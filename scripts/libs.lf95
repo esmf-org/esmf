@@ -1,0 +1,5 @@
+#!/bin/sh
+# this script expects the Lahey lf95 command (or a wrapper to lf95, e.g. mpif90)
+# and returns the lf95 system libraries 
+$1 --verbose $ESMF_DIR/scripts/hello.f90 2>&1 | grep `which ld` | awk 'BEGIN { RS=" "}; /^-l/ ' | xargs
+rm -f hello.o a.out

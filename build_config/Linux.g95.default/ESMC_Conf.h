@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.3 2006/02/08 06:32:42 eschwab Exp $"
+"$Id: ESMC_Conf.h,v 1.4 2006/09/22 23:55:39 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -55,8 +55,6 @@ Licensed under the GPL.
 #endif
 
 #define ESMC_HAVE_SYS_UTSNAME_H
-
-#define ESMF_NO_INITIALIZERS 1
 
 #define ESMC_PRESENT(arg) ( (arg) != 0 )
 

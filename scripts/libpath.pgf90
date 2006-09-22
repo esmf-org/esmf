@@ -1,0 +1,5 @@
+#!/bin/sh
+# this script expects the pgf90 command (or a wrapper to pgf90, e.g. mpif90)
+# and returns the path of the pgf90 system libraries
+# tested for PGI compiler version: 5.2
+$1 -dryrun 2>&1 | grep "\/.pgf90rc" | head -1 | awk '{ print $3} '| sed 's/bin\/.pgf90rc/lib/g'

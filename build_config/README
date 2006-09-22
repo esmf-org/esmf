@@ -9,7 +9,7 @@
  Laboratory, University of Michigan, National Centers for Environmental
  Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
  NASA Goddard Space Flight Center.
- Licensed under the GPL.
+ Licensed under the GNU GPL.
 
 ================================================================================
 
@@ -22,28 +22,27 @@ included by the ESMF build system.
 Naming Conventions
 ------------------
 
-The subdirectories here follow a 3-part naming convention:
+In $ESMF_DIR/build_config, each compiler/platform combination has
+a separate subdirectory which follows a 3-part naming convention:
 
-The first part is the system name, which is set automatically using the 
-output from 'uname -s'.  (The Cray X1 is an exception; the environment 
-variable ESMF_ARCH should be set to 'Unicos' before building there.)
+The first part is the system name as it is automatically set in ESMF_OS.
 
 The second part is the compiler name for those platforms which support
 compilers from different vendors.  For those systems which come with a
 single vendor-supplied compiler, the compiler name is 'default'.  
 The environment variable ESMF_COMPILER is used to select the compiler.
 
-The last part of the name is the site-specific information.  The 'default'
+The last part of the name is the site-specific information. The 'default'
 directories contain files which are always read for the given 
-architecture/compiler combination.  Then, in addition, if the environment
+architecture/compiler combination. Then, in addition, if the environment
 variable ESMF_SITE has a value, the corresponding directory will be 
 searched after the default directory, for overrides and additional settings 
 of directory names, values, flags, and other custom information.
 
 Note that building on the SGI Altix is the same as the other Linux/Intel 
 platforms, so set ESMF_COMPILER to 'intel' to use the files in the
-Linux.intel.default directory.  Also for Altix, set ESMF_COMM to 'mpi'
-and make sure ESMF_PREC is unset.  
+Linux.intel.default directory. For Altix set ESMF_COMM to 'mpi' in order to
+pick up the vendor MPI library.
 
 
 File Descriptions
@@ -59,6 +58,5 @@ Each default directory contains the following files:
  build_rules.mk : makefile fragment which is included by the main ESMF build
                   system and contains specific settings for this platform.
 
-
 ================================================================================
- $Id: README,v 1.26 2006/03/03 20:32:29 nscollins Exp $
+ $Id: README,v 1.27 2006/09/22 23:55:37 theurich Exp $

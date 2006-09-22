@@ -1,9 +1,9 @@
-# $Id: build_rules.mk,v 1.7 2006/05/16 17:58:13 theurich Exp $
+# $Id: build_rules.mk,v 1.8 2006/09/22 23:55:40 theurich Exp $
 # 
 #  NEC SX build, cross compiler on a Linux front end
 #
 
-export ESMF_PREC := 64
+export ESMF_ABI := 64
 
 
 AR = sxar
@@ -55,7 +55,7 @@ endif
 
 ############################################################
 
-ifeq ($(ESMF_PREC),32)
+ifeq ($(ESMF_ABI),32)
 
 echo "NEC system is 64 bit only"
 exit
@@ -74,7 +74,7 @@ CFLAGS     += -DESMF_NOPOSIXIPC
 
 ############################################################
 #
-ifeq ($(ESMF_PREC), 64)
+ifeq ($(ESMF_ABI), 64)
 
 LD		   = sxmpic++ 
 

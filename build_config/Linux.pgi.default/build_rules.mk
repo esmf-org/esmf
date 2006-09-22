@@ -1,126 +1,113 @@
-# $Id: build_rules.mk,v 1.25 2006/01/31 15:43:10 nscollins Exp $
+# $Id: build_rules.mk,v 1.26 2006/09/22 23:55:39 theurich Exp $
 #
-#  Linux.pgi.default
+# Linux.pgi.default
 #
 
-
+############################################################
+# Default compiler setting.
 #
+ESMF_F90DEFAULT         = pgf90
+ESMF_CXXDEFAULT         = pgCC
+
+############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)
 export ESMF_COMM := mpiuni
 endif
 
-
 ############################################################
+# MPI dependent settings.
 #
-# location of external libs.  if you want to use any of these,
-# define ESMF_SITE to my_site so the build system can find it,
-# copy this file into Linux.pgi.my_site, and uncomment the
-# libs you want included.  remove the rest of this file since
-# both this file and the site file will be included.
-
-# LAPACK_INCLUDE   = 
-# LAPACK_LIB       = -L/usr/local/lib -llapack
-# NETCDF_INCLUDE   = -I/usr/local/include/netcdf
-# NETCDF_LIB       = -L/usr/local/lib -lnetcdf
-# HDF_INCLUDE      = -I/usr/local/include/hdf
-# HDF_LIB          = -L/usr/local/lib/ -lmfhdf -ldf -ljpeg -lz
-# BLAS_INCLUDE     = 
-# BLAS_LIB         = -latlas
-
-#
-############################################################
-
-# Location of MPI (Message Passing Interface) software
-
+ifeq ($(ESMF_COMM),mpiuni)
+# MPI stub library -----------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
+else
+ifeq ($(ESMF_COMM),mpich)
+# Mpich ----------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_F90LINKLIBS       += -lpmpich++ -lmpich
+ESMF_CXXDEFAULT         = mpiCC
+ESMF_CXXCOMPILEOPTS    += -DESMF_MPICH
+ESMF_CXXLINKLIBS       += -lmpich
+ESMF_MPIRUNDEFAULT      = mpirun
+ifeq ($(ESMF_BATCH),lsf.ibmpjl)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
+endif
+else
+ifeq ($(ESMF_COMM),mpich2)
+# Mpich2 ---------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
 ifeq ($(ESMF_COMM),lam)
-# this section is set up for LAM mpi
-MPI_LIB        += -lmpi -llam
+# LAM (assumed to be built with pgf90) ---------------------
+ESMF_F90DEFAULT         = mpif77
+ESMF_CXXDEFAULT         = mpic++
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+ifeq ($(ESMF_BATCH),lsf.ibmpjl)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
+endif
+else
+ifeq ($(ESMF_COMM),openmpi)
+# OpenMPI --------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
+ifeq ($(ESMF_COMM),user)
+# User specified flags -------------------------------------
+else
+$(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
+endif
+endif
+endif
+endif
 endif
 
-# for mpich: if your system sets either MPI_HOME or MPICH to the location of
-# the mpi include files, libraries, and binary executables, this makefile 
-# should work unchanged.  (MPICH takes precedence over MPI_HOME if both are 
-# set.)  if your system has mpich installed but not in either /usr or
-# /usr/local, and neither of these environment variables are set, you must 
-# set one of them to the location where the include, lib, and bin dirs will 
-# be found.
-
-# set up to use MPICH
-ifeq ($(ESMF_COMM),mpich)
- ifdef MPICH
-  export MPI_HOME := $(MPICH)
- endif
-MPI_INCLUDE    += -DESMF_MPICH=1
-MPI_LIB        += -lpmpich++ -lmpich
-MPIRUN         += $(ESMF_NODES)
-endif
-
-# name of the lib which includes the posix thread support.
-THREAD_LIB     = -lpthread
-
-# compilers
+############################################################
+# Print compiler version string
 #
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v -c
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v -c
 
-# the default is to use the pgi C and C++ compilers.
-# if you want gcc and g++, set ESMF_C_COMPILER to gcc before building.
+############################################################
+# Need this until the file convention is fixed (then remove these two lines)
+#
+ESMF_F90COMPILEFREENOCPP = -Mfreeform
+ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform
 
-ifneq ($(ESMF_COMM),mpich)
-ifeq ($(ESMF_C_COMPILER),gcc)
-C_CC               = gcc
-C_CXX              = g++
-C_FC               = pgf90
-else
-C_CC		   = pgcc 
-C_CXX		   = pgCC
-C_FC		   = pgf90
-endif
-endif
+############################################################
+# Determine where pgf90's libraries are located
+#
+ESMF_CXXLINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.pgf90 $(ESMF_F90COMPILER))
+ESMF_CXXLINKRPATHS += $(ESMF_RPATHPREFIX)$(shell $(ESMF_DIR)/scripts/libpath.pgf90 $(ESMF_F90COMPILER))
 
-# if you are using mpich, then however the mpich wrappers have been built
-# will determine which compilers you are using.
-ifeq ($(ESMF_COMM),mpich)
-C_CC		   = mpicc
-C_CXX		   = mpiCC
-C_FC		   = mpif90
-endif
+############################################################
+# Determine where pgCC's libraries are located
+#
+ESMF_F90LINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.pgCC $(ESMF_CXXCOMPILER))
+ESMF_F90LINKRPATHS += $(ESMF_RPATHPREFIX)$(shell $(ESMF_DIR)/scripts/libpath.pgCC $(ESMF_CXXCOMPILER))
 
-# the default is to link with the pgi C and C++ libraries unless you have
-# already set ESMF_C_COMPILER to gcc. 
-ifeq ($(ESMF_C_COMPILER),gcc)
-PGI_C_LIB_NEEDED = -lstdc++
-else
-PGI_C_LIB_NEEDED =
-endif
+############################################################
+# Link against libesmf.a using the F90 linker front-end
+#
+ESMF_F90LINKLIBS += -lrt -lC $(shell $(ESMF_DIR)/scripts/libs.pgCC $(ESMF_CXXCOMPILER))
 
-# print version 
-C_CCV              = ${C_CC} -V -v
-C_CXXV             = ${C_CXX} -V -v
-C_FCV              = ${C_FC} -V -v
+############################################################
+# Link against libesmf.a using the C++ linker front-end
+#
+ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.pgf90 $(ESMF_F90COMPILER))
 
-# fortran flags
-F_FREECPP          = -Mpreprocess -Mfreeform
-F_FIXCPP           = -Mpreprocess -Mnofreeform
-F_FREENOCPP        = -Mfreeform
-F_FIXNOCPP         = -Mnofreeform
-
-# use LD_LIBRARY_PATH to find settings; this is just here as a default
-# if the variable is unset
-ifneq ($(origin LD_LIBRARY_PATH), environment)
-C_LIB_PATHS   = -L/opt/pgi-5.2/linux86/5.2/lib
-C_LD_PATHS    = $(C_SLFLAG)/opt/pgi/pgi-5.2/linux86/5.2/lib
-endif
-
-C_F90CXXLIBS       = $(PGI_C_LIB_NEEDED) -lrt -lC -lc
-C_CXXF90LIBS       = $(PGI_C_LIB_NEEDED) -lrt -lC \
-                     -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
-###############################################################################
-
-PARCH		   = linux_pgi
-
-
-SL_LIBS_TO_MAKE = 
-C_SL_LIBOPTS  = -shared
-
-
+############################################################
+# Blank out shared library options
+#
+ESMF_SL_LIBS_TO_MAKE  =

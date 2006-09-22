@@ -1,0 +1,5 @@
+#!/bin/sh
+# this script expects the ifort command (or a wrapper to ifort, e.g. mpif90)
+# and returns the path of the ifort system libraries
+# tested for Intel compiler verison: 8.0, 8.1, 9.0, 9,1
+$1 -dryrun $ESMF_DIR/scripts/hello.f90 2>&1 | grep "for_main.o " | sed 's/\\//g'

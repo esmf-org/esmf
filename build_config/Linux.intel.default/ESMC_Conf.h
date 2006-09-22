@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.7 2006/02/08 06:24:58 eschwab Exp $"
+"$Id: ESMC_Conf.h,v 1.8 2006/09/22 23:55:39 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -65,7 +65,13 @@ Licensed under the GPL.
 #define ESMF_F90_PTR_PLUS_RANK 12
 #define ESMC_POINTER_SIZE 4
 #endif
-#if S64
+#if S32_ia64
+#define ESMF_IS_32BIT_MACHINE 1
+#define ESMF_F90_PTR_BASE_SIZE 36
+#define ESMF_F90_PTR_PLUS_RANK 12
+#define ESMC_POINTER_SIZE 4
+#endif
+#if S64_ia64
 #define ESMF_IS_64BIT_MACHINE 1
 #define ESMF_F90_PTR_BASE_SIZE 72 
 #define ESMF_F90_PTR_PLUS_RANK 24

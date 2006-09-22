@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2006/01/30 18:11:26 nscollins Exp $ 
+# $Id: makefile,v 1.10 2006/09/22 23:55:47 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -33,17 +33,6 @@ SYSTEM_TESTS_RUN_UNI  = RUN_FlowWithCouplingUNI
 ESMF_FlowWithCouplingSTest.o: $(SYSTEM_TESTS_OBJ)
 
 include $(ESMF_DIR)/makefile
-
-# The Darwin (Mac OS X), xlf 8.1 compiler cannot compile FlowSolverMod.F90
-# with the -g flag (produces an internal compiler error).  removing the -g
-# allows the file to build.
-ifeq ($(ESMF_ARCH),Darwin)
-ifeq ($(ESMF_COMPILER),xlf)
-ifeq ($(ESMF_BOPT),g)
-G_FFLAGS =
-endif
-endif
-endif
 
 DIRS = 
 

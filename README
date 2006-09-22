@@ -1,4 +1,3 @@
-
 ================================================================================
 
                         README - ESMF v3.0.1 release
@@ -11,15 +10,15 @@
  Laboratory, University of Michigan, National Centers for Environmental
  Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
  NASA Goddard Space Flight Center.
- Licensed under the GPL.
+ Licensed under the GNU GPL.
 
 ================================================================================
 
 Hello and welcome to the world of ESMF.
 
 
-If you need to link your code with an already-built ESMF library, go to
-the "LINKING" section below.
+If you need to compile and link your code against an already-built ESMF library,
+go to the "APPLICATION" section below.
 
 
 If you need to build the ESMF library, go to the "BUILDING" section below.
@@ -27,83 +26,47 @@ If you need to build the ESMF library, go to the "BUILDING" section below.
 have to build the library first.)
 
 
-If you did not find a makefile for your platform, or the makefile did not
-work for you, go to the "PORTING" section below.
-
-
 If you are looking for more documentation, or higher-level information
 about the ESMF project itself, go to the "MORE HELP" section below.
 
 
-Please contact esmf_support@ucar.edu with any questions or problems.
+Please contact <esmf_support@ucar.edu> with any questions or problems.
 
 ================================================================================
 ================================================================================
 
-LINKING applications with ESMF:
-------------------------------
+APPLICATION compilation and linking
+-----------------------------------
 
-If you want to compile and link your application with an ESMF library
+If you want to compile and link your application against an ESMF library
 which has already been installed on your system, you will need to tell
 the compiler where the ESMF module files and ESMF library files are located.
 If this has already been documented by the installer of the ESMF library,
-follow the directions given.  However, if not, then you must add the
-correct compiler flags yourself.
+follow the directions given. However, if not, then you must determine the
+correct compiler and linker flags yourself.
 
-You can do this in a variety of ways.  If you already have build scripts or
-existing makefiles, you can explicitly add the correct compiler flags which
-tell the compiler which directories to search for modules and which libraries
-to include at link time.  The ESMF build process puts the modules and
-libraries in separate directories depending on the options used to compile
-the library.  Running 'gmake info' from the top of the ESMF install
-directory will print out what flags need to be used.  The actual values
-depend on having several environment variables set first, including ESMF_DIR
-and those listed below.
+You can do this in a variety of ways. If you already have build scripts or
+existing makefiles, you can explicitly add the correct compiler and linker
+flags. The ESMF build process puts the modules and libraries in separate
+directories depending on the options used when building the ESMF library.
+The directory containing the ESMF library file also contains a makefile 
+fragment named "esmf.mk" (e.g. ./lib/libg/Linux.intel.32.mpich.default/esmf.mk
+for an ESMF library built on Linux with the Intel compiler for 32-bit using
+the mpich MPI-implementation). This makefile fragment defines several variables
+indicating compiler options, include paths, linker options, library paths and
+libraries necessary to compile and link against ESMF with Fortran or C++. Look
+at "esmf.mk" to pull out the necessary flags to compile and link your own code
+against the installed ESMF library.
 
-If you do not have a makefile, or if you are willing to include a makefile
-fragment from within your own makefile, an example makefile for user code can
-be found in $ESMF_DIR/build/makefile.sample.  It in turn includes the
-makefile fragment $ESMF_DIR/build/esmfuser.mk that sets the correct module
-and library paths.
+Alternatively, you may want to include "esmf.mk" from within your own build
+system. All of the variables defined in "esmf.mk" have prefix "ESMF_"
+as to prevent name space conflicts with users' makefiles. Notice that "esmf.mk"
+is a self-contained file and is not affected by environment variables. It is
+not necessary to set any ESMF_ environment variables to use an ESMF library
+that has been installed on your system!
 
-The sample makefile depends on a correctly set ESMF_DIR environment variable
-that contains the path to the ESMF installation.  Other environment variables
-which may need to be set depend on the platform.  The most likely ones are
-briefly listed immediately below, but see the "BUILDING" section below for
-more detailed information on what the variables are for and what values they
-need to have.
-
-ESMF_COMPILER - Will need to be set on all Linux systems, and on any other
-                system which can have more than one type of compiler installed.
-
-ESMF_PREC - If this system can run with both 32-bit and 64-bit executables,
-            the default is 64 bits, but 32 can be selected with this variable.
-
-ESMF_COMM - If a vendor-installed mpi package is not the only option for an
-            MPI library (e.g. lam, mpich) this must be set.
-
-ESMF_BOPT - The default is an optimized library, but a debuggable library
-            can be selected by setting this to "g".
-
-
-If you do not already have a makefile, copy the makefile.sample to your 
-directory, edit it to replace the sample program with your own, make sure 
-the proper environment variables are set, and type 'gmake'.
-
-If your application already has an existing makefile, examine makefile.sample
-to see if you can include the esmfuser.mk makefile fragment and then use the
-ESMF rules and predefined makefile variables with your own rules and
-variables.
-
-Or you can use the sample makefile to print out the actual variable values
-and transfer them into your own makefiles if you do not want to include
-'esmfuser.mk' in your own makefile.
-
-Another way to see the values of the compiler and linker flags is to cd to
-$ESMF_DIR and run 'gmake info'.  This will print out the compiler names, the
-compiler version information, the compiler flags, and link-time libraries
-which have been selected by the various environment variable settings.
-
+The $ESMF_DIR/application directory contains a sample ESMF code and Makefile
+that demonstrate how to use "esmf.mk" for your own application.
 
 For help at the programming level, cd to $ESMF_DIR/quick_start for an
 example application which uses ESMF.
@@ -111,16 +74,38 @@ example application which uses ESMF.
 ================================================================================
 ================================================================================
 
-BUILDING the ESMF library:
+BUILDING the ESMF library
 -------------------------
 
-Quickstart information for the impatient:
+The following compilers and utilities are required for compiling, linking and
+testing the ESMF software:
+* Fortran90 (or later) compiler
+* C++ compiler
+* MPI implementation compatible with the above compilers (but see below)
+* GNU's gcc compiler - for a standard cpp preprocessor implementation
+* GNU make
+* Perl - for running test scripts
 
- - Set required environment variable(s) (see next section below).
+Alternatively ESMF can be built using a single-processor MPI-bypass library
+that comes with ESMF. It allows ESMF applications to be linked and run in
+single-process mode.
 
- - Type 'gmake' (the GNU make program) to build the ESMF library.
 
- - Type 'gmake check' to build and run the unit and system tests.
+Steps of the standard build procedure:
+
+ 1) Set required environment variable(s) (see next section below).
+
+ 2) Type 'gmake' (the GNU make program) to build the ESMF library.
+
+ 3) Optionally test the ESMF library using any of the following targets:
+    a) 'gmake unit_tests' to build and run the unit tests
+    b) 'gmake system_tests' to build and run the system tests
+    c) 'gmake check' to build and run the unit and system tests.
+    d) 'gmake examples' to build and run the examples
+    e) 'gmake demos' to build and run the demos
+    f) 'gmake all_tests' to build and run all available tests and demos
+    Please consult the "Platform Specific Notes Related to Executing Test 
+    Targets" below before attempting to use any of these targets.
 
 ================================================================================
 
@@ -128,128 +113,160 @@ GNUmake
 -------
 
 The ESMF build system uses the GNU make program; it is generally named
-'gmake' but may also be simply 'make' or 'gnumake' on some platforms.  We do
-not use configure or autoconf;  the selection of various options is done by
+'gmake' but may also be simply 'make' or 'gnumake' on some platforms. We do
+not use configure or autoconf; the selection of various options is done by
 setting environment variables before building the framework.
 
 
 Environment Variables
 ---------------------
 
+The following environment variables are the most likely ones to be used
+for the ESMF library build under normal circumstances. In most situations only
+one or two environment variables must be set. There are other environment
+variables which can be set to customize the ESMF library build process. The 
+ESMF User's Guide documents these in detail.
+
 ESMF_DIR
 
 The environment variable ESMF_DIR must be set to the full pathname of the 
-top level ESMF directory before building the framework.  This is the only 
+top level ESMF directory before building the framework. This is the only 
 environment variable which is required to be set on all platforms under 
 all conditions.
 
 bsh/ksh example  :  export ESMF_DIR=/home/joeuser/esmf
 csh/tcsh example :  setenv ESMF_DIR /home/joeuser/esmf
 
-ESMF_COMPILER
+ESMF_BOPT
 
-Check the "Downloads & Documentation" link on the ESMF web site for a 
-current list of supported platforms.
-
-On any platform which does not come with a single vendor's Fortran compiler
-installed (e.g. Linux or Mac OS X) ESMF_COMPILER must be set to select
-which Fortran compiler has been installed.  To see possible values for 
-ESMF_COMPILER, cd to $ESMF_DIR/build_config and list the directories there.
-The first part of each directory name corresponds to the output of 
-'uname -s' for this platform.  The second part contains possible values 
-for ESMF_COMPILER.  Directories showing architectures and compilers
-that are not listed on the "Downloads & Documentation" page may not
-be complete or tested, and may not work correctly.  
+This environment variable controls the build option. To make a debuggable
+version of the library set ESMF_BOPT to 'g' before building. The default is 'O'
+(capital oh) which builds an optimized version of the library. If ESMF_BOPT is
+O, ESMF_OPTLEVEL can also be set to a numeric value between 0 and 4 to select a
+specific optimization level.
 
 ESMF_COMM
 
-On multiprocessor systems with a vendor-supplied MPI communications library,
-that is the default for communications and ESMF_COMM should not be set.  
-For other systems, ESMF comes with with a single-processor MPI-bypass 
-library which is the default.   To run multiprocessor applications
-select an MPI implementation by setting ESMF_COMM to one of 'mpich' or
-'lam' before building ESMF.  Additional valid values may exist; check the
-release notes for the specific platform on the web site for more details.
-If the MPI files are not installed in a system directory (e.g. /usr/lib)
-also set MPI_HOME to the directory containing the include, lib, and bin dirs.
+On systems with a vendor-supplied MPI communications library the vendor library 
+is chosen by default for communications and ESMF_COMM need not be set. For other
+systems (e.g. Linux or Darwin) a multitude of MPI implementations is available
+and ESMF_COMM must be set to indicate which implementation is used to build
+the ESMF library. Set ESMF_COMM according to your situation to: mpich, mpich2,
+lam, openmpi or intelmpi. ESMF_COMM may also be set to "user" indicating that
+the user will set all the required flags using advanced ESMF environment
+variables. Please see the User's Guide for more details.
 
-ESMF_SITE
+Alternatively, ESMF comes with a single-processor MPI-bypass library which is
+the default for Linux and Darwin systems. To force the use of this bypass
+library set ESMF_COMM equal to "mpiuni".
 
-The esmfcontrib repository contains makefiles which have already been 
-customized for certain machines.  If one exists for your site and you wish
-to use it, download the corresponding files into the build_contrib directory
-and set ESMF_SITE to your location.  See the sourceforge site
-http://sourceforge.net/projects/esmfcontrib  for more information.
+ESMF_COMPILER
 
-ESMF_BOPT
+The ESMF library build requires a working Fortran90 and C++ compiler. On 
+platforms that don't come with a single vendor supplied compiler suite
+(e.g. Linux or Darwin) ESMF_COMPILER must be set to select which Fortran and
+C++ compilers are being used to build the ESMF library. Notice that setting the
+ESMF_COMPILER variable does _not_ affect how the compiler executables are
+located on the system. ESMF_COMPILER (together with ESMF_COMM) affect the
+name that is expected for the compiler executables. Furthermore, the 
+ESMF_COMPILER setting is used to select compiler and linker flags consistent
+with the compilers indicated.
 
-To make a debuggable version of the library set ESMF_BOPT to 'g' before
-building.  The default is 'O' (capital oh) which builds an optimized library.
-If ESMF_BOPT is O, ESMF_OPTLEVEL can also be set to a numeric value 
-between 0 and 4 to select a specific optimization level.
+By default Fortran and C++ compiler executables are expected to be located in
+a location contained in the user's PATH environment variable. This means that
+if you cannot locate the correct compiler executable via the "which" command
+on the shell prompt the ESMF build system won't find it either!
 
-ESMF_PREC
+There are advanced ESMF environment variables that can be used to select 
+specific compiler executables by specifying the full path. This can be used to
+pick specific compiler executables without having to modify the PATH environment
+variable. Please see the User's Guide for details.
 
-If this system supports the building of both 32-bit and 64-bit executables
-(pointer wordsize), this variable can be set to select which format to use.
-Valid values are '32' or '64'.
+Use 'gmake info' to see which compiler executables the ESMF build system will
+be using according to your environment variable settings.
 
-LD_LIBRARY_PATH
-ESMF_CXX_LIBRARY_PATH
-ESMF_F90_LIBRARY_PATH
+To see possible values for ESMF_COMPILER, cd to $ESMF_DIR/build_config and list
+the directories there. The first part of each directory name corresponds to the
+output of 'uname -s' for this platform. The second part contains possible values
+for ESMF_COMPILER. In some cases multiple combinations of Fortran and C++
+compilers are possible, e.g. there is "intel" and "intelgcc" available for
+Linux. Setting ESMF_COMPILER to "intel" indicates that both Intel Fortran and
+C++ compilers are used, whereas "intelgcc" indicates that the Intel Fortran
+compiler is used in combination with GCC's C++ compiler.
 
-The first of these is often set by default in a system configuration file
-and consists of colon-separated directories to search for library files.
-The other two variables are ESMF specific, in the same colon-separated
-format, which indicate where to search for C++ and F90 libraries,
-respectively.  If the library builds successfully but none of the tests
-can be linked, set these to indicate where to find the libraries needed.
+If you do not find a configuration that matches your situation you will need to
+port ESMF. Please see the "PORTING" section below for help.
 
+ESMF_ABI
 
-There are other environment variables which can be set to customize
-the ESMF make process.  The ESMF User's Guide documents these in detail.
+If a system supports 32-bit and 64-bit (pointer wordsize) application binary
+interfaces (ABIs), this variable can be set to select which ABI to use. Valid 
+values are '32' or '64'. By default the most common ABI is chosen.
+
+ESMF_OS
+
+Typically equal to the output of "uname -s" except for UNICOS/mp where
+ESMF_OS is set to Unicos. This variable is not normally set by the user unless 
+cross-compiling. ESMF_OS indicates the target system for which the ESMF library
+is being built. Under normal circumstances, i.e. ESMF is being build on the 
+target system, ESMF_OS is set automatically. However, when cross-compiling for
+a different target system ESMF_OS must be set to the respective target OS. For
+example, when compiling for the Cray X1 on an interactive X1 node ESMF_OS will
+be set automatically. However, when ESMF is being cross-compiled for the X1 on
+a Linux host the user must set ESMF_OS to Unicos manually in order to indicate
+the intended target platform.
+
 
 
 Supported Makefile Targets
 --------------------------
 
- info    : print out extensive system configuration information about what
-           compilers, libraries, paths, flags, etc are being used
+ info       : print out extensive system configuration information about what
+              compilers, libraries, paths, flags, etc are being used
 
- clean   : remove all files built for this platform/compiler/wordsize.
- clobber : remove all files built for all architectures
+ clean      : remove all files built for this platform/compiler/wordsize.
+ distclean  : remove all files built for all architectures
+ clobber    : same as distclean
 
- lib     : build the ESMF libraries only (default)
- check   : build and run the unit and system tests to validate the library
- all     : build the libraries, unit and system test, examples, and demos.
- doc     : build the documentation (requires specific latex macros packages
-           and additional utilities).  See the ESMF web site for details;  it
-           also contains pre-built pdf and html versions of all docs.
+ lib        : build the ESMF libraries only (default)
+ check      : build and run the unit and system tests to validate the library
+ all        : build the libraries, unit and system test, examples, and demos.
+ doc        : build the documentation (requires specific latex macros packages
+              and additional utilities).  See the ESMF web site for details;  it
+              also contains pre-built pdf and html versions of all docs.
 
- unit_tests         : build and run the unit tests
- build_unit_tests   : build only
- run_unit_tests     : run only
- clean_unit_tests   : remove unit test executables only
+ unit_tests           : build and run the unit tests
+ unit_tests_uni       : build unit tests and run them in uni-processor mode
+ build_unit_tests     : build unit tests (don't run)
+ run_unit_tests       : run unit tests (don't build)
+ run_unit_tests_uni   : run unit tests in uni-processor mode (don't build)
+ clean_unit_tests     : remove unit test executables only
 
- system_tests       : build and run the more comprehensive system tests
- build_system_tests : build only
- run_system_tests   : run only
- clean_system_tests : remove system test executables only
+ system_tests         : build and run the system tests
+ system_tests_uni     : build system tests and run them in uni-processor mode
+ build_system_tests   : build system tests (don't run)
+ run_system_tests     : run system tests (don't build)
+ run_system_tests_uni : run system tests in uni-processor mode (don't build)
+ clean_system_tests   : remove system test executables only
 
- examples           : build and run the examples
- build_examples     : build only
- run_examples       : run only
- clean_examples     : remove example executables only
+ examples             : build and run the examples
+ examples_uni         : build examples and run them in uni-processor mode
+ build_examples       : build examples (don't run)
+ run_examples         : run examples (don't build)
+ run_examples_uni     : run examples in uni-processor mode (don't build)
+ clean_examples       : remove example executables only
 
- demos              : build and run the more comprehensive demos
- build_demos        : build only
- run_demos          : run only
- clean_demos        : remove demo executables only
+ demos                : build and run the demos
+ demos_uni            : build demos and run them in uni-processor mode
+ build_demos          : build demos (don't run)
+ run_demos            : run demos (don't build)
+ run_demos_uni        : run demos in uni-processor mode (don't build)
+ clean_demos          : remove demo executables only
 
- all_tests          : build and run all available tests and demos
- build_all_tests    : build only
- run_all_tests      : run only
- clean_all_tests    : remove all test and demo executables 
+ all_tests            : build and run all available tests and demos
+ build_all_tests      : build all available tests and demos (don't run)
+ run_all_tests        : run all available tests and demos (don't build)
+ clean_all_tests      : remove all available test and demo executables
 
 Note:
 
@@ -257,38 +274,87 @@ Note:
  'uninstall' target.  They will be added in a future release of ESMF.
 
 
+Platform Specific Notes Related to Executing Test Targets
+---------------------------------------------------------
 
-Directories
------------
+After the ESMF library has been built successfully it is a good idea to test
+its functional integrity by building and executing a range of test applications.
+It is important to use the same environment settings for the ESMF gmake test 
+targets as were used during the library built.
 
-build_config:    Contains makefile fragments that can be customized by the 
-                 user for specific platforms, compilers, and sites.
-                 See the README in this directory for help with porting to
-                 new platforms or compilers.
+The ESMF library sources come with 4 flavors of test codes:
+- unit_tests:   separately test the functionality of individual ESMF code units
+- system_tests: test the interplay of multiple ESMF code units
+- examples:     demonstrate features of individual ESMF code units. Example
+                sources are quoted in the ESMF Reference Manual.
+- demos:        more complex applications to demonstrate ESMF's capabilities
 
-build:           Contains the generic portion of the build that a
-                 user would not be expected to modify.  Also contains a 
-                 sample user makefile.
+Unless the ESMF library was built in MPI-bypass mode (mpiuni) all applications
+compiled and linked against ESMF automatically become MPI applications and must
+be executed as such. Details of how to execute MPI applications vary widely from
+system to system. The ESMF gmake test targets hide a good portion of this
+complexity. The remaining differences are given here on a per platform basis:
 
-scripts:         Contains scripts for testing and uniprocessor runs, and some
-                 templates.
-
-src:             Contains the source code.
-
-
-The following directories are created during the building and testing stages:
-
-lib:             Contains the ESMF libraries.
-
-mod:             Contains the Fortran module files.
-
-quick_start:     Contains skeleton application files to use as a template.
-
-test:            Contains unit and system test executables and output.
-
-examples:	 Contains examples executables and output.
-
-doc:             Contains documentation (if built).
+IBM      -    The ESMF AIX configuration assumes the use of LoadLeveler by
+ AIX &        default. In general this means that the user must set the
+ Linux        MP_RMPOOL environment variable to a valid setting in order to
+              successfully start MPI applications. In our experience "1" will
+              be a good value, but see your own system documentation for more
+              help on this.
+              IBM systems running LSF (i.e. new AIX systems as well as IBM/AMD64
+              Linux clusters) require that the ESMF_BATCH environment variable
+              is set to "lsf.ibmpjl". This will ensure that each ESMF test
+              application runs as a separate LSF job and uses the IBM parallel
+              job launcher facility for LSF. Details about the LSF setup, such
+              as queues, limits and project ids, are site dependent. These
+              options must be specified via the associated environment variable
+              ESMF_BATCHOPTIONS and will be used by the ESMF makefile in
+              conjunction with the LSF bsub command. (E.g. on NCAR's bluevista
+              machine you may want to set ESMF_BATCHOPTIONS="-qdebug -W10".)
+              The test targets expect to be run from within a queue that allows
+              interactive mode. Please consult your system documentation for
+              more help on this.
+              
+OSF1     -    The default assumed for the HP/Compaq Sierra Cluster is to run
+              test targets through the LSF batch system. Each ESMF test
+              application runs as a separate LSF job and uses the RMS prun
+              facility to start parallel execution. Details about the LSF setup,
+              such as queues, limits and project ids, are site dependent. These
+              options must be specified via the associated environment variable
+              ESMF_BATCHOPTIONS and will be used by the ESMF makefile in
+              conjunction with the LSF bsub command. (E.g. on GSFC's halem
+              machine you may want to set ESMF_BATCHOPTIONS="-qgeneral
+              -P<your_project_id>".) 
+              The test targets expect to be run from within a queue that
+              allows interactive mode. Please consult your system documentation
+              for more help on this.
+              
+Darwin   -    The ESMF Darwin configurations assume that resources to run the
+              test applications have been made available prior to calling ESMF
+              gmake test targets. The ESMF makefile uses the MPI startup 
+              script according to the ESMF_COMM setting in order to launch
+              parallel execution.
+              
+IRIX64   -    The ESMF IRIX64 configuration assumes that resources to run the
+              test applications have been made available prior to calling ESMF
+              gmake test targets. The ESMF makefile uses SGI's MPI startup 
+              script in order to launch parallel execution.
+              
+Linux    -    The ESMF Linux configurations assume that resources to run the
+              test applications have been made available prior to calling ESMF
+              gmake test targets. The ESMF makefile uses the MPI startup 
+              script according to the ESMF_COMM setting in order to launch
+              parallel execution. Only exception to this rule are IBM/Linux
+              clusters. Please see the IBM section for details.
+              
+Unicos   -    The ESMF Unicos configuration assumes that resources to run the
+              test applications have been made available prior to calling ESMF
+              gmake test targets. The ESMF makefile uses Cray's MPI startup 
+              script in order to launch parallel execution. On some Cray X1
+              systems it will be necessary to set the MPI_REQUEST_MAX
+              environment variable to about 4000 to successfully run all 
+              bundled ESMF test applications.
+              
 
 ================================================================================
 ================================================================================
@@ -302,14 +368,14 @@ Overview
 
 If the build_config directory does not already contain a directory for your
 platform/compiler, or if your platform/compiler is already supported but you
-need to make some adaptions for your local system, this section should help
+need to make some adaptations for your local system, this section should help
 you get started.
 
-The top level makefile is $ESMF_DIR/makefile.  It should not need to be
-modified.   The bulk of the makefile rules and settings used by all platforms
-and compilers is $ESMF_DIR/build/common.mk.  This makefile should not be
+The top level makefile is $ESMF_DIR/makefile. It should not need to be
+modified. The bulk of the makefile rules and settings used by all platforms
+and compilers is $ESMF_DIR/build/common.mk. This makefile should not be
 changed unless the modification is intended to apply to every system on which
-ESMF is built.  This makefile is included by the top level makefile.
+ESMF is built. This makefile is included by the top level makefile.
 
 The per-platform makefile fragments which contain the settings which differ
 for each system and compiler combination are in separate subdirectories under
@@ -317,12 +383,13 @@ $ESMF_DIR/build_config.
 
 If you find the settings are close and you just need to add additional
 information, or the changes are very specific to a particular system, you can
-set ESMF_SITE to a value, and then the makefiles will include
-$ESMF_DIR/build_config/platform.compiler.$ESMF_SITE/build_rules.mk, 
+set the environment variable ESMF_SITE to a value, and then the makefiles will
+include
+$ESMF_DIR/build_config/$ESMF_OS.$ESMF_COMPILER.$ESMF_SITE/build_rules.mk,
 in addition to the default settings.
 
 If you are supporting a completely new platform, make a new directory
-following the naming pattern described below.  Copy the contents of the
+following the naming pattern described below. Copy the contents of the
 closest existing match into that directory and start making changes.
 
 
@@ -332,26 +399,24 @@ Naming Conventions
 In $ESMF_DIR/build_config, each compiler/platform combination has
 a separate subdirectory which follows a 3-part naming convention:
 
-The first part is the system name, which is set automatically using the 
-output from 'uname -s'.  (The Cray X1 is an exception; the environment 
-variable ESMF_ARCH should be set to 'Unicos' before building there.)
+The first part is the system name as it is automatically set in ESMF_OS.
 
 The second part is the compiler name for those platforms which support
 compilers from different vendors.  For those systems which come with a
 single vendor-supplied compiler, the compiler name is 'default'.  
 The environment variable ESMF_COMPILER is used to select the compiler.
 
-The last part of the name is the site-specific information.  The 'default'
+The last part of the name is the site-specific information. The 'default'
 directories contain files which are always read for the given 
-architecture/compiler combination.  Then, in addition, if the environment
+architecture/compiler combination. Then, in addition, if the environment
 variable ESMF_SITE has a value, the corresponding directory will be 
 searched after the default directory, for overrides and additional settings 
 of directory names, values, flags, and other custom information.
 
 Note that building on the SGI Altix is the same as the other Linux/Intel 
 platforms, so set ESMF_COMPILER to 'intel' to use the files in the
-Linux.intel.default directory.  Also for Altix, set ESMF_COMM to 'mpi'
-and make sure ESMF_PREC is unset.  
+Linux.intel.default directory. For Altix set ESMF_COMM to 'mpi' in order to
+pick up the vendor MPI library.
 
 
 File Descriptions
@@ -366,47 +431,6 @@ Each default directory contains the following files:
 
  build_rules.mk : makefile fragment which is included by the main ESMF build
                   system and contains specific settings for this platform.
-
-
-Additional Environment Variables
---------------------------------
-
-See the ESMF User's Guide for a complete description of all the environment
-variables supported by the build system.  However, for convienence, these
-are the ones most likely to be necessary to adjust for new platforms:
-
-On platforms that don't support Pthreads the following option is critical:
-
-ESMF_PTHREADS     
-
-The default value is ON. Setting this variable to OFF will turn ESMF's
-pthreads features off and a stub header file will be used instead of the
-Pthreads header during library compilation. This may be necessary on systems
-that do not supply a working Pthreads implementation.
-
-
-Compiling with or without netCDF I/O libraries:
-
-NETCDF_LIB
-NETCDF_INCLUDE    
-
-By default the system does not try to link in the netCDF I/O libraries, but
-the makefiles are prepared to include them if these variables are defined.
-To use netCDF I/O, set both NETCDF_LIB and NETCDF_INCLUDE environment 
-variables to the directories where the netCDF files have been installed.
-
-
-Selecting a particular C compiler or Compiler Version:
-
-ESMF_C_COMPILER         
-ESMF_COMPILER_VERSION
-
-If it is possible to compile Fortran code with different C compilers on this
-platform (e.g. vendor-supplied C vs. gcc) then ESMF_C_COMPILER should control
-this choice.   If there are incompatible changes in flags or link libs from
-one version of the compiler to another, ESMF_COMPILER_VERSION should be set to
-the numeric version to select the right case inside the makefiles.
-
 
 
 Customizing an Existing Platform
@@ -444,19 +468,6 @@ Adding a New Platform
    Since ESMF contains both F90 and C++ code, generally the linkers are
    not able to simply link without being given additional libraries.
 
-   Generally the C_CXXF90LIBS line (F90 libraries which need to be added to
-   the link line when the link is being done with the C++ compiler), and the
-   C_F90CXXLIBS line (C++ libs which need to be added when the link is being
-   done with the F90 compiler) will need to be updated.  Running a C++ or F90
-   link in a single language with -v (or whatever flag gives verbose output
-   about the exact lines being executed) may help find what libraries are
-   silently added by the compilers.
-
-   The build_rules.mk file should only need to set C_xxx variables, which
-   is the naming convention for platform specific values.  If you have to
-   set a value which does not have a C_xxx name in order to compile, email
-   esmf_support@ucar.edu to let us know.
-
 4. Edit the ESMC_Conf.h file and look over the values.  (In reality, most
    of these variables are not actually used.)  However, see the ESMF_F90_PTR
    settings at the end of the file.  These *must* match the size of the 
@@ -473,33 +484,40 @@ Adding a New Platform
    email esmf_support@ucar.edu so we can include it in our next release.
 
 
-Platform Specific Notes Related to makefiles and Environment Variables
-----------------------------------------------------------------------
+Directories
+-----------
 
-AIX systems - Those using LoadLeveler will generally need to set the
-MP_RMPOOL environment variable, and generally 1 will be a good value.
-See your own system admins for more help on this if 1 doesn't work.
-Those systems running LSF instead of POE should set ESMF_BATCHQUEUE to 'lsf'
-before executing; this will select the proper run script for the
-tests and example programs.
+application:     Contains a simple ESMF application and Makefile to demonstrate
+                 the use of the esmf.mk makefile fragment.
 
-OSF (HP/Compaq) systems - Our makefiles support those systems needing 
-a -P project number argument to the bsub command in order to correctly 
-charge system usage.  Set the ESMF_PROJECT environment variable to the
-project name and it will be passed with -P into bsub when submitting a job.
-See your own system admins for more info on whether this is needed.
+build_config:    Contains makefile fragments that can be customized by the 
+                 user for specific platforms, compilers, and sites.
+                 See the README in this directory for help with porting to
+                 new platforms or compilers.
 
-Linux/intel - The intel compilers have an additional option on cross-language
-linking.  You can compile with the intel C and Fortran compilers, but then
-link with the gcc libraries.  To use this combination set ESMF_C_LIBRARY to gcc.
+build:           Contains the generic portion of the build that a
+                 user would not be expected to modify.  Also contains a 
+                 sample user makefile.
 
-Darwin (Mac)/xlf - This compiler supports compiling and linking with either
-gcc or xlc.  Use ESMF_C_COMPILER to control this choice.
+scripts:         Contains scripts for testing and uniprocessor runs, and some
+                 templates.
+
+src:             Contains the source code.
 
 
+The following directories are created during the building and testing stages:
 
-And as always, you can email esmf_support@ucar.edu with any questions 
-or problems.
+lib:             Contains the ESMF libraries.
+
+mod:             Contains the Fortran module files.
+
+quick_start:     Contains skeleton application files to use as a template.
+
+test:            Contains unit and system test executables and output.
+
+examples:	 Contains examples executables and output.
+
+doc:             Contains documentation (if built).
 
 ================================================================================
 
@@ -523,6 +541,11 @@ Follow the directions on that web page to download a tarball and for
 access to the ESMF CVS repository.  The Sourceforge site also contains 
 the bugs, support, and task lists for ESMF.
 
+Use test cases demonstrating how ESMF can be used in realistic situations are
+available as a separate module through CVS. Please follow the instructions on 
+the ESMF web site:
+        http://www.esmf.ucar.edu -> Development -> Test and Validation
+
 Contributions from ESMF users are available at:
 	http://sourceforge.net/projects/esmfcontrib
 
@@ -530,4 +553,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.73 2006/05/20 21:37:14 svasquez Exp $
+ $Id: README,v 1.74 2006/09/22 23:55:36 theurich Exp $

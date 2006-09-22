@@ -1,166 +1,123 @@
-#  $Id: build_rules.mk,v 1.17 2006/03/20 20:13:19 tjcnrl Exp $
+# $Id: build_rules.mk,v 1.18 2006/09/22 23:55:38 theurich Exp $
 #
-#  Darwin.xlf.default
-#
-# if you have xlf and gcc/g++, this should work as-is.
-# if you also have xlc/xlC and want to use them, then:
-#   setenv ESMF_C_COMPILER xlc
-# before building.
+# Darwin.xlf.default
 #
 
+############################################################
+# Default compiler setting.
 #
-#  Make sure that ESMF_PREC is set to 32
-#
-ESMF_PREC = 32
+ESMF_F90DEFAULT         = xlf90_r
+ESMF_CXXDEFAULT         = xlC_r
 
-#
+############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)
-export ESMF_COMM := mpiuni
-endif
-
-#
-# default C compiler setting.
-#
-ifndef ESMF_C_COMPILER
-export ESMF_C_COMPILER := gcc
+export ESMF_COMM := mpi
 endif
 
 ############################################################
+# MPI dependent settings.
 #
-# location of external libs.  if you want to use any of these,
-# define ESMF_SITE to my_site so the build system can find it,
-# copy this file into Darwin.xlf.my_site, and uncomment the
-# libs you want included.  remove the rest of this file since
-# both this file and the site file will be included.
-
-# LAPACK_INCLUDE   = 
-# LAPACK_LIB       = -L/usr/local/lib -llapack
-# NETCDF_INCLUDE   = -I/usr/local/include/netcdf
-# NETCDF_LIB       = -L/usr/local/lib -lnetcdf
-# HDF_INCLUDE      = -I/usr/local/include/hdf
-# HDF_LIB          = -L/usr/local/lib -lmfhdf -ldf -ljpeg -lz
-# BLAS_INCLUDE     = 
-# BLAS_LIB         = -L/usr/local/lib -latlas
-
-#
-############################################################
-
-
-# Location of MPI (Message Passing Interface) software
-
-# Set ESMF_COMM depending on whether you have installed the mpich
-# or lam library.  The default location is to have the include files
-# and libs installed in /usr/local - if they are someplace else,
-# set MPI_HOME first.  (the mpiuni case is handled in the common.mk file.)
-
+ifeq ($(ESMF_COMM),mpiuni)
+# MPI stub library -----------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -WF,-DESMF_MPIUNI
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
+else
+ifeq ($(ESMF_COMM),mpich)
+# Mpich ----------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_F90LINKLIBS       += 
+ESMF_CXXDEFAULT         = mpiCC
+ESMF_CXXCOMPILEOPTS    += -DESMF_MPICH
+ESMF_MPIRUNDEFAULT      = mpirun
+else
+ifeq ($(ESMF_COMM),mpich2)
+# Mpich2 ---------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
 ifeq ($(ESMF_COMM),lam)
-# with lam-mpi installed in $MPI_HOME or /usr/local:
-MPI_LIB        +=  -lmpi -llam -llamf77mpi
-endif
-
-ifeq ($(ESMF_COMM),mpich)
-# with mpich installed in $MPI_HOME or /usr/local:
-CPPFLAGS       += -DESMF_MPICH=1
-MPI_LIB        += -lmpich -lpmpich
-endif
-
-
-# common commands which differ from the defaults somehow
-SED			= /usr/bin/sed
-
-#
-# C compiler flags
-#
-RESTRICTED_POINTERS	= -qkeyword=restrict
-NO_AUTO_PARALLEL	= -qsmp=noauto
-NO_INLINING		= -Q
-NO_LINE_DIRECTIVES	= -P
-
-#
-# Fortran compiler flags
-#
-REAL8			= -qrealsize=8
-STRICT			= -qstrict
-FPP_PREFIX		= -WF,
-F_FREECPP               = -qfree=f90 -qsuffix=cpp=F90
-F_FIXCPP                = -qfixed=132 -qsuffix=cpp=F
-F_FREENOCPP             = -qfree=f90 -qsuffix=f=f90
-F_FIXNOCPP              = -qfixed=132 -qsuffix=f=f        
-
-#
-# compiler section
-#
-ifeq ($(ESMF_COMM),mpich)
-# with mpich, have to call wrappers instead of compilers directly
-# for now, assume they are built with gcc settings and not around xlc
-C_CC		= mpicc
-C_CCV		= $(C_CC) --version
-C_CXX		= mpicxx
-C_CXXV		= $(C_CXX) --version
-C_FC		= mpif90 
-C_FCV		= $(C_FC) --version
-
-CXXLIB_PATHS    =
-F90LIB_PATHS    = -L/opt/ibmcmp/xlf/8.1/lib
-C_CXXF90LIBS	= -L. $(CXXLIB_PATHS) -lm -lstdc++ \
-		      $(F90LIB_PATHS) -lxlf90_r -lxlfmath -lxl
-C_F90CXXLIBS	= -L. $(CXXLIB_PATHS) -lstdc++ \
-		      $(F90LIB_PATHS) -lxlf90_r
-
+# LAM (assumed to be built with xlf90) ---------------------
+ESMF_F90DEFAULT         = mpif77
+ESMF_CXXDEFAULT         = mpic++
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
-# non-mpich section: lam or mpiuni
-
-ifeq ($(ESMF_C_COMPILER),gcc)
-# default is to use gcc/g++ for the compiling C files
-C_CC		= gcc
-C_CCV		= $(C_CC) -v
-C_CXX		= g++
-C_CXXV		= $(C_CXX) -v
-CXXLIB_PATHS    =
-F90LIB_PATHS    = -L/opt/ibmcmp/xlf/8.1/lib
-C_CXXF90LIBS	= ${MPI_LIB} -lstdc++ -L. \
-		  $(F90LIB_PATHS) -lxlf90_r -lxlfmath -lxl
-C_F90CXXLIBS	= ${MPI_LIB} -lstdc++ -L. \
-		  $(F90LIB_PATHS) -lxlf90_r
-
+ifeq ($(ESMF_COMM),openmpi)
+# OpenMPI --------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
-# if you have the ibm xlc/xlC product, setenv ESMF_C_COMPILER xlc first
-C_CC		= xlc_r 
-C_CCV		= which $(C_CC)
-C_CXX		= xlC_r 
-C_CXXV		= which $(C_CXX)
-CXXLIB_PATHS    = -L/opt/ibmcmp/vacpp/6.0/lib/
-F90LIB_PATHS    = -L/opt/ibmcmp/xlf/8.1/lib
-C_CXXF90LIBS	= -L. $(F90LIB_PATHS) -lxlf90_r -lxlfmath -lxl \
-		      $(CXXLIB_PATHS) -lm -libmc++ -lstdc++
-C_F90CXXLIBS	= -L. $(F90LIB_PATHS) -lxlf90_r \
-		      $(CXXLIB_PATHS) -libmc++ -lstdc++
-
-# end of xlc section
+ifeq ($(ESMF_COMM),user)
+# User specified flags -------------------------------------
+else
+$(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
+endif
+endif
+endif
+endif
 endif
 
-
+############################################################
+# Print compiler version string
 #
-# xlf Fortran compiler from ibm for mac os x
+ESMF_F90COMPILER_VERSION    = which ${ESMF_F90COMPILER}
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -qversion
+
+############################################################
+# xlf90 needs flag to indicate FPP options
 #
-C_FC		= xlf95_r 
-C_FCV		= which $(C_FC)
+ESMF_FPPPREFIX           = -WF,
 
-# end of non-mpich section
-endif
+############################################################
+# Special debug flags
+#
+ESMF_F90OPTFLAG_G       += -qcheck -qfullpath
+ESMF_CXXOPTFLAG_G       += -qcheck -qfullpath
 
-# settings independent of which compiler is selected
+############################################################
+# Blank out variables to prevent rpath encoding
+#
+ESMF_F90LINKRPATHS      =
+ESMF_CXXLINKRPATHS      =
 
-C_SLFLAG                  = -L
+############################################################
+# xlf90 does not know about Fortran suffices
+#
+ESMF_F90COMPILEFREECPP   = -qfree=f90 -qsuffix=cpp=F90
+ESMF_F90COMPILEFREENOCPP = -qfree=f90 -qsuffix=f=f90
+ESMF_F90COMPILEFIXCPP    = -qfixed=132 -qsuffix=cpp=F
+ESMF_F90COMPILEFIXNOCPP  = -qfixed=132 -qsuffix=f=f
 
-###########################################
+############################################################
+# Determine where xlf's libraries are located
+#
+ESMF_CXXLINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.xl $(ESMF_F90COMPILER))
 
-PARCH			= mac_osx
+############################################################
+# Determine where xlc's libraries are located
+#
+ESMF_F90LINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.xl $(ESMF_CXXCOMPILER))
 
-SL_LIBS_TO_MAKE =
+############################################################
+# Link against libesmf.a using the F90 linker front-end
+#
+ESMF_F90LINKLIBS += -libmc++ -lstdc++
 
-C_SL_LIBOPTS  = -G -qmkshrobj $(C_F90CXXLIBS) $(MPI_LIB)
+############################################################
+# Link against libesmf.a using the C++ linker front-end
+#
+ESMF_CXXLINKLIBS += -lxlf90_r -lxlfmath
 
-
+############################################################
+# Blank out shared library options
+#
+ESMF_SL_LIBS_TO_MAKE  =

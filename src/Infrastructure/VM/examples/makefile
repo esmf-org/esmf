@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.18 2006/06/19 21:53:40 theurich Exp $
+# $Id: makefile,v 1.19 2006/09/22 23:55:42 theurich Exp $
 
-ALL: build_examples
-
-run: run_examples
+ALL:      build_examples
+run:      run_examples
+run_uni:  run_examples_uni
 
 CFLAGS    =
 FFLAGS    =
@@ -87,7 +87,7 @@ run_ESMF_VMAllFullReduceEx:
 	$(MAKE) EXNAME=VMAllFullReduce NP=4 exfrun
 
 run_ESMF_VMAllFullReduceEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx > $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx.stdout
+	$(MAKE) EXNAME=VMAllFullReduce NP=1 exfrun
 
 run_ESMF_VMComponentEx:
 	$(MAKE) EXNAME=VMComponent NP=4 exfrun

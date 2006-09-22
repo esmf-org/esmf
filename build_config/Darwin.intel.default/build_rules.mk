@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1 2006/03/03 16:21:36 nscollins Exp $
+# $Id: build_rules.mk,v 1.2 2006/09/22 23:55:38 theurich Exp $
 #
 # Darwin.intel.default
 #
@@ -131,7 +131,7 @@ endif
 
 # on some architectures we may need gcc flags to set to 64 bit, but those will be
 # architecture specific and not generic -- maybe a site file?
-ifeq ($(ESMF_PREC),64)
+ifeq ($(ESMF_ABI),64)
 ifneq ($(ESMF_C_COMPILER),gcc)
 CFLAGS	   += -size_lp64
 endif

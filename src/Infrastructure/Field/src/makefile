@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2004/08/03 19:33:46 nscollins Exp $ 
+# $Id: makefile,v 1.18 2006/09/22 23:58:58 theurich Exp $ 
 
 #
 ALL: build_here 
@@ -21,6 +21,13 @@ LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/Field/src
 
 include $(ESMF_DIR)/makefile
+
+# on AIX with the new XLF compiler (version 10.1) there is a
+# problem compiling the local files with optimization ->
+# solution: turn optimization off for AIX
+ifeq ($(ESMF_OS),AIX)
+ESMF_OPTLEVEL = 0
+endif
 
 DIRS	  = 
 

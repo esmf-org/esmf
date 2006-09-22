@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2006/05/04 20:17:05 theurich Exp $
+# $Id: makefile,v 1.13 2006/09/22 23:55:42 theurich Exp $
 
 ALL: build_examples
 run: run_examples
@@ -84,8 +84,8 @@ CLOBBERDIRS =
 #  Run targets
 #
 run_ESMF_DistGridEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_DistGridEx > $(ESMF_EXDIR)/ESMF_DistGridEx.stdout
+	-${ESMF_MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_DistGridEx > $(ESMF_EXDIR)/ESMF_DistGridEx.stdout
 
 run_ESMF_DistGridEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_DistGridEx > $(ESMF_EXDIR)/ESMF_DistGridEx.stdout
+	-${ESMF_MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_DistGridEx > $(ESMF_EXDIR)/ESMF_DistGridEx.stdout
 

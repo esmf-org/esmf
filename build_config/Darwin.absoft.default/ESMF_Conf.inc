@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.5 2005/02/03 17:50:07 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.6 2006/09/22 23:55:38 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -11,12 +11,8 @@ Licensed under the GPL.
 #endif
 
 #if 0
-If you want to check that later versions of the Absoft compiler
-can now handle initializers for derived type members in F90, remove
-the #if 0/#endif lines below, and fix up the start of the remaining
-line to be #define ESMF_ ... and then try to rebuild the framework.
-
-When we try it now, we get errors like the following at compile time:
+In the past we had problems with initializers using Absoft up to version 9.0. 
+We get errors like the following at compile time:
 
 tmod-2612 tmod: INTERNAL 
   Internal: IR xlate; SOURCE line: 48, file: src/Infrastructure/TimeMgr/interface/ESMF_Time.F90; INTERNAL site: 1437, tag: 0, val: -1
@@ -27,5 +23,5 @@ Contact technical support at support@absoft.com
 
 #endif
 
-#define ESMF_NO_INITIALIZERS 1
 
+#define ESMF_NO_INITIALIZERS 1

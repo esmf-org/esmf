@@ -1,13 +1,7 @@
-
-Settings for Linux, using the commercial NAGware Fortran
-compiler and the gnu gcc compiler.
-
-
-This version has been tested on the Jazz linux cluster at argonne.
-
+Settings for Linux, using the commercial NAGware Fortran compiler and the
+GCC C++ compiler.
 
 Requires the following environment settings:
 
 ESMF_COMPILER nag
-ESMF_PREC 32
 

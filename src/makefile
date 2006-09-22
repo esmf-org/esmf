@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2006/02/14 18:27:51 svasquez Exp $ 
+# $Id: makefile,v 1.13 2006/09/22 23:55:42 theurich Exp $ 
 
 
 LOCDIR   = src
@@ -6,12 +6,12 @@ LOCDIR   = src
 include $(ESMF_DIR)/makefile
 
 DIRS        = prologue Infrastructure Superstructure epilogue \
-              doc system_tests demo use_test_cases
+              doc system_tests demo
 
 
 CLEANFILES  = 
 CLEANDIRS   = 
 CLOBBERDIRS = 
-DUSTDIRS    = Infrastructure Superstructure system_tests demo use_test_cases
+DUSTDIRS    = Infrastructure Superstructure system_tests demo
 
 

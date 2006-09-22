@@ -1,6 +1,12 @@
 !
-!     $Id: mpif.h,v 1.1 2004/06/04 15:48:02 nscollins Exp $
+!     $Id: mpif.h,v 1.2 2006/09/22 23:55:42 theurich Exp $
 !
+
+!===============================================================================
+! This header file is not used in ESMF nor is it intended for user code!
+! Please see comment in mpi.c before Fortran symbol section for more details.
+! *gjt*
+!===============================================================================
 
 !     Trying to provide as little support for fortran code in petsc as needed
 

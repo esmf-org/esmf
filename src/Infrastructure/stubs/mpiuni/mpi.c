@@ -1,4 +1,4 @@
-/*$Id: mpi.c,v 1.3 2005/06/30 04:20:18 theurich Exp $*/
+/*$Id: mpi.c,v 1.4 2006/09/22 23:55:42 theurich Exp $*/
 
 /*
       This provides a few of the MPI-uni functions that cannot be implemented
@@ -182,6 +182,29 @@ double ESMC_MPI_Wtime(void)
   seconds = tv.tv_sec + tv.tv_usec * 0.000001;
   return seconds;
 }
+
+/*=============================================================================
+  I if'ed out the remaining section of this source file in order to prevent
+  conflicts with other MPI-stub libraries. PetSc MPIUNI is really not meant
+  as a full MPI stub library, but just as a means to an end. For ESMF all that
+  matter is to make the ESMF library built in the absense of an MPI 
+  implementation. The only portion of ESMF that makes calls into MPI is the
+  VM which is written in C++. This makes matter very straight forward because
+  the MPIUNI mpi.h will #define the MPI symbols to Petsc_ symbols and there will
+  be no symbol conflicts with other MPI stub libraries used for the user code.
+  
+  ESMF is in the fortunate position of not needing Fortran MPI stub symbols and
+  thus I if'ed those out here. 
+  
+  In conclusion:
+  - ESMF uses the Petsc MPIUNI stubs to make the VM compile and link w/o MPI.
+  - ESMF symbols in MPIUNI mode do not conflict with other MPI stub libs.
+  - ESMF does not provide Fortran nor C MPI stubs for the user
+  - There are better/more complete MPI stub libraries available for user code.
+  
+  *gjt*
+==============================================================================*/
+#if 0
 
 /* -------------------     Fortran versions of several routines ------------------ */
 
@@ -374,6 +397,11 @@ void MPIUNI_STDCALL MPI_ALLREDUCE(void *sendbuf,void *recvbuf,int *count,int *da
 } 
 
 
+/* I think the following may be for Fortran linkage, but we should not have
+   these symbols in ESMF or else we may conflict with other MPI-stubs!
+   gjt */
+
+
 /* These are some symbols needed by some MPI procs.  These will
    core dump if they try to call these functions, but this at least
    allows compilation, which is the whole point of mpiuni. */
@@ -392,7 +420,6 @@ int
 	mpi_wait_,
 	mpi_irecv_;
 	
-	
 
 
 
@@ -400,5 +427,7 @@ int
 }
 #endif
 
+
+#endif	
 
 

@@ -1,13 +1,15 @@
-#  $Id: build_rules.mk,v 1.6 2006/03/20 20:13:19 tjcnrl Exp $
+# $Id: build_rules.mk,v 1.7 2006/09/22 23:55:40 theurich Exp $
 #
-#  Linux.xlf.default - which currently means Blue Gene L
-#   which is the only semi-Linux platform which runs xlf.
+# Linux.xlf.default
 #
 
-# Blue Gene L is only 32:
-ESMF_PREC=32
-
+############################################################
+# Default compiler setting.
 #
+ESMF_F90DEFAULT         = blrts_xlf90
+ESMF_CXXDEFAULT         = blrts_xlC
+
+############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)
@@ -15,104 +17,109 @@ export ESMF_COMM := mpi
 endif
 
 ############################################################
+# MPI dependent settings.
 #
-# location of external libs.  if you want to use any of these,
-# define ESMF_SITE to my_site so the build system can find it,
-# copy this file into Linux.absoft.my_site, and uncomment the
-# libs you want included.  remove the rest of this file since
-# both this file and the site file will be included.
-
-# LAPACK_INCLUDE   = 
-# LAPACK_LIB       = -L/bgl/local/lib  -llapack440 
-# NETCDF_INCLUDE   = -I/bgl/local/netcdf-3.5.1/include
-# NETCDF_LIB       = -L/bgl/local/netcdf-3.5.1/lib -lnetcdf
-# HDF_INCLUDE      = -I/usr/local/include/hdf
-# HDF_LIB          = -L/usr/local/lib/ -lmfhdf -ldf -ljpeg -lz
-# BLAS_LIB         = -L/bgl/local/lib -lblas440 ${FC_LIB}
-
-#
-############################################################
-
-# stubs for pthreads - pthreads are not supported on bgl
-CPPFLAGS        += -DESMF_NO_PTHREADS
-
-
-
-#
-# Location of MPI (Message Passing Interface) software
-#
+ifeq ($(ESMF_COMM),mpiuni)
+# MPI stub library -----------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
+else
 ifeq ($(ESMF_COMM),mpi)
-MPIRUN         = ${ESMF_TOP_DIR}/scripts/mpirun.bgl
+# Vendor MPI -----------------------------------------------
+# ESMF_F90DEFAULT         = blrts_xlf90
+ESMF_F90LINKLIBS       += 
+# ESMF_CXXDEFAULT         = blrts_xlC
+ESMF_CXXLINKLIBS       += 
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.rs6000_sp
+ifeq ($(ESMF_BATCH),lsf.ibmpjl)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
+endif
+else
+ifeq ($(ESMF_COMM),user)
+# User specified flags -------------------------------------
+else
+$(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
+endif
 endif
 
-
-# ######################### Common compiler options #####################
-DARCH			= -DLINUX
-DsysARCH                = -DsysAIX
-
-COM_MEMCHECK_FLAG      = -qcheck
-COM_FULLPATH_FLAG      = -qfullpath
-COM_ALL_DEBUG_FLAGS    = $(COM_MEMCHECK_FLAG) $(COM_FULLPATH_FLAG)
-COM_MAXMEM_FLAG        = -qmaxmem=4000
-COM_NOWARN_FLAG        = -w
-COM_SPILL_FLAG         = -qspill=3000
-COM_ALL_OPT_FLAGS      = $(COM_MAXMEM_FLAG) $(COM_NOWARN_FLAG) $(COM_SPILL_FLAG)
-
-RESTRICTED_POINTERS	= -qkeyword=restrict
-STRICT			= -qstrict
-
-NO_AUTO_PARALLEL	= 
-NO_INLINING		= -Q
-NO_LINE_DIRECTIVES	= -P
-
-FPP_PREFIX		= -WF,
-F_FREECPP               = -qfree=f90 -qsuffix=cpp=F90
-F_FIXCPP                = -qfixed=132 -qsuffix=cpp=F
-F_FREENOCPP             = -qfree=f90 -qsuffix=f=f90
-F_FIXNOCPP              = -qfixed=132 -qsuffix=f=f        
-
-C_SLFLAG	        = -L
-
-# misc flags
-REAL8		= -qrealsize=8
-
-# compilers
-C_CC		= mpcc 
-C_CXX		= mpCC 
-C_FC		= mpxlf90 
-
-C_CLINKER	= $(C_CC) -bmaxdata:0x70000000  -qcheck 
-C_FLINKER	= $(C_FC) -bmaxdata:0x70000000 -lC -qcheck 
-
-
-# version info
-C_CCV		= $(C_CC) --version
-C_CXXV		= $(C_CXX) --version
-C_FCV		= $(C_FC) --version
-
-# compiler flags
-G_CFLAGS	+= $(COM_ALL_DEBUG_FLAGS)
-G_FFLAGS	+= $(COM_ALL_DEBUG_FLAGS)
-
-O_CFLAGS	+= $(COM_ALL_OPT_FLAGS)
-O_FFLAGS	+= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
-
-
-C_CXXF90LIBS	= -L/opt/ibmcmp/xlf/9.1/blrts_lib \
-                  -L/opt/ibmcmp/vacpp/7.0/blrts_lib \
-                  -lm -lxlf90 -lxl -lxlopt -libmc++ -lxlfmath -lm -lrt
-
-C_F90CXXLIBS	= -L/opt/ibmcmp/xlf/9.1/blrts_lib \
-                  -L/opt/ibmcmp/vacpp/7.0/blrts_lib \
-                  -lxlf90 -lxl -lxlopt -libmc++ -lxlfmath -lm -lrt
-
+############################################################
+# Set ESMF_MPIRUNDEFAULT according to ESMF_BATCH setting
+#
+ifeq ($(ESMF_BATCH),lsf.ibmpjl)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
+endif
 
 ############################################################
+# Print compiler version string
+#
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -qversion
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -qversion
 
-PARCH		= Linux
+############################################################
+# 32- vs. 64-bit ABI
+#
+ifeq ($(ESMF_ABI),32)
+ESMF_CXXCOMPILEOPTS       +=  -I/bgl/BlueLight/ppcfloor/bglsys/include
+ESMF_CXXLINKOPTS          +=  -L/bgl/BlueLight/ppcfloor/bglsys/lib -lmpich.rts -lmsglayer.rts -lrts.rts -ldevices.rts
+ESMF_F90COMPILEOPTS       +=  -I/bgl/BlueLight/ppcfloor/bglsys/include
+#ESMF_F90LINKOPTS          +=  -L/bgl/BlueLight/ppcfloor/bglsys/lib -lmpich.rts -lmsglayer.rts -lrts.rts -ldevices.rts
+ESMF_F90LINKOPTS          +=  -L/bgl/BlueLight/ppcfloor/bglsys/lib \
+                              -L/opt/ibmcmp/vacpp/bg/8.0/blrts_lib -libmc++ -lxlopt -lxl \
+                              -lstdc++ -lm -lc -lgcc -lcxxmpich.rts -lmpich.rts \
+			      -lmsglayer.rts -lrts.rts -ldevices.rts
 
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_CXXCOMPILEOPTS       += -q64
+ESMF_CXXLINKOPTS          += -q64
+ESMF_F90COMPILEOPTS       += -q64
+ESMF_F90LINKOPTS          += -q64
+ESMF_ARDEFAULT             = ar -X64
+ESMF_RANLIBDEFAULT         = ranlib -X64
+endif
 
-SL_LIBS_TO_MAKE = 
-C_SL_LIBOPTS  = -G
+############################################################
+# xlf90 needs flag to indicate FPP options
+#
+ESMF_FPPPREFIX           = -WF,
 
+############################################################
+# Special debug flags
+#
+ESMF_F90OPTFLAG_G       += -qcheck -qfullpath
+ESMF_CXXOPTFLAG_G       += -qcheck -qfullpath
 
+############################################################
+# Blank out variables to prevent rpath encoding
+#
+ESMF_F90LINKRPATHS      =
+ESMF_CXXLINKRPATHS      =
+
+############################################################
+# xlf90 does not know about Fortran suffices
+#
+ESMF_F90COMPILEFREECPP   = -qfree=f90 -qsuffix=cpp=F90
+ESMF_F90COMPILEFREENOCPP = -qfree=f90 -qsuffix=f=f90
+ESMF_F90COMPILEFIXCPP    = -qfixed=132 -qsuffix=cpp=F
+ESMF_F90COMPILEFIXNOCPP  = -qfixed=132 -qsuffix=f=f
+
+############################################################
+# Link against libesmf.a using the F90 linker front-end
+#
+ESMF_F90LINKLIBS += -L/opt/ibmcmp/vacpp/bg/8.0/lib -libmc++ -lxl -lxlopt
+
+############################################################
+# Link against libesmf.a using the C++ linker front-end
+#
+ESMF_CXXLINKLIBS += -lm -lxlf90 -lC
+
+############################################################
+# Shared library options
+#
+ESMF_SL_LIBOPTS  += -G -qmkshrobj
+ifeq ($(ESMF_ABI),64)
+ESMF_SL_LIBOPTS  += -q64
+endif

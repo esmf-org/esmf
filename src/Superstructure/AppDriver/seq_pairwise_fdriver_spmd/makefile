@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2005/05/23 16:58:17 nscollins Exp $ 
+# $Id: makefile,v 1.11 2006/09/22 23:55:43 theurich Exp $ 
 
 # by default, this makefile builds the executable named "Application"
 ALL:  executable
@@ -29,14 +29,14 @@ executable: $(APPOBJS)
 
 # run the executable in parallel.
 run:  Application
-	${MPIRUN} -np 4 ./Application
+	${ESMF_MPIRUN} -np 4 ./Application
 
 # run only a single copy.
 rununi: Application
-	${MPIRUN} -np 1 ./Application
+	${ESMF_MPIRUN} -np 1 ./Application
 
 
 # files to be deleted when cleaning up.
 clean:
-	${RM} -f Application $(CLEANFILES)
+	${ESMF_RM} -f Application $(CLEANFILES)
 

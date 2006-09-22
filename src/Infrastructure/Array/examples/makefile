@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2006/05/16 17:58:13 theurich Exp $
+# $Id: makefile,v 1.15 2006/09/22 23:55:42 theurich Exp $
 
 ALL: build_examples
 run: run_examples
@@ -88,26 +88,26 @@ CLOBBERDIRS =
 #  Run targets
 #
 run_ESMF_ArrayEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArrayEx > $(ESMF_EXDIR)/ESMF_ArrayEx.stdout
+	-${ESMF_MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArrayEx > $(ESMF_EXDIR)/ESMF_ArrayEx.stdout
 
 run_ESMF_ArrayEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayEx > $(ESMF_EXDIR)/ESMF_ArrayEx.stdout
+	-${ESMF_MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayEx > $(ESMF_EXDIR)/ESMF_ArrayEx.stdout
 
 
 run_ESMF_ArrayLarrayEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArrayLarrayEx > $(ESMF_EXDIR)/ESMF_ArrayLarrayEx.stdout
+	-${ESMF_MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArrayLarrayEx > $(ESMF_EXDIR)/ESMF_ArrayLarrayEx.stdout
 
 run_ESMF_ArrayLarrayEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayLarrayEx > $(ESMF_EXDIR)/ESMF_ArrayLarrayEx.stdout
+	-${ESMF_MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayLarrayEx > $(ESMF_EXDIR)/ESMF_ArrayLarrayEx.stdout
 
 run_ESMF_ArrayFarrayHaloEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArrayFarrayHaloEx > $(ESMF_EXDIR)/ESMF_ArrayFarrayHaloEx.stdout
+	-${ESMF_MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArrayFarrayHaloEx > $(ESMF_EXDIR)/ESMF_ArrayFarrayHaloEx.stdout
 
 run_ESMF_ArrayFarrayHaloEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayFarrayHaloEx > $(ESMF_EXDIR)/ESMF_ArrayFarrayHaloEx.stdout
+	-${ESMF_MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayFarrayHaloEx > $(ESMF_EXDIR)/ESMF_ArrayFarrayHaloEx.stdout
 
 run_ESMF_ArrayFarrayEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArrayFarrayEx > $(ESMF_EXDIR)/ESMF_ArrayFarrayEx.stdout
+	-${ESMF_MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArrayFarrayEx > $(ESMF_EXDIR)/ESMF_ArrayFarrayEx.stdout
 
 run_ESMF_ArrayFarrayEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayFarrayEx > $(ESMF_EXDIR)/ESMF_ArrayFarrayEx.stdout
+	-${ESMF_MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayFarrayEx > $(ESMF_EXDIR)/ESMF_ArrayFarrayEx.stdout

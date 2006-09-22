@@ -1,5 +1,4 @@
-Settings for the NEC build, with a cross-compiler running
-on a Linux front end.
+Settings for the NEC build, with a cross-compiler running on a Linux front end.
 
 Requires the following environment settings:
 
@@ -7,5 +6,3 @@ ESMF_COMPILER sxcross
 
 NOTE: This build has not been tested yet.  The initial settings
 were donated by Rene Ridler, NEC Europe.
-
-

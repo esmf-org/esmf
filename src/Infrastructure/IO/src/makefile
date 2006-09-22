@@ -1,11 +1,11 @@
-# $Id: makefile,v 1.17 2006/06/08 13:27:50 tjcnrl Exp $
+# $Id: makefile,v 1.18 2006/09/22 23:55:42 theurich Exp $
 
 ALL: build_here
 
 CFLAGS    =
 FFLAGS    =
 SOURCEC   = 
-ifeq ($(ESMF_NO_IOCODE),true)
+ifeq ($(ESMF_NO_IOCODE),TRUE)
 SOURCEF   = wrf_io.F90
 else
 SOURCEF   = wrf_io.F90 field_routines.F90 module_wrf_error.f90 wrf_abort.f90

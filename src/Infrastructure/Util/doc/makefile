@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2006/03/01 21:36:10 eschwab Exp $
+# $Id: makefile,v 1.4 2006/09/22 23:55:42 theurich Exp $
 
 ALL: onedoc
 
@@ -49,8 +49,8 @@ include $(ESMF_DIR)/makefile
 # Filter out #if's, #endif's and #define's from error codes file,
 #  which appears as an appendix in the ESMF reference manual.
 ESMF_ErrReturnCodes.tex : ESMF_ErrReturnCodes_chapi.tex
-	$(RM) ESMF_ErrReturnCodes.tex
-	$(GREPV) 'if' ESMF_ErrReturnCodes_chapi.tex | $(SED) 's/#define //' > ESMF_ErrReturnCodes.tex
+	$(ESMF_RM) ESMF_ErrReturnCodes.tex
+	$(ESMF_GREPV) 'if' ESMF_ErrReturnCodes_chapi.tex | $(ESMF_SED) 's/#define //' > ESMF_ErrReturnCodes.tex
 
 DIRS = 
 

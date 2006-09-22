@@ -1,8 +1,6 @@
-Settings for Mac OS X, using the g95 compiler and the gnu gcc compiler.
-(For the gnu gfortran/f95 compiler, see the gfortran directory).
+Settings for Darwin (Mac OS X), using the g95 compiler and the GNU C++ compiler.
 
 Requires the following environment settings:
 
 ESMF_COMPILER g95
-ESMF_PREC 32
 

@@ -1,200 +1,115 @@
-#  $Id: build_rules.mk,v 1.25 2006/03/20 20:13:18 tjcnrl Exp $
+# $Id: build_rules.mk,v 1.26 2006/09/22 23:55:37 theurich Exp $
 #
-#  AIX.default.default
+# AIX.default.default
 #
 
+############################################################
+# Default compiler setting.
 #
+ESMF_F90DEFAULT         = xlf90_r
+ESMF_CXXDEFAULT         = xlC_r
+
+############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)
-  export ESMF_COMM := mpi
+export ESMF_COMM := mpi
 endif
 
 ############################################################
+# MPI dependent settings.
 #
-# location of external libs.  if you want to use any of these,
-# define ESMF_SITE to my_site so the build system can find it,
-# copy this file into AIX.default.my_site, and uncomment the
-# libs you want included.  remove the rest of this file since
-# both this file and the site file will be included.
-
-# Note: If you use the IBM version of lapack you must include 
-#  -lessl at the end of the line defining the BLAS libraries.
-#
-
-# ifeq ($(ESMF_PREC),32)
-# LAPACK_INCLUDE   = 
-# LAPACK_LIB       = -L/usr/local/lib32/r4i4 -llapack -lessl
-# NETCDF_INCLUDE   = -I/usr/local/include
-# NETCDF_LIB       = -L/usr/local/lib32/r4i4 -lnetcdf
-# HDF_INCLUDE      = -I/usr/local/include/hdf
-# HDF_LIB          = -L/usr/local/lib32/r4i4 -lmfhdf
-# BLAS_INCLUDE     = 
-# BLAS_LIB         = -lblas
-# endif
-# # end 32 bit section
-# ifeq ($(ESMF_PREC),64)
-# LAPACK_INCLUDE   = 
-# LAPACK_LIB       = -L/usr/local/lib64/r4i4 -llapack -lessl
-# NETCDF_INCLUDE   = -I/usr/local/include
-# NETCDF_LIB       = -L/usr/local/lib64/r4i4 -lnetcdf
-# HDF_INCLUDE      = -I/usr/local/include/hdf
-# HDF_LIB          = -L/usr/local/lib64/r4i4 -lmfhdf
-# BLAS_INCLUDE     = 
-# BLAS_LIB         = -lblas
-# endif
-# # end 64 bit section
-
-
-#
-# Location of the vendor supplied MPI (Message Passing Interface) software
-#
-ifeq ($(ESMF_COMM),mpi)
-MPI_INCLUDE    += 
-MPI_LIB        += -lmpi_r
-ifeq ($(ESMF_BATCHQUEUE),lsf)
-MPIRUN         = ${ESMF_TOP_DIR}/scripts/mpirun.aixlsf
-export ESMF_BATCH := true
-else
-MPIRUN         = ${ESMF_TOP_DIR}/scripts/mpirun.rs6000_sp
-export ESMF_BATCH := false
-endif
-endif
-
-
-#
-# Location of STL files for C++
-#
-LOCAL_INCLUDE += -I/usr/vacpp/include
-
-# UNUSED??
-#
-# location of smp library
-#
-# XLSMP_LIB      = -L/usr/lpp/xlsmp/aix51 -lxlsmp
-
-
-# ######################### Common compiler options #####################
-DARCH			= -DAIX
-DsysARCH                = -DsysAIX
-
-COM_MEMCHECK_FLAG      = -qcheck
-COM_FULLPATH_FLAG      = -qfullpath
-COM_ALL_DEBUG_FLAGS    = $(COM_MEMCHECK_FLAG) $(COM_FULLPATH_FLAG)
-
-COM_MAXMEM_FLAG        = -qmaxmem=4000
-COM_NOWARN_FLAG        = -w
-COM_SPILL_FLAG         = -qspill=3000
-COM_ALL_OPT_FLAGS      = $(COM_MAXMEM_FLAG) $(COM_NOWARN_FLAG) $(COM_SPILL_FLAG)
-
-RESTRICTED_POINTERS	= -qkeyword=restrict
-STRICT			= -qstrict
-
-NO_AUTO_PARALLEL	= -qsmp=noauto
-NO_INLINING		= -Q
-NO_LINE_DIRECTIVES	= -P
-
-FPP_PREFIX		= -WF,
-F_FREECPP               = -qfree=f90 -qsuffix=cpp=F90
-F_FIXCPP                = -qfixed=132 -qsuffix=cpp=F
-F_FREENOCPP             = -qfree=f90 -qsuffix=f=f90
-F_FIXNOCPP              = -qfixed=132 -qsuffix=f=f        
-
-C_SLFLAG		= -L
-
-
-############################################################
-
-# default name
-C_CC = cc_r
-
-ifeq ($(ESMF_COMM),mpi)
-  MPIPREFIX=mp
-  C_CC = mpCC_r
-  # is this still needed?
-  MPI64_LIB  = -lmpi_r -lvtd_r -lmpci_r
-endif
 ifeq ($(ESMF_COMM),mpiuni)
-  C_CC=xlC_r
+# MPI stub library -----------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -WF,-DESMF_MPIUNI
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
+else
+ifeq ($(ESMF_COMM),mpi)
+# Vendor MPI -----------------------------------------------
+ESMF_F90DEFAULT         = mpxlf90_r
+ESMF_F90LINKLIBS       += -lmpi_r
+ESMF_CXXDEFAULT         = mpCC_r
+ESMF_CXXLINKLIBS       += -lmpi_r
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.rs6000_sp
+ifeq ($(ESMF_BATCH),lsf.ibmpjl)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
 endif
-
-C_CXX			= $(MPIPREFIX)CC_r 
-C_FC			= $(MPIPREFIX)xlf90_r 
+else
+ifeq ($(ESMF_COMM),user)
+# User specified flags -------------------------------------
+else
+$(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
+endif
+endif
 
 ############################################################
-
-ifeq ($(ESMF_PREC),32)
-PARCH			= rs6000
-AR32_64			= ar -X 32_64
-
-# compilers and flags
-REAL8			= -qrealsize=8
-
-# linkopts are used when linking an executable using the shared lib
-C_LINKOPTS += -brtl -bmaxdata:0x80000000 -qcheck
-
-# linking with shared libs
-C_SL_LIBLINKER 		= $(C_CC) 
-
-endif
-# end 32 bit section
+# Print compiler version string
+#
+ESMF_F90COMPILER_VERSION    = lslpp -l | fgrep xlf
+ESMF_CXXCOMPILER_VERSION    = lslpp -l | fgrep xlC
 
 ############################################################
-
-ifeq ($(ESMF_PREC),64)
-PARCH		= rs6000_64
-AR		= ar -X64
-RANLIB		= ranlib -X64
-AR32_64		= ar -X 32_64
-
-# compilers
-C_64BIT		= -q64
-REAL8		= -qrealsize=8
-
-C_CC		+= $(C_64BIT)
-C_CXX		+= $(C_64BIT)
-C_FC		+= $(C_64BIT)
-
-# linkopts are used when linking an executable using the shared lib
-C_LINKOPTS += -brtl -bmaxdata:0x80000000 -bmaxstack:0x1000000 \
-               -bloadmap:loadmap.txt
-
-# linking with shared libs
-C_SL_LIBLINKER 	= $(C_CC) $(C_64BIT)
-
+# 32- vs. 64-bit ABI
+#
+ifeq ($(ESMF_ABI),32)
+ESMF_CXXCOMPILEOPTS       += -q32
+ESMF_CXXLINKOPTS          += -q32
+ESMF_F90COMPILEOPTS       += -q32
+ESMF_F90LINKOPTS          += -q32
+ESMF_ARDEFAULT             = ar -X32
+ESMF_RANLIBDEFAULT         = ranlib -X32
 endif
-# end 64 bit section
+ifeq ($(ESMF_ABI),64)
+ESMF_CXXCOMPILEOPTS       += -q64
+ESMF_CXXLINKOPTS          += -q64
+ESMF_F90COMPILEOPTS       += -q64
+ESMF_F90LINKOPTS          += -q64
+ESMF_ARDEFAULT             = ar -X64
+ESMF_RANLIBDEFAULT         = ranlib -X64
+endif
 
-
-# start of common section
+############################################################
+# xlf90 needs flag to indicate FPP options
 #
-C_CCV		= lslpp -l | fgrep xlC
-C_CXXV		= lslpp -l | fgrep xlC
-C_FCV		= lslpp -l | fgrep xlf
+ESMF_FPPPREFIX           = -WF,
 
-C_CXXF90LIBS	= -L. -lm_r -lxlf90_r -lC_r
-C_F90CXXLIBS	= -L. -lxlf90_r -lC_r
-
-
-# ------------------------- BOPT - g options ------------------------------
-G_CFLAGS	+= $(COM_ALL_DEBUG_FLAGS)
-G_FFLAGS	+= $(COM_ALL_DEBUG_FLAGS)
-
-# ------------------------- BOPT - O options ------------------------------
-O_CFLAGS	+= $(COM_ALL_OPT_FLAGS)
-O_FFLAGS	+= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
+############################################################
+# Special debug flags
 #
+ESMF_F90OPTFLAG_G       += -qcheck -qfullpath
+ESMF_CXXOPTFLAG_G       += -qcheck -qfullpath
 
+############################################################
+# Blank out variables to prevent rpath encoding
+#
+ESMF_F90LINKRPATHS      =
+ESMF_CXXLINKRPATHS      =
 
-# shared lib section - this platform does make a shared lib.
+############################################################
+# xlf90 does not know about Fortran suffices
+#
+ESMF_F90COMPILEFREECPP   = -qfree=f90 -qsuffix=cpp=F90
+ESMF_F90COMPILEFREENOCPP = -qfree=f90 -qsuffix=f=f90
+ESMF_F90COMPILEFIXCPP    = -qfixed=132 -qsuffix=cpp=F
+ESMF_F90COMPILEFIXNOCPP  = -qfixed=132 -qsuffix=f=f
 
-# libopts are the options used when converting lib.a to lib.so
-C_SL_LIBOPTS  += -G -qmkshrobj $(C_F90CXXLIBS) $(MPI_LIB)
+############################################################
+# Link against libesmf.a using the F90 linker front-end
+#
+ESMF_F90LINKLIBS += -lxlf90_r -lC_r
 
+############################################################
+# Link against libesmf.a using the C++ linker front-end
+#
+ESMF_CXXLINKLIBS += -lm_r -lxlf90_r -lC_r
 
-# unused?  TODO: remove
-#C_CXXSOLIBS	= -L. -lm_r -lxlf90_r -lC_r
-# C_SL_LIBLINKER is defined in the 32/64 bit sections above. 
-
-# end of common settings
-
+############################################################
+# Shared library options
+#
+ESMF_SL_LIBOPTS  += -G -qmkshrobj
+ifeq ($(ESMF_ABI),64)
+ESMF_SL_LIBOPTS  += -q64
+endif

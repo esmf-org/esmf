@@ -1,0 +1,4 @@
+#!/bin/sh
+# this script expects the Compaq f90 command
+# and returns the path to the f90 system libraries
+$1 -v 2>&1 | grep `which cc` | awk 'BEGIN { RS=" "}; /-L/ ' | sed 's/-L//g' | xargs

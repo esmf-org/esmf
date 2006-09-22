@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.38 2005/10/12 19:06:21 nscollins Exp $ 
+# $Id: makefile,v 1.39 2006/09/22 23:55:43 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -112,15 +112,15 @@ RUN_ESMF_CompSetServUTestUNI:
 $(ESMC_TESTDIR)/ESMC_CompCreate: ESMC_CompCreate.o
 	-$(CLINKER) $(LINKOPTS) -o $(ESMC_TESTDIR)/ESMC_CompCreate \
          ESMC_CompCreate.o $(CLINKLIBS)
-	${RM} -f ESMC_CompCreate.o
+	${ESMF_RM} -f ESMC_CompCreate.o
 
 RUN_ESMC_CompCreate:
 	cp -f grid.rc $(ESMF_TESTDIR)
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_CompCreate > $(ESMC_TESTDIR)/ESMC_CompCreate.stdout
+	-${ESMF_MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_CompCreate > $(ESMC_TESTDIR)/ESMC_CompCreate.stdout
 
 RUN_ESMC_CompCreateUNI:
 	cp -f grid.rc $(ESMF_TESTDIR)
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_CompCreate > $(ESMC_TESTDIR)/ESMC_CompCreate.stdout
+	-${ESMF_MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_CompCreate > $(ESMC_TESTDIR)/ESMC_CompCreate.stdout
 
 
 #
@@ -131,15 +131,15 @@ ESMF_UserRun.o: ESMF_UserGComp.o
 $(ESMC_TESTDIR)/ESMF_CompRun: ESMF_UserGComp.o ESMF_CompRun.o
 	-$(FLINKER) $(LINKOPTS) -o $(ESMC_TESTDIR)/ESMF_CompRun ESMF_CompRun.o \
          ESMF_UserGComp.o $(FLINKLIBS)
-	${RM} -f ESMF_CompRun.o
+	${ESMF_RM} -f ESMF_CompRun.o
 
 RUN_ESMF_CompRun:
 	cp -f grid.rc $(ESMF_TESTDIR)
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CompRun > $(ESMC_TESTDIR)/ESMF_CompRun.stdout
+	-${ESMF_MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CompRun > $(ESMC_TESTDIR)/ESMF_CompRun.stdout
 
 RUN_ESMF_CompRunUNI:
 	cp -f grid.rc $(ESMF_TESTDIR)
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CompRun > $(ESMC_TESTDIR)/ESMF_CompRun.stdout
+	-${ESMF_MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CompRun > $(ESMC_TESTDIR)/ESMF_CompRun.stdout
 
 
 
@@ -152,14 +152,14 @@ ESMF_UserGComp_F.o : ESMF_UserGComp.o
 $(ESMC_TESTDIR)/ESMC_CompRun: ESMF_UserGComp.o ESMF_UserGComp_F.o ESMC_CompRun.o
 	-$(CLINKER) $(LINKOPTS) -o $(ESMC_TESTDIR)/ESMC_CompRun \
          ESMC_CompRun.o ESMF_UserGComp.o ESMF_UserGComp_F.o $(CLINKLIBS)
-	${RM} -f ESMC_CompRun.o ESMF_UserGComp_F.o ESMF_UserGComp.o
+	${ESMF_RM} -f ESMC_CompRun.o ESMF_UserGComp_F.o ESMF_UserGComp.o
 
 RUN_ESMC_CompRun:
 	cp -f grid.rc $(ESMF_TESTDIR)
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_CompRun > $(ESMC_TESTDIR)/ESMC_CompRun.stdout
+	-${ESMF_MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_CompRun > $(ESMC_TESTDIR)/ESMC_CompRun.stdout
 
 RUN_ESMC_CompRunUNI:
 	cp -f grid.rc $(ESMF_TESTDIR)
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_CompRun > $(ESMC_TESTDIR)/ESMC_CompRun.stdout
+	-${ESMF_MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_CompRun > $(ESMC_TESTDIR)/ESMC_CompRun.stdout
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.8 2006/06/12 16:54:52 samsoncheung Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.9 2006/09/22 23:59:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,6 +10,77 @@
 !
 !==============================================================================
 !
+
+module ESMF_StateReconcileEx_Mod
+
+
+contains
+
+!BOE
+!\subsubsection{Initialization and SetServices Routines}
+!  
+! These are the separate subroutines called by the code above.
+!EOE
+
+!BOC
+! Initialize routine which creates "field1" on PETs 0 and 1
+subroutine comp1_init(gcomp, istate, ostate, clock, rc)
+    use ESMF_Mod
+    type(ESMF_GridComp), intent(inout) :: gcomp
+    type(ESMF_State), intent(inout) :: istate, ostate
+    type(ESMF_Clock), intent(in) :: clock
+    integer, intent(out) :: rc
+
+    type(ESMF_Field) :: field1
+    integer :: localrc
+
+    print *, "i am comp1_init"
+
+    field1 = ESMF_FieldCreateNoData(name="Comp1 Field", rc=localrc)
+  
+    call ESMF_StateAddField(istate, field1, rc=localrc)
+    
+    rc = localrc
+
+end subroutine comp1_init
+
+! Initialize routine which creates "field2" on PETs 2 and 3
+subroutine comp2_init(gcomp, istate, ostate, clock, rc)
+    use ESMF_Mod
+    type(ESMF_GridComp), intent(inout) :: gcomp
+    type(ESMF_State), intent(inout) :: istate, ostate
+    type(ESMF_Clock), intent(in) :: clock
+    integer, intent(out) :: rc
+
+    type(ESMF_Field) :: field2
+    integer :: localrc
+
+    print *, "i am comp2_init"
+
+    field2 = ESMF_FieldCreateNoData(name="Comp2 Field", rc=localrc)
+    
+    call ESMF_StateAddField(istate, field2, rc=localrc)
+
+    rc = localrc
+
+end subroutine comp2_init
+
+subroutine comp_dummy(gcomp, rc)
+   use ESMF_MOd
+   type(ESMF_GridComp), intent(inout) :: gcomp
+   integer, intent(out) :: rc
+
+   rc = ESMF_SUCCESS
+end subroutine comp_dummy
+!EOC
+    
+end module ESMF_StateReconcileEx_Mod
+
+
+
+
+
+
     program ESMF_StateReconcileEx
 
 !------------------------------------------------------------------------------
@@ -25,37 +96,11 @@
 
     ! ESMF Framework module
     use ESMF_Mod
+    use ESMF_StateReconcileEx_Mod
     implicit none
 
-    ! Interface blocks for subroutines at end of program
-    interface
-      subroutine comp_dummy(gcomp, rc)
-        use ESMF_MOd
-        type(ESMF_GridComp), intent(inout) :: gcomp
-        integer, intent(out) :: rc
-      end subroutine comp_dummy
-
-      subroutine comp1_init(gcomp, istate, ostate, clock, rc)
-        use ESMF_Mod
-        type(ESMF_GridComp), intent(inout) :: gcomp
-        type(ESMF_State), intent(inout) :: istate, ostate
-        type(ESMF_Clock), intent(in) :: clock
-        integer, intent(out) :: rc
-      end subroutine comp1_init
-    
-      subroutine comp2_init(gcomp, istate, ostate, clock, rc)
-        use ESMF_Mod
-        type(ESMF_GridComp), intent(inout) :: gcomp
-        type(ESMF_State), intent(inout) :: istate, ostate
-        type(ESMF_Clock), intent(in) :: clock
-        integer, intent(out) :: rc
-    
-      end subroutine comp2_init
-
-    end interface
-
     ! Local variables
-    integer :: rc
+    integer :: rc, petCount
     type(ESMF_State) :: state1
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_VM) :: vm
@@ -66,7 +111,17 @@
     finalrc = ESMF_SUCCESS
 
 
-    call ESMF_Initialize(rc=rc)
+    call ESMF_Initialize(vm=vm, rc=rc)
+    
+    ! verify that this example can run on the given petCount
+    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+
+    if (petCount<4) then
+      print *, "This test must run on at least 4 PETs."
+      goto 20
+    endif
+    
 
 !-------------------------------------------------------------------------
 !BOE
@@ -165,6 +220,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !-------------------------------------------------------------------------
+20  continue
     call ESMF_Finalize(rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -177,62 +233,4 @@
 
 !BOC
 end program ESMF_StateReconcileEx
-
-!BOE
-!\subsubsection{Initialization and SetServices Routines}
-!  
-! These are the separate subroutines called by the code above.
-!EOE
-
-!BOC
-! Initialize routine which creates "field1" on PETs 0 and 1
-subroutine comp1_init(gcomp, istate, ostate, clock, rc)
-    use ESMF_Mod
-    type(ESMF_GridComp), intent(inout) :: gcomp
-    type(ESMF_State), intent(inout) :: istate, ostate
-    type(ESMF_Clock), intent(in) :: clock
-    integer, intent(out) :: rc
-
-    type(ESMF_Field) :: field1
-    integer :: localrc
-
-    print *, "i am comp1_init"
-
-    field1 = ESMF_FieldCreateNoData(name="Comp1 Field", rc=localrc)
-  
-    call ESMF_StateAddField(istate, field1, rc=localrc)
-    
-    rc = localrc
-
-end subroutine comp1_init
-
-! Initialize routine which creates "field2" on PETs 2 and 3
-subroutine comp2_init(gcomp, istate, ostate, clock, rc)
-    use ESMF_Mod
-    type(ESMF_GridComp), intent(inout) :: gcomp
-    type(ESMF_State), intent(inout) :: istate, ostate
-    type(ESMF_Clock), intent(in) :: clock
-    integer, intent(out) :: rc
-
-    type(ESMF_Field) :: field2
-    integer :: localrc
-
-    print *, "i am comp2_init"
-
-    field2 = ESMF_FieldCreateNoData(name="Comp2 Field", rc=localrc)
-    
-    call ESMF_StateAddField(istate, field2, rc=localrc)
-
-    rc = localrc
-
-end subroutine comp2_init
-
-subroutine comp_dummy(gcomp, rc)
-   use ESMF_MOd
-   type(ESMF_GridComp), intent(inout) :: gcomp
-   integer, intent(out) :: rc
-
-   rc = ESMF_SUCCESS
-end subroutine comp_dummy
 !EOC
-    

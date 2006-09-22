@@ -1,10 +1,6 @@
-Settings for SGI IRIX operating system, using the SGI Fortran
+Settings for SGI IRIX64 operating system, using the MIPSPro Fortran
 and C compilers.  (If you are looking for the Altix makefiles,
 see the Linux.intel directory.)
 
-
-Requires no specific environment variable settings; if you
-want to compile 32 bit executables, set this first:
-
-ESMF_PREC 32
+Default ESMF_ABI is 64. To compile for 32-bit set ESMF_ABI to 32.
 

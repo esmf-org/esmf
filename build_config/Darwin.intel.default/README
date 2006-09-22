@@ -1,4 +1,4 @@
-Settings for the new Mac OS X machines with Intel chips,
+Settings for Darwin (Mac OS X) machines with Intel chips,
 using the Intel fortran compiler and either Intel or gcc C compiler.
 
 Requires the following environment settings:
@@ -14,7 +14,7 @@ To compile with gcc,  set: ESMF_C_COMPILER gcc
 
 Defaults to 64 bit, can compile on 32-bit systems with:
 
-ESMF_PREC 32
+ESMF_ABI 32
 
 
 NOTE: This configuration is untested as of now.  The intel

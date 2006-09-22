@@ -1,105 +1,127 @@
-# $Id: build_rules.mk,v 1.7 2006/06/07 20:51:50 theurich Exp $
+# $Id: build_rules.mk,v 1.8 2006/09/22 23:55:39 theurich Exp $
 #
-#  Linux.g95.default
+# Linux.g95.default
 #
+
+############################################################
+# Default compiler setting.
 #
+ESMF_F90DEFAULT         = g95
+ESMF_CXXDEFAULT         = g++
+
+############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)
 export ESMF_COMM := mpiuni
 endif
 
-# lam has not been tested.
+############################################################
+# MPI dependent settings.
+#
+ifeq ($(ESMF_COMM),mpiuni)
+# MPI stub library -----------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
+else
+ifeq ($(ESMF_COMM),mpich)
+# Mpich ----------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_F90LINKLIBS       += -lpmpich++ -lmpich
+ESMF_CXXDEFAULT         = mpiCC
+ESMF_CXXCOMPILEOPTS    += -DESMF_MPICH
+ESMF_MPIRUNDEFAULT      = mpirun
+else
+ifeq ($(ESMF_COMM),mpich2)
+# Mpich2 ---------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
 ifeq ($(ESMF_COMM),lam)
-# with lam-mpi installed:
-MPI_LIB        += -lmpi -llam
-endif
-
-ifeq ($(ESMF_COMM),mpich)
-# with mpich installed:
-MPI_LIB        += -lpmpich++ -lmpich
-MPI_INCLUDE    += -DESMF_MPICH
-MPIRUN         += $(ESMF_NODES)
-endif
-
-ifeq ($(ESMF_COMM),mpich2)
-# with mpich installed:
-MPI_LIB        +=
-MPI_INCLUDE    +=
-MPIRUN         += $(ESMF_NODES)
-MPIMPMDRUN      = mpiexec
-endif
-
+# LAM (assumed to be built with g95) -----------------------
+ESMF_F90DEFAULT         = mpif77
+ESMF_CXXDEFAULT         = mpic++
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
 ifeq ($(ESMF_COMM),openmpi)
-# with mpich installed:
-MPI_LIB        += -lmpi_cxx
-MPI_INCLUDE    +=
-MPIRUN         += $(ESMF_NODES)
-MPIMPMDRUN      = mpiexec
+# OpenMPI --------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_F90LINKLIBS       += -lmpi_cxx
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
+ifeq ($(ESMF_COMM),user)
+# User specified flags -------------------------------------
+else
+$(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
+endif
+endif
+endif
+endif
 endif
 
-THREAD_LIB     =
+############################################################
+# Print compiler version string
+#
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v --version
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
-# straight compilers front-ends
-ifneq ($(ESMF_COMM),mpich)
-C_CC		= gcc 
-C_CXX		= g++
-C_FC		= g95
+############################################################
+# Fortran symbol convention must match other libraries used
+#
+ESMF_F90COMPILEOPTS       += -fno-second-underscore
+ESMF_F90LINKOPTS          += -fno-second-underscore
+
+############################################################
+# On IA64 set long and pointer types to 64-bit
+#
+ifeq ($(ESMF_ABI),64)
+ESMF_CXXCOMPILEOPTS       += -march=k8 -m64 -mcmodel=medium
+ESMF_CXXLINKOPTS          += -march=k8 -m64 -mcmodel=medium
+ESMF_F90COMPILEOPTS       += -march=k8 -m64 -mcmodel=medium
+ESMF_F90LINKOPTS          += -march=k8 -m64 -mcmodel=medium
 endif
 
-# mpich compiler front-end wrappers
-ifeq ($(ESMF_COMM),mpich)
-C_CC    	= mpicc
-C_CXX   	= mpiCC
-C_FC    	= mpif90
-endif
+############################################################
+# Need this until the file convention is fixed (then remove these two lines)
+#
+ESMF_F90COMPILEFREENOCPP = -ffree-form
+ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 
-# mpich2 compiler front-end wrappers
-ifeq ($(ESMF_COMM),mpich2)
-C_CC    	= mpicc
-# MPICH_IGNORE_CXX_SEEK is workaround for MPI-2 bug (see MPICH2 docs)
-C_CXX   	= mpicxx -DMPICH_IGNORE_CXX_SEEK
-C_FC    	= mpif90
-endif
+############################################################
+# Determine where gcc's libraries are located
+#
+ESMF_F90LINKPATHS += \
+  -L$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so))
+ESMF_F90LINKRPATHS += \
+  -Wl,-rpath,$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so))
 
-# OpenMPI compiler front-end wrappers
-ifeq ($(ESMF_COMM),openmpi)
-C_CC    	= mpicc
-C_CXX   	= mpicxx
-C_FC    	= mpif90
-endif
+############################################################
+# Determine where g95's libraries are located
+#
+ESMF_CXXLINKPATHS += \
+  -L$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
+ESMF_CXXLINKRPATHS += \
+  -Wl,-rpath,$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
 
-# how to get version string out of compiler front-ends
-C_CCV		= ${C_CC} -dumpversion
-C_CXXV		= ${C_CXX} -dumpversion
-C_FCV           = ${C_FC} -dumpversion
+############################################################
+# Link against libesmf.a using the F90 linker front-end
+#
+ESMF_F90LINKLIBS += -lrt -lstdc++
 
-# this must match the Fortran symbol convention of any other libraries used
-FFLAGS          = -fno-second-underscore
+############################################################
+# Link against libesmf.a using the C++ linker front-end
+#
+ESMF_CXXLINKLIBS += -lrt -lf95
 
-# not tested 64-bit option
-ifeq ($(ESMF_PREC),64)
-CFLAGS         += -march=k8 -m64 -mcmodel=medium
-FFLAGS         += -march=k8 -m64 -mcmodel=medium
-endif
-
-# options for how to process four different flavors of Fortran source
-F_FREECPP       = -cpp -ffree-form
-F_FIXCPP        = -cpp -ffixed-form
-F_FREENOCPP     = -ffree-form
-F_FIXNOCPP      = -ffixed-form
-
-# use the GCC -print-file-name option to determine location of stdc++ and 
-# Fortran libraries and thus define the C_LIB_PATHS
-C_LIB_PATHS     := -L$(dir $(shell $(C_CXX) -print-file-name=libstdc++.so)) \
-  -L$(dir $(shell $(C_FC) -print-file-name=libf95.a))
-
-# flags required to link against libesmf.a using the F90 linker front-end
-C_F90CXXLIBS    = -lrt -lstdc++
-# flags required to link against libesmf.a using the C++ linker front-end
-C_CXXF90LIBS    = -lrt -lf95
-
-
-PARCH	        = linux_g95
-
-SL_LIBS_TO_MAKE = 
+############################################################
+# Blank out shared library options
+#
+ESMF_SL_LIBS_TO_MAKE  =

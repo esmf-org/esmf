@@ -1,9 +1,1 @@
-
-Settings for Cray Unicos system, X1, using the Cray Fortran
-and C compilers.
-
-
-Requires the following environment settings:
-
-ESMF_ARCH Unicos
-
+Settings for Cray Unicos system, X1, using the Cray Fortran and C++ compilers.

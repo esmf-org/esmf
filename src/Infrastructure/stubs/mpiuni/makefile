@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2004/06/04 15:48:02 nscollins Exp $ 
+# $Id: makefile,v 1.2 2006/09/22 23:55:42 theurich Exp $ 
 
 ALL: build_here 
 
@@ -13,7 +13,7 @@ OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
 MANSEC	  = Timeobj
-LIBBASE	  = libmpiuni
+LIBBASE	  = libesmf
 
 LOCDIR	  = src/Infrastructure/stubs/mpiuni/
 

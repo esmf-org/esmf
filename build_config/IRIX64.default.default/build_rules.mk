@@ -1,9 +1,16 @@
-# $Id: build_rules.mk,v 1.26 2006/03/03 21:12:35 theurich Exp $
+# $Id: build_rules.mk,v 1.27 2006/09/22 23:55:39 theurich Exp $
 # 
 # IRIX64.default.default
 #
 
+############################################################
+# Default compiler setting.
 #
+ESMF_F90DEFAULT         = f90
+ESMF_F90LINKERDEFAULT   = CC
+ESMF_CXXDEFAULT         = CC
+
+############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)
@@ -11,114 +18,107 @@ export ESMF_COMM := mpi
 endif
 
 ############################################################
+# MPI dependent settings.
 #
-# location of external libs.  if you want to use any of these,
-# define ESMF_SITE to my_site so the build system can find it,
-# copy this file into IRIX64.default.my_site, and uncomment the
-# libs you want included.  remove the rest of this file since
-# both this file and the site file will be included.
-
-# LAPACK_INCLUDE   = 
-# LAPACK_LIB       = -L/usr/local/lib -llapacko
-# NETCDF_INCLUDE   = -I/usr/local/include/netcdf
-# NETCDF_LIB       = -L/usr/local/lib -lnetcdf
-# HDF_INCLUDE      = -I/usr/local/include/hdf
-# HDF_LIB          = -L/usr/local/lib -lmfhdf -ldf -ljpeg -lz
-# BLAS_INCLUDE     = 
-# BLAS_LIB         = -latlas
-
-#
-############################################################
-
-#
-# Location of MPI (Message Passing Interface) software  
-#
-# We recommend using SGI's MPI implementation over MPICH on the Origin and 
-# Powerchallenge.
-#
-# If you are using the MPICH implementation of MPI with version BELOW 1.1,
-# you should remove the -DESMC_HAVE_INT_MPI_COMM. If you are using MPICH 
-# Version 1.1 or SGI's version of MPI you MUST retain it.
-#
+ifeq ($(ESMF_COMM),mpiuni)
+# MPI stub library -----------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
+else
 ifeq ($(ESMF_COMM),mpi)
-MPI_INCLUDE     += -DESMC_HAVE_INT_MPI_COMM
-MPIMPMDRUN	 = mpirun
+# Vendor MPI -----------------------------------------------
+ESMF_F90LINKLIBS       += -lmpi++ -lmpi
+ESMF_CXXLINKLIBS       += -lmpi++ -lmpi
+ESMF_MPIRUNDEFAULT      = mpirun
+else
+ifeq ($(ESMF_COMM),user)
+# User specified flags -------------------------------------
+else
+$(error Invalid ESMF_COMM setting: $(ESMF_COMM))
 endif
-
-
-#
-# The following lines can be used with MPICH
-#
-ifeq ($(ESMF_COMM),mpich)
-MPI_LIB        += -lmpi
-MPI_INCLUDE    += -DESMC_HAVE_INT_MPI_COMM 
 endif
-
-# For IRIX64 the default is MPI_Comm_c2f not supported
-# nsc - this seems to be causing problems - try without it.
-#CPPFLAGS       += -DESMF_DONT_HAVE_MPI_COMM_C2F
+endif
 
 ############################################################
+# Print compiler version string
+#
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -version
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -version
 
-# cryptic flags used below
-SGI_FLAGS1          = -Wl,-woff,84,-woff,85,-woff,134
-SGI_FLAGS2          = -woff 1164
-
-ifeq ($(ESMF_PREC),32)
-SIZEFLAG = -n32
-SL_ABIOPTS         = -check_registry /usr/lib32/so_locations
-CXXINITFILE        =
+############################################################
+# 32- vs. 64-bit ABI
+#
+ifeq ($(ESMF_ABI),32)
+ESMF_CXXCOMPILEOPTS       += -n32
+ESMF_CXXLINKOPTS          += -n32
+ESMF_F90COMPILEOPTS       += -n32
+ESMF_F90LINKOPTS          += -n32
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_CXXCOMPILEOPTS       += -64
+ESMF_CXXLINKOPTS          += -64
+ESMF_F90COMPILEOPTS       += -64
+ESMF_F90LINKOPTS          += -64
 endif
 
-ifeq ($(ESMF_PREC),64)
-SIZEFLAG = -64
-SL_ABIOPTS         = -check_registry /usr/lib64/so_locations
-CXXINITFILE        =
+############################################################
+# Special compiler flags
+#
+# abide to C++ language standard; don't put libc into std name space
+ESMF_CXXCOMPILEOPTS       += -LANG:std=on:libc_in_namespace_std=off
+#
+# allow for multi-processor code (important for shared objects!)
+ESMF_CXXCOMPILEOPTS       += -mp
+ESMF_CXXLINKOPTS          += -mp
+ESMF_F90COMPILEOPTS       += -mp
+ESMF_F90LINKOPTS          += -mp
+
+############################################################
+# Conditionally add pthread compiler and linker flags
+#
+ifeq ($(ESMF_PTHREADS),ON)
+ESMF_F90LINKLIBS       += -lpthread
+ESMF_CXXLINKLIBS       += -lpthread
 endif
 
-C_CC		   = CC $(SIZEFLAG) -mp $(SGI_FLAGS2) 
-C_CXX		   = CC $(SIZEFLAG) -mp $(SGI_FLAGS2) -LANG:std=on:libc_in_namespace_std=off
-C_FC		   = f90 $(SIZEFLAG) -mp -macro_expand
+############################################################
+# Special optimization flags
+#
+ESMF_CXXOPTFLAG_O       += -OPT:Olimit=6500
+ESMF_F90OPTFLAG_O       += -OPT:Olimit=6500
 
-C_CLINKER	   = CC $(SIZEFLAG) -mp $(SGI_FLAGS1) -MP:open_mp=ON
-C_FLINKER	   = CC $(SIZEFLAG) -mp $(SGI_FLAGS1) -MP:open_mp=ON
-# replaced the following line by the line above to force C++ linker front end
-# for _all_ ESMF application. *gjt*
-#C_FLINKER	   = f90 $(SIZEFLAG) -mp $(SGI_FLAGS1) -MP:open_mp=ON
+############################################################
+# Help f90 to understand Fortran suffices
+#
+ESMF_F90COMPILEFREECPP   = -freeform -cpp
+ESMF_F90COMPILEFREENOCPP = -freeform -nocpp
+ESMF_F90COMPILEFIXCPP    = -fixedform -cpp -extend_source
+ESMF_F90COMPILEFIXNOCPP  = -fixedform -nocpp -extend_source
 
-C_SLFLAG           = -rpath
+############################################################
+# Prefix for rpath option
+#
+ESMF_RPATHPREFIX      = -rpath 
 
-C_CXXF90LD         = CC $(SIZEFLAG)
-C_F90CXXLD         = f90 $(SIZEFLAG)
+############################################################
+# IRIX64 does not have a ranlib -> "true" is a noop command
+#
+ESMF_RANLIBDEFAULT         = true
 
-RANLIB             = true
+############################################################
+# Link against libesmf.a using the F90 linker front-end
+#
+ESMF_F90LINKLIBS += -lftn -lfortran -lm
 
-C_CCV		   = cc -version
-C_CXXV		   = CC -version
-C_FCV              = f90 -version
+############################################################
+# Link against libesmf.a using the C++ linker front-end
+#
+ESMF_CXXLINKLIBS += -lftn -lfortran -lm
 
-C_CXXF90LIBS       = -rpath . -lftn -lfortran -lCio -lmpi++ -lmpi -lpthread -lm
-C_F90CXXLIBS       = -rpath . -lftn -lfortran -lCio -lmpi++ -lmpi -lpthread -lm
-# replaced the following line by the line above to force C++ linker front end
-# for _all_ ESMF application. *gjt*
-#C_F90CXXLIBS       = $(CXXINITFILE) -rpath . -lC -lCio -lc -lmpi++ -lmpi #-lpthread 
-
-# fortran flags
-F_FREECPP       = -freeform -cpp
-F_FIXCPP        = -fixedform -cpp -extend_source
-F_FREENOCPP     = -freeform -nocpp
-F_FIXNOCPP      = -fixedform -nocpp -extend_source
-
-# additional optimize flags
-O_CFLAGS	   += -OPT:Olimit=6500
-
-###############################################################################
-
-PARCH		   = IRIX
-
-# this platform does make a shared lib
-
-C_SL_LIBLINKER = $(C_CXX) $(SIZEFLAG) -shared -rpath .
-C_SL_LIBOPTS   = $(SL_ABIOPTS) -rpath $(ESMF_LIBDIR) -shared
-
-
+############################################################
+# Shared library options
+#
+ESMF_SL_LIBOPTS  += -shared $(ESMF_CXXCOMPILEOPTS)
+ESMF_SL_LIBLIBS  += $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)

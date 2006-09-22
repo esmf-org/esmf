@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2004/10/26 21:46:09 nscollins Exp $
+# $Id: makefile,v 1.14 2006/09/22 23:55:42 theurich Exp $
 
 # leave alone.
 ALL: build_here 
@@ -39,9 +39,9 @@ include $(ESMF_DIR)/makefile
 # compiling with absoft 9+, you can comment out this code if you want
 # the default level of optimization (which is -O2).
 ifeq ($(ESMF_COMPILER),absoft)
- ifeq ($(ESMF_ARCH),Darwin)
+ ifeq ($(ESMF_OS),Darwin)
   ifeq ($(ESMF_BOPT),O)
-   O_FOPTFLAGS += -O1
+   ESMF_F90OPTFLAG_O = -O1
   endif
  endif
 endif

@@ -1,99 +1,112 @@
-#  $Id: build_rules.mk,v 1.17 2005/04/22 19:33:40 nscollins Exp $
+# $Id: build_rules.mk,v 1.18 2006/09/22 23:55:38 theurich Exp $
 #
-#  Darwin.nag.default
+# Darwin.nag.default
 #
 
+############################################################
+# Default compiler setting.
+#
+ESMF_F90DEFAULT         = f95
+ESMF_CXXDEFAULT         = g++
 
-#
-#  Make sure that ESMF_PREC is set to 32
-#
-ESMF_PREC = 32
-
-#
+############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)
 export ESMF_COMM := mpiuni
 endif
 
-
 ############################################################
+# MPI dependent settings.
 #
-# location of external libs.  if you want to use any of these,
-# define ESMF_SITE to my_site so the build system can find it,
-# copy this file into Darwin.nag.my_site, and uncomment the
-# libs you want included.  remove the rest of this file since
-# both this file and the site file will be included.
-
-# LAPACK_INCLUDE   = 
-# LAPACK_LIB       = -L/usr/local/lib -llapack -lessl
-# NETCDF_INCLUDE   = -I/usr/local/include/netcdf
-# NETCDF_LIB       = -L/usr/local/lib -lnetcdf
-# HDF_INCLUDE      = -I/usr/local/include/hdf
-# HDF_LIB          = -L/usr/local/lib -lmfhdf
-# BLAS_INCLUDE     = 
-# BLAS_LIB         = -lblas
-
-#
-############################################################
-
-# Location of MPI (Message Passing Interface) software
-
-# Set ESMF_COMM depending on whether you have installed the mpich
-# or lam library.  The default location is to have the include files
-# and libs installed in /usr/local - if they are someplace else,
-# set MPI_HOME first.  (the mpiuni case is handled in the common.mk file.)
-
-ifeq ($(ESMF_COMM),lam)
-MPI_LIB        += -llamf77mpi -lmpi -llam
-endif
-
+ifeq ($(ESMF_COMM),mpiuni)
+# MPI stub library -----------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
+else
 ifeq ($(ESMF_COMM),mpich)
-# with mpich installed in $MPI_HOME or /usr/local:
-MPI_INCLUDE    += -DESMF_MPICH=1
-MPI_LIB        += -lmpich -lpmpich
+# Mpich ----------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_F90LINKLIBS       += 
+ESMF_CXXDEFAULT         = mpiCC
+ESMF_CXXCOMPILEOPTS    += -DESMF_MPICH
+ESMF_MPIRUNDEFAULT      = mpirun
+else
+ifeq ($(ESMF_COMM),mpich2)
+# Mpich2 ---------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
+ifeq ($(ESMF_COMM),lam)
+# LAM (assumed to be built with nag f95) ----------------
+ESMF_F90DEFAULT         = mpif77
+ESMF_CXXDEFAULT         = mpic++
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
+ifeq ($(ESMF_COMM),openmpi)
+# OpenMPI --------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
+ifeq ($(ESMF_COMM),user)
+# User specified flags -------------------------------------
+else
+$(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
+endif
+endif
+endif
+endif
 endif
 
-
+############################################################
+# Print compiler version string
+#
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v -V -dryrun
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
 ############################################################
-
-# commands which do not match the defaults exactly
-RANLIB		   = ranlib -s
-SED		   = /usr/bin/sed
-
-# compilers
-C_CC		   = cc
-C_CXX		   = g++ -fPIC
-C_FC		   = f95 
-
-C_CCV		   = ${C_CC} --version
-C_CXXV		   = ${C_CXX} --version
-C_FCV              = ${C_FC} -V 
-
+# Set kind numbering system to "byte"
 #
-# Fortran flags
+ESMF_F90COMPILEOPTS += -kind=byte
+
+############################################################
+# Set f95 to be more premissive and issue warning before error
 #
-FFLAGS          += -kind=byte -w=x77 -mismatch_all -gline
-F_FREECPP       = -free -fpp
-F_FIXCPP        = -fixed -fpp
-F_FREENOCPP     = -free
-F_FIXNOCPP      = -fixed
+ESMF_F90COMPILEOPTS += -dusty
 
-C_F90CXXLIBS       = -L/usr/local/lib/NAGware -lf96 -lstdc++
-C_CXXF90LIBS       = -L/usr/local/lib/NAGware -lf96 -lstdc++ \
-                     /usr/local/lib/NAGWare/libf96.a  \
-                     /usr/local/lib/NAGWare/quickfit.o
+############################################################
+# Need this until the file convention is fixed (then remove these two lines)
+#
+ESMF_F90COMPILEFREECPP   = -free -fpp
+ESMF_F90COMPILEFREENOCPP = -free
+ESMF_F90COMPILEFIXCPP    = -fixed -fpp
+ESMF_F90COMPILEFIXNOCPP  = -fixed
 
-# turn off the search path arg
-C_SLFLAG =
+############################################################
+# Blank out variables to prevent rpath encoding
+#
+ESMF_F90LINKRPATHS      =
+ESMF_CXXLINKRPATHS      =
 
-###############################################################################
+############################################################
+# Link against libesmf.a using the F90 linker front-end
+#
+ESMF_F90LINKLIBS += -lstdc++
 
-PARCH		   = mac_osx
+############################################################
+# Link against libesmf.a using the C++ linker front-end
+#
+ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COMPILER))
 
-# set this to libesmf.so to build shared
-SL_LIBS_TO_MAKE = 
-C_SL_LIBOPTS  = 
-
-
+############################################################
+# Blank out shared library options
+#
+ESMF_SL_LIBS_TO_MAKE  =

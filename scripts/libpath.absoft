@@ -1,0 +1,5 @@
+#!/bin/sh
+# this script expects the Absoft f90 command (or a wrapper to f90, e.g. mpif90)
+# and returns the path to the Absoft f90 system libraries
+$1 -v $ESMF_DIR/scripts/hello.f90 2>&1 | grep "\-L" | awk 'BEGIN { RS=" "}; /^-L/ ' | sed 's/-L//g' | xargs
+rm -f hello.o a.out

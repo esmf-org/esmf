@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2 2006/04/21 18:41:41 tjcnrl Exp $
+# $Id: build_rules.mk,v 1.3 2006/09/22 23:55:38 theurich Exp $
 #
 #  Darwin.g95.default
 #  T. Campbell, April 2006, based on Linux.g95.default
@@ -49,6 +49,10 @@ C_CXXV		= ${C_CXX} -dumpversion
 C_FCV           = ${C_FC} -dumpversion
 
 FFLAGS          = -fno-second-underscore
+ifeq ($(ESMF_ABI),64)
+CFLAGS         += -march=k8 -m64 -mcmodel=medium
+FFLAGS         += -march=k8 -m64 -mcmodel=medium
+endif
 F_FREECPP       = -cpp -ffree-form
 F_FIXCPP        = -cpp -ffixed-form
 F_FREENOCPP     = -ffree-form

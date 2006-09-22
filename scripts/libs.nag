@@ -1,0 +1,6 @@
+#!/bin/sh
+# this script expects the NAG f95 command (or a wrapper to f95, e.g. mpif90)
+# and returns the system libraries that f95 needs to link against
+# tested for NAG compiler verison: 5.0
+LINKER=`$1 -dryrun $ESMF_DIR/scripts/hello.f90 2>&1 | grep "quickfit.o" | awk '{ print $1 }'`
+$1 -dryrun $ESMF_DIR/scripts/hello.f90 2>&1 | grep "quickfit.o" | awk 'BEGIN { RS=" "}; /./' | grep -v $LINKER | grep -v hello.o | xargs

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiInitUTest.F90,v 1.2 2005/10/12 19:06:21 nscollins Exp $
+! $Id: ESMF_VMUserMpiInitUTest.F90,v 1.3 2006/09/22 23:55:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -524,7 +524,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUserMpiInitUTest.F90,v 1.2 2005/10/12 19:06:21 nscollins Exp $'
+      '$Id: ESMF_VMUserMpiInitUTest.F90,v 1.3 2006/09/22 23:55:42 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -537,9 +537,13 @@
 !------------------------------------------------------------------------------- 
 
       ! testing that VM is o.k. with user initializing MPI
+#ifndef ESMF_MPIUNI     
       call MPI_Init(ierr)
       print *, "The user code called MPI_Init() and does IO before ESMF_Initialize() is called"
-      
+#else
+      print *, "This test is meaningless in MPIUNI mode!"
+#endif
+  
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       !------------------------------------------------------------------------

@@ -1,4 +1,4 @@
- $Id: README,v 1.7 2005/12/16 21:02:52 nscollins Exp $
+$Id: README,v 1.8 2006/09/22 23:55:37 theurich Exp $
 
 ================================================================================
 
@@ -6,23 +6,13 @@
 
 ================================================================================
 
-This directory contains a makefile fragment, esmfuser.mk, which is intended
-to be included in user makefiles.  It defines the compile flags needed to
-locate the ESMF module files, and it defines the link flags and link libraries
-needed to link applications which use the ESMF.  See 'makefile.sample' for
-an example of how to use the esmfuser.mk fragment.  
-
-Besides these files, the only other file that should be in this
-directory is the makefile fragment common.mk.  The file common.mk
+This directory contains a single file "common.mk". The file common.mk
 contains GNU makefile code used by the esmf build system across
 all platforms.  Users should have no reason to edit common.mk.
 
-The only directory that should be here is a doc directory.  This 
+The only directory that should be here is a doc directory. This 
 directory contains tex files used for build system documentation.
 
 See README files at the top level of this distribution and in 
-build_config for documentation on the build system.  The ESMF User's 
+build_config for documentation on the build system. The ESMF User's 
 Guide also contains build system documentation.
-
-
-
