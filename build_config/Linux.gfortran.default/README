@@ -1,12 +1,6 @@
 Settings for Linux, using the gfortran compiler that comes with the GCC of
-version 4.0.0 and up. (See g95 for the Fortran 90 compiler distributed 
-separately from GCC.)
+version 4.0.0 and up.
 
 Requires the following environment settings:
 
 ESMF_COMPILER gfortran
-
-Defaults to a 64-bit build, set this for 32-bit systems:
-
-ESMF_PREC 32
-
