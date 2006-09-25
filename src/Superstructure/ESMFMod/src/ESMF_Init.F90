@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.37 2006/06/19 21:53:41 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.38 2006/09/25 20:29:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -279,8 +279,9 @@
       endif
 
       ! Write our version number out into the log
-      call ESMF_LogWrite("Running with ESMF Version " // ESMF_VERSION_STRING, &
-                          ESMF_LOG_INFO, rc=status)
+      call ESMF_LogWrite(&
+        "Running with ESMF Version " // ESMF_VERSION_STRING, &
+        ESMF_LOG_INFO, rc=status)
       if (status .ne. ESMF_SUCCESS) then
           print *, "Error writing into the default log"
           return
