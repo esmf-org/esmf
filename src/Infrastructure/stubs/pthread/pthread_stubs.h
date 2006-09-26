@@ -822,8 +822,8 @@ extern int pthread_atfork (void (*__prepare) (void),
 extern void pthread_kill_other_threads_np (void) ;
   #define NO_LIBPTHREAD
   #define pthread_mutex_init(a,b)
-  #define pthread_mutex_lock(a)
-  #define pthread_mutex_unlock(a)
+  #define pthread_mutex_lock(a) 0;
+  #define pthread_mutex_unlock(a) 0;
   #define pthread_mutex_destroy(a)
   #define pthread_self() 0
   #define pthread_cond_init(a,b)
