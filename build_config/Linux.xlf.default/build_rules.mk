@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.7 2006/09/22 23:55:40 theurich Exp $
+# $Id: build_rules.mk,v 1.8 2006/09/26 22:41:30 theurich Exp $
 #
 # Linux.xlf.default
 #
@@ -28,14 +28,11 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
-# ESMF_F90DEFAULT         = blrts_xlf90
+ESMF_F90DEFAULT         = mpxlf90
 ESMF_F90LINKLIBS       += 
-# ESMF_CXXDEFAULT         = blrts_xlC
+ESMF_CXXDEFAULT         = mpxlC
 ESMF_CXXLINKLIBS       += 
-ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.rs6000_sp
-ifeq ($(ESMF_BATCH),lsf.ibmpjl)
-ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
-endif
+ESMF_MPIRUNDEFAULT      = mpirun
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
@@ -46,40 +43,15 @@ endif
 endif
 
 ############################################################
-# Set ESMF_MPIRUNDEFAULT according to ESMF_BATCH setting
-#
-ifeq ($(ESMF_BATCH),lsf.ibmpjl)
-ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
-endif
-
-############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -qversion
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -qversion
+ESMF_F90COMPILER_VERSION = ${ESMF_F90COMPILER} -qversion
+ESMF_CXXCOMPILER_VERSION = ${ESMF_CXXCOMPILER} -qversion
 
 ############################################################
-# 32- vs. 64-bit ABI
+# BlueGene does not have support for POSIX IPC (mempry mapped files)
 #
-ifeq ($(ESMF_ABI),32)
-ESMF_CXXCOMPILEOPTS       +=  -I/bgl/BlueLight/ppcfloor/bglsys/include
-ESMF_CXXLINKOPTS          +=  -L/bgl/BlueLight/ppcfloor/bglsys/lib -lmpich.rts -lmsglayer.rts -lrts.rts -ldevices.rts
-ESMF_F90COMPILEOPTS       +=  -I/bgl/BlueLight/ppcfloor/bglsys/include
-#ESMF_F90LINKOPTS          +=  -L/bgl/BlueLight/ppcfloor/bglsys/lib -lmpich.rts -lmsglayer.rts -lrts.rts -ldevices.rts
-ESMF_F90LINKOPTS          +=  -L/bgl/BlueLight/ppcfloor/bglsys/lib \
-                              -L/opt/ibmcmp/vacpp/bg/8.0/blrts_lib -libmc++ -lxlopt -lxl \
-                              -lstdc++ -lm -lc -lgcc -lcxxmpich.rts -lmpich.rts \
-			      -lmsglayer.rts -lrts.rts -ldevices.rts
-
-endif
-ifeq ($(ESMF_ABI),64)
-ESMF_CXXCOMPILEOPTS       += -q64
-ESMF_CXXLINKOPTS          += -q64
-ESMF_F90COMPILEOPTS       += -q64
-ESMF_F90LINKOPTS          += -q64
-ESMF_ARDEFAULT             = ar -X64
-ESMF_RANLIBDEFAULT         = ranlib -X64
-endif
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NOPOSIXIPC
 
 ############################################################
 # xlf90 needs flag to indicate FPP options
@@ -107,19 +79,26 @@ ESMF_F90COMPILEFIXCPP    = -qfixed=132 -qsuffix=cpp=F
 ESMF_F90COMPILEFIXNOCPP  = -qfixed=132 -qsuffix=f=f
 
 ############################################################
+# Determine link path for xlf frontend
+#
+ESMF_F90LINKPATHS +=
+
+############################################################
+# Determine link path for xlC frontend
+#
+ESMF_CXXLINKPATHS +=
+
+############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -L/opt/ibmcmp/vacpp/bg/8.0/lib -libmc++ -lxl -lxlopt
+ESMF_F90LINKLIBS +=
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lm -lxlf90 -lC
+ESMF_CXXLINKLIBS +=
 
 ############################################################
-# Shared library options
+# Blank out shared library options
 #
-ESMF_SL_LIBOPTS  += -G -qmkshrobj
-ifeq ($(ESMF_ABI),64)
-ESMF_SL_LIBOPTS  += -q64
-endif
+ESMF_SL_LIBS_TO_MAKE  =
