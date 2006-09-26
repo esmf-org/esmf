@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.8 2006/09/26 22:41:30 theurich Exp $
+# $Id: build_rules.mk,v 1.9 2006/09/26 23:07:15 theurich Exp $
 #
 # Linux.xlf.default
 #
@@ -49,9 +49,14 @@ ESMF_F90COMPILER_VERSION = ${ESMF_F90COMPILER} -qversion
 ESMF_CXXCOMPILER_VERSION = ${ESMF_CXXCOMPILER} -qversion
 
 ############################################################
-# BlueGene does not have support for POSIX IPC (mempry mapped files)
+# BlueGene does not have support for POSIX IPC (memory mapped files)
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NOPOSIXIPC
+
+############################################################
+# BlueGene does not have support for Pthreads
+#
+ESMF_PTHREADS := OFF
 
 ############################################################
 # xlf90 needs flag to indicate FPP options
