@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.72 2006/09/26 18:37:13 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.73 2006/09/26 20:29:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -4123,15 +4123,6 @@ void vmk_wtimeprec(double *prec){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if 0
-    // IntraProcessMutex Methods
-    vmk_ipmutex *vmk_ipmutexallocate(void);
-    void vmk_ipmutexdeallocate(vmk_ipmutex *ipmutex);
-    int vmk_ipmutexlock(vmk_ipmutex *ipmutex);
-    int vmk_ipmutexunlock(vmk_ipmutex *ipmutex);
-#endif
-
-    
     vmk_ipmutex *ESMC_VMK::vmk_ipmutexallocate(void){
       int firstFlag;
       pthread_mutex_lock(ipSetupMutex);
