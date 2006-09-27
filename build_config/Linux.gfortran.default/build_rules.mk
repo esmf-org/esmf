@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.3 2006/09/25 22:01:19 theurich Exp $
+# $Id: build_rules.mk,v 1.4 2006/09/27 18:21:54 theurich Exp $
 #
 # Linux.gfortran.default
 #
@@ -42,7 +42,7 @@ ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
 ifeq ($(ESMF_COMM),lam)
-# LAM (assumed to be built with g95) -----------------------
+# LAM (assumed to be built with gfortran) -----------------------
 ESMF_F90DEFAULT         = mpif77
 ESMF_CXXDEFAULT         = mpic++
 ESMF_MPIRUNDEFAULT      = mpirun
@@ -104,7 +104,7 @@ ESMF_F90LINKRPATHS += \
   -Wl,-rpath,$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so))
 
 ############################################################
-# Determine where g95's libraries are located
+# Determine where gfortran's libraries are located
 #
 ESMF_CXXLINKPATHS += \
   -L$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.so))
