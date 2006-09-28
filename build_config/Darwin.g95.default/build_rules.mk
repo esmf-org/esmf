@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.4 2006/09/28 16:59:21 theurich Exp $
+# $Id: build_rules.mk,v 1.5 2006/09/28 17:39:09 theurich Exp $
 #
 # Dawin.g95.default
 #
@@ -96,30 +96,32 @@ ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 
 ############################################################
+# Blank out variables to prevent rpath encoding
+#
+ESMF_F90LINKRPATHS      =
+ESMF_CXXLINKRPATHS      =
+
+############################################################
 # Determine where gcc's libraries are located
 #
 ESMF_F90LINKPATHS += \
-  -L$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so))
-ESMF_F90LINKRPATHS += \
-  -Wl,-rpath,$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so))
+  -L$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a))
 
 ############################################################
 # Determine where g95's libraries are located
 #
 ESMF_CXXLINKPATHS += \
   -L$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
-ESMF_CXXLINKRPATHS += \
-  -Wl,-rpath,$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lrt -lstdc++
+ESMF_F90LINKLIBS += -lstdc++
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt -lf95
+ESMF_CXXLINKLIBS += -lf95
 
 ############################################################
 # Blank out shared library options
