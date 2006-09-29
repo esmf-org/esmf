@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.14 2006/03/20 22:31:21 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.15 2006/09/29 18:37:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -131,13 +131,14 @@ type ESMF_Log
     type(ESMF_Logical)                              ::  logNone   
     type(ESMF_Logical)			            ::  flushed 
     type(ESMF_Logical)			            ::  dirty
-    type(ESMF_Logical)                              ::  FileIsOpen
     type(ESMF_HaltType)                             ::  halt
     type(ESMF_LogType)			            ::  logtype      
 #ifndef ESMF_NO_INITIALIZERS
     type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY=>Null()
+    type(ESMF_Logical)                              ::  FileIsOpen=ESMF_False
 #else
     type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY
+    type(ESMF_Logical)                              ::  FileIsOpen
 #endif                                          
     character(len=32)                               ::  nameLogErrFile
     character(len=ESMF_MAXSTR)                      ::  petNumLabel

@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.12 2006/03/23 01:14:40 theurich Exp $
+// $Id: ESMC_Util.C,v 1.13 2006/09/29 18:37:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.12 2006/03/23 01:14:40 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.13 2006/09/29 18:37:20 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -744,7 +744,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
     char msgbuf[ESMF_MAXSTR];
 
     // minor idiotproofing
-    if ((src == NULL) || (src[0] == '\0') || (dst == NULL) || (dlen <= 0)) {
+    if ((src == NULL) || (dst == NULL) || (dlen <= 0)) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad count or NULL pointer", &rc);
        return rc;
