@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.13 2006/04/19 21:31:04 samsoncheung Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.14 2006/09/29 21:41:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -740,13 +740,11 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
             if (rc.NE.ESMF_SUCCESS) return
 
             ptr5di4(:,:,:,:,:) = i4val
-#endif
-
           case default
             print *, "unsupported data type in Field"
             return
          end select
-
+#endif
       case default
         print *, "unsupported rank"
 
@@ -1402,6 +1400,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
 
         end select
 
+#ifndef ESMF_NO_GREATER_THAN_4D
       case (5)
         select case (kind)
           case (ESMF_R8%dkind)
@@ -1533,6 +1532,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
             return
 
         end select
+#endif
 
       case default
         print *, "no code to handle data of rank", rank

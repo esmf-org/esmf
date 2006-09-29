@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.56 2006/04/04 23:47:49 theurich Exp $
+! $Id: ESMF_BundleComm.F90,v 1.57 2006/09/29 21:41:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.56 2006/04/04 23:47:49 theurich Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.57 2006/09/29 21:41:20 theurich Exp $'
 
 !==============================================================================
 !
@@ -1993,12 +1993,14 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          if (srank .ne. drank) then
-              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                  "Corresponding Fields in Bundles must have same data rank", &
-                                       ESMF_CONTEXT, rc)
-              return
-          endif
+        ! skip the following check in order to allow arbitrary-to-arbitrary
+        ! TODO: only skip the following error checking for arb-to-arb case
+        !  if (srank .ne. drank) then
+        !      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        !          "Corresponding Fields in Bundles must have same data rank", &
+        !                               ESMF_CONTEXT, rc)
+        !      return
+        !  endif
 
           if (stype .ne. dtype) then
               call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
