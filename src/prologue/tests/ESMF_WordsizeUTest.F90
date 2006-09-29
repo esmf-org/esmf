@@ -1,4 +1,4 @@
-! $Id: ESMF_WordsizeUTest.F90,v 1.8 2006/03/03 20:41:22 nscollins Exp $
+! $Id: ESMF_WordsizeUTest.F90,v 1.9 2006/09/29 23:53:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -112,14 +112,24 @@
     ! Compare F90 and C++ sizes; they must match.
     !NEX_UTest
     write(failMsg,*) "Size mismatch for I1 variable"
+#ifndef ESMF_NO_INTEGER_1_BYTE
     write(name, *) "Verifying F90 I1 matches C I1"
     call ESMF_Test((i1sizeC .eq. i1sizeF), name, failMsg, result, ESMF_SRCLINE) 
+#else
+    write(name, *) "Verifying F90 I1 matches C I1 - disabled"
+    call ESMF_Test((0 .eq. 0), name, failMsg, result, ESMF_SRCLINE) 
+#endif
 
     !------------------------------------------------------------------------
     !NEX_UTest
     write(failMsg,*) "Size mismatch for I2 variable"
+#ifndef ESMF_NO_INTEGER_1_BYTE
     write(name, *) "Verifying F90 I2 matches C I2"
     call ESMF_Test((i2sizeC .eq. i2sizeF), name, failMsg, result, ESMF_SRCLINE) 
+#else
+    write(name, *) "Verifying F90 I2 matches C I2"
+    call ESMF_Test((0 .eq. 0), name, failMsg, result, ESMF_SRCLINE) 
+#endif
 
     !------------------------------------------------------------------------
     !NEX_UTest

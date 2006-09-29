@@ -79,49 +79,78 @@ of the top level ESMF directory before building the framework.  This is the
 only environment variable which is required to be set on all platforms under 
 all conditions.
 
-\item[ESMF\_COMPILER]
-On any platform which does not come with a single vendor-supplied Fortran 
-compiler (e.g. Linux or Mac OS X) {\tt ESMF\_COMPILER} must be set to select
-which Fortran compiler has been installed.  To see valid values for 
-{\tt ESMF\_COMPILER}, look in the {\tt build\_config} directory in the
-unpacked source tree.  List the subdirectories there.
-The first part of each subdirectory name corresponds to the output 
-of 'uname -s' for each platform.  The second part contains valid values 
-for {\tt ESMF\_COMPILER}.
+\item[ESMF\_BOPT]
+This environment variable controls the build option. To make a debuggable
+version of the library set {\tt ESMF\_BOPT} to {\tt g} before building. The
+default is {\tt O} (capital oh) which builds an optimized version of the 
+library. If {\tt ESMF\_BOPT} is {\tt O}, {\tt ESMF\_OPTLEVEL} can also be set
+to a numeric value between 0 and 4 to select a specific optimization level.
 
 \item[ESMF\_COMM]
-On multiprocessor systems with a vendor-supplied MPI communications library,
-that is the default for communications and {\tt ESMF\_COMM} should not be set.  
-For other systems, ESMF comes with with a single-processor MPI-bypass 
-library which is the default.   To run multiprocessor applications
-select an MPI implementation by setting {\tt ESMF\_COMM} to {\tt mpich} or
-{\tt lam} before building ESMF.  Additional valid values may exist; check the
-release notes for the specific platform on the web site for more details.
-If the MPI files are not installed in a system directory (e.g. {\tt /usr/lib})
-also set {\tt MPI\_HOME} to the directory containing the include, lib, 
-and bin dirs.
+On systems with a vendor-supplied MPI communications library the vendor library 
+is chosen by default for communications and {\tt ESMF\_COMM} need not be set.
+For other systems (e.g. Linux or Darwin) a multitude of MPI implementations is
+available and {\tt ESMF\_COMM} must be set to indicate which implementation is
+used to build the ESMF library. Set {\tt ESMF\_COMM} according to your situation
+to: {\tt mpich, mpich2, lam, openmpi} or {\tt intelmpi}. {\tt ESMF\_COMM} may
+also be set to {\tt user} indicating that the user will set all the required
+flags using advanced ESMF environment variables.
+
+Alternatively, ESMF comes with a single-processor MPI-bypass library which is
+the default for Linux and Darwin systems. To force the use of this bypass
+library set {\tt ESMF\_COMM} equal to "mpiuni".
+
+\item[ESMF\_COMPILER]
+The ESMF library build requires a working Fortran90 and C++ compiler. On 
+platforms that don't come with a single vendor supplied compiler suite
+(e.g. Linux or Darwin) {\tt ESMF\_COMPILER} must be set to select which Fortran
+and C++ compilers are being used to build the ESMF library. Notice that setting
+the {\tt ESMF\_COMPILER} variable does {\em not} affect how the compiler
+executables are located on the system. {\tt ESMF\_COMPILER} (together with
+{\tt ESMF\_COMM}) affect the name that is expected for the compiler executables.
+Furthermore, the {\tt ESMF\_COMPILER} setting is used to select compiler and
+linker flags consistent with the compilers indicated.
+
+By default Fortran and C++ compiler executables are expected to be located in
+a location contained in the user's {\tt PATH} environment variable. This means
+that if you cannot locate the correct compiler executable via the {\tt which}
+command on the shell prompt the ESMF build system won't find it either!
+
+There are advanced ESMF environment variables that can be used to select 
+specific compiler executables by specifying the full path. This can be used to
+pick specific compiler executables without having to modify the {\tt PATH}
+environment variable.
+
+Use 'gmake info' to see which compiler executables the ESMF build system will
+be using according to your environment variable settings.
+
+To see possible values for {\tt ESMF\_COMPILER}, cd to 
+{\tt \$ESMF\_DIR/build\_config} and list the directories there. The first part 
+of each directory name corresponds to the output of 'uname -s' for this 
+platform. The second part contains possible values for {\tt ESMF\_COMPILER}. In
+some cases multiple combinations of Fortran and C++ compilers are possible, e.g.
+there is {\tt intel} and {\tt intelgcc} available for Linux. Setting 
+{\tt ESMF\_COMPILER} to {\tt intel} indicates that both Intel Fortran and 
+C++ compilers are used, whereas {\tt intelgcc} indicates that the Intel Fortran
+compiler is used in combination with GCC's C++ compiler.
+
+If you do not find a configuration that matches your situation you will need to
+port ESMF.
+
+\item[ESMF\_ABI]
+If a system supports 32-bit and 64-bit (pointer wordsize) application binary
+interfaces (ABIs), this variable can be set to select which ABI to use. Valid 
+values are {\tt 32} or {\tt 64}. By default the most common ABI is chosen.
 
 \item[ESMF\_SITE]
 The Sourceforge {\tt esmfcontrib} repository contains makefiles which have 
 already been customized for certain machines.  If one exists for your site 
 and you wish to use it, download the corresponding files into the 
-{\tt build\_contrib} directory
-and set {\tt ESMF\_SITE} to your location (which corresponds to the last
-part of the directory name).  See the Sourceforge site
-{\tt http://sourceforge.net/projects/esmfcontrib} for more information.
+{\tt build\_contrib} directory and set {\tt ESMF\_SITE} to your location
+(which corresponds to the last part of the directory name).  See the 
+Sourceforge site {\tt http://sourceforge.net/projects/esmfcontrib} for more 
+information.
 
-\item[ESMF\_BOPT]
-To make a debuggable version of the library set {\tt ESMF\_BOPT} to 
-{\tt g} before building.  The default is {\tt O} (capital oh) which builds an 
-optimized library.
-If {\tt ESMF\_BOPT} is unset or is {\tt O}, {\tt ESMF\_OPTLEVEL} can be set 
-to a numeric value between 0 and 4 to select a specific optimization level.
-(Note that level 0 corresponds to no optimization on most compilers.)
-
-\item[ESMF\_PREC]
-If this system supports the building of both 32-bit and 64-bit executables
-(pointer wordsize), this variable can be set to select which format to use.
-Valid values are {\tt 32} or {\tt 64}.
 
 \end{description}
 

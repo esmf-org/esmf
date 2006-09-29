@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.1 2005/05/06 20:10:39 nscollins Exp $
+%  $Id: ESMF_builddetail.tex,v 1.2 2006/09/29 23:57:41 theurich Exp $
 
 % there is a separate copy of this under build/doc which is
 % now used only by the implementation report.  this was separated
@@ -37,10 +37,10 @@ The {\tt build\_config} directory contains makefile fragments for each
 supported platform defining compilers, compiler flags, and the various
 other definitions that are necessary to build on each platform.  Files
 can also be added to this directory for specific machines where the
-build settings are different from the standards of the architecture.
+build settings are different from the standards of the platform.
 One of the files in this directory will be included by the
 build/common.mk file depending the values of the environment variables
-ESMF\_ARCH, ESMF\_COMPILER and ESMF\_SITE.  See below for more details
+ESMF\_OS, ESMF\_COMPILER and ESMF\_SITE.  See below for more details
 on environment variables.
 
 \item{{\bf Environment Variables}}
@@ -93,35 +93,33 @@ constitutes a complete set of build rules and settings.  Starting from
 the local makefile, successive include commands are used to string
 together makefiles and makefile fragments to create a complete system
 of build rules and settings.  Configuration of the build system is
-done by including a configuration makefile fragment.  The build
-system can be configured for a machine's architecture or, if needed,
-for a particular machine and its compiler. A configuration for a
+done by including a configuration makefile fragment. A configuration for a
 specific machine or compiler is referred to as a site configuration.
 
 The string of files included is fairly short.  Makefiles below the top
 level makefile include the top level makefile. The top level makefile
 includes build/common.mk and then build/common.mk includes a
 configuration file from the build\_config directory.  The configuration
-files in the build\_config directory contain the architecture and site
-specific build settings.  The architecture, compiler and site that a file
+files in the build\_config directory contain the platform and site
+specific build settings.  The os, compiler and site that a file
 configures is determined by its name.  The configuration makefile
 fragments follow this naming convention:
 
 \begin{verbatim}
-    ESMF_ARCH.ESMF_COMPILER.ESMF_SITE/build_rules.mk
+    ESMF_OS.ESMF_COMPILER.ESMF_SITE/build_rules.mk
 \end{verbatim}
 
-Where ESMF\_ARCH, ESMF\_COMPILER, and ESMF\_SITE are environment
+Where ESMF\_OS, ESMF\_COMPILER, and ESMF\_SITE are environment
 variables either set by the user or given default values by the build
-system. ESMF\_ARCH is the current architecture and will have the value
-returned by the command {\tt uname -s}.  ESMF\_COMPILER is the compiler
-name.  ESMF\_SITE, if set, is generally the current machine name,
-the location, or the organization (e.g. mit, cola).  If there are no site
-specific files for a particular architecture, then ESMF\_COMPILER and
-ESMF\_SITE will be set to {\tt default}.  Examples:
+system. ESMF\_OS is the target operating system. If the build is performed
+on the target system ESMF\_OS will typically have the value returned by the
+command {\tt uname -s}. ESMF\_COMPILER is the compiler name. ESMF\_SITE, if set,
+is generally the current machine name, the location, or the organization (e.g.
+mit, cola).  If there are no site specific files for a particular platform, then
+ESMF\_COMPILER and ESMF\_SITE will be set to {\tt default}.  Examples:
 
 \begin{verbatim}
-    AIX.default.default/build_rules.mk      ! Default configuation for RS6000.
+    AIX.default.default/build_rules.mk      ! Default configuation for IBM SP
     Linux.lahey.default/build_rules.mk      ! Linux configuation using lahey compilers.
 \end{verbatim}
 
@@ -140,10 +138,10 @@ The ESMF build system provides preprocessor directives in
 that are included in the source code.  The path to these files is
 
 \begin{verbatim}
-    build_config/ESMF_ARCH.ESMF_COMPILER.ESMF_SITE
+    build_config/ESMF_OS.ESMF_COMPILER.ESMF_ABI.ESMF_SITE
 \end{verbatim}
 
-Where ESMF\_ARCH, ESMF\_COMPILER, and ESMF\_SITE are
+Where ESMF\_OS, ESMF\_COMPILER, ESMF\_ABI and ESMF\_SITE are
 environment variables set by the user or given default values be the
 build system.  Based on the settings of these environment variables,
 the build system provides a path to the correct files during
@@ -168,6 +166,6 @@ only contain overrides and additional definitions.
 
 See the {\tt README} file in the {\tt build\_config} directory in the
 source tree for more detailed information on what files will generally
-need to be customized to support a new architecture.
+need to be customized to support a new platform.
 
 
