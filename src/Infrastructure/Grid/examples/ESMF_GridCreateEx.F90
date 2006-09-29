@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateEx.F90,v 1.31 2006/03/20 22:27:33 theurich Exp $
+! $Id: ESMF_GridCreateEx.F90,v 1.32 2006/09/29 21:29:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -41,6 +41,8 @@
       character(len=ESMF_MAXSTR) :: name
       real(ESMF_KIND_R8), dimension(2) :: min, max
       real(ESMF_KIND_R8) :: delta1(40), delta2(50), delta3(10)
+      type(ESMF_ArraySpec):: arrayspec1
+      type(ESMF_Field):: humidity1
 
       ! return code
       integer :: rc
@@ -204,7 +206,13 @@
 
 ! This example shows how to create the same non-uniform 3D {\tt ESMF\_Grid} as
 ! from the previous example but distributed in an arbitrary fashion as one might
-! for a column model.  In ESMF, this is known as vector storage.
+! for a column model.  Different from a block distributed ESMF\_Grid, the Field 
+! associated with an arbitrary Grid has to be one dimension less than the Grid 
+! itself.  A Field associated with a 2D horizontal Grid is stored as an 1D
+! array. In this example, the Field has to be a 2D Field for the 3D ESMF\_Grid
+! with the 2 horizontal dimensions collapsed into the first dimension of the
+! Field and the vertical dimension stored in the second dimension of the 
+! Field.
 !EOE
 
 !BOC
@@ -281,6 +289,16 @@
       call ESMF_GridDistribute(grid3, delayout=layout, myCount=myCount, &
                                myIndices=myIndices, rc=rc)
 
+      ! The Field for an arbitrary Grid has to be one dimension less, i.e., 2D
+      ! for a 3D Grid.
+      ! Set up 2D Array for the Field
+      call ESMF_ArraySpecSet(arrayspec1, rank=2, type=ESMF_DATA_REAL,&
+           kind=ESMF_R8)
+
+      ! Create the Field 
+      humidity1 = ESMF_FieldCreate(grid3, arrayspec1, &
+		horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
+		haloWidth=0, name="humidity1", rc=rc)
 !EOC
  
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
