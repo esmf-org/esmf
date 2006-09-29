@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.6 2006/05/19 16:22:57 theurich Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.7 2006/09/29 23:24:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,7 +10,99 @@
 !
 !============================================================================== 
 !
-    program ESMF_StateReconcileUTest
+
+
+module ESMF_StateReconcileUTest_Mod
+
+contains
+
+! Initialize routine which creates "field1" on PETs 0 and 1
+subroutine comp1_init(gcomp, istate, ostate, clock, rc)
+    use ESMF_Mod
+    type(ESMF_GridComp), intent(inout) :: gcomp
+    type(ESMF_State), intent(inout) :: istate, ostate
+    type(ESMF_Clock), intent(in) :: clock
+    integer, intent(out) :: rc
+
+    type(ESMF_Field) :: field1
+    integer :: localrc
+
+    print *, "i am comp1_init"
+
+    field1 = ESMF_FieldCreateNoData(name="Comp1 Field", rc=localrc)
+  
+    call ESMF_StateAddField(istate, field1, rc=localrc)
+    
+    rc = localrc
+
+end subroutine comp1_init
+
+! Initialize routine which creates "field2" on PETs 2 and 3
+subroutine comp2_init(gcomp, istate, ostate, clock, rc)
+    use ESMF_Mod
+    type(ESMF_GridComp), intent(inout) :: gcomp
+    type(ESMF_State), intent(inout) :: istate, ostate
+    type(ESMF_Clock), intent(in) :: clock
+    integer, intent(out) :: rc
+
+    type(ESMF_Field) :: field2
+    integer :: localrc
+
+    print *, "i am comp2_init"
+
+    field2 = ESMF_FieldCreateNoData(name="Comp2 Field", rc=localrc)
+    
+    call ESMF_StateAddField(istate, field2, rc=localrc)
+
+    rc = localrc
+
+end subroutine comp2_init
+
+subroutine comp_dummy(gcomp, rc)
+   use ESMF_Mod
+   type(ESMF_GridComp), intent(inout) :: gcomp
+   integer, intent(out) :: rc
+
+   rc = ESMF_SUCCESS
+end subroutine comp_dummy
+    
+subroutine StateDestroyAll(state, rc)
+   use ESMF_Mod
+   type(ESMF_State), intent(inout) :: state
+   integer, intent(out) :: rc
+
+   type(ESMF_Field) :: field(100)
+   integer :: i, itemCount
+   character(len=ESMF_MAXSTR) :: nameList(100)
+
+   ! assumes all items are empty fields.  if that changes, this code has
+   ! to get the grid and delete that as well (after deleting the field) and
+   ! get and delete the array after, too.
+   call ESMF_StateGet(state, itemCount=itemCount, itemNameList=nameList, rc=rc)
+   if (rc .ne. ESMF_SUCCESS) return
+
+   do i=1, itemCount
+       call ESMF_StateGetField(state, nameList(i), field(i),  rc=rc)
+       if (rc .ne. ESMF_SUCCESS) return
+   enddo
+
+   call ESMF_StateDestroy(state, rc=rc)
+   if (rc .ne. ESMF_SUCCESS) return
+  
+   do i=1, itemCount
+       call ESMF_FieldDestroy(field(i),  rc=rc)
+       if (rc .ne. ESMF_SUCCESS) return
+   enddo
+
+   rc = ESMF_SUCCESS
+   return
+end subroutine StateDestroyAll
+
+end module ESMF_StateReconcileUTest_Mod
+
+
+
+program ESMF_StateReconcileUTest
 
 !------------------------------------------------------------------------------
 !==============================================================================
@@ -27,37 +119,8 @@
     ! ESMF Framework module
     use ESMF_Mod
     use ESMF_TestMod
+    use ESMF_StateReconcileUTest_Mod
     implicit none
-
-    !-------------------------------------------------------------------------
-    ! Interface blocks for subroutines at end of program
-    interface
-      subroutine comp_dummy(gcomp, rc)
-        use ESMF_Mod
-        type(ESMF_GridComp), intent(inout) :: gcomp
-        integer, intent(out) :: rc
-      end subroutine comp_dummy
-
-      subroutine comp1_init(gcomp, istate, ostate, clock, rc)
-        use ESMF_Mod
-        type(ESMF_GridComp), intent(inout) :: gcomp
-        type(ESMF_State), intent(inout) :: istate, ostate
-        type(ESMF_Clock), intent(in) :: clock
-        integer, intent(out) :: rc
-    
-      end subroutine comp1_init
-    
-      subroutine comp2_init(gcomp, istate, ostate, clock, rc)
-        use ESMF_Mod
-        type(ESMF_GridComp), intent(inout) :: gcomp
-        type(ESMF_State), intent(inout) :: istate, ostate
-        type(ESMF_Clock), intent(in) :: clock
-        integer, intent(out) :: rc
-    
-      end subroutine comp2_init
-
-    end interface
-    !-------------------------------------------------------------------------
 
 
     !-------------------------------------------------------------------------
@@ -464,110 +527,3 @@
     call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize()
 
 end program ESMF_StateReconcileUTest
-
-
-! Initialize routine which creates "field1" on PETs 0 and 1
-subroutine comp1_init(gcomp, istate, ostate, clock, rc)
-    use ESMF_Mod
-    type(ESMF_GridComp), intent(inout) :: gcomp
-    type(ESMF_State), intent(inout) :: istate, ostate
-    type(ESMF_Clock), intent(in) :: clock
-    integer, intent(out) :: rc
-
-    type(ESMF_Field) :: field1
-    type(ESMF_ArraySpec)  :: arrayspec
-    type(ESMF_DistGrid)   :: distgrid
-    type(ESMF_Array)      :: array
-    integer :: localrc
-
-    print *, "i am comp1_init"
-
-    field1 = ESMF_FieldCreateNoData(name="Comp1 Field", rc=localrc)
-    call ESMF_StateAddField(istate, field1, rc=localrc)
-    
-    call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, &
-      rank=2, rc=localrc)
-    distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
-      regDecomp=(/2,2/), rc=localrc)
-    array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-      indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-    call ESMF_ArraySet(array, name="Comp1 Array", rc=localrc)
-    call ESMF_StateAddArray(istate, array, rc)
-    
-    rc = localrc
-
-end subroutine comp1_init
-
-! Initialize routine which creates "field2" on PETs 2 and 3
-subroutine comp2_init(gcomp, istate, ostate, clock, rc)
-    use ESMF_Mod
-    type(ESMF_GridComp), intent(inout) :: gcomp
-    type(ESMF_State), intent(inout) :: istate, ostate
-    type(ESMF_Clock), intent(in) :: clock
-    integer, intent(out) :: rc
-
-    type(ESMF_Field) :: field2
-    type(ESMF_ArraySpec)  :: arrayspec
-    type(ESMF_DistGrid)   :: distgrid
-    type(ESMF_Array)      :: array
-    integer :: localrc
-
-    print *, "i am comp2_init"
-
-    field2 = ESMF_FieldCreateNoData(name="Comp2 Field", rc=localrc)
-    call ESMF_StateAddField(istate, field2, rc=localrc)
-
-    call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, &
-      rank=2, rc=localrc)
-    distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/9,4/), &
-      regDecomp=(/2,2/), rc=localrc)
-    array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-      indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-    call ESMF_ArraySet(array, name="Comp2 Array", rc=localrc)
-    call ESMF_StateAddArray(istate, array, rc)
-    
-    rc = localrc
-
-end subroutine comp2_init
-
-subroutine comp_dummy(gcomp, rc)
-   use ESMF_Mod
-   type(ESMF_GridComp), intent(inout) :: gcomp
-   integer, intent(out) :: rc
-
-   rc = ESMF_SUCCESS
-end subroutine comp_dummy
-    
-subroutine StateDestroyAll(state, rc)
-   use ESMF_Mod
-   type(ESMF_State), intent(inout) :: state
-   integer, intent(out) :: rc
-
-   type(ESMF_Field) :: field(100)
-   integer :: i, itemCount
-   character(len=ESMF_MAXSTR) :: nameList(100)
-
-   ! assumes all items are empty fields.  if that changes, this code has
-   ! to get the grid and delete that as well (after deleting the field) and
-   ! get and delete the array after, too.
-   call ESMF_StateGet(state, itemCount=itemCount, itemNameList=nameList, rc=rc)
-   if (rc .ne. ESMF_SUCCESS) return
-
-!todo: taking this out will cause this test to memory leak, but now that
-!      Arrays are included in this test the destroy routine must be re-written!
-!   do i=1, itemCount
-!       call ESMF_StateGetField(state, nameList(i), field(i),  rc=rc)
-!       if (rc .ne. ESMF_SUCCESS) return
-!   enddo
-
-   call ESMF_StateDestroy(state, rc=rc)
-   if (rc .ne. ESMF_SUCCESS) return
-  
-!   do i=1, itemCount
-!       call ESMF_FieldDestroy(field(i),  rc=rc)
-!       if (rc .ne. ESMF_SUCCESS) return
-!   enddo
-
-   rc = ESMF_SUCCESS
-   return
-end subroutine StateDestroyAll

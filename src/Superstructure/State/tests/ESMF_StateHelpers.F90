@@ -1,4 +1,4 @@
-! $Id: ESMF_StateHelpers.F90,v 1.2 2006/04/19 21:31:04 samsoncheung Exp $
+! $Id: ESMF_StateHelpers.F90,v 1.3 2006/09/29 23:24:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -508,19 +508,22 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
     real (ESMF_KIND_R8), dimension(:,:),       pointer :: ptr2dr8
     real (ESMF_KIND_R8), dimension(:,:,:),     pointer :: ptr3dr8
     real (ESMF_KIND_R8), dimension(:,:,:,:),   pointer :: ptr4dr8
-    real (ESMF_KIND_R8), dimension(:,:,:,:,:), pointer :: ptr5dr8
     real (ESMF_KIND_R4), dimension(:,:),       pointer :: ptr2dr4
     real (ESMF_KIND_R4), dimension(:,:,:),     pointer :: ptr3dr4
     real (ESMF_KIND_R4), dimension(:,:,:,:),   pointer :: ptr4dr4
-    real (ESMF_KIND_R4), dimension(:,:,:,:,:), pointer :: ptr5dr4
     real (ESMF_KIND_I8), dimension(:,:),       pointer :: ptr2di8
     real (ESMF_KIND_I8), dimension(:,:,:),     pointer :: ptr3di8
     real (ESMF_KIND_I8), dimension(:,:,:,:),   pointer :: ptr4di8
-    real (ESMF_KIND_I8), dimension(:,:,:,:,:), pointer :: ptr5di8
     real (ESMF_KIND_I4), dimension(:,:),       pointer :: ptr2di4
     real (ESMF_KIND_I4), dimension(:,:,:),     pointer :: ptr3di4
     real (ESMF_KIND_I4), dimension(:,:,:,:),   pointer :: ptr4di4
+
+#ifndef ESMF_NO_GREATER_THAN_4D
+    real (ESMF_KIND_R8), dimension(:,:,:,:,:), pointer :: ptr5dr8
+    real (ESMF_KIND_R4), dimension(:,:,:,:,:), pointer :: ptr5dr4
+    real (ESMF_KIND_I8), dimension(:,:,:,:,:), pointer :: ptr5di8
     real (ESMF_KIND_I4), dimension(:,:,:,:,:), pointer :: ptr5di4
+#endif
 
     rc = ESMF_FAILURE
         
@@ -691,6 +694,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
             return
          end select
 
+#ifndef ESMF_NO_GREATER_THAN_4D
       case (5)
         select case (kind)
           case (ESMF_R8%dkind)
@@ -736,12 +740,11 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
             if (rc.NE.ESMF_SUCCESS) return
 
             ptr5di4(:,:,:,:,:) = i4val
-
           case default
             print *, "unsupported data type in Field"
             return
          end select
-
+#endif
       case default
         print *, "unsupported rank"
 
@@ -1397,6 +1400,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
 
         end select
 
+#ifndef ESMF_NO_GREATER_THAN_4D
       case (5)
         select case (kind)
           case (ESMF_R8%dkind)
@@ -1528,6 +1532,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
             return
 
         end select
+#endif
 
       case default
         print *, "no code to handle data of rank", rank
@@ -2391,11 +2396,12 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
 
     ! do some basic error checks and then figure out how many x DEs are empty
     if (present(data_xde)) then
-       if ((data_xde .lt. 0) .or. (data_xde .ge. xde)) then
+       if ((data_xde .le. 0) .or. (data_xde .gt. xde)) then
 
          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-                               "data_xde must be >= 0 and < xde", &
+                               "data_xde must be > 0 and <= xde", &
                                 ESMF_CONTEXT, rc)
+         goto 10
        else
         emptyx = xde - data_xde
         fullx = data_xde
@@ -2404,11 +2410,12 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
 
     ! same thing for y
     if (present(data_yde)) then
-       if ((data_yde .lt. 0) .or. (data_yde .ge. yde)) then
+       if ((data_yde .le. 0) .or. (data_yde .gt. yde)) then
 
          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-                               "data_yde must be >= 0 and < yde", &
+                               "data_yde must be > 0 and <= yde", &
                                 ESMF_CONTEXT, rc)
+          goto 10
        else
         emptyy = yde - data_yde
         fully = data_yde
