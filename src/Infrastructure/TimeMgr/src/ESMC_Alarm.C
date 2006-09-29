@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.54 2005/06/22 20:32:56 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.55 2006/09/29 18:51:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.54 2005/06/22 20:32:56 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.55 2006/09/29 18:51:49 theurich Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -1051,9 +1051,8 @@ int ESMC_Alarm::count=0;
       ringingOnPrevTimeStep = ringingOnCurrTimeStep;
     
       // check if time to turn on alarm
-      if (!ringing && enabled) {
-        ringingOnCurrTimeStep = ESMC_AlarmCheckTurnOn(positive);
-      }
+      if (!ringing && enabled) 
+         ESMC_AlarmCheckTurnOn(positive);
 
       // else if not sticky, check if time to turn off alarm
       //   (user is responsible for turning off sticky alarms via RingerOff())
@@ -1718,6 +1717,11 @@ int ESMC_Alarm::count=0;
 
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmCheckTurnOn()"
+
+    // The original comment few lines below indicates that the ringing state
+    // would be turned off elsewhere. However, it is initialized (turn off) 
+    // here for the sake of X1 compiler.  That may be taken off later.
+    ringingOnCurrTimeStep = false;
 
     bool checkRinging = (timeStepPositive) ?
                 clock->currTime >= ringTime && clock->prevTime < ringTime :

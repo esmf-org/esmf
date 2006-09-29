@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.95 2005/07/20 19:52:16 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.96 2006/09/29 18:51:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.95 2005/07/20 19:52:16 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.96 2006/09/29 18:51:49 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1647,13 +1647,13 @@
 
       ! ----------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_DISABLE_UTest
       ! Validate an uninitialized time
       write(failMsg, *) "Should not return ESMF_SUCCESS "
       write(name, *) "Validate an uninitialzed time Test"
-      call ESMF_TimeValidate(stopTime3, rc=rc)
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_TimeValidate(stopTime3, rc=rc)
+!      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+!                      name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 
