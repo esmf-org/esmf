@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.33 2006/01/05 00:35:23 eschwab Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.34 2006/09/29 18:13:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.33 2006/01/05 00:35:23 eschwab Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.34 2006/09/29 18:13:23 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -55,7 +55,7 @@
       character(4) :: my_pet_char
       character(8) :: todays_date
       character(10) :: todays_time
-      integer :: my_v(8), log_v(8), k
+      integer :: my_v(8), log_v(8), k, init_sec
       integer, pointer :: rndseed(:)
       
 
@@ -322,9 +322,17 @@
       call ESMF_VMGetGlobal(vm, rc=rc)
       call ESMF_VMGet(vm, localPet=my_pet, rc=rc)
       ! Loop according to Pet Number so each PET has a different time
+      call date_and_time(values=my_v)
+      init_sec = my_v(7)
       do i=1, (((my_pet+1)*7) * 116931)
-         ! This call put here to waste time
-     	 call date_and_time(date=todays_date, time=todays_time)
+         ! This call makes "todays_time" has a second difference between 
+         ! pets.
+         call date_and_time(values=my_v)
+         if( (my_v(7)-init_sec) .ge. (my_pet+1) ) then
+            call date_and_time(date=todays_date, time=todays_time)
+            !write(*,*)"my_pet, diff ", my_pet, (my_v(7)-init_sec)
+            exit
+         endif
       end do
       print *, "Ending the no-op loop"
 
