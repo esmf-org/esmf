@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.31 2006/03/15 20:48:09 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.32 2006/10/02 17:05:51 theurich Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -718,7 +718,11 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating an Array from a Spec with rank of 5 Test"
     array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc=rc)
+#ifdef ESMF_NO_GREATER_THAN_4D
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
     !--------------------------------------------------------------------------
     !EX_UTest
