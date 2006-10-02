@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.cpp,v 1.26 2006/06/27 20:49:42 samsoncheung Exp $
+! $Id: ESMF_LocalArrayCreate.cpp,v 1.2 2006/10/02 18:11:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,10 +9,10 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
-^define ESMF_FILENAME "ESMF_LocalArray.F90"
+^define ESMF_FILENAME "ESMF_LocalArrayCreate.F90"
 !
-!     ESMF LocalArray module
-      module ESMF_LocalArrayMod
+!     ESMF LocalArrayCreate module
+      module ESMF_LocalArrayCreateMod
 !
 !==============================================================================
 !
@@ -30,7 +30,7 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !MODULE: ESMF_LocalArrayMod - Manage data uniformly between F90 and C++     
+! !MODULE: ESMF_LocalArrayCreateMod - Manage data uniformly between F90 and C++
 !
 ! !DESCRIPTION:
 !
@@ -132,7 +132,7 @@ AllTypesMacro(LocalArrayType)
       public ESMF_LocalArrayDestroy
  
 
-      public ESMF_LocalArraySetData, ESMF_LocalArrayGetData
+      public ESMF_LocalArraySetData
       public ESMF_LocalArraySetInfo, ESMF_LocalArrayGetInfo
       public ESMF_LocalArrayGet, ESMF_LocalArrayGetName
  
@@ -160,7 +160,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.cpp,v 1.26 2006/06/27 20:49:42 samsoncheung Exp $'
+      '$Id: ESMF_LocalArrayCreate.cpp,v 1.2 2006/10/02 18:11:50 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -237,25 +237,6 @@ InterfaceMacro(LocalArrCreateByFlPtr)
 end interface
 !EOP
 
-!------------------------------------------------------------------------------
-
-!BOP
-! !IROUTINE: ESMF_LocalArrayGetData -- Get an F90 pointer to the data contents
-
-! !INTERFACE:
-     interface ESMF_LocalArrayGetData
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-      ! < declarations of interfaces for each T/K/R >
-InterfaceMacro(LocalArrayGetData)
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_LocalArrayGetData} functions.   
-!  
-!EOP
-end interface
 
 !------------------------------------------------------------------------------
 interface operator (.eq.)
@@ -931,12 +912,6 @@ DeclarationMacro(LocalArrConstrF90Ptr)
 
 !! < start of macros which become actual function bodies after expansion >
 DeclarationMacro(LocalArrayAdjust)
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-
-!! < start of macros which become actual function bodies after expansion >
-DeclarationMacro(LocalArrayGetData)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -2667,11 +2642,6 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
        end subroutine ESMF_LocalArrayAdjust
 
-
-
-
-
-
 !------------------------------------------------------------------------------
-        end module ESMF_LocalArrayMod
+        end module ESMF_LocalArrayCreateMod
 

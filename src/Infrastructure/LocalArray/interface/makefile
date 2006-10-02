@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.11 2006/09/22 23:55:42 theurich Exp $
+# $Id: makefile,v 1.12 2006/10/02 18:11:50 theurich Exp $
 
 # leave alone.
 ALL: build_here 
 
-AUTOGEN   = ESMF_LocalArray.F90
+AUTOGEN   = ESMF_LocalArrayCreate.F90 ESMF_LocalArrayGet.F90
 
 SOURCEC	  = ESMC_LocalArray_F.C 
-SOURCEF	  = $(AUTOGEN) ESMF_LocalAlloc_C.F90
+SOURCEF	  = $(AUTOGEN) ESMF_LocalArray.F90 ESMF_LocalAlloc_C.F90
 SOURCEH	  = 
 STOREH	  = 
 CPPFILES  = $(AUTOGEN)
@@ -39,7 +39,7 @@ CLEANDIRS   =
 CLEANFILES  = $(AUTOGEN)
 CLOBBERDIRS =
 
-ESMF_LocalAlloc_C.o:  ESMF_LocalArray.o
+ESMF_LocalArrayCreate.F90: ESMF_LocalArrayCreate.cpp ESMF_LocalArrayMacros.h ESMF_LocalAllocMacros.h
 
-ESMF_LocalArray.o: ESMF_LocalArray.cpp ESMF_LocalArrayMacros.h
+ESMF_LocalArrayGet.F90: ESMF_LocalArrayGet.cpp ESMF_LocalArrayMacros.h ESMF_LocalAllocMacros.h
 
