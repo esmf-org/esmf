@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.25 2005/11/04 22:12:57 nscollins Exp $
+// $Id: ESMC_RTable.C,v 1.26 2006/10/02 21:55:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,11 +35,15 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_RTable.C,v 1.25 2005/11/04 22:12:57 nscollins Exp $";
+            "$Id: ESMC_RTable.C,v 1.26 2006/10/02 21:55:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
 //-----------------------------------------------------------------------------
+int compare(const void* item1, const void* item2) {
+  return (((ESMC_XPacket*)item1)->ESMC_XPacketGetIndex()
+	  - ((ESMC_XPacket*)item2)->ESMC_XPacketGetIndex());
+}
 //-----------------------------------------------------------------------------
 //
 // This section includes all the RTable routines
@@ -448,6 +452,40 @@
     return ESMF_FAILURE;
 
  } // end ESMC_RTableValidate
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RTableSort"
+//BOP
+// !IROUTINE:  ESMC_RTableSort - sort the XPackets in each table according to
+//               its block_index value
+//
+// !INTERFACE:
+      int ESMC_RTable::ESMC_RTableSort(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ) {    // in - none
+//
+// !DESCRIPTION:
+//      Sort the XPackets in each table according to its block_index value
+//      Returns error code if problems are found.  ESMC_Base class method.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    int i, j;
+    ESMC_XPacket *xptbl;
+
+    for (i = 0; i < entrycount; i++) {
+      xptbl = entry[i].xp;
+      qsort(xptbl, entry[i].xpcount, sizeof(ESMC_XPacket), compare);
+    }
+    return ESMF_SUCCESS;
+
+ } // end ESMC_RTableSort
 
 
 //-----------------------------------------------------------------------------

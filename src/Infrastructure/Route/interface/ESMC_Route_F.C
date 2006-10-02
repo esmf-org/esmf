@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.42 2006/01/23 20:03:35 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.43 2006/10/02 21:55:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -231,7 +231,6 @@ extern "C" {
 
        void FTN(c_esmc_routerunna)(ESMC_Route **ptr, void *src,
                                    void *dst, ESMC_DataKind *dk, int *status) {
-
            *status = (*ptr)->ESMC_RouteRun(src, dst, *dk);
        }
 
@@ -300,6 +299,32 @@ extern "C" {
                              dstGlobalStart, *dstGSCount,
                              dstGlobalCount, *dstLayout, *hasSrcData,
                              *srcMyDE, *srcVector, srcCompAI, srcTotalAI,
+                             *srcAICount, srcAICountPerDE,
+                             srcGlobalStart, *srcGSCount,
+                             srcGlobalCount, *srcLayout);
+       }
+
+       void FTN(c_esmc_routeprecomputeredista2a)(ESMC_Route **ptr, int *rank,
+                     ESMC_Logical *hasDstData,
+                     int *dstMyDE,
+                     ESMC_AxisIndex *dstCompAI,
+                     int *dstAICount, int *dstAICountPerDE,
+                     int *dstGlobalStart, int *dstGSCount,
+                     int *dstGlobalCount, ESMC_DELayout **dstLayout,
+                     ESMC_Logical *hasSrcData,
+                     int *srcMyDE,
+                     ESMC_AxisIndex *srcCompAI,
+                     int *srcAICount, int *srcAICountPerDE,
+                     int *srcGlobalStart, int *srcGSCount,
+                     int *srcGlobalCount, ESMC_DELayout **srcLayout,
+                     int *status) {
+
+         *status = (*ptr)->ESMC_RoutePrecomputeRedistA2A(*rank,*hasDstData,
+                             *dstMyDE, dstCompAI,
+                             *dstAICount, dstAICountPerDE,
+                             dstGlobalStart, *dstGSCount,
+                             dstGlobalCount, *dstLayout, *hasSrcData,
+                             *srcMyDE, srcCompAI,
                              *srcAICount, srcAICountPerDE,
                              srcGlobalStart, *srcGSCount,
                              srcGlobalCount, *srcLayout);

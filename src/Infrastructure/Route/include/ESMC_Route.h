@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.61 2006/03/14 19:33:43 theurich Exp $
+// $Id: ESMC_Route.h,v 1.62 2006/10/02 21:55:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,6 +81,7 @@
      ESMC_RTable *recvRT;   // receive route table
      int recvitems;         // if >0, numitems needed in the destination array
      ESMC_CommTable *ct;    // communication scheduling table
+     double timer1, timer2, timer3;
 
 // !PUBLIC MEMBER FUNCTIONS:
 
@@ -132,6 +133,17 @@
                        ESMC_DELayout *dstdeLayout, ESMC_Logical hasSrcData,
                        int srcMyDE, ESMC_Logical srcVector,
                        ESMC_AxisIndex *srcCompAI, ESMC_AxisIndex *srcTotalAI,
+                       int srcAICount, int *srcAICountPerDE,
+                       int *srcGlobalStart, int srcGSCount, int *srcGlobalCount,
+                       ESMC_DELayout *srcdeLayout);
+    int ESMC_RoutePrecomputeRedistA2A(int rank, ESMC_Logical hasDstData,
+                       int dstMyDE,
+                       ESMC_AxisIndex *dstCompAI,
+                       int dstAICount, int *dstAICountPerDE,
+                       int *dstGlobalStart, int dstGSCount, int *dstGlobalCount,
+                       ESMC_DELayout *dstdeLayout, ESMC_Logical hasSrcData,
+                       int srcMyDE,
+                       ESMC_AxisIndex *srcCompAI,
                        int srcAICount, int *srcAICountPerDE,
                        int *srcGlobalStart, int srcGSCount, int *srcGlobalCount,
                        ESMC_DELayout *srcdeLayout);

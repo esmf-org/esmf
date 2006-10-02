@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.38 2006/01/06 19:56:54 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.39 2006/10/02 21:55:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -94,13 +94,16 @@
 
      int stride[ESMF_MAXDIM];        // number of items to skip in each dim-1
      int rep_count[ESMF_MAXDIM];     // repeat count for each dim-1
-     
+
+     int single;                      // flag for single element     
 // !PUBLIC MEMBER FUNCTIONS:
 //
 
   public:
     int ESMC_XPacketSetDefault(int rank, int offset, int contig_length, 
                                int *stride, int *rep_count);
+
+    int ESMC_XPacketCopy(ESMC_XPacket *xpacket);
 
  // accessor methods for class members
     int ESMC_XPacketGet(int *nrank, int *noffset, int *ncontig_length, 
@@ -114,7 +117,9 @@
                                             return ESMF_SUCCESS; }
 
     int ESMC_XPacketGetOffset(void) { return this->offset; }
-
+    int ESMC_XPacketSetIndex(int index) { this->block_index=index;
+                                          return ESMF_SUCCESS;}
+    int ESMC_XPacketGetIndex(void) { return this->block_index;}
     // returns true if entire xp describes a single chunk of mem
     bool ESMC_XPacketIsContig(void) { return (this->contigrank == this->rank); }
 
@@ -128,6 +133,7 @@
     void ESMC_XPacketSetContig(void);
 
     bool ESMC_XPacketIsEmpty();      // returns true if the xp is empty
+    bool ESMC_XPacketIsSingle() { return (this->single==1); }
 
  // miscellaneous fun stuff
     int ESMC_XPacketIntersect(ESMC_XPacket *xpacket1, 
@@ -142,7 +148,6 @@
                                 // TODO: change name here Total->Alloc
 
     int ESMC_XPacketMinMax(int *minitems, int *maxitems);
-
     int ESMC_XPacketPrint(const char *options);
     int ESMC_XPacketPrint(int indent=0, const char *options="");
 
@@ -159,11 +164,11 @@
                                       int nbytes, int numAddrs, char **buffer,
                                       int *bufferSize);
     friend int ESMC_XPacketPackBuffer(int xpCount, ESMC_XPacket **xpList,
-                                      int nbytes, int numAddrs, void **dataAddr,
-                                      char *buffer);
+      ESMC_DataKind dk, int nbytes, int numAddrs, void **dataAddr,
+      char *buffer);
     friend int ESMC_XPacketUnpackBuffer(int xpCount, ESMC_XPacket **xpList,
-                                      int nbytes, char *buffer,
-                                      int numAddrs, void **dataAddr);
+      ESMC_DataKind dk, int nbytes, char *buffer, int numAddrs,
+      void **dataAddr);
     friend int ESMC_XPacketDoBuffer(ESMC_PackUnpackFlag packflag, 
                                     int xpCount, ESMC_XPacket **xpList,
                                     int nbytes, int numAddrs, void **dataAddr,
@@ -191,12 +196,12 @@
     int ESMC_XPacketMakeBuffer(int xpCount, ESMC_XPacket **xpList,
                                int nbytes, int numAddrs, 
                                char **buffer, int *bufferSize);
-    int ESMC_XPacketPackBuffer(int xpCount, ESMC_XPacket **xpList,
-                               int nbytes, int numAddrs, 
-                               void **dataAddr, char *buffer);
+    int ESMC_XPacketPackBuffer(int xpCount, ESMC_XPacket **xpList, 
+      ESMC_DataKind dk, int nbytes, int numAddrs, void **dataAddr, 
+      char *buffer);
     int ESMC_XPacketUnpackBuffer(int xpCount, ESMC_XPacket **xpList,
-                                 int nbytes, int numAddrs, 
-                                 char *buffer, void **dataAddr);
+      ESMC_DataKind dk, int nbytes, int numAddrs, char *buffer, 
+      void **dataAddr);
     int ESMC_XPacketDoBuffer(ESMC_PackUnpackFlag packflag, 
                              int xpCount, ESMC_XPacket **xpList,
                              int nbytes, int numAddrs, 

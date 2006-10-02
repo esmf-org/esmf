@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.79 2006/01/23 22:00:23 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.80 2006/10/02 21:55:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -106,6 +106,7 @@
       public ESMF_RoutePrecomputeHalo
       public ESMF_RoutePrecomputeRedist
       public ESMF_RoutePrecomputeRedistV
+      public ESMF_RoutePrecomputeRedistA2A
       public ESMF_RoutePrecomputeRegrid
       public ESMF_RoutePrecomputeDomList
       public ESMF_RouteRun
@@ -140,7 +141,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.79 2006/01/23 22:00:23 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.80 2006/10/02 21:55:27 theurich Exp $'
 
 !==============================================================================
 !
@@ -1004,6 +1005,157 @@ end subroutine rias
         if (rcpresent) rc = status
 
         end subroutine ESMF_RoutePrecomputeRedistV
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_RoutePrecomputeRedistA2A - Precompute communication paths
+
+! !INTERFACE:
+      subroutine ESMF_RoutePrecomputeRedistA2A(route, rank, hasDstData, &
+                                             dstMyDE, dstCompAI, &
+                                             dstAICountPerDE, &
+                                             dstGlobalStart, &
+                                             dstGlobalCount, dstDElayout, &
+					     hasSrcData, &
+                                             srcMyDE, srcCompAI, &
+                                             srcAICountPerDE, &
+                                             srcGlobalStart, &
+                                             srcGlobalCount, srcDElayout, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Route), intent(in) :: route
+      integer, intent(in) :: rank
+      type(ESMF_Logical), intent(in) :: hasDstData
+      integer, intent(in) :: dstMyDE
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: dstCompAI
+      integer, dimension(:), intent(in) :: dstAICountPerDE
+      integer, dimension(:,:), intent(in) :: dstGlobalStart
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dstGlobalCount
+      type(ESMF_DELayout), intent(in) :: dstDElayout
+      type(ESMF_Logical), intent(in) :: hasSrcData
+      integer, intent(in) :: srcMyDE
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: srcCompAI
+      integer, dimension(:), intent(in) :: srcAICountPerDE
+      integer, dimension(:,:), intent(in) :: srcGlobalStart
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: srcGlobalCount
+      type(ESMF_DELayout), intent(in) :: srcDElayout
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Precompute the data movement needed to execute a data redistribution
+!     operation from an arbitrarily distributed grid to an arbitrary 
+!     distributed grid
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[route] 
+!          {\tt ESMF\_Route} to associate this information with.
+!     \item[rank]
+!          Data rank.
+!     \item[dstMyDE]
+!          The ID of the destination DE.
+!     \item[dstCompAI]
+!          A 2D array of {\tt ESMF\_AxisIndex}s, describing the
+!          computational region of the data for each DE in the destination.
+!     \item[dstGlobalStart]
+!          Array of integer offsets for the corner of each DE relative to
+!          the undecomposed destination object.
+!     \item[dstGlobalCount]
+!          Array of integers, one per dimension, for the total count
+!          of items for the undecomposed destination object.
+!     \item[dstDELayout]
+!          {\tt ESMF\_DELayout} for the destination data decomposition.
+!     \item[srcMyDE]
+!          The ID of the source DE.
+!     \item[srcCompAI]
+!          A 2D array of {\tt ESMF\_AxisIndex}s, describing the
+!          computational region of the data for each DE in the source.
+!     \item[srcGlobalStart]
+!          Array of integer offsets for the corner of each DE relative to
+!          the undecomposed source object.
+!     \item[srcGlobalCount]
+!          Array of integers, one per dimension, for the total count
+!          of items for the undecomposed source object.
+!     \item[srcDELayout]
+!          {\tt ESMF\_DELayout} for the source data decomposition.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+        ! local variables
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+        integer :: i,j                     ! counters
+        integer :: dstAICount, srcAICount
+        integer :: dstGSCount, srcGSCount
+        type(ESMF_Logical) :: dstESMFVector, srcESMFVector
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! set some sizes to pass to C++ code
+        dstAICount = size(dstCompAI,1)
+        srcAICount = size(srcCompAI,1)
+        dstGSCount = size(dstGlobalStart,1)
+        srcGSCount = size(srcGlobalStart,1)
+
+        ! Translate AxisIndices from F90 to C++
+        ! TODO: fix so that for the vector field we do not pass in both
+        !       computational and total AIs, since they are the same
+        !       to do that will require something like the commented
+        !       out lines below
+        do j   = 1,rank
+          do i = 1,dstAICount
+            dstCompAI(i,j)%min  =  dstCompAI(i,j)%min - 1
+            dstCompAI(i,j)%max  =  dstCompAI(i,j)%max - 1
+          enddo
+          do i = 1,srcAICount
+            srcCompAI(i,j)%min  =  srcCompAI(i,j)%min - 1
+            srcCompAI(i,j)%max  =  srcCompAI(i,j)%max - 1
+          enddo
+        enddo
+
+        ! Call C++  code
+        call c_ESMC_RoutePrecomputeRedistA2A(route, rank, hasDstData, &
+                                           dstMyDE, &
+                                           dstCompAI, &
+                                           dstAICount, dstAICountPerDE, &
+                                           dstGlobalStart, dstGSCount, &
+                                           dstGlobalCount, dstDElayout, &
+                                           hasSrcData, srcMyDE, &
+                                           srcCompAI, &
+                                           srcAICount, srcAICountPerDE, &
+                                           srcGlobalStart, srcGSCount, &
+                                           srcGlobalCount, srcDElayout, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "Route PrecomputeRedistV error"
+          ! don't return before adding 1 back to AIs
+        endif
+
+        ! Translate AxisIndices back to  F90 from C++
+        do j   = 1,rank
+          do i = 1,dstAICount
+            dstCompAI(i,j)%min  =  dstCompAI(i,j)%min + 1
+            dstCompAI(i,j)%max  =  dstCompAI(i,j)%max + 1
+          enddo
+          do i = 1,srcAICount
+            srcCompAI(i,j)%min  =  srcCompAI(i,j)%min + 1
+            srcCompAI(i,j)%max  =  srcCompAI(i,j)%max + 1
+          enddo
+        enddo
+
+        if (rcpresent) rc = status
+
+        end subroutine ESMF_RoutePrecomputeRedistA2A
 
 !------------------------------------------------------------------------------
 !BOPI

@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.h,v 1.12 2005/10/12 19:06:17 nscollins Exp $
+// $Id: ESMC_RTable.h,v 1.13 2006/10/02 21:55:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,7 +49,7 @@
  class ESMC_RTable;
 
 // grow the rtable entries by more than 1 at a time
-#define ALLOCCHUNK 4
+#define ALLOCCHUNK 400
 
 // !PRIVATE TYPES:
 
@@ -84,7 +84,7 @@
     int ESMC_RTableGetEntry(int vmid, int xpcount, ESMC_XPacket **xp); 
     int ESMC_RTableGetCount(int vmid, int *xpcount);
     int ESMC_RTableGetTotalCount(int *xpcount);
-    
+    int ESMC_RTableSort(void);
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_RTableValidate(const char *options) const;
     int ESMC_RTablePrint(const char *options) const;
