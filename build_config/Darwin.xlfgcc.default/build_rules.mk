@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2 2006/09/22 23:55:38 theurich Exp $
+# $Id: build_rules.mk,v 1.3 2006/10/02 15:07:02 theurich Exp $
 #
 # Darwin.xlfgcc.default
 #
@@ -92,8 +92,8 @@ ESMF_CXXLINKRPATHS      =
 # xlf90 does not know about Fortran suffices
 #
 ESMF_F90COMPILEFREECPP   = -qfree=f90 -qsuffix=cpp=F90
-ESMF_F90COMPILEFREENOCPP = -qfree=f90 -qsuffix=f=F
-ESMF_F90COMPILEFIXCPP    = -qfixed=132 -qsuffix=cpp=f90
+ESMF_F90COMPILEFREENOCPP = -qfree=f90 -qsuffix=f=f90
+ESMF_F90COMPILEFIXCPP    = -qfixed=132 -qsuffix=cpp=F
 ESMF_F90COMPILEFIXNOCPP  = -qfixed=132 -qsuffix=f=f
 
 ############################################################
