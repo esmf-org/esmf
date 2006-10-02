@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2006/03/24 16:33:28 theurich Exp $
+# $Id: makefile,v 1.2 2006/10/02 20:42:17 theurich Exp $
 
 # leave alone.
 ALL: build_here 
@@ -39,7 +39,7 @@ include $(ESMF_DIR)/makefile
 # on the mac, you have to give this additional flag so the file uses > 16 bit
 # offsets internally in the file.
 ifeq ($(ESMF_COMPILER),absoft)
-FFLAGS += -N11
+ESMF_F90COMPILEOPTS += -N11
 endif
 
 # leave the following line blank.
