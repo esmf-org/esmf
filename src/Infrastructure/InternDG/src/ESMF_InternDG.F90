@@ -1,4 +1,4 @@
-! $Id: ESMF_InternDG.F90,v 1.2 2006/03/23 01:12:38 theurich Exp $
+! $Id: ESMF_InternDG.F90,v 1.3 2006/10/02 20:36:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -220,7 +220,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_InternDG.F90,v 1.2 2006/03/23 01:12:38 theurich Exp $'
+      '$Id: ESMF_InternDG.F90,v 1.3 2006/10/02 20:36:30 theurich Exp $'
 
 !==============================================================================
 !
@@ -1844,6 +1844,7 @@
       integer :: j, thisCount(1), nDEs, myDE, thisDE
       type(ESMF_InternDGGlobal), pointer :: glob
       type(ESMF_VM) :: vm
+      integer, dimension(:), allocatable :: allCounts
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -1870,8 +1871,25 @@
                                 ESMF_CONTEXT, rc)) return
       call ESMF_DELayoutGet(delayout, vm=vm, rc=localrc)
  
+#if 1
       ! collective call to gather count from all DEs
-      do j     = 1,nDEs
+      ! New implementation (P. Li, 7/2006) -- This implementation calls
+      ! ESMF_VMAllGather instead of ESMF_VMBroadcast() to collect count 
+      ! We have to allocate a temperary array allCount to store the values
+      allocate(allCounts(nDEs), stat=localrc)
+      thisCount(1) = myCount
+      call ESMF_VMAllGather(vm, thisCount, allCounts, 1, rc=localrc)
+      do j = 1,nDEs
+        glob%cellCountPerDE(j)         = allCounts(j)
+        glob%cellCountPerDEPerDim(j,1) = allCounts(j)
+      enddo
+      deallocate(allCounts, stat=localrc)
+#else
+      ! collective call to gather count from all DEs
+      ! Old implementation -- This implementation calls n ESMF_VMBroadcast()
+      ! (n is total number of DEs) in order to collect the count from all DEs.
+      ! It performs very poorly on Cray X1 system.  
+      do j = 1,nDEs
         thisDE = j - 1
         if (myDE.eq.thisDE) then
           thisCount(1) = myCount
@@ -1880,9 +1898,8 @@
         glob%cellCountPerDE(j)         = thisCount(1)
         glob%cellCountPerDEPerDim(j,1) = thisCount(1)
       enddo
-
+#endif
       if (present(rc)) rc = ESMF_SUCCESS
-
       end subroutine ESMF_InternDGSetCountsArb
 
 !------------------------------------------------------------------------------
@@ -2332,9 +2349,10 @@
 ! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
-      integer :: i, i1, i2, j
+      integer :: i, i1, i2, i3, j, badcount
       integer :: nDEs, myDE, thisDE
-      integer, dimension(:), allocatable :: indices
+      integer, dimension(:), allocatable :: indices, globalIndices
+      integer, dimension(:), allocatable :: disp, bufsize
       type(ESMF_InternDGGlobal), pointer :: glob
       type(ESMF_InternDGLocal), pointer :: me
       type(ESMF_VM) :: vm
@@ -2355,7 +2373,11 @@
       call ESMF_DELayoutGet(dgtype%delayout, vm=vm, deCount=nDEs, rc=localrc)
       call ESMF_VMGet(vm, localPet=myDE, rc=localrc)   ! fix this
 
-      i1    = 0
+#if 0
+      ! This is the old implementation that uses a loop of ESMF_VMBroadcast to
+      ! collect the localIndices from all the DEs and put them into the AI
+      ! array.  It performs very poorly on Cray X1.
+       i1    = 0
       do j  = 1,nDEs
         thisDE = j - 1
         if (myDE.eq.thisDE) then
@@ -2380,11 +2402,68 @@
           AI(i1,2)%stride = glob%globalCellCountPerDim(2)
         enddo
       enddo
+#else
+      ! globalIndices is a global indices array used by MPI_AllGatherV
+      ! New implementation (P.Li - 7/2006):  Use ESMF_VMAllGatherV() to replace
+      ! a loop of ESMF_VMBroadcast().  This implementation requires more
+      ! memory space to hold the global Indices.  The performance of this
+      ! implementation on IBM cluster and Cray X1 is better than the old
+      ! implementation. However, it is memory inefficient when a large number
+      ! of processors is used.  Therefore, we might want to consider using
+      ! a loop of asynchronized send and recv calls instead of a global
+      ! call. 
+      allocate(globalIndices(2*glob%globalCellCount), stat=localrc)
+      allocate(bufsize(nDEs), stat=localrc)
+      allocate(disp(nDEs), stat=localrc)
+	  do i = 1,me%localCellCount
+            i2 = i + me%localCellCount
+            indices(i)  = me%localIndices(i,1)
+            indices(i2) = me%localIndices(i,2)
+          enddo
+
+      ! construct displacement array for MPI_AllGatherV()
+      disp(1) = 0
+      bufsize(1) = glob%cellCountPerDE(1)*2
+      do j = 2,nDEs
+	disp(j) = disp(j-1)+glob%cellCountPerDE(j-1)*2      
+        bufsize(j) = glob%cellCountPerDE(j)*2
+      enddo
+  
+      call ESMF_VMAllGatherV(vm, indices, 2*me%localCellCount, &
+	 	globalIndices, bufsize, disp, rc=localrc)
+
+      i1 = 0
+      do j  = 1,nDEs
+          AICountPerDE(j) = glob%cellCountPerDE(j)
+          i2 = i1*2
+        do i = 1,glob%cellCountPerDE(j)
+          i1 = i1 + 1
+          i2 = i2 + 1
+	  i3 = i2 + glob%cellCountPerDE(j)
+          AI(i1,1)%min    = globalIndices(i2)
+          AI(i1,1)%max    = globalIndices(i2)
+          AI(i1,1)%stride = glob%globalCellCountPerDim(1)
+          AI(i1,2)%min    = globalIndices(i3)
+          AI(i1,2)%max    = globalIndices(i3)
+          AI(i1,2)%stride = glob%globalCellCountPerDim(2)
+        enddo
+      enddo
 
       ! clean up
+      deallocate(globalIndices, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(disp, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(bufsize, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
+#endif
       deallocate(indices, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
                                      ESMF_CONTEXT, rc)) return
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_InternDGGetAllAIArb
