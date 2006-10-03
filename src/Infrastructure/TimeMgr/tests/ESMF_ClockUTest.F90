@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.96 2006/09/29 18:51:49 theurich Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.97 2006/10/03 05:55:40 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.96 2006/09/29 18:51:49 theurich Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.97 2006/10/03 05:55:40 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -85,6 +85,7 @@
       integer(ESMF_KIND_I8) :: advanceCounts, year, day2, minute, second
       integer(ESMF_KIND_I4) :: day, hour
       integer :: datetime(8)
+      integer :: timeStepCount
 
       ! initialize ESMF framework
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -2178,6 +2179,53 @@
       call ESMF_Test((stepOnePass .and. stepTwoPass .and. &
                       advanceCounts .eq. 31), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ClockDestroy(clock, rc)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(name, *) "Set runTimeStepCount test 1"
+      call ESMF_TimeSet(startTime, yy=2006, mm=9, dd=8, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime,  yy=2006, mm=9, dd=12, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, h=24, rc=rc)
+      clock = ESMF_ClockCreate("Day Clock", &
+                                timeStep, startTime, stopTime, rc=rc)
+      timeStepCount = 2
+      call ESMF_ClockSet(clock, runTimeStepCount=timeStepCount, rc=rc)
+
+      do while (.not.ESMF_ClockIsDone(clock, rc))
+        call ESMF_ClockAdvance(clock, rc=rc)
+      end do
+
+      call ESMF_ClockGet(clock, advanceCount=advanceCounts, rc=rc)
+      print *, "advanceCounts = ", advanceCounts
+
+      write(failMsg, *) "runTimeStepCount test 1 failed."
+      call ESMF_Test(advanceCounts.eq.2 .and. rc.eq.ESMF_SUCCESS, &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_ClockDestroy(clock, rc)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(name, *) "Set runTimeStepCount test 2"
+      timeStepCount = 3
+      clock = ESMF_ClockCreate("Day Clock", timeStep, startTime, &
+                               runTimeStepCount=timeStepCount, rc=rc)
+
+      do while (.not.ESMF_ClockIsDone(clock, rc))
+        call ESMF_ClockAdvance(clock, rc=rc)
+      end do
+
+      call ESMF_ClockGet(clock, advanceCount=advanceCounts, rc=rc)
+      print *, "advanceCounts = ", advanceCounts
+
+      write(failMsg, *) "runTimeStepCount test 2 failed."
+      call ESMF_Test(advanceCounts.eq.3 .and. rc.eq.ESMF_SUCCESS, &
+                     name, failMsg, result, ESMF_SRCLINE)
       call ESMF_ClockDestroy(clock, rc)
 
       ! ----------------------------------------------------------------------------
