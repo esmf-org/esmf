@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.75 2005/06/22 19:31:49 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.76 2006/10/03 05:54:16 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.75 2005/06/22 19:31:49 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.76 2006/10/03 05:54:16 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -129,7 +129,19 @@ int ESMC_Clock::count=0;
       clock->stopTimeEnabled = true;
     }
     if (runTimeStepCount != ESMC_NULL_POINTER) {
-      clock->stopTime = clock->startTime + (*runTimeStepCount * *timeStep);
+      // use passed-in timestep if specified, otherwise use the clock's
+      ESMC_TimeInterval duration;
+      if (timeStep != ESMC_NULL_POINTER) {
+        duration = *runTimeStepCount * *timeStep;
+      } else {
+        duration = *runTimeStepCount * clock->timeStep;
+      }
+      clock->stopTime = clock->startTime + duration;
+#if 0
+// TODO: this code breaks Apple's g++ 3.3 compiler!
+      clock->stopTime = clock->startTime + (*runTimeStepCount *
+        (timeStep != ESMC_NULL_POINTER) ? *timeStep : clock->timeStep);
+#endif
       clock->stopTimeEnabled = true;
     }
 
@@ -306,7 +318,19 @@ int ESMC_Clock::count=0;
       this->stopTimeEnabled = true;
     }
     if (runTimeStepCount != ESMC_NULL_POINTER) {
-      this->stopTime = this->startTime + (*runTimeStepCount * *timeStep);
+      // use passed-in timestep if specified, otherwise use the clock's
+      ESMC_TimeInterval duration;
+      if (timeStep != ESMC_NULL_POINTER) {
+        duration = *runTimeStepCount * *timeStep;
+      } else {
+        duration = *runTimeStepCount * this->timeStep;
+      }
+      this->stopTime = this->startTime + duration;
+#if 0
+// TODO: this code breaks Apple's g++ 3.3 compiler!
+      this->stopTime = this->startTime + (*runTimeStepCount *
+        (timeStep != ESMC_NULL_POINTER) ? *timeStep : this->timeStep);
+#endif
       this->stopTimeEnabled = true;
     }
 
