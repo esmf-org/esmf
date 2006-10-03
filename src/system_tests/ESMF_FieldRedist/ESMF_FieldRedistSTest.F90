@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.33 2006/03/28 21:52:35 theurich Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.34 2006/10/03 18:03:58 theurich Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -81,10 +81,10 @@
 
     miscount = 0
 
-    if (npets .eq. 1) then
-       print *, "This test must run with > 1 processor"
+     if (2*(npets/2) .ne. npets) then
+       print *, "This test must run on an even number of processes"
        goto 20
-    endif
+     endif
 
     print *, "Create section finished"
 
