@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.235 2006/08/10 19:16:47 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.236 2006/10/03 19:03:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.235 2006/08/10 19:16:47 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.236 2006/10/03 19:03:28 theurich Exp $'
 
 !==============================================================================
 !
@@ -227,7 +227,8 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_GridGetCoord
-        module procedure ESMF_GridGetCoordByDim
+        module procedure ESMF_GridGetCoordByDim1D
+        module procedure ESMF_GridGetCoordByDim2D
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that retrieve
@@ -3072,12 +3073,182 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridGetCoordByDim"
+#define ESMF_METHOD "ESMF_GridGetCoordByDim1D"
 !BOP
-! !IROUTINE: ESMF_GridGetCoordByDim - Get the horizontal and/or vertical coordinates of a Grid
+! !IROUTINE: ESMF_GridGetCoordByDim1D - Get the horizontal and/or vertical coordinates of a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetCoordByDim(grid, dim, horzrelloc, vertrelloc, &
+      subroutine ESMF_GridGetCoordByDim1D(grid, dim, horzrelloc, vertrelloc, &
+        centerCoord, cornerCoord, faceCoord, reorder, total, localCounts, &
+        docopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in) :: dim
+      type(ESMF_RelLoc), intent(in), optional :: horzrelloc
+      type(ESMF_RelLoc), intent(in), optional :: vertrelloc
+      real(ESMF_KIND_R8), pointer, dimension(:) :: centerCoord
+      real(ESMF_KIND_R8), pointer, dimension(:), optional :: cornerCoord
+      real(ESMF_KIND_R8), pointer, dimension(:), optional :: faceCoord
+      logical, intent(in), optional :: reorder
+      logical, intent(in), optional :: total
+      integer, intent(out), optional :: localCounts(1)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Returns coordinate information for the {\tt grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          {\tt ESMF\_Grid} to be queried.
+!     \item[dim]
+!          dimension to be queried.
+!     \item[{[horzrelloc]}]
+!          Horizontal relative location of the subGrid to be queried.
+!     \item[[{vertrelloc]}]
+!          Vertical relative location of the subGrid to be queried.
+!     \item[{[centerCoord]}]
+!          Coordinates of each cell center.  The dimension index should
+!          be defined first (e.g. x = coord(1,i,j), y=coord(2,i,j)).
+!     \item[{[cornerCoord]}]
+!          Coordinates of corners of each cell.  The dimension index should
+!          be defined first, followed by the corner index.  Corners can
+!          be numbered in either clockwise or counter-clockwise direction,
+!          but must be numbered consistently throughout the Grid.
+!     \item[{[faceCoord]}]
+!          Coordinates of face centers of each cell.  The dimension index should
+!          be defined first, followed by the face index.  Faces should
+!          be numbered consistently with corners.  For example, face 1 should
+!          correspond to the face between corners 1,2.
+!     \item[{[reorder]}]
+!          If TRUE, reorder any results using a previously set CoordOrder 
+!          before returning.  If FALSE, do not reorder.  The default
+!          value is TRUE and users should not need to reset this for most
+!          applications.  This optional argument is available mostly for
+!          internal use.
+!     \item[{[total]}]
+!          If TRUE, return the total coordinates including internally
+!          generated boundary cells. If FALSE, return the computational
+!          cells (which is what the user will be expecting).  The default
+!          value is FALSE.
+!     \item[{[localCounts]}]
+!          Counts per dimension of the local piece of decomposition.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      type(ESMF_InternArray), dimension(:), pointer :: localCenterCoord
+      type(ESMF_InternArray), dimension(:), pointer :: localCornerCoord
+      type(ESMF_InternArray), dimension(:), pointer :: localFaceCoord
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
+      ! Call GridGetCoord routines based on GridStructure
+
+      select case(grid%ptr%gridStructure%gridStructure)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
+      case(0)
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT
+      case(1)
+        allocate(localCenterCoord(2))
+        allocate(localCornerCoord(2))
+        allocate(localFaceCoord(2))
+        call ESMF_LRGridGetCoord(grid, horzrelloc, vertrelloc, &
+          localCenterCoord, localCornerCoord, localFaceCoord, &
+          reorder, total, localrc)
+        if (present(localCounts)) then
+          call ESMF_InternArrayGet(localCenterCoord(1), counts=localCounts, rc=rc)
+        endif
+!        if (present(centerCoord)) then
+          call ESMF_InternArrayGetData(localCenterCoord(dim), centerCoord, &
+            docopy, rc=rc)
+!        endif
+        if (present(cornerCoord)) then
+          call ESMF_InternArrayGetData(localCornerCoord(dim), cornerCoord, &
+            docopy, rc=rc)
+        endif
+        if (present(faceCoord)) then
+          call ESMF_InternArrayGetData(localFaceCoord(dim), faceCoord,&
+            docopy, rc=rc)
+        endif
+        deallocate(localCenterCoord)
+        deallocate(localCornerCoord)
+        deallocate(localFaceCoord)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
+      case(2)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
+      case(3)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_USER
+      case(4)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      case default
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
+      end select
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetCoordByDim1D
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetCoordByDim2D"
+!BOP
+! !IROUTINE: ESMF_GridGetCoordByDim2D - Get the horizontal and/or vertical coordinates of a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridGetCoordByDim2D(grid, dim, horzrelloc, vertrelloc, &
         centerCoord, cornerCoord, faceCoord, reorder, total, localCounts, &
         docopy, rc)
 !
@@ -3238,7 +3409,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridGetCoordByDim
+      end subroutine ESMF_GridGetCoordByDim2D
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
