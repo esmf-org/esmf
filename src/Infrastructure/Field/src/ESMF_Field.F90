@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.217 2006/08/07 23:47:16 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.218 2006/10/04 05:12:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -107,10 +107,10 @@
 
       type ESMF_LocalField
         sequence
-        type(ESMF_InternArray) :: localdata           ! local data for this DE
-        type(ESMF_LocalArray) :: localarray      !cheung
-        type (ESMF_Mask) :: mask                 ! may belong in Grid
-        type (ESMF_ArraySpec) :: arrayspec       ! so field can allocate
+        type(ESMF_InternArray) :: localdata   ! local data for this DE
+        type(ESMF_LocalArray)  :: localarray  ! alternat. storage of local data
+        type(ESMF_Mask)        :: mask        ! may belong in Grid
+        type(ESMF_ArraySpec)   :: arrayspec   ! so field can allocate
 
         integer :: rwaccess                      ! reserved for future use
         integer :: accesscount                   ! reserved for future use
@@ -147,7 +147,7 @@
         type (ESMF_IOSpec) :: iospec         ! iospec values
         type (ESMF_Status) :: iostatus       ! if unset, inherit from gcomp
 
-        integer :: haloinfo                  ! haloWidth
+        integer :: haloWidth  ! used to aid InternArray -> LocalArray migration
       end type
 
 !------------------------------------------------------------------------------
@@ -186,13 +186,13 @@
    public ESMF_FieldGetLocalGridInfo   ! Return local Grid info
 
    public ESMF_FieldGetInternArray     ! Return the data Array
-   public ESMF_FieldGetArray           ! Return the Local Array
+   public ESMF_FieldGetLocalArray      ! Return the Local Array
    public ESMF_FieldGetGlobalDataInfo  ! Return global data info
    public ESMF_FieldGetLocalDataInfo   ! Return local data info
 
    public ESMF_FieldSetGrid            ! Set a Grid (may regrid if different
                                        !   Grid is already present)
-   public ESMF_FieldSetArray           ! Set a data Array in a Field
+   public ESMF_FieldSetLocalArray      ! Set a data Array in a Field
    public ESMF_FieldSetDataValues      ! Set Field data values 
 
    public ESMF_FieldSetDataMap         ! Set a DataMap (may reorder if different
@@ -210,7 +210,7 @@
 
    public ESMF_FieldWrite              ! Write data and grid from a Field
 
-   public ESMF_FieldConstruct          ! Only public for internal use
+   public ESMF_FieldConstructLA        ! Only public for internal use
    public ESMF_FieldConstructIA        ! Only public for internal use
    public ESMF_FieldSerialize
    public ESMF_FieldDeserialize
@@ -275,7 +275,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.217 2006/08/07 23:47:16 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.218 2006/10/04 05:12:02 theurich Exp $'
 
 !==============================================================================
 !
@@ -306,6 +306,24 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
+! !IROUTINE: ESMF_FieldConstructLA - Construct the internals of a new Field
+!
+! !INTERFACE:
+      interface ESMF_FieldConstructLA
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_FieldConstructLANew
+        module procedure ESMF_FieldConstructLANewArray
+
+! !DESCRIPTION:
+!     This interface provides an entry point for methods that construct a 
+!     complete {\tt ESMF\_Field}.
+ 
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE: ESMF_FieldConstructIA - Construct the internals of a new Field
 !
 ! !INTERFACE:
@@ -319,24 +337,6 @@
 !     This interface provides an entry point for methods that construct a
 !     complete {\tt ESMF\_Field}.
 
-!EOPI
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_FieldConstruct - Construct the internals of a new Field
-!
-! !INTERFACE:
-      interface ESMF_FieldConstruct
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldConstructNew
-        module procedure ESMF_FieldConstructNewArray
-
-! !DESCRIPTION:
-!     This interface provides an entry point for methods that construct a 
-!     complete {\tt ESMF\_Field}.
- 
 !EOPI
       end interface
 !
@@ -968,13 +968,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetArray"
+#define ESMF_METHOD "ESMF_FieldGetLocalArray"
 
 !BOP
-! !IROUTINE: ESMF_FieldGetArray - Get Local Array associated with the Field
+! !IROUTINE: ESMF_FieldGetLocalArray - Get Local Array associated with the Field
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldGetArray(field, array, rc)
+      subroutine ESMF_FieldGetLocalArray(field, array, rc)
 
 !
 ! !ARGUMENTS:
@@ -984,14 +984,14 @@
 
 !
 ! !DESCRIPTION:
-!     Get data in {\tt ESMF\_Array} form.
+!     Get data in {\tt ESMF\_LocalArray} form.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [{[array]}]
-!           Field {\tt ESMF\_Array}.
+!           Field {\tt ESMF\_LocalArray}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1028,7 +1028,7 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldGetArray
+      end subroutine ESMF_FieldGetLocalArray
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1048,14 +1048,14 @@
 
 !
 ! !DESCRIPTION:
-!     Get data in {\tt ESMF\_Array} form.
+!     Get data in {\tt ESMF\_InternArray} form.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [{[array]}]
-!           Field {\tt ESMF\_Array}.
+!           Field {\tt ESMF\_InternArray}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2342,13 +2342,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldSetArray"
+#define ESMF_METHOD "ESMF_FieldSetLocalArray"
 
 !BOP
-! !IROUTINE: ESMF_FieldSetArray - Set data Array associated with the Field
+! !IROUTINE: ESMF_FieldSetLocalArray - Set data Array associated with the Field
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldSetArray(field, array, rc)
+      subroutine ESMF_FieldSetLocalArray(field, array, rc)
 
 !
 ! !ARGUMENTS:
@@ -2358,14 +2358,14 @@
 
 !
 ! !DESCRIPTION:
-!     Set data in {\tt ESMF\_Array} form.
+!     Set data in {\tt ESMF\_LocalArray} form.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [{[array]}]
-!           {\tt ESMF\_Array} containing data.
+!           {\tt ESMF\_LocalArray} containing data.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2409,7 +2409,7 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldSetArray
+      end subroutine ESMF_FieldSetLocalArray
 
 !------------------------------------------------------------------------------
 !BOP
@@ -3386,10 +3386,9 @@
       if (ftypep%arraystatus .eq. ESMF_STATUS_READY) then
 
           ! get array counts and other info
-          !cheung
           call ESMF_LocalArrayGet(ftypep%localfield%localarray, counts=arraycounts, &
                               rank=arrayrank, rc=status)
-          halo = ftypep%haloinfo
+          halo = ftypep%haloWidth
 
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
@@ -4837,13 +4836,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldConstructNew"
+#define ESMF_METHOD "ESMF_FieldConstructLANew"
 
 !BOPI
-! !IROUTINE: ESMF_FieldConstructNew - Construct the internals of a Field
+! !IROUTINE: ESMF_FieldConstructLANew - Construct the internals of a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructNew(ftype, grid, arrayspec, allocflag, &
+      subroutine ESMF_FieldConstructLANew(ftype, grid, arrayspec, allocflag, &
                                         horzRelloc, vertRelloc, haloWidth, &
                                         datamap, name, iospec, rc)
 !
@@ -4863,7 +4862,7 @@
 ! !DESCRIPTION:
 ! 
 !     Constructs all {\tt ESMF\_Field} internals, including the allocation
-!     of a data {\tt ESMF\_Array}.   TODO: this is missing a counts argument,
+!     of a data {\tt ESMF\_LocalArray}.   TODO: this is missing a counts argument,
 !     which is required if the arrayspec rank is greater than the grid rank.
 !     Either that, or we must enforce that a datamap comes in, and it
 !     contains the counts for non-grid dims.
@@ -5018,17 +5017,17 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldConstructNew
+      end subroutine ESMF_FieldConstructLANew
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldConstructNewArray"
+#define ESMF_METHOD "ESMF_FieldConstructLANewArray"
 
 !BOPI
-! !IROUTINE: ESMF_FieldConstructNewArray - Construct the internals of a Field
+! !IROUTINE: ESMF_FieldConstructLANewArray - Construct the internals of a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructNewArray(ftype, grid, array, horzRelloc, &
+      subroutine ESMF_FieldConstructLANewArray(ftype, grid, array, horzRelloc, &
                                              vertRelloc, datamap, &
                                              name, iospec, haloWidth, rc)
 !
@@ -5103,11 +5102,11 @@
       ftype%localfield%localarray = array
       ftype%arraystatus = ESMF_STATUS_READY
 
-      ! cheung
+      ! store haloWidth inside of Field object
       if(present(haloWidth)) then
-         ftype%haloinfo = haloWidth
+         ftype%haloWidth = haloWidth
       else
-         ftype%haloinfo = 0
+         ftype%haloWidth = 0
       endif
 
       ! instead of adding error checking all over the place, call the
@@ -5127,7 +5126,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldConstructNewArray
+      end subroutine ESMF_FieldConstructLANewArray
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

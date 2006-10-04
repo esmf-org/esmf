@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGlobalEx.F90,v 1.6 2006/06/27 20:58:43 samsoncheung Exp $
+! $Id: ESMF_FieldGlobalEx.F90,v 1.7 2006/10/04 05:12:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
     integer :: dataIndexList(3), lbounds(3), localCount(3), ubounds(3)
     real (ESMF_KIND_R8), dimension(:,:,:), pointer :: f90ptr1
     real (ESMF_KIND_R8), dimension(2) :: origin
-    type(ESMF_LocalArray)        :: iarray1
+    type(ESMF_LocalArray)        :: larray1
     type(ESMF_DELayout)     :: layout
     type(ESMF_Field)        :: field1
     type(ESMF_FieldDataMap) :: datamap
@@ -120,10 +120,10 @@
     f90ptr1(:,:,:) = 0.0        ! Good idea to initialize an array
 
     ! create the array from the F90 pointer and haloWidth
-    iarray1 = ESMF_LocalArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
+    larray1 = ESMF_LocalArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_LocalArrayPrint(iarray1, rc=rc)
+    call ESMF_LocalArrayPrint(larray1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
@@ -138,7 +138,7 @@
     call ESMF_FieldDataMapSetDefault(datamap, dataRank=3, &
                                      dataIndexList=dataIndexList, &
                                      counts=localCount(1:1), rc=rc)
-    field1 = ESMF_FieldCreate(grid, iarray1, horzRelloc=ESMF_CELL_CENTER, &
+    field1 = ESMF_FieldCreate(grid, larray1, horzRelloc=ESMF_CELL_CENTER, &
                     datamap=datamap, haloWidth=haloWidth, name="pressure", rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
