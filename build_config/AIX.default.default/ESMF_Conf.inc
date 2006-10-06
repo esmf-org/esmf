@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.5 2005/02/03 17:50:07 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.6 2006/10/06 18:07:20 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,15 +14,10 @@ Licensed under the GPL.
 Apparently some versions the AIX xlf 8.x compiler are unable to 
 handle initializers for derived type contents.  If this is a problem
 on your system, remove the #if 0/#endif lines and fix the #define line
-before you compile the framework.  (This will selectively disable a few
-key derived types with initializers.)   If still unsuccessful, change
-the #define to ESMF_NO_INITIALIZERS which will effectively remove all
-attempts to give derived type members initial values.  In both cases,
-the symptom something is wrong is an incomprehensible "internal compiler"
-error message during the compile of the framework.
+before you compile the framework.
 #endif
 
 #if 0
--#-define ESMF_AIX_8_INITBUG 1
+-#-define ESMF_NO_INITIALIZERS 1
 #endif
 
