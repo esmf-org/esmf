@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.73.2.2 2006/08/03 23:37:36 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.73.2.3 2006/10/06 04:04:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -126,6 +126,7 @@ module ESMF_VMMod
   public ESMF_VMAllGather
   public ESMF_VMAllGatherV
   public ESMF_VMAllReduce
+  public ESMF_VMAllToAllV
   public ESMF_VMBarrier
   public ESMF_VMBroadcast
   public ESMF_VMGather
@@ -169,7 +170,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.73.2.2 2006/08/03 23:37:36 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.73.2.3 2006/10/06 04:04:17 theurich Exp $"
 
 !==============================================================================
 
@@ -253,6 +254,25 @@ module ESMF_VMMod
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMAllReduce} functions.   
+!EOPI 
+      end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMAllToAllV -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMAllToAllV
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMAllToAllVI4
+      module procedure ESMF_VMAllToAllVR4
+      module procedure ESMF_VMAllToAllVR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMAllToAllV} functions.   
 !EOPI 
       end interface
 
@@ -444,7 +464,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Single data variable to be received. All PETs must specify a
@@ -545,7 +565,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Single data variable to be received. All PETs must specify a
@@ -646,7 +666,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Single data variable to be received. All PETs must specify a
@@ -739,7 +759,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
@@ -836,7 +856,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
@@ -933,7 +953,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
@@ -1030,7 +1050,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
@@ -1447,7 +1467,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Single data variable to be received. All PETs must specify a
@@ -1482,7 +1502,6 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    !integer :: size
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -1549,7 +1568,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
@@ -1584,7 +1603,6 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    !integer :: size
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -1651,7 +1669,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
@@ -1686,7 +1704,6 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    !integer :: size
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -1711,6 +1728,333 @@ module ESMF_VMMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMAllReduceR8
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllToAllVI4()"
+!BOP
+! !IROUTINE: ESMF_VMAllToAllV - AllToAllV 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllToAllV()
+  subroutine ESMF_VMAllToAllVI4(vm, sendData, sendCounts, sendOffsets, &
+    recvData, recvCounts, recvOffsets, blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer,                  intent(in)              :: sendCounts(:)
+    integer,                  intent(in)              :: sendOffsets(:)
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
+    integer,                  intent(in)              :: recvCounts(:)
+    integer,                  intent(in)              :: recvOffsets(:)
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that performs a total exchange
+!   operation, sending pieces of the contiguous data buffer {\tt semdData} to
+!   all other PETs while receiving data into the contiguous data buffer
+!   {\tt recvData} from all other PETs.\newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contiguous data array holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[sendCounts] 
+!        Number of {\tt sendData} elements to send from local PET to
+!        destination PET.
+!   \item[sendOffsets] 
+!        Offsets in units of elements in {\tt sendData} marking to start of
+!        element sequence to be send from local PET to destination PET.
+!   \item[recvData] 
+!        Single data variable to be received. All PETs must specify a
+!        valid result variable.
+!   \item[recvCounts] 
+!        Number of {\tt recvData} elements to be received by local PET from
+!        source PET.
+!   \item[recvOffsets] 
+!        Offsets in units of elements in {\tt recvData} marking to start of
+!        element sequence to be received by local PET from source PET.
+!   \item[{[blockingflag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             (default) Block until local operation has completed.
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commhandle]}]
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        communication calls of the VM context.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
+          ESMF_LOG_ERROR, &
+          ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMAllToAllV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
+      recvData(1), recvCounts(1), recvOffsets(1), ESMF_I4, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMAllToAllVI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllToAllVR4()"
+!BOP
+! !IROUTINE: ESMF_VMAllToAllV - AllToAllV 4-byte reals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllToAllV()
+  subroutine ESMF_VMAllToAllVR4(vm, sendData, sendCounts, sendOffsets, &
+    recvData, recvCounts, recvOffsets, blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    real(ESMF_KIND_R4), target,   intent(in)          :: sendData(:)
+    integer,                  intent(in)              :: sendCounts(:)
+    integer,                  intent(in)              :: sendOffsets(:)
+    real(ESMF_KIND_R4), target,   intent(out)         :: recvData(:)
+    integer,                  intent(in)              :: recvCounts(:)
+    integer,                  intent(in)              :: recvOffsets(:)
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that performs a total exchange
+!   operation, sending pieces of the contiguous data buffer {\tt semdData} to
+!   all other PETs while receiving data into the contiguous data buffer
+!   {\tt recvData} from all other PETs.\newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contiguous data array holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[sendCounts] 
+!        Number of {\tt sendData} elements to send from local PET to
+!        destination PET.
+!   \item[sendOffsets] 
+!        Offsets in units of elements in {\tt sendData} marking to start of
+!        element sequence to be send from local PET to destination PET.
+!   \item[recvData] 
+!        Single data variable to be received. All PETs must specify a
+!        valid result variable.
+!   \item[recvCounts] 
+!        Number of {\tt recvData} elements to be received by local PET from
+!        source PET.
+!   \item[recvOffsets] 
+!        Offsets in units of elements in {\tt recvData} marking to start of
+!        element sequence to be received by local PET from source PET.
+!   \item[{[blockingflag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             (default) Block until local operation has completed.
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commhandle]}]
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        communication calls of the VM context.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
+          ESMF_LOG_ERROR, &
+          ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMAllToAllV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
+      recvData(1), recvCounts(1), recvOffsets(1), ESMF_R4, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMAllToAllVR4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllToAllVR8()"
+!BOP
+! !IROUTINE: ESMF_VMAllToAllV - AllToAllV 4-byte reals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllToAllV()
+  subroutine ESMF_VMAllToAllVR8(vm, sendData, sendCounts, sendOffsets, &
+    recvData, recvCounts, recvOffsets, blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    real(ESMF_KIND_R8), target,   intent(in)          :: sendData(:)
+    integer,                  intent(in)              :: sendCounts(:)
+    integer,                  intent(in)              :: sendOffsets(:)
+    real(ESMF_KIND_R8), target,   intent(out)         :: recvData(:)
+    integer,                  intent(in)              :: recvCounts(:)
+    integer,                  intent(in)              :: recvOffsets(:)
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that performs a total exchange
+!   operation, sending pieces of the contiguous data buffer {\tt semdData} to
+!   all other PETs while receiving data into the contiguous data buffer
+!   {\tt recvData} from all other PETs.\newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contiguous data array holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[sendCounts] 
+!        Number of {\tt sendData} elements to send from local PET to
+!        destination PET.
+!   \item[sendOffsets] 
+!        Offsets in units of elements in {\tt sendData} marking to start of
+!        element sequence to be send from local PET to destination PET.
+!   \item[recvData] 
+!        Single data variable to be received. All PETs must specify a
+!        valid result variable.
+!   \item[recvCounts] 
+!        Number of {\tt recvData} elements to be received by local PET from
+!        source PET.
+!   \item[recvOffsets] 
+!        Offsets in units of elements in {\tt recvData} marking to start of
+!        element sequence to be received by local PET from source PET.
+!   \item[{[blockingflag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             (default) Block until local operation has completed.
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commhandle]}]
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        communication calls of the VM context.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
+          ESMF_LOG_ERROR, &
+          ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMAllToAllV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
+      recvData(1), recvCounts(1), recvOffsets(1), ESMF_R8, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMAllToAllVR8
 !------------------------------------------------------------------------------
 
 
@@ -1789,7 +2133,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[bcstData]
-!        Contiguous data arry. On {\tt root} PET {\tt bcstData} holds data that
+!        Contiguous data array. On {\tt root} PET {\tt bcstData} holds data that
 !        is to be broadcasted to all other PETs. On all other PETs 
 !        {\tt bcstData} is used to receive the broadcasted data.
 !   \item[count] 
@@ -1886,7 +2230,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[bcstData]
-!        Contiguous data arry. On {\tt root} PET {\tt bcstData} holds data that
+!        Contiguous data array. On {\tt root} PET {\tt bcstData} holds data that
 !        is to be broadcasted to all other PETs. On all other PETs 
 !        {\tt bcstData} is used to receive the broadcasted data.
 !   \item[count] 
@@ -1984,7 +2328,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[bcstData]
-!        Contiguous data arry. On {\tt root} PET {\tt bcstData} holds data that
+!        Contiguous data array. On {\tt root} PET {\tt bcstData} holds data that
 !        is to be broadcasted to all other PETs. On all other PETs 
 !        {\tt bcstData} is used to receive the broadcasted data.
 !   \item[count] 
@@ -2081,7 +2425,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[bcstData]
-!        Contiguous data arry. On {\tt root} PET {\tt bcstData} holds data that
+!        Contiguous data array. On {\tt root} PET {\tt bcstData} holds data that
 !        is to be broadcasted to all other PETs. On all other PETs 
 !        {\tt bcstData} is used to receive the broadcasted data.
 !   \item[count] 
@@ -2179,7 +2523,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. Only the {\tt recvData}
@@ -2279,7 +2623,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. Only the {\tt recvData}
@@ -2379,7 +2723,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. Only the {\tt recvData}
@@ -2479,7 +2823,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. Only the {\tt recvData}
@@ -3393,7 +3737,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Single data variable to be received. All PETs must specify a
@@ -3498,7 +3842,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
@@ -3603,7 +3947,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
@@ -3700,7 +4044,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. Only the {\tt sendData}
+!        Contiguous data array holding data to be send. Only the {\tt sendData}
 !        array specified by the {\tt root} PET will be used by this method.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
@@ -3800,7 +4144,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. Only the {\tt sendData}
+!        Contiguous data array holding data to be send. Only the {\tt sendData}
 !        array specified by the {\tt root} PET will be used by this method.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
@@ -3900,7 +4244,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. Only the {\tt sendData}
+!        Contiguous data array holding data to be send. Only the {\tt sendData}
 !        array specified by the {\tt root} PET will be used by this method.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
@@ -4000,7 +4344,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data arry holding data to be send. Only the {\tt sendData}
+!        Contiguous data array holding data to be send. Only the {\tt sendData}
 !        array specified by the {\tt root} PET will be used by this method.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
@@ -5400,7 +5744,7 @@ module ESMF_VMMod
   subroutine ESMF_VMAbort(rc)
 !
 ! !ARGUMENTS:
-    integer, intent(out), optional :: rc           
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Abort Global VM.\newline
