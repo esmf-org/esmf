@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllToAllVUTest.F90,v 1.1 2006/06/09 15:51:05 theurich Exp $
+! $Id: ESMF_VMAllToAllVUTest.F90,v 1.2 2006/10/10 18:04:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_VMAllToAllUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMAllToAllVUTest.F90,v 1.1 2006/06/09 15:51:05 theurich Exp $'
+    '$Id: ESMF_VMAllToAllVUTest.F90,v 1.2 2006/10/10 18:04:43 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -103,7 +103,7 @@ program ESMF_VMAllToAllUTest
   ! prepare data array1
   k=1
   do i=1, petCount
-    do j=1, i
+    do j=1, nsize
       iarray1(k) = i
       f4array1(k) = real(i)
       f8array1(k) = real(i)
