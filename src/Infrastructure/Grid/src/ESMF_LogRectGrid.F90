@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.154 2006/03/28 21:52:26 theurich Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.155 2006/10/12 17:56:13 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.154 2006/03/28 21:52:26 theurich Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.155 2006/10/12 17:56:13 peggyli Exp $'
 
 !==============================================================================
 !
@@ -4183,6 +4183,15 @@
 
       ! initialize some values
       gridBoundWidth = 1   ! TODO: move into structure, make input?
+
+      ! gridBoundWidth is not fully implemented for arbitrary grid.  It
+      ! is not used to set up a totalArray for the physGrid as did in
+      ! ESMF_LRGridAddPhysGridBlock.  Moreover, being set to 1 results in
+      ! shifting the grid coordinates by 1 to the right, thus causing 
+      ! ESMF_GridGetCoord() returning wrong values.
+      !  **PLi (10/11/2006)**
+      gridBoundWidth = 0
+
       localMin =  99999999.
       localMax = -99999999.
 
