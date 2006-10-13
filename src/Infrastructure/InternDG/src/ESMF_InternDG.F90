@@ -1,4 +1,4 @@
-! $Id: ESMF_InternDG.F90,v 1.3 2006/10/02 20:36:30 theurich Exp $
+! $Id: ESMF_InternDG.F90,v 1.4 2006/10/13 04:07:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -220,7 +220,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_InternDG.F90,v 1.3 2006/10/02 20:36:30 theurich Exp $'
+      '$Id: ESMF_InternDG.F90,v 1.4 2006/10/13 04:07:31 theurich Exp $'
 
 !==============================================================================
 !
@@ -457,7 +457,10 @@
                                   counts, countsPerDEDim1, countsPerDEDim2, &
                                   periodic=periodic, &
                                   coversDomain=coversDomain, &
-                                  name=name, rc=rc)
+                                  name=name, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
 !     Set return values.
       ESMF_InternDGCreateBlock%ptr => dgtype
@@ -536,7 +539,10 @@
 
 !     Call construction method to allocate and initialize grid internals.
       call ESMF_InternDGConstructArb(dgtype, dimCount, delayout, decompIDs, &
-                                      myCount, myIndices, counts, name, rc)
+                                  myCount, myIndices, counts, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
 !     Set return values.
       ESMF_InternDGCreateArb%ptr => dgtype
