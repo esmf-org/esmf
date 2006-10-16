@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.34 2006/10/04 05:12:02 theurich Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.35 2006/10/16 18:56:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
     integer :: gridCount(2)
     type(ESMF_Grid) :: grid
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_LocalArray) :: larray1, larray2
+    type(ESMF_InternArray) :: iarray1, iarray2
     type(ESMF_DELayout) :: layout
     type(ESMF_VM) :: vm
     !type(ESMF_RelLoc) :: relativelocation
@@ -70,10 +70,10 @@
 
     allocate(f90ptr1(gridCount(1),gridCount(2)))
 
-    larray1 = ESMF_LocalArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
+    iarray1 = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_LocalArrayPrint(larray1, rc=rc)
+    call ESMF_InternArrayPrint(iarray1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
@@ -85,7 +85,7 @@
 !EOE
       
 !BOC
-    field1 = ESMF_FieldCreate(grid, larray1, &
+    field1 = ESMF_FieldCreate(grid, iarray1, &
                          horzRelloc=ESMF_CELL_CENTER, name="pressure", rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -131,18 +131,18 @@
 !   !  pointer to the old data array; the set call passes in the 
 !   !  pointer to the new array.
 
-    call ESMF_FieldGetLocalArray(field1, array=larray1, rc=rc)
+    call ESMF_FieldGetInternArray(field1, array=iarray1, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! the size of the data in the array still has to line up with the Grid
     ! and its decomposition
     allocate(f90ptr2(gridCount(1),gridCount(2)))
-    larray2 = ESMF_LocalArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)
+    iarray2 = ESMF_InternArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)  
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldSetLocalArray(field1, array=larray2, rc=rc)
+    call ESMF_FieldSetInternArray(field1, array=iarray2, rc=rc)
     print *, "Field example 3 returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
