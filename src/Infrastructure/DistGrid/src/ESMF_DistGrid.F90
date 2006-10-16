@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.144.2.5 2006/08/04 03:34:59 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.144.2.6 2006/10/16 21:39:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -220,7 +220,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.144.2.5 2006/08/04 03:34:59 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.144.2.6 2006/10/16 21:39:20 theurich Exp $'
 
 !==============================================================================
 !
@@ -457,7 +457,10 @@
                                   counts, countsPerDEDim1, countsPerDEDim2, &
                                   periodic=periodic, &
                                   coversDomain=coversDomain, &
-                                  name=name, rc=rc)
+                                  name=name, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
 !     Set return values.
       ESMF_DistGridCreateBlock%ptr => dgtype
@@ -536,7 +539,10 @@
 
 !     Call construction method to allocate and initialize grid internals.
       call ESMF_DistGridConstructArb(dgtype, dimCount, delayout, decompIDs, &
-                                      myCount, myIndices, counts, name, rc)
+                                      myCount, myIndices, counts, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
 !     Set return values.
       ESMF_DistGridCreateArb%ptr => dgtype
