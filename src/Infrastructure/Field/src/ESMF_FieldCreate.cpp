@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.14 2006/10/04 05:12:02 theurich Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.15 2006/10/16 18:59:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.14 2006/10/04 05:12:02 theurich Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.15 2006/10/16 18:59:15 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -194,7 +194,7 @@ InterfaceMacro(FieldCreateEPtr)
                                   ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize field internals.
-      call ESMF_FieldConstructLA(ftype, grid, arrayspec, allocflag, &
+      call ESMF_FieldConstructIA(ftype, grid, arrayspec, allocflag, &
                                   horzRelloc, vertRelloc, haloWidth, &
                                   datamap, name, iospec, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -224,7 +224,7 @@ InterfaceMacro(FieldCreateEPtr)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid                
-      type(ESMF_LocalArray), intent(in) :: array              
+      type(ESMF_InternArray), intent(in) :: array              
       type(ESMF_CopyFlag), intent(in), optional :: copyflag       
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
@@ -295,9 +295,9 @@ InterfaceMacro(FieldCreateEPtr)
                                        ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize field internals.
-      call ESMF_FieldConstructLA(ftype, grid, array, horzRelloc, &
+      call ESMF_FieldConstructIA(ftype, grid, array, horzRelloc, &
                                        vertRelloc, datamap, name, &
-                                       iospec, haloWidth, status)
+                                       iospec, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
