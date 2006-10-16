@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.161 2006/09/22 23:55:37 theurich Exp $
+#  $Id: common.mk,v 1.162 2006/10/16 19:12:07 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -346,7 +346,7 @@ ESMF_RANLIBDEFAULT          = ranlib
 ESMF_SEDDEFAULT             = sed
 ESMF_CPPDEFAULT             = gcc
 
-ESMF_RM                     = rm -f
+ESMF_RM                     = rm -rf
 ESMF_MV                     = mv -f
 ESMF_WC                     = wc 
 ESMF_GREPV                  = grep -v
