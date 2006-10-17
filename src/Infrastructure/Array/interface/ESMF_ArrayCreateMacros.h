@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayCreateMacros.h,v 1.1 2004/03/16 18:02:19 nscollins Exp $
+! $Id: ESMF_ArrayCreateMacros.h,v 1.9.4.1 2006/10/17 21:59:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 
 
 #define ArrayLocalVarMacro(mname, mtypekind, mrank, mdim) \
-        type(ESMF_ArrWrap##mrank##D##mtypekind) :: local##mrank##D##mtypekind
+        type(ESMF_ArrWrap##mrank##D##mtypekind) :: l##mrank##D##mtypekind
 
 
 #if 0
@@ -43,7 +43,7 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayCreate - make an ESMF array from an unallocated Fortran array pointer @\
+! !IROUTINE: ESMF_ArrayCreate - Make an ESMF array from an unallocated Fortran array pointer @\
 ! @\
 ! !INTERFACE: @\
 !      ! Private name; call using ESMF_ArrayCreate() @\
@@ -61,9 +61,12 @@
 !      integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
-! Creates an {\tt Array} based on an unallocated (but allocatable) Fortran @\
-!   array pointer.  This routine allocates memory to the array and fills in @\
-!   the array object with all necessary information. @\
+! Creates an {\tt ESMF\_Array} based on an unallocated (but allocatable) @\
+! Fortran array pointer.  This routine allocates memory to the array and @\
+! saves all necessary information about bounds, data type, kind, etc. @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 ! The function return is an {\tt ESMF\_Array} type with space @\
 ! allocated for data. @\
@@ -93,8 +96,11 @@
 #define ArrayCreateByMTPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-      function ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind(fptr, counts, haloWidth, & @\
-                                                     lbounds, ubounds, rc) @\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD "ESMF_ArrayCreateByMTPtr##rank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_ArrayCreateByMTPtr" @\
+      function ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind(fptr, counts, & @\
+                                           haloWidth, lbounds, ubounds, rc) @\
  @\
       type(ESMF_Array) :: ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind @\
  @\
@@ -109,22 +115,18 @@
         type (ESMF_Array) :: array          ! new array object @\
         integer :: status                   ! local error status @\
         integer :: hwidth                   ! local copy of halo width @\
-        logical :: rcpresent                ! did user specify rc? @\
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
-        rcpresent = .FALSE. @\
+        if (present(rc)) rc = ESMF_FAILURE @\
         array%this = ESMF_NULL_POINTER @\
- @\
-        if (present(rc)) then @\
-          rcpresent = .TRUE. @\
-          rc = ESMF_FAILURE @\
-        endif @\
  @\
         ! Test to see if array already allocated, and fail if so. @\
         if (associated(fptr)) then @\
-          print *, "Pointer cannot already be allocated" @\
-          return @\
+           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                                "Pointer cannot already be allocated", & @\
+                                 ESMF_CONTEXT, rc) @\
+           return @\
         endif @\
  @\
         ! Always supply a halo value, setting it to 0 if not specified. @\
@@ -137,17 +139,19 @@
         ! Call create routine @\
         call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                           ESMF_FROM_FORTRAN, status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array initial construction error" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         call ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind(array, counts, hwidth,& @\
                                  fptr, ESMF_DATA_SPACE, lbounds, ubounds, status) @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         ! return value set by c_ESMC func above @\
         ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind = array @\
-        if (rcpresent) rc = status @\
+        if (present(rc)) rc = status @\
  @\
         end function ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind   @\
  @\
@@ -166,7 +170,7 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayCreate - make an ESMF array from an allocated Fortran array @\
+! !IROUTINE: ESMF_ArrayCreate - Make an ESMF array from an allocated Fortran array @\
 ! @\
 ! !INTERFACE: @\
 !     ! Private name; call using ESMF_ArrayCreate() @\
@@ -182,9 +186,12 @@
 !      integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
-! Creates an {\tt ESMF\_Array} based on an already allocated Fortran array @\
-!   pointer.  This routine can make a copy or reference the existing data @\
-!   and fills in the array object with all necessary information. @\
+! Create an {\tt ESMF\_Array} based on an already allocated Fortran array @\
+! pointer.  This routine can make a copy or reference the existing data @\
+! and saves all necessary information about bounds, data type, kind, etc. @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 ! The function return is an {\tt ESMF\_Array} type. @\
 ! @\
@@ -210,8 +217,12 @@
 #define ArrayCreateByFullPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD "ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_ArrayCreateByFullPtr" @\
  @\
-      function ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind(fptr, docopy, haloWidth, rc) @\
+      function ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind(fptr, docopy, & @\
+                                                haloWidth, rc) @\
  @\
       type(ESMF_Array) :: ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind @\
  @\
@@ -224,7 +235,6 @@
         type (ESMF_Array) :: array          ! new array object @\
         integer :: status                   ! local error status @\
         integer :: hwidth                   ! local copy of halo width @\
-        logical :: rcpresent                ! did user specify rc? @\
         type (ESMF_CopyFlag) :: copy        ! do we copy or ref? @\
         integer, dimension(mrank) :: counts ! per dim @\
         integer, dimension(mrank) :: lbounds ! per dim @\
@@ -232,13 +242,8 @@
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
-        rcpresent = .FALSE. @\
+        if (present(rc)) rc = ESMF_FAILURE @\
         array%this = ESMF_NULL_POINTER @\
- @\
-        if (present(rc)) then @\
-          rcpresent = .TRUE. @\
-          rc = ESMF_FAILURE @\
-        endif @\
  @\
         ! Set default for copyflag @\
         if (present(docopy)) then @\
@@ -249,7 +254,9 @@
  @\
         ! Test to see if array is not already allocated, and fail if so. @\
         if (.not.associated(fptr)) then @\
-          print *, "Pointer must already be associated" @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                                "Pointer must already be allocated", & @\
+                                 ESMF_CONTEXT, rc) @\
           return @\
         endif @\
  @\
@@ -269,17 +276,19 @@
         ! Call create routine @\
         call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                       ESMF_FROM_FORTRAN, status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array initial construction error" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         call ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind(array, counts, hwidth,& @\
                                   fptr, copy, lbounds, ubounds, status) @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         ! return value set by c_ESMC func above @\
         ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind = array @\
-        if (rcpresent) rc = status @\
+        if (present(rc)) rc = status @\
  @\
         end function ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind   @\
  @\
@@ -314,20 +323,25 @@
 !      integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
-!  Creates a Fortran pointer of the requested T/K/R.  After creating the @\
-!  pointer and doing the allocation based on counts, also goes ahead and @\
+!  Create a Fortran pointer of the requested type/kind/rank. @\
+!  After creating the pointer and doing the allocation @\
+!  based on counts, also goes ahead and @\
 !  calls into the C++ interfaces to set values on the {\tt ESMF\_Array} @\
 !  object. (This is to save on the total number of nested crossings of the @\
 !  Fortran/C++ boundary.) @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 !  Optional args are an existing Fortran pointer which if given is used @\
 !  instead of a new one, and a docopy flag which if set to copy will @\
 !  do a contents copy or reference. @\
+! @\
 ! The arguments are: @\
 !  \begin{description} @\
 !  \item[array]  The {\tt ESMF\_Array} to set the values into. @\
 !  \item[counts]  An integer array of counts.  Must be the same length as the rank. @\
-!  \item[hwidth]  An integer halo width. Width on each edge. @\
+!  \item[hwidth]  An integer halo width. Currently same width on each edge. @\
 !  \item[{[fptr]}] An optional existing Fortran pointer.  Will be used instead of an @\
 !   internally generated Fortran pointer if given.  Must be given if the {\tt docopy} is specified. @\
 !  \item[{[docopy]}]  An optional copy flag which can be specified if an Fortran pointer is also @\
@@ -343,6 +357,9 @@
 #define ArrayConstructF90PtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD "ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_ArrayConstructF90Ptr" @\
       subroutine ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind(array, counts, hwidth, fptr, & @\
                                                    docopy, lbounds, ubounds, rc) @\
  @\
@@ -356,11 +373,11 @@
       integer, intent(out), optional :: rc   @\
  @\
         ! Local variables @\
-        integer :: i                        ! temp var @\
         integer :: status                   ! local error status @\
-        logical :: rcpresent                ! did user specify rc? @\
+        integer :: i                        ! loop counter @\
         logical :: willalloc                ! do we need to alloc/dealloc? @\
         logical :: willcopy                 ! do we need to copy data? @\
+        logical :: zerosize                 ! one or more counts = 0 @\
         type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call @\
  @\
         type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap ! to pass f90 ptr to C++ @\
@@ -370,15 +387,13 @@
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
-        rcpresent = .FALSE. @\
-        if (present(rc)) then @\
-          rcpresent = .TRUE. @\
-          rc = ESMF_FAILURE @\
-        endif @\
+        if (present(rc)) rc = ESMF_FAILURE @\
+        zerosize = .FALSE. @\
  @\
         ! Assume defaults first, then alter if lb or ub specified, @\
         ! or if an existing pointer is given and can be queried. @\
         lb(:) = 1 @\
+        ub(:) = 1 @\
         ub(1:size(counts)) = counts @\
  @\
         ! Decide if we need to do: make a new allocation, copy existing data @\
@@ -388,7 +403,12 @@
            willcopy = .false. @\
            do_dealloc = ESMF_TRUE @\
         else @\
-           if (docopy .eq. ESMF_DATA_SPACE) then @\
+           if (.not. associated(fptr)) then @\
+               nullify(newp) @\
+               willalloc = .true. @\
+               willcopy = .false. @\
+               do_dealloc = ESMF_TRUE @\
+           else if (docopy .eq. ESMF_DATA_SPACE) then @\
                newp => fptr    ! ptr alias, important this be =>  @\
                lb(1:size(counts)) = lbound(fptr) @\
                ub(1:size(counts)) = ubound(fptr) @\
@@ -420,11 +440,29 @@
             if (present(ubounds)) then @\
                 ub(1:size(ubounds)) = ubounds @\
             endif @\
-            allocate(newp ( mrng ), stat=status) @\
-            if (status .ne. 0) then     ! f90 status, not ESMF @\
-              print *, "Array space allocate error" @\
-              return @\
+            ! more error checking; for allocation lb must be @\
+            ! less than or equal ub.  if any count is 0, all counts @\
+            ! will be 0 for now. @\
+            zerosize = .FALSE. @\
+            do i=1, mrank @\
+                if (counts(i) .le. 0) then @\
+                    zerosize = .TRUE. @\
+                    lb(i) = 0 @\
+                    ub(i) = 0 @\
+                else if (lb(i) .gt. ub(i)) then @\
+                    call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
+                                 "Lower bounds must be .le. upper bounds", & @\
+                                 ESMF_CONTEXT, rc) @\
+                    return @\
+                endif @\
+            enddo @\
+            if (zerosize) then @\
+                allocate(newp ( mlen ), stat=status) @\
+            else @\
+                allocate(newp ( mrng ), stat=status) @\
             endif @\
+            if (ESMF_LogMsgFoundAllocError(status, "Array data space", & @\
+                                       ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
         if (willcopy) then @\
@@ -438,17 +476,23 @@
         offsets = 0 @\
  @\
         wrap % ptr##mrank##D##mtypekind => newp @\
-        call c_ESMC_ArraySetInfo(array, wrap, & @\
-                                 ESMF_DATA_ADDRESS(newp(mloc)), counts, & @\
-                                 lb, ub, offsets, & @\
-                                 ESMF_TRUE, do_dealloc, hwidth, status) @\
- @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array internal set info error" @\
-          return @\
+        if (zerosize) then @\
+            call c_ESMC_ArraySetInfo(array, wrap, & @\
+                                     ESMF_NULL_POINTER, counts, & @\
+                                     lb, ub, offsets, & @\
+                                     ESMF_TRUE, do_dealloc, hwidth, status) @\
+        else @\
+            call c_ESMC_ArraySetInfo(array, wrap, & @\
+                                     ESMF_DATA_ADDRESS(newp(mloc)), counts, & @\
+                                     lb, ub, offsets, & @\
+                                     ESMF_TRUE, do_dealloc, hwidth, status) @\
         endif @\
  @\
-        if (rcpresent) rc = status @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
+ @\
+        if (present(rc)) rc = status @\
  @\
         end subroutine ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind  @\
  @\
@@ -474,7 +518,18 @@
 !      integer, intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
-!      Deallocate data contents if Array object is responsible for cleaning up. @\
+!   Deallocate data contents if {\tt ESMF\_Array} is responsible @\
+!   for deleting data space.  This routine is for internal use only. @\
+! @\
+!  \begin{description} @\
+!  \item[array] @\
+!    An {\tt ESMF\_Array} object. @\
+!  \item[wrap] @\
+!    A Fortran pointer of the proper type/kind/rank, wrapped in a @\
+!    derived type to allow the pointer itself to be passed by reference. @\
+!  \item[{[rc]}] @\
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!  \end{description} @\
 ! @\
 !EOPI @\
  @\
@@ -482,6 +537,9 @@
 #define ArrayDeallocateMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD "ESMF_ArrayDeallocate##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_ArrayDeallocate" @\
       subroutine ESMF_ArrayDeallocate##mrank##D##mtypekind(array, wrap, rc) @\
  @\
       type(ESMF_Array) :: array @\
