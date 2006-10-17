@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.151.2.1 2006/10/11 23:14:32 peggyli Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.151.2.2 2006/10/17 16:39:45 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.151.2.1 2006/10/11 23:14:32 peggyli Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.151.2.2 2006/10/17 16:39:45 oehmke Exp $'
 
 !==============================================================================
 !
@@ -4190,7 +4190,15 @@
       ! shifting the grid coordinates by 1 to the right, thus causing 
       ! ESMF_GridGetCoord() returning wrong values.
       !  **PLi (10/11/2006)**
-      gridBoundWidth = 0
+      ! gridBoundWidth = 0
+      !
+      ! The extra coordinate boundary layer obtained by setting
+      ! gridBoundWidth=1 is used in ESMF_LRGridSetCoord to set some 
+      ! of the corner locations, so leave gridBoundWidth=1, and
+      ! instead offset the myIndices values. - Bob Oehmke 10/13/2006 
+      gridBoundWidth = 1
+
+
       localMin =  99999999.
       localMax = -99999999.
 
@@ -4341,13 +4349,15 @@
 
       ! set coordinates
       call ESMF_LRGridSetCoord(grid, physGridId, dimCount, myCount, &
-                               myIndices, relloc, coordUse1, coordUse2, &
+                               myIndices,gridBoundWidth, relloc,    &
+                               coordUse1, coordUse2, &
                                total=.true., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       call ESMF_LRGridSetCoord(grid, physGridId, dimCount, myCount, &
-                               myIndices, relloc, coordUse1, coordUse2, &
+                               myIndices, gridBoundWidth, relloc,   &
+                               coordUse1, coordUse2, &
                                total=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -6913,7 +6923,8 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_LRGridSetCoord()
       subroutine ESMF_LRGridSetCoordComputeArb(grid, physGridId, dimCount, &
-                                               myCount, myIndices, relloc, &
+                                               myCount, myIndices,         &
+                                               gridBoundWidth, relloc,     &
                                                coord1, coord2, total, rc)
 !
 ! !ARGUMENTS:
@@ -6922,6 +6933,7 @@
       integer, intent(in) :: dimCount
       integer, intent(in) :: myCount
       integer, dimension(:,:), intent(in) :: myIndices
+      integer, intent(in) :: gridBoundWidth
       type(ESMF_RelLoc), intent(in) :: relloc
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
@@ -6946,6 +6958,8 @@
 !          Array of grid indices to be distributed to this DE.  The size of this
 !          array must be at least [myCount] in the first dimension and 2 in the
 !          second.
+!     \item[gridBoundWidth]
+!          Width of extra boundary layer
 !     \item[relloc]
 !          Relative location in grid cell for which this PhysGrid.
 !     \item[coord1]
@@ -6999,6 +7013,11 @@
                                           haloWidth=0, rc=localrc)
       enddo
 
+
+      ! NOTE: the +gridBoundaryWidth is to offset the indices to
+      !       account for the boundary layer, if the total=.true.
+      !       ever becomes meaningful this will have to be
+      !       adjusted to account for that - Bob Oehmke (10/13/2006)
       select case (dimCount)
       case(1)   ! 1D coordinates, assumed mostly for vertical grids
 
@@ -7012,14 +7031,14 @@
 
         elseif (relloc.eq.ESMF_CELL_CENTER .or. relloc.eq.ESMF_CELL_CELL) then  ! TODO:?
           do i = 1,myCount
-            i1 = myIndices(i,1)
+            i1 = myIndices(i,1)+gridBoundWidth
             center(  i) = 0.5d0*(coord1(i1)+coord1(i1+1))
             corner(1,i) = coord1(i1  )
             corner(2,i) = coord1(i1+1)
           enddo
         elseif (relloc .eq. ESMF_CELL_TOPFACE) then   ! TODO: check bottom or top
           do i = 1,myCount
-            i1 = myIndices(i,1)
+            i1 = myIndices(i,1)+gridBoundWidth
             center(  i) = coord1(i1+1)
             corner(1,i) = 0.5d0*(coord1(i1  )+coord1(i1+1))
             corner(2,i) = 0.5d0*(coord1(i1+1)+coord1(i1+2))
@@ -7044,11 +7063,11 @@
         ! TODO: also set faces
         if (relloc .eq. ESMF_CELL_UNDEFINED) then
           localrc = ESMF_FAILURE
-
+      
         elseif (relloc .eq. ESMF_CELL_CENTER) then
           do i = 1,myCount
-            i1 = myIndices(i,1)
-            j1 = myIndices(i,2)
+            i1 = myIndices(i,1)+gridBoundWidth
+            j1 = myIndices(i,2)+gridBoundWidth
             center1(i)   = 0.5d0*(coord1(i1)+coord1(i1+1))
             center2(i)   = 0.5d0*(coord2(j1)+coord2(j1+1))
             cornerUse11  =        coord1(i1  )
@@ -7067,8 +7086,8 @@
 
         elseif (relloc .eq. ESMF_CELL_NFACE) then
           do i = 1,myCount
-            i1 = myIndices(i,1)
-            j1 = myIndices(i,2)
+            i1 = myIndices(i,1)+gridBoundWidth
+            j1 = myIndices(i,2)+gridBoundWidth
             center1(i)   = 0.5d0*(coord1(i1  )+coord1(i1+1))
             center2(i)   =        coord2(j1+1)
             cornerUse11  =        coord1(i1  )
@@ -7087,8 +7106,8 @@
 
         elseif (relloc .eq. ESMF_CELL_SFACE) then
           do i = 1,myCount
-            i1 = myIndices(i,1)
-            j1 = myIndices(i,2)
+            i1 = myIndices(i,1)+gridBoundWidth
+            j1 = myIndices(i,2)+gridBoundWidth
             center1(i)   = 0.5d0*(coord1(i1  )+coord1(i1+1))
             center2(i)   =        coord2(j1  )
             cornerUse11  =        coord1(i1  )
@@ -7107,8 +7126,8 @@
 
         elseif (relloc .eq. ESMF_CELL_EFACE) then
           do i = 1,myCount
-            i1 = myIndices(i,1)
-            j1 = myIndices(i,2)
+            i1 = myIndices(i,1)+gridBoundWidth
+            j1 = myIndices(i,2)+gridBoundWidth
             center1(i)   =        coord1(i1+1)
             center2(i)   = 0.5d0*(coord2(j1  )+coord2(j1+1))
             cornerUse11  = 0.5d0*(coord1(i1  )+coord1(i1+1))
@@ -7127,8 +7146,8 @@
 
         elseif (relloc .eq. ESMF_CELL_WFACE) then
           do i = 1,myCount
-            i1 = myIndices(i,1)
-            j1 = myIndices(i,2)
+            i1 = myIndices(i,1)+gridBoundWidth
+            j1 = myIndices(i,2)+gridBoundWidth
             center1(i)   =        coord1(i1  )
             center2(i)   = 0.5d0*(coord2(j1  )+coord2(j1+1))
             cornerUse11  = 0.5d0*(coord1(i1-1)+coord1(i1  ))
@@ -7147,8 +7166,8 @@
 
         elseif (relloc .eq. ESMF_CELL_NECORNER) then
           do i = 1,myCount
-            i1 = myIndices(i,1)
-            j1 = myIndices(i,2)
+            i1 = myIndices(i,1)+gridBoundWidth
+            j1 = myIndices(i,2)+gridBoundWidth
             center1(i)   =        coord1(i1+1)
             center2(i)   =        coord2(j1+1)
             cornerUse11  = 0.5d0*(coord1(i1  )+coord1(i1+1))
@@ -7167,8 +7186,8 @@
 
         elseif (relloc .eq. ESMF_CELL_SWCORNER) then
           do i = 1,myCount
-            i1 = myIndices(i,1)
-            j1 = myIndices(i,2)
+            i1 = myIndices(i,1)+gridBoundWidth
+            j1 = myIndices(i,2)+gridBoundWidth
             center1(i)   =        coord1(i1  )
             center2(i)   =        coord2(j1  )
             cornerUse11  = 0.5d0*(coord1(i1-1)+coord1(i1  ))
@@ -7187,8 +7206,8 @@
 
         elseif (relloc .eq. ESMF_CELL_SECORNER) then
           do i = 1,myCount
-            i1 = myIndices(i,1)
-            j1 = myIndices(i,2)
+            i1 = myIndices(i,1)+gridBoundWidth
+            j1 = myIndices(i,2)+gridBoundWidth
             center1(i)   =        coord1(i1+1)
             center2(i)   =        coord2(j1  )
             cornerUse11  = 0.5d0*(coord1(i1  )+coord1(i1+1))
@@ -7207,8 +7226,8 @@
 
        elseif (relloc .eq. ESMF_CELL_NWCORNER) then
           do i = 1,myCount
-            i1 = myIndices(i,1)
-            j1 = myIndices(i,2)
+            i1 = myIndices(i,1)+gridBoundWidth
+            j1 = myIndices(i,2)+gridBoundWidth
             center1(i)   =        coord1(i1  )
             center2(i)   =        coord2(j1+1)
             cornerUse11  = 0.5d0*(coord1(i1-1)+coord1(i1  ))
