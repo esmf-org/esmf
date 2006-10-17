@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.56 2006/10/16 19:01:43 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.57 2006/10/17 17:20:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.56 2006/10/16 19:01:43 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.57 2006/10/17 17:20:21 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -620,7 +620,7 @@ end function
     type(ESMF_DELayout):: delayout  ! opaque pointer to new C++ DELayout
     integer :: len_deCountList, len_petList
     integer, pointer :: opt_deCountList(:), opt_petList(:)
-    integer, target :: dummy(0)     ! used to satisfy the C interface...
+    integer, target :: dummy(1)     ! used to satisfy the C interface...
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -790,7 +790,7 @@ end function
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                 :: status       ! local error status
-    integer, target         :: dummy(0)     ! used to satisfy the C interface...
+    integer, target         :: dummy(1)     ! used to satisfy the C interface...
     integer, pointer        :: opt_petMap(:)  ! optional argument
     integer                 :: len_petMap   ! number of elements in optional arg
     integer, pointer        :: opt_vasMap(:)  ! optional argument
@@ -931,7 +931,7 @@ end function
 
     integer :: len_localDeList, len_deCountPerDim
     integer, pointer :: opt_localDeList(:), opt_deCountPerDim(:)
-    integer, target :: dummy(0)     ! used to satisfy the C interface...
+    integer, target :: dummy(1)     ! used to satisfy the C interface...
     
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -1019,7 +1019,7 @@ end function
     integer :: localrc                        ! local return code
 
     integer :: i, len_coord, len_cde, len_cw
-    integer, target :: dummy(0)     ! used to satisfy the C interface...
+    integer, target :: dummy(1)     ! used to satisfy the C interface...
     integer, pointer:: opt_DEcoord(:), opt_DEcde(:), opt_DEcw(:)
 
     ! Assume failure until success
@@ -1117,7 +1117,7 @@ end function
     integer :: localrc                        ! local return code
 
     integer :: len_deMatchList
-    integer, target :: dummy(0)     ! used to satisfy the C interface...
+    integer, target :: dummy(1)     ! used to satisfy the C interface...
     integer, pointer:: opt_deMatchList(:)
 
     ! Assume failure until success
@@ -1195,7 +1195,7 @@ end function
     integer :: localrc                        ! local return code
 
     integer :: len_petMatchList
-    integer, target :: dummy(0)     ! used to satisfy the C interface...
+    integer, target :: dummy(1)     ! used to satisfy the C interface...
     integer, pointer:: opt_petMatchList(:)
 
     ! Assume failure until success
@@ -1536,7 +1536,7 @@ end function
     integer :: localrc                        ! local return code
 
     integer :: len_petMatchList
-    integer, target :: dummy(0)     ! used to satisfy the C interface...
+    integer, target :: dummy(1)     ! used to satisfy the C interface...
     integer, pointer:: opt_petMatchList(:)
 
     ! Assume failure until success
