@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_InternArrayCreateMacros.h,v 1.2 2006/03/28 21:52:26 theurich Exp $
+! $Id: ESMF_InternArrayCreateMacros.h,v 1.3 2006/10/18 17:49:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -403,7 +403,12 @@
            willcopy = .false. @\
            do_dealloc = ESMF_TRUE @\
         else @\
-           if (docopy .eq. ESMF_DATA_SPACE) then @\
+           if (.not. associated(fptr)) then @\
+               nullify(newp) @\
+               willalloc = .true. @\
+               willcopy = .false. @\
+               do_dealloc = ESMF_TRUE @\
+           else if (docopy .eq. ESMF_DATA_SPACE) then @\
                newp => fptr    ! ptr alias, important this be =>  @\
                lb(1:size(counts)) = lbound(fptr) @\
                ub(1:size(counts)) = ubound(fptr) @\
