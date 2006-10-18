@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: roles.tex,v 1.3 2006/08/07 18:49:28 cdeluca Exp $
+% CVS $Id: roles.tex,v 1.4 2006/10/18 22:56:53 murphysj Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/roles.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -12,42 +12,58 @@ This document is available via the {\bf Management} link on
 the ESMF website navigation bar.
 
 \subsection{Core Team}
-ESMF software implementation is led by a {\bf Core Team} based in the 
-Scientific Computing Division (SCD) of the National Center for
+ESMF software implementation is led by a distributed {\bf Core Team} which is based in the 
+Technology Development Division (TDD) of the National Center for
 Atmospheric Research (NCAR).  The Core Team relies on close interaction
 with customers, and the work of many contributors.  Core Team
 activities are open to all active ESMF developers.
 
-\subsubsection{Core Team Roles}
 All Core Team members are responsible for helping to 
 develop effective project processes and for following
 processes that are in place.
 
-Most of the staff on the Core Team are developers.  Developers
-interact with customers throughout the whole development 
-life cycle: to understand customer requirements and preferences,
-and to design, implement, document, and test ESMF software.
-Developers in ESMF are to large
-extent self-managed, and are responsible for setting
-technical strategies that align with project objectives
-and customer desires.
 
-The Core Team has one or more testers.  The lead tester, called
-the {\bf Integrator}, is responsible for running regression
+\subsubsection{Core Team Roles}
+
+{\bf Developers} are the Core Team members that design, implement, document, and test
+ESMF software.  They are expected to interact with customers throughout the entire
+development process in order to understand customer requirements.  Developer priorities are set by the Change Review Board (CRB) but developers are expected to understand customer requirements and
+needs and to manage their own time.
+
+The {\bf Integrator}, is the lead tester. He or she is responsible for running regression
 tests, managing project computing accounts, preparing for releases,
 generating project metrics, and overseeing request and bug tracking.
 
-The {\bf Core Team Manager} is responsible for overseeing development
-overall, and coordinating activities of multiple developers
+The {\bf Core Team Manager} is responsible for overseeing the overall development, and 
+for coordinating the activities of multiple developers
 so that project schedules and priorities are achieved.
-Responsibilities include assigning tasks, deciding on
-short-term priorities based on longer-term objectives, 
-and monitoring conformance to processes and conventions.
-The Core Team Manager also has responsibilities not directly
-related to development, such as project administration,
-hiring, the acquistion of funding, and the representation of 
-the Core Team to Executive Management, the Change Review 
+Responsibilities include:
+
+\begin{itemize}
+\item Project administration and the assignment of  tasks
+\item Acquisition of funding
+\item Deciding on short-term priorities based on longer-term objectives
+\item Monitoring conformance to processes and conventions
+\item Representation of the Core Team to NCAR executive management, the Change Review 
 Board, and sponsors.
+\end{itemize}
+
+Code {\bf Advocates} are Core Team members who have been assigned to interface with owners of
+a particular code e.g. CCSM, GEOS-5. Advocates are expected to:
+\begin{enumerate}
+\item Contact the code owners and keep track of what and how they are doing. They should know
+the following things about their assigned code:
+
+\begin{itemize}
+\item contact info
+\item models or components being ESMF-ized
+\item what the customer is trying to do
+\item what platforms they are working on
+\item what pieces of ESMF they are using
+\item Coordinate all support requests for that code
+\end{itemize}
+
+\end{enumerate}
 
 \subsection{Joint Specification Team (JST)}
 The Core Team, along with contributors, customers, technical
