@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.54.2.2 2006/08/04 17:24:17 theurich Exp $
+! $Id: ESMF_BundleComm.F90,v 1.54.2.3 2006/10/18 23:47:01 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.54.2.2 2006/08/04 17:24:17 theurich Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.54.2.3 2006/10/18 23:47:01 peggyli Exp $'
 
 !==============================================================================
 !
@@ -1936,6 +1936,7 @@
       integer :: status                           ! Error status
       integer :: i
       type(ESMF_BundleType), pointer :: stypep, dtypep
+      type(ESMF_GridStorage) :: sgridStorage, dgridStorage
       integer :: srank, drank
       type(ESMF_DataType) :: stype, dtype
       type(ESMF_DataKind) :: skind, dkind
@@ -1993,14 +1994,26 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-        ! skip the following check in order to allow arbitrary-to-arbitrary
-        ! TODO: only skip the following error checking for arb-to-arb case
-        !  if (srank .ne. drank) then
-        !      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-        !          "Corresponding Fields in Bundles must have same data rank", &
-        !                               ESMF_CONTEXT, rc)
-        !      return
-        !  endif
+        ! check if the rank of the source array and the destination array are 
+        ! the same if the grid distribution are both arbitrary or both block.
+        ! Skip the checking if one is arbitrary and the other is block
+	! ** P Li ** 10/17/2006
+          call ESMF_GridGet(stypep%grid, gridStorage=sgridStorage, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          call ESMF_GridGet(dtypep%grid, gridStorage=dgridStorage, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          if (sgridStorage.eq.dgridStorage) then				    
+            if (srank .ne. drank) then
+              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                  "Corresponding Fields in Bundles must have same data rank", &
+                                       ESMF_CONTEXT, rc)
+              return
+            endif
+	  endif
 
           if (stype .ne. dtype) then
               call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
