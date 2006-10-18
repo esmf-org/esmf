@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.9 2006/09/26 23:07:15 theurich Exp $
+# $Id: build_rules.mk,v 1.10 2006/10/18 21:52:51 theurich Exp $
 #
 # Linux.xlf.default
 #
@@ -47,6 +47,11 @@ endif
 #
 ESMF_F90COMPILER_VERSION = ${ESMF_F90COMPILER} -qversion
 ESMF_CXXCOMPILER_VERSION = ${ESMF_CXXCOMPILER} -qversion
+
+############################################################
+# BlueGene needs to link with F90 front end
+#
+ESMF_CXXLINKERDEFAULT = $(ESMF_F90LINKERDEFAULT)
 
 ############################################################
 # BlueGene does not have support for POSIX IPC (memory mapped files)
