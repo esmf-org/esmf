@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.62.2.3 2006/10/06 04:04:17 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.62.2.4 2006/10/19 21:36:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1774,7 +1774,6 @@ ESMC_VMKPlan::~ESMC_VMKPlan(void){
 void ESMC_VMKPlan::vmkplan_garbage(void){
   // perform garbage collection within a ESMC_VMKPlan object
   if (spawnflag != NULL){
-    delete [] petlist;
     delete [] spawnflag;
     delete [] contribute;
     delete [] cspawnid;
@@ -1782,6 +1781,8 @@ void ESMC_VMKPlan::vmkplan_garbage(void){
     contribute = NULL;
     cspawnid = NULL;
     myvms = NULL;     // this does NOT deallocate VM objects!
+    if (!parentVMflag)
+      delete [] petlist;
   }
 }
 
@@ -1848,7 +1849,7 @@ void ESMC_VMKPlan::vmkplan_mpi_c_part(ESMC_VMK &vm){
 
 
 void ESMC_VMKPlan::vmkplan_useparentvm(ESMC_VMK &vm){
-  // set up a ESMC_VMKPlan that will maximize the number of thread-pets
+  // set up a ESMC_VMKPlan that will run inside of parent VM
   parentVMflag = 1;
   npets = vm.npets;
   spawnflag = new int[npets];
@@ -1859,6 +1860,8 @@ void ESMC_VMKPlan::vmkplan_useparentvm(ESMC_VMK &vm){
     contribute[i]=0;
     cspawnid[i]=0;
   }
+  // now deal with mypet specific members
+  nspawn = spawnflag[vm.mypet];
 }
 
 
