@@ -1,0 +1,31 @@
+#!/bin/ksh
+# $Id: mpirun.xlf.bgl,v 1.1 2006/10/19 21:27:04 svasquez Exp $
+# This script provides an interface such that the simple command
+# mpirun -np #
+# runs # copies of the program in parallel.
+
+if [ "$1" != "-np" ]
+then
+        echo "Usage: mpirun -np #"
+        exit 1
+fi
+
+num_procs=$2
+shift 2
+prog=$*
+working_dir=`pwd`
+
+echo "exec cqsub -qdebug -C $working_dir  -t30 -n2 -c$num_procs -O $prog $prog"
+
+proc_id=`cqsub -qdebug -C $working_dir -t30 -n2 -c$num_procs -O $prog $prog`
+
+# Since this is not an interactive schell, we must grep for the proc_id until 
+# it is gone, indicating the job is done or the walltime has expired.
+
+while cqstat | grep $proc_id
+do
+        sleep 30
+done
+
+mv $prog.output $prog.stdout
+
