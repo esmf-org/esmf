@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.85 2006/05/02 18:25:52 samsoncheung Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.86 2006/10/19 04:22:10 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.85 2006/05/02 18:25:52 samsoncheung Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.86 2006/10/19 04:22:10 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -320,6 +320,14 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
+      ! Verifing that a Field with a Grid and Array can be destroyed
+      call ESMF_FieldDestroy(f4, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Destroying a Field with a Grid and Array Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
       ! Test requirement FLD1.1.1
       ! Fields may be created by specifying attributes, a grid, data array 
       ! dimensions and descriptors, optional masks (e.g. for active cells), 
@@ -436,14 +444,6 @@
      !!write(failMsg, *) ""
      !!write(name, *) "Destroying a Grid in a Field Test"
      !!call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Verifing that a Field with a Grid and Array can be destroyed
-      call ESMF_FieldDestroy(f3, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Destroying a Field with a Grid and Array Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
