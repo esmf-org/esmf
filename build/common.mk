@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.162 2006/10/16 19:12:07 theurich Exp $
+#  $Id: common.mk,v 1.163 2006/10/19 21:28:14 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1669,7 +1669,10 @@ check_unit_tests:
 ftest:
 	-@cd $(ESMF_TESTDIR) ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
-	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
+	if [ $(ESMF_BATCHSUBMIT) = "true" ] ; then \
+	  echo $(ESMF_MPIRUN) -np $(NP) ESMF_$(TNAME)UTest ; \
+	  $(ESMF_MPIRUN) -np $(NP) ESMF_$(TNAME)UTest ; \
+	elif [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest ; \
 	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest ; \
 	else \
