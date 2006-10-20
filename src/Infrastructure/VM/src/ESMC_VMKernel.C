@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.62.2.4 2006/10/19 21:36:34 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.62.2.5 2006/10/20 16:46:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@
 #include <math.h>
 
 // Memory mapped files may not be available on all systems
-#ifdef ESMF_NOPOSIXIPC
+#ifdef ESMF_NO_POSIXIPC
 #else
 #include <sys/mman.h>
 #endif
@@ -329,7 +329,7 @@ void ESMC_VMK::vmk_init(void){
 #endif      
     }
   }
-    // setup the IntraProcessSharedMemoryAllocation Table
+  // setup the IntraProcessSharedMemoryAllocation Table
   ipshmTable = new void*[IPSHM_TABLE_SIZE];
   ipshmDeallocTable = new int[IPSHM_TABLE_SIZE];
   ipshmCount = new int;
@@ -344,18 +344,22 @@ void ESMC_VMK::vmk_init(void){
   firsthandle=NULL;
   // set up physical machine info
   ncores=size;          // user is required to start with #processes=#cores!!!!
+  // determine CPU ids
   cpuid = new int[ncores];
-  ssiid = new int[ncores];
-  long int *temp_ssiid = new long int[ncores];
   for (int i=0; i<ncores; i++){
     cpuid[i]=i;                 // hardcoded assumption of single-core CPUs
-    if (i==rank){
-#ifdef _SX
-      temp_ssiid[i]=i;
+  }
+  // determine SSI ids
+  ssiid = new int[ncores];
+#ifdef ESMF_NO_GETHOSTID
+  for (int i=0; i<ncores; i++){
+    ssiid[i]=i;                 // hardcoded assumption of single-CPU SSIs
+  }
 #else
+  long int *temp_ssiid = new long int[ncores];
+  for (int i=0; i<ncores; i++){
+    if (i==rank)
       temp_ssiid[i]=gethostid();
-#endif
-    }
     MPI_Bcast(&temp_ssiid[i], sizeof(long int), MPI_BYTE, i, mpi_c);
   }
   // now re-number the ssiid[] to go like 0, 1, 2, ...
@@ -374,6 +378,7 @@ void ESMC_VMK::vmk_init(void){
     }
   }
   delete [] temp_ssiid;
+#endif
   // ESMC_VMK pet -> core mapping
   lpid = new int[npets];
   pid = new int[npets];
@@ -516,7 +521,7 @@ void ESMC_VMK::vmk_construct(void *ssarg){
   this->firsthandle=NULL;
   // preference dependent settings
   if (pref_intra_ssi == PREF_INTRA_SSI_POSIXIPC){
-#ifdef ESMF_NOPOSIXIPC
+#ifdef ESMF_NO_POSIXIPC
     fprintf(stderr, "PREF_INTRA_SSI_POSIXIPC not supported on this platform!\n"
       "-> default into PREF_INTRA_SSI_MPI1.\n");
     sarg->pref_intra_ssi = PREF_INTRA_SSI_MPI1;
@@ -659,7 +664,7 @@ void ESMC_VMK::vmk_destruct(void){
 #endif          
           delete shmp;
         }else if (commarray[pet1][pet2].comm_type==VM_COMM_TYPE_POSIXIPC){
-#ifdef ESMF_NOPOSIXIPC
+#ifdef ESMF_NO_POSIXIPC
 #else
           // this means that mypet is either pet1 or pet2
           pipc_mp *pipcmp=commarray[pet1][pet2].pipcmp;
@@ -3990,7 +3995,7 @@ void ESMC_VMK::vmk_wait(vmk_commhandle **commhandle, int nanopause){
             if (mpi_mutex_flag)
               pthread_mutex_unlock(pth_mutex);
             if (completeFlag) break;
-#ifdef _SX
+#ifdef ESMF_NO_NANOSLEEP
 #else
             nanosleep(&dt, NULL);
 #endif
