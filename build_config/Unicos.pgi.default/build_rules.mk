@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1.2.3 2006/10/20 16:47:01 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.4 2006/10/20 16:48:37 theurich Exp $
 #
 # Unicos.pgi.default
 #
@@ -51,6 +51,11 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v -c
 # XT3 compute nodes do not have support for POSIX IPC (memory mapped files)
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
+
+############################################################
+# XT3 compute nodes do not have support for "gethostid()"
+#
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
 
 ############################################################
 # XT3 compute nodes do not have support for Pthreads
