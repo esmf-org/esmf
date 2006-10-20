@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.11 2006/10/19 21:25:16 svasquez Exp $
+# $Id: build_rules.mk,v 1.12 2006/10/20 18:56:58 theurich Exp $
 #
 # Linux.xlf.default
 #
@@ -60,7 +60,7 @@ ESMF_CXXLINKERDEFAULT = $(ESMF_F90LINKERDEFAULT)
 ############################################################
 # BlueGene does not have support for POSIX IPC (memory mapped files)
 #
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NOPOSIXIPC
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 
 ############################################################
 # BlueGene does not have support for Pthreads
