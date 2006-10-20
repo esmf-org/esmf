@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.62.2.6 2006/10/20 17:13:06 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.62.2.7 2006/10/20 18:25:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -166,6 +166,7 @@ int vmkt_join(vmkt_t *vmkt){
 
 void ESMC_VMK::vmk_obtain_args(void){
   // obtain command line args for this process
+#ifndef ESMF_NO_SYSTEMCALL
   int mypid = getpid();
   char command[160], fname[80], uname[80], args[8000];
   sprintf(command, "uname > .uname.%d", mypid);
@@ -244,6 +245,7 @@ void ESMC_VMK::vmk_obtain_args(void){
   //printf("argc=%d\n", argc);
   //for (i=0; i<argc; i++)
   //  printf("%s\n", argv[i]);
+#endif
 }
 
 
@@ -841,7 +843,15 @@ static void *vmk_sigcatcher(void *arg){
   fprintf(stderr,"I am a sigcatcher for pid %d and am going to sleep...\n",
     getpid());
 #endif
+
+#ifdef ESMF_NO_SIGNALS
+#ifndef ESMF_NO_PTHREADS
+#error Need signals for Pthreads in VMKernel
+#endif
+#else
   sigwait(&sigs_to_catch, &caught);
+#endif
+  
 #if (VERBOSITY > 5)
   fprintf(stderr, "I am a sigcatcher for pid %d and signal: %d woke me up...\n",
     getpid(), caught);
