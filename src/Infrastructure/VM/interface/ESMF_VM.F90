@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.73.2.3 2006/10/06 04:04:17 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.73.2.4 2006/10/20 22:46:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -148,6 +148,7 @@ module ESMF_VMMod
   public ESMF_VMWait
   public ESMF_VMWaitQueue
   public ESMF_VMWtime
+  public ESMF_VMWtimeDelay
   public ESMF_VMWtimePrec
 ! - ESMF-private methods:
   public ESMF_VMInitialize
@@ -170,7 +171,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.73.2.3 2006/10/06 04:04:17 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.73.2.4 2006/10/20 22:46:24 theurich Exp $"
 
 !==============================================================================
 
@@ -5579,6 +5580,50 @@ module ESMF_VMMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMWtime
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMWtimeDelay()"
+!BOP
+! !IROUTINE: ESMF_VMWtimeDelay - Delay execution
+
+! !INTERFACE:
+  subroutine ESMF_VMWtimeDelay(delay, rc)
+!
+! !ARGUMENTS:
+    real(ESMF_KIND_R8),     intent(in)              :: delay
+    integer,                intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Delay execution for amount of seconds.\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[delay] 
+!        Delay time in seconds.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface
+    call c_ESMC_VMWtimeDelay(delay, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMWtimeDelay
 !------------------------------------------------------------------------------
 
 

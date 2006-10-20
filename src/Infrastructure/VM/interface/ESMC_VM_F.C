@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.52.2.4 2006/10/19 21:36:34 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.52.2.5 2006/10/20 22:46:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -387,6 +387,13 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmwtime()"
     vmk_wtime(time);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+  }
+
+  void FTN(c_esmc_vmwtimedelay)(double *delay, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmwtime()"
+    vmk_wtimedelay(*delay);
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
