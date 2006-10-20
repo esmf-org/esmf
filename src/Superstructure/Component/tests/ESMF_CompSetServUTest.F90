@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.1 2005/07/20 19:06:21 nscollins Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.2 2006/10/20 03:49:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -160,6 +160,54 @@
     write(name, *) "Verify Internal State Test"
     call ESMF_Test((data2%testnumber.eq.4567), name, failMsg, result, ESMF_SRCLINE)
     print *, "data2%testnumber = ", data2%testnumber
+
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Destroying a component
+
+    call ESMF_GridCompDestroy(comp1, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Create a Component
+    cname = "Atmosphere - child in parent VM context"
+    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
+      configFile="grid.rc", contextflag=ESMF_CHILD_IN_PARENT_VM, rc=rc)  
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Set Services
+
+    call ESMF_GridCompSetServices(comp1, SetServ1, rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Setting Component Services"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Call init
+
+    call ESMF_GridCompInitialize(comp1, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling Component Init"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
 #endif

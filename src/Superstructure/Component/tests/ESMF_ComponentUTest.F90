@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.2 2005/08/25 21:59:58 theurich Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.3 2006/10/20 03:49:26 theurich Exp $
 !
 ! Test code which creates a new Component.
 
@@ -44,9 +44,9 @@
     !------------------------------------------------------------------------
     !NEX_UTest
     ! Verifing that a Gridded Component can be created
-    cname = "Atmosphere"
+    cname = "Atmosphere - default context"
     comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
-                                             configFile="grid.rc", rc=rc)  
+      configFile="grid.rc", rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -69,7 +69,57 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
-    ! add more tests here
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verifing that a Gridded Component can be created in parent VM context
+    cname = "Atmosphere - child in parent VM context"
+    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
+      configFile="grid.rc", contextflag=ESMF_CHILD_IN_PARENT_VM, rc=rc)  
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Gridded Component"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verifing that a Gridded Component can be printed
+    call ESMF_GridCompPrint(comp1, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Printing a Gridded Component"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verifing that a Gridded Component can be destroyed
+    call ESMF_GridCompDestroy(comp1, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Gridded Component"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verifing that a Gridded Component can be created in new VM context
+    cname = "Atmosphere - child in new VM context"
+    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
+      configFile="grid.rc", contextflag=ESMF_CHILD_IN_NEW_VM, rc=rc)  
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Gridded Component"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verifing that a Gridded Component can be printed
+    call ESMF_GridCompPrint(comp1, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Printing a Gridded Component"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verifing that a Gridded Component can be destroyed
+    call ESMF_GridCompDestroy(comp1, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Gridded Component"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 
