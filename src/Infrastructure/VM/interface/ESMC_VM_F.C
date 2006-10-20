@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.55 2006/09/26 18:37:13 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.56 2006/10/20 03:55:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -459,11 +459,13 @@ extern "C" {
     (*ptr) = new ESMC_VMPlan;
     if (*contextflag==ESMF_CHILD_IN_PARENT_VM)
       (*ptr)->vmkplan_useparentvm(**ptr_vm);
-    else if (*npetlist > 0)
+    else if (*npetlist > 0){
       (*ptr)->vmkplan_minthreads(**ptr_vm, 1, (int*)petlist, *npetlist);
-    else
+      (*ptr)->vmkplan_mpi_c_part(**ptr_vm);
+    }else{
       (*ptr)->vmkplan_minthreads(**ptr_vm, 1);
-    (*ptr)->vmkplan_mpi_c_part(**ptr_vm);
+      (*ptr)->vmkplan_mpi_c_part(**ptr_vm);
+    }
     // set the nothreadflag because this is the default for new VMs
     (*ptr)->nothreadflag = 1;
     //debug: (*ptr)->vmkplan_print();

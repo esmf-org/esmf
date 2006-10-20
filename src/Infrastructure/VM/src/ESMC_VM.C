@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.41 2006/06/19 21:53:41 theurich Exp $
+// $Id: ESMC_VM.C,v 1.42 2006/10/20 03:55:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.41 2006/06/19 21:53:41 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.42 2006/10/20 03:55:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -337,34 +337,36 @@ void *ESMC_VM::ESMC_VMStartup(
   }else
     *rc=ESMF_SUCCESS;
 
-  // now take care of VMId book keeping for ESMF...
-  int i, pid, m, n;
-  int localrc;
-  int matchArray_count_old = matchArray_count;
-  // enter information for all threads of this new VM into the matchArray
-  // TODO: make this thread-safe for when we allow ESMF-threading!
-  for (int j=0; j<vmp->nspawn; j++){
-    matchArray_tid[matchArray_count]  = vmp->myvms[j]->vmk_mypthid(); // pthid
-    matchArray_vm[matchArray_count]   = vmp->myvms[j];
+  if (!(vmp->parentVMflag)){
+    // for new VM context take care of VMId book keeping for ESMF...
+    int i, pid, m, n;
+    int localrc;
+    int matchArray_count_old = matchArray_count;
+    // enter information for all threads of this new VM into the matchArray
+    // TODO: make this thread-safe for when we allow ESMF-threading!
+    for (int j=0; j<vmp->nspawn; j++){
+      matchArray_tid[matchArray_count]  = vmp->myvms[j]->vmk_mypthid(); // pthid
+      matchArray_vm[matchArray_count]   = vmp->myvms[j];
 
-    matchArray_vmID[matchArray_count] = ESMC_VMIdCreate(&localrc);  // new VMId
-    for (i=0; i<vmp->myvms[j]->vmk_npets(); i++){
-      // loop through all the pets in the VM
-      pid = vmp->myvms[j]->vmk_pid(i);
-      m = pid / 8;
-      n = pid % 8;
-      matchArray_vmID[matchArray_count].vmKey[m] |= 0x80>>n;  // set the bits
-    }
-    matchArray_vmID[matchArray_count].localID = 0;  // assume this is first
-    for (i=matchArray_count_old-1; i>=0; i--){
-      if (ESMC_VMKeyCompare(matchArray_vmID[i].vmKey,
-        matchArray_vmID[matchArray_count].vmKey) == ESMF_TRUE){
-        matchArray_vmID[matchArray_count].localID = 
-          matchArray_vmID[i].localID + 1; // overwrite the previous default
-        break;
+      matchArray_vmID[matchArray_count] = ESMC_VMIdCreate(&localrc);// new VMId
+      for (i=0; i<vmp->myvms[j]->vmk_npets(); i++){
+        // loop through all the pets in the VM
+        pid = vmp->myvms[j]->vmk_pid(i);
+        m = pid / 8;
+        n = pid % 8;
+        matchArray_vmID[matchArray_count].vmKey[m] |= 0x80>>n;  // set the bits
       }
+      matchArray_vmID[matchArray_count].localID = 0;  // assume this is first
+      for (i=matchArray_count_old-1; i>=0; i--){
+        if (ESMC_VMKeyCompare(matchArray_vmID[i].vmKey,
+          matchArray_vmID[matchArray_count].vmKey) == ESMF_TRUE){
+          matchArray_vmID[matchArray_count].localID = 
+            matchArray_vmID[i].localID + 1; // overwrite the previous default
+          break;
+        }
+      }
+      ++matchArray_count;         // done
     }
-    ++matchArray_count;         // done
   }
   
   // return pointer to info structure
