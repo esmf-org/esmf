@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1.2.2 2006/10/05 22:15:04 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.3 2006/10/20 16:47:01 theurich Exp $
 #
 # Unicos.pgi.default
 #
@@ -50,7 +50,7 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v -c
 ############################################################
 # XT3 compute nodes do not have support for POSIX IPC (memory mapped files)
 #
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NOPOSIXIPC
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 
 ############################################################
 # XT3 compute nodes do not have support for Pthreads
