@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.62.2.5 2006/10/20 16:46:30 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.62.2.6 2006/10/20 17:13:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -357,11 +357,9 @@ void ESMC_VMK::vmk_init(void){
   }
 #else
   long int *temp_ssiid = new long int[ncores];
-  for (int i=0; i<ncores; i++){
-    if (i==rank)
-      temp_ssiid[i]=gethostid();
-    MPI_Bcast(&temp_ssiid[i], sizeof(long int), MPI_BYTE, i, mpi_c);
-  }
+  int hostid = gethostid();
+  MPI_Allgather(&hostid, sizeof(long int), MPI_BYTE, temp_ssiid, 
+    sizeof(long int), MPI_BYTE, mpi_c);
   // now re-number the ssiid[] to go like 0, 1, 2, ...
   int ssi_counter=0;
   for (int i=0; i<ncores; i++){
