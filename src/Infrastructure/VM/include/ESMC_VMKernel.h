@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.36 2006/09/26 18:37:13 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.37 2006/10/23 22:06:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -288,6 +288,7 @@ class ESMC_VMK{
 
 void vmk_wtime(double *time);
 void vmk_wtimeprec(double *prec);
+void vmk_wtimedelay(double delay);
 
 class ESMC_VMKPlan{
   public:

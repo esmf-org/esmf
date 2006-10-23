@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.75 2006/10/20 18:47:08 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.76 2006/10/23 22:06:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -4089,6 +4089,14 @@ void vmk_wtimeprec(double *prec){
   *prec = temp_prec;
 }
 
+
+void vmk_wtimedelay(double delay){
+  double t1, t2;
+  vmk_wtime(&t1);
+  t2 = t1;
+  while(t2-t1<delay)
+    vmk_wtime(&t2);
+}
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
