@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.cqsub,v 1.1 2006/10/23 18:04:13 theurich Exp $
+# $Id: mpirun.cqsub,v 1.2 2006/10/23 20:23:57 theurich Exp $
 # This script provides an interface such that the simple command
 # mpirun -np #
 # runs # copies of the program in parallel.
@@ -15,9 +15,9 @@ shift 2
 prog=$*
 working_dir=`pwd`
 
-echo "exec cqsub -qdebug -C $working_dir  -t30 -n2 -c$num_procs -O $prog $prog"
+echo "exec cqsub -qdebug -C $working_dir  -t30 -n$num_procs -O $prog $prog"
 
-proc_id=`cqsub -qdebug -C $working_dir -t30 -n2 -c$num_procs -O $prog $prog`
+proc_id=`cqsub -qdebug -C $working_dir -t30 -n$num_procs -O $prog $prog`
 
 # Since this is not an interactive shell, we must grep for the proc_id until 
 # it is gone, indicating the job is done or the walltime has expired.
