@@ -1,6 +1,6 @@
 ! Simple ESMF application
 
-program esmf_test0
+program esmf_application
 
   ! modules
   use ESMF_Mod
@@ -13,7 +13,7 @@ program esmf_test0
   call ESMF_Initialize(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
-  print *, "hi from program esmf_test0"
+  print *, "hi from program esmf_application"
   print *, "======================= finished ================================="
 
   call ESMF_Finalize(rc=rc)
