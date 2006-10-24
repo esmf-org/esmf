@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69.2.13 2006/09/20 23:02:34 theurich Exp $
+# $Id: makefile,v 1.69.2.14 2006/10/24 19:06:05 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -49,6 +49,8 @@ all:  lib build_unit_tests build_examples build_system_tests build_demos
 #-------------------------------------------------------------------------------
 script_info:
 	-@echo " "
+	-@echo "------------------------------------------"
+	-@echo "Make version:"; $(MAKE) -v; echo ""
 	-@echo "------------------------------------------"
 	-@echo "Fortran Compiler version:"; $(ESMF_F90COMPILER_VERSION); echo ""
 	-@echo "------------------------------------------"
