@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.120 2004/03/16 18:04:06 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.210.2.1 2006/10/24 22:49:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_Field.F90"
 !
 !     ESMF Field module
       module ESMF_FieldMod
@@ -22,6 +23,7 @@
 ! INCLUDES
 #include "ESMF.h"
 
+
 !------------------------------------------------------------------------------
 !
 !BOPI
@@ -34,7 +36,7 @@
 ! description 
 ! expressed as a set of {\tt ESMF\_Attributes} with a data {\tt ESMF\_Array}, 
 ! {\tt ESMF\_Grid}, and I/O specification, or {\tt ESMF\_IOSpec}.  
-! A {\tt ESMF\_DataMap} describes the 
+! An {\tt ESMF\_FieldDataMap} describes the 
 ! relationship of the {\tt ESMF\_Array} to the {\tt ESMF\_Grid}.  
 !
 ! This type is implemented in Fortran 90 and a corresponding
@@ -42,16 +44,26 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
+      use ESMF_UtilTypesMod    ! ESMF base class
+      use ESMF_UtilMod
       use ESMF_BaseMod
-      use ESMF_IOMod
+      use ESMF_VMMod
+      use ESMF_LogErrMod
+      use ESMF_IOSpecMod
+      use ESMF_ArraySpecMod
       use ESMF_LocalArrayMod
-      use ESMF_DataMapMod
+      use ESMF_ArrayDataMapMod
       use ESMF_DELayoutMod
       use ESMF_GridTypesMod
       use ESMF_GridMod
-      use ESMF_ArrayBaseMod
+      use ESMF_ArrayMod
       use ESMF_ArrayCreateMod
+      use ESMF_ArrayGetMod
       use ESMF_ArrayCommMod
+      use ESMF_TimeMod
+      use ESMF_FieldDataMapMod
+      use wrf_data
+
       implicit none
 
 !------------------------------------------------------------------------------
@@ -73,19 +85,34 @@
                                ESMF_READONLY = ESMF_Access(1)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_DataAllocate
+!     ! ESMF_AllocFlag
 !
 !     ! Interface flag for setting whether Field does the data allocation.
 
-      type ESMF_DataAllocate
+      type ESMF_AllocFlag
       sequence
       private
         integer :: a_type
       end type
 
-      type(ESMF_DataAllocate), parameter ::  &
-                               ESMF_DO_ALLOCATE = ESMF_DataAllocate(0), &
-                               ESMF_NO_ALLOCATE = ESMF_DataAllocate(1)
+      type(ESMF_AllocFlag), parameter ::  &
+                               ESMF_ALLOC = ESMF_AllocFlag(0), &
+                               ESMF_NO_ALLOC = ESMF_AllocFlag(1)
+
+!------------------------------------------------------------------------------
+!     ! ESMF_IndexFlag
+!
+!     ! Interface flag for setting whether Field data has global index bounds
+
+      type ESMF_IndexFlag
+      sequence
+      private
+        integer :: i_type
+      end type
+
+      type(ESMF_IndexFlag), parameter ::  &
+                               ESMF_INDEX_DELOCAL  = ESMF_IndexFlag(0), &
+                               ESMF_INDEX_GLOBAL = ESMF_IndexFlag(1)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_LocalField
@@ -94,13 +121,11 @@
 !     ! local DE.
 
       type ESMF_LocalField
-      sequence
-      !private
-   
+        sequence
         type (ESMF_Array) :: localdata           ! local data for this DE
-        !type (ESMF_Status) :: gridstatus         ! is grid set yet?
-        !type (ESMF_Status) :: datastatus         ! is data set yet?
         type (ESMF_Mask) :: mask                 ! may belong in Grid
+        type (ESMF_ArraySpec) :: arrayspec       ! so field can allocate
+
         integer :: rwaccess                      ! reserved for future use
         integer :: accesscount                   ! reserved for future use
 
@@ -118,19 +143,19 @@
        
         type (ESMF_Base) :: base             ! base class object
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
-        type (ESMF_Status) :: fieldstatus = ESMF_STATE_UNINIT
-        type (ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT
-        type (ESMF_Status) :: datastatus = ESMF_STATE_UNINIT
-        type (ESMF_GridType), pointer :: gridp => NULL()  ! for faster access
+        type (ESMF_Status) :: fieldstatus = ESMF_STATUS_UNINIT
+        type (ESMF_Status) :: gridstatus = ESMF_STATUS_UNINIT
+        type (ESMF_Status) :: datastatus = ESMF_STATUS_UNINIT
+        type (ESMF_Status) :: datamapstatus = ESMF_STATUS_UNINIT
 #else
         type (ESMF_Status) :: fieldstatus
         type (ESMF_Status) :: gridstatus
         type (ESMF_Status) :: datastatus
-        type (ESMF_GridType), pointer :: gridp
+        type (ESMF_Status) :: datamapstatus
 #endif
-        type (ESMF_Grid) :: grid             ! save to satisfy query routines
+        type (ESMF_Grid) :: grid
         type (ESMF_LocalField) :: localfield ! this differs per DE
-        type (ESMF_DataMap) :: mapping       ! mapping of array indices to grid
+        type (ESMF_FieldDataMap) :: mapping  ! mapping of array indices to grid
         type (ESMF_IOSpec) :: iospec         ! iospec values
         type (ESMF_Status) :: iostatus       ! if unset, inherit from gcomp
 
@@ -156,45 +181,35 @@
 ! !PUBLIC TYPES:
       public ESMF_Field, ESMF_Access
       public ESMF_FieldType, ESMF_LocalField  ! for internal lib use only
-      public ESMF_DataAllocate, ESMF_NO_ALLOCATE, ESMF_DO_ALLOCATE
+      public ESMF_AllocFlag, ESMF_NO_ALLOC, ESMF_ALLOC
+      public ESMF_IndexFlag, ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL
 
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-   public ESMF_FieldCreate             ! Create a new Field with data
 
    public ESMF_FieldCreateNoData       ! Create a new Field without data
    public ESMF_FieldDestroy            ! Destroy a Field
 
-   public ESMF_FieldAttachData         ! Associate data with a Field - 
-                                       !   reference (default) or copy 
-   public ESMF_FieldDetachData         ! Dissociate data from a Field and 
-                                       !   return its pointer
-
    public ESMF_FieldGet                ! Generic Get() routine, replaces others
 
-   public ESMF_FieldGetName            ! Get Field name
- 
-   public ESMF_FieldGetGrid            ! Return a Grid pointer
    public ESMF_FieldGetGlobalGridInfo  ! Return global Grid info
    public ESMF_FieldGetLocalGridInfo   ! Return local Grid info
 
-   public ESMF_FieldGetData            ! Return a data pointer
+   public ESMF_FieldGetArray           ! Return the data Array
    public ESMF_FieldGetGlobalDataInfo  ! Return global data info
    public ESMF_FieldGetLocalDataInfo   ! Return local data info
-   public ESMF_FieldGetRelLoc          ! Return relative location
- 
-   public ESMF_FieldGetDataMap         ! Return a pointer to DataMap object
 
    public ESMF_FieldSetGrid            ! Set a Grid (may regrid if different
                                        !   Grid is already present)
+   public ESMF_FieldSetArray           ! Set a data Array in a Field
    public ESMF_FieldSetDataValues      ! Set Field data values 
+
    public ESMF_FieldSetDataMap         ! Set a DataMap (may reorder if different
                                        !   DataMap is already present)
 
-
-   public ESMF_FieldSetAttribute       ! Set and Get Attributes
+   public ESMF_FieldSetAttribute       ! Set and Get attributes
    public ESMF_FieldGetAttribute       !  
 
    public ESMF_FieldGetAttributeCount  ! number of attribs
@@ -206,44 +221,77 @@
 
    public ESMF_FieldWrite              ! Write data and grid from a Field
 
+   public ESMF_FieldConstruct          ! Only public for internal use
+   public ESMF_FieldSerialize
+   public ESMF_FieldDeserialize
+
 !  !subroutine ESMF_FieldWriteRestart(field, iospec, rc)
 !  !function ESMF_FieldReadRestart(name, iospec, rc)
-   !subroutine ESMF_FieldWrite(field, subset, iospec, rc)
+!  !subroutine ESMF_FieldWrite(field, subset, iospec, rc)
 !  !function ESMF_FieldRead(fname, gname, dnames, iospec, rc)
 !
 !
 !EOPI
 
+! !PRIVATE MEMBER FUNCTIONS:
+
+   private ESMF_FieldWriteFileASCII
+#if !(ESMF_NO_IOCODE)
+!!$   private ESMF_FieldWriteFileNetCDF
+!!$        private ESMF_FieldWriteFileNetCDF1DI1
+!!$        private ESMF_FieldWriteFileNetCDF2DI1
+!!$        private ESMF_FieldWriteFileNetCDF3DI1
+!!$        private ESMF_FieldWriteFileNetCDF4DI1
+!!$        private ESMF_FieldWriteFileNetCDF5DI1
+!!$        private ESMF_FieldWriteFileNetCDF6DI1
+!!$        private ESMF_FieldWriteFileNetCDF7DI1
+!!$        private ESMF_FieldWriteFileNetCDF1DI2
+!!$        private ESMF_FieldWriteFileNetCDF2DI2
+!!$        private ESMF_FieldWriteFileNetCDF3DI2
+!!$        private ESMF_FieldWriteFileNetCDF4DI2
+!!$        private ESMF_FieldWriteFileNetCDF5DI2
+!!$        private ESMF_FieldWriteFileNetCDF6DI2
+!!$        private ESMF_FieldWriteFileNetCDF7DI2
+!!$        private ESMF_FieldWriteFileNetCDF1DI4
+!!$        private ESMF_FieldWriteFileNetCDF2DI4
+!!$        private ESMF_FieldWriteFileNetCDF3DI4
+!!$        private ESMF_FieldWriteFileNetCDF4DI4
+!!$        private ESMF_FieldWriteFileNetCDF5DI4
+!!$        private ESMF_FieldWriteFileNetCDF6DI4
+!!$        private ESMF_FieldWriteFileNetCDF7DI4
+!!$        private ESMF_FieldWriteFileNetCDF1DI8
+!!$        private ESMF_FieldWriteFileNetCDF2DI8
+!!$        private ESMF_FieldWriteFileNetCDF3DI8
+!!$        private ESMF_FieldWriteFileNetCDF4DI8
+!!$        private ESMF_FieldWriteFileNetCDF5DI8
+!!$        private ESMF_FieldWriteFileNetCDF6DI8
+!!$        private ESMF_FieldWriteFileNetCDF7DI8
+!!$        private ESMF_FieldWriteFileNetCDF1DR4
+        private ESMF_FieldWriteFileNetCDF2DR4
+        private ESMF_FieldWriteFileNetCDF3DR4
+!!$        private ESMF_FieldWriteFileNetCDF4DR4
+!!$        private ESMF_FieldWriteFileNetCDF5DR4
+!!$        private ESMF_FieldWriteFileNetCDF6DR4
+!!$        private ESMF_FieldWriteFileNetCDF7DR4
+!!$        private ESMF_FieldWriteFileNetCDF1DR8
+        private ESMF_FieldWriteFileNetCDF2DR8
+        private ESMF_FieldWriteFileNetCDF3DR8
+!!$        private ESMF_FieldWriteFileNetCDF4DR8
+!!$        private ESMF_FieldWriteFileNetCDF5DR8
+!!$        private ESMF_FieldWriteFileNetCDF6DR8
+!!$        private ESMF_FieldWriteFileNetCDF7DR8
+#endif
+   
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.120 2004/03/16 18:04:06 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.210.2.1 2006/10/24 22:49:40 svasquez Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOPI
-! !IROUTINE: ESMF_FieldCreate - Create a new Field with data
-!
-! !INTERFACE:
-      interface ESMF_FieldCreate 
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldCreateNew
-        module procedure ESMF_FieldCreateFromArray
-        module procedure ESMF_FieldCreateRemap
-
-! !DESCRIPTION:
-!     This interface provides an entry point for methods that create a complete
-!     {\tt ESMF\_Field}.  These method all contain a {\tt ESMF\_Grid} and {\tt ESMF\_Data}.  The variations
-!     allow the user to specify the data using either a Fortran array or 
-!     an {\tt ESMF\_Array}.
-!    
- 
-!EOPI
-      end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
@@ -253,14 +301,14 @@
       interface ESMF_FieldCreateNoData
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldCreateNoBuffer
+        module procedure ESMF_FieldCreateNoDataPtr
         module procedure ESMF_FieldCreateNoArray
         module procedure ESMF_FieldCreateNoGridArray  
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create 
-!     a {\tt ESMF\_Field} without allocating or referencing any associated data.
-!     The variations allow a {\tt ESMF\_Grid} to be specified or not, and for
+!     an {\tt ESMF\_Field} without allocating or referencing any associated data.
+!     The variations allow an {\tt ESMF\_Grid} to be specified or not, and for
 !     the data description to be specified or not.
  
 !EOPI
@@ -292,7 +340,7 @@
       interface ESMF_FieldConstructNoData
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldConstructNoBuffer
+        module procedure ESMF_FieldConstructNoDataPtr
         module procedure ESMF_FieldConstructNoArray
         module procedure ESMF_FieldConstructNoGridArray  
 
@@ -305,53 +353,20 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldAttachData - Associate data with a Field
-!
-! !INTERFACE:
-      interface ESMF_FieldAttachData 
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldAttachBuffer
-        module procedure ESMF_FieldAttachArray
-        module procedure ESMF_FieldAttachGridArray
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that attach
-!     data to a {\tt ESMF\_Field}.
- 
-!EOPI
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_FieldDetachData - Obtain direct data access from a Field
-!
-! !INTERFACE:
-      interface ESMF_FieldDetachData 
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldDetachBuffer
-        module procedure ESMF_FieldDetachArray
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that detach
-!     data from a {\tt ESMF\_Field}.
- 
-!EOPI
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_FieldSetAttribute  - Set Field Attributes
+! !IROUTINE: ESMF_FieldSetAttribute  - Set Field attributes
 !
 ! !INTERFACE:
       interface ESMF_FieldSetAttribute 
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldSetIntAttr
-        module procedure ESMF_FieldSetIntListAttr
-        module procedure ESMF_FieldSetRealAttr
-        module procedure ESMF_FieldSetRealListAttr
+        module procedure ESMF_FieldSetInt4Attr
+        module procedure ESMF_FieldSetInt4ListAttr
+        module procedure ESMF_FieldSetInt8Attr
+        module procedure ESMF_FieldSetInt8ListAttr
+        module procedure ESMF_FieldSetReal4Attr
+        module procedure ESMF_FieldSetReal4ListAttr
+        module procedure ESMF_FieldSetReal8Attr
+        module procedure ESMF_FieldSetReal8ListAttr
         module procedure ESMF_FieldSetLogicalAttr
         module procedure ESMF_FieldSetLogicalListAttr
         module procedure ESMF_FieldSetCharAttr
@@ -365,16 +380,20 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldGetAttribute  - Get Field Attributes
+! !IROUTINE: ESMF_FieldGetAttribute  - Get Field attributes
 !
 ! !INTERFACE:
       interface ESMF_FieldGetAttribute 
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldGetIntAttr
-        module procedure ESMF_FieldGetIntListAttr
-        module procedure ESMF_FieldGetRealAttr
-        module procedure ESMF_FieldGetRealListAttr
+        module procedure ESMF_FieldGetInt4Attr
+        module procedure ESMF_FieldGetInt4ListAttr
+        module procedure ESMF_FieldGetInt8Attr
+        module procedure ESMF_FieldGetInt8ListAttr
+        module procedure ESMF_FieldGetReal4Attr
+        module procedure ESMF_FieldGetReal4ListAttr
+        module procedure ESMF_FieldGetReal8Attr
+        module procedure ESMF_FieldGetReal8ListAttr
         module procedure ESMF_FieldGetLogicalAttr
         module procedure ESMF_FieldGetLogicalListAttr
         module procedure ESMF_FieldGetCharAttr
@@ -388,7 +407,7 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldGetAttributeInfo - Get type, count from a Field Attribute
+! !IROUTINE: ESMF_FieldGetAttributeInfo - Get type, count from a Field attribute
 !
 ! !INTERFACE:
       interface ESMF_FieldGetAttributeInfo
@@ -403,7 +422,6 @@
  
 !EOPI
       end interface
-
 !
 !
 !
@@ -412,456 +430,58 @@
       contains
 !
 !==============================================================================
-!BOPI
-! !IROUTINE:  ESMF_FieldAttachData - Associate an Array object with a Field
-
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttachData()
-      subroutine ESMF_FieldAttachArray(field, array, copyflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field
-      type(ESMF_Array), intent(in) :: array            
-      type(ESMF_CopyFlag), intent(in), optional :: copyflag      
-      integer, intent(out), optional :: rc             
-!
-! !DESCRIPTION:
-! Associates an {\tt ESMF\_Array} with a {\tt ESMF\_Field} and sets a 
-!  flag in the {\tt ESMF\_Field} indicating that data is present.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
-!     \item [array]
-!           Pointer to {\tt ESMF\_Array}.
-!     \item [{[copyflag]}]
-!           Indicates whether the array should be copied or referenced.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS: FLD1.6.5
-
-!	BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
-
-        end subroutine ESMF_FieldAttachArray
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE:  ESMF_FieldAttachData - Associate a data buffer with a field
-
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttachData()
-      subroutine ESMF_FieldAttachBuffer(field, buffer, copyflag, rc)
-!
-! !ARGUMENTS:
- 
-      type(ESMF_Field), intent(in) :: field            
-      real, dimension (:), pointer :: buffer           
-      type(ESMF_CopyFlag), intent(in), optional :: copyflag      
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     Associates a data buffer with a {\tt ESMF\_Field} and sets a flag in 
-!     the {\tt ESMF\_Field} indicating that data is present.  
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
-!     \item [buffer]
-!           Pointer to data buffer.
-!     \item [{[copyflag]}]
-!           Indicates whether the buffer should be copied or referenced.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-! !REQUIREMENTS: FLD1.6.5
-
-!       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
-
-        end subroutine ESMF_FieldAttachBuffer
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE:  ESMF_FieldAttachData - Associate a Grid and an Array with a Field
-
-! !INTERFACE:
-      ! Private name; call using ESMF_AttachData()
-      subroutine ESMF_FieldAttachGridArray(field, grid, array, copyflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field            
-      type(ESMF_Grid) :: grid
-      type(ESMF_Array), intent(in) :: array
-      type(ESMF_CopyFlag), intent(in) :: copyflag      
-      integer, intent(out), optional :: rc             
-!
-! !DESCRIPTION:
-!     Associates an {\tt ESMF\_Array} and a {\tt ESMF\_Grid} with a 
-!     {\tt ESMF\_Field} and sets a flag in 
-!     the {\tt ESMF\_Field} indicating that data is present.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
-!     \item [grid]
-!           Pointer to {\tt ESMF\_Grid}.
-!     \item [array]
-!           Pointer to {\tt ESMF\_Array}.
-!     \item [copyflag]
-!           Indicates whether the array should be copied or referenced.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS: FLD1.6.5
-
-!       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
-
-        end subroutine ESMF_FieldAttachGridArray
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:   ESMF_FieldCreate - Create a new Field
-
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldCreate()
-      function ESMF_FieldCreateNew(grid, arrayspec, allocflag, horzRelloc, &
-                                   vertRelloc, haloWidth, datamap, name, &
-                                   iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Field) :: ESMF_FieldCreateNew
-!
-! !ARGUMENTS:
-      type(ESMF_Grid) :: grid               
-      type(ESMF_ArraySpec), intent(in) :: arrayspec     
-      type(ESMF_DataAllocate), intent(in), optional :: allocflag
-      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
-      type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap          
-      character (len=*), intent(in), optional :: name 
-      type(ESMF_IOSpec), intent(in), optional :: iospec 
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     An interface function to {\tt ESMF\_FieldCreate()}.
-!     Create a {\tt ESMF\_Field} and allocate space internally for a
-!     gridded {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
-!     \item [arrayspec]
-!           {\tt ESMF\_Data} specification. 
-!     \item [{[allocflag]}]
-!           Whether to allocate space for the array.  Default is
-!           {\tt ESMF\_DO\_ALLOCATE}.  Other option is {\tt ESMF\_NO\_ALLOCATE}.
-!     \item [{[horzRelloc]}] 
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
-!     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
-!     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
-!     \item [{[name]}] 
-!           {\tt Field} name. 
-!     \item [{[iospec]}] 
-!           I/O specification. 
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: FLD1.1.1, FLD1.5.1
 
 
-      type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldCreateNoDataPtr"
 
-      ! Initialize pointers
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      nullify(ftype)
-      nullify(ESMF_FieldCreateNew%ftypep)
-
-      ! Initialize return code   
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      allocate(ftype, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then 
-        print *, "ERROR in ESMF_FieldCreateNew: Allocate"
-        return
-      endif 
-
-      ! Call construction method to allocate and initialize field internals.
-      call ESMF_FieldConstructNew(ftype, grid, arrayspec, allocflag, &
-                                  horzRelloc, vertRelloc, haloWidth, &
-                                  datamap, name, iospec, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldCreateNew: Field construct new asp"
-        return
-      endif 
-   
-      ! Set return values.
-      ESMF_FieldCreateNew%ftypep => ftype
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end function ESMF_FieldCreateNew
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldCreate - Create a Field from an existing ESMF Array
-
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldCreate()
-      function ESMF_FieldCreateFromArray(grid, array, copyflag, horzRelloc, &
-                                         vertRelloc, haloWidth, datamap, name, &
-                                         iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Field) :: ESMF_FieldCreateFromArray    
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid                
-      type(ESMF_Array), intent(in) :: array              
-      type(ESMF_CopyFlag), intent(in), optional :: copyflag       
-      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
-      type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap           
-      character (len = *), intent(in), optional :: name   
-      type(ESMF_IOSpec), intent(in), optional :: iospec   
-      integer, intent(out), optional :: rc                
-!
-! !DESCRIPTION:
-!     An interface function to {\tt ESMF\_FieldCreate()}.
-!     This version of creation assumes the data exists already and is being
-!     passed in through an {\tt ESMF\_Array}.  
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
-!     \item [array]
-!           Includes data specification and allocated memory. 
-!     \item [{[copyflag]}]
-!           Indicates whether to reference the array or make a 
-!           copy of it.  Valid values are {\tt ESMF\_DATA\_COPY} and 
-!           {\tt ESMF\_DATA\_REF}, respectively.
-!     \item [{[horzRelloc]}] 
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
-!     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
-!     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
-!     \item [{[name]}] 
-!           {\tt Field} name. 
-!     \item [{[iospec]}] 
-!           I/O specification. 
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: FLD1.1.2, FLD1.5.1
-
-
-      type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
-      
-!     Initialize pointers
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      nullify(ftype)
-      nullify(ESMF_FieldCreateFromArray%ftypep)
-
-!     Initialize return code   
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
-
-      allocate(ftype, stat=status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
-      if(status .NE. 0) then 
-        print *, "ERROR in ESMF_FieldCreateFromArray: Allocate"
-        return
-      endif 
-
-!     Call construction method to allocate and initialize field internals.
-      call ESMF_FieldConstructNewArray(ftype, grid, array, horzRelloc, &
-                                       vertRelloc, haloWidth, datamap, name, &
-                                       iospec, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldCreateNew: Field construct NewArray"
-        return
-      endif 
-   
-
-!     Set return values.
-      ESMF_FieldCreateFromArray%ftypep => ftype
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end function ESMF_FieldCreateFromArray
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldCreate - Create a Field by remapping another Field
-
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldCreate()
-      function ESMF_FieldCreateRemap(srcfield, grid, horzRelloc, vertRelloc, &
-                                     haloWidth, datamap, name, iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Field) :: ESMF_FieldCreateRemap
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: srcfield            
-      type(ESMF_Grid), intent(in) :: grid                 
-      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
-      type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap              
-      character (len = *), intent(in), optional :: name   
-      type(ESMF_IOSpec), intent(in), optional :: iospec   
-      integer, intent(out), optional :: rc                
-!
-! !DESCRIPTION:
-!
-! An interface function to {\tt ESMF\_FieldCreate()}.
-! Remaps data between an existing {\tt ESMF\_Grid} on a source {\tt ESMF\_Field}
-! and a new {\tt ESMF\_Grid}.  The {\tt ESMF\_Grid} is referenced by the 
-! new {\tt ESMF\_Field}.  Data is copied.
-!
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [srcfield]
-!           Source {\tt ESMF\_Field}.
-!     \item [grid]
-!           {\tt ESMF\_Grid} of source {\tt ESMF\_Field}.
-!     \item [horzRelLoc]
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
-!     \item [vertRelLoc]
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[halowidth]}]
-!           Halo width.
-!     \item [{[datamap]}]
-!           {\tt ESMF\_DataMap}
-!     \item [{[name]}]
-!       {\tt ESMF\_Field} name.
-!     \item [{[iospec]}]
-!       {\tt ESMF\_Field} {\tt ESMF\_IOSpec}.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.1.5, FLD1.5.1, FLD1.6.1
-
-
-      type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
-      
-      ! Initialize pointers
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      nullify(ftype)
-      nullify(ESMF_FieldCreateRemap%ftypep)
-
-      ! Initialize return code   
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
-
-      allocate(ftype, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then 
-        print *, "ERROR in ESMF_FieldCreateRemap: Allocate"
-        return
-      endif 
-
-      ! TODO: Insert field construction method
-
-      ! Set return values.
-      ESMF_FieldCreateRemap%ftypep => ftype
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end function ESMF_FieldCreateRemap
-
-!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated data buffer
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
-      function ESMF_FieldCreateNoBuffer(grid, arrayspec, horzRelloc, vertRelloc, &
-                                        haloWidth, datamap, name, iospec, rc)
+      function ESMF_FieldCreateNoDataPtr(grid, arrayspec, horzRelloc, &
+                                         vertRelloc, haloWidth, &
+                                         datamap, name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Field) :: ESMF_FieldCreateNoBuffer   
+      type(ESMF_Field) :: ESMF_FieldCreateNoDataPtr   
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid                 
       type(ESMF_ArraySpec), intent(in) :: arrayspec    
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap    
+      integer, intent(in), optional :: haloWidth    
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap    
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
 !     An interface function to {\tt ESMF\_FieldCreateNoData()}.
-!     Creates a {\tt ESMF\_Field} in its entirety except for the assignment
+!     Creates an {\tt ESMF\_Field} in its entirety except for the assignment
 !     or allocation of an associated raw data buffer.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
+!           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [arrayspec]
 !           Data specification. 
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
+!           Relative location of data per grid cell/vertex in the vertical
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
+!     \item [{[haloWidth]}]
+!           Halo region width when data is eventually created.  Defaults to 0.
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -876,51 +496,45 @@
 
       type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
    
       ! Initialize pointers
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
       nullify(ftype)
-      nullify(ESMF_FieldCreateNoBuffer%ftypep)
+      nullify(ESMF_FieldCreateNoDataPtr%ftypep)
 
       ! Initialize return code   
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       allocate(ftype, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then 
-        print *, "ERROR in FieldCreateNoBuffer: Allocate"
-        return
-      endif 
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! Call construction method to build field internals.
-      call ESMF_FieldConstructNoBuffer(ftype, grid, arrayspec, horzRelloc, &
+      call ESMF_FieldConstructNoDataPtr(ftype, grid, arrayspec, horzRelloc, &
                                        vertRelloc, haloWidth, datamap, name, &
                                        iospec, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldCreateNoBuffer: Field construct NoBuf"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      ESMF_FieldCreateNoBuffer%ftypep => ftype
-      if(rcpresent) rc = ESMF_SUCCESS
+      ESMF_FieldCreateNoDataPtr%ftypep => ftype
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_FieldCreateNoBuffer
+      end function ESMF_FieldCreateNoDataPtr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldCreateNoArray"
+
 !BOP
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated Array object
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
       function ESMF_FieldCreateNoArray(grid, horzRelloc, vertRelloc, &
-                                       haloWidth, datamap, name, iospec, rc)
+                                       datamap, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Field) :: ESMF_FieldCreateNoArray 
@@ -929,30 +543,31 @@
       type(ESMF_Grid) :: grid                 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap              
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap              
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
 !     An interface function to {\tt ESMF\_FieldCreateNoData()}.
-!     This version of {\tt ESMF\_FieldCreate} builds a {\tt ESMF\_Field} 
+!     This version of {\tt ESMF\_FieldCreate} builds an {\tt ESMF\_Field} 
 !     and depends on a later call to add an {\tt ESMF\_Array} to it.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
+!           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
+!           Relative location of data per grid cell/vertex in the vertical
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -964,46 +579,40 @@
 !EOP
 ! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 
-
+ 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
       integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
       
       ! Initialize pointers
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
       nullify(ftype)
       nullify(ESMF_FieldCreateNoArray%ftypep)
 
       ! Initialize return code   
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       allocate(ftype, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then 
-        print *, "ERROR in FieldCreateNoArray: Allocate"
-        return
-      endif 
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! Call field construction method
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
-                                      haloWidth, datamap, name, iospec, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldCreateNoArray: Construct"
-        return
-      endif 
+                                      datamap, name, &
+                                      iospec, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       ESMF_FieldCreateNoArray%ftypep => ftype
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoArray
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldCreateNoGridArray"
+
 !BOP
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no Grid or Array
 
@@ -1022,7 +631,7 @@
 ! !DESCRIPTION:
 !     An interface function to {\tt ESMF\_FieldCreateNoData()}.
 !     This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
-!     and depends on later calls to add a {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
+!     and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
 !     it.  
 !
 !     The arguments are:
@@ -1036,47 +645,39 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 
 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
       integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
       
       ! Initialize pointers
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
       nullify(ftype)
       nullify(ESMF_FieldCreateNoGridArray%ftypep)
 
       ! Initialize return code   
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       allocate(ftype, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then 
-        print *, "ERROR in ESMF_FieldCreateNoGridArray: Allocate"
-        return
-      endif 
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! Call field construction method
       call ESMF_FieldConstructNoGridArray(ftype, name, iospec, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldCreateNoGridArray: Construct"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       ESMF_FieldCreateNoGridArray%ftypep => ftype
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoGridArray
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldDestroy"
+
 !BOP
 ! !IROUTINE: ESMF_FieldDestroy - Free all resources associated with a Field
 
@@ -1093,157 +694,69 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: FLD1.4
 
       ! Local variables
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
       ! Initialize return code   
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
-      ! If already destroyed or never created, return ok
-      if (.not. associated(field%ftypep)) then
-        print *, "FieldDestroy called on uninitialized or destroyed Field"
-        if(rcpresent) rc = ESMF_FAILURE   ! should this really be an error?
-        return
-      endif
+      ! TODO: If already destroyed or never created, return ok?
+      ! (should it be ok to destroy the same object twice without complaint?)
+      ! for now, no, you can't delete an object twice 
+      call ESMF_FieldValidate(field, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
       ! Destruct all field internals and then free field memory.
       call ESMF_FieldDestruct(field%ftypep, status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldDestroy from ESMF_FieldDestruct"
-        return
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+           
+      if (associated(field%ftypep)) then
+         deallocate(field%ftypep, stat=status)
+         if (ESMF_LogMsgFoundAllocError(status, "Deallocating Field", &
+                                       ESMF_CONTEXT, rc)) return
       endif 
            
-      if (associated(field%ftypep)) deallocate(field%ftypep, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .ne. 0) then 
-        print *, "ERROR in ESMF_FieldDestroy: Deallocate of Field class"
-        return
-      endif 
-           
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldDestroy
 
 !------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE:  ESMF_FieldDetachData - Disassociate a buffer from a Field
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGet"
 
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldDetachData()
-      subroutine ESMF_FieldDetachBuffer(field, buffer, access, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field             
-      integer, intent(out) :: buffer                    
-      type(ESMF_Access), intent(in), optional :: access 
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     Returns a pointer to the {\tt ESMF\_Field}'s data buffer and marks the 
-!     {\tt ESMF\_Field} as not having any associated data.
-!
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
-!     \item [buffer]
-!           Buffer to disassociate.
-!     \item [{[access}]]
-!           {\tt ESMF\_Access} which may be ESMF\_READWRITE or ESMF\_READONLY.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!           
-!EOPI
-! !REQUIREMENTS: FLD1.6.5
-
-
-!
-! TODO: code goes here.   this routine BOPI for 2 reasons - one, it isn't
-!  implemented, and two - it may be removed and replaced by a GetData call
-!  with a flag to indicate exclusive access.
-!
-        end subroutine ESMF_FieldDetachBuffer
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE:  ESMF_FieldDetachData - Disassociate an Array from a Field
-
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldDetachData()
-      subroutine ESMF_FieldDetachArray(field, array, access, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field
-      type(ESMF_Array), intent(out) :: array
-      type(ESMF_Access), intent(in), optional :: access
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Returns a pointer to the {\tt ESMF\_Field}'s {\tt ESMF\_Array} and marks the 
-!     {\tt ESMF\_Field} as not having any associated data.
-!
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
-!     \item [array]
-!           {\tt ESMF\_Array} to disassociate.
-!     \item [{[access}]]
-!           {\tt ESMF\_Access} which may be ESMF\_READWRITE or ESMF\_READONLY.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS: FLD1.6.5
-
-
-!
-! TODO: code goes here.  This code marked BOPI for the same reason as above;
-!  it may be replaced by a GetData call with a flag. 
-!
-        end subroutine ESMF_FieldDetachArray
-
-!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_FieldGet - Return info associated with a Field
 !
 ! !INTERFACE:
       subroutine ESMF_FieldGet(field, grid, array, datamap, horzRelloc, &
-                               vertRelloc, name, rc)
+                               vertRelloc, haloWidth, iospec, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field    
       type(ESMF_Grid), intent(out), optional :: grid     
       type(ESMF_Array), intent(out), optional :: array     
-      type(ESMF_DataMap), intent(out), optional :: datamap     
+      type(ESMF_FieldDataMap), intent(out), optional :: datamap     
       type(ESMF_RelLoc), intent(out), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
+      integer, intent(out), optional :: haloWidth
+      type(ESMF_IOSpec), intent(out), optional :: iospec 
       character(len=*), intent(out), optional :: name
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Query a {\tt ESMF\_Field} for various things.  All arguments after
+!      Query an {\tt ESMF\_Field} for various things.  All arguments after
 !      the {\tt Field} are optional.  To select individual items use the
 !      named\_argument=value syntax.
 !
@@ -1251,18 +764,25 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [{[grid]}]
 !           {\tt ESMF\_Grid}.
 !     \item [{[array]}]
 !           {\tt ESMF\_Array}.
 !     \item [{[datamap]}]
-!           {\tt ESMF\_DataMap}.
+!           {\tt ESMF\_FieldDataMap}.
 !     \item [{[horzRelloc}]]
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
 !     \item [{[vertRelloc]}]
 !           Relative location of data per grid cell/vertex in the vertical grid.
+!     \item [{[haloWidth]}]
+!           Integer value for the width of the halo (ghost zone) region in the
+!           data array.  This can also be queried directly from the
+!           {\tt ESMF\_Array} object.
+!     \item [{[iospec]}]
+!           {\tt ESMF\_IOSpec} object which contains settings for options
+!           related to I/O. 
 !     \item [{[name]}]
 !           Name of queried item.
 !     \item [{[rc]}]
@@ -1270,7 +790,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: FLD1.6.2
 
         type(ESMF_FieldType), pointer :: ftype
         integer :: status
@@ -1278,78 +797,85 @@
         ! assume failure
         if (present(rc)) rc = ESMF_FAILURE
 
-        ! Minimal error checking
-        if (.not.associated(field%ftypep)) then
-          print *, "ERROR: Invalid or Destroyed Field"
-          return
-        endif
+        ! Validate object first
+        call ESMF_FieldValidate(field, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
  
         ftype => field%ftypep
-        if (ftype%fieldstatus .ne. ESMF_STATE_READY) then
-          print *, "ERROR: Field not ready"
-          return
-        endif
 
         if (present(grid)) then
-            if (ftype%gridstatus .ne. ESMF_STATE_READY) then
-              print *, "ERROR: No grid attached to Field"
-              return
+            if (ftype%gridstatus .ne. ESMF_STATUS_READY) then
+                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "No Grid or Bad Grid attached to Field", &
+                                 ESMF_CONTEXT, rc)) return
             endif
             grid = ftype%grid
         endif
 
         if (present(array)) then
-            if (ftype%datastatus .ne. ESMF_STATE_READY) then
-              print *, "ERROR: No data attached to Field"
-              return
+            if (ftype%datastatus .ne. ESMF_STATUS_READY) then
+                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "No data attached to Field", &
+                                 ESMF_CONTEXT, rc)) return
             endif
             array = ftype%localfield%localdata
         endif
 
         if (present(datamap)) then
             ! TODO: what's the proper test here?  you could have a map w/ no data yet
-            !if (ftype%datastatus .ne. ESMF_STATE_READY) then
-            !  print *, "ERROR: No data attached to Field"
-            !  return
-            !endif
+            !    if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+            !                    "No data attached to Field", &
+            !                     ESMF_CONTEXT, rc)) return
             datamap = ftype%mapping
         endif
 
         if (present(horzRelloc)) then
             ! TODO: what's the proper test here?  ditto code above.
-            !if (ftype%datastatus .ne. ESMF_STATE_READY) then
-            !  print *, "ERROR: No data attached to Field"
-            !  return
+            !if (ftype%datastatus .ne. ESMF_STATUS_READY) then
+            !    if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+            !                    "No data attached to Field", &
+            !                     ESMF_CONTEXT, rc)) return
             !endif
-            call ESMF_DataMapGet(ftype%mapping, horzRelloc=horzRelloc, rc=status)
-            if (status .ne. ESMF_SUCCESS) then
-                print *, "ERROR in getting Horizontal RelLoc in ESMF_DataMapGet"
-                rc = status
-                return
-            endif
+            call ESMF_FieldDataMapGet(ftype%mapping, horzRelloc=horzRelloc, rc=status)
+            if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         endif
 
         if (present(vertRelloc)) then
             ! TODO: what's the proper test here?  ditto code above.
-            !if (ftype%datastatus .ne. ESMF_STATE_READY) then
+            !if (ftype%datastatus .ne. ESMF_STATUS_READY) then
             !  print *, "ERROR: No data attached to Field"
             !  return
             !endif
-            call ESMF_DataMapGet(ftype%mapping, vertRelloc=vertRelloc, rc=status)
-            if (status .ne. ESMF_SUCCESS) then
-                print *, "ERROR in getting Vertical RelLoc in ESMF_DataMapGet"
-                rc = status
-                return
-            endif
+            call ESMF_FieldDataMapGet(ftype%mapping, vertRelloc=vertRelloc, rc=status)
+            if (ESMF_LogMsgFoundError(status, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
         endif
 
-        if (present(name)) then
-            call ESMF_GetName(ftype%base, name, status)
-            if (status .ne. ESMF_SUCCESS) then
-                print *, "ERROR in getting Field name in ESMF_FieldGet"
-                rc = status
-                return
+        if (present(haloWidth)) then
+            if (ftype%datastatus .ne. ESMF_STATUS_READY) then
+                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                 "Cannot return haloWidth because no data attached to Field", &
+                                 ESMF_CONTEXT, rc)) return
             endif
+            call ESMF_ArrayGet(ftype%localfield%localdata, &
+                               haloWidth=haloWidth, rc=rc)
+            if (ESMF_LogMsgFoundError(rc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+        endif
+
+        if (present(iospec)) iospec = ftype%iospec
+
+        if (present(name)) then
+            call c_ESMC_GetName(ftype%base, name, status)
+            if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         endif
 
         if (present(rc)) rc = ESMF_SUCCESS
@@ -1357,78 +883,79 @@
         end subroutine ESMF_FieldGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetArray"
+
 !BOP
-! !IROUTINE: ESMF_FieldGetName - Retrieve the name of a Field
+! !IROUTINE: ESMF_FieldGetArray - Get data Array associated with the Field
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldGetName(field, name, rc)
+      subroutine ESMF_FieldGetArray(field, array, rc)
 
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field
-      character (len = *), intent(out) :: name
-      integer, intent(out), optional :: rc
+      type(ESMF_Field), intent(in) :: field      
+      type(ESMF_Array), intent(out) :: array
+      integer, intent(out), optional :: rc           
 
 !
 ! !DESCRIPTION:
-!      Returns the name of the field.  If the field was created without 
-!      specifying a name, the framework will have assigned it a unique one.
+!     Get data in {\tt ESMF\_Array} form.
 !
-!       
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           {\tt ESMF\_Field} object to query..
-!     \item [name]
-!           Field name.
+!           An {\tt ESMF\_Field} object.
+!     \item [{[array]}]
+!           Field {\tt ESMF\_Array}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      !character(len=ESMF_MAXSTR) :: str
+      type(ESMF_FieldType), pointer :: ftypep
 
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+      ! Initialize return code   
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate first
+      call ESMF_FieldValidate(field, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ftypep => field%ftypep
+
+      if (ftypep%datastatus .ne. ESMF_STATUS_READY) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "No data associated with Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
-      ! Minimal error checking 
-      if (.not.associated(field%ftypep)) then
-        print *, "Invalid or Destroyed Field"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
-      endif
+      !call ESMF_StatusString(ftypep%datastatus, str, rc)
+      !print *, "getting array data, status = ", trim(str)
+      array = ftypep%localfield%localdata
+   
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-        print *, "Field not ready"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
-      endif
-
-      call ESMF_GetName(field%ftypep%base, name, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetName"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldGetName
+      end subroutine ESMF_FieldGetArray
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetInt4Attr"
+
 !BOP
-! !IROUTINE: ESMF_FieldGetAttribute  - Retrieve an integer Attribute
+! !IROUTINE: ESMF_FieldGetAttribute  - Retrieve a 4-byte integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
-      subroutine ESMF_FieldGetIntAttr(field, name, value, rc)
+      subroutine ESMF_FieldGetInt4Attr(field, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
@@ -1438,120 +965,332 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt ESMF\_Field}.
+!     Returns an integer attribute from the {\tt field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The integer value of the named Attribute.
+!           The integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_INTEGER, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_INTEGER, ESMF_I4, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldGetIntAttr
+      end subroutine ESMF_FieldGetInt4Attr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetInt4ListAttr"
+
 !BOP
-! !IROUTINE: ESMF_FieldGetAttribute - Retrieve an integer list Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
-      subroutine ESMF_FieldGetIntListAttr(field, name, count, value, rc)
+      subroutine ESMF_FieldGetInt4ListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      integer(ESMF_KIND_I4), dimension(:), intent(out) :: value
+      integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns an integer list attribute from a {\tt ESMF\_Field}.
-!
+!      Returns a 4-byte integer list attribute from the {\tt field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The integer values of the named Attribute.
+!           The number of values in the attribute.
+!     \item [valueList]
+!           The integer values of the named attribute.
+!           The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
-          print *, "ESMF_FieldGetAttribute: count longer than value list"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_INTEGER, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_INTEGER, ESMF_I4, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldGetIntListAttr
+      end subroutine ESMF_FieldGetInt4ListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetInt8Attr"
+
 !BOP
-! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a real Attribute
+! !IROUTINE: ESMF_FieldGetAttribute  - Retrieve an 8-byte integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
-      subroutine ESMF_FieldGetRealAttr(field, name, value, rc)
+      subroutine ESMF_FieldGetInt8Attr(field, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I8), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns an 8-byte integer attribute from the {\tt field}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The integer value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldGetInt8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetInt8ListAttr"
+
+!BOP
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve an 8-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldGetAttribute()
+      subroutine ESMF_FieldGetInt8ListAttr(field, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an 8-byte integer list attribute from the {\tt field}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the attribute.
+!     \item [valueList]
+!           The integer values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldGetInt8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetReal4Attr"
+
+!BOP
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a 4-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldGetAttribute()
+      subroutine ESMF_FieldGetReal4Attr(field, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R4), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a 4-byte real attribute from the {\tt field}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The real value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R4, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldGetReal4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetReal4ListAttr"
+
+!BOP
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a 4-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldGetAttribute()
+      subroutine ESMF_FieldGetReal4ListAttr(field, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a 4-byte real attribute from an {\tt ESMF\_Field}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the attribute.
+!     \item [valueList]
+!           The real values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R4, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldGetReal4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetReal8Attr"
+
+!BOP
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve an 8-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldGetAttribute()
+      subroutine ESMF_FieldGetReal8Attr(field, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
@@ -1561,115 +1300,102 @@
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from a {\tt ESMF\_Field}.
+!      Returns an 8-byte real attribute from the {\tt field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The real value of the named Attribute.
+!           The real value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_REAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_REAL, ESMF_R8, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldGetRealAttr
+      end subroutine ESMF_FieldGetReal8Attr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetReal8ListAttr"
+
 !BOP
-! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a real list Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve an 8-byte real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
-      subroutine ESMF_FieldGetRealListAttr(field, name, count, value, rc)
+      subroutine ESMF_FieldGetReal8ListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      real(ESMF_KIND_R8), dimension(:), intent(out) :: value
+      real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from a {\tt ESMF\_Field}.
+!      Returns an 8-byte real attribute from an {\tt ESMF\_Field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The real values of the named Attribute.
+!           The number of values in the attribute.
+!     \item [valueList]
+!           The real values of the named attribute.
+!           The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       integer :: limit
 
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
-          print *, "ESMF_FieldGetAttribute: count longer than value list"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_REAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_REAL, ESMF_R8, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldGetRealListAttr
+      end subroutine ESMF_FieldGetReal8ListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetLogicalAttr"
+
 !BOP
-! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1683,115 +1409,103 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an logical attribute from a {\tt ESMF\_Field}.
+!      Returns a logical attribute from the {\tt field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The logical value of the named Attribute.
+!           The logical value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_LOGICAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldGetLogicalAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetLogicalListAttr"
+
 !BOP
-! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical list Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
-      subroutine ESMF_FieldGetLogicalListAttr(field, name, count, value, rc)
+      subroutine ESMF_FieldGetLogicalListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(out) :: value
+      type(ESMF_Logical), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns an logical list attribute from a {\tt ESMF\_Field}.
+!      Returns a logical list attribute from the {\tt field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The logical values of the named Attribute.
+!           The number of values in the attribute.
+!     \item [valueList]
+!           The logical values of the named attribute.
+!           The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       integer :: limit
 
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
-          print *, "ESMF_FieldGetAttribute: count longer than value list"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                    "count longer than valueList", &
+                                     ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldGetLogicalListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetCharAttr"
+
 !BOP
-! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a character Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a character attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1805,50 +1519,41 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt ESMF\_Field}.
-!
+!      Returns a character attribute from the {\tt field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The character value of the named Attribute.
+!           The character value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
 
       call c_ESMC_AttributeGetChar(field%ftypep%base, name, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldGetCharAttr
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetAttributeCount"
+
 !BOP
-! !IROUTINE: ESMF_FieldGetAttributeCount - Query the number of Attributes
+! !IROUTINE: ESMF_FieldGetAttributeCount - Query the number of attributes
 !
 ! !INTERFACE:
       subroutine ESMF_FieldGetAttributeCount(field, count, rc)
@@ -1860,72 +1565,76 @@
 
 !
 ! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
+!     Returns the number of attributes associated with the given {\tt field} 
+!     in the argument {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [count]
-!           The number of attributes on this object.
+!           The number of attributes associated with this object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
 
       call c_ESMC_AttributeGetCount(field%ftypep%base, count, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttributeCount"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldGetAttributeCount
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetAttrInfoByName"
+
 !BOP
-! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field Attributes by name
+! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field attributes by name
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttributeInfo()
-      subroutine ESMF_FieldGetAttrInfoByName(field, name, type, count, rc)
+      subroutine ESMF_FieldGetAttrInfoByName(field, name, datatype, &
+                                             datakind, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
       character(len=*), intent(in) :: name
-      type(ESMF_DataType), intent(out), optional :: type
+      type(ESMF_DataType), intent(out), optional :: datatype
+      type(ESMF_DataKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
+!     Returns information associated with the named attribute, 
+!     including {\tt datatype} and {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to query.
-!     \item [type]
-!           The type of the Attribute.
-!     \item [count]
-!           The number of items in this Attribute.  For character types,
+!           The name of the attribute to query.
+!     \item [{[datatype]}]
+!           The data type of the attribute. One of the values
+!           {\tt ESMF\_DATA\_INTEGER}, {\tt ESMF\_DATA\_REAL},
+!           {\tt ESMF\_DATA\_LOGICAL}, or {\tt ESMF\_DATA\_CHARACTER}.
+!     \item [{[datakind]}]
+!           The datakind of the attribute, if attribute is type
+!           {\tt ESMF\_DATA\_INTEGER} or {\tt ESMF\_DATA\_REAL}.
+!           One of the values {\tt ESMF\_I4}, {\tt ESMF\_I8}, {\tt ESMF\_R4},
+!           or {\tt ESMF\_R8}.
+!           For all other types the value {\tt ESMF\_NOKIND} is returned.
+!     \item [{[count]}]
+!           The number of items in this attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1933,67 +1642,73 @@
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       type(ESMF_DataType) :: localDt
+      type(ESMF_DataKind) :: localDk
       integer :: localCount
 
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
       call c_ESMC_AttributeGetAttrInfoName(field%ftypep%base, name, &
-                                           localDt, localCount, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttributeInfo"
-        return
-      endif 
+                                           localDt, localDk, localCount, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (present(type)) type = localDt
+      if (present(datatype)) datatype = localDt
+      if (present(datakind)) datakind = localDk
       if (present(count)) count = localCount
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldGetAttrInfoByName
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetAttrInfoByNum"
+
 !BOP
-! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field Attributes by number
+! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field attributes by index number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttributeInfo()
-      subroutine ESMF_FieldGetAttrInfoByNum(field, num, name, type, count, rc)
+      subroutine ESMF_FieldGetAttrInfoByNum(field, attributeIndex, name, &
+                                            datatype, datakind, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
-      integer, intent(in) :: num
+      integer, intent(in) :: attributeIndex
       character(len=*), intent(out), optional :: name
-      type(ESMF_DataType), intent(out), optional :: type
+      type(ESMF_DataType), intent(out), optional :: datatype
+      type(ESMF_DataKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
+!      Returns information associated with the indexed attribute, 
+!      including {\tt name}, {\tt datatype}, {\tt datakind} (if applicable)
+!      and {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [num]
-!           The number of the Attribute to query.
+!           An {\tt ESMF\_Field} object.
+!     \item [attributeIndex]
+!           The index number of the attribute to query.
 !     \item [name]
-!           Returns the name of the Attribute.
-!     \item [type]
-!           Returns the type of the Attribute.
-!     \item [count]
-!           Returns the number of items in this Attribute.  For character types,
+!           Returns the name of the attribute.
+!     \item [{[datatype]}]        
+!           The data type of the attribute. One of the values
+!           {\tt ESMF\_DATA\_INTEGER}, {\tt ESMF\_DATA\_REAL},
+!           {\tt ESMF\_DATA\_LOGICAL}, or {\tt ESMF\_DATA\_CHARACTER}.
+!     \item [{[datakind]}]
+!           The datakind of the attribute, if attribute is type
+!           {\tt ESMF\_DATA\_INTEGER} or {\tt ESMF\_DATA\_REAL}.
+!           One of the values {\tt ESMF\_I4}, {\tt ESMF\_I8}, {\tt ESMF\_R4},
+!           or {\tt ESMF\_R8}.
+!           For all other types the value {\tt ESMF\_NOKIND} is returned.
+!     \item [{[count]}]
+!           Returns the number of items in this attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2001,92 +1716,33 @@
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       character(len=ESMF_MAXSTR) :: localName
       type(ESMF_DataType) :: localDt
+      type(ESMF_DataKind) :: localDk
       integer :: localCount
 
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeGetAttrInfoNum(field%ftypep%base, num, &
-                                         localName, localDt, localCount, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttributeInfo"
-        return
-      endif 
+      call c_ESMC_AttributeGetAttrInfoNum(field%ftypep%base, attributeIndex, &
+                                         localName, localDt, localDk, &
+                                         localCount, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (present(name)) name = localName
-      if (present(type)) type = localDt
+      if (present(datatype)) datatype = localDt
+      if (present(datakind)) datakind = localDk
       if (present(count)) count = localCount
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldGetAttrInfoByNum
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldGetGrid - Return the Grid associated with a Field
-!
-! !INTERFACE:
-      subroutine ESMF_FieldGetGrid(field, grid, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field    
-      type(ESMF_Grid), intent(out) :: grid     
-      integer, intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!      Returns a reference to the {\tt ESMF\_Grid} associated with this {\tt ESMF\_Field}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [Grid]
-!           {\tt ESMF\_Grid} returned.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: FLD1.6.2
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetGlobalGridInfo"
 
-
-        ! assume failure
-        if (present(rc)) rc = ESMF_FAILURE
-
-        ! Minimal error checking
-        if (.not.associated(field%ftypep)) then
-          print *, "ERROR: Invalid or Destroyed Field"
-          return
-        endif
- 
-        if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-          print *, "ERROR: Field not ready"
-          return
-        endif
-
-        if (field%ftypep%gridstatus .ne. ESMF_STATE_READY) then
-          print *, "ERROR: No grid attached to Field"
-          return
-        endif
-
-        grid = field%ftypep%grid
-
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_FieldGetGrid
-
-!------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_FieldGetGlobalGridInfo - Get information about the Global Grid
 !
@@ -2109,7 +1765,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [{[ndim]}]
 !           Number of dimensions.
 !     \item [{[ncell]}]
@@ -2124,7 +1780,6 @@
 !
 !
 !EOPI
-! !REQUIREMENTS: FLD1.7.2
 
 
 !
@@ -2137,6 +1792,9 @@
         end subroutine ESMF_FieldGetGlobalGridInfo
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetLocalGridInfo"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldGetLocalGridInfo - Get information about the Local Grid
 !
@@ -2158,7 +1816,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [{[ndim]}]
 !           Number of dimensions.
 !     \item [{[ncell]}]
@@ -2173,7 +1831,6 @@
 !
 !
 !EOPI
-! !REQUIREMENTS: FLD1.7.2
 
 
 !
@@ -2182,101 +1839,9 @@
         end subroutine ESMF_FieldGetLocalGridInfo
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldGetData - Get Data associated with the Field
-!
-! !INTERFACE:
-      subroutine ESMF_FieldGetData(field, array, buffer, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetGlobalDataInfo"
 
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field      
-      type(ESMF_Array), intent(out), optional :: array
-      integer, intent(out), optional :: buffer
-      integer, intent(out), optional :: rc           
-
-!
-! !DESCRIPTION:
-!     Get data either in {\tt ESMF\_Array} or buffer form.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [{[array]}]
-!           Field {\tt ESMF\_Array}.
-!     \item [{[buffer]}]
-!           Field buffer.
-!     \item [{[size]}]
-!           Size of grid.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
-
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      logical :: apresent                         ! Array present
-      logical :: bpresent                         ! Buffer present
-      character(len=ESMF_MAXSTR) :: str
-      type(ESMF_FieldType), pointer :: ftypep
-
-      ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      apresent = .FALSE.
-      bpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      ! Minimal error checking 
-      if (.not.associated(field%ftypep)) then
-        print *, "ESMF_FieldGetData: Invalid or Destroyed Field"
-        return
-      endif
-
-      ftypep => field%ftypep
-
-      if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-        print *, "ESMF_FieldGetData: Field not ready"
-        return
-      endif
-
-      ! Set codes depending on what the caller specified
-      if(present(array)) apresent=.TRUE.
-      if(present(buffer)) bpresent=.TRUE.
-
-      if(apresent) then
-          if (ftypep%datastatus .ne. ESMF_STATE_READY) then
-              print *, "ESMF_FieldGetData: no data associated with field"
-              return
-          endif
-
-          !call ESMF_StatusString(ftypep%datastatus, str, rc)
-          !print *, "getting array data, status = ", trim(str)
-          array = ftypep%localfield%localdata
-      endif 
-   
-      if(bpresent) then
-          ! TODO: check that an array is associated with the field
-          !  if (field%ptr%localfield%datastatus .eq. ...)
-
-          ! TODO: and extract data also
-          ! array = field%ptr%localfield%localdata
-      endif 
-
-      ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldGetData
-
-!------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_FieldGetGlobalDataInfo - Get information about Field Data
 !
@@ -2289,7 +1854,7 @@
       integer, intent(out), optional :: size(:)        
       integer, dimension(ESMF_MAXDIM), intent(out) :: indexorder 
       type(ESMF_DataType), intent(out) :: datatype
-      type(ESMF_Interleave), intent(out) :: interleave   
+      type(ESMF_InterleaveFlag), intent(out) :: interleave   
       integer, intent(out), optional :: rc           
 
 !
@@ -2299,7 +1864,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [{[size]}]
 !           Field size.
 !     \item [indexorder]
@@ -2313,7 +1878,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
 
 
 !
@@ -2322,61 +1886,9 @@
         end subroutine ESMF_FieldGetGlobalDataInfo
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldGetDataMap - Get DataMap associated with Field
-! !INTERFACE:
-      subroutine ESMF_FieldGetDataMap(field, datamap, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field          
-      type(ESMF_DataMap), intent(out) :: datamap     
-      integer, intent(out), optional :: rc           
-!
-! !DESCRIPTION:
-!      Returns a description of the actual ordering of data in the
-!      memory buffer, e.g. row-major/column-major.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [datamap]
-!           Field {\tt ESMF\_DataMap}.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: FLD1.2, FLD1.6.3 (pri 2?)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetLocalDataInfo"
 
-
-
-        ! assume failure
-        if (present(rc)) rc = ESMF_FAILURE
-
-        ! Minimal error checking
-        if (.not.associated(field%ftypep)) then
-          print *, "ERROR: Invalid or Destroyed Field"
-          return
-        endif
- 
-        if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-          print *, "ERROR: Field not ready"
-          return
-        endif
-
-        if (field%ftypep%datastatus .ne. ESMF_STATE_READY) then
-          print *, "ERROR: No data attached to Field"
-          return
-        endif
-
-        datamap = field%ftypep%mapping
-
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_FieldGetDataMap
-
-!------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_FieldGetLocalDataInfo - Get information about Field Data
 !
@@ -2389,7 +1901,7 @@
       integer, intent(out), optional :: size(:)        
       integer, dimension(ESMF_MAXDIM), intent(out) :: indexorder 
       type(ESMF_DataType), intent(out) :: datatype
-      type(ESMF_Interleave), intent(out) :: interleave   
+      type(ESMF_InterleaveFlag), intent(out) :: interleave   
       integer, intent(out), optional :: rc           
 
 !
@@ -2400,7 +1912,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [{[size]}]
 !           Field size.
 !     \item [indexorder]
@@ -2414,7 +1926,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
 
 
 !
@@ -2423,46 +1934,9 @@
         end subroutine ESMF_FieldGetLocalDataInfo
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldGetRelLoc - Return relative location
-!
-! !INTERFACE:
-      subroutine ESMF_FieldGetRelLoc(field, horzRelloc, vertRelloc, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field 
-      type(ESMF_RelLoc), intent(out), optional :: horzRelloc 
-      type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!     Finds and returns the relative location of the field. Use
-!     DataMap access routines to get relloc.
-!
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [name]
-!           A {\tt ESMF\_Field} name.
-!     \item [{[horzRelloc]}]
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
-!     \item [{[vertRelloc]}]
-!            Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldPrint"
 
-
-      call ESMF_DataMapGet(field%ftypep%mapping, horzRelloc=horzRelloc, &
-                           vertRelloc=vertRelloc, rc=rc)
-
-      end subroutine ESMF_FieldGetRelLoc
-
-!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_FieldPrint - Print the contents of a Field
 
@@ -2476,72 +1950,86 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Routine to print information about a field.
+!     Prints information about the {\tt field} to {\tt stdout}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [options]
-!           Print options.
+!     \item [{[options]}]
+!           Print options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         character(len=ESMF_MAXSTR) :: name, str
         type(ESMF_FieldType), pointer :: fp 
         integer :: status
+        !character(len=ESMF_MAXSTR) :: msgbuf
 
 
         if (present(rc)) rc = ESMF_FAILURE
 
-        print *, "Field Print:"
+        !nsc call ESMF_LogWrite("Field Print:", ESMF_LOG_INFO)
+        write(*,*) "Field Print:"
         if (.not. associated(field%ftypep)) then
-          print *, "Empty or Uninitialized Field"
+        !jw  call ESMF_LogWrite("Empty or Uninitialized Field", ESMF_LOG_INFO)
+          write(*,*) "Empty or Uninitialized Field"
           if (present(rc)) rc = ESMF_SUCCESS
           return
         endif
 
         fp => field%ftypep
         call ESMF_BasePrint(fp%base, str, status)
-        if(status .NE. ESMF_SUCCESS) then 
-          if (present(rc)) rc = ESMF_FAILURE
-          return
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         call ESMF_StatusString(fp%fieldstatus, str, status)
-        print *, "Field status = ", trim(str)
+      !jw  write(msgbuf, *)  "Field status = ", trim(str)
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+        write(*, *)  "Field status = ", trim(str)
 
-        if (fp%fieldstatus .ne. ESMF_STATE_READY) then
-          if (present(rc)) rc = ESMF_FAILURE
+        if (fp%fieldstatus .ne. ESMF_STATUS_READY) then
+          if (present(rc)) rc = ESMF_SUCCESS
           return
         endif
 
-        call ESMF_GetName(fp%base, name, status)
-        if(status .NE. ESMF_SUCCESS) then 
-          print *, "ERROR in ESMF_FieldGetName"
-          return
-        endif 
-        print *, "  Name = '",  trim(name), "'"
+        call c_ESMC_GetName(fp%base, name, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      !jw  write(msgbuf, *)  "  Name = '",  trim(name), "'"
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+        write(*, *)  "  Name = '",  trim(name), "'"
 
         call ESMF_StatusString(fp%gridstatus, str, status)
-        print *, "Grid status = ", trim(str)
-        if (fp%gridstatus .eq. ESMF_STATE_READY) then 
+      !jw  write(msgbuf, *)  "Grid status = ", trim(str)
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+        write(*, *)  "Grid status = ", trim(str)
+        if (fp%gridstatus .eq. ESMF_STATUS_READY) then 
            call ESMF_GridPrint(fp%grid, "", status)
         endif
 
         call ESMF_StatusString(fp%datastatus, str, status)
-        print *, "Data status = ", trim(str)
-        if (fp%datastatus .eq. ESMF_STATE_READY) then 
+      !jw  write(msgbuf, *)  "Data status = ", trim(str)
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+        write(*, *)  "Data status = ", trim(str)
+        !TODO: add code here to print more info
+        if (fp%datastatus .eq. ESMF_STATUS_READY) then 
            call ESMF_ArrayPrint(fp%localfield%localdata, "", status)
         endif
 
-        call ESMF_DataMapPrint(fp%mapping, "", status)
-
+        call ESMF_StatusString(fp%datamapstatus, str, status)
+      !jw  write(msgbuf, *)  "FieldDataMap status = ", trim(str)
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+        write(*, *)  "FieldDataMap status = ", trim(str)
         !TODO: add code here to print more info
+        if (fp%datamapstatus .eq. ESMF_STATUS_READY) then 
+           call ESMF_FieldDataMapPrint(fp%mapping, "", status)
+        endif
+
 
         ! global field contents
         !type (ESMF_IOSpec) :: iospec             ! iospec values
@@ -2555,6 +2043,9 @@
         end subroutine ESMF_FieldPrint
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRead"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldRead - Read in a Field from external storage
 !
@@ -2579,7 +2070,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [name]
-!           A {\tt ESMF\_Field} name.
+!           An {\tt ESMF\_Field} name.
 !     \item [{[gname]}]
 !            {\tt ESMF\_Grid} name.
 !     \item [{[dnames]}]
@@ -2591,7 +2082,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
 
 !
@@ -2608,6 +2098,9 @@
         end function ESMF_FieldRead
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldReadRestart"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldReadRestart - Read back in a saved Field
 !
@@ -2625,13 +2118,13 @@
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
-!      all data associated with a {\tt ESMF\_Field} from the 
+!      all data associated with an {\tt ESMF\_Field} from the 
 !      last call to WriteRestart.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [name]
-!           A {\tt ESMF\_Field} name.
+!           An {\tt ESMF\_Field} name.
 !     \item [{[iospec]}]
 !            I/O specification.
 !     \item [{[rc]}]
@@ -2639,7 +2132,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: FLD1.6.8
 
 !       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
 
@@ -2656,6 +2148,690 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetArray"
+
+!BOP
+! !IROUTINE: ESMF_FieldSetArray - Set data Array associated with the Field
+!
+! !INTERFACE:
+      subroutine ESMF_FieldSetArray(field, array, rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field      
+      type(ESMF_Array), intent(in) :: array
+      integer, intent(out), optional :: rc           
+
+!
+! !DESCRIPTION:
+!     Set data in {\tt ESMF\_Array} form.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [{[array]}]
+!           {\tt ESMF\_Array} containing data.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+
+      integer :: status                           ! Error status
+      !character(len=ESMF_MAXSTR) :: str
+      type(ESMF_FieldType), pointer :: ftypep
+
+      ! Initialize return code   
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! validate before using
+      call ESMF_FieldValidate(field, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+ 
+      ftypep => field%ftypep
+
+      ! TODO: do we allow this?  if so, do we just destroy the old array?
+      !if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
+      !   if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+      !                          "Data already associated with Field", &
+      !                           ESMF_CONTEXT, rc)) return
+      !endif
+
+      ftypep%localfield%localdata = array
+      ftypep%datastatus = ESMF_STATUS_READY
+   
+      ! Now revalidate to be sure the grid and datamap, if they exist, are
+      ! consistent with the new array.
+      call ESMF_FieldValidate(field, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+ 
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetArray
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetInt4Attr"
+
+!BOP
+! !IROUTINE: ESMF_FieldSetAttribute - Set a 4-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldSetAttribute()
+      subroutine ESMF_FieldSetInt4Attr(field, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I4), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a 4-byte integer attribute to the {\tt field}.
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The integer value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I4, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetInt4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetInt4ListAttr"
+
+!BOP
+! !IROUTINE: ESMF_FieldSetAttribute - Set a 4-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldSetAttribute()
+      subroutine ESMF_FieldSetInt4ListAttr(field, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a 4-byte integer list attribute to the {\tt field}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is
+!     given by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [count]
+!           The number of integers in the {\tt valueList}.
+!     \item [valueList]
+!           The integer values of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I4, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetInt4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetInt8Attr"
+
+!BOP
+! !IROUTINE: ESMF_FieldSetAttribute - Set an 8-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldSetAttribute()
+      subroutine ESMF_FieldSetInt8Attr(field, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I8), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an 8-byte integer attribute to the {\tt field}.
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The integer value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetInt8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetInt8ListAttr"
+
+!BOP
+! !IROUTINE: ESMF_FieldSetAttribute - Set an 8-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldSetAttribute()
+      subroutine ESMF_FieldSetInt8ListAttr(field, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches an 8-byte integer list attribute to the {\tt field}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is
+!     given by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [count]
+!           The number of integers in the {\tt valueList}.
+!     \item [valueList]
+!           The integer values of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetInt8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetReal4Attr"
+
+!BOP
+! !IROUTINE: ESMF_FieldSetAttribute - Set a 4-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldSetAttribute()
+      subroutine ESMF_FieldSetReal4Attr(field, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R4), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a 4-byte real attribute to the {\tt field}.
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The real value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R4, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetReal4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetReal4ListAttr"
+
+!BOP
+! !IROUTINE: ESMF_FieldSetAttribute - Set a 4-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldSetAttribute()
+      subroutine ESMF_FieldSetReal4ListAttr(field, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a 4-byte real list attribute to the {\tt field}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is
+!     given by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [count]
+!           The number of reals in the {\tt valueList}.
+!     \item [value]
+!           The real values of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R4, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetReal4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetReal8Attr"
+
+!BOP
+! !IROUTINE: ESMF_FieldSetAttribute - Set an 8-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldSetAttribute()
+      subroutine ESMF_FieldSetReal8Attr(field, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R8), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an 8-byte real attribute to the {\tt field}.
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The real value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetReal8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetReal8ListAttr"
+
+!BOP
+! !IROUTINE: ESMF_FieldSetAttribute - Set an 8-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldSetAttribute()
+      subroutine ESMF_FieldSetReal8ListAttr(field, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches an 8-byte real list attribute to the {\tt field}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is
+!     given by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [count]
+!           The number of reals in the {\tt valueList}.
+!     \item [value]
+!           The real values of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetReal8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetLogicalAttr"
+
+!BOP
+! !IROUTINE: ESMF_FieldSetAttribute - Set a logical attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldSetAttribute()
+      subroutine ESMF_FieldSetLogicalAttr(field, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      type(ESMF_Logical), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a logical attribute to the {\tt field}.
+!     The attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The logical true/false value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetLogicalAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetLogicalListAttr"
+
+!BOP
+! !IROUTINE: ESMF_FieldSetAttribute - Set a logical list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldSetAttribute()
+      subroutine ESMF_FieldSetLogicalListAttr(field, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a logical list attribute to the {\tt field}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of logical items in the {\tt valueList} is
+!     given by {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [count]
+!           The number of logicals in the {\tt valueList}.
+!     \item [value]
+!           The logical true/false values of the attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, &
+                                    count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetLogicalListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetCharAttr"
+
+!BOP
+! !IROUTINE: ESMF_FieldSetAttribute - Set a character attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldSetAttribute()
+      subroutine ESMF_FieldSetCharAttr(field, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      character (len = *), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a character attribute to the {\tt field}.
+!     The attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The character value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      call c_ESMC_AttributeSetChar(field%ftypep%base, name, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetCharAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetGrid"
 
 !BOP
 ! !IROUTINE: ESMF_FieldSetGrid - Set Grid associated with the Field
@@ -2672,12 +2848,12 @@
 !  Used only with the version of {\tt ESMF\_FieldCreate} which creates an empty 
 !  {\tt ESMF\_Field} and allows the {\tt ESMF\_Grid} to be specified later.  
 !  Otherwise it is an error to try to change the {\tt ESMF\_Grid} 
-!  associated with a {\tt ESMF\_Field}.
+!  associated with an {\tt ESMF\_Field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [grid]
 !           {\tt ESMF\_Grid} to be added.
 !     \item [{[rc]}]
@@ -2685,44 +2861,55 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: FLD1.1.3
-
+        type(ESMF_FieldType), pointer :: ftype
         logical :: had_grid
+        integer :: localrc
 
         ! assume failure
         if (present(rc)) rc = ESMF_FAILURE
 
-        ! Minimal error checking
-        if (.not.associated(field%ftypep)) then
-          print *, "ERROR: Invalid or Destroyed Field"
-          return
-        endif
- 
-        if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-          print *, "ERROR: Field not ready"
-          return
-        endif
+        ! Validate first
+        call ESMF_FieldValidate(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        ftype => field%ftypep
 
         ! decide if we're regridding or just adding a grid to a partially
         ! created field.
         had_grid = .FALSE.
-        if (field%ftypep%gridstatus .eq. ESMF_STATE_READY) had_grid = .TRUE.
+        if (ftype%gridstatus .eq. ESMF_STATUS_READY) had_grid = .TRUE.
 
         if (.not. had_grid) then
            ! if no grid, just add it
-           field%ftypep%grid = grid
-           field%ftypep%gridstatus = ESMF_STATE_READY
+           ftype%grid = grid
+           ftype%gridstatus = ESMF_STATUS_READY
         else
            ! this could be considered a request to regrid the data
-           print *, "not currently supported.  since a grid exists, this"
-           print *, "will be a request to regrid the field"
+           call ESMF_LogWrite("Replacing existing grid not yet supported", &
+                               ESMF_LOG_WARNING, &
+                               ESMF_CONTEXT)
+           call ESMF_LogWrite("Will be considered a regrid request", &
+                               ESMF_LOG_WARNING, &
+                               ESMF_CONTEXT)
         endif
+
+        ! now validate again to be sure that if the field had an existing
+        ! array or datamap, that we haven't created an inconsistent object
+        call ESMF_FieldValidate(field, "", rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_FieldSetGrid
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetDataMap"
+
 !BOP
 ! !IROUTINE: ESMF_FieldSetDataMap - Set DataMap assocated with a Field
 !
@@ -2731,19 +2918,19 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field
-      type(ESMF_DataMap), intent(in) :: datamap
+      type(ESMF_FieldDataMap), intent(in) :: datamap
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!  Used to set the ordering of a {\tt ESMF\_Field}.  If an initialized 
-!  {\tt ESMF\_DataMap} and associated data are already in the 
+!  Used to set the ordering of an {\tt ESMF\_Field}.  If an initialized 
+!  {\tt ESMF\_FieldDataMap} and associated data are already in the 
 !  {\tt ESMF\_Field}, the data will be reordered according to the new 
 !  specification.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [datamap]
 !           New memory order of data.
 !     \item [{[rc]}]
@@ -2751,44 +2938,53 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: FLD1.2
-
+        integer :: status
         logical :: had_data
 
         ! assume failure
         if (present(rc)) rc = ESMF_FAILURE
 
-        ! Minimal error checking
-        if (.not.associated(field%ftypep)) then
-          print *, "ERROR: Invalid or Destroyed Field"
-          return
-        endif
+        ! Validate first
+        call ESMF_FieldValidate(field, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
  
-        if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-          print *, "ERROR: Field not ready"
-          return
-        endif
-
         ! decide if we're reordering data or just setting an initial map
-        ! created field.
+        ! in an already created field without data.  (the latter is ok;
+        ! the former is not implemented yet.)
         had_data = .FALSE.
-        if (field%ftypep%datastatus .eq. ESMF_STATE_READY) had_data = .TRUE.
+        if (field%ftypep%datastatus .eq. ESMF_STATUS_READY) had_data = .TRUE.
 
         if (.not. had_data) then
            ! if no datamap, just add it
            field%ftypep%mapping = datamap
         else
            ! this could be considered a request to reorder the data
-           print *, "not currently supported.  since data exists, this"
-           print *, "will be a request to reorder the data in the field"
+           call ESMF_LogWrite("Replacing existing datamap not yet supported", &
+                               ESMF_LOG_WARNING, &
+                               ESMF_CONTEXT)
+           call ESMF_LogWrite("Will be considered a data reorder request", &
+                               ESMF_LOG_WARNING, &
+                               ESMF_CONTEXT)
            return
         endif
+
+        ! and now revalidate to ensure a consistent datamap
+        call ESMF_FieldValidate(field, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+ 
 
         if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_FieldSetDataMap
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetDataValues"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldSetDataValues - Set contents of Data array
 !
@@ -2803,14 +2999,14 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Allows specified data values associated with a {\tt ESMF\_Field} to be set 
+!      Allows specified data values associated with an {\tt ESMF\_Field} to be set 
 !      through the {\tt ESMF\_Field} interface instead of detaching data and setting 
 !      it outside the framework.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [index]
 !           Index or range to set.
 !     \item [values]
@@ -2820,7 +3016,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: FLD1.6.7
 
 
 !       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
@@ -2830,491 +3025,1144 @@
         end subroutine ESMF_FieldSetDataValues
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldValidate"
+
 !BOP
-! !IROUTINE: ESMF_FieldSetAttribute - Set an integer Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldSetAttribute()
-      subroutine ESMF_FieldSetIntAttr(field, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(inout) :: field  
-      character (len = *), intent(in) :: name
-      integer(ESMF_KIND_I4), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an integer attribute to a {\tt ESMF\_Field}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [value]
-!           The integer value of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_INTEGER, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldSetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldSetIntAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldSetAttribute - Set an integer list Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldSetAttribute()
-      subroutine ESMF_FieldSetIntListAttr(field, name, count, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      integer(ESMF_KIND_I4), dimension(:), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an integer list attribute to a {\tt ESMF\_Field}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The integer values of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: limit
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-  
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_FieldSetAttribute: count longer than value list"
-          return
-      endif
-
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_INTEGER, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldSetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldSetIntListAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldSetAttribute - Set a real Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldSetAttribute()
-      subroutine ESMF_FieldSetRealAttr(field, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
-      character (len = *), intent(in) :: name
-      real(ESMF_KIND_R8), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a real attribute to a {\tt ESMF\_Field}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [value]
-!           The real value of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_REAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldSetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldSetRealAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldSetAttribute - Set a real list Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldSetAttribute()
-      subroutine ESMF_FieldSetRealListAttr(field, name, count, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a real list attribute to a {\tt ESMF\_Field}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The real values of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: limit
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_FieldSetAttribute: count longer than value list"
-          return
-      endif
-
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_REAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldSetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldSetRealListAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldSetAttribute - Set a logical Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldSetAttribute()
-      subroutine ESMF_FieldSetLogicalAttr(field, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
-      character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an logical attribute to a {\tt ESMF\_Field}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [value]
-!           The logical true/false value of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_LOGICAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldSetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldSetLogicalAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldSetAttribute - Set a logical list Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldSetAttribute()
-      subroutine ESMF_FieldSetLogicalListAttr(field, name, count, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an logical list attribute to a {\tt ESMF\_Field}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The logical true/false values of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: limit
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_FieldSetAttribute: count longer than value list"
-          return
-      endif
-
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldSetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldSetLogicalListAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldSetAttribute - Set a character Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldSetAttribute()
-      subroutine ESMF_FieldSetCharAttr(field, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
-      character (len = *), intent(in) :: name
-      character (len = *), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a character attribute to a {\tt ESMF\_Field}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [value]
-!           The character value of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeSetChar(field%ftypep%base, name, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldSetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldSetCharAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_FieldValidate - Check the internal consistency of a Field
+! !IROUTINE:  ESMF_FieldValidate - Check validity of a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldValidate(field, opt, rc)
+      subroutine ESMF_FieldValidate(field, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field 
-      character (len = *), intent(in) :: opt 
+      character (len = *), intent(in), optional :: options 
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Routine to validate the internal state of a {\tt ESMF\_Field}.
+!      Validates that the {\tt field} is internally consistent.
+!      Currently this method determines if the {\tt field} is uninitialized 
+!      or already destroyed.  The code also checks if the data and grid sizes agree.
+!      Currently we allow for 1 point mismatch to accommodate different staggerings.
+!      The method returns an error code if problems 
+!      are found.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [opt]
-!           Validation option.
+!           {\tt ESMF\_Field} to validate.
+!     \item [{[options]}]
+!           Validation options are not yet supported.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt field} 
+!           is valid.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  FLD4.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
-!     Initialize return code; assume failure until success is certain
+      type(ESMF_FieldType), pointer :: ftypep
+      type(ESMF_Relloc) :: horzRelloc, vertRelloc
+      character(len=ESMF_MAXSTR) :: msgbuf
+      integer :: gridcounts(ESMF_MAXGRIDDIM)   ! how big the local grid is
+      integer :: arraycounts(ESMF_MAXDIM)      ! how big the local array is
+      integer :: maplist(ESMF_MAXDIM)          ! mapping between them
+      integer :: otheraxes(ESMF_MAXDIM)        ! counts for non-grid dims
+      integer :: gridrank, maprank, arrayrank, halo
+      integer :: gridcellcount, arraycellcount
+      logical :: hasgrid, hasarray, hasmap     ! decide what we can validate
+      integer :: i, j
+    
+      ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       if (.not.associated(field%ftypep)) then 
-          print *, "Uninitialized or Destroyed Field"
-          return
+         call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)
+         return
       endif 
 
-      if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-          print *, "Uninitialized or Destroyed Field"
-          return
+      ftypep => field%ftypep
+
+
+      ! make sure the field is ready before trying to look at contents
+      if (ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
+         call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)
+         return
       endif 
 
-      ! TODO: add more code here
+      ! figure out whether there is a grid, datamap, and/or arrays first
+      ! before doing tests to be sure they are consistent.
+      hasgrid = .FALSE.
+      hasarray = .FALSE.
+      hasmap = .FALSE.
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      ! make sure there is data before asking the datamap questions.
+      if (ftypep%datamapstatus .eq. ESMF_STATUS_READY) then
+
+          ! get needed info from datamap. 
+          call ESMF_FieldDataMapGet(ftypep%mapping, horzRelloc=horzRelloc, &
+                                    vertRelloc=vertRelloc, &
+                                    dataRank=maprank, dataIndexList=maplist, &
+                                    counts=otheraxes, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          hasmap = .TRUE.
+      endif
+
+      ! if there is no datamap yet, then default horzRelloc to cell center
+      ! before asking thegrid for count information
+      if (.not. hasmap) then
+          horzRelloc = ESMF_CELL_CENTER
+      endif
+
+      ! make sure there is a grid before asking it questions.
+      if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
+
+          ! get grid dim and extents for the local piece
+          call ESMF_GridGet(ftypep%grid, distDimCount=gridrank, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          call ESMF_GridGetDELocalInfo(ftypep%grid, horzRelloc, vertRelloc, &
+                                    localCellCountPerDim=gridcounts, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          hasgrid = .TRUE.
+
+          ! compute total number of grid items for later
+          gridcellcount = 1
+          do i = 1, gridrank
+              gridcellcount = gridcellcount * gridcounts(i)
+          enddo
+      endif
+
+      ! make sure there is data before asking it questions.
+      if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
+
+          ! get array counts and other info
+          call ESMF_ArrayGet(ftypep%localfield%localdata, counts=arraycounts, &
+                             haloWidth=halo, rank=arrayrank, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          hasarray = .TRUE.
+
+          ! compute total number of array items for later
+          arraycellcount = 1
+          do i = 1, arrayrank
+              arraycellcount = arraycellcount * arraycounts(i)
+          enddo
+      endif
+
+      ! and now see if it is at all consistent.
+      if (hasarray .and. hasmap) then
+          if (arrayrank .ne. maprank) then
+              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                             "rank in fielddatamap must match rank in array", &
+                                       ESMF_CONTEXT, rc)
+              return
+          endif
+      endif
+
+      ! if array and datamap and grid, check exact counts now
+      if (hasarray .and. hasmap .and. hasgrid) then
+
+          ! if the array and grid cell counts are 0, there is no local
+          ! data on the PET and we should look no further.
+          if ((arraycellcount .eq. 0) .and. (gridcellcount .eq. 0)) then
+             continue ! ok, no data on this local PET.  
+          else
+            j = 1
+            do i = 1, arrayrank
+              if (maplist(i) .eq. 0) then
+                  ! maplist is 0 if the axes does not correspond to the grid.
+                  ! in that case, it must correspond to the counts in the map.
+                  ! TODO: for now the halo is added to all axes in the array,
+                  ! not just those which correspond to the grid.  when we fix
+                  ! this, then change this test to ignore halo widths.
+                  if ((abs(arraycounts(i)) - (otheraxes(j) + (2*halo))) > 1 ) then
+                      if (arraycounts(i) .eq. otheraxes(j)) then
+                       write(msgbuf,*) "array index", i, "(", arraycounts(i), &
+                                       ") != datamap index", j, &
+                                       "(", otheraxes(j) + (2*halo), &
+                                       ") including halo width"
+                          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, msgbuf, &
+                                                   ESMF_CONTEXT, rc)
+                          return
+                      else 
+                       write(msgbuf,*) "array index", i, "(", arraycounts(i), &
+                                       ") != datamap index", j, &
+                                       "(", otheraxes(j) + (2*halo), ")"
+                          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, msgbuf, &
+                                                   ESMF_CONTEXT, rc)
+                  
+                          return
+                      endif
+                  endif
+                  j = j + 1
+              else
+                  ! maplist is not 0, so this axes does correspond to the grid.
+                  ! the sizes must match, taking into account the halo widths
+                  ! and the index reordering.
+                  if (abs(arraycounts(i) - (gridcounts(maplist(i)) + (2*halo))) > 1 ) then
+                      write(msgbuf,*) "array index", i, "(", arraycounts(i), &
+                                      ") != grid index", maplist(i), "(", &
+                                      gridcounts(maplist(i)) + (2*halo), ")"
+                      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, msgbuf, &
+                                                ESMF_CONTEXT, rc)
+                      return
+                  endif
+    
+              endif
+            enddo
+          endif
+      endif
+
+      
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldWrite"
+
 !BOP
 ! !IROUTINE: ESMF_FieldWrite - Write a Field to external storage
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldWrite(field, & ! subset, 
+      subroutine ESMF_FieldWrite(field, iospec, timestamp, rc)
+!
+! !ARGUMENTS:
+        type(ESMF_Field), intent(in) :: field
+        type(ESMF_IOSpec), intent(in), optional :: iospec
+        type(ESMF_Time), intent(in), optional :: timestamp 
+        integer, intent(out), optional :: rc               ! return code
+
+!
+! !DESCRIPTION:
+!      Used to write data to persistent storage in a variety of formats.  
+!      (see WriteRestart/ReadRestart for quick data dumps.)  Details of I/O 
+!      options specified in the IOSpec derived type. 
+!
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [name]
+!           An {\tt ESMF\_Field} name.
+!     \item [{[iospec]}]
+!            I/O specification.
+!     \item [{[timestamp]}]
+!            A timestamp of type {\tt ESMF\_Time} for the data.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+        ! Local variables
+        integer :: status, de_id
+        type(ESMF_Array) :: out_array
+        type(ESMF_DataType) arr_type
+        type(ESMF_DataKind) arr_kind
+        integer out_rank
+        integer out_kind
+        integer out_type
+        integer, dimension(:), pointer :: out_counts
+        integer, dimension(:), pointer :: out_lbounds
+        integer, dimension(:), pointer :: out_ubounds
+        integer, dimension(:), pointer :: out_strides
+        type(ESMF_Grid) :: grid
+        type(ESMF_DELayout) :: delayout
+        type (ESMF_IOFileFormat) :: fileformat
+        type(ESMF_Time) :: ts
+        character (19) Date
+      
+        ! call ESMF_Log(?, 'entry into ESMF_FieldWrite');
+
+        ! Set initial values
+        status = ESMF_FAILURE 
+
+        ! Initialize return code
+        if (present(rc)) rc = ESMF_FAILURE      
+           
+        ! Get filename out of IOSpec, if specified.  Otherwise use the
+        ! name of the Field.
+        if (present(IOSpec)) then
+           call ESMF_IOSpecGet(IOSpec, iofileformat=fileformat, rc=status)
+           if (fileformat == ESMF_IO_FILEFORMAT_HDF) then
+              print*, "HDF output is not currently supported."
+              return
+           else if (fileformat == ESMF_IO_FILEFORMAT_UNSPECIFIED) then
+              call ESMF_FieldWriteFileASCII(field, iospec, rc=status)
+              if (ESMF_LogMsgFoundError(status, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+              if (present(rc)) rc = ESMF_SUCCESS
+              return
+           else if (fileformat == ESMF_IO_FILEFORMAT_NETCDF) then
+#if (ESMF_NO_IOCODE)
+              print*, "netCDF support not configured in."
+              return
+#else
+              continue
+#endif
+           else
+              print*, "Unrecognized IO Fileformat."
+              return
+           endif
+        else ! No IOSpec passed in, so check in the Field
+           call ESMF_IOSpecGet(field%ftypep%iospec, iofileformat=fileformat, rc=status)
+           if (fileformat == ESMF_IO_FILEFORMAT_HDF) then
+              print*, "HDF output is not currently supported."
+              return
+           else if (fileformat == ESMF_IO_FILEFORMAT_UNSPECIFIED) then
+           call ESMF_FieldWriteFileASCII(field, iospec, rc=status)
+              if (ESMF_LogMsgFoundError(status, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+              if (present(rc)) rc = ESMF_SUCCESS
+
+              return
+           else if (fileformat == ESMF_IO_FILEFORMAT_NETCDF) then
+#if (ESMF_NO_IOCODE)
+              print*, "netCDF support not configured in."
+              return
+#else
+              continue
+#endif
+           else
+              print*, "Unrecognized IO Fileformat."
+              return
+           endif
+        endif
+
+        if ( present(timestamp) ) then
+           ts = timestamp
+        else
+           ! as a default, set the date/time as the current real time.
+           call ESMF_TimeSyncToRealTime(ts, status)
+        endif
+        ! get the date from the timestamp.
+        call ESMF_TimeGet(ts, timeString=Date, rc=status)
+        Date = Date(1:10)//'_'//Date(12:19)
+
+        ! Collect results on DE 0 and output to a file
+        call ESMF_FieldGet(field, grid=grid, rc=status)
+!!$        call ESMF_FieldGet( field, name=fieldname, rc=status)
+        call ESMF_GridGet(grid, delayout=delayout, rc=status)
+        call ESMF_DELayoutGet(delayout, localDE=de_id, rc=status)
+
+        ! Output to file, from de_id 0 only
+!!$        call ESMF_FieldAllGather(field, out_array, rc=status)
+        call ESMF_ArrayGather(field%ftypep%localfield%localdata, &
+                              field%ftypep%grid, field%ftypep%mapping, &
+                              0, out_array, rc=status)
+
+
+        if (de_id .eq. 0) then       
+        call ESMF_ArrayGet(out_array, out_rank, arr_type, arr_kind, rc=rc)
+        allocate(out_counts (out_rank), &
+                 out_lbounds(out_rank), &
+                 out_ubounds(out_rank), &
+                 out_strides(out_rank), stat=rc)
+        call ESMF_ArrayGet(out_array, counts=out_counts, lbounds=out_lbounds, &
+                           ubounds=out_ubounds, strides=out_strides, rc=rc)
+
+        out_type = arr_type%dtype
+        out_kind = arr_kind%dkind
+
+#if !(ESMF_NO_IOCODE)
+        select case (out_type)
+          case (ESMF_DATA_INTEGER%dtype)
+            select case (out_rank)
+              case (1)
+                select case (out_kind)
+!!$                  case (ESMF_I1%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF1DI1(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I2%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF1DI2(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I4%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF1DI4(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I8%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF1DI8(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case default
+                    print *, "unsupported kind"
+                end select
+
+              case (2)
+                select case (out_kind)
+                  case (ESMF_I1%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF2DI1(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I2%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF2DI2(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I4%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF2DI4(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I8%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF2DI8(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case default
+                    print *, "unsupported kind"
+                end select
+
+              case (3)
+                select case (out_kind)
+!!$                  case (ESMF_I1%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF3DI1(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I2%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF3DI2(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I4%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF3DI4(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I8%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF3DI8(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case default
+                    print *, "unsupported kind"
+                end select
+
+              case (4)
+                select case (out_kind)
+!!$                  case (ESMF_I1%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF4DI1(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I2%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF4DI2(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I4%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF4DI4(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I8%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF4DI8(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case default
+                    print *, "unsupported kind"
+                end select
+
+              case (5)
+                select case (out_kind)
+!!$                  case (ESMF_I1%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF5DI1(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I2%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF5DI2(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I4%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF5DI4(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I8%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF5DI8(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case default
+                    print *, "unsupported kind"
+                end select
+
+              case (6)
+                select case (out_kind)
+!!$                  case (ESMF_I1%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF6DI1(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I2%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF6DI2(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I4%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF6DI4(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I8%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF6DI8(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case default
+                    print *, "unsupported kind"
+                end select
+
+              case (7)
+                select case (out_kind)
+!!$                  case (ESMF_I1%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF7DI1(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I2%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF7DI2(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I4%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF7DI4(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_I8%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF7DI8(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case default
+                    print *, "unsupported kind"
+                end select
+
+              case default
+                print *, "unsupported rank"
+            end select
+
+           case (ESMF_DATA_REAL%dtype)
+            select case (out_rank)
+              case (1)
+                select case (out_kind)
+!!$                  case (ESMF_R4%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF1DR4(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_R8%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF1DR8(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case default
+                    print *, "unsupported kind"
+                end select
+
+              case (2)
+                select case (out_kind)
+                  case (ESMF_R4%dkind)
+                    call ESMF_FieldWriteFileNetCDF2DR4(field, grid, out_array, out_counts, &
+                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case (ESMF_R8%dkind)
+                    call ESMF_FieldWriteFileNetCDF2DR8(field, grid, out_array, out_counts, &
+                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case default
+                    print *, "unsupported kind"
+                end select
+
+              case (3)
+                select case (out_kind)
+                  case (ESMF_R4%dkind)
+                    call ESMF_FieldWriteFileNetCDF3DR4(field, grid, out_array, out_counts, &
+                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case (ESMF_R8%dkind)
+                    call ESMF_FieldWriteFileNetCDF3DR8(field, grid, out_array, out_counts, &
+                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case default
+                    print *, "unsupported kind"
+                end select
+
+              case (4)
+                select case (out_kind)
+!!$                  case (ESMF_R4%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF4DR4(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_R8%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF4DR8(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case default
+                    print *, "unsupported kind"
+                end select
+
+              case (5)
+                select case (out_kind)
+!!$                  case (ESMF_R4%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF5DR4(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_R8%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF5DR8(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case default
+                    print *, "unsupported kind"
+                end select
+
+              case (6)
+                select case (out_kind)
+!!$                  case (ESMF_R4%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF6DR4(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_R8%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF6DR8(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case default
+                    print *, "unsupported kind"
+                end select
+
+              case (7)
+                select case (out_kind)
+!!$                  case (ESMF_R4%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF7DR4(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+!!$                  case (ESMF_R8%dkind)
+!!$                    call ESMF_FieldWriteFileNetCDF7DR8(field, grid, out_array, out_counts, &
+!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case default
+                    print *, "unsupported kind"
+                end select
+
+              case default
+                print *, "unsupported rank"
+            end select
+          case default
+            print *, "unsupported type"
+         end select
+
+#endif
+
+      endif ! (de_id .eq. 0) then  
+
+        call ESMF_ArrayDestroy(out_array, status)
+        if  (present(rc)) rc = ESMF_SUCCESS
+        
+      end subroutine ESMF_FieldWrite
+
+
+#if !(ESMF_NO_IOCODE)
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldWriteFileNetCDF2DR4 - Write a Field to external storage
+!
+! !INTERFACE:
+      subroutine ESMF_FieldWriteFileNetCDF2DR4(field, grid, array, counts, & 
+                                 lbounds, ubounds, date, iospec, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field 
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Array), intent(in) :: array
+        integer, dimension(:), intent(in) :: counts
+        integer, dimension(:), intent(in) :: lbounds
+        integer, dimension(:), intent(in) :: ubounds
+      character (19), intent(in) :: date
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!      Used to write data to persistent storage in a variety of formats.  
+!      (see WriteRestart/ReadRestart for quick data dumps.)  Details of I/O 
+!      options specified in the IOSpec derived type. 
+!
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [name]
+!           An {\tt ESMF\_Field} name.
+!     \item [{[subset]}]
+!            {\tt ESMF\_Subset}.
+!     \item [{[iospec]}]
+!            I/O specification.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+        ! Local variables
+        integer comm
+        integer IOComm
+        type(ESMF_VM) :: vm
+        character (80) SysDepInfo
+        integer     :: DataHandle
+        integer DomDesc
+        character*2 MemOrd
+        character*2 Stagger
+        character*31, dimension(2) :: DimNames
+        character(len=ESMF_MAXSTR) :: filename
+        real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: data_ptr
+        integer wrf_type
+        integer status
+
+        ! call ESMF_Log(?, 'entry into ESMF_FieldWrite');
+
+        ! Set initial values
+        status = ESMF_FAILURE 
+
+        wrf_type = WRF_REAL
+
+        ! Initialize return code
+        if (present(rc)) rc = ESMF_FAILURE      
+           
+        ! Get filename out of IOSpec, if specified.  Otherwise use the
+        ! name of the Field.
+        if (present(IOSpec)) then
+            call ESMF_IOSpecGet(IOSpec, filename=filename, rc=status)
+        else
+            call ESMF_FieldGet(field, name=filename, rc=status)
+        endif
+
+! We are not taking advantage of the ability to have a different
+! communicator just for IO.  So we set the IO communicator to that of
+! the field DE.
+        call ESMF_VMGetGlobal(vm, rc=Status)
+        call ESMF_VMGet(vm, mpiCommunicator=comm, rc=rc)
+        IOComm = Comm
+  
+        Stagger = ''
+
+! This is a WRF string used to pass additional control information to
+! the I/O interface.  Currently it's only setting is to describe if the
+! DATASET is a RESTART, HISTORY, BOUNDARY condition or INITIAL condition
+! field.
+! FieldWrite does not currently have a use for this feature and always
+! uses the same I/O stream.         
+        SysDepInfo = 'DATASET=HISTORY'
+
+! This is a required WRF variable to "that may be used to pass a
+! communication package specific domain."  
+! For now it is set to 0 which is a null setting.
+        DomDesc = 0
+  
+           MemOrd = "XY"
+           DimNames(1) = 'X'
+           DimNames(2) = 'Y'
+        
+        call ESMF_ArrayGetData( array, data_ptr, ESMF_DATA_REF, rc)
+
+! Initialize the output stream.
+           call ext_ncd_ioinit(sysdepinfo,status)
+
+! To write multiple times into the same file, the I/O stream will
+! probably need a separate initialize routine.  Upon initialization,
+! 'DataHandle' will be carried around, perhaps in ESMF_IOSpec, to
+! reaccess the file.
+      call ext_ncd_open_for_write_begin( filename, comm, iocomm, sysdepinfo, datahandle, status)
+           
+! This call 'trains' the output library but does not write out any data.
+      call ext_ncd_write_field(datahandle,date,filename,data_ptr,wrf_type,comm,iocomm,domdesc,&
+                              &memord,stagger,dimnames,lbounds,ubounds,lbounds,ubounds,&
+                              &lbounds,ubounds,status)
+  
+      call ext_ncd_open_for_write_commit(datahandle, status)
+  
+! This call does output the data.
+      call ext_ncd_write_field(datahandle,date,filename,data_ptr,wrf_type,comm,iocomm,domdesc,&
+                              &memord,stagger,dimnames,lbounds,ubounds,lbounds,ubounds,&
+                              &lbounds,ubounds,status)
+  
+! For writing multiple times to the same file, these calls will have
+! to be placed in a separate close routine to release the handle on
+! the IO stream.
+      call ext_ncd_ioclose( datahandle, status)
+      call ext_ncd_ioexit(status)
+
+         end subroutine ESMF_FieldWriteFileNetCDF2DR4
+        
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldWriteFileNetCDF2DR8 - Write a Field to external storage
+!
+! !INTERFACE:
+      subroutine ESMF_FieldWriteFileNetCDF2DR8(field, grid, array, counts, & 
+                                 lbounds, ubounds, date, iospec, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field 
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Array), intent(in) :: array
+        integer, dimension(:), intent(in) :: counts
+        integer, dimension(:), intent(in) :: lbounds
+        integer, dimension(:), intent(in) :: ubounds
+      character (19), intent(in) :: date
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!      Used to write data to persistent storage in a variety of formats.  
+!      (see WriteRestart/ReadRestart for quick data dumps.)  Details of I/O 
+!      options specified in the IOSpec derived type. 
+!
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [name]
+!           An {\tt ESMF\_Field} name.
+!     \item [{[subset]}]
+!            {\tt ESMF\_Subset}.
+!     \item [{[iospec]}]
+!            I/O specification.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+        ! Local variables
+        integer Comm
+        integer IOComm
+        type(ESMF_VM) :: vm
+        character (80) SysDepInfo
+        integer     :: DataHandle
+        integer DomDesc
+        character*2 MemOrd
+        character*2 Stagger
+        character*31, dimension(2) :: DimNames
+        character(len=ESMF_MAXSTR) :: filename
+        real(kind=ESMF_KIND_R8), dimension(:,:), pointer :: data_ptr
+        integer wrf_type
+        integer status
+
+        ! call ESMF_Log(?, 'entry into ESMF_FieldWrite');
+
+        ! Set initial values
+        status = ESMF_FAILURE 
+
+        wrf_type = WRF_DOUBLE
+
+        ! Initialize return code
+        if (present(rc)) rc = ESMF_FAILURE      
+           
+        ! Get filename out of IOSpec, if specified.  Otherwise use the
+        ! name of the Field.
+        if (present(IOSpec)) then
+            call ESMF_IOSpecGet(IOSpec, filename=filename, rc=status)
+        else
+            call ESMF_FieldGet(field, name=filename, rc=status)
+        endif
+
+! We are not taking advantage of the ability to have a different
+! communicator just for IO.  So we set the IO communicator to that of
+! the field DE.
+        call ESMF_VMGetGlobal(vm, rc=Status)
+        call ESMF_VMGet(vm, mpiCommunicator=comm, rc=rc)
+        IOComm = Comm
+  
+        Stagger = ''
+
+! This is a WRF string used to pass additional control information to
+! the I/O interface.  Currently it's only setting is to describe if the
+! DATASET is a RESTART, HISTORY, BOUNDARY condition or INITIAL condition
+! field.
+! FieldWrite does not currently have a use for this feature and always
+! uses the same I/O stream.         
+        SysDepInfo = 'DATASET=HISTORY'
+
+! This is a required WRF variable to "that may be used to pass a
+! communication package specific domain."  
+! For now it is set to 0 which is a null setting.
+        DomDesc = 0
+  
+           MemOrd = "XY"
+           DimNames(1) = 'X'
+           DimNames(2) = 'Y'
+
+        call ESMF_ArrayGetData( array, data_ptr, ESMF_DATA_REF, rc)
+
+! Initialize the output stream.
+           call ext_ncd_ioinit(SysDepInfo,Status)
+
+! To write multiple times into the same file, the I/O stream will
+! probably need a separate initialize routine.  Upon initialization,
+! 'DataHandle' will be carried around, perhaps in ESMF_IOSpec, to
+! reaccess the file.
+           call ext_ncd_open_for_write_begin( FileName, Comm, IOComm, SysDepInfo, DataHandle, Status)
+           
+! This call 'trains' the output library but does not write out any data.
+           call ext_ncd_write_field(DataHandle,Date,filename,data_ptr,wrf_type,Comm,IOComm,DomDesc,&
+                &MemOrd,Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
+                &lbounds,ubounds,Status)
+  
+           call ext_ncd_open_for_write_commit(DataHandle, Status)
+  
+! This call does output the data.
+           call ext_ncd_write_field(DataHandle,Date,filename,data_ptr,wrf_type,Comm,IOComm,DomDesc,&
+                &MemOrd,Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
+                &lbounds,ubounds,Status)
+  
+! For writing multiple times to the same file, these calls will have
+! to be placed in a separate close routine to release the handle on
+! the IO stream.
+           call ext_ncd_ioclose( DataHandle, Status)
+           call ext_ncd_ioexit(Status)
+
+         end subroutine ESMF_FieldWriteFileNetCDF2DR8
+        
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldWriteFileNetCDF3DR4 - Write a Field to external storage
+!
+! !INTERFACE:
+      subroutine ESMF_FieldWriteFileNetCDF3DR4(field, grid, array, counts, & 
+                                 lbounds, ubounds, date, iospec, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field 
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Array), intent(in) :: array
+        integer, dimension(:), intent(in) :: counts
+        integer, dimension(:), intent(in) :: lbounds
+        integer, dimension(:), intent(in) :: ubounds
+      character (19), intent(in) :: date
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!      Used to write data to persistent storage in a variety of formats.  
+!      (see WriteRestart/ReadRestart for quick data dumps.)  Details of I/O 
+!      options specified in the IOSpec derived type. 
+!
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [name]
+!           An {\tt ESMF\_Field} name.
+!     \item [{[subset]}]
+!            {\tt ESMF\_Subset}.
+!     \item [{[iospec]}]
+!            I/O specification.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+        ! Local variables
+      integer Comm
+      integer IOComm
+        type(ESMF_VM) :: vm
+        character (80) SysDepInfo
+        integer     :: DataHandle
+        integer DomDesc
+        character*3 MemOrd
+        character*3 Stagger
+        character*31, dimension(3) :: DimNames
+        character(len=ESMF_MAXSTR) :: filename
+        real(kind=ESMF_KIND_R4), dimension(:,:,:), pointer :: data_ptr
+        integer wrf_type
+        integer status
+
+        ! call ESMF_Log(?, 'entry into ESMF_FieldWrite');
+
+        ! Set initial values
+        status = ESMF_FAILURE 
+
+        wrf_type = WRF_REAL
+
+        ! Initialize return code
+        if (present(rc)) rc = ESMF_FAILURE      
+           
+        ! Get filename out of IOSpec, if specified.  Otherwise use the
+        ! name of the Field.
+        if (present(IOSpec)) then
+            call ESMF_IOSpecGet(IOSpec, filename=filename, rc=status)
+        else
+            call ESMF_FieldGet(field, name=filename, rc=status)
+        endif
+
+! We are not taking advantage of the ability to have a different
+! communicator just for IO.  So we set the IO communicator to that of
+! the field DE.
+        call ESMF_VMGetGlobal(vm, rc=Status)
+        call ESMF_VMGet(vm, mpiCommunicator=comm, rc=rc)
+        IOComm = Comm
+  
+        Stagger = ''
+
+! This is a WRF string used to pass additional control information to
+! the I/O interface.  Currently it's only setting is to describe if the
+! DATASET is a RESTART, HISTORY, BOUNDARY condition or INITIAL condition
+! field.
+! FieldWrite does not currently have a use for this feature and always
+! uses the same I/O stream.         
+        SysDepInfo = 'DATASET=HISTORY'
+
+! This is a required WRF variable to "that may be used to pass a
+! communication package specific domain."  
+! For now it is set to 0 which is a null setting.
+        DomDesc = 0
+  
+! Possibly add this as an ESMF_IOSpec item.
+! I thought this could be related to COORD_ORDER, but that is not an a direct correlation.
+! Hardwire it for now.
+           MemOrd = "XYZ"
+           DimNames(1) = 'X'
+           DimNames(2) = 'Y'
+           DimNames(3) = 'Z'
+        
+
+        call ESMF_ArrayGetData( array, data_ptr, ESMF_DATA_REF, rc)
+
+! Initialize the output stream.
+           call ext_ncd_ioinit(SysDepInfo,Status)
+
+! To write multiple times into the same file, the I/O stream will
+! probably need a separate initialize routine.  Upon initialization,
+! 'DataHandle' will be carried around, perhaps in ESMF_IOSpec, to
+! reaccess the file.
+           call ext_ncd_open_for_write_begin( FileName, Comm, IOComm, SysDepInfo, DataHandle, Status)
+           
+! This call 'trains' the output library but does not write out any data.
+           call ext_ncd_write_field(DataHandle,Date,filename,data_ptr,wrf_type,Comm,IOComm,DomDesc,&
+                &MemOrd,Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
+                &lbounds,ubounds,Status)
+  
+           call ext_ncd_open_for_write_commit(DataHandle, Status)
+  
+! This call does output the data.
+           call ext_ncd_write_field(DataHandle,Date,filename,data_ptr,wrf_type,Comm,IOComm,DomDesc,&
+                &MemOrd,Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
+                &lbounds,ubounds,Status)
+  
+! For writing multiple times to the same file, these calls will have
+! to be placed in a separate close routine to release the handle on
+! the IO stream.
+           call ext_ncd_ioclose( DataHandle, Status)
+           call ext_ncd_ioexit(Status)
+
+         end subroutine ESMF_FieldWriteFileNetCDF3DR4
+        
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldWriteFileNetCDF3DR8 - Write a Field to external storage
+!
+! !INTERFACE:
+      subroutine ESMF_FieldWriteFileNetCDF3DR8(field, grid, array, counts, & 
+                                 lbounds, ubounds, date, iospec, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field 
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Array), intent(in) :: array
+        integer, dimension(:), intent(in) :: counts
+        integer, dimension(:), intent(in) :: lbounds
+        integer, dimension(:), intent(in) :: ubounds
+      character (19), intent(in) :: date
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!      Used to write data to persistent storage in a variety of formats.  
+!      (see WriteRestart/ReadRestart for quick data dumps.)  Details of I/O 
+!      options specified in the IOSpec derived type. 
+!
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [name]
+!           An {\tt ESMF\_Field} name.
+!     \item [{[subset]}]
+!            {\tt ESMF\_Subset}.
+!     \item [{[iospec]}]
+!            I/O specification.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+        ! Local variables
+        integer Comm
+        integer IOComm
+        type(ESMF_VM) :: vm
+        character (80) SysDepInfo
+        integer     :: DataHandle
+        integer DomDesc
+        character*3 MemOrd
+        character*3 Stagger
+        character*31, dimension(3) :: DimNames
+        character(len=ESMF_MAXSTR) :: filename
+        real(kind=ESMF_KIND_R8), dimension(:,:,:), pointer :: data_ptr
+        integer wrf_type
+        integer status
+
+        ! call ESMF_Log(?, 'entry into ESMF_FieldWrite');
+
+        ! Set initial values
+        status = ESMF_FAILURE 
+
+        wrf_type = WRF_DOUBLE
+
+        ! Initialize return code
+        if (present(rc)) rc = ESMF_FAILURE      
+           
+        ! Get filename out of IOSpec, if specified.  Otherwise use the
+        ! name of the Field.
+        if (present(IOSpec)) then
+            call ESMF_IOSpecGet(IOSpec, filename=filename, rc=status)
+        else
+            call ESMF_FieldGet(field, name=filename, rc=status)
+        endif
+
+! We are not taking advantage of the ability to have a different
+! communicator just for IO.  So we set the IO communicator to that of
+! the field DE.
+        call ESMF_VMGetGlobal(vm, rc=Status)
+        call ESMF_VMGet(vm, mpiCommunicator=comm, rc=rc)
+        IOComm = Comm
+  
+        Stagger = ''
+
+! This is a WRF string used to pass additional control information to
+! the I/O interface.  Currently it's only setting is to describe if the
+! DATASET is a RESTART, HISTORY, BOUNDARY condition or INITIAL condition
+! field.
+! FieldWrite does not currently have a use for this feature and always
+! uses the same I/O stream.         
+        SysDepInfo = 'DATASET=HISTORY'
+
+! This is a required WRF variable to "that may be used to pass a
+! communication package specific domain."  
+! For now it is set to 0 which is a null setting.
+        DomDesc = 0
+  
+! Possibly add this as an ESMF_IOSpec item.
+! Hardwire it for now.
+           MemOrd = "XYZ"
+           DimNames(1) = 'X'
+           DimNames(2) = 'Y'
+           DimNames(3) = 'Z'
+        
+        call ESMF_ArrayGetData( array, data_ptr, ESMF_DATA_REF, rc)
+
+! Initialize the output stream.
+           call ext_ncd_ioinit(SysDepInfo,Status)
+
+! To write multiple times into the same file, the I/O stream will
+! probably need a separate initialize routine.  Upon initialization,
+! 'DataHandle' will be carried around, perhaps in ESMF_IOSpec, to
+! reaccess the file.
+           call ext_ncd_open_for_write_begin( FileName, Comm, IOComm, SysDepInfo, DataHandle, Status)
+           
+! This call 'trains' the output library but does not write out any data.
+           call ext_ncd_write_field(DataHandle,Date,filename,data_ptr,wrf_type,Comm,IOComm,DomDesc,&
+                &MemOrd,Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
+                &lbounds,ubounds,Status)
+  
+           call ext_ncd_open_for_write_commit(DataHandle, Status)
+  
+! This call does output the data.
+           call ext_ncd_write_field(DataHandle,Date,filename,data_ptr,wrf_type,Comm,IOComm,DomDesc,&
+                &MemOrd,Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
+                &lbounds,ubounds,Status)
+  
+! For writing multiple times to the same file, these calls will have
+! to be placed in a separate close routine to release the handle on
+! the IO stream.
+           call ext_ncd_ioclose( DataHandle, Status)
+           call ext_ncd_ioexit(Status)
+
+         end subroutine ESMF_FieldWriteFileNetCDF3DR8
+
+#endif
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldWriteFileASCII - Write a Field to external storage
+!
+! !INTERFACE:
+      subroutine ESMF_FieldWriteFileASCII(field, & ! subset, 
                                  iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(inout) :: field 
+      type(ESMF_Field), intent(in) :: field 
 !     type(ESMF_Subset), intent(in), optional :: subset
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc  
@@ -3328,7 +4176,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [name]
-!           A {\tt ESMF\_Field} name.
+!           An {\tt ESMF\_Field} name.
 !     \item [{[subset]}]
 !            {\tt ESMF\_Subset}.
 !     \item [{[iospec]}]
@@ -3338,16 +4186,15 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
         ! Local variables
         integer :: status, de_id
-        logical :: rcpresent
         type(ESMF_Array) :: outarray
         type(ESMF_Grid) :: grid
-        type(ESMF_DELayout) :: layout
+        type(ESMF_DELayout) :: delayout
         character(len=ESMF_MAXSTR) :: filename
-
+        character(len=ESMF_MAXSTR) :: name
 
         ! TODO: revised code goes here
 
@@ -3356,13 +4203,9 @@
 
         ! Set initial values
         status = ESMF_FAILURE 
-        rcpresent = .FALSE.
 
         ! Initialize return code
-        if(present(rc)) then
-            rcpresent=.TRUE.
-            rc = ESMF_FAILURE      
-        endif
+        if (present(rc)) rc = ESMF_FAILURE      
            
         ! Get filename out of IOSpec, if specified.  Otherwise use the
         ! name of the Field.
@@ -3371,26 +4214,56 @@
         else
             call ESMF_FieldGet(field, name=filename, rc=status)
         endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Collect results on DE 0 and output to a file
         call ESMF_FieldGet(field, grid=grid, rc=status)
-        call ESMF_GridGetDELayout(grid, layout, rc=status)
-        call ESMF_DELayoutGetDEID(layout, de_id, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        call ESMF_GridGet(grid, delayout=delayout, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        call ESMF_DELayoutGet(delayout, localDE=de_id, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-        ! Output to file
-        call ESMF_ArrayAllGather(field%ftypep%localfield%localdata, &
-                                 field%ftypep%grid, field%ftypep%mapping, &
-                                 outarray, rc=status)
+        write(name,'(i1)') de_id
+        call ESMF_ArrayWrite(field%ftypep%localfield%localdata,&
+                             filename=trim(name), rc=status)
+
+        ! Output to file, from de_id 0 only
+        call ESMF_ArrayGather(field%ftypep%localfield%localdata, &
+                              field%ftypep%grid, field%ftypep%mapping, &
+                              0, outarray, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         !call ESMF_FieldAllGather(field, outarray, rc=status)
         if (de_id .eq. 0) then       
             call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
+            if (ESMF_LogMsgFoundError(status, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+            call ESMF_ArrayDestroy(outarray, status)
+            if (ESMF_LogMsgFoundError(status, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
         endif
-        call ESMF_ArrayDestroy(outarray, status)
 
-        end subroutine ESMF_FieldWrite
+      if (present(rc)) rc = ESMF_SUCCESS
 
+      end subroutine ESMF_FieldWriteFileASCII
+        
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldWriteRestart"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldWriteRestart - Save Field in the quickest manner possible
 !
@@ -3411,7 +4284,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [{[iospec]}]
 !            I/O specification.
 !     \item [{[rc]}]
@@ -3420,7 +4293,6 @@
 !
 !
 !EOPI
-! !REQUIREMENTS: FLD1.6.8
 
 
 !       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
@@ -3433,9 +4305,12 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-! This section includes all the Field internal methods.
+! This section includes all Field internal methods.
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldConstructNew"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldConstructNew - Construct the internals of a Field
 
@@ -3448,11 +4323,11 @@
       type(ESMF_FieldType), pointer :: ftype 
       type(ESMF_Grid) :: grid               
       type(ESMF_ArraySpec), intent(in) :: arrayspec     
-      type(ESMF_DataAllocate), intent(in), optional :: allocflag
+      type(ESMF_AllocFlag), intent(in), optional :: allocflag
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap           
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap           
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -3460,31 +4335,35 @@
 ! !DESCRIPTION:
 ! 
 !     Constructs all {\tt ESMF\_Field} internals, including the allocation
-!     of a data {\tt ESMF\_Array}.  
+!     of a data {\tt ESMF\_Array}.   TODO: this is missing a counts argument,
+!     which is required if the arrayspec rank is greater than the grid rank.
+!     Either that, or we must enforce that a datamap comes in, and it
+!     contains the counts for non-grid dims.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
+!           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [arrayspec]
 !           Data specification. 
 !     \item [{[allocflag]}]
-!           Set to allocate space for data array.  Default is
-!           {\tt ESMF\_DO\_ALLOCATE}.  Other option is {\tt ESMF\_NO\_ALLOCATE}.
+!           Allocate space for data array or not.  For possible values
+!           see Section~\ref{opt:allocflag}.
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!           If a relative location is specified both as an argument
+!           Relative location of data per grid cell/vertex in the vertical
+!           grid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -3495,25 +4374,20 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       type(ESMF_Array) :: array                   ! New array
-      type(ESMF_RelLoc) :: hRelLoc
+      type(ESMF_RelLoc) :: hRelLoc, vRelLoc
+      type(ESMF_FieldDataMap) :: dmap
       integer, dimension(ESMF_MAXDIM) :: gridcounts, arraycounts
       integer, dimension(ESMF_MAXDIM) :: dimorder, counts
-      integer :: hwidth
-      integer :: i, j, arrayRank, gridRank
+      integer :: hwidth, minRank
+      integer :: i, j, arrayRank, gridRank, baseGridRank
 
       ! Initialize return code   
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! make sure hwidth has a value here.
       if (present(haloWidth)) then
@@ -3522,46 +4396,74 @@
           hwidth = 0
       endif
 
-      call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
-                                      hwidth, datamap, name, iospec, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNew: Field construct NoA"
-        return
-      endif 
-
+      ! construct a reasonable datamap first before calling field construct
       call ESMF_ArraySpecGet(arrayspec, rank=arrayRank, rc=status)
-      if(status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_ArraySpecGet"
-        return
-      endif 
-      call ESMF_GridGet(grid, numDims=gridRank, rc=status)
-      if(status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridGet"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      ! make sure hRelLoc has a value before GridGetDE call
+      call ESMF_GridGet(grid, distDimCount=gridRank, dimCount=baseGridRank, &
+                        rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      minRank = min(arrayRank, gridRank)
+      if (present(datamap)) then
+          dmap = datamap
+      else
+          call ESMF_FieldDataMapSetDefault(dmap, minRank, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      endif
+
+      ! this sets the grid status, and the datamap status
+      call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
+                                      dmap, name, &
+                                      iospec, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      ! make sure hRelLoc has a value before GridGetDELocalInfo call
       if (present(horzRelLoc)) then
           hRelLoc = horzRelloc
       else
           if (present(datamap)) then
-              call ESMF_DataMapGet(datamap, horzRelLoc=hRelLoc, rc=status)
+              call ESMF_FieldDataMapGet(datamap, horzRelLoc=hRelLoc, rc=status)
           else
-              print *, "ERROR in ESMF_FieldConstructNew: ", & 
-                       "no valid RelLoc in either argument list or datamap."
-              return
+               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                       "no valid RelLoc in either argument list or datamap", &
+                                 ESMF_CONTEXT, rc)) return
           endif
       endif
-      call ESMF_GridGetDE(grid, horzRelLoc=hRelLoc, vertRelLoc=vertRelLoc, &
-                          localCellCountPerDim=gridcounts(1:gridRank), rc=status)
-      if(status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridGetDE"
-        return
-      endif 
+      if (present(vertRelLoc)) then
+          vRelLoc = vertRelloc
+      else
+          if (present(datamap)) then
+              call ESMF_FieldDataMapGet(datamap, vertRelLoc=vRelLoc, rc=status)
+          else
+              if (baseGridRank .le. 2) then
+                  vRelLoc = ESMF_CELL_UNDEFINED
+              else
+                  if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+               "no valid vertical RelLoc in either argument list or datamap", &
+                                            ESMF_CONTEXT, rc)) return
+              endif
+          endif
+      endif
+      call ESMF_GridGetDELocalInfo(ftype%grid, horzRelLoc=hRelLoc, &
+                                   vertRelLoc=vRelLoc, &
+                                   localCellCountPerDim=gridcounts(1:gridRank), &
+                                   rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! get information back from datamap
-      call ESMF_DataMapGet(ftype%mapping, dataIorder=dimorder, &
-                                                    counts=counts, rc=status)
+      call ESMF_FieldDataMapGet(ftype%mapping, dataIndexList=dimorder, &
+                                counts=counts, rc=status)
 
       arraycounts(:) = 1
       j = 1
@@ -3570,30 +4472,36 @@
             arraycounts(i) = counts(j) 
             j = j + 1
          else
+            !! TODO: decide if the counts going into ArrayCreate do or do not
+            !! include either halo widths or allocation widths.  If so, this
+            !! is the right count.  If not, then add hwidths plus awidths.
+            !!arraycounts(i) = gridcounts(dimorder(i))
             arraycounts(i) = gridcounts(dimorder(i)) + (2 * hwidth)
          endif
       enddo
 
       array = ESMF_ArrayCreate(arrayspec, arraycounts, hwidth, rc=status) 
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNew: Array create"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ftype%localfield%localdata = array
-      ftype%datastatus = ESMF_STATE_READY
+      ftype%datastatus = ESMF_STATUS_READY
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldConstructNew
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldConstructNewArray"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldConstructNewArray - Construct the internals of a Field
 
 ! !INTERFACE:
       subroutine ESMF_FieldConstructNewArray(ftype, grid, array, horzRelloc, &
-                                             vertRelloc, haloWidth, datamap, &
+                                             vertRelloc, datamap, &
                                              name, iospec, rc)
 !
 ! !ARGUMENTS:
@@ -3602,8 +4510,7 @@
       type(ESMF_Array), intent(in) :: array     
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap           
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap           
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -3616,20 +4523,22 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
+!           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [array]
 !           Data. 
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
+!           Relative location of data per grid cell/vertex in the vertical
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -3639,57 +4548,71 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      type(ESMF_Field) :: tfield                  ! temp field for error check
 
       ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
+      ! this validates the grid already, no need to validate it first.
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
-                                      haloWidth, datamap, name, iospec, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNew: Field construct NoA 2"
-        return
-      endif 
+                                      datamap=datamap, name=name, &
+                                      iospec=iospec, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
+      ! make sure the array is a valid object first.
       call ESMF_ArrayValidate(array, "", status)
-      if (status .ne. ESMF_SUCCESS) then
-        print *, "Error uninitialized or invalid array"
-        return
-      endif
-      ftype%localfield%localdata = array
-      !ftype%localfield%datastatus = ESMF_STATE_READY
-      ftype%datastatus = ESMF_STATE_READY
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if(rcpresent) rc = ESMF_SUCCESS
+
+      ftype%localfield%localdata = array
+      ftype%datastatus = ESMF_STATUS_READY
+
+      ! instead of adding error checking all over the place, call the
+      ! validate routine to check sizes of array vs grid to be sure
+      ! they are consistent.  the tfield is a temp wrapper so we can
+      ! call the user level validate
+      tfield%ftypep => ftype
+      call ESMF_FieldValidate(tfield, "", status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) then
+          ! rc is already set, we just need to mark that the array
+          ! is not valid.
+          ftype%datastatus = ESMF_STATUS_INVALID
+          return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldConstructNewArray
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldConstructNoDataPtr"
+
 !BOPI
-! !IROUTINE: ESMF_FieldConstructNoBuffer - Construct a Field with no associated buffer
+! !IROUTINE: ESMF_FieldConstructNoDataPtr - Construct a Field with no associated buffer
 
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructNoBuffer(ftype, grid, arrayspec, &
+      subroutine ESMF_FieldConstructNoDataPtr(ftype, grid, arrayspec, &
                                            horzRelloc, vertRelloc, haloWidth, &
                                            datamap, name, iospec, rc)
 !
 ! !ARGUMENTS:     
       type(ESMF_FieldType), pointer :: ftype                
-      type(ESMF_Grid) :: grid               
+      type(ESMF_Grid), intent(in) :: grid               
       type(ESMF_ArraySpec), intent(in) :: arrayspec     
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap 
+      integer, intent(in), optional :: haloWidth 
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap 
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -3702,20 +4625,24 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
+!           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [arrayspec]
 !           Data specification. 
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
+!           Relative location of data per grid cell/vertex in the vertical 
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
+!     \item [{[haloWidth]}]
+!           Width of the halo region around the data.  Defaults to 0.
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -3725,124 +4652,113 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: gridRank
+      integer :: gridRank, arrayRank
 
       ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
  
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNoBuffer: BaseCreate"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      ! TODO: Check to see grid is valid first.
-
+      ! Check to see grid is valid first.
       call ESMF_GridValidate(grid, "", status)
-      if (status .ne. ESMF_SUCCESS) then
-        print *, "Error uninitialized or invalid grid"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       ftype%grid = grid
-      ftype%gridstatus = ESMF_STATE_READY
+      ftype%gridstatus = ESMF_STATUS_READY
 
-      call ESMF_GridGet(grid, numDims=gridRank, rc=status)
+      call ESMF_GridGet(grid, distDimCount=gridRank, rc=status)
       if (present(datamap)) then
         ftype%mapping = datamap   ! copy, datamap can be reused by user now
         ! if specified as explicit args to create, they override anything
         ! in the existing datamap
-        call ESMF_DataMapSet(ftype%mapping, horzRelloc=horzRelloc, &
+        call ESMF_FieldDataMapSet(ftype%mapping, horzRelloc=horzRelloc, &
                              vertRelloc=vertRelloc, rc=status)
       else
-        if (gridRank .eq. 1) then
-          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_I, &
+          call ESMF_ArraySpecGet(arrayspec, rank=arrayRank, rc=status)
+          call ESMF_FieldDataMapSetDefault(ftype%mapping, arrayRank, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
-        else if (gridRank .eq. 2) then
-          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_IJ, &
-                                horzRelloc=horzRelloc, &
-                                vertRelloc=vertRelloc, rc=status)
-        else if (gridRank .eq. 3) then
-          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_IJK, &
-                                horzRelloc=horzRelloc, &
-                                vertRelloc=vertRelloc, rc=status)
-        endif
       endif
+      ftype%datamapstatus = ESMF_STATUS_READY
 
-!     call ESMF_ArrayConstructNoBuffer(ftype%array)
+      ! construct the array here - but TODO: we are missing the counts
+      ! in case there are non-grid axes.  there has to be an additional
+      ! counts array which contains counts for any data axes which is
+      ! not associated with the grid.  e.g. for a 3d data array on a 2d grid,
+      ! there would be counts(1).  for 4d data, counts(2).
+      
 
       ! If I/O spec is present, copy it into the field object; otherwise just 
       ! initialize the I/O spec in the field object.
       if(present(iospec)) then
-!       ESMF_IOSpecCopyInit(ftype%iospec, iospec, status)
-        if(status .NE. ESMF_SUCCESS) then 
-          print *, "ERROR in ESMF_FieldConstructNoBuffer: IOSpec init"
-          return
-        endif 
+        !ESMF_IOSpecCopyInit(ftype%iospec, iospec, status)
+        !if (ESMF_LogMsgFoundError(status, &
+        !                          ESMF_ERR_PASSTHRU, &
+        !                          ESMF_CONTEXT, rc)) return
       else 
-!       ESMF_IOSpecInit(ftype%iospec, status)
-        if(status .NE. ESMF_SUCCESS) then 
-          print *, "ERROR in ESMF_FieldConstructNoBuffer: IOSpec init"
-          return
-        endif 
+        !ESMF_IOSpecInit(ftype%iospec, status)
+        !if (ESMF_LogMsgFoundError(status, &
+        !                          ESMF_ERR_PASSTHRU, &
+        !                          ESMF_CONTEXT, rc)) return
       endif
 
-      ftype%fieldstatus = ESMF_STATE_READY
+      ftype%fieldstatus = ESMF_STATUS_READY
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldConstructNoBuffer
+      end subroutine ESMF_FieldConstructNoDataPtr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldConstructNoArray"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldConstructNoArray - Construct a Field with no associated Array
 
 ! !INTERFACE:
       subroutine ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, &
-                                            vertRelloc, haloWidth, &
+                                            vertRelloc, &
                                             datamap, name, iospec, rc)
 !
 ! !ARGUMENTS:     
       type(ESMF_FieldType), pointer :: ftype   
-      type(ESMF_Grid) :: grid                 
+      type(ESMF_Grid), intent(in) :: grid                 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
-      type(ESMF_DataMap), intent(in), optional :: datamap              
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap              
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
 ! 
-! Constructs a {\tt ESMF\_Field} except for its internal data {\tt ESMF\_Array}.
+! Constructs an {\tt ESMF\_Field} except for its internal data {\tt ESMF\_Array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
+!           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
+!           Relative location of data per grid cell/vertex in the vertical
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -3852,74 +4768,69 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       integer :: gridRank
 
       ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNoArray: BaseCreate"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Attach grid
       call ESMF_GridValidate(grid, "", status)
-      if (status .ne. ESMF_SUCCESS) then
-        print *, "Error uninitialized or invalid grid"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       ftype%grid = grid
-      ftype%gridstatus = ESMF_STATE_READY
+      ftype%gridstatus = ESMF_STATUS_READY
 
-      call ESMF_GridGet(grid, numDims=gridRank, rc=status)
+      call ESMF_GridGet(ftype%grid, distDimCount=gridRank, rc=status)
       if (present(datamap)) then
         ! this does a copy, datamap ok for user to delete now
         ftype%mapping = datamap   
 
         ! take care of override horz and vert rellocs.  if specified both in
         ! the datamap and as explicit args, the arguments take priority.
-        call ESMF_DataMapSet(ftype%mapping, horzRelloc=horzRelloc, &
+        call ESMF_FieldDataMapSet(ftype%mapping, horzRelloc=horzRelloc, &
                              vertRelloc=vertRelloc, rc=status)
       else
         ! create default datamap with 1-for-1 correspondence to grid
         if (gridRank .eq. 1) then
-          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_I, &
+          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_I, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
         else if (gridRank .eq. 2) then
-          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_IJ, &
+          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJ, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
         else if (gridRank .eq. 3) then
-          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_IJK, &
+          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJK, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
         endif
       endif
+      ftype%datamapstatus = ESMF_STATUS_READY
 
 !
 ! add more code here
 !
      
-      ftype%fieldstatus = ESMF_STATE_READY
+      ftype%fieldstatus = ESMF_STATUS_READY
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if  (present(rc)) rc = ESMF_SUCCESS
       
       end subroutine ESMF_FieldConstructNoArray
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldConstructNoGridArray"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldConstructNoGridArray - Construct a Field with no Grid or Array
 !
@@ -3941,7 +4852,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [ftypep]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [{[name]}]
 !           {\tt ESMF\_Field} name.
 !     \item [{[iospec]}]
@@ -3952,48 +4863,42 @@
 !
 !
 !EOPI
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 
 
       ! Local variables
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
       ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftypep%base, "Field", name, 0, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNoGridArray: BaseCreate"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Initialize field contents
-      !ftypep%localfield%gridstatus = ESMF_STATE_UNINIT
-      !ftypep%localfield%datastatus = ESMF_STATE_UNINIT
-      ftypep%gridstatus = ESMF_STATE_UNINIT
-      ftypep%datastatus = ESMF_STATE_UNINIT
+      ftypep%gridstatus = ESMF_STATUS_UNINIT
+      ftypep%datastatus = ESMF_STATUS_UNINIT
+      ftypep%datamapstatus = ESMF_STATUS_UNINIT
 
       ! Set the mapping as unknown/invalid
-      call ESMF_DataMapSetInvalid(ftypep%mapping, status)
+      call ESMF_FieldDataMapSetInvalid(ftypep%mapping, status)
 
-      ftypep%fieldstatus = ESMF_STATE_READY
+      ftypep%fieldstatus = ESMF_STATUS_READY
 
 !
 ! add more code here
 !
      
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
       
       end subroutine ESMF_FieldConstructNoGridArray
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldDestruct"
+
 !BOPI
 ! !IROUTINE:   ESMF_FieldDestruct - Free any Field memory allocated internally
 !
@@ -4010,44 +4915,38 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
       integer :: status
-      logical :: rcpresent                          ! Return code present
 
       ! Initialize return code; assume failure until success is certain
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
-
-      print *, "Field Destruct called"
 
       ! release the base class resources
       call ESMF_BaseDestroy(ftype%base, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldDestruct: BaseDestroy failed"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
 !
 ! TODO: more code goes here
 !
 
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if  (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldDestruct
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBoxIntersect"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldBoxIntersect - Intersect bounding boxes
 !
@@ -4083,44 +4982,23 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: my_DE, my_dst_DE, my_src_DE, gridrank
-      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: dst_min, dst_max
-      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: src_min, src_max
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: myAI
-      type(ESMF_DELayout) :: parentlayout, srclayout, dstlayout
-      type(ESMF_FieldType) :: stypep, dtypep      ! field type info
+      type(ESMF_DELayout) :: gridDELayout
       type(ESMF_Grid) :: srcGrid, dstGrid
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
-      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc 
+      type(ESMF_RelLoc) :: dstHorzRelLoc, dstVertRelLoc, &
+                           srcHorzRelLoc, srcVertRelLoc
+      type(ESMF_VM) :: vm
 
       ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
-      stypep = srcField%ftypep
-      dtypep = dstField%ftypep
-
-      ! Our DE number in the parent layout  TODO: for now, just use one of the
-      !                                           grid layouts.  In the future,
-      !                                           there will be proxy grids on all
-      !                                           DEs of the coupler layout and a
-      !                                           different method for determining
-      !                                           if my_DE is part of a layout
-      call ESMF_GridGetDELayout(stypep%grid, parentlayout, status)
-      call ESMF_DELayoutGetDEID(parentlayout, my_DE, status)
-
-      ! TODO: we need not only to know if this DE has data in the field,
-      !   but also the de id for both src & dest fields
+      ! TODO: replace this with a better way to get the current VM
+      call ESMF_GridGet(srcField%ftypep%grid, delayout=gridDELayout, rc=status)
+      call ESMF_DELayoutGetVM(gridDELayout, vm, rc=status)
 
       ! This routine is called on every processor in the parent layout.
       !  It is quite possible that the source and destination fields do
@@ -4128,73 +5006,281 @@
       !  we do not go lower than this on the processors which are uninvolved
       !  in this communication.
 
-      ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
-      call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
-      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
+      hasdata = ESMF_TRUE   ! temp for now to get rid of warning
       hassrcdata = (hasdata .eq. ESMF_TRUE)
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
-        ! don't ask for our de number if this de isn't part of the layout
-        call ESMF_DELayoutGetDEID(srclayout, my_src_DE, status)
-        call ESMF_GridGet(stypep%grid, numDims=gridrank, rc=status)
-        call ESMF_FieldGetRelLoc(srcField, horzRelLoc, vertRelLoc, rc)
-        call ESMF_GridGetDE(stypep%grid, horzRelLoc=horzRelLoc, &
-                            vertRelLoc=vertRelLoc, &
-                            globalAIPerDim=myAI(1:gridrank), rc=status)
+        call ESMF_FieldGet(srcField, horzRelloc=srcHorzRelLoc, &
+                           vertRelloc=srcVertRelLoc, grid=srcGrid, rc=rc)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
-      ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
-      call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
-      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
       hasdstdata = (hasdata .eq. ESMF_TRUE)
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
-        ! don't ask for our de number if this de isn't part of the layout
-        call ESMF_DELayoutGetDEID(dstlayout, my_dst_DE, status)
+        call ESMF_FieldGet(dstField, horzRelloc=dstHorzRelLoc, &
+                           vertRelloc=dstVertRelLoc, grid=dstGrid, rc=rc)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       ! if neither are true this DE cannot be involved in the communication
       !  and it can just return now.
       if ((.not. hassrcdata) .and. (.not. hasdstdata)) then
-        if (rcpresent) rc = ESMF_SUCCESS
+        if  (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
       ! if src field exists on this DE, query it for information
       if (hassrcdata) then
-        ! Query the datamap and set info for grid so it knows how to
-        ! match up the array indices and the grid indices.
-        call ESMF_FieldGetGrid(srcField, srcGrid, status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in FieldBoxIntersect: FieldGetGrid returned failure"
-          return
-        endif
         ! From the grid get the bounding box on this DE
-        call ESMF_GridGet(srcGrid, minLocalCoordPerDim=src_min, &
-                         maxLocalCoordPerDim=src_max, rc=status)
-        call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, src_min, src_max, &
-                                       myAI, sendDomainList, status)
+        call ESMF_GridBoxIntersectSend(srcGrid, dstGrid, sendDomainList, &
+                                       total=.false., layer=.false., rc=status)
       endif
 
       ! if dst field exists on this DE, query it for information
       if (hasdstdata) then
-        ! Query the datamap and set info for grid so it knows how to
-        ! match up the array indices and the grid indices.
-        call ESMF_FieldGetGrid(dstField, dstGrid, status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in FieldBoxIntersect: FieldGetGrid returned failure"
-          return
-        endif
-        ! From the grid get the bounding box on this DE
-        call ESMF_GridGet(dstGrid, minLocalCoordPerDim=dst_min, &
-                          maxLocalCoordPerDim=dst_max, rc=status)
-        call ESMF_GridBoxIntersectRecv(srcGrid, dst_min, dst_max, &
-                                       recvDomainList, rc=status)
+        call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, vm, recvDomainList, &
+                                       hasdstdata, hassrcdata, &
+                                       total=.false., layer=.false., rc=status)
       endif
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if  (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldBoxIntersect
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSerialize"
+
+!BOPI
+! !IROUTINE: ESMF_FieldSerialize - Serialize field info into a byte stream
+!
+! !INTERFACE:
+      subroutine ESMF_FieldSerialize(field, buffer, length, offset, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field 
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: length
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes an {\tt ESMF\_Field} object and adds all the information needed
+!      to save the information to a file or recreate the object based on this
+!      information.   Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_FieldWrite()} and {\tt ESMF\_FieldRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           {\tt ESMF\_Field} object to be serialized.
+!     \item [buffer]
+!           Data buffer which will hold the serialized information.
+!     \item [length]
+!           Current length of buffer, in bytes.  If the serialization
+!           process needs more space it will allocate it and update
+!           this length.
+!     \item [offset]
+!           Current write offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc                     ! Error status
+      type(ESMF_FieldType), pointer :: fp    ! field type
+
+      ! shortcut to internals
+      fp => field%ftypep
+
+#if 0
+      ! TODO: these are currently unused and are not serialized or deserialized.
+      type (ESMF_LocalField) :: localfield ! this differs per DE
+        type (ESMF_Mask) :: mask                 ! may belong in Grid
+        integer :: rwaccess                      ! reserved for future use
+        integer :: accesscount                   ! reserved for future use
+#endif
+
+      call c_ESMC_BaseSerialize(fp%base, buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_FieldSerialize(fp%fieldstatus, fp%gridstatus, fp%datastatus, &
+                                 fp%datamapstatus, fp%iostatus, &
+                                 buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
+          call ESMF_GridSerialize(fp%grid, buffer, length, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+
+      if (fp%datamapstatus .eq. ESMF_STATUS_READY) then
+          call ESMF_FieldDataMapSerialize(fp%mapping, buffer, length, &
+                                          offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+
+    ! TODO: if shallow, call C directly?
+      !call ESMF_IOSpecSerialize(fp%iospec, buffer, length, offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+      if (fp%datastatus .eq. ESMF_STATUS_READY) then
+          call c_ESMC_ArraySerializeNoData(fp%localfield%localdata, buffer(1),&
+                                           length, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+
+      !call c_ESMC_ArraySpecSerialize(fp%localfield%arrayspec, buffer, length, &
+      !                               offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSerialize
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldDeserialize"
+
+!BOPI
+! !IROUTINE: ESMF_FieldDeserialize - Deserialize a byte stream into a Field
+!
+! !INTERFACE:
+      function ESMF_FieldDeserialize(vm, buffer, offset, rc) 
+!
+! !RETURN VALUE:
+      type(ESMF_Field) :: ESMF_FieldDeserialize   
+!
+! !ARGUMENTS:
+      type(ESMF_VM), intent(in) :: vm
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes a byte-stream buffer and reads the information needed to
+!      recreate a Field object.  Recursively calls the deserialize routines
+!      needed to recreate the subobjects.
+!      Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_FieldWrite()} and {\tt ESMF\_FieldRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [vm]
+!           Current VM in which this object should be created.
+!     \item [buffer]
+!           Data buffer which holds the serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           unread byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc, status             ! Error status, allocation status
+      type(ESMF_FieldType), pointer :: fp    ! field type
+
+      ! in case of error, make sure this is invalid.
+      nullify(ESMF_FieldDeserialize%ftypep)
+
+      ! shortcut to internals
+      allocate(fp, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, &
+                                     "space for new Field object", &
+                                     ESMF_CONTEXT, rc)) return
+
+
+#if 0
+      ! TODO: these are currently unused and not serialized.
+      type (ESMF_LocalField) :: localfield ! this differs per DE
+        type (ESMF_Mask) :: mask                 ! may belong in Grid
+        integer :: rwaccess                      ! reserved for future use
+        integer :: accesscount                   ! reserved for future use
+#endif
+
+      call ESMF_BaseCreate(fp%base, "Field", "dummy", 0, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      ! this overwrites the name and adds attributes to the base obj.
+      call c_ESMC_BaseDeserialize(fp%base, buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_FieldDeserialize(fp%fieldstatus, fp%gridstatus, &
+                                   fp%datastatus, fp%datamapstatus, &
+                                   fp%iostatus, buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
+          fp%grid = ESMF_GridDeserialize(vm, buffer, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+
+      if (fp%datamapstatus .eq. ESMF_STATUS_READY) then
+          call ESMF_FieldDataMapDeserialize(fp%mapping, buffer, &
+                                          offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+
+    ! TODO: if shallow, call C directly?
+      !call ESMF_IOSpecDeserialize(fp%iospec, buffer, offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+      if (fp%datastatus .eq. ESMF_STATUS_READY) then
+          call c_ESMC_ArrayDeserializeNoData(fp%localfield%localdata, &
+                                       buffer(1), offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+    
+    ! TODO: if shallow, call C directly?
+      !call ESMF_ArraySpecDeserialize(fp%arrayspec, buffer, offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+      ESMF_FieldDeserialize%ftypep => fp
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_FieldDeserialize
+!------------------------------------------------------------------------------
 
       end module ESMF_FieldMod
+
