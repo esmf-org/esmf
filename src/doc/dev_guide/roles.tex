@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: roles.tex,v 1.7 2006/10/24 19:34:52 murphysj Exp $
+% CVS $Id: roles.tex,v 1.8 2006/10/24 21:50:56 murphysj Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/roles.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -21,7 +21,6 @@ activities are open to all active ESMF developers.
 All Core Team members are responsible for helping to 
 develop effective project processes and for following
 processes that are in place.
-
 
 \subsubsection{Core Team Roles}
 \label{core}
@@ -48,7 +47,6 @@ Responsibilities include:
 Board, and sponsors.
 \end{itemize}
 
-
 Code {\bf Advocates} are Core Team members who have been assigned to interface with owners of
 a particular code e.g. CCSM, GEOS-5. Advocates are expected to contact the code owners and keep track of what and how they are doing. They should know the following things about their assigned code:
 
@@ -58,8 +56,36 @@ a particular code e.g. CCSM, GEOS-5. Advocates are expected to contact the code 
 \item what the customer is trying to do
 \item what platforms they are working on
 \item what pieces of ESMF they are using
-\item Coordinate all support requests for that code
+\item their current status of ESMF-ization
+\item what is holding them up if anything
+\item open tickets (see section \autoref{tracking_tools} for types) and their status
 \end{itemize}
+
+Code {\bf Advocates} should do the following for their code:
+\begin{itemize}
+\item Touch base periodically and find out how things are going
+\item Coordinate the resolution of all tickets (see section \autoref{tracking_tools} for types)
+\item Be prepared to brief the status of all requests and issues
+\item Update or ensure the update of related tickets (see Section \autoref {usr_support} for details on
+the proper handling of tickets).
+\end{itemize}
+
+{\bf Advocates} are NOT responsible for:
+\begin{itemize}
+\item Representing the code to the CRB
+\item Fielding support related phone calls. We want all customers to send support requests to esmf\_support. Dire emergencies (e.g. ESMF is killing NCEP operations) are exempt from the no-phone rule. If a customer
+really feels the need to take with a Advocate or developer, they need to arrange for a date and time through
+one of the ESMF mailing lists.
+\end {itemize}
+
+{\bf Code Points of Contact} should not take advantage of their {\bf Advocates}. If you have an issue, 
+please send it to esmf\_support, don't call your {\bf Advocate}. There are many good reason for doing this, including developer absences, group visibility and communication, and developer priorities.
+
+{\bf Handlers} are developers assigned to fix a particular problem reported on one of the trackers (see 
+\autoref{tracking_tools} for list). They are expected to be sufficiently familiar with the issue and the
+code involved so as to not unnecessarily pester the customer with requests for information (e.g. the
+information is contained in previous tickets from the same customer). See section \autoref{usr_support} for
+a complete list of {\bf Handlers} activities in the support process.  
 
 \subsection{Joint Specification Team (JST)}
 The Core Team, along with contributors, customers, technical
