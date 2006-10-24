@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.18 2003/10/16 23:33:54 nscollins Exp $
+// $Id: ESMC_LogErr.h,v 1.57.2.1 2006/10/24 22:51:25 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -13,8 +13,8 @@
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
-#ifndef ESMC_LOG
-#define ESMC_LOG
+#ifndef ESMC_LOGERR_H
+#define ESMC_LOGERR_H
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -38,64 +38,39 @@
 #include <ctype.h>
 
 #include "ESMF_LogConstants.inc"
-#include "ESMF_ErrConstants.inc"
-#include "ESMC_UtilityFunctions.h"
+#include "ESMF_ErrReturnCodes.inc"
+
+enum ESMC_MsgType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
+enum ESMC_LogType{ESMC_LOG_SINGLE=1,ESMC_LOG_MULTI=2};
+int ESMC_LogFinalize();         
+char *ESMC_LogGetErrMsg(int rc);          
+int ESMC_LogSetFilename(char filename[]);
+void ESMC_TimeStamp(int *y,int* mn,int *d,int *h,int *m,int *s,int *ms);
 
 class ESMC_Log {
-  private:
-// !PRIVATE MEMBER FUNCIONS:
-    void ESMC_LogFormName();
-    void ESMC_LogPrintHeader(int fortIO);
-    void ESMC_LogPrint(int fortIO, int errCode, int line, char file[],
-                       char dir[], char msg[]=NULL);
-    void ESMC_LogGetErrMsg(int errCode, char msg[]) const;
-    bool ESMC_LogNameValid(char name[], int FortIO);
+private:
 // !PRIVATE TYPES:
 
-    ESMC_Logical oneLogErrFile;
-                                // If log data written to one log file,
-                                // this is set to true.  Otherwise set to false.
-                                // ESMC_OpenFile can override
-                                // this value
-
-    ESMC_Logical  standardOut;  // if log data written to standard out,
-                                // this variable
-                                // is set to true. Otherwise set to false.
-                                // ESMC_OpenFile
-                                // can over-ride this value.
-
-    ESMC_Logical fortIsOpen;    // used to to a file with Fortran
-                                // I/O libraries 
-    
-    int unitNumber;             // fortran unit number for log/err file when
-                                // ESMC\_LogGetUnit
-                                // is used  Can be overwritten by
-                                // ESMC_OpenFileFortran
-
-
     int numFilePtr;             // index into global array of File pointers
-                                // for C++ I/O.
+                                // for C++ I/O
+    ESMC_Logical FileIsOpen;
 
-
-    int numFileFort;            // index into global array of unit numbers for 
-                                // Fortran I/O
-
-    ESMC_Logical verbose;       // If set to ESMC_TF_TRUE, log
-                                // messages written out.
+    ESMC_Logical verbose;       // If set to ESMC_TF_TRUE, log messages written 
+                                // out.
 
     ESMC_Logical flush;         // If true, all output is flushed
 
-    ESMC_Logical haltOnWarn;    // Code will stop executing on
-                                // encountering a warning
-			    
-    ESMC_Logical haltOnErr;     // Code will stop executing on
-                                // encountering an error
+    ESMC_Logical rootOnly;
 
+    int halt;
 
-    char nameLogErrFile[32];    // name of logfile.
-                                // If multiple files are written out,
-                                // PE rank is automatically
-                                // appended to name.
+    int filetype;
+
+    int stream;
+
+    int max_elements;
+    
+    int *pet_number;
 		
     ESMC_Logical fileI0;        // If true, output written to files
 
@@ -104,51 +79,43 @@ class ESMC_Log {
   public:
 // !PUBLIC MEMBER FUNCTIONS:
 // (see ESMC\_LogErr.C for a description of these methods)
-    void ESMC_LogInfo(char* fmt,...);   
-    void ESMC_LogInfoFortran(char fmt[],
-    char charData[],char strData[][32],int intData[], double floatData[]);
-    void ESMC_LogOpenFile(int numLogFile,char name[]);
-    void ESMC_LogOpenFortFile(int numLogFile, char name[]);
-    int ESMC_LogGetUnit();
-    void ESMC_LogCloseFile();
-    void ESMC_LogCloseFortFile();
-    void ESMC_LogSetFlush();
-    ESMC_Logical ESMC_LogGetFlush() const;
-    void ESMC_LogSetNotFlush();
-    void ESMC_LogSetVerbose();
-    ESMC_Logical ESMC_LogGetVerbose() const;
-    void ESMC_LogSetNotVerbose();
-    void ESMC_LogSetHaltOnErr();
-    ESMC_Logical ESMC_LogGetHaltOnErr() const;
-    void ESMC_LogSetNotHaltOnErr();
-    void ESMC_LogSetHaltOnWarn();
-    ESMC_Logical ESMC_LogGetHaltOnWarn() const;
-    void ESMC_LogSetNotHaltOnWarn();
-    void ESMC_LogWarnMsg_(int errCode, int line, char file[],
-                     char dir[], char msg[]);
-    void ESMC_LogWarn_(int errCode, int line, char file[],
-                     char dir[]);
-    void ESMC_LogWarnFortran(int errCode, int line, char file[],
-         char dir[], char msg[]);
-    void ESMC_LogErr_(int errCode, int line, char file[], char dir[]);
-    void ESMC_LogErrMsg_(int errCode, int line, char file[],
-                     char dir[], char msg[]);
-    void ESMC_LogErrFortran(int errCode,int line,char file[],char dir[],char msg[]);
-    void ESMC_LogExit();
-    void ESMC_LogSet(char* option, ESMC_Logical value, ...);
-    void ESMC_LogGet(char* option, ESMC_Logical & value, ...);
-    FILE* ESMC_GetFileHandle();
-    ESMC_Log();
+    
+    bool ESMC_LogAllocError(int *rcToReturn);
+    bool ESMC_LogAllocError(int LINE,char FILE[],char method[],int *rcToReturn);
+    void ESMC_LogClose();
+    bool ESMC_LogFoundError(int rcToCheck,int *rcToReturn);
+    bool ESMC_LogFoundError(int rcToCheck,int LINE,char FILE[],char method[],
+         int *rcToReturn);
+    bool ESMC_LogMsgAllocError(char msg[],int *rcToReturn);
+    bool ESMC_LogMsgAllocError(char msg[],int LINE,char FILE[],char method[],
+    int *rcToReturn);
+        bool ESMC_LogMsgFoundError(int rcToCheck,char msg[],int *rcToReturn);
+    bool ESMC_LogMsgFoundError(int rcToCheck,char msg[],int LINE,char FILE[],
+         char method[],int *rcToReturn);
+    void ESMC_LogOpen(char filename[]);
+    bool ESMC_LogWrite(char msg[],int msgtype);
+    bool ESMC_LogWrite(char msg[],int msgtype,int LINE,char FILE[],
+         char method[]);       
+// !PUBLIC Variables:          
+    FILE *ESMC_LogFile;
+    char nameLogErrFile[32];
+    int *pet_num;
+    int logNone;
+
+  private:
+// !PRIVATE MEMBER FUNCIONS:
+    
 };
-//EOP
 
-// private static data - address of fortran callback funcs
-
- extern "C" {
-  void FTN(f_esmf_logopenfortran)(ESMC_Logical*, int *, char*, int );
-  void FTN(f_esmf_logclosefortran)(int *);
-  void FTN(f_esmf_logprintstring)(int *, char*, ESMC_Logical*, int );
-  void FTN(f_esmf_logprintnewline)(int *, ESMC_Logical*);
+// the default global log object
+extern ESMC_Log ESMC_LogDefault;
+extern "C" {
+ void FTN(f_esmf_logwrite0)(char *msg, int *msgtype, int *rc, int mlen);
+ void FTN(f_esmf_logwrite1)(char *msg, int *msgtype,
+                            int *line, char *file, char *method, int *rc,
+                            int mlen, int flen, int mdlen);
 }
 
-#endif  //ESMC_LOG
+//EOP
+
+#endif  //ESMC_LOGERR_H
