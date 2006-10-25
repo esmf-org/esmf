@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.21 2006/02/14 22:05:25 nscollins Exp $
+// $Id: ESMC_FTable.C,v 1.22 2006/10/25 02:08:46 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.21 2006/02/14 22:05:25 nscollins Exp $";
+           "$Id: ESMC_FTable.C,v 1.22 2006/10/25 02:08:46 samsoncheung Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -285,6 +285,10 @@
 
     thisfunc = i;
 
+    // The 2nd time I come in, delete the old one
+    if (thisfunc < funccount) 
+       delete ((int *) funcs[thisfunc].funcarg[1]);
+    
     // extend the table if needed
     if (thisfunc >= funcalloc) {
         funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
