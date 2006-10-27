@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.35.2.3 2006/10/24 22:55:25 svasquez Exp $
+! $Id: ESMF_Init.F90,v 1.35.2.4 2006/10/27 05:57:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !
 ! !INTERFACE:
       subroutine ESMF_Initialize(defaultConfigFileName, defaultCalendar, &
-                                 defaultLogFileName, defaultLogType, vm, logNone, rc)
+                                 defaultLogFileName, defaultLogType, vm, rc)
 !
 ! !ARGUMENTS:
       character(len=*),        intent(in),  optional :: defaultConfigFileName
@@ -103,7 +103,6 @@
       character(len=*),        intent(in),  optional :: defaultLogFileName
       type(ESMF_LogType),      intent(in),  optional :: defaultLogType  
       type(ESMF_VM),           intent(out), optional :: vm   
-      integer,                 intent(in),  optional :: logNone  
       integer,                 intent(out), optional :: rc     
 
 !
@@ -143,9 +142,6 @@
 !           during initialization.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \item [{[logNone]}]
-!           If set to {\tt ESMF\_TRUE}, disables generation of log file.
-!           Defaults to {\tt ESMF\_FALSE}.
 !
 !     \end{description}
 !
@@ -157,7 +153,7 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       call ESMF_FrameworkInternalInit(ESMF_MAIN_F90, defaultConfigFileName, &
-        defaultCalendar, defaultLogFileName, defaultLogType, lognone, rc=localrc)
+        defaultCalendar, defaultLogFileName, defaultLogType, rc=localrc)
                                       
       ! LogErr not yet initialized -> explicit print on error
       if (localrc .ne. ESMF_SUCCESS) then
@@ -188,7 +184,7 @@
 ! !INTERFACE:
       subroutine ESMF_FrameworkInternalInit(lang, defaultConfigFileName, &
                                        defaultCalendar, defaultLogFileName, &
-                                       defaultLogType, lognone, rc)
+                                       defaultLogType, rc)
 !
 ! !ARGUMENTS:
       integer,                 intent(in)            :: lang     
@@ -196,7 +192,6 @@
       type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar     
       character(len=*),        intent(in),  optional :: defaultLogFileName
       type(ESMF_LogType),      intent(in),  optional :: defaultLogType  
-      integer, intent(in),optional		        :: lognone  
       integer,                 intent(out), optional :: rc     
 
 !
@@ -218,7 +213,7 @@
 !           If not specified, defaults to "ESMF_ErrorLog".
 !     \item [{[defaultLogType]}]
 !           Sets the default Log Type to be used by ESMF Log Manager.
-!           If not specified, defaults to "ESMF_LOG_SINGLE".
+!           If not specified, defaults to "ESMF\_LOG\_MULTI".
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -259,23 +254,26 @@
       ! an incorrect value
       if (present(defaultLogType)) then
         if (defaultLogType.eq.ESMF_LOG_SINGLE .OR. &
-            defaultLogType.eq.ESMF_LOG_MULTI) then
+            defaultLogType.eq.ESMF_LOG_MULTI .OR. &
+            defaultLogType.eq.ESMF_LOG_NONE) then
           defaultLogTypeUse = defaultLogType
         else
-          defaultLogTypeUse = ESMF_LOG_SINGLE
+          defaultLogTypeUse = ESMF_LOG_MULTI
         endif
+      else
+        defaultLogTypeUse = ESMF_LOG_MULTI
       endif
 
       if (present(defaultLogFileName)) then
          if (len_trim(defaultLogFileName).ne.0) then
-           call ESMF_LogInitialize(defaultLogFileName, lognone, logType=defaultLogTypeUse, &
+           call ESMF_LogInitialize(defaultLogFileName, logType=defaultLogTypeUse, &
                                   rc=status)
          else
-           call ESMF_LogInitialize("ESMF_LogFile", lognone, logType=defaultLogTypeUse, &
+           call ESMF_LogInitialize("ESMF_LogFile", logType=defaultLogTypeUse, &
                                      rc=status)
          endif
       else
-         call ESMF_LogInitialize("ESMF_LogFile", lognone, logType=defaultLogTypeUse, &
+         call ESMF_LogInitialize("ESMF_LogFile", logType=defaultLogTypeUse, &
                                    rc=status)
       endif
       if (status .ne. ESMF_SUCCESS) then
