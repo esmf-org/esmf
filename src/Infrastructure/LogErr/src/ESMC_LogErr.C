@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.72 2005/11/04 19:54:29 eschwab Exp $
+// $Id: ESMC_LogErr.C,v 1.73 2006/10/27 20:51:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.72 2005/11/04 19:54:29 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.73 2006/10/27 20:51:25 theurich Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -290,13 +290,14 @@ bool ESMC_Log::ESMC_LogWrite(
     	int msgtype   // Msg Type   
       )
 // !DESCRIPTION:
-// Prints log messsge and returns true if successful.  It takes two arguments -
+// Prints log message and returns true if successful.  It takes two arguments -
 // msg which is a user message and log type.  This method does not use cpp
 // macros
 //EOP
 {
     int rc;
 	
+    if (ESMC_LogDefault.logtype == ESMC_LOG_NONE) return true;
     FTN(f_esmf_logwrite0)(msg, &msgtype, &rc, strlen(msg));
 
     return (rc == ESMF_SUCCESS) ? true : false;
@@ -321,12 +322,13 @@ bool ESMC_Log::ESMC_LogWrite(
     char method[]
     )
 // !DESCRIPTION:
-// Prints log messsge and returns true if successful.  It takes two arguments -
+// Prints log message and returns true if successful.  It takes two arguments -
 // msg which is a user message and log type.  This method uses cpp macros
 //EOP
 {
     int rc;
     
+    if (ESMC_LogDefault.logtype == ESMC_LOG_NONE) return true;
     FTN(f_esmf_logwrite1)(msg, &msgtype, &LINE, FILE, method, &rc,
                           strlen(msg), strlen(FILE), strlen(method));
 
