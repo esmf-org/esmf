@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.15 2006/09/29 18:37:20 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.16 2006/10/27 20:44:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,8 @@ end type
 !     ! Log Types
 type(ESMF_LogType), parameter		:: &
     ESMF_LOG_SINGLE = ESMF_LogType(1), &
-    ESMF_LOG_MULTI = ESMF_LogType(2)
+    ESMF_LOG_MULTI = ESMF_LogType(2),  &
+    ESMF_LOG_NONE = ESMF_LogType(3)
     
 !     ! Log Entry                            
 type ESMF_LOGENTRY
@@ -128,7 +129,6 @@ type ESMF_Log
     type(ESMF_Logical)                              ::  flushImmediately    
     type(ESMF_Logical)                              ::  rootOnly    
     type(ESMF_Logical)                              ::  verbose  
-    type(ESMF_Logical)                              ::  logNone   
     type(ESMF_Logical)			            ::  flushed 
     type(ESMF_Logical)			            ::  dirty
     type(ESMF_HaltType)                             ::  halt
@@ -152,6 +152,7 @@ end type ESMF_Log
     public ESMF_LOG_ERROR
     public ESMF_LOG_SINGLE
     public ESMF_LOG_MULTI
+    public ESMF_LOG_NONE    
     public ESMF_LOG_HALTNEVER
     public ESMF_LOG_HALTWARNING
     public ESMF_LOG_HALTERROR
@@ -188,6 +189,10 @@ interface operator (.eq.)
    module procedure ESMF_llteq
 end interface
 
+interface operator (.ne.)
+   module procedure ESMF_lltne
+end interface
+
 interface operator (.gt.)
    module procedure ESMF_lmtgt
 end interface
@@ -220,6 +225,13 @@ logical ESMF_llteq
 type(ESMF_LogType), intent(in) :: lt1,lt2
 
     ESMF_llteq = (lt1%ftype .eq. lt2%ftype)
+end function
+
+function ESMF_lltne(lt1, lt2)
+logical ESMF_lltne
+type(ESMF_LogType), intent(in) :: lt1,lt2
+
+    ESMF_lltne = (lt1%ftype .ne. lt2%ftype)
 end function
 
 function ESMF_lmtgt(mt1, mt2)
@@ -260,12 +272,16 @@ end function
             rc=ESMF_FAILURE
         endif
 
+    if (log%logtype .ne. ESMF_LOG_NONE) then
+
+
 	if (log%FileIsOpen .eq. ESMF_TRUE) then
 	    call ESMF_LogFlush(log,rc=rc2)		
     	    CLOSE(UNIT=log%unitNumber)
 	    log%FileIsOpen=ESMF_FALSE
 	    deallocate(log%LOG_ENTRY,stat=status)	
 	endif
+    endif
 
 	if (present(rc)) then
             rc=ESMF_SUCCESS
@@ -651,11 +667,10 @@ end subroutine ESMF_LogGet
 ! !IROUTINE: ESMF_LogInitialize - Initialize Log file(s)
 
 ! !INTERFACE: 
-      subroutine ESMF_LogInitialize(filename, lognone, logtype, rc)
+      subroutine ESMF_LogInitialize(filename, logtype, rc)
 !
 ! !ARGUMENTS:
       character(len=*)                                  :: filename
-      integer, intent(in),optional		        :: lognone  
       type(ESMF_LogType), intent(in),optional           :: logtype  
       integer, intent(out),optional	                :: rc
 
@@ -671,17 +686,16 @@ end subroutine ESMF_LogGet
 !            Name of file.  Maximum length 26 characters to allow for
 !            the PET number to be added and keep the total file name
 !            length under 32 characters.
-!      \item [{[lognone]}]
-!            Turns off logging if equal to {\tt ESMF\_LOG\_NONE}.
 !      \item [{[logtype]}]
-!            Specifies {\tt ESMF\_LOG\_SINGLE} or {\tt ESMF\_LOG\_MULTI}.
+!            Specifies {\tt ESMF\_LOG\_SINGLE}, {\tt ESMF\_LOG\_MULTI} or
+!            {\tt ESMF\_LOG\_NONE}.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
 ! 
 !EOPI
 	
-    call ESMF_LogOpen(ESMF_LogDefault, filename, lognone, logtype, rc)
+    call ESMF_LogOpen(ESMF_LogDefault, filename, logtype, rc)
 
 end subroutine ESMF_LogInitialize
 
@@ -894,12 +908,11 @@ end subroutine ESMF_LogMsgSetError
 ! !IROUTINE: ESMF_LogOpen - Open Log file(s)
 
 ! !INTERFACE: 
-    subroutine ESMF_LogOpen(log, filename, lognone, logtype, rc)
+    subroutine ESMF_LogOpen(log, filename, logtype, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Log)			                :: log
     character(len=*)			                :: filename
-    integer, intent(in),optional                        :: lognone  
     type(ESMF_LogType), intent(in),optional             :: logtype  
     integer, intent(out),optional	                :: rc
 
@@ -917,10 +930,9 @@ end subroutine ESMF_LogMsgSetError
 !            Name of file.  Maximum length 26 characters to allow for
 !            the PET number to be added and keep the total file name
 !            length under 32 characters.
-!      \item [{[lognone]}]
-!            Turns off logging if equal to {\tt ESMF\_LOG\_NONE}.
 !      \item [{[logtype]}]
-!            Specifies {\tt ESMF\_LOG\_SINGLE} or {\tt ESMF\_LOG\_MULTI}.
+!            Specifies {\tt ESMF\_LOG\_SINGLE}, {\tt ESMF\_LOG\_MULTI} or
+!            {\tt ESMF\_LOG\_NONE}.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -956,10 +968,6 @@ end subroutine ESMF_LogMsgSetError
     log%flushImmediately = ESMF_FALSE
     log%rootOnly = ESMF_FALSE
     log%verbose = ESMF_FALSE
-    log%logNone = ESMF_FALSE !default is to log
-    if (present(lognone)) then
-      if (lognone .eq. ESMF_LOG_NONE) log%logNone = ESMF_TRUE 
-    endif
     log%flushed = ESMF_FALSE
     log%dirty = ESMF_FALSE
     log%FileIsOpen=ESMF_FALSE
@@ -967,8 +975,11 @@ end subroutine ESMF_LogMsgSetError
     if (present(logtype)) then
       	log%logtype=logtype
     else
-        log%logtype=ESMF_LOG_SINGLE
-    endif	
+        log%logtype=ESMF_LOG_MULTI
+    endif
+    
+  if(log%logtype .ne. ESMF_LOG_NONE) then
+    	
     if (log%logtype .eq. ESMF_LOG_SINGLE) then
         log%nameLogErrFile=trim(filename)
     else
@@ -1050,7 +1061,9 @@ end subroutine ESMF_LogMsgSetError
     endif
     log%LOG_ENTRY => localbuf
     
-    call c_ESMC_LogInitialize(filename,log%petNumber,rc2)
+  endif
+  
+    call c_ESMC_LogInitialize(filename,log%petNumber,log%logtype,rc2)
     if (present(rc)) then
         rc=ESMF_SUCCESS    
     endif
@@ -1232,14 +1245,16 @@ end subroutine ESMF_LogSet
       alog => ESMF_LogDefault
     endif
 
-    if (alog%FileIsOpen .ne. ESMF_TRUE) then
-      print *, "ESMF_Log not open -- cannot ESMF_LogWrite()."
-      rc=ESMF_FAILURE
-      return
-    endif
+    if (alog%logtype .ne. ESMF_LOG_NONE) then
 
-    index = alog%fIndex
-    if (alog%logNone .ne. ESMF_TRUE) then
+        if (alog%FileIsOpen .ne. ESMF_TRUE) then
+          print *, "ESMF_Log not open -- cannot ESMF_LogWrite()."
+          rc=ESMF_FAILURE
+          return
+        endif
+
+        index = alog%fIndex
+      
     	alog%dirty = ESMF_TRUE    
     	call c_esmc_timestamp(y,mn,dy,h,m,s,ms)
     	call DATE_AND_TIME(d,t)	
