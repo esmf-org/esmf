@@ -1,0 +1,63 @@
+% $Id: LogErr_options.tex,v 1.7.2.1 2006/10/27 05:46:10 theurich Exp $
+
+% Earth System Modeling Framework
+% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the GPL.
+
+\subsubsection{ESMF\_HaltType}
+
+\label{opt:Halttype}
+{\sf DESCRIPTION:\\}
+Specifies when to halt - e.g., never, warning, error.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_LOG\_HALTNEVER] 
+         Never halt.
+   \item [ESMF\_LOG\_HALTWARNING]
+         Halt on a warning.
+   \item [ESMF\_LOG\_HALTERROR]
+         Halt on an error.
+\end{description}
+
+\subsubsection{ESMF\_MsgType}
+
+\label{opt:msgtype}
+{\sf DESCRIPTION:\\}
+Specifies what sort of message - e.g., info, warning, 
+error - will be written to an {\tt ESMF\_Log} file.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_LOG\_INFO] 
+         Message is informational.
+   \item [ESMF\_LOG\_WARNING]
+         Message is a warning.
+   \item [ESMF\_LOG\_ERROR]
+         Message indicates an error.
+\end{description}
+
+\subsubsection{ESMF\_LogType}
+
+\label{opt:logtype}
+{\sf DESCRIPTION:\\}
+Specifies single, multi or no Log.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_LOG\_SINGLE] 
+         Log is single Log.
+   \item [ESMF\_LOG\_MULTI]
+         Log is multi Log.
+   \item [ESMF\_LOG\_NONE]
+         There is no Log.
+\end{description}
+
+
+
+
+
