@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.75 2006/02/23 05:14:25 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.76 2006/10/27 21:14:45 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.75 2006/02/23 05:14:25 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.76 2006/10/27 21:14:45 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -736,11 +736,6 @@
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-
-        ! Deallocate the gridcomp struct itself
-        deallocate(gridcomp%compp, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "compclass dealloc", &
-                                       ESMF_CONTEXT, rc)) return
 
         nullify(gridcomp%compp)
  
