@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.38 2006/09/25 20:29:58 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.39 2006/10/27 20:35:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -213,7 +213,7 @@
 !           If not specified, defaults to "ESMF_ErrorLog".
 !     \item [{[defaultLogType]}]
 !           Sets the default Log Type to be used by ESMF Log Manager.
-!           If not specified, defaults to "ESMF_LOG_SINGLE".
+!           If not specified, defaults to "ESMF\_LOG\_MULTI".
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -254,11 +254,14 @@
       ! an incorrect value
       if (present(defaultLogType)) then
         if (defaultLogType.eq.ESMF_LOG_SINGLE .OR. &
-            defaultLogType.eq.ESMF_LOG_MULTI) then
+            defaultLogType.eq.ESMF_LOG_MULTI .OR. &
+            defaultLogType.eq.ESMF_LOG_NONE) then
           defaultLogTypeUse = defaultLogType
         else
-          defaultLogTypeUse = ESMF_LOG_SINGLE
+          defaultLogTypeUse = ESMF_LOG_MULTI
         endif
+      else
+        defaultLogTypeUse = ESMF_LOG_MULTI
       endif
 
       if (present(defaultLogFileName)) then
