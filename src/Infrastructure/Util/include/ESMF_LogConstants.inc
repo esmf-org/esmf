@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogConstants.inc,v 1.2 2005/12/15 05:33:40 eschwab Exp $
+ $Id: ESMF_LogConstants.inc,v 1.3 2006/10/27 20:42:35 theurich Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -73,12 +73,5 @@ ESMF\_LOG\_MAXTRYOPEN: maximum tries to determine fortran unit number
 !EOP
 #endif
 #define ESMF_LOG_MAXTRYOPEN 10000
-
-#if 0
-!BOP
-ESMF\_LOG\_NONE: log constant for no logging
-!EOP
-#endif
-#define ESMF_LOG_NONE 0
 
 #endif
