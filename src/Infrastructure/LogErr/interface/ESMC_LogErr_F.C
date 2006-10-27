@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr_F.C,v 1.16.6.1 2006/10/24 22:52:42 svasquez Exp $
+// $Id: ESMC_LogErr_F.C,v 1.16.6.2 2006/10/27 05:51:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.16.6.1 2006/10/24 22:52:42 svasquez Exp $";
+ static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.16.6.2 2006/10/27 05:51:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -113,7 +113,7 @@ extern "C" {
 // !ARGUMENTS:
       char *filename,           // in - F90 filename, non-null terminated string
       int *petnum,
-      int *lognone,
+      ESMC_LogType *logtype,
       int *rc,                  // out - return code
       int nlen){                // hidden/in - strlen count for filename
 // 
@@ -136,7 +136,7 @@ extern "C" {
   } 
   strcpy(ESMC_LogDefault.nameLogErrFile,fname);
   ESMC_LogDefault.pet_num=petnum;
-  ESMC_LogDefault.logNone = *lognone;
+  ESMC_LogDefault.logtype=*logtype;
   if (fname)  delete [] fname;
   *rc = ESMF_SUCCESS;
   return;
