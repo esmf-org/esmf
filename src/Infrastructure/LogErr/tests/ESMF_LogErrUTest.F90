@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.33.2.3 2006/10/31 18:54:57 theurich Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.33.2.4 2006/10/31 19:23:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.33.2.3 2006/10/31 18:54:57 theurich Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.33.2.4 2006/10/31 19:23:43 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -459,8 +459,9 @@
       ! Verify correct PET was written into log file
       write(failMsg, *) "PET number in file is wrong"
       write(name, *) "Verify PET number in Log File Test"
-      call ESMF_Test((my_pet_char.eq.pet_num), name, failMsg, result, ESMF_SRCLINE)
-      print *, " My PET char is ", my_pet_char
+      call ESMF_Test((lge(my_pet_char,pet_num).and.lle(my_pet_char,pet_num)), &
+        name, failMsg, result, ESMF_SRCLINE)
+      print *, " My PET char is ", my_pet_char, "and I read: ", pet_num
       
       !------------------------------------------------------------------------
       !EX_UTest
