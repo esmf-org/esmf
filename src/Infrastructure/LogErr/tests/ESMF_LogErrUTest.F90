@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.34 2006/09/29 18:13:23 theurich Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.35 2006/10/31 18:59:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.34 2006/09/29 18:13:23 theurich Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.35 2006/10/31 18:59:35 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -55,6 +55,7 @@
       character(4) :: my_pet_char
       character(8) :: todays_date
       character(10) :: todays_time
+      character(80) :: filename
       integer :: my_v(8), log_v(8), k, init_sec
       integer, pointer :: rndseed(:)
       
@@ -337,17 +338,15 @@
       print *, "Ending the no-op loop"
 
       ! Generate a random string using clock as seed and write it to log file
-      ! Halem (HP), k=2; Bluesky (IBM), k=2;
-      !   Jazz/PGI (Intel Linux Cluster), k=34
       call random_seed()
       call random_seed(size=k)
       print *, "size of random seed = ", k
       allocate(rndseed(k))
+      call date_and_time(values=my_v)
       do i=1,k
-        call date_and_time(values=my_v)
-        rndseed(i)=my_v(8)*my_v(7)+k
+        rndseed(i)=i*(my_v(6)+my_v(7))
       end do
-      print *, "generated a random seed based on current time = " , rndseed(1)
+      print *, "generated a random seed based on current time = " , rndseed
       call random_seed(put=rndseed(1:k))
       deallocate(rndseed)
       do i=1, 5
@@ -392,12 +391,22 @@
       print *, " rc = ", rc
 
       !------------------------------------------------------------------------
+      ! Verify that the file can be opened with Fortran IO
+      !EX_UTest
+      write(name, *) "Open Log file with Fortran IO Test"
+      write(failMsg, *) "open() returned failure"
+      filename = my_pet_char // ".Log Test File 2"
+      open (unit=1, file = filename, action = "read", &
+            form = "formatted", iostat = input_status)
+      call ESMF_Test((input_status.eq.0), name, failMsg, result, ESMF_SRCLINE)
+      print *, " filename = ", filename
+      print *, " input_status = ", input_status
+      if (input_status.ne.0) goto 100 ! cannot continue test without open file
+
+      !------------------------------------------------------------------------
       ! Verify that the correct string was written to the file
       !EX_UTest
       rc = ESMF_FAILURE
-      input_status = 0
-      open (unit=1, file = "Log Test File 2", action = "read", &
-            form = "formatted", iostat = input_status)
       do
           read (1, *, iostat = input_status) todays_date, todays_time, &
                                              msg_type, Pet_num, msg_string
@@ -410,7 +419,7 @@
           endif
       end do
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) " Verify LogFlush Test"
+      write(name, *) "Verify random string Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, "rc = ", rc
       print *, "msg_string is ", msg_string
@@ -462,7 +471,7 @@
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
-
+100   continue
       call ESMF_TestEnd(result, ESMF_SRCLINE)
 
 
