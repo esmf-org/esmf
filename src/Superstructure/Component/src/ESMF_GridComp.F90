@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.77 2006/10/30 20:41:24 samsoncheung Exp $
+! $Id: ESMF_GridComp.F90,v 1.78 2006/11/01 07:13:57 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.77 2006/10/30 20:41:24 samsoncheung Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.78 2006/11/01 07:13:57 peggyli Exp $'
 
 !==============================================================================
 !
@@ -769,7 +769,7 @@
       integer,                  intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user-supplised finalization code for 
+!  Call the associated user-supplied finalization code for 
 !  an {\tt ESMF\_GridComp}.
 !    
 !  The arguments are:
@@ -777,14 +777,20 @@
 !   \item[gridcomp]
 !    The {\tt ESMF\_GridComp} to call finalize routine for.
 !   \item[{[importState]}]  
-!    {\tt ESMF\_State} containing import data.
+!    {\tt ESMF\_State} containing import data. If not present, a dummy
+!    argument will be passed to the user-supplied routine.  The 
+!    importState argument in the user code cannot be optional. 
 !   \item[{[exportState]}]  
-!    {\tt ESMF\_State} containing export data.
+!    {\tt ESMF\_State} containing export data. If not present, a dummy
+!    argument will be passed to the user-supplied routine.  The 
+!    exportState argument in the user code cannot be optional. 
 !   \item[{[clock]}]  
 !    External {\tt ESMF\_Clock} for passing in time information.  
 !    This is generally the parent component's clock, and will be treated
 !    as read-only by the child component.  The child component can maintain
-!    a private clock for its own internal time computations.
+!    a private clock for its own internal time computations. If not present, a dummy
+!    argument will be passed to the user-supplied routine.  The 
+!    clock argument in the user code cannot be optional. 
 !   \item[{[phase]}]  
 !      Component providers must document whether their each of their
 !      routines are {\em single-phase} or {\em multi-phase}.
@@ -905,14 +911,20 @@
 !   \item[gridcomp]
 !    {\tt ESMF\_GridComp} to call initialize routine for.
 !   \item[{[importState]}]  
-!    {\tt ESMF\_State} containing import data for coupling.
+!    {\tt ESMF\_State} containing import data for coupling. If not present, a dummy
+!    argument will be passed to the user-supplied routine.  The 
+!    importState argument in the user code cannot be optional. 
 !   \item[{[exportState]}]  
-!    {\tt ESMF\_State} containing export data for coupling.
-!   \item[{[clock]}]
-!    External {\tt ESMF\_Clock} for passing in time information.
+!    {\tt ESMF\_State} containing export data for coupling. If not present, a dummy
+!    argument will be passed to the user-supplied routine.  The 
+!    exportState argument in the user code cannot be optional. 
+!   \item[{[clock]}]  
+!    External {\tt ESMF\_Clock} for passing in time information.  
 !    This is generally the parent component's clock, and will be treated
 !    as read-only by the child component.  The child component can maintain
-!    a private clock for its own internal time computations.
+!    a private clock for its own internal time computations. If not present, a dummy
+!    argument will be passed to the user-supplied routine.  The 
+!    clock argument in the user code cannot be optional. 
 !   \item[{[phase]}]
 !    Component providers must document whether their each of their
 !    routines are {\em single-phase} or {\em multi-phase}.
@@ -1069,16 +1081,20 @@
 !   \item[gridcomp]
 !    {\tt ESMF\_GridComp} to call run routine for.
 !   \item[{[importState]}]  
-!    {\tt ESMF\_State} containing import data.
+!    {\tt ESMF\_State} containing import data. If not present, a dummy
+!    argument will be passed to the user-supplied routine.  The 
+!    importState argument in the user code cannot be optional. 
 !   \item[{[exportState]}]  
-!    {\tt ESMF\_State} containing export data.
+!    {\tt ESMF\_State} containing export data. If not present, a dummy
+!    argument will be passed to the user-supplied routine.  The 
+!    exportState argument in the user code cannot be optional. 
 !   \item[{[clock]}]  
-!    External clock for passing in time information.
-!   \item[{[clock]}]
-!    External {\tt ESMF\_Clock} for passing in time information.
+!    External {\tt ESMF\_Clock} for passing in time information.  
 !    This is generally the parent component's clock, and will be treated
 !    as read-only by the child component.  The child component can maintain
-!    a private clock for its own internal time computations.
+!    a private clock for its own internal time computations. If not present, a dummy
+!    argument will be passed to the user-supplied routine.  The 
+!    clock argument in the user code cannot be optional. 
 !   \item[{[phase]}]   
 !    Component providers must document whether their each of their
 !    routines are {\em single-phase} or {\em multi-phase}.    
