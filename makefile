@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69.2.14 2006/10/24 19:06:05 theurich Exp $
+# $Id: makefile,v 1.69.2.15 2006/11/01 06:05:56 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -93,6 +93,12 @@ script_info:
 	  echo "ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)" ; fi
 	-@if [ -n "$(ESMF_NO_INTEGER_2_BYTE)" ] ; then \
 	  echo "ESMF_NO_INTEGER_2_BYTE: $(ESMF_NO_INTEGER_2_BYTE)" ; fi
+	-@echo " "
+	-@echo "ESMF_INSTALL_PREFIX:    $(ESMF_INSTALL_PREFIX)"
+	-@echo "ESMF_INSTALL_HEADERDIR: $(ESMF_INSTALL_HEADERDIR)"
+	-@echo "ESMF_INSTALL_MODDIR:    $(ESMF_INSTALL_MODDIR)"
+	-@echo "ESMF_INSTALL_LIBDIR:    $(ESMF_INSTALL_LIBDIR)"
+	-@echo "ESMF_INSTALL_DOCDIR:    $(ESMF_INSTALL_DOCDIR)"
 	-@echo " "
 	-@echo "------------------------------------------"
 	-@echo "ESMF environment variables pointing to 3rd party software:"
@@ -238,6 +244,9 @@ info_mk:
 	-@if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
 	  echo "# ESMF_NETCDF_LIBPATH: $(ESMF_NETCDF_LIBPATH)" >> $(MKINFO) ; fi
 
+install_info_mk:
+	$(MAKE) info_mk ESMF_LDIR=$(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_LIBDIR) ESMF_LIBDIR=$(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_LIBDIR) ESMF_MODDIR=$(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_MODDIR) ESMF_INCDIR=$(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_HEADERDIR)
+
 # Ranlib on the libraries
 ranlib:
 	$(ESMF_RANLIB) $(ESMF_LIBDIR)/*.a
@@ -268,29 +277,16 @@ DOCS	   = build/README build/doc/*
 
 SCRIPTS    = 
 
-# TODO: this target is not so useful right now - because we try
-# to build shared libs on many of our platforms.  the executables
-# linked against that lib (like the unit tests and examples) then
-# store that build directory inside as where to find the shared
-# lib at load time.  to move them, we have to know the eventual
-# location of the libs (by having something like ESMF_INSTALL_DIR
-# defined at the time the executables are linked, so we can add
-# an extra -rpath or -L flag to the link to add the install lib
-# dir to be searched at load time.
-# also, this should just have a single variable and not separate
-# ones for the lib, mod, and includes.
-# also, there should be options to install just the bare lib,
-# the unit tests and quickstart files, and then everything.
+# ------------------------------------------------------------------
+# INSTALL target
 install:
-	@if [ "$(ESMF_LIB_INSTALL)" != "" ] ; then \
-	 cp -fp $(ESMF_LIBDIR)/* $(ESMF_LIB_INSTALL) ; \
-	fi
-	if [ "$(ESMF_MOD_INSTALL)" != "" ] ; then \
-	 cp -fp $(ESMF_MODDIR)/*.mod $(ESMF_MOD_INSTALL) ; \
-	fi
-	if [ "$(ESMF_H_INSTALL)" != "" ] ; then \
-	 cp -fp $(ESMF_BUILD)/src/include/*.h $(ESMF_H_INSTALL) ; \
-	fi
+	mkdir -p $(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_HEADERDIR)
+	cp -fp $(ESMF_BUILD)/src/include/*.h $(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_HEADERDIR)
+	mkdir -p $(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_MODDIR)
+	cp -fp $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_MODDIR)
+	mkdir -p $(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_LIBDIR)
+	cp -fp $(ESMF_LIBDIR)/* $(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_LIBDIR)
+	$(MAKE) install_info_mk
 
 
 # ------------------------------------------------------------------
