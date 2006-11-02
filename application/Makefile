@@ -1,7 +1,14 @@
 # Example GNU Makefile for user ESMF application
 
-# -> adjust the path in the following line to match your situation:
-include ../lib/libg/Linux.intel.32.mpich.default/esmf.mk
+# -> adjust the path in the following lines to match your situation:
+ifndef ESMF_INSTALL_PREFIX_ABSPATH
+ESMF_INSTALL_PREFIX_ABSPATH = /you/need/to/adjust/this/path
+endif
+ifndef ESMF_INSTALL_LIBDIR
+ESMF_INSTALL_LIBDIR = lib
+endif
+# -> adjust the path in the following lines to match your situation:
+include $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_LIBDIR)/esmf.mk
 
 .SUFFIXES: .f90
 
@@ -13,8 +20,13 @@ include ../lib/libg/Linux.intel.32.mpich.default/esmf.mk
 
 
 # -----------------------------------------------------------------------------
-
 esmf_application: esmf_application.o
+
+# -----------------------------------------------------------------------------
+check:
+	@if [ -f esmf_application ]; then \
+           echo "PASS: check"; \
+        fi
 
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
