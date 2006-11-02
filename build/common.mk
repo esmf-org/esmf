@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.29 2006/11/01 06:05:56 theurich Exp $
+#  $Id: common.mk,v 1.155.2.30 2006/11/02 21:46:26 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -246,6 +246,7 @@ endif
 ifndef ESMF_INSTALL_PREFIX
 export ESMF_INSTALL_PREFIX := ./
 endif
+export ESMF_INSTALL_PREFIX_ABSPATH := $(shell $(ESMF_DIR)/scripts/abspath $(ESMF_INSTALL_PREFIX))
 
 ifndef ESMF_INSTALL_HEADERDIR
 export ESMF_INSTALL_HEADERDIR := include
