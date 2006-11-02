@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.156 2006/10/17 23:04:12 oehmke Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.157 2006/11/02 01:26:36 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.156 2006/10/17 23:04:12 oehmke Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.157 2006/11/02 01:26:36 peggyli Exp $'
 
 !==============================================================================
 !
@@ -4708,20 +4708,11 @@
       endif
 
       if (present(vertRelLoc)) then
-   !     if (gridRank.le.2) then
-   !         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-   !                             "cannot define vertical relloc on 2D grid", &
-   !                              ESMF_CONTEXT, rc)) return
-   !     endif
         if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
           call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
- !       else
- !         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
- !                                       "undefined vertical relloc", &
- !                                       ESMF_CONTEXT, rc)) return
         endif
       endif
 
@@ -5005,11 +4996,6 @@
       endif
 
       if (present(vertRelLoc)) then
-  !      if (gridRank.le.2) then
-  !         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-  !                             "cannot define vertical relloc on 2D grid", &
-  !                              ESMF_CONTEXT, rc)) return
-  !      endif
         if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
           call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -5017,10 +5003,6 @@
                                     ESMF_CONTEXT, rc)) return
 
           vertDistIdUse = grid%ptr%internDGIndex(vertPhysIdUse)
-  !      else
-  !           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-  !                               "undefined vertical relloc", &
-  !                                ESMF_CONTEXT, rc)) return
         endif
       endif
 
@@ -5299,22 +5281,12 @@
       endif
 
       if (present(vertRelLoc)) then
-        if (gridRank.le.2) then
-          !call ESMF_LogWrite("vertical relloc defined on a 2D grid", &
-          !                   ESMF_LOG_WARNING, ESMF_CONTEXT)
-        else
-          if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
-            call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-                                      ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) return
-            vertDistIdUse = grid%ptr%internDGIndex(vertPhysIdUse)
-          else
-            dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                          "undefined vertical relloc", &
-                                          ESMF_CONTEXT, rc)
-            return
-          endif
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
+          call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          vertDistIdUse = grid%ptr%internDGIndex(vertPhysIdUse)
         endif
       endif
 
@@ -5476,33 +5448,18 @@
       endif
 
       if (present(vertRelLoc)) then
-
-        ! first check and make sure this Grid has vertical subGrids,  If not, issue
-        ! a warning and ignore the vertical AIs
-        if (gridRank.le.2) then
-          call ESMF_LogWrite("vertical relloc defined on a 2D grid", &
-                             ESMF_LOG_WARNING, ESMF_CONTEXT)
-        else
-
-          ! get the physgrid/interndg identifier from the vertical relLoc.  If it
-          ! is not valid return an error.
-          if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
-            call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-                                      ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) return
-            vertDistIdUse = grid%ptr%internDGIndex(vertPhysIdUse)
-            AIrank = AIrank + 1
-            vert   = .true.
-          else
-            dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                          "undefined vertical relloc", &
-                                          ESMF_CONTEXT, rc)
-            return
-          endif
+	! get the physgrid/interndg identifier from the vertical relLoc.  If it
+        ! is not valid return an error.
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .and. gridRank.eq.3) then
+          call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          vertDistIdUse = grid%ptr%internDGIndex(vertPhysIdUse)
+          AIrank = AIrank + 1
+          vert   = .true.
         endif
       endif
-
       ! check if the AI array pointer is associated 
       !  -  If it is, check that it is large enough to hold the requested data.
       !  -  If it is not, allocate it here
@@ -5728,10 +5685,6 @@
                                     ESMF_CONTEXT, rc)) return
           vertDistIdUse = grid%ptr%internDGIndex(vertPhysIdUse)
         endif
- !    else
- !      dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
- !                                    "undefined vertical relloc", &
- !                                    ESMF_CONTEXT, rc)) return
       endif
 
       hdgtype => grid%ptr%interndgs(horzDistIdUse)%ptr
@@ -6134,10 +6087,6 @@
                                     ESMF_CONTEXT, rc)) return
           vertDistIdUse = grid%ptr%internDGIndex(vertPhysIdUse)
         endif
- !    else
- !      dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
- !                                    "undefined vertical relloc", &
- !                                    ESMF_CONTEXT, rc)) return
       endif
 
       hdgtype => grid%ptr%interndgs(horzDistIdUse)%ptr
