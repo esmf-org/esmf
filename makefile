@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69.2.15 2006/11/01 06:05:56 theurich Exp $
+# $Id: makefile,v 1.69.2.16 2006/11/02 21:42:17 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -245,7 +245,7 @@ info_mk:
 	  echo "# ESMF_NETCDF_LIBPATH: $(ESMF_NETCDF_LIBPATH)" >> $(MKINFO) ; fi
 
 install_info_mk:
-	$(MAKE) info_mk ESMF_LDIR=$(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_LIBDIR) ESMF_LIBDIR=$(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_LIBDIR) ESMF_MODDIR=$(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_MODDIR) ESMF_INCDIR=$(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_HEADERDIR)
+	$(MAKE) info_mk ESMF_LDIR=$(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_LIBDIR) ESMF_LIBDIR=$(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_LIBDIR) ESMF_MODDIR=$(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_MODDIR) ESMF_INCDIR=$(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_HEADERDIR)
 
 # Ranlib on the libraries
 ranlib:
@@ -280,14 +280,33 @@ SCRIPTS    =
 # ------------------------------------------------------------------
 # INSTALL target
 install:
-	mkdir -p $(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_HEADERDIR)
-	cp -fp $(ESMF_BUILD)/src/include/*.h $(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_HEADERDIR)
-	mkdir -p $(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_MODDIR)
-	cp -fp $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_MODDIR)
-	mkdir -p $(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_LIBDIR)
-	cp -fp $(ESMF_LIBDIR)/* $(ESMF_INSTALL_PREFIX)/$(ESMF_INSTALL_LIBDIR)
+	-@echo " "
+	-@echo "Installing ESMF into: "$(ESMF_INSTALL_PREFIX_ABSPATH)
+	-@echo " "
+	mkdir -p $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_HEADERDIR)
+	cp -fp $(ESMF_BUILD)/src/include/*.h $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_HEADERDIR)
+	mkdir -p $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_MODDIR)
+	cp -fp $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_MODDIR)
+	mkdir -p $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_LIBDIR)
+	cp -fp $(ESMF_LIBDIR)/* $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_LIBDIR)
 	$(MAKE) install_info_mk
+	-@echo " "
+	-@echo "ESMF installation complete"
+	-@echo " "
 
+# ------------------------------------------------------------------
+# INSTALLCHECK target
+installcheck:
+	-@echo " "
+	-@echo "Checking ESMF installation in: "$(ESMF_INSTALL_PREFIX_ABSPATH)
+	-@echo " "
+	cd $(ESMF_DIR)/application ;\
+	$(MAKE) clean;\
+	$(MAKE);\
+        $(MAKE) check
+	-@echo " "
+	-@echo "ESMF installation check complete"
+	-@echo " "
 
 # ------------------------------------------------------------------
 # add dummy rules here to avoid gnumake trying to remake the actual
