@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.40 2004/03/16 00:08:09 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.60.2.1 2006/11/03 05:35:41 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -6,6 +6,7 @@
 \usepackage{html}
 \usepackage{times}
 \usepackage{graphicx}
+\usepackage{hyperref}
 \usepackage[T1]{fontenc}
 
 \newcommand{\docmttype}{Reference Manual for Fortran}
@@ -13,7 +14,7 @@
 \newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
 \newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}
 \newcommand{\mytitle}{\longname \docmttype ~~}
-\newcommand{\myversion}{Version 2.0}
+\newcommand{\myversion}{Version 2.2}
 
 \newenvironment
 {reqlist}
@@ -26,12 +27,19 @@
 \newcommand{\longname}{ESMF }
 \newcommand{\funcname}{ESMF }
 \newcommand{\shortname}{REF}
-\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Tom Bettge, Byron Boville, Nancy Collins, Tony Craig, Carlos Cruz, Arlindo da Silva, Cecelia DeLuca, Brian Eaton, Bob Hallberg, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Brian Kauffman, Jay Larson, John Michalakes, David Neckels, Jim Rosinski, Earl Schwab, Shepard Smithline, Max Suarez, Silverio Vasquez, Jon Wolfe, Weiyu Yang, Mike Young, Leonid Zaslavsky}
+\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Byron Boville, Samson Cheung, Nancy Collins, Tony Craig, Carlos Cruz, Arlindo da Silva, Cecelia DeLuca, Rosalinda de Fainchtein, Brian Eaton, Bob Hallberg, Tom Henderson, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Erik Kluzek, Brian Kauffman, Jay Larson, Peggy Li, John Michalakes, Sylvia Murphy, David Neckels, Bob Oehmke, Chuck Panaccione, Jim Rosinski, Will Sawyer, Earl Schwab, Shepard Smithline, Don Stark, Max Suarez, Spencer Swift, Gerhard Theurich, Silverio Vasquez, Jon Wolfe, Weiyu Yang, Mike Young, Leonid Zaslavsky}
 %===============================================================================
 \setlength{\textwidth}{6.5truein}
 \setlength{\textheight}{8.5truein}
 \setlength{\oddsidemargin}{0in}
 \setlength{\unitlength}{1truecm}
+
+% setting hbadness this high is supposed to suppress warnings about underfull 
+% boxes, which seems to work.  setting tolerance to 10000 was supposed to
+% suppress all the overfull box warnings but it seemed to have no effect  
+% so i took it back out.
+\hbadness = 10000
+\vbadness = 10000
 
 \begin{document}
 
@@ -68,7 +76,11 @@
 \newpage
 %\section{API Overview}
 \input{ESMF_api}
-%\subsection{Design and Implementation Notes}
+
+%\section{Global Options and Parameters}
+\input{ESMF_options}
+
+%\subsection{Overall Design and Implementation Notes}
 \input{ESMF_implnotes}
 
 \newpage
@@ -106,25 +118,38 @@
 %\section{Design and Implementation Notes}
 \input{ESMF_infradataimplnotes.tex}
 
-#include "../Infrastructure/Field/doc/Field_refdoc.ctex"
-
-#include "../Infrastructure/DataMap/doc/DataMap_refdoc.ctex"
-
-#include "../Infrastructure/ArrayComm/doc/Array_refdoc.ctex"
+\newpage
 
 #include "../Infrastructure/Bundle/doc/Bundle_refdoc.ctex"
 
+#include "../Infrastructure/BundleDataMap/doc/BundleDataMap_refdoc.ctex"
+
+#include "../Infrastructure/Field/doc/Field_refdoc.ctex"
+
+#include "../Infrastructure/FieldDataMap/doc/FieldDataMap_refdoc.ctex"
+
+#include "../Infrastructure/ArrayComm/doc/Array_refdoc.ctex"
+
+#include "../Infrastructure/ArrayDataMap/doc/ArrayDataMap_refdoc.ctex"
+
+#include "../Infrastructure/ArraySpec/doc/ArraySpec_refdoc.ctex"
+
 #include "../Infrastructure/Grid/doc/Grid_refdoc.ctex"
 
-%#include "../Infrastructure/PhysGrid/doc/PhysGrid_refdoc.ctex"
+#include "../Infrastructure/IOSpec/doc/IOSpec_refdoc.ctex"
 
-%#include "../Infrastructure/DistGrid/doc/DistGrid_refdoc.ctex"
+\newpage
 
-%#include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
+%\section{Overview of Distributed Data Methods}
+\input{ESMF_inframethodoverview.tex}
 
+#include "../Infrastructure/ArrayComm/doc/ArrayHalo_refdoc.ctex"
+
+#include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
+
+#include "../Infrastructure/ArrayComm/doc/ArrayRedist_refdoc.ctex"
 
 %===============================================================================
-
 \newpage
 \begin{htmlonly}
 \addcontentsline{toc}{part}{Infrastructure:  Utilities}
@@ -137,9 +162,10 @@
 \input{ESMF_infrautiloverview}
 
 \newpage
+
 #include "../Infrastructure/TimeMgr/doc/TimeMgr_refdoc.ctex"
 
-#include "../Infrastructure/DELayout/doc/CommMem_refdoc.ctex"
+%#include "../Infrastructure/DELayout/doc/CommMem_refdoc.ctex"
 
 #include "../Infrastructure/Config/doc/Config_refdoc.ctex"
 
@@ -147,13 +173,36 @@
 
 #include "../Infrastructure/LogErr/doc/LogErr_refdoc.ctex"
 
-%#include "../Infrastructure/Machine/doc/Machine_refdoc.ctex"
+#include "../Infrastructure/DELayout/doc/DELayout_refdoc.ctex"
 
-%#include "../Infrastructure/Route/doc/Route_refdoc.ctex"
+#include "../Infrastructure/VM/doc/VM_refdoc.ctex"
 
 %#include "../Infrastructure/IO/doc/IO_refdoc.ctex"
 
+\newpage
+\section{Bibliography}
+\bibliography{ESMF_refdoc} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Appendices}
+\end{htmlonly}
+\part{Appendices}
+
+\input{ESMF_appuml}
+\input{ESMF_apperr}
+
 \end{document}
+
+
+
+
+
+
+
+
 
 
 
