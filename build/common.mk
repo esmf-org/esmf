@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.30 2006/11/02 21:46:26 theurich Exp $
+#  $Id: common.mk,v 1.155.2.31 2006/11/03 18:30:40 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -244,24 +244,48 @@ endif
 # If INSTALL environment variables are not set give them default values #-------------------------------------------------------------------------------
 
 ifndef ESMF_INSTALL_PREFIX
-export ESMF_INSTALL_PREFIX := ./
+ESMF_INSTALL_PREFIX := ./DEFAULTINSTALLDIR
 endif
-export ESMF_INSTALL_PREFIX_ABSPATH := $(shell $(ESMF_DIR)/scripts/abspath $(ESMF_INSTALL_PREFIX))
+ESMF_INSTALL_PREFIX_ABSPATH := $(shell $(ESMF_DIR)/scripts/abspath $(ESMF_INSTALL_PREFIX))
 
 ifndef ESMF_INSTALL_HEADERDIR
-export ESMF_INSTALL_HEADERDIR := include
+ESMF_INSTALL_HEADERDIR := include
+endif
+pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_INSTALL_HEADERDIR))
+ifeq ($(pathtype),rel)
+export ESMF_INSTALL_HEADERDIR_ABSPATH = $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_HEADERDIR)
+else
+export ESMF_INSTALL_HEADERDIR_ABSPATH = $(ESMF_INSTALL_HEADERDIR)
 endif
 
 ifndef ESMF_INSTALL_MODDIR
-export ESMF_INSTALL_MODDIR = mod/mod$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
+ESMF_INSTALL_MODDIR = mod/mod$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
+endif
+pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_INSTALL_MODDIR))
+ifeq ($(pathtype),rel)
+export ESMF_INSTALL_MODDIR_ABSPATH = $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_MODDIR)
+else
+export ESMF_INSTALL_MODDIR_ABSPATH = $(ESMF_INSTALL_MODDIR)
 endif
 
 ifndef ESMF_INSTALL_LIBDIR
-export ESMF_INSTALL_LIBDIR = lib/lib$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
+ESMF_INSTALL_LIBDIR = lib/lib$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
+endif
+pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_INSTALL_LIBDIR))
+ifeq ($(pathtype),rel)
+export ESMF_INSTALL_LIBDIR_ABSPATH = $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_LIBDIR)
+else
+export ESMF_INSTALL_LIBDIR_ABSPATH = $(ESMF_INSTALL_LIBDIR)
 endif
 
 ifndef ESMF_INSTALL_DOCDIR
-export ESMF_INSTALL_DOCDIR := doc
+ESMF_INSTALL_DOCDIR := doc
+endif
+pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_INSTALL_DOCDIR))
+ifeq ($(pathtype),rel)
+export ESMF_INSTALL_DOCDIR_ABSPATH = $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_DOCDIR)
+else
+export ESMF_INSTALL_DOCDIR_ABSPATH = $(ESMF_INSTALL_DOCDIR)
 endif
 
 #-------------------------------------------------------------------------------
