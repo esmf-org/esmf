@@ -2,7 +2,7 @@
 # this script returns the absolute path
 workdir=`pwd`
 abspath=$1
-firstchar=`echo $1 | awk 'BEGIN { FS="" }; { print $1 }'`
+firstchar=`echo $1 | awk '{ print substr($0,1,1) }'`
 if [ $firstchar != / ]; then
 abspath=$workdir/$1
 fi
