@@ -21,9 +21,9 @@ If you need to compile and link your code against an already-built ESMF library,
 go to the "APPLICATION" section below.
 
 
-If you need to build the ESMF library, go to the "BUILDING" section below.
-(If you just downloaded the ESMF tarball, it is source code and you will
-have to build the library first.)
+If you need to build the ESMF library, go to the "BUILDING and INSTALLING"
+section below. (If you just downloaded the ESMF tarball, it is source code and
+you will have to build the library first.)
 
 
 If you are looking for more documentation, or higher-level information
@@ -74,8 +74,8 @@ example application which uses ESMF.
 ================================================================================
 ================================================================================
 
-BUILDING the ESMF library
--------------------------
+BUILDING and INSTALLING the ESMF library
+----------------------------------------
 
 The following compilers and utilities are required for compiling, linking and
 testing the ESMF software:
@@ -91,13 +91,13 @@ that comes with ESMF. It allows ESMF applications to be linked and run in
 single-process mode.
 
 
-Steps of the standard build procedure:
+Steps of the standard build and install procedure:
 
  1) Set required environment variable(s) (see next section below).
 
  2) Type 'gmake' (the GNU make program) to build the ESMF library.
 
- 3) Optionally test the ESMF library using any of the following targets:
+ 3) Optionally test the ESMF library build using any of the following targets:
     a) 'gmake unit_tests' to build and run the unit tests
     b) 'gmake system_tests' to build and run the system tests
     c) 'gmake check' to build and run the unit and system tests.
@@ -106,6 +106,10 @@ Steps of the standard build procedure:
     f) 'gmake all_tests' to build and run all available tests and demos
     Please consult the "Platform Specific Notes Related to Executing Test 
     Targets" below before attempting to use any of these targets.
+    
+ 4) Type 'gmake install' to install the ESMF library in a custom location.
+ 
+ 5) Optionally test the ESMF library installation via 'gmake installcheck'.
 
 ================================================================================
 
@@ -216,6 +220,13 @@ be set automatically. However, when ESMF is being cross-compiled for the X1 on
 a Linux host the user must set ESMF_OS to Unicos manually in order to indicate
 the intended target platform.
 
+ESMF_INSTALL_PREFIX
+
+This variable specifies the prefix of the installation path used during the
+installation process accessible thought the install target. Libraries, F90
+module files, header files and documentation all are installed relative to
+ESMF_INSTALL_PREFIX by default. The ESMF_INSTALL_PREFIX may be provided as
+absolute path or relative to ESMF_DIR.
 
 
 Supported Makefile Targets
@@ -268,11 +279,9 @@ Supported Makefile Targets
  run_all_tests        : run all available tests and demos (don't build)
  clean_all_tests      : remove all available test and demo executables
 
-Note:
-
- The normal 'install' target is *NOT CURRENTLY SUPPORTED*.  Neither is the
- 'uninstall' target.  They will be added in a future release of ESMF.
-
+ install              : install the ESMF library in a custom location
+ installcheck         : check the ESMF library installation
+ 
 
 Platform Specific Notes Related to Executing Test Targets
 ---------------------------------------------------------
@@ -553,4 +562,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.69.2.11 2006/09/20 21:06:26 theurich Exp $
+ $Id: README,v 1.69.2.12 2006/11/03 21:51:01 theurich Exp $
