@@ -1,4 +1,4 @@
-     % $Id: tracking.tex,v 1.10 2006/11/02 20:00:42 murphysj Exp $
+     % $Id: tracking.tex,v 1.11 2006/11/07 22:12:35 murphysj Exp $
 
 \section{Tracking and Metrics}
 
@@ -60,11 +60,26 @@ Examples:
 \item  {\bf LONG:} typekind vs type and kind (4)
 \end{itemize}
 
+\subsubsection{Estimating Task Completion Time}
+
+The following guidelines should be used when determining task completion time:
+\begin{itemize}
+
+\item Estimates are in calendar weeks.
+\item Estimates do not include the 25% time spent on support.  Thus items are allocated at 3 weeks per month.
+\item Estimates do not include integration and release preparation.
+\item Estimates do include any research time that's part of the developer's position. Calendar weeks are not corrected for this.
+\item Design estimates do include looking at other packages, design, time for iterating on telecons, design reviews, feedback, and prototyping.
+\item Implementation estimates do include implementation, code reivews, testing, and documentation. Documentation time and testing time should both
+equal coding time. Alos include any peripheral capabilities that will be needed to support the main item.
+\item Use the past as a guide and estimate long.
+\end {itemize}
+
 \subsubsection{Labeling Completion Time on Tasks}
 
 An estimated time to complete should be placed at the end of any ticket title labeled with the {\bf LONG:} key. If the time includes a design phase,
-this should be listed first e.g. (3/4) equals 3 weeks design plus 4 additional weeks for completion. Examine the two examples in the preceeding section. The first item will
-take two weeks to design and 3 additional weeks to complete. The second item has no design phase and will take 4 weeks to complete. 
+this should be listed first e.g. (3/4) equals 3 weeks design plus 4 additional weeks for completion. Examine the two examples in the preceeding section. 
+The first item will take two weeks to design and 3 additional weeks to complete. The second item has no design phase and will take 4 weeks to complete. 
 
 \subsubsection{Prioritization of Task Tickets}
 
