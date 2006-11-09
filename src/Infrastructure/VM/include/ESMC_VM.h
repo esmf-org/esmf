@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.30 2006/06/19 21:53:40 theurich Exp $
+// $Id: ESMC_VM.h,v 1.31 2006/11/09 14:29:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@ class ESMC_VM : public ESMC_VMK {   // inherits from ESMC_VMK class
     ESMC_VMId *ESMC_VMGetVMId(int *rc);   // Return VMId of the VM context.
     int ESMC_VMSendVMId(ESMC_VMId *vmid, int dest);
     int ESMC_VMRecvVMId(ESMC_VMId *vmid, int source);
-    void ESMC_VMPrint(void);
+    void ESMC_VMPrint(int *rc=NULL);
 };// end class ESMC_VM
 
 // external ESMC_VM methods:
