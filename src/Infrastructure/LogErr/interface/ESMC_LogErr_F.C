@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr_F.C,v 1.17 2006/10/27 20:50:10 theurich Exp $
+// $Id: ESMC_LogErr_F.C,v 1.18 2006/11/09 14:33:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.17 2006/10/27 20:50:10 theurich Exp $";
+ static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.18 2006/11/09 14:33:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -66,7 +66,9 @@ extern "C" {
 //EOP
 // !REQUIREMENTS: 
 
-  *rc = ESMF_SUCCESS;
+  if (ESMC_LogDefault.errorMaskCount > 0)
+    delete [] ESMC_LogDefault.errorMask;
+  if (rc) *rc = ESMF_SUCCESS;
   return;
 
 }  // end c_ESMC_Logfinalize
@@ -138,10 +140,46 @@ extern "C" {
   ESMC_LogDefault.pet_num=petnum;
   ESMC_LogDefault.logtype=*logtype;
   if (fname)  delete [] fname;
+  ESMC_LogDefault.errorMaskCount = 0;
+  ESMC_LogDefault.errorMask = NULL;
   *rc = ESMF_SUCCESS;
   return;
 
 }  // end c_ESMC_Loginitialize
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_LogSet - set values in global default Error Log
+//
+// !INTERFACE:
+      void FTN(c_esmc_logset)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      int *errorMask,
+      int *errorMaskCount,
+      int *rc){                 // out - return code
+// 
+// !DESCRIPTION:
+//     Set values in C++ version of global default LogErr.
+//
+//EOP
+// !REQUIREMENTS: 
+
+  *rc = ESMF_FAILURE;
+  if (ESMC_LogDefault.errorMaskCount > 0)
+    delete [] ESMC_LogDefault.errorMask;
+  ESMC_LogDefault.errorMaskCount = *errorMaskCount;
+  ESMC_LogDefault.errorMask = new int[*errorMaskCount];
+  for (int i=0; i<*errorMaskCount; i++)
+    ESMC_LogDefault.errorMask[i] = errorMask[i];
+  *rc = ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_LogSet
 
 
 //-----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.16 2006/10/27 20:44:46 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.17 2006/11/09 14:33:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -136,9 +136,13 @@ type ESMF_Log
 #ifndef ESMF_NO_INITIALIZERS
     type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY=>Null()
     type(ESMF_Logical)                              ::  FileIsOpen=ESMF_False
+    integer, dimension(:), pointer                  ::  errorMask(:)=>Null()
+    integer                                         ::  errorMaskCount=0
 #else
     type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY
     type(ESMF_Logical)                              ::  FileIsOpen
+    integer, dimension(:), pointer                  ::  errorMask(:)
+    integer                                         ::  errorMaskCount
 #endif                                          
     character(len=32)                               ::  nameLogErrFile
     character(len=ESMF_MAXSTR)                      ::  petNumLabel
@@ -266,11 +270,11 @@ end function
 ! 
 !EOP
 	
-	integer::rc2,status
+    integer::rc2,status
 	
-	if (present(rc)) then
-            rc=ESMF_FAILURE
-        endif
+    if (present(rc)) then
+      rc=ESMF_FAILURE
+    endif
 
     if (log%logtype .ne. ESMF_LOG_NONE) then
 
@@ -282,10 +286,14 @@ end function
 	    deallocate(log%LOG_ENTRY,stat=status)	
 	endif
     endif
+    
+    if (log%errorMaskCount .gt. 0) then
+      deallocate(log%errorMask)
+    endif
 
-	if (present(rc)) then
-            rc=ESMF_SUCCESS
-        endif
+    if (present(rc)) then
+      rc=ESMF_SUCCESS
+    endif
 	
 end subroutine ESMF_LogClose
 
@@ -311,8 +319,9 @@ end subroutine ESMF_LogClose
 !      \end{description}
 ! 
 !EOPI
-
+        integer :: rc2
         call ESMF_LogClose(ESMF_LogDefault, rc)
+        call c_ESMC_LogFinalize(rc2)
 
 end subroutine ESMF_LogFinalize
 
@@ -518,7 +527,7 @@ end function ESMF_LogFoundAllocError
 	character(len=*), intent(in), optional          :: file
 	character(len=*), intent(in), optional	        :: method
 	integer, intent(out), optional                  :: rcToReturn
-	type(ESMF_LOG),intent(in),optional		:: log
+	type(ESMF_LOG),intent(in), target, optional     :: log
 	
 ! !DESCRIPTION:
 !      This function returns a logical true for ESMF return codes that indicate 
@@ -551,14 +560,31 @@ end function ESMF_LogFoundAllocError
 ! 
 !EOP
 	
-    ESMF_LogFoundError = .FALSE.
-    if (present(rcToReturn)) then
-        rcToReturn = rcToCheck
+    integer:: i
+    logical:: masked = .false.
+    type(ESMF_LOG), pointer          :: alog
+
+    if (present(log)) then
+      alog => log
+    else
+      alog => ESMF_LogDefault
     endif
+    
+    ! set default returns
+    ESMF_LogFoundError = .FALSE.
+    if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
+    
+    ! check the error code
     if (rcToCheck .NE. ESMF_SUCCESS) then
+      do i=1, alog%errorMaskCount
+        if (alog%errorMask(i) .eq. rcToCheck) masked = .true.
+      enddo
+      if (.not.masked) then
         call ESMF_LogWrite("StandardError",ESMF_LOG_ERROR,line,file,method,&
 	log)
         ESMF_LogFoundError = .TRUE.
+        if (present(rcToReturn)) rcToReturn = rcToCheck
+      endif
     endif	
        
 end function ESMF_LogFoundError
@@ -793,7 +819,7 @@ end function ESMF_LogMsgFoundAllocError
 	character(len=*), intent(in), optional          :: file
 	character(len=*), intent(in), optional	        :: method
 	integer, intent(out),optional                   :: rcToReturn
-	type(ESMF_LOG), intent(in), optional		:: log
+	type(ESMF_LOG), intent(in), target, optional    :: log
 	
 
 ! !DESCRIPTION:
@@ -830,14 +856,31 @@ end function ESMF_LogMsgFoundAllocError
 ! 
 !EOP
 	
-    ESMF_LogMsgFoundError=.FALSE.
-	if (present(rcToReturn)) then
-            rcToReturn = rcToCheck
-        endif
-	if (rcToCheck .NE. ESMF_SUCCESS) then
-	    call ESMF_LogWrite(msg,ESMF_LOG_ERROR,line,file,method,log)
-	    ESMF_LogMsgFoundError=.TRUE.
-	endif	
+    integer:: i
+    logical:: masked = .false.
+    type(ESMF_LOG), pointer          :: alog
+
+    if (present(log)) then
+      alog => log
+    else
+      alog => ESMF_LogDefault
+    endif
+    
+    ! set default returns
+    ESMF_LogMsgFoundError = .FALSE.
+    if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
+    
+    ! check the error code
+    if (rcToCheck .NE. ESMF_SUCCESS) then
+      do i=1, alog%errorMaskCount
+        if (alog%errorMask(i) .eq. rcToCheck) masked = .true.
+      enddo
+      if (.not.masked) then
+        call ESMF_LogWrite(msg,ESMF_LOG_ERROR,line,file,method,log)
+        ESMF_LogMsgFoundError=.TRUE.
+        if (present(rcToReturn)) rcToReturn = rcToCheck
+      endif
+    endif	
        
 end function ESMF_LogMsgFoundError
 
@@ -857,7 +900,7 @@ end function ESMF_LogMsgFoundError
 	character(len=*), intent(in), optional          :: file
 	character(len=*), intent(in), optional	        :: method
 	integer, intent(out),optional                   :: rcToReturn
-	type(ESMF_LOG), intent(in), optional		:: log
+	type(ESMF_LOG), intent(in), target, optional    :: log
 	
 
 ! !DESCRIPTION:
@@ -893,12 +936,29 @@ end function ESMF_LogMsgFoundError
 !      \end{description}
 ! 
 !EOP
-	
-    if (present(rcToReturn)) then
-        rcToReturn = rcValue
+
+    integer:: i
+    logical:: masked = .false.
+    type(ESMF_LOG), pointer          :: alog
+
+    if (present(log)) then
+      alog => log
+    else
+      alog => ESMF_LogDefault
     endif
+
+    ! set default returns
+    if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
+	
+    ! check the error code
     if (rcValue .NE. ESMF_SUCCESS) then
+      do i=1, alog%errorMaskCount
+        if (alog%errorMask(i) .eq. rcValue) masked = .true.
+      enddo
+      if (.not.masked) then
         call ESMF_LogWrite(msg,ESMF_LOG_ERROR,line,file,method,log)
+        if (present(rcToReturn)) rcToReturn = rcValue
+      endif
     endif	
        
 end subroutine ESMF_LogMsgSetError
@@ -972,6 +1032,8 @@ end subroutine ESMF_LogMsgSetError
     log%dirty = ESMF_FALSE
     log%FileIsOpen=ESMF_FALSE
     log%halt=ESMF_LOG_HALTNEVER
+    nullify(log%errorMask)
+    log%errorMaskCount=0
     if (present(logtype)) then
       	log%logtype=logtype
     else
@@ -1063,6 +1125,8 @@ end subroutine ESMF_LogMsgSetError
     
   endif
   
+    !TODO: this is really strange because every time ESMF_LogOpen() is called
+    !TODO: the _default_ Log on the C side is initialized, odd, isn't it? *gjt*
     call c_ESMC_LogInitialize(filename,log%petNumber,log%logtype,rc2)
     if (present(rc)) then
         rc=ESMF_SUCCESS    
@@ -1076,7 +1140,7 @@ end subroutine ESMF_LogOpen
 
 ! !INTERFACE: 
 	subroutine ESMF_LogSet(log,verbose,flush,rootOnly,halt, &
-                               stream,maxElements,rc)
+                               stream,maxElements,errorMask,rc)
 !
 ! !ARGUMENTS:
 !	
@@ -1087,6 +1151,7 @@ end subroutine ESMF_LogOpen
 	type(ESMF_HaltType), intent(in),optional                :: halt
 	integer, intent(in),optional			        :: stream  
 	integer, intent(in),optional			        :: maxElements
+	integer, intent(in),optional			        :: errorMask(:)
 	integer, intent(out),optional			        :: rc
 	
 ! !DESCRIPTION:
@@ -1117,12 +1182,15 @@ end subroutine ESMF_LogOpen
 !            \end{description}
 !      \item [{[maxElements]}]
 !            Maximum number of elements in the Log.
+!      \item [{[errorMask]}]
+!            List of error codes that will {\em not} be logged as errors.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
 ! 
 !EOP
-    integer :: i, status
+    integer :: i, status, status2
+    logical :: isDefault=.false.
     type(ESMF_LOG), pointer          :: alog
     type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
 
@@ -1130,6 +1198,7 @@ end subroutine ESMF_LogOpen
       alog => log
     else
       alog => ESMF_LogDefault
+      isDefault = .true.
     endif
 
     if (present(rc)) then
@@ -1174,6 +1243,25 @@ end subroutine ESMF_LogOpen
         alog%maxElements=maxElements
       endif
     endif    
+    if (present(errorMask)) then
+      if (alog%errorMaskCount .gt. 0) then
+        deallocate(alog%errorMask)
+      endif
+      alog%errorMaskCount = size(errorMask)
+      allocate(alog%errorMask(alog%errorMaskCount))
+      alog%errorMask = errorMask  ! copy the content of the errorMask argument
+    endif
+    
+    ! currently the connection between F90 and C++ side of LogErr is only well
+    ! defined for the default Log, so only then call the C++ side LogSet().
+    if (isDefault) then
+      !TODO: I am only implementing this to get the errorMask into the C++ side
+      !TODO: LogErr needs major help anyway, so someday this may get sorted out
+      !TODO: to work for more general cases. *gjt*
+      if (present(errorMask)) then
+        call c_ESMC_LogSet(alog%errorMask(1),alog%errorMaskCount,status2)
+      endif
+    endif
 
     if (present(rc)) then
         rc=ESMF_SUCCESS 

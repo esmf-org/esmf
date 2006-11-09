@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.58 2006/10/27 20:46:59 theurich Exp $
+// $Id: ESMC_LogErr.h,v 1.59 2006/11/09 14:33:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,8 +42,8 @@
 
 enum ESMC_MsgType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
 enum ESMC_LogType{ESMC_LOG_SINGLE=1,ESMC_LOG_MULTI=2,ESMC_LOG_NONE=3};
-int ESMC_LogFinalize();         
-char *ESMC_LogGetErrMsg(int rc);          
+int ESMC_LogFinalize();
+char *ESMC_LogGetErrMsg(int rc);
 int ESMC_LogSetFilename(char filename[]);
 void ESMC_TimeStamp(int *y,int* mn,int *d,int *h,int *m,int *s,int *ms);
 
@@ -76,7 +76,7 @@ private:
 
     int stdOutUnitNumber;       // Unit number corresponding to standard 
                                 // out
-
+    
   public:
 // !PUBLIC MEMBER FUNCTIONS:
 // (see ESMC\_LogErr.C for a description of these methods)
@@ -102,6 +102,9 @@ private:
     char nameLogErrFile[32];
     int *pet_num;
     ESMC_LogType logtype;
+    int *errorMask;
+    int errorMaskCount;
+
 
   private:
 // !PRIVATE MEMBER FUNCIONS:

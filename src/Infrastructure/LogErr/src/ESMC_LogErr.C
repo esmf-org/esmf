@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.73 2006/10/27 20:51:25 theurich Exp $
+// $Id: ESMC_LogErr.C,v 1.74 2006/11/09 14:33:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.73 2006/10/27 20:51:25 theurich Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.74 2006/11/09 14:33:35 theurich Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -356,11 +356,17 @@ bool ESMC_Log::ESMC_LogFoundError(
 //EOP
 {
     bool result=false;
-    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
-    if (rcToCheck!=ESMF_SUCCESS)
-    {
-         result=true;
-         ESMC_LogWrite(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR);
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
+    if (rcToCheck!=ESMF_SUCCESS){
+      int i;
+      for (i=0; i<errorMaskCount; i++)
+        if (errorMask[i] == rcToCheck) break;
+      if (i==errorMaskCount){
+        // this means that rcToCheck was _not_ in the errorMask -> flag error
+        result=true;
+        if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
+        ESMC_LogWrite(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR);
+      }
     }
     return result;
 }
@@ -390,11 +396,17 @@ bool ESMC_Log::ESMC_LogFoundError(
 //EOP
 {
     bool result=false;
-    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
-    if (rcToCheck!=ESMF_SUCCESS)
-    {
-         result=true;
-         ESMC_LogWrite(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR,LINE,FILE,method);
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
+    if (rcToCheck!=ESMF_SUCCESS){
+      int i;
+      for (i=0; i<errorMaskCount; i++)
+        if (errorMask[i] == rcToCheck) break;
+      if (i==errorMaskCount){
+        // this means that rcToCheck was _not_ in the errorMask -> flag error
+        result=true;
+        if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
+        ESMC_LogWrite(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR,LINE,FILE,method);
+      }
     }
     return result;
 }
@@ -422,13 +434,19 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
 //EOP
 {
     bool result=false;
-    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
-    if (rcToCheck!=ESMF_SUCCESS)
-    {
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
+    if (rcToCheck!=ESMF_SUCCESS){
+      int i;
+      for (i=0; i<errorMaskCount; i++)
+        if (errorMask[i] == rcToCheck) break;
+      if (i==errorMaskCount){
+        // this means that rcToCheck was _not_ in the errorMask -> flag error
         result=true;
+        if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
         char logMsg[ESMF_MAXSTR];
         strcpy(logMsg, ESMC_LogGetErrMsg(rcToCheck));
         ESMC_LogWrite(strcat(logMsg,msg),ESMC_LOG_ERROR);
+      }
     }
     return result;
 }
@@ -458,15 +476,21 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
 //EOP
 {
     bool result=false;
-    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
-    if (rcToCheck!=ESMF_SUCCESS)
-    {
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
+    if (rcToCheck!=ESMF_SUCCESS){
+      int i;
+      for (i=0; i<errorMaskCount; i++)
+        if (errorMask[i] == rcToCheck) break;
+      if (i==errorMaskCount){
+        // this means that rcToCheck was _not_ in the errorMask -> flag error
         result=true;   // TODO: if this line moved to after ESMC_LogWrite()
                        // below, will crash ESMF_TimeIntervalUTest.F90 on 
                        // Linux longs 2.4.20-31.9, Lahey lf95 6.0 optimized
+        if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
         char logMsg[ESMF_MAXSTR];
         strcpy(logMsg, ESMC_LogGetErrMsg(rcToCheck));
         ESMC_LogWrite(strcat(logMsg,msg),ESMC_LOG_ERROR,LINE,FILE,method);
+      }
     }
     return result;
 }
