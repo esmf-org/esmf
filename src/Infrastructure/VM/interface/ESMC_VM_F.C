@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.57 2006/10/23 22:06:27 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.58 2006/11/09 14:28:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -267,8 +267,9 @@ extern "C" {
   void FTN(c_esmc_vmprint)(ESMC_VM **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmprint()"
-    (*ptr)->ESMC_VMPrint();
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+    int localrc;
+    (*ptr)->ESMC_VMPrint(&localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
   }
 
   void FTN(c_esmc_vmrecv)(ESMC_VM **ptr, void *message, int *size, int *source,
