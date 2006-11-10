@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_ErrReturnCodes.inc,v 1.3 2006/03/01 21:34:29 eschwab Exp $
+$Id: ESMF_ErrReturnCodes.inc,v 1.4 2006/11/10 22:41:19 oehmke Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -96,9 +96,11 @@ Fortran Return codes 1-500
 #define  ESMF_RC_BUSY            45
 #define  ESMF_RC_LIB             46
 #define  ESMF_RC_ATTR_UNUSED     47
+#define  ESMF_RC_OBJ_NOT_CREATED 48
+#define  ESMF_RC_OBJ_DELETED     49
 
 #if 0
-48-500 reserved for future Fortran return code definitions
+50-500 reserved for future Fortran return code definitions
 #endif
 
 #if 0
@@ -154,9 +156,11 @@ C++ Return codes 501-1000
 #define  ESMC_RC_BUSY            545
 #define  ESMC_RC_LIB             546
 #define  ESMC_RC_ATTR_UNUSED     547
+#define  ESMC_RC_OBJ_NOT_CREATED 548
+#define  ESMC_RC_OBJ_DELETED     549
 
 #if 0
-548-1000 reserved for future C++ return code definitions
+550-1000 reserved for future C++ return code definitions
 \end{verbatim}
 //EOP
 #endif

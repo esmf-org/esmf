@@ -1,4 +1,4 @@
-//$Id: ESMC_ErrMsgs.C,v 1.4 2005/10/31 18:34:59 eschwab Exp $
+//$Id: ESMC_ErrMsgs.C,v 1.5 2006/11/10 22:41:18 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -74,6 +74,9 @@ static const char *errMsg[] = {
   "Error in library called by ESMF ",                 // ESMF_RC_LIB
 
   "Attribute unused ",                                // ESMF_RC_ATTR_UNUSED
+  "Object being used before creation ",             // ESMF_RC_OBJ_NOT_CREATED 
+  "Object being used after deletion ",              // ESMF_RC_OBJ_DELETED     
+
 
 // 48-500 reserved for future F90 return code definitions
   "","","","","","","","","","","","","","","","","","","","","","","","","",
@@ -94,7 +97,7 @@ static const char *errMsg[] = {
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
-  "","","",
+  "",
 
 // C++ Error message                                     Return Code (501-1000)
 // -----------------------------------------------       -----------------------
@@ -153,6 +156,8 @@ static const char *errMsg[] = {
   "Error in library called by ESMF ",                 // ESMC_RC_LIB
 
   "Attribute unused ",                                // ESMC_RC_ATTR_UNUSED
+  "Object being used before creation ",             // ESMC_RC_OBJ_NOT_CREATED 
+  "Object being used after deletion ",              // ESMC_RC_OBJ_DELETED     
 
 // 548-1000 reserved for future C++ return code definitions
   "","","","","","","","","","","","","","","","","","","","","","","","","",
@@ -173,6 +178,6 @@ static const char *errMsg[] = {
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
-  "","",""
+  ""
 
 };
