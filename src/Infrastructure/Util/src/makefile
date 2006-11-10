@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2006/04/13 23:15:23 theurich Exp $ 
+# $Id: makefile,v 1.4 2006/11/10 23:01:08 oehmke Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
@@ -8,11 +8,13 @@ FFLAGS    =
 
 SOURCEC	  = ESMC_Util.C ESMC_Fraction.C ESMC_F90Interface.C
 SOURCEF	  = ESMF_UtilTypes.F90 \
-            ESMF_LogErr.F90
+            ESMF_LogErr.F90    \
+            ESMF_InitMacros.F90
 STOREH    = ESMF_Macros.inc ESMF_Version.inc ESMF.h ESMC_Macros.h \
             ESMC_Util.h ESMF_StdCppMacros.h ESMC_Start.h \
             ESMC_F90Interface.h ESMF_ErrReturnCodes.inc ESMF_LogMacros.inc \
-	    ESMF_LogConstants.inc ESMC_Fraction.h ESMF_TypeKindTemplate.h
+	    ESMF_LogConstants.inc ESMC_Fraction.h ESMF_TypeKindTemplate.h \
+            ESMF_InitMacros.inc 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
@@ -31,5 +33,5 @@ CLEANDIRS   =
 CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
 CLOBBERDIRS = 
 
-ESMF_LogErr.o: ESMF_UtilTypes.o
+ESMF_LogErr.o: ESMF_UtilTypes.o ESMF_InitMacros.o
 
