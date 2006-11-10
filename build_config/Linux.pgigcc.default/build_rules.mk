@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2 2006/09/22 23:55:40 theurich Exp $
+# $Id: build_rules.mk,v 1.3 2006/11/10 19:40:06 theurich Exp $
 #
 # Linux.pgigcc.default
 #
@@ -69,8 +69,8 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v -c
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
+ESMF_F90COMPILER_VERSION    = $(ESMF_DIR)/scripts/version.pgf90 $(ESMF_F90COMPILER)
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
 ############################################################
 # Link against GCC's stdc++ library (because g++ is used)
