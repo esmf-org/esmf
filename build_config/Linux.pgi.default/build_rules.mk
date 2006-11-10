@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.25.2.12 2006/09/19 06:01:26 theurich Exp $
+# $Id: build_rules.mk,v 1.25.2.13 2006/11/10 18:57:01 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -76,8 +76,8 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v -c
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v -c
+ESMF_F90COMPILER_VERSION    = $(ESMF_DIR)/scripts/version.pgf90 $(ESMF_F90COMPILER)
+ESMF_CXXCOMPILER_VERSION    = $(ESMF_DIR)/scripts/version.pgCC $(ESMF_CXXCOMPILER)
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
