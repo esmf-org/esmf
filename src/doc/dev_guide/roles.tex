@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: roles.tex,v 1.9 2006/10/27 20:35:31 murphysj Exp $
+% CVS $Id: roles.tex,v 1.10 2006/11/10 20:29:16 cdeluca Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/roles.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -29,7 +29,7 @@ ESMF software.  They are expected to interact with customers throughout the enti
 development process in order to understand customer requirements.  Developer priorities are set by the Change Review Board (CRB) but developers are expected to understand customer requirements and
 needs and to manage their own time.
 
-The {\bf Integrator}, is the lead tester. He or she is responsible for running regression
+The {\bf Integrator} is the lead tester. He or she is responsible for running regression
 tests, managing project computing accounts, preparing for releases,
 generating project metrics, and overseeing request and bug tracking.
 
@@ -73,13 +73,14 @@ the proper handling of tickets).
 {\bf Advocates} are NOT responsible for:
 \begin{itemize}
 \item Representing the code to the CRB
-\item Fielding support related phone calls. We want all customers to send support requests to esmf\_support. Dire emergencies (e.g. ESMF is killing NCEP operations) are exempt from the no-phone rule. If a customer
-really feels the need to take with a Advocate or developer, they need to arrange for a date and time through
-one of the ESMF mailing lists.
-\end {itemize}
+\item Fielding support related phone calls.
 
-{\bf Code Points of Contact} should not take advantage of their {\bf Advocates}. If you have an issue, 
-please send it to esmf\_support, don't call your {\bf Advocate}. There are many good reason for doing this, including developer absences, group visibility and communication, and developer priorities.
+All customers should send support requests to \htmladdnormallink{esmf\_support@ucar.edu}{mailto:esmf\_support@ucar.edu}.
+They should not call their Advocate or other developers.  Dire emergencies are exempt from the no-phone rule. 
+There are many good reason for doing this, including developer absences, group visibility and communication,
+and enabling developers to set priorities.  If a customer really feels the need to talk with an
+Advocate or developer, they need to arrange for a date and time through the support list.
+\end {itemize}
 
 {\bf Handlers} are developers assigned to fix a particular problem reported on one of the trackers (see 
 ~\ref{tracking_tools} for list). They are expected to be sufficiently familiar with the issue and the
@@ -98,7 +99,7 @@ related communities.
 \subsection{Change Review Board (CRB)}
 \label{crb}
 ESMF development priorities and schedules are set by a 
-{\bf Change Review Board}. or {\bf CRB} that consists of individuals
+{\bf Change Review Board} (CRB) that consists of individuals
 associated with major ESMF initiatives and applications.  
 Members of the CRB are chosen by the ESMF Executive Management.
 
