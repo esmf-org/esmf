@@ -1,0 +1,11 @@
+#!/bin/sh
+# this script expects the pgf90 command (or a wrapper to pgf90, e.g. mpif90)
+# and returns the version of pgf90 and the optinal wrapper
+PATHEXE=`which $1`
+PGF90EXE=`$1 -dryrun 2>&1 | grep "\/pgf90rc" | head -1 | awk '{ print $3} '| sed 's/pgf90rc/pgf90/g'`
+if [ $PGF90EXE = $PATHEXE ]; then
+$PGF90EXE -V
+else
+$1 -v -c
+$PGF90EXE -V
+fi
