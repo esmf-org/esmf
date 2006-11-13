@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.71 2006/09/26 17:24:50 theurich Exp $
+# $Id: makefile,v 1.72 2006/11/13 23:37:20 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -49,67 +49,77 @@ all:  lib build_unit_tests build_examples build_system_tests build_demos
 #-------------------------------------------------------------------------------
 script_info:
 	-@echo " "
-	-@echo "------------------------------------------"
+	-@echo "--------------------------------------------------------------"
 	-@echo "Make version:"; $(MAKE) -v; echo ""
-	-@echo "------------------------------------------"
+	-@echo "--------------------------------------------------------------"
 	-@echo "Fortran Compiler version:"; $(ESMF_F90COMPILER_VERSION); echo ""
-	-@echo "------------------------------------------"
+	-@echo "--------------------------------------------------------------"
 	-@echo "C++ Compiler version:"; $(ESMF_CXXCOMPILER_VERSION); echo "" 
-	-@echo "------------------------------------------"
+	-@echo "--------------------------------------------------------------"
 	-@if [ -f $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h ] ; then \
 	  fgrep ESMF_VERSION_STRING $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) "s/^#define //" ; fi
-	-@echo "------------------------------------------"
+	-@echo "--------------------------------------------------------------"
 	-@echo " "
-	-@echo "Using ESMF environment variables:"
+	-@echo "--------------------------------------------------------------"
+	-@echo " * ESMF environment variables *"
 	-@echo "ESMF_DIR: $(ESMF_DIR)"
 	-@if [ "$(ESMF_BUILD)" != "$(ESMF_DIR)" ] ; then \
-	  echo "ESMF_BUILD: $(ESMF_BUILD)" ; fi
-	-@echo "ESMF_OS: $(ESMF_OS)"
-	-@echo "ESMF_MACHINE: $(ESMF_MACHINE)"
-	-@echo "ESMF_ABI: $(ESMF_ABI)"
-	-@echo "ESMF_COMPILER: $(ESMF_COMPILER)"
-	-@echo "ESMF_BOPT: $(ESMF_BOPT)"
+	  echo "ESMF_BUILD:             $(ESMF_BUILD)" ; fi
+	-@echo "ESMF_OS:                $(ESMF_OS)"
+	-@echo "ESMF_MACHINE:           $(ESMF_MACHINE)"
+	-@echo "ESMF_ABI:               $(ESMF_ABI)"
+	-@echo "ESMF_COMPILER:          $(ESMF_COMPILER)"
+	-@echo "ESMF_BOPT:              $(ESMF_BOPT)"
 	-@if [ -n "$(ESMF_OPTLEVEL)" ] ; then \
-	  echo "ESMF_OPTLEVEL: $(ESMF_OPTLEVEL)" ; fi
-	-@echo "ESMF_COMM: $(ESMF_COMM)"
-	-@echo "ESMF_SITE: $(ESMF_SITE)"
-	-@echo "ESMF_EXHAUSTIVE: $(ESMF_EXHAUSTIVE)"
+	  echo "ESMF_OPTLEVEL:          $(ESMF_OPTLEVEL)" ; fi
+	-@echo "ESMF_COMM:              $(ESMF_COMM)"
+	-@echo "ESMF_SITE:              $(ESMF_SITE)"
+	-@echo "ESMF_EXHAUSTIVE:        $(ESMF_EXHAUSTIVE)"
 	-@if [ -n "$(ESMF_BATCH)" ] ; then \
-	  echo "ESMF_BATCH: $(ESMF_BATCH)" ; fi
+	  echo "ESMF_BATCH:             $(ESMF_BATCH)" ; fi
 	-@if [ -n "$(ESMF_BATCHOPTIONS)" ] ; then \
-	  echo "ESMF_BATCHOPTIONS: $(ESMF_BATCHOPTIONS)" ; fi
+	  echo "ESMF_BATCHOPTIONS:      $(ESMF_BATCHOPTIONS)" ; fi
 	-@if [ -n "$(ESMF_MPIRUNOPTIONS)" ] ; then \
-	  echo "ESMF_MPIRUNOPTIONS: $(ESMF_MPIRUNOPTIONS)" ; fi
+	  echo "ESMF_MPIRUNOPTIONS:     $(ESMF_MPIRUNOPTIONS)" ; fi
 	-@if [ -n "$(ESMF_STDCXX_LIBRARY)" ] ; then \
-	  echo "ESMF_STDCXX_LIBRARY: $(ESMF_STDCXX_LIBRARY)" ; fi
-	-@echo "ESMF_PTHREADS: $(ESMF_PTHREADS)"
+	  echo "ESMF_STDCXX_LIBRARY:    $(ESMF_STDCXX_LIBRARY)" ; fi
+	-@echo "ESMF_PTHREADS:          $(ESMF_PTHREADS)"
 	-@if [ -n "$(ESMF_TESTWITHTHREADS)" ] ; then \
-	  echo "ESMF_TESTWITHTHREADS: $(ESMF_TESTWITHTHREADS)" ; fi
+	  echo "ESMF_TESTWITHTHREADS:   $(ESMF_TESTWITHTHREADS)" ; fi
 	-@if [ -n "$(ESMF_NO_IOCODE)" ] ; then \
-	  echo "ESMF_NO_IOCODE: $(ESMF_NO_IOCODE)" ; fi
+	  echo "ESMF_NO_IOCODE:         $(ESMF_NO_IOCODE)" ; fi
 	-@if [ -n "$(ESMF_ARRAY_LITE)" ] ; then \
-	  echo "ESMF_ARRAY_LITE: $(ESMF_ARRAY_LITE)" ; fi
+	  echo "ESMF_ARRAY_LITE:        $(ESMF_ARRAY_LITE)" ; fi
 	-@if [ -n "$(ESMF_NO_INTEGER_1_BYTE)" ] ; then \
 	  echo "ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)" ; fi
 	-@if [ -n "$(ESMF_NO_INTEGER_2_BYTE)" ] ; then \
 	  echo "ESMF_NO_INTEGER_2_BYTE: $(ESMF_NO_INTEGER_2_BYTE)" ; fi
 	-@echo " "
-	-@echo "------------------------------------------"
-	-@echo "ESMF environment variables pointing to 3rd party software:"
+	-@echo "--------------------------------------------------------------"
+	-@echo " * ESMF environment variables pointing to 3rd party software *"
 	-@if [ -n "$(ESMF_NETCDF_INCLUDE)" ] ; then \
 	  echo "ESMF_NETCDF_INCLUDE: $(ESMF_NETCDF_INCLUDE)" ; fi
 	-@if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
 	  echo "ESMF_NETCDF_LIBPATH: $(ESMF_NETCDF_LIBPATH)" ; fi
+	-@echo " "
+	-@echo "--------------------------------------------------------------"
+	-@echo " * ESMF environment variables for final installation *"
+	-@echo "ESMF_INSTALL_PREFIX:    $(ESMF_INSTALL_PREFIX)"
+	-@echo "ESMF_INSTALL_HEADERDIR: $(ESMF_INSTALL_HEADERDIR)"
+	-@echo "ESMF_INSTALL_MODDIR:    $(ESMF_INSTALL_MODDIR)"
+	-@echo "ESMF_INSTALL_LIBDIR:    $(ESMF_INSTALL_LIBDIR)"
+	-@echo "ESMF_INSTALL_DOCDIR:    $(ESMF_INSTALL_DOCDIR)"
+	-@echo " "
 #
 info:   script_info
 	-@echo " "
-	-@echo "------------------------------------------"
-	-@echo "Compilers, Linkers, Flags, and Libraries:"
-	-@echo "Location of the preprocessor: " `which $(word 1, $(ESMF_CPP))`
+	-@echo "--------------------------------------------------------------"
+	-@echo " * Compilers, Linkers, Flags, and Libraries *"
+	-@echo "Location of the preprocessor:     " `which $(word 1, $(ESMF_CPP))`
 	-@echo "Location of the Fortran compiler: " `which $(word 1, $(ESMF_F90COMPILER))`
-	-@echo "Location of the Fortran linker: " `which $(word 1, $(ESMF_F90LINKER))`
-	-@echo "Location of the C++ compiler: " `which $(word 1, $(ESMF_CXXCOMPILER))`
-	-@echo "Location of the C++ linker: " `which $(word 1, $(ESMF_CXXLINKER))`
+	-@echo "Location of the Fortran linker:   " `which $(word 1, $(ESMF_F90LINKER))`
+	-@echo "Location of the C++ compiler:     " `which $(word 1, $(ESMF_CXXCOMPILER))`
+	-@echo "Location of the C++ linker:       " `which $(word 1, $(ESMF_CXXLINKER))`
 	-@echo ""
 	-@echo "Fortran compiler flags:"
 	-@echo "ESMF_F90COMPILEOPTS: $(ESMF_F90COMPILEOPTS)"
@@ -136,10 +146,10 @@ info:   script_info
 	-@echo "ESMF_CXXESMFLINKLIBS: $(ESMF_CXXESMFLINKLIBS)"
 	-@echo ""
 	-@echo ""
-	-@echo "------------------------------------------"
+	-@echo "--------------------------------------------------------------"
 	-@echo Compiling on `date` on `hostname`
 	-@echo Machine characteristics: `uname -a`
-	-@echo "=========================================="
+	-@echo "=============================================================="
 	-@echo " "
 #
 #
@@ -238,6 +248,9 @@ info_mk:
 	-@if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
 	  echo "# ESMF_NETCDF_LIBPATH: $(ESMF_NETCDF_LIBPATH)" >> $(MKINFO) ; fi
 
+install_info_mk:
+	$(MAKE) info_mk ESMF_LDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_LIBDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_MODDIR=$(ESMF_INSTALL_MODDIR_ABSPATH) ESMF_INCDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)
+
 # Ranlib on the libraries
 ranlib:
 	$(ESMF_RANLIB) $(ESMF_LIBDIR)/*.a
@@ -268,30 +281,40 @@ DOCS	   = build/README build/doc/*
 
 SCRIPTS    = 
 
-# TODO: this target is not so useful right now - because we try
-# to build shared libs on many of our platforms.  the executables
-# linked against that lib (like the unit tests and examples) then
-# store that build directory inside as where to find the shared
-# lib at load time.  to move them, we have to know the eventual
-# location of the libs (by having something like ESMF_INSTALL_DIR
-# defined at the time the executables are linked, so we can add
-# an extra -rpath or -L flag to the link to add the install lib
-# dir to be searched at load time.
-# also, this should just have a single variable and not separate
-# ones for the lib, mod, and includes.
-# also, there should be options to install just the bare lib,
-# the unit tests and quickstart files, and then everything.
+# ------------------------------------------------------------------
+# INSTALL target
 install:
-	@if [ "$(ESMF_LIB_INSTALL)" != "" ] ; then \
-	 cp -fp $(ESMF_LIBDIR)/* $(ESMF_LIB_INSTALL) ; \
-	fi
-	if [ "$(ESMF_MOD_INSTALL)" != "" ] ; then \
-	 cp -fp $(ESMF_MODDIR)/*.mod $(ESMF_MOD_INSTALL) ; \
-	fi
-	if [ "$(ESMF_H_INSTALL)" != "" ] ; then \
-	 cp -fp $(ESMF_BUILD)/src/include/*.h $(ESMF_H_INSTALL) ; \
-	fi
+	-@echo " "
+	-@echo "Installing ESMF:"
+	-@echo " "
+	mkdir -p $(ESMF_INSTALL_HEADERDIR_ABSPATH)
+	cp -fp $(ESMF_BUILD)/src/include/*.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
+	mkdir -p $(ESMF_INSTALL_MODDIR_ABSPATH)
+	cp -fp $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_MODDIR_ABSPATH)
+	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
+	cp -fp $(ESMF_LIBDIR)/* $(ESMF_INSTALL_LIBDIR_ABSPATH)
+	mkdir -p $(ESMF_INSTALL_DOCDIR_ABSPATH)
+	@if [ -d $(ESMF_DOCDIR) ]; then \
+        cp -rfp $(ESMF_DOCDIR)/* $(ESMF_INSTALL_DOCDIR_ABSPATH); \
+        fi
+	$(MAKE) install_info_mk
+	-@echo " "
+	-@echo "ESMF installation complete."
+	-@echo " "
 
+# ------------------------------------------------------------------
+# INSTALLCHECK target
+installcheck:
+	-@echo " "
+	-@echo "Checking ESMF installation:"
+	-@echo " "
+	cd $(ESMF_DIR)/application ;\
+	$(MAKE) clean;\
+	$(MAKE);\
+        $(MAKE) check
+	-@echo " "
+	-@echo "ESMF installation check complete."
+	-@echo " "
 
 # ------------------------------------------------------------------
 # add dummy rules here to avoid gnumake trying to remake the actual

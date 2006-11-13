@@ -1,15 +1,17 @@
-%  $Id: ESMF_builddetail.tex,v 1.2 2006/09/29 23:57:41 theurich Exp $
+%  $Id: ESMF_builddetail.tex,v 1.3 2006/11/13 23:37:21 theurich Exp $
 
 % there is a separate copy of this under build/doc which is
 % now used only by the implementation report.  this was separated
-% out because it replicated information which was in the ESMF_install file.
+% out because it replicated information which was in the ESMF_install and
+% ESMF_quickstart files.
 
-\subsection{Make System}
+\subsection{The ESMF Build System}
 \label{sec:make}
 For most users the description of the build system in previous
 sections should be sufficient.  Some users, however, may wish to have
 a more detailed knowledge of the make system either for configuring
 different build options or for porting to unsupported platforms.
+
 \subsubsection{General Structure}
 
 The ESMF build system is divided into two parts.  The first is the
@@ -98,50 +100,53 @@ specific machine or compiler is referred to as a site configuration.
 
 The string of files included is fairly short.  Makefiles below the top
 level makefile include the top level makefile. The top level makefile
-includes build/common.mk and then build/common.mk includes a
-configuration file from the build\_config directory.  The configuration
-files in the build\_config directory contain the platform and site
+includes {\tt build/common.mk} and then {\tt build/common.mk} includes a
+configuration file from the {\tt build\_config} directory.  The configuration
+files in the {\tt build\_config} directory contain the platform and site
 specific build settings.  The os, compiler and site that a file
 configures is determined by its name.  The configuration makefile
 fragments follow this naming convention:
 
 \begin{verbatim}
-    ESMF_OS.ESMF_COMPILER.ESMF_SITE/build_rules.mk
+    build_config/ESMF_OS.ESMF_COMPILER.ESMF_SITE/build_rules.mk
 \end{verbatim}
 
-Where ESMF\_OS, ESMF\_COMPILER, and ESMF\_SITE are environment
+Where {\tt ESMF\_OS}, {\tt ESMF\_COMPILER} and {\tt ESMF\_SITE} are environment
 variables either set by the user or given default values by the build
-system. ESMF\_OS is the target operating system. If the build is performed
-on the target system ESMF\_OS will typically have the value returned by the
-command {\tt uname -s}. ESMF\_COMPILER is the compiler name. ESMF\_SITE, if set,
-is generally the current machine name, the location, or the organization (e.g.
-mit, cola).  If there are no site specific files for a particular platform, then
-ESMF\_COMPILER and ESMF\_SITE will be set to {\tt default}.  Examples:
+system. {\tt ESMF\_OS} is the target operating system. If the build is performed
+{\ em on} the target system {\tt ESMF\_OS} will typically have the value
+returned by the command {\tt uname -s}. {\tt ESMF\_COMPILER} is the compiler
+name. {\tt ESMF\_SITE}, if set, is generally the current machine name, the
+location, or the organization (e.g. mit, cola).  If there are no site specific
+files for a particular platform, then {\tt ESMF\_COMPILER} and {\tt ESMF\_SITE}
+will be set to {\tt default}.  Examples:
 
 \begin{verbatim}
-    AIX.default.default/build_rules.mk      ! Default configuation for IBM SP
-    Linux.lahey.default/build_rules.mk      ! Linux configuation using lahey compilers.
+    ! Default configuation for IBM AIX systems
+    build_config/AIX.default.default/build_rules.mk
+    
+    ! Linux configuation using lahey compilers.    
+    build_config/Linux.lahey.default/build_rules.mk
 \end{verbatim}
 
 \subsubsection{Source Code Configuration}
 
-C++ and C source code written to build on a range of platforms many
-times require preprocessor directives to configure the source code for
-specific platforms.  The directives are included in the source code
-and are processed by the C preprocessor (cpp) before the source code
-is compiled.  The directives are used to determine among other things,
-the memory requirements of variable types and the system resources
-that are available.
+Some of the ESMF C++ and Fortran source files contain preprocessor directives
+to configure the source code for specific platforms.  The directives are 
+included in the source code and are processed by the C preprocessor (cpp) 
+before the source code is compiled.  The directives are used to determine among
+other things, the size of variable types.
 
 The ESMF build system provides preprocessor directives in 
 {\tt ESMC\_Conf.h} and {\tt ESMF\_Conf.inc} files
 that are included in the source code.  The path to these files is
 
 \begin{verbatim}
-    build_config/ESMF_OS.ESMF_COMPILER.ESMF_ABI.ESMF_SITE
+    build_config/ESMF_OS.ESMF_COMPILER.ESMF_SITE/ESMC_Conf.h
+    build_config/ESMF_OS.ESMF_COMPILER.ESMF_SITE/ESMF_Conf.inc
 \end{verbatim}
 
-Where ESMF\_OS, ESMF\_COMPILER, ESMF\_ABI and ESMF\_SITE are
+Where {\tt ESMF\_OS}, {\tt ESMF\_COMPILER} and {\tt ESMF\_SITE} are
 environment variables set by the user or given default values be the
 build system.  Based on the settings of these environment variables,
 the build system provides a path to the correct files during
@@ -151,11 +156,10 @@ source code compiles.
 
 The build system can be ported to other Unix platforms by adding new
 makefile fragments and configuration files.  The new makefile fragment 
-file has to follow the naming
-convention used by the existing makefile fragment files and be created in the
-directory build\_config.  The new file will also have to define
-the same makefile variables as the existing makefile fragment files.
-Example:
+file has to follow the naming convention used by the existing makefile 
+fragment files and be created in the {\tt build\_config} directory. The 
+new file will also have to define the same makefile variables as the existing
+makefile fragment files. Example:
 
 \begin{verbatim}
       build_config/Linux.pgi.mysite/build_rules.mk
@@ -167,5 +171,3 @@ only contain overrides and additional definitions.
 See the {\tt README} file in the {\tt build\_config} directory in the
 source tree for more detailed information on what files will generally
 need to be customized to support a new platform.
-
-

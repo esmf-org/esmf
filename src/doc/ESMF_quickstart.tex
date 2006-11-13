@@ -151,6 +151,12 @@ and you wish to use it, download the corresponding files into the
 Sourceforge site {\tt http://sourceforge.net/projects/esmfcontrib} for more 
 information.
 
+\item[ESMF\_INSTALL\_PREFIX]
+This variable specifies the prefix of the installation path used during the
+installation process accessible thought the install target. Libraries, F90
+module files, header files and documentation all are installed relative to
+{\tt ESMF\_INSTALL\_PREFIX} by default. The {\tt ESMF\_INSTALL\_PREFIX} may be
+provided as absolute path or relative to {\tt ESMF\_DIR}.
 
 \end{description}
 
@@ -171,11 +177,8 @@ under the "Downloads \& Documentation" link.
            compilers, libraries, paths, flags, etc are being used
 \item[clean] remove all files built for this platform/compiler/wordsize.
 \item[clobber] remove all files built for all architectures
+\item[install] install the ESMF library in a custom location
 \end{description}
-
-Note: The normal {\tt install} target is {\it not} currently supported.  
-Neither is the {\tt uninstall} target.  
-They will be added in a future release of ESMF.
 
 
 

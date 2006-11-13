@@ -1,6 +1,6 @@
-% $Id: ESMF_install.tex,v 1.50 2006/09/29 23:57:41 theurich Exp $
+% $Id: ESMF_install.tex,v 1.51 2006/11/13 23:37:21 theurich Exp $
 
-%\section{Installing and Building the ESMF}
+%\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
 
 Major releases of the ESMF software can be downloaded by following
@@ -14,8 +14,8 @@ On some platforms a shared library, {\tt libesmf.so}, is also created.
 Follow the instructions in the following sections
 to build the library and link it with your application.
 
-\subsection{Installation}
-\label{InstallProcedures}
+\subsection{Build and Installation}
+\label{BuildProcedures}
 
 \input{ESMF_systemreq}
 
@@ -169,6 +169,14 @@ Possible value: {\em flag}
 
 This variable can be used to override the default C++ optimization flag.
 
+\item[ESMF\_DIR]
+Possible value: {\em absolute path}
+
+The environment variable {\tt ESMF\_DIR} must be set to the full pathname 
+of the top level ESMF directory before building the framework. This is the 
+only environment variable which is required to be set on all platforms under 
+all conditions.
+
 \item[ESMF\_EXHAUSTIVE] 
 Possible value: {\tt ON}, {\tt OFF} (default)
 
@@ -230,6 +238,43 @@ Possible value: {\em flag}
 
 This variable can be used to override the default  Fortran90 optimization flag.
 
+\item[ESMF\_INSTALL\_PREFIX]
+Possible value: {\em relative or absolute path}
+
+This variable specifies the prefix of the installation path used during the
+installation process accessible thought the install target. Libraries, F90
+module files, header files and documentation all are installed relative to
+{\tt ESMF\_INSTALL\_PREFIX} by default. The {\tt ESMF\_INSTALL\_PREFIX} may be
+provided as absolute path or relative to {\tt ESMF\_DIR}.
+
+\item[ESMF\_INSTALL\_DOCDIR]
+Possible value: {\em relative or absolute path}
+
+Location into which to install the documentation during installation. This
+location can be specified as absolute path or relative to
+{\tt ESMF\_INSTALL\_PREFIX}.
+
+\item[ESMF\_INSTALL\_HEADERDIR]
+Possible value: {\em relative or absolute path}
+
+Location into which to install the header files during installation. This
+location can be specified as absolute path or relative to
+{\tt ESMF\_INSTALL\_PREFIX}.
+
+\item[ESMF\_INSTALL\_LIBDIR]
+Possible value: {\em relative or absolute path}
+
+Location into which to install the library files during installation. This
+location can be specified as absolute path or relative to
+{\tt ESMF\_INSTALL\_PREFIX}.
+
+\item[ESMF\_INSTALL\_MODDIR]
+Possible value: {\em relative or absolute path}
+
+Location into which to install the F90 module files during installation. This
+location can be specified as absolute path or relative to
+{\tt ESMF\_INSTALL\_PREFIX}.
+
 \item[ESMF\_MACHINE]
 Possible value: output of {\tt uname -m} where available.
 
@@ -251,12 +296,12 @@ Possible value: {\em flags}
 This variable can be used to provide additional options to {\tt ESMF\_MPIRUN}. 
 
 \item[ESMF\_NETCDF\_INCLUDE]
-Possible value: {\em path}
+Possible value: {\em absolute path}
 
 This variable can be used to point to the desired NETCDF header files.
 
 \item[ESMF\_NETCDF\_LIBPATH]
-Possible value: {\em path}
+Possible value: {\em absolute path}
 
 This variable can be used to point to the desired NETCDF library files.
 
@@ -398,7 +443,7 @@ to one platform/architecture at a time.  The output from the test cases
 will be stored in a separate directories so the results will be kept 
 separate for different architectures or options.
 
-\subsubsection{Building the ESMF Libraries}
+\subsubsection{Building the ESMF Library}
 \label{BuildESMF}
 
 % GNU make requirement.  File in build/doc
@@ -466,4 +511,30 @@ located in the top level directory \${ESMF\_DIR}/doc.
 %% 
 %% 
 
+\subsubsection{Installing the ESMF}
+\label{InstallESMF}
 
+The ESMF build system offers the standard {\tt install} target to install all
+necessary files created during the build process into user specified locations.
+The installation procedure will also install the ESMF documentation if it has
+been built successfully following the procedure outlined above.
+
+The installation location can be customized using five {\tt ESMF\_} environment
+variables:
+\begin{itemize}
+\item {\tt ESMF\_INSTALL\_PREFIX}
+\item {\tt ESMF\_INSTALL\_HEADERDIR}
+\item {\tt ESMF\_INSTALL\_LIBDIR}
+\item {\tt ESMF\_INSTALL\_MODDIR}
+\item {\tt ESMF\_INSTALL\_DOCDIR}
+\end{itemize}
+
+Install ESMF with the command:
+\begin{verbatim}
+  gmake install
+\end{verbatim}
+
+Check the ESMF installation with the command:
+\begin{verbatim}
+  gmake installcheck
+\end{verbatim}
