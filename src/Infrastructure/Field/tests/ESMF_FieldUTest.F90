@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.87 2006/11/15 01:33:01 donstark Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.88 2006/11/15 17:08:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.87 2006/11/15 01:33:01 donstark Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.88 2006/11/15 17:08:09 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -789,8 +789,8 @@ print *, "done with test"
 
 ! grid destroy to clear previous grids.
        call ESMF_GridDestroy(grid, rc=rc)
+
       !------------------------------------------------------------------------
-      !EX_UTest
       ! ESMF 3D Field Validate test to accommodate the single point mismatch 
       ! between center and edge staggerings. This Bug is actually a grid design 
       ! issue having to do with the grid being specified by vertex locations.
@@ -826,6 +826,7 @@ print *, "done with test"
        call ESMF_GridGetDELocalInfo(grid, ESMF_CELL_CENTER,          &
                  Vertrelloc=ESMF_CELL_TOPFACE,                       &
                  localCellCountPerDim=cellCounts, rc=rc)
+      !EX_UTest
        write(failMsg, *) ""
        write(name, *) "Getting cell counts for each DE"
        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -838,6 +839,7 @@ print *, "done with test"
                  vertRelloc=ESMF_CELL_TOPFACE,                       &
                  name="field", rc=rc)
        print*,'field create',rc
+      !EX_UTest
        write(failMsg, *) ""
        write(name, *) "Create Field with vertical axis longer than grid"
        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -845,6 +847,7 @@ print *, "done with test"
       ! validate field
        call ESMF_FieldValidate(f1, rc=rc)
        print*,'field create',rc,ESMF_SUCCESS
+      !EX_UTest
        write(failMsg, *) ""
        write(name, *) "Field Validated "
        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
