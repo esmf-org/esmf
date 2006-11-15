@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.31 2006/11/03 18:30:40 theurich Exp $
+#  $Id: common.mk,v 1.155.2.32 2006/11/15 00:31:07 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -292,11 +292,9 @@ endif
 # TODO: in general ESMF_BUILD is respected - most generated files are created
 # underneath ESMF_BUILD and not ESMF_DIR.  but there are exceptions.
 # the ones i know about are:  
-# - in the build_config/platform-specific directories is a config file 
-# called 'machineinfo.h' which is generated at build time.  this 
-# build_config dir is included in compiles, so if the machineinfo.h file
-# (and conf.h) are moved, a -I flag will also have to be updated to point to
-# the new location.  the complication is that since this a per-platform file
+# - in the build_config/platform-specific directories are config header files, 
+# so if these config files are moved, a -I flag will also have to be updated to 
+# point to the new location.  the complication is that since these are per-platform files
 # and since we promise to support building for multiple architectures from
 # the same source tree, these files cannot go into a generic include dir.
 # - the 'storeh:' target copies include files into src/include under the
@@ -892,7 +890,7 @@ libf:$(LIBNAME)($(OBJSF))
 
 # Build all of ESMF from the top.  This target can be called from any
 # subdir and it will go up to the top dir and build from there.
-lib:  info info_h build_libs info_mk
+lib:  info build_libs info_mk
 
 build_libs: chkdir_lib include cppfiles
 	cd $(ESMF_DIR) ;\
