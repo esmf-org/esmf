@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.49.2.7 2006/11/03 21:51:01 theurich Exp $
+% $Id: ESMF_install.tex,v 1.49.2.8 2006/11/15 00:17:40 theurich Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -14,12 +14,12 @@ On some platforms a shared library, {\tt libesmf.so}, is also created.
 Follow the instructions in the following sections
 to build the library and link it with your application.
 
-\subsection{Build and Installation}
-\label{BuildProcedures}
 
+\subsection{System Requirements}
+\label{sec:systemreq}
 \input{ESMF_systemreq}
 
-\subsubsection{ESMF Environment Variables}
+\subsection{ESMF Environment Variables}
 \label{EnvironmentVariables}
 
 The following is a full alphabetical list of all environment variables which
@@ -434,7 +434,7 @@ Environment variables can also be set from the gmake command line:
   gmake ESMF_ABI=32
 \end{verbatim}
 
-\subsubsection{Supported Platforms}
+\subsection{Supported Platforms}
 \input{../../build/doc/user_arch}
 
 Building the library for multiple architectures or options at the same
@@ -443,7 +443,7 @@ to one platform/architecture at a time.  The output from the test cases
 will be stored in a separate directories so the results will be kept 
 separate for different architectures or options.
 
-\subsubsection{Building the ESMF Library}
+\subsection{Building the ESMF Library}
 \label{BuildESMF}
 
 % GNU make requirement.  File in build/doc
@@ -471,7 +471,7 @@ directories and entering {\tt gmake run\_examples} or
 uni-processor targets are available as {\tt gmake run\_examples\_uni} or
 {\tt gmake run\_unit\_tests\_uni}.
 
-\subsubsection{Building the ESMF Documentation}
+\subsection{Building the ESMF Documentation}
 \label{BuildDocumentation}
 
 The documentation consists of an {\it ESMF User's Guide}, 
@@ -511,7 +511,7 @@ located in the top level directory \${ESMF\_DIR}/doc.
 %% 
 %% 
 
-\subsubsection{Installing the ESMF}
+\subsection{Installing the ESMF}
 \label{InstallESMF}
 
 The ESMF build system offers the standard {\tt install} target to install all
