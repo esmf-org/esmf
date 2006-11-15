@@ -1,4 +1,4 @@
-! $Id: ESMF_InitMacros.F90,v 1.1 2006/11/10 23:01:08 oehmke Exp $
+! $Id: ESMF_InitMacros.F90,v 1.2 2006/11/15 02:39:06 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -11,7 +11,7 @@
 !==============================================================================
 !
 !     ESMF InitMacro Module
-      module ESMF_InitMacroMod
+      module ESMF_InitMacrosMod
 
 
 !
@@ -76,6 +76,6 @@ contains
 end function ESMF_InitCheckDeep
 
 
-end module ESMF_InitMacroMod
+end module ESMF_InitMacrosMod
 
 
