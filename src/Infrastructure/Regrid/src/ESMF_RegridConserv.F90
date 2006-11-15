@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.58 2006/03/28 21:52:31 theurich Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.59 2006/11/15 06:38:07 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -80,7 +80,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.58 2006/03/28 21:52:31 theurich Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.59 2006/11/15 06:38:07 donstark Exp $'
 
 !==============================================================================
 
@@ -328,13 +328,13 @@
                                   ESMF_CONTEXT, rc)) return
 
         call ESMF_InternArrayGetData(dstLocalCoordArray(1), dstLocalCoordX, &
-                               ESMF_DATA_REF, localrc)
+                               ESMF_DATA_COPY, localrc)
         call ESMF_InternArrayGetData(dstLocalCoordArray(2), dstLocalCoordY, &
-                               ESMF_DATA_REF, localrc)
+                               ESMF_DATA_COPY, localrc)
         call ESMF_InternArrayGetData(dstLocalCornerArray(1), dstLocalCornerX, &
-                               ESMF_DATA_REF, localrc)
+                               ESMF_DATA_COPY, localrc)
         call ESMF_InternArrayGetData(dstLocalCornerArray(2), dstLocalCornerY, &
-                               ESMF_DATA_REF, localrc)
+                               ESMF_DATA_COPY, localrc)
       endif
 
       ! get source grid info
@@ -491,6 +491,10 @@
           dstLocalCoordY  =  dstLocalCoordY*pi/180.0d0
           dstLocalCornerX = dstLocalCornerX*pi/180.0d0
           dstLocalCornerY = dstLocalCornerY*pi/180.0d0
+        ! convert destination longitudes to 0,2pi interval
+          where (dstLocalCoordX < 0.0d0)  dstLocalCoordX =  &
+                                        modulo( dstLocalCoordX, -pi2 ) + pi2
+          dstLocalCoordX = modulo( dstLocalCoordX, pi2 )
         endif
 
         ! These are computed later - initialize to zero
@@ -519,6 +523,10 @@
           srcGatheredCoordY  =  srcGatheredCoordY*pi/180.0d0
           srcGatheredCornerX = srcGatheredCornerX*pi/180.0d0
           srcGatheredCornerY = srcGatheredCornerY*pi/180.0d0
+        ! convert destination longitudes to 0,2pi interval
+          where (srcGatheredCoordX < 0.0d0)  srcGatheredCoordX =  &
+                                        modulo( srcGatheredCoordX, -pi2 ) + pi2
+          srcGatheredCoordX = modulo( srcGatheredCoordX, pi2 )
         endif
 
         ! These are computed later - initialize to zero here
