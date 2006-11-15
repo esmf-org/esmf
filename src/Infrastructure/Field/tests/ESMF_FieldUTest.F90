@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.86 2006/10/19 04:22:10 samsoncheung Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.87 2006/11/15 01:33:01 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.86 2006/10/19 04:22:10 samsoncheung Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.87 2006/11/15 01:33:01 donstark Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -51,7 +51,7 @@
 
 !     !LOCAL VARIABLES:
       integer :: i, count
-      integer, dimension(2) :: cellCounts
+      integer, dimension(3) :: cellCounts
       type(ESMF_DELayout) :: delayout
       type(ESMF_VM) :: vm
       type(ESMF_Grid) :: grid, grid2, grid3, grid4, grid5, nogrid
@@ -71,6 +71,11 @@
       character (len=32) :: lattrstr
       type(ESMF_Logical) :: lattr, lattrlist(6)
       character (len=512) :: cattr, cattr2
+
+      integer :: im, jm, km
+      real(ESMF_KIND_R8) :: xmin,xmax,ymin,ymax
+      real(ESMF_KIND_R8), dimension(:), allocatable :: delta
+      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: fptr
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -262,15 +267,6 @@
      
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get local Grid counts now for use later
-      call ESMF_GridGetDELocalInfo(grid, ESMF_CELL_CENTER, &
-                                    localCellCountPerDim=cellCounts, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Getting cell counts for each DE"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
       ! Test requirement FLD1.5.1. Default name attribute 
       ! The only default attribute of a field will be a name. A unique 
       ! name will be generated if not supplied by the user.
@@ -440,8 +436,8 @@
       ! a ton of checks into every function.  it is reasonable to add a
       ! field function after the grid is destroyed and see if that is 
       ! detected, after we decide on a framework-wide consistent strategy.
-     !!call ESMF_GridDestroy(grid, rc=rc)
      !!write(failMsg, *) ""
+     !!call ESMF_GridDestroy(grid, rc=rc)
      !!write(name, *) "Destroying a Grid in a Field Test"
      !!call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -497,7 +493,6 @@
       call ESMF_GridGet(grid3, name=gname3, rc=rc)
       print *, "Grid (grid3) name = ", trim(gname3)
       call ESMF_Test((gname.eq.gname3), name, failMsg, result, ESMF_SRCLINE)
-
       !------------------------------------------------------------------------
       !EX_UTest
       ! Req. xxx - getting a data pointer directly from a field
@@ -792,6 +787,71 @@ print *, "done with test"
       ! Cannot be tested until Bug 705716 "Field Query attributes not 
       !  implemented" is fixed.
 
+! grid destroy to clear previous grids.
+       call ESMF_GridDestroy(grid, rc=rc)
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! ESMF 3D Field Validate test to accommodate the single point mismatch 
+      ! between center and edge staggerings. This Bug is actually a grid design 
+      ! issue having to do with the grid being specified by vertex locations.
+
+      ! define grid dimensions
+       im = 18
+       jm = 36
+       km = 72
+      ! build uniform global grid in degrees
+       xmin = 0.0
+       xmax = 360.0
+       ymin =-90.0
+       ymax = 90.0
+       grid = ESMF_GridCreateHorzLatLonUni(counts=(/im,jm/),         &
+                     minGlobalCoordPerDim=(/xmin,ymin/),             &
+                     maxGlobalCoordPerDim=(/xmax,ymax/),             &
+                     horzStagger=ESMF_GRID_HORZ_STAGGER_A,           &
+                     periodic=(/ ESMF_TRUE, ESMF_FALSE /),           &
+                     name="A-grid", rc=rc)
+
+      ! construct vertical coordinate and add to height to grid
+       allocate( delta(km) )
+       delta(1:km) = 1.0
+       call ESMF_GridAddVertHeight( grid, delta=delta,               &
+              vertStagger=ESMF_GRID_VERT_STAGGER_TOP, rc=rc)
+       deallocate( delta )
+
+      ! distribute first two dimensions of the grid
+       call ESMF_GridDistribute(grid, delayout=delayout,             &
+                                decompIds=(/1,2,0/), rc=rc)
+
+      ! Get local Grid counts now for use later
+       call ESMF_GridGetDELocalInfo(grid, ESMF_CELL_CENTER,          &
+                 Vertrelloc=ESMF_CELL_TOPFACE,                       &
+                 localCellCountPerDim=cellCounts, rc=rc)
+       write(failMsg, *) ""
+       write(name, *) "Getting cell counts for each DE"
+       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! Create the test field from a fortran pointer  
+       allocate( fptr(cellCounts(1),cellCounts(2),cellCounts(3)+1) )  
+       print*,'cellcounts',cellCounts
+       f1 = ESMF_FieldCreate(grid, fptr, ESMF_DATA_REF,              &
+                 horzRelloc=ESMF_CELL_CENTER,                        &
+                 vertRelloc=ESMF_CELL_TOPFACE,                       &
+                 name="field", rc=rc)
+       print*,'field create',rc
+       write(failMsg, *) ""
+       write(name, *) "Create Field with vertical axis longer than grid"
+       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! validate field
+       call ESMF_FieldValidate(f1, rc=rc)
+       print*,'field create',rc,ESMF_SUCCESS
+       write(failMsg, *) ""
+       write(name, *) "Field Validated "
+       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! clean up
+       deallocate( fptr )
+       call ESMF_FieldDestroy(f1, rc)
 #endif
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
