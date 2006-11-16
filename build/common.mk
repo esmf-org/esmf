@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.165 2006/11/13 23:37:20 theurich Exp $
+#  $Id: common.mk,v 1.166 2006/11/16 22:17:49 cdeluca Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -152,10 +152,6 @@ endif
 
 ifndef ESMF_NO_INTEGER_2_BYTE
 export ESMF_NO_INTEGER_2_BYTE = default
-endif
-
-ifndef ESMF_NO_IOCODE
-export ESMF_NO_IOCODE = default
 endif
 
 #-------------------------------------------------------------------------------
@@ -627,22 +623,6 @@ ESMF_CXXLINKPATHS    += -L$(ESMF_NETCDF_LIBPATH)
 ESMF_CXXLINKLIBS     += -lnetcdf
 ESMF_F90COMPILEPATHS += -I$(ESMF_NETCDF_INCLUDE)
 ESMF_F90LINKPATHS    += -L$(ESMF_NETCDF_LIBPATH)
-ESMF_F90LINKLIBS     += -lnetcdf
-# turn IO code on by default if NETCDF library was specified
-ifeq ($(ESMF_NO_IOCODE),default)
-export ESMF_NO_IOCODE = FALSE
-endif
-endif
-
-# if at this point ESMF_NO_IOCODE is still not FALSE then set it TRUE
-ifneq ($(ESMF_NO_IOCODE),FALSE)
-export ESMF_NO_IOCODE = TRUE
-endif
-
-ifneq ($(ESMF_NO_IOCODE),FALSE)
-CPPFLAGS       += -DESMF_NO_IOCODE
-else
-ESMF_CXXLINKLIBS     += -lnetcdf
 ESMF_F90LINKLIBS     += -lnetcdf
 endif
 

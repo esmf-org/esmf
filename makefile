@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.72 2006/11/13 23:37:20 theurich Exp $
+# $Id: makefile,v 1.73 2006/11/16 22:17:49 cdeluca Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -86,8 +86,6 @@ script_info:
 	-@echo "ESMF_PTHREADS:          $(ESMF_PTHREADS)"
 	-@if [ -n "$(ESMF_TESTWITHTHREADS)" ] ; then \
 	  echo "ESMF_TESTWITHTHREADS:   $(ESMF_TESTWITHTHREADS)" ; fi
-	-@if [ -n "$(ESMF_NO_IOCODE)" ] ; then \
-	  echo "ESMF_NO_IOCODE:         $(ESMF_NO_IOCODE)" ; fi
 	-@if [ -n "$(ESMF_ARRAY_LITE)" ] ; then \
 	  echo "ESMF_ARRAY_LITE:        $(ESMF_ARRAY_LITE)" ; fi
 	-@if [ -n "$(ESMF_NO_INTEGER_1_BYTE)" ] ; then \
@@ -233,8 +231,6 @@ info_mk:
 	-@echo "# ESMF_PTHREADS: $(ESMF_PTHREADS)" >> $(MKINFO)
 	-@if [ -n "$(ESMF_TESTWITHTHREADS)" ] ; then \
 	  echo "# ESMF_TESTWITHTHREADS: $(ESMF_TESTWITHTHREADS)" >> $(MKINFO) ; fi
-	-@if [ -n "$(ESMF_NO_IOCODE)" ] ; then \
-	  echo "# ESMF_NO_IOCODE: $(ESMF_NO_IOCODE)" >> $(MKINFO) ; fi
 	-@if [ -n "$(ESMF_ARRAY_LITE)" ] ; then \
 	  echo "# ESMF_ARRAY_LITE: $(ESMF_ARRAY_LITE)" >> $(MKINFO) ; fi
 	-@if [ -n "$(ESMF_NO_INTEGER_1_BYTE)" ] ; then \

@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.51 2006/11/13 23:37:21 theurich Exp $
+% $Id: ESMF_install.tex,v 1.52 2006/11/16 22:17:49 cdeluca Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -315,20 +315,6 @@ from generating data array interfaces for data types of 1-byte integers.
 Possible value: {\tt TRUE}, {\tt FALSE} (default)
 
 Same as {\tt ESMF\_NO\_INTEGER\_1\_BYTE} but for 2-byte integers.
-
-\item[ESMF\_NO\_IOCODE] 
-Possible value: {\tt TRUE}, {\tt FALSE}
-
-If set to {\tt TRUE} ESMF will {\em not} depend on {\tt netCDF} for I/O.
-If set to {\tt FALSE} ESMF will be compiled including an I/O prototype that
-depends on {\tt netCDF}. In the latter case ESMF must be able to find the
-{\tt netCDF} header and library files. Please see environment variables
-{\tt ESMF\_NETCDF\_INCLUDE} and {\tt ESMF\_NETCDF\_LIBPATH} for details.
-
-The default value of {\tt ESMF\_NO\_IOCODE} depends on whether environment variable {\tt ESMF\_NETCDF\_INCLUDE} is defined or not. If {\tt ESMF\_NETCDF\_INCLUDE} is defined {\tt ESMF\_NO\_IOCODE} will be set
-to {\tt FALSE} by default. Otherwise {\tt ESMF\_NO\_IOCODE} will default
-to {\tt TRUE}. In either case the user can override the default by defining
-{\tt ESMF\_NO\_IOCODE} in their environment.
 
 \item[ESMF\_OPTLEVEL] 
 Possible value: {\em numerical value}
