@@ -14,7 +14,7 @@
 
 ================================================================================
 
-Hello and welcome to the world of ESMF.
+Hello and welcome to ESMF.
 
 
 If you need to compile and link your code against an already-built ESMF library,
@@ -562,4 +562,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.69.2.15 2006/11/16 04:57:31 cdeluca Exp $
+ $Id: README,v 1.69.2.16 2006/11/16 05:27:52 cdeluca Exp $
