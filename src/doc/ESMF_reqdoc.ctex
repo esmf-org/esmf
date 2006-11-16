@@ -1,4 +1,4 @@
-% $Id: ESMF_reqdoc.ctex,v 1.21 2006/11/16 18:53:15 cdeluca Exp $
+% $Id: ESMF_reqdoc.ctex,v 1.22 2006/11/16 19:52:23 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -215,22 +215,6 @@
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 #include "../Infrastructure/LogErr/doc/LogErr_reqdoc.ctex"
-
-%================================================================================
-
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: I/O}
-\end{htmlonly}
-\part{Infrastructure Utilities: I/O}
-\label{part:Infrastructure Utilities:_I/O}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-#include "../Infrastructure/IO/doc/IO_reqdoc.ctex"
 
 %================================================================================
 

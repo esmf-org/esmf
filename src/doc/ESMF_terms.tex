@@ -46,6 +46,11 @@ numerical and computational methods.
   (Location Stream) with a location on a grid. A single grid cell may contain 
   zero or more Location Stream points. See also \htmlref{Location Stream}{glos:LocStream}, \htmlref{cell}{glos:Cell}. 
 
+\label{glos:BUFR}
+\item[BUFR]
+  Binary Universal Form of Representation.  This is a World Meteorological Organization
+data format.  See \htmladdnormallink{BUFR links}{http://dss.ucar.edu/docs/formats/bufr/}.
+
 \label{glos:Bundle}
 \item[Bundle] The ESMF Bundle class represents a set of fields that 
   are associated with the same physical grid and are distributed in a similar 
@@ -67,6 +72,11 @@ numerical and computational methods.
   a single integer index value or a set of integer index values ( e.g.
   (i) for 1-d, (i,j) for 2-d, (i,j,k) for 3d ). 
   See also \htmlref{index}{glos:Index}.
+
+\label{glos:CF}
+\item[CF Conventions]
+Climate and Forecast Conventions.  These are emerging conventions for expressing 
+Earth science metadata.  See the \htmladdnormallink{CF home page}{http://www.cgd.ucar.edu/cms/eaton/cf-metadata/}.
 
 \label{glos:CRB}
 \item[Change Review Board] The Change Review Board is the ESMF management
@@ -276,6 +286,13 @@ of its data.  See also \htmlref{Grid}{glos:Grid}.
   \htmlref{global domain}{glos:GlobDomain}.
   See also \htmlref{global reduction}{glos:GlobReduction}.
 
+\label{glos:GRIB}
+\item[GRIB]
+  The GRid in Binary Data format from the World Meteorological Organization.
+This format is frequently used by operational weather centers.  See the
+\htmladdnormallink{GRIB}{http://www.wmo.ch/web/www/WDM/Guides/Guide-binary-2.html} and
+\htmladdnormallink{GRIB2}{http://www.wmo.ch/web/www/DPS/grib-2.html} home pages.
+
 \label{glos:Grid} 
 \item[Grid] 
   The discrete division of space associated with
@@ -417,7 +434,12 @@ of its data.  See also \htmlref{Grid}{glos:Grid}.
   Multiple Program Multiple Datastream.
   Multiple executables, any of which could itself be an SPMD
   executable, executing independently within an application. 
-  See also \htmlref{SPMD}{glos:SPMD}
+  See also \htmlref{SPMD}{glos:SPMD}.
+
+\label{glos:NetCDF}
+\item[NetCDF]
+  Network Common Data Form.  This is a popular I/O library and data format
+in the Earth sciences. See \htmladdnormallink{NetCDF home page}{http://www.unidata.ucar.edu/software/netcdf/}. 
 
 \label{glos:Node} 
 \item[Node] 
