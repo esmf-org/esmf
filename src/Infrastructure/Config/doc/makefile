@@ -1,17 +1,12 @@
-# $Id: makefile,v 1.3 2006/01/26 21:39:06 nscollins Exp $
+# $Id: makefile,v 1.4 2006/11/16 23:55:55 cdeluca Exp $
 
 ALL: onedoc
 
 LOCDIR = src/Infrastructure/Config/doc
 
-DVIFILES  =	Config_reqdoc.dvi \
-		Config_refdoc.dvi
-
-PDFFILES  =     ${ESMC_DOCDIR}/Config_reqdoc.pdf \
-		${ESMC_DOCDIR}/Config_refdoc.pdf
-
-HTMLFILES =	${ESMC_DOCDIR}/Config_reqdoc \
-		${ESMC_DOCDIR}/Config_refdoc
+DVIFILES  =	Config_refdoc.dvi
+PDFFILES  =     ${ESMC_DOCDIR}/Config_refdoc.pdf
+HTMLFILES =	${ESMC_DOCDIR}/Config_refdoc
 
 #
 # Tex Files to make
@@ -35,16 +30,13 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REQDOC_DEP_FILES = 
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 
 include $(ESMF_DIR)/makefile
 
 DIRS = 
-
-CLEANDIRS   = Config_reqdoc Config_refdoc $(HTMLFILES)
+CLEANDIRS   = Config_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              ConfigAttr_reqdoc.tex $(PDFFILES)
+              $(PDFFILES)
 CLOBBERDIRS =

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2006/01/26 21:39:06 nscollins Exp $ 
+# $Id: makefile,v 1.4 2006/11/16 23:55:55 cdeluca Exp $ 
 
 ALL: onedoc 
 
@@ -14,9 +14,7 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/FieldDataMap/doc
 
 DVIFILES  = 	FieldDataMap_refdoc.dvi
-
 PDFFILES  =     ${ESMC_DOCDIR}/FieldDataMap_refdoc.pdf
-
 HTMLFILES = 	${ESMC_DOCDIR}/FieldDataMap_refdoc
 
 #
@@ -42,14 +40,12 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhastive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
-
 CLEANDIRS   = FieldDataMap_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               FieldDataMap_refdoc.tex $(PDFFILES)

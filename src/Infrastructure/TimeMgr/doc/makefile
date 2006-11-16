@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2006/01/26 21:39:07 nscollins Exp $
+# $Id: makefile,v 1.20 2006/11/16 23:55:58 cdeluca Exp $
 
 ALL: onedoc
 
@@ -13,17 +13,10 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/TimeMgr/doc
 
-DVIFILES  =	TimeMgr_reqdoc.dvi \
-		TimeMgr_desdoc.dvi \
-		TimeMgr_refdoc.dvi
+DVIFILES  =	TimeMgr_refdoc.dvi
+PDFFILES  =     ${ESMC_DOCDIR}/TimeMgr_refdoc.pdf
+HTMLFILES = 	${ESMC_DOCDIR}/TimeMgr_refdoc
 
-PDFFILES  =     ${ESMC_DOCDIR}/TimeMgr_reqdoc.pdf \
-		${ESMC_DOCDIR}/TimeMgr_desdoc.pdf \
-		${ESMC_DOCDIR}/TimeMgr_refdoc.pdf
-
-HTMLFILES = 	${ESMC_DOCDIR}/TimeMgr_reqdoc \
-		${ESMC_DOCDIR}/TimeMgr_desdoc \
-		${ESMC_DOCDIR}/TimeMgr_refdoc
 # 
 # Tex files to make
 #
@@ -51,17 +44,14 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../int
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REQDOC_DEP_FILES = 
-DESDOC_DEP_FILES = TimeMgr_syn.tex
 REFDOC_DEP_FILES = 
 
 include $(ESMF_DIR)/makefile
 
 DIRS = 
-
-CLEANDIRS   = TimeMgr_reqdoc TimeMgr_desdoc TimeMgr_refdoc $(HTMLFILES)
+CLEANDIRS   = TimeMgr_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              TimeMgr_reqdoc.tex TimeMgr_desdoc.tex TimeMgr_refdoc.tex \
+              TimeMgr_refdoc.tex \
               $(PDFFILES)
 CLOBBERDIRS =
 

@@ -1,13 +1,11 @@
-# $Id: makefile,v 1.6 2006/01/26 21:39:06 nscollins Exp $
+# $Id: makefile,v 1.7 2006/11/16 23:55:55 cdeluca Exp $
 
 ALL: onedoc
 
 LOCDIR = src/Infrastructure/DELayout/doc
 
 DVIFILES = DELayout_refdoc.dvi
-
 PDFFILES  = $(ESMC_DOCDIR)/DELayout_refdoc.pdf
-
 HTMLFILES = $(ESMC_DOCDIR)/DELayout_refdoc
 
 #
@@ -32,15 +30,11 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REQDOC_DEP_FILES = 
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) DELayout_desc.tex DELayout_usage.tex DELayout_rest.tex DELayout_implnotes.tex
-
 
 include $(ESMF_DIR)/makefile
 
 DIRS = 
-
 CLEANDIRS   = DELayout_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               DELayout_refdoc.tex $(PDFFILES)

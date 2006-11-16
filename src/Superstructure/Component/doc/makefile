@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2006/01/26 21:39:07 nscollins Exp $ 
+# $Id: makefile,v 1.24 2006/11/16 23:55:58 cdeluca Exp $ 
 
 ALL: onedoc
 
@@ -15,15 +15,8 @@ LIBBASE	  =
 LOCDIR	  = src/Superstructure/Component/doc
 
 DVIFILES  =     Component_refdoc.dvi
-#		Component_reqdoc.dvi \
-
-
 PDFFILES  =     $(ESMC_DOCDIR)/Component_refdoc.pdf
-#		$(ESMC_DOCDIR)/Component_reqdoc.pdf \
-
 HTMLFILES =     $(ESMC_DOCDIR)/Component_refdoc
-#		$(ESMC_DOCDIR)/Component_reqdoc \
-
 
 #
 # Tex Files to make
@@ -50,10 +43,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhastive list of 
 # all of the dependent files, but even a partial listing  will be helpfull.
 #
-REQDOC_DEP_FILES = 
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
-
 
 include $(ESMF_DIR)/makefile
 

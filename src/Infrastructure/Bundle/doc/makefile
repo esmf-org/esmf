@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2006/11/16 22:02:18 cdeluca Exp $ 
+# $Id: makefile,v 1.9 2006/11/16 23:55:54 cdeluca Exp $ 
 
 ALL: onedoc 
 
@@ -14,9 +14,7 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/Bundle/doc
 
 DVIFILES  = 	Bundle_refdoc.dvi
-
 PDFFILES  =	${ESMC_DOCDIR}/Bundle_refdoc.pdf
-
 HTMLFILES = 	${ESMC_DOCDIR}/Bundle_refdoc
 
 #
@@ -42,16 +40,12 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhastive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
-
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
-
 CLEANDIRS   = Bundle_reqdoc Bundle_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               Bundle_reqdoc.tex Bundle_refdoc.tex $(PDFFILES)

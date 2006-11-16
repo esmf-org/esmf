@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2006/01/26 21:39:07 nscollins Exp $ 
+# $Id: makefile,v 1.5 2006/11/16 23:55:56 cdeluca Exp $ 
 
 ALL: onedoc
 
@@ -14,11 +14,8 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/IOSpec/doc
 
 DVIFILES  =   IOSpec_refdoc.dvi 
-
 PDFFILES  =   ${ESMC_DOCDIR}/IOSpec_refdoc.pdf
-
 HTMLFILES =   ${ESMC_DOCDIR}/IOSpec_refdoc 
-
 
 #
 # Tex Files to make
@@ -42,15 +39,11 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REQDOC_DEP_FILES = 
-
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
-
 
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
-
 CLEANDIRS   = IOSpec_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               IOSpec_refdoc.tex $(PDFFILES)

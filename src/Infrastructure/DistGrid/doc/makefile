@@ -1,13 +1,11 @@
-# $Id: makefile,v 1.14 2006/05/16 17:58:13 theurich Exp $
+# $Id: makefile,v 1.15 2006/11/16 23:55:55 cdeluca Exp $
 
 All: onedoc
 
 LOCDIR = src/Infrastructure/DistGrid/doc
 
 DVIFILES = DistGrid_refdoc.dvi
-
 PDFFILES  = $(ESMC_DOCDIR)/DistGrid_refdoc.pdf
-
 HTMLFILES = $(ESMC_DOCDIR)/DistGrid_refdoc
 
 #
@@ -32,15 +30,12 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REQDOC_DEP_FILES = 
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) DistGrid_desc.tex DistGrid_usage.tex DistGrid_rest.tex DistGrid_implnotes.tex
 
 
 include $(ESMF_DIR)/makefile
 
 DIRS = 
-
 CLEANDIRS   = DistGrid_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               DistGrid_refdoc.tex $(PDFFILES)

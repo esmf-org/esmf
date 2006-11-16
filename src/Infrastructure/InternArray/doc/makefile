@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2006/03/24 16:33:28 theurich Exp $ 
+# $Id: makefile,v 1.2 2006/11/16 23:55:56 cdeluca Exp $ 
 
 ALL: onedoc 
 
@@ -14,9 +14,7 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/InternArrayDataMap/doc
 
 DVIFILES  = 	InternArrayDataMap_refdoc.dvi
-
 PDFFILES  =     ${ESMC_DOCDIR}/InternArrayDataMap_refdoc.pdf
-
 HTMLFILES = 	${ESMC_DOCDIR}/InternArrayDataMap_refdoc
 
 #
@@ -45,11 +43,9 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
-
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
-
 CLEANDIRS   = InternArrayDataMap_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               InternArrayDataMap_refdoc.tex $(PDFFILES)

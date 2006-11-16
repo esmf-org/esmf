@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2006/01/26 21:39:06 nscollins Exp $ 
+# $Id: makefile,v 1.15 2006/11/16 23:55:56 cdeluca Exp $ 
 
 ALL: onedoc
 
@@ -14,14 +14,9 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Grid/doc
 
-DVIFILES  =	Grid_desdoc.dvi \
-		Grid_refdoc.dvi
-
-PDFFILES  =     $(ESMC_DOCDIR)/Grid_desdoc.pdf \
-		${ESMC_DOCDIR}/Grid_refdoc.pdf
-
-HTMLFILES =	$(ESMC_DOCDIR)/Grid_desdoc \
-		${ESMC_DOCDIR}/Grid_refdoc
+DVIFILES  =	Grid_refdoc.dvi
+PDFFILES  =     $(ESMC_DOCDIR)/Grid_refdoc.pdf
+HTMLFILES =	$(ESMC_DOCDIR)/Grid_refdoc
 
 #
 # Tex Files to make
@@ -39,21 +34,17 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f90))))
 
-
 #
 # Files that a doc depends on.  Do not list the the ctex file !  
 # The ctex file is listed in the rule found in the build/common file.
 # These lists almost certainly will not be an exhastive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REQDOC_DEP_FILES = 
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
-
 CLEANDIRS   = Grid_desdoc Grid_reqdoc Grid_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               Grid_desdoc.tex Grid_reqdoc.tex Grid_refdoc.tex $(PDFFILES)

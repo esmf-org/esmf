@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2006/03/24 16:36:36 theurich Exp $ 
+# $Id: makefile,v 1.2 2006/11/16 23:55:56 cdeluca Exp $ 
 
 ALL: onedoc
 
@@ -15,9 +15,7 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/InternArrayComm/doc
 
 DVIFILES  = 	InternArray_refdoc.dvi 
-
 PDFFILES  =     ${ESMC_DOCDIR}/InternArray_refdoc.pdf
-
 HTMLFILES = 	${ESMC_DOCDIR}/InternArray_refdoc 
 
 #
@@ -47,15 +45,12 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../int
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REQDOC_DEP_FILES = 
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
-
 CLEANDIRS   = InternArray_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               InternArray_refdoc.tex $(PDFFILES)

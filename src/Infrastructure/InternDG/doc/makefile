@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2006/03/23 01:29:43 theurich Exp $ 
+# $Id: makefile,v 1.2 2006/11/16 23:55:56 cdeluca Exp $ 
 
 ALL: onedoc
 
@@ -14,17 +14,9 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/InternDG/doc
 
-DVIFILES  = 	InternDG_reqdoc.dvi \
-		InternDG_desdoc.dvi \
-		InternDG_refdoc.dvi
-
-PDFFILES  =     ${ESMC_DOCDIR}/InternDG_reqdoc.pdf \
-		${ESMC_DOCDIR}/InternDG_desdoc.pdf \
-		${ESMC_DOCDIR}/InternDG_refdoc.pdf
-
-HTMLFILES = 	${ESMC_DOCDIR}/InternDG_reqdoc \
-		${ESMC_DOCDIR}/InternDG_desdoc \
-		${ESMC_DOCDIR}/InternDG_refdoc
+DVIFILES  = 	InternDG_refdoc.dvi
+PDFFILES  =     ${ESMC_DOCDIR}/InternDG_refdoc.pdf
+HTMLFILES = 	${ESMC_DOCDIR}/InternDG_refdoc
 
 #
 # Tex Files to make
@@ -48,19 +40,15 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REQDOC_DEP_FILES = 
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
-
 
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
-
-CLEANDIRS   = InternDG_reqdoc InternDG_desdoc InternDG_refdoc \
+CLEANDIRS   = InternDG_refdoc \
               $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              InternDG_desdoc.tex InternDG_reqdoc.tex InternDG_refdoc.tex \
+              InternDG_refdoc.tex \
               $(PDFFILES)
 CLOBBERDIRS =
 

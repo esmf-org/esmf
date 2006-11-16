@@ -1,4 +1,4 @@
-% $Id: ESMF_reqdoc.ctex,v 1.23 2006/11/16 22:02:28 cdeluca Exp $
+% $Id: ESMF_reqdoc.ctex,v 1.24 2006/11/16 23:55:58 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -103,102 +103,6 @@
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 \input{ESMF_req}
-
-%================================================================================
-
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Superstructure: Components}
-\end{htmlonly}
-\part{Superstructure: Components}
-\label{part:Superstructure:_Components}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-#include "../Superstructure/Component/doc/Coupler_reqdoc.ctex"
-
-%================================================================================
-
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Regridding}
-\end{htmlonly}
-\part{Infrastructure Fields and Grids: Regridding}
-\label{part:Infrastructure_Fields_and_Grids:_Regridding}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-#include "../Infrastructure/Regrid/doc/Regrid_reqdoc.ctex"
-
-%================================================================================
-
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Time Management}
-\end{htmlonly}
-\part{Infrastructure Utilities: Time Management}
-\label{part:Infrastructure_Utilities:_Time_Management}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-#include "../Infrastructure/TimeMgr/doc/TimeMgr_reqdoc.ctex"
-
-%================================================================================
-
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Communication and Memory Kernels}
-\end{htmlonly}
-\part{Infrastructure Utilities: Communication and Memory Kernels}
-\label{part:Infrastructure_Utilities:_Communication_and_Memory_Kernels}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-#include "../Infrastructure/DELayout/doc/CommMem_reqdoc.ctex"
-
-%================================================================================
-
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Log}
-\end{htmlonly}
-\part{Infrastructure Utilities: Log}
-\label{part:Infrastructure_Utilities:_Log}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-#include "../Infrastructure/LogErr/doc/LogErr_reqdoc.ctex"
-
-%================================================================================
-
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Configuration Attributes}
-\end{htmlonly}
-\part{Infrastructure Utilities: Configuration Attributes}
-\label{part:Infrastructure_Utilities:_CA}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-#include "../Infrastructure/Config/doc/Config_reqdoc.ctex"
 
 %================================================================================
 

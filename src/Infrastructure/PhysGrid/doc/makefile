@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2006/11/16 22:02:27 cdeluca Exp $ 
+# $Id: makefile,v 1.16 2006/11/16 23:55:57 cdeluca Exp $ 
 
 ALL: onedoc
 
@@ -14,14 +14,9 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/PhysGrid/doc
 
-DVIFILES  = 	PhysGrid_reqdoc.dvi \
-		PhysGrid_refdoc.dvi
-
-PDFFILES  =     ${ESMC_DOCDIR}/PhysGrid_reqdoc.pdf \
-		${ESMC_DOCDIR}/PhysGrid_refdoc.pdf
-
-HTMLFILES = 	${ESMC_DOCDIR}/PhysGrid_reqdoc \
-		${ESMC_DOCDIR}/PhysGrid_refdoc
+DVIFILES  = 	PhysGrid_refdoc.dvi
+PDFFILES  =     ${ESMC_DOCDIR}/PhysGrid_refdoc.pdf
+HTMLFILES = 	${ESMC_DOCDIR}/PhysGrid_refdoc
 
 #
 # Tex Files to make
@@ -45,17 +40,14 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REQDOC_DEP_FILES = 
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
-
-CLEANDIRS   = PhysGrid_reqdoc PhysGrid_refdoc $(HTMLFILES)
+CLEANDIRS   = PhysGrid_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              PhysGrid_reqdoc.tex PhysGrid_refdoc.tex  \
+              PhysGrid_refdoc.tex  \
               $(PDFFILES)
 CLOBBERDIRS =
 

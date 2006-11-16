@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2006/01/26 21:39:08 nscollins Exp $ 
+# $Id: makefile,v 1.5 2006/11/16 23:55:58 cdeluca Exp $ 
 
 ALL: onedoc
 
@@ -15,9 +15,7 @@ LIBBASE	  =
 LOCDIR	  = src/Superstructure/State/doc
 
 DVIFILES  =     State_refdoc.dvi
-
 PDFFILES  =     $(ESMC_DOCDIR)/State_refdoc.pdf
-
 HTMLFILES =     $(ESMC_DOCDIR)/State_refdoc
 
 #
@@ -42,15 +40,11 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhastive list of 
 # all of the dependent files, but even a partial listing  will be helpfull.
 #
-REQDOC_DEP_FILES = 
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
-
 
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
-
 CLEANDIRS   = State_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               State_refdoc.tex $(PDFFILES) 

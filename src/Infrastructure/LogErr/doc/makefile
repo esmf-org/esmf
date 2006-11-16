@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2006/01/26 21:39:07 nscollins Exp $
+# $Id: makefile,v 1.11 2006/11/16 23:55:57 cdeluca Exp $
 
 ALL: onedoc
 
@@ -14,14 +14,8 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/LogErr/doc
 
 DVIFILES  =	LogErr_refdoc.dvi 
-#		LogErr_reqdoc.dvi
-
 PDFFILES  =	${ESMC_DOCDIR}/LogErr_refdoc.pdf 
-#		${ESMC_DOCDIR}/LogErr_reqdoc.pdf
-
 HTMLFILES =	${ESMC_DOCDIR}/LogErr_refdoc 
-#		${ESMC_DOCDIR}/LogErr_reqdoc
-
 
 #
 # Tex Files to make
@@ -51,15 +45,12 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../int
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REQDOC_DEP_FILES = 
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 
 include $(ESMF_DIR)/makefile
 
 DIRS = 
-
 CLEANDIRS   = LogErr_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               LogErr_refdoc.tex $(PDFFILES)
