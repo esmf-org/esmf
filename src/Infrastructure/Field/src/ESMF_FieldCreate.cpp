@@ -1,12 +1,12 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.15 2006/10/16 18:59:15 theurich Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.16 2006/11/16 05:20:59 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 ^define ESMF_FILENAME "ESMF_FieldCreate.F90"
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.15 2006/10/16 18:59:15 theurich Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.16 2006/11/16 05:20:59 cdeluca Exp $'
 
 !==============================================================================
 ! 

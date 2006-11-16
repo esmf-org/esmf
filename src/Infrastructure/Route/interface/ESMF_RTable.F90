@@ -1,12 +1,12 @@
-! $Id: ESMF_RTable.F90,v 1.9 2005/10/12 19:06:17 nscollins Exp $
+! $Id: ESMF_RTable.F90,v 1.10 2006/11/16 05:21:16 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 #define ESMF_FILENAME "ESMF_RTable.F90"
@@ -79,7 +79,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RTable.F90,v 1.9 2005/10/12 19:06:17 nscollins Exp $'
+      '$Id: ESMF_RTable.F90,v 1.10 2006/11/16 05:21:16 cdeluca Exp $'
 
 !==============================================================================
 !

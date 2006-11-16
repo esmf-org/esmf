@@ -1,12 +1,12 @@
-// $Id: ESMC_HWMonitor.h,v 1.4 2003/04/03 22:40:00 nscollins Exp $
+// $Id: ESMC_HWMonitor.h,v 1.5 2006/11/16 05:21:12 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMF HWMonitor C++ definition include file
 //

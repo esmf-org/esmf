@@ -1,12 +1,12 @@
-// $Id: ESMC_FTable.C,v 1.22 2006/10/25 02:08:46 samsoncheung Exp $
+// $Id: ESMC_FTable.C,v 1.23 2006/11/16 05:21:24 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMC Function table implementation (body) file
 #define ESMF_FILENAME "ESMC_FTable.C"
@@ -50,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.22 2006/10/25 02:08:46 samsoncheung Exp $";
+           "$Id: ESMC_FTable.C,v 1.23 2006/11/16 05:21:24 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //

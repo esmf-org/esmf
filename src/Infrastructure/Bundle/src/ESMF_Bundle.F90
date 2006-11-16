@@ -1,12 +1,12 @@
-! $Id: ESMF_Bundle.F90,v 1.84 2006/08/10 18:59:54 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.85 2006/11/16 05:20:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2005, University Corporation for Atmospheric Research, 
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 !

@@ -1,12 +1,12 @@
-// $Id: ESMC_Base.C,v 1.68 2006/02/09 16:58:13 svasquez Exp $
+// $Id: ESMC_Base.C,v 1.69 2006/11/16 05:20:55 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2005, University Corporation for Atmospheric Research,
+// Copyright 2002-2008, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 #define ESMF_FILENAME "ESMC_Base.C"
 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.68 2006/02/09 16:58:13 svasquez Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.69 2006/11/16 05:20:55 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter

@@ -1,12 +1,12 @@
-// $Id: ESMC_FieldComm.h,v 1.1 2004/01/26 17:43:59 nscollins Exp $
+// $Id: ESMC_FieldComm.h,v 1.2 2006/11/16 05:20:56 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMC FieldComm include file for C++
 

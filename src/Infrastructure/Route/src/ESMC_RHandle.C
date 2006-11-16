@@ -1,12 +1,12 @@
-// $Id: ESMC_RHandle.C,v 1.12 2006/04/24 21:29:42 theurich Exp $
+// $Id: ESMC_RHandle.C,v 1.13 2006/11/16 05:21:16 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMC RHandle method implementation (body) file
 #define ESMF_FILENAME "ESMC_RHandle.C"
@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-       "$Id: ESMC_RHandle.C,v 1.12 2006/04/24 21:29:42 theurich Exp $";
+       "$Id: ESMC_RHandle.C,v 1.13 2006/11/16 05:21:16 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //

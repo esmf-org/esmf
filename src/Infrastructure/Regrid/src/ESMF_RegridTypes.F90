@@ -1,12 +1,12 @@
-! $Id: ESMF_RegridTypes.F90,v 1.82 2006/04/04 23:47:48 theurich Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.83 2006/11/16 05:21:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 !
@@ -263,7 +263,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.82 2006/04/04 23:47:48 theurich Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.83 2006/11/16 05:21:15 cdeluca Exp $'
 
 !==============================================================================
 !

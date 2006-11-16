@@ -1,12 +1,12 @@
-// $Id: ESMC_Util.h,v 1.15 2006/10/18 17:52:02 samsoncheung Exp $
+// $Id: ESMC_Util.h,v 1.16 2006/11/16 05:21:21 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2005, University Corporation for Atmospheric Research,
+// Copyright 2002-2008, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 // ESMF Util C++ declaration include file
 //

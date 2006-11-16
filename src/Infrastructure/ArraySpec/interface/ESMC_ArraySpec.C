@@ -1,10 +1,10 @@
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMC ArraySpec method implementation (body) file
 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArraySpec.C,v 1.3 2006/02/17 16:40:00 nscollins Exp $";
+            "$Id: ESMC_ArraySpec.C,v 1.4 2006/11/16 05:20:55 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //

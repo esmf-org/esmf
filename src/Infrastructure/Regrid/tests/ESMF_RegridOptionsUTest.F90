@@ -1,12 +1,12 @@
-! $Id: ESMF_RegridOptionsUTest.F90,v 1.7 2006/04/19 21:31:04 samsoncheung Exp $
+! $Id: ESMF_RegridOptionsUTest.F90,v 1.8 2006/11/16 05:21:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2005, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 !
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_RegridOptionsUTest.F90,v 1.7 2006/04/19 21:31:04 samsoncheung Exp $'
+      '$Id: ESMF_RegridOptionsUTest.F90,v 1.8 2006/11/16 05:21:15 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"

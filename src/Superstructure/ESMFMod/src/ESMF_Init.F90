@@ -1,12 +1,12 @@
-! $Id: ESMF_Init.F90,v 1.39 2006/10/27 20:35:04 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.40 2006/11/16 05:21:24 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 #define ESMF_FILENAME "ESMF_Init.F90"
