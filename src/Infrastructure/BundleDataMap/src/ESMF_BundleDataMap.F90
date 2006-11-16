@@ -1,7 +1,7 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.26.4.1 2006/11/16 00:15:22 cdeluca Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.26.4.2 2006/11/16 06:14:34 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2008, University Corporation for Atmospheric Research, 
+! Copyright 2002-2006, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -110,7 +110,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.26.4.1 2006/11/16 00:15:22 cdeluca Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.26.4.2 2006/11/16 06:14:34 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
