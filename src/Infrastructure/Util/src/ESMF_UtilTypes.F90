@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.31 2006/11/16 17:44:07 cdeluca Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.32 2006/11/16 20:22:27 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -526,7 +526,7 @@
       public ESMF_ID_CALENDAR, ESMF_ID_TIMEINTERVAL, ESMF_ID_ALARM
       public ESMF_ID_CLOCK, ESMF_ID_ARRAYSPEC, ESMF_ID_LOCALARRAY
       public ESMF_ID_ARRAYDATAMAP, ESMF_ID_VM, ESMF_ID_DELAYOUT
-      public ESMF_ID_CONFIG, ESMF_ID_PERFPROF, ESMF_ID_ARRAY
+      public ESMF_ID_CONFIG, ESMF_ID_ARRAY
       public ESMF_ID_INTERNARRAY, ESMF_ID_INTERNDG
       public ESMF_ID_PHYSGRID, ESMF_ID_GRID, ESMF_ID_EXCHANGEPACKET
       public ESMF_ID_COMMTABLE, ESMF_ID_ROUTETABLE, ESMF_ID_ROUTE
