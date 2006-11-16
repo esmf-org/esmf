@@ -1,4 +1,4 @@
-// $Id: ESMC.h,v 1.8 2006/11/16 05:21:24 cdeluca Exp $
+// $Id: ESMC.h,v 1.9 2006/11/16 07:06:36 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -60,7 +60,6 @@
 #include "ESMC_InternArrayComm.h"
 
 // components and related items
-#include "ESMC_Xform.h"
 #include "ESMC_State.h"
 #include "ESMC_FTable.h"
 #include "ESMC_Comp.h"

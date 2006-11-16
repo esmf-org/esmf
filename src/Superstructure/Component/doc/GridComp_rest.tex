@@ -1,4 +1,4 @@
-% $Id: GridComp_rest.tex,v 1.5 2006/11/16 05:21:23 cdeluca Exp $
+% $Id: GridComp_rest.tex,v 1.6 2006/11/16 07:06:36 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -16,11 +16,6 @@
 {\tt ESMF\_State} objects.  The input data are available at the time 
 the user Component code is called, and data to be returned to another 
 Component are available when that code returns.  
-{\tt ESMF\_Xform} objects provide a way for
-a Component to prepare data to be transformed and 
-sent to another Component from within the execution of 
-the user Component code.
-Transforms are not implemented in this version of the framework.
 
 \item {\bf Data isolation.} 
 Gridded Components must only communicate with other

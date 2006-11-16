@@ -1,4 +1,4 @@
-% $Id: CplComp_rest.tex,v 1.5 2006/11/16 05:21:23 cdeluca Exp $
+% $Id: CplComp_rest.tex,v 1.6 2006/11/16 07:06:36 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -15,11 +15,7 @@
 \item {\bf No Transforms.}  Components must exchange data through 
 {\tt ESMF\_State} objects.  The input data are available at the time 
 the component code is called, and data to be returned to another 
-component are available
-when that code returns.  {\tt ESMF\_Xform} objects provide a way for
-a component to prepare data to be transformed and sent to another 
-component from within the execution of the component code.
-Transforms are not implemented in this version of the framework.
+component are available when that code returns.  
 
 \item {\bf No automatic unit conversions.}  The ESMF framework does not 
 currently contain tools for performing unit conversions, operations that 

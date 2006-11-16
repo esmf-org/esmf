@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2004/03/18 18:36:15 nscollins Exp $ 
+# $Id: makefile,v 1.15 2006/11/16 07:06:36 cdeluca Exp $ 
 
 ALL: build_here
 
@@ -9,7 +9,7 @@ include $(ESMF_DIR)/makefile
 # The ESMF_Mod file is currently in the Component/src directory,
 # since this is the last to get built.
 
-DIRS     =  Xform State Component ESMFMod AppDriver
+DIRS     =  State Component ESMFMod AppDriver
 
 CLEANDIRS   =
 CLEANFILES  =

@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.95 2006/11/16 05:21:25 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.96 2006/11/16 07:06:36 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,6 @@
       use ESMF_InternArrayGetMod
       use ESMF_FieldMod
       use ESMF_BundleMod
-      use ESMF_XformMod
       use ESMF_StateTypesMod
       implicit none
 
@@ -68,10 +67,6 @@
       !public ESMF_State{Get/Set}Ready    ! is data ready
       !public ESMF_State{Get/Set}Valid    ! has data been validated?
       !public ESMF_State{Get/Set}CompName ! normally set at create time
-
-      public ESMF_StateTransform          ! execute xform on a state
-      !public ESMF_StateTransformComplete ! is export state ok to update?
-      ! TODO: this needs to be renamed.
       !public ESMF_StateValidate          ! is import state ready to read?
  
       public ESMF_StateSetAttribute       ! Set and Get Attributes
@@ -92,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.95 2006/11/16 05:21:25 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.96 2006/11/16 07:06:36 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -3932,63 +3927,6 @@ end interface
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateValidate
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateTransform"
-!BOPI
-! !IROUTINE: ESMF_StateTransform - Apply a Transform to State Data
-!
-! !INTERFACE:
-      subroutine ESMF_StateTransform(state, xformname, xform, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state 
-      character(len=*), intent(in) :: xformname
-      type(ESMF_Xform), dimension(:), intent(in) :: xform
-      integer, intent(out), optional :: rc            
-!
-! !DESCRIPTION:
-!  Apply an {\tt ESMF\_Transform} to an {\tt ESMF\_State}.  
-!  This routine is intended to be called
-!  from within an {\tt ESMF\_Component} when it is not practical 
-!  to return to the
-!  calling layer in order to do the coupling directly.  
-!  This call 
-!  passes through the framework back into user-written coupling code
-!  to allow exchange of data between {\tt ESMF\_Component}s.  
-!  It returns back to
-!  the calling location and allows the {\tt ESMF\_Component} to continue 
-!  execution from that place.  
-!  {\tt ESMF\_Component}s which run in sequential mode have no need to use
-!  this routine; Coupling code is called after an {\tt ESMF\_Component}
-!  returns to the calling code.
-!
-!     The arguments are:
-!     \begin{description}     
-!     \item[state]
-!       {\tt ESMF\_State} to apply {\tt ESMF\_Xform} to.
-!     \item[xformname]
-!       {\tt ESMF\_Xform} name to be called.
-!     \item[xform]
-!       {\tt ESMF\_Xform} object to be applied..
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-!
-! TODO: code goes here
-!
-
-        ! This is a wrapper which turns around and calls into the
-        ! transform code to execute the callback.
-
-        if (present(rc)) rc = ESMF_FAILURE
-
-        end subroutine ESMF_StateTransform
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

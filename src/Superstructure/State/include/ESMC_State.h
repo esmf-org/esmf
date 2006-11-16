@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.8 2006/11/16 05:21:25 cdeluca Exp $
+// $Id: ESMC_State.h,v 1.9 2006/11/16 07:06:36 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -45,7 +45,6 @@
 #include "ESMC_InternArray.h"
 #include "ESMC_Field.h"
 #include "ESMC_Bundle.h"
-#include "ESMC_Xform.h"
 
 
 // !PUBLIC TYPES:
@@ -82,8 +81,6 @@ typedef enum ESMC_Ready { ReadyToRead=1, ReadyToWrite=2 } ESMC_Ready;
     //int ESMC_StateGet<Value>(<value type> *value) const;
     //int ESMC_StateSet<Value>(<value type>  value);
     
-    int ESMC_StateTransform(ESMC_Xform *list);
-
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_StatePrint(const char *options) const;
 
@@ -163,7 +160,6 @@ typedef enum ESMC_Ready { ReadyToRead=1, ReadyToWrite=2 } ESMC_Ready;
       void FTN(f_esmf_stategetfield)(ESMC_State *state, char *name, ESMC_Field *field, int *rc);
       void FTN(f_esmf_stategetarray)(ESMC_State *state, char *name, ESMC_Array *array, int *rc);
       void FTN(f_esmf_stategetstate)(ESMC_State *state, char *name, nestedstate, int *rc);
-      void FTN(f_esmf_statetransform)(ESMC_State *state, xformchar *name, xform, int *rc);
       void FTN(f_esmf_statewriterestart)(ESMC_State *state, iospec, int *rc);
       void FTN(f_esmf_statereadrestart)(char *name, iospec, int *rc);
       void FTN(f_esmf_statevalidate)(ESMC_State *state, char *options, int *rc);

@@ -1,4 +1,4 @@
-// $Id: ESMC_State.C,v 1.6 2006/11/16 05:21:25 cdeluca Exp $
+// $Id: ESMC_State.C,v 1.7 2006/11/16 07:06:36 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.6 2006/11/16 05:21:25 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.7 2006/11/16 07:06:36 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -251,33 +251,6 @@
     return ESMF_FAILURE;
 
  } // end ESMC_StateValidate
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_StateTransform - execute a State transformation
-//
-// !INTERFACE:
-      int ESMC_State::ESMC_StateTransform(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_Xform *list) {             // in - list of transforms to execute
-//
-// !DESCRIPTION:
-//     Executes a precomputed list of transformations on an {\tt ESMF\_State}.
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-//
-//  code goes here
-//
-    return ESMF_FAILURE;
-
- } // end ESMC_StateTransform
 
 
 //-----------------------------------------------------------------------------
