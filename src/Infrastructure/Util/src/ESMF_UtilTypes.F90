@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.30 2006/11/16 05:21:21 cdeluca Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.31 2006/11/16 17:44:07 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -232,7 +232,6 @@
          ESMF_ID_VM = ESMF_ObjectID(12, "ESMF_VM"), &
          ESMF_ID_DELAYOUT = ESMF_ObjectID(13, "ESMF_DELayout"), &
          ESMF_ID_CONFIG = ESMF_ObjectID(14, "ESMF_Config"), &
-         ESMF_ID_PERFPROF = ESMF_ObjectID(15, "ESMF_PerfProf"), &
          ESMF_ID_ARRAY = ESMF_ObjectID(16, "ESMF_Array"), &
          ESMF_ID_INTERNDG = ESMF_ObjectID(17, "ESMF_InternDG"), &
          ESMF_ID_PHYSGRID = ESMF_ObjectID(18, "ESMF_PhysGrid"), &

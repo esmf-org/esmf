@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.74 2006/04/13 23:00:17 theurich Exp $ 
+# $Id: makefile,v 1.75 2006/11/16 17:44:07 cdeluca Exp $ 
 
 ALL: build_here
 
@@ -8,7 +8,7 @@ include $(ESMF_DIR)/makefile
 
 
 DIRS     =	stubs Util Base IOSpec LogErr IO TimeMgr VM DELayout \
-                Config PerfProf InternDG ArraySpec LocalArray \
+                Config InternDG ArraySpec LocalArray \
                 InternArray PhysGrid Grid Route FieldDataMap \
                 InternArrayComm Field BundleDataMap Bundle \
                 Regrid FieldComm BundleComm \
