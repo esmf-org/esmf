@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.32 2006/11/15 00:31:07 theurich Exp $
+#  $Id: common.mk,v 1.155.2.33 2006/11/16 19:06:12 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -89,9 +89,7 @@ $(error Deprecated environment variable ESMF_H_INSTALL detected. Please see READ
 endif
 
 #-------------------------------------------------------------------------------
-# If environment variables are not set give them literal value "default".
-# The following lists _all_ valid environment variables except ESMF_DIR
-# which has been set by this point in main makefile.
+# Set defaults for environment variables that are not set
 #-------------------------------------------------------------------------------
 
 ifndef ESMF_BUILD
@@ -135,7 +133,7 @@ export ESMF_SITE = default
 endif
 
 ifndef ESMF_PTHREADS
-export ESMF_PTHREADS = default
+export ESMF_PTHREADS = $(ESMF_PTHREADSDEFAULT)
 endif
 
 ifndef ESMF_TESTWITHTHREADS
@@ -218,10 +216,6 @@ endif
 
 ifneq ($(ESMF_EXHAUSTIVE),ON)
 export ESMF_EXHAUSTIVE = OFF
-endif
-
-ifneq ($(ESMF_PTHREADS),OFF)
-export ESMF_PTHREADS = ON
 endif
 
 ifneq ($(ESMF_TESTWITHTHREADS),ON)
@@ -397,6 +391,8 @@ endif
 # the ESMF_xxxDEFAULT values are only used if ESMF_xxx is not defined in
 # user's environment.
 #-------------------------------------------------------------------------------
+ESMF_PTHREADSDEFAULT        = ON
+
 ESMF_ARDEFAULT              = ar
 ESMF_ARCREATEFLAGSDEFAULT   = cr
 ESMF_AREXTRACTFLAGSDEFAULT  = -x
