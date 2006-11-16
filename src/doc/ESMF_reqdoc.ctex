@@ -1,4 +1,4 @@
-% $Id: ESMF_reqdoc.ctex,v 1.20 2006/11/16 17:44:08 cdeluca Exp $
+% $Id: ESMF_reqdoc.ctex,v 1.21 2006/11/16 18:53:15 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -119,21 +119,6 @@
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 #include "../Superstructure/Component/doc/Coupler_reqdoc.ctex"
-
-%================================================================================
-
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Fields}
-\end{htmlonly}
-\part{Infrastructure Fields and Grids: Fields}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-#include "../Infrastructure/Field/doc/Field_reqdoc.ctex"
 
 %================================================================================
 

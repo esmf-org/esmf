@@ -51,7 +51,8 @@ numerical and computational methods.
   are associated with the same physical grid and are distributed in a similar 
   fashion across the same physical axes.  Fields within a Bundle may be
   staggered differently and may have different dimensions. 
-  See also \htmlref{Field}{glos:Field}. 
+  See also \htmlref{Field}{glos:Field}, \htmlref{Packed Bundle}{glos:PackedBundle},
+  \htmlref{Loose Bundle}{glos:LooseBundle}. 
 
 \label{glos:Calendar}
 \item[Calendar] Calendar is an ESMF class that 
@@ -230,10 +231,14 @@ are in the \htmladdnormallink{ESMF Project Plan}{http://www.esmf.ucar.edu/esmf\_
   See also \htmlref{State}{glos:State}, \htmlref{import State}{glos:ImportState}.
 
 \label{glos:Field} 
-\item[Field] The ESMF Field class represents a physical quantity
-  defined within a region of space.  A Field includes a Grid 
-  and any metadata necessary for a full description of its data.
-  See also \htmlref{Grid}{glos:Grid}.
+\item[Field] The ESMF Field class represents a tangible or derived quantity
+defined within a continuous region of space.  The Field class includes
+the physical grid associated with the quantity and a decomposition
+that specifies how data associated with points in the 
+physical grid are distributed in computer memory and/or how computational 
+work is divided among threads.  A Field also includes a specification 
+of gridpoint staggering and any metadata necessary for a full description
+of its data.  See also \htmlref{Grid}{glos:Grid}.
 
 \label{glos:Framework} 
 \item[Framework] We use the term framework to 

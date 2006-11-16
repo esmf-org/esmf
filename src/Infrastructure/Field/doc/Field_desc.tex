@@ -1,23 +1,27 @@
-% $Id: Field_desc.tex,v 1.3 2004/03/16 00:04:10 cdeluca Exp $
+% $Id: Field_desc.tex,v 1.4 2006/11/16 18:53:15 cdeluca Exp $
 
-A Field represents a scalar physical field, such as temperature.  
+An ESMF Field represents a physical field, such as temperature.
+The motivation for including Fields in ESMF is that bundles of 
+Fields are the entities that are normally exchanged when coupling
+Components.
+  
+The ESMF Field class contains discretized field data, a reference 
+to its associated grid, and metadata.  The Field class maintains the
+relationship of how a data array maps onto a grid (e.g. one item per
+cell located at the cell center, one item per cell located at the NW
+corner,  one item per cell vertex).  This means that different Fields
+which are on the same underlying ESMF Grid but have different
+staggerings can share the same Grid object without needing to replicate
+it multiple times. 
+
 ESMF does not currently support vector fields, so the components of 
-a vector field must be stored as separate Field objects.  The 
-ESMF Field class contains the discretized field data, a reference 
-to its associated grid, and metadata.  
-
-The Field class maintains the relationship of
-how data maps onto the Grid (e.g. one item per cell located at
-the cell center, one item per cell located at the NW corner, 
-one item per cell vertex, etc).  This means that different Fields
-which are on the same underlying Grid but have different
-mappings (staggerings) can share the same Grid object without
-needing to copy or replicate it multiple times. 
+a vector field must be stored as separate Field objects.  
 
 The Field class provides methods for initialization, setting and 
-retrieving data values, I/O, general data redistribution and regridding, 
+retrieving data values, general data redistribution and regridding, 
 standard communication methods such as gather and scatter, and 
-manipulation of attributes.
+manipulation of attributes.  Field methods are called from objects
+internal to the framework and can also be called from user code.
 
 
 
