@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2006/01/26 21:39:07 nscollins Exp $ 
+# $Id: makefile,v 1.15 2006/11/16 22:02:27 cdeluca Exp $ 
 
 ALL: onedoc
 
@@ -15,15 +15,12 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/PhysGrid/doc
 
 DVIFILES  = 	PhysGrid_reqdoc.dvi \
-		PhysGrid_desdoc.dvi \
 		PhysGrid_refdoc.dvi
 
 PDFFILES  =     ${ESMC_DOCDIR}/PhysGrid_reqdoc.pdf \
-		${ESMC_DOCDIR}/PhysGrid_desdoc.pdf \
 		${ESMC_DOCDIR}/PhysGrid_refdoc.pdf
 
 HTMLFILES = 	${ESMC_DOCDIR}/PhysGrid_reqdoc \
-		${ESMC_DOCDIR}/PhysGrid_desdoc \
 		${ESMC_DOCDIR}/PhysGrid_refdoc
 
 #
@@ -56,9 +53,9 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = PhysGrid_reqdoc PhysGrid_desdoc PhysGrid_refdoc $(HTMLFILES)
+CLEANDIRS   = PhysGrid_reqdoc PhysGrid_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              PhysGrid_desdoc.tex PhysGrid_reqdoc.tex PhysGrid_refdoc.tex  \
+              PhysGrid_reqdoc.tex PhysGrid_refdoc.tex  \
               $(PDFFILES)
 CLOBBERDIRS =
 

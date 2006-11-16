@@ -1,4 +1,4 @@
-% $Id: ESMF_reqdoc.ctex,v 1.22 2006/11/16 19:52:23 cdeluca Exp $
+% $Id: ESMF_reqdoc.ctex,v 1.23 2006/11/16 22:02:28 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -119,38 +119,6 @@
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 #include "../Superstructure/Component/doc/Coupler_reqdoc.ctex"
-
-%================================================================================
-
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Physical Grids}
-\end{htmlonly}
-\part{Infrastructure Fields and Grids: Physical Grids}
-\label{part:Infrastructure_Fields_and_Grids:_Physical_Grids}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-#include "../Infrastructure/PhysGrid/doc/PhysGrid_reqdoc.ctex"
-
-%================================================================================
-
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Distributed Grids}
-\end{htmlonly}
-\part{Infrastructure Fields and Grids: Distributed Grids}
-\label{part:Infrastructure_Fields_and_Grids:_Distributed_Grids}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-#include "../Infrastructure/DistGrid/doc/DistGrid_reqdoc.ctex"
 
 %================================================================================
 
