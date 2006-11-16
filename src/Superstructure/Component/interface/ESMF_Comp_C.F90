@@ -1,12 +1,12 @@
-!  $Id: ESMF_Comp_C.F90,v 1.11 2004/01/27 18:05:46 nscollins Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.32.2.1 2006/11/16 00:15:54 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 !
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.11 2004/01/27 18:05:46 nscollins Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.32.2.1 2006/11/16 00:15:54 cdeluca Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -39,161 +39,282 @@
 ! 
 !EOP
 !------------------------------------------------------------------------------
-   subroutine f_esmf_frameworkinitialize(lang, rc)
+
+
+   recursive subroutine f_esmf_compsetvminfo(comp, vm_info, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
+       use ESMF_VMMod
+
+       type(ESMF_CWrap)   :: comp
+       type(ESMF_Pointer) :: vm_info
+       integer            :: rc
+
+       call ESMF_CompSet(compp=comp%compp, vm_info=vm_info, rc=rc)
+
+   end subroutine f_esmf_compsetvminfo
+
+   recursive subroutine f_esmf_compgetvmparent(comp, vm_parent, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
+       use ESMF_VMMod
+
+       type(ESMF_CWrap) :: comp
+       type(ESMF_VM)    :: vm_parent
+       integer          :: rc
+
+       call ESMF_CompGet(compp=comp%compp, vm_parent=vm_parent, rc=rc)
+
+   end subroutine f_esmf_compgetvmparent
+
+   recursive subroutine f_esmf_compgetvmplan(comp, vmplan, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
+       use ESMF_VMMod
+
+       type(ESMF_CWrap)   :: comp
+       type(ESMF_VMPlan)  :: vmplan
+       integer            :: rc
+
+       call ESMF_CompGet(compp=comp%compp, vmplan=vmplan, rc=rc)
+
+   end subroutine f_esmf_compgetvmplan
+
+   recursive subroutine f_esmf_compinsertvm(comp, vm, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
+       use ESMF_VMMod
+
+       type(ESMF_CWrap) :: comp
+       type(ESMF_VM)    :: vm
+       integer          :: rc
+
+       call ESMF_CompSet(compp=comp%compp, vm=vm, rc=rc)
+
+   end subroutine f_esmf_compinsertvm
+
+   recursive subroutine f_esmf_compget(comp, ctype, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
 
-       integer :: lang
+       type(ESMF_CWrap) :: comp
+       type(ESMF_CompType) :: ctype
        integer :: rc
 
-       call ESMF_FrameworkInternalInit(lang, rc)
+       call ESMF_CompGet(comp%compp, ctype=ctype, rc=rc)
 
-   end subroutine f_esmf_frameworkinitialize
+   end subroutine f_esmf_compget
 
-   subroutine f_esmf_frameworkfinalize(rc)
+   recursive subroutine f_esmf_compreplicate(comp, comp_src, vm, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
+       use ESMF_VMMod
 
+       type(ESMF_CWrap) :: comp
+       type(ESMF_CWrap) :: comp_src
+       type(ESMF_VM)    :: vm
        integer :: rc
 
-       call ESMF_Finalize(rc)
+       type (ESMF_CompClass), pointer :: compclass  
+       
+       nullify(comp%compp)
+       nullify(compclass)
+       allocate(compclass)
+       compclass = comp_src%compp
+       call ESMF_CompSet(compclass, vm=vm)
+       comp%compp => compclass
 
-   end subroutine f_esmf_frameworkfinalize
+   end subroutine f_esmf_compreplicate
 
+   recursive subroutine f_esmf_compcopy(comp, comp_src, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
+       use ESMF_VMMod
 
-!------------------------------------------------------------------------------
+       type(ESMF_CWrap) :: comp_src
+       type(ESMF_CWrap) :: comp
+       integer :: rc
 
-   subroutine f_esmf_gridcompcreate(gcomp, name, layout, mtype, grid, clock, &
-                                     config, configfile, rc)
-       !use ESMF_BaseMod    ! ESMF base class
+       type (ESMF_CompClass), pointer :: compclass_src, compclass
+       
+       compclass_src => comp_src%compp
+       compclass => comp%compp
+       compclass = compclass_src
+
+   end subroutine f_esmf_compcopy
+
+   recursive subroutine f_esmf_compdelete(comp, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
+       
+       type(ESMF_CWrap) :: comp
+       integer :: rc
+       
+       deallocate(comp%compp)
+       nullify(comp%compp)
+       
+   end subroutine f_esmf_compdelete
+
+   subroutine f_esmf_gridcompcreate(gcomp, name, mtype, grid, &
+                                     config, configFile, clock, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
        use ESMF_ConfigMod
-       use ESMF_DELayoutMod
        use ESMF_ClockMod
        use ESMF_GridTypesMod
-       use ESMF_GridCompMod
        use ESMF_CompMod
+       use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: gcomp
-       character(len=*) :: name
-       type(ESMF_DELayout) :: layout
-       type(ESMF_ModelType) :: mtype
-       type(ESMF_Grid) :: grid
-       type(ESMF_Clock) :: clock
-       type(ESMF_Config) :: config
-       character(len=*) :: configfile
-       integer :: rc
+       character(len=*), optional :: name
+       type(ESMF_GridCompType), optional :: mtype
+       type(ESMF_Grid), optional :: grid
+       type(ESMF_Config), optional :: config
+       character(len=*), optional :: configFile
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: rc
 
-       gcomp = ESMF_GridCompCreate(name, layout, mtype, grid, clock, &
-                                       config, configfile, rc)
+       gcomp = ESMF_GridCompCreate(name=name, gridcomptype=mtype, &
+         grid=grid, config=config, configFile=configFile, clock=clock, rc=rc)
     
    end subroutine f_esmf_gridcompcreate
 
    subroutine f_esmf_gridcompdestroy(comp, rc)
-       !use ESMF_BaseMod    ! ESMF base class
-       !use ESMF_CompMod
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp
-       integer :: rc              
+       integer, optional :: rc              
 
        call ESMF_GridCompDestroy(comp, rc)
     
    end subroutine f_esmf_gridcompdestroy
 
-   subroutine f_esmf_gridcompinitialize(comp, importstate, exportstate, &
-                                        clock, phase, rc)
-       !use ESMF_BaseMod    ! ESMF base class
+   subroutine f_esmf_gridcompinitialize(comp, importState, exportState, &
+                                        clock, phase, blockingFlag, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
-       type(ESMF_State) :: importstate
-       type(ESMF_State) :: exportstate
-       type(ESMF_Clock) :: clock
-       integer :: phase
-       integer :: rc     
+       type(ESMF_State), optional :: importState
+       type(ESMF_State), optional :: exportState
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: phase
+       type(ESMF_BlockingFlag), optional :: blockingFlag
+       integer, optional :: rc     
 
-       call ESMF_GridCompInitialize(comp, importstate, exportstate, &
-                                    clock, phase, rc)
+       call ESMF_GridCompInitialize(comp, importState, exportState, &
+                                    clock, phase, blockingFlag, rc)
 
    end subroutine f_esmf_gridcompinitialize
 
-   subroutine f_esmf_gridcomprun(comp, rc)
-       !use ESMF_BaseMod    ! ESMF base class
+   subroutine f_esmf_gridcomprun(comp, importState, exportState, &
+                                        clock, phase, blockingFlag, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
-       type(ESMF_State) :: importstate
-       type(ESMF_State) :: exportstate
-       type(ESMF_Clock) :: clock
-       integer :: phase
-       integer :: rc     
+       type(ESMF_State), optional :: importState
+       type(ESMF_State), optional :: exportState
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: phase
+       type(ESMF_BlockingFlag), optional :: blockingFlag
+       integer, optional :: rc     
 
-       call ESMF_GridCompRun(comp, importstate, exportstate, &
-                             clock, phase, rc)
+       call ESMF_GridCompRun(comp, importState, exportState, &
+                             clock, phase, blockingFlag, rc)
 
    end subroutine f_esmf_gridcomprun
 
-   subroutine f_esmf_gridcompfinalize(comp, rc)
-       !use ESMF_BaseMod    ! ESMF base class
+   subroutine f_esmf_gridcompfinalize(comp, importState, exportState, &
+                                        clock, phase, blockingFlag, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
-       type(ESMF_State) :: importstate
-       type(ESMF_State) :: exportstate
-       type(ESMF_Clock) :: clock
-       integer :: phase
-       integer :: rc     
+       type(ESMF_State), optional :: importState
+       type(ESMF_State), optional :: exportState
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: phase
+       type(ESMF_BlockingFlag), optional :: blockingFlag
+       integer, optional :: rc     
 
-       call ESMF_GridCompFinalize(comp, importstate, exportstate, &
-                                  clock, phase, rc)
+       call ESMF_GridCompFinalize(comp, importState, exportState, &
+                                  clock, phase, blockingFlag, rc)
 
    end subroutine f_esmf_gridcompfinalize
  
    subroutine f_esmf_gridcompset(comp, rc)
-       !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
-       integer :: rc     
+       integer, optional :: rc     
 
        call ESMF_GridCompSet(comp)
 
    end subroutine f_esmf_gridcompset
  
    subroutine f_esmf_gridcompget(comp, rc)
-       !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
-       integer :: rc     
+       integer, optional :: rc     
 
        call ESMF_GridCompGet(comp)
 
    end subroutine f_esmf_gridcompget
 
    subroutine f_esmf_gridcompvalidate(comp, options, rc)
-       !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
-       character(len=*) :: options
-       integer :: rc     
+       character(len=*), optional :: options
+       integer, optional :: rc     
 
        call ESMF_GridCompValidate(comp, options, rc)
 
    end subroutine f_esmf_gridcompvalidate
 
    subroutine f_esmf_gridcompprint(comp, options, rc)
-       !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
-       character(len=*) :: options
-       integer :: rc     
+       character(len=*), optional :: options
+       integer, optional :: rc     
 
        call ESMF_GridCompPrint(comp, options, rc)
 
@@ -202,133 +323,153 @@
 
 !------------------------------------------------------------------------------
 
-   subroutine f_esmf_cplcompcreate(ccomp, name, layout, config, configfile, clock, rc)
-       !use ESMF_BaseMod    ! ESMF base class
-       use ESMF_DELayoutMod
+   subroutine f_esmf_cplcompcreate(ccomp, name, config, configFile, clock, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: ccomp
-       character(len=*) :: name
-       type(ESMF_DELayout) :: layout
-       type(ESMF_Config) :: config
-       character(len=*) :: configfile
-       type(ESMF_Clock) :: clock
-       integer :: rc
+       character(len=*), optional :: name
+       type(ESMF_Config), optional :: config
+       character(len=*), optional :: configFile
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: rc
 
-       ccomp = ESMF_CplCompCreate(name, layout, config, configfile, clock, rc)
+       ccomp = ESMF_CplCompCreate(name=name, config=config, &
+        configFile=configFile, clock=clock, rc=rc)
     
    end subroutine f_esmf_cplcompcreate
 
    subroutine f_esmf_cplcompdestroy(comp, rc)
-       !use ESMF_BaseMod    ! ESMF base class
-       !use ESMF_CompMod
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp
-       integer :: rc              
+       integer, optional :: rc              
 
        call ESMF_CplCompDestroy(comp, rc)
     
    end subroutine f_esmf_cplcompdestroy
 
-   subroutine f_esmf_cplcompinitialize(comp, importstate, exportstate, &
-                                        clock, phase, rc)
-       !use ESMF_BaseMod    ! ESMF base class
+   subroutine f_esmf_cplcompinitialize(comp, importState, exportState, &
+                                        clock, phase, blockingFlag, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
-       type(ESMF_State) :: importstate
-       type(ESMF_State) :: exportstate
-       type(ESMF_Clock) :: clock
-       integer :: phase
-       integer :: rc     
+       type(ESMF_State), optional :: importState
+       type(ESMF_State), optional :: exportState
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: phase
+       type(ESMF_BlockingFlag), optional :: blockingFlag
+       integer, optional :: rc     
 
-       call ESMF_CplCompInitialize(comp, importstate, exportstate, &
-                                    clock, phase, rc)
+       call ESMF_CplCompInitialize(comp, importState, exportState, &
+                                    clock, phase, blockingFlag, rc)
 
    end subroutine f_esmf_cplcompinitialize
 
-   subroutine f_esmf_cplcomprun(comp, rc)
-       !use ESMF_BaseMod    ! ESMF base class
+   subroutine f_esmf_cplcomprun(comp, importState, exportState, &
+                                        clock, phase, blockingFlag, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
-       type(ESMF_State) :: importstate
-       type(ESMF_State) :: exportstate
-       type(ESMF_Clock) :: clock
-       integer :: phase
-       integer :: rc     
+       type(ESMF_State), optional :: importState
+       type(ESMF_State), optional :: exportState
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: phase
+       type(ESMF_BlockingFlag), optional :: blockingFlag
+       integer, optional :: rc     
 
-       call ESMF_CplCompRun(comp, importstate, exportstate, &
-                             clock, phase, rc)
+       call ESMF_CplCompRun(comp, importState, exportState, &
+                             clock, phase, blockingFlag, rc)
 
    end subroutine f_esmf_cplcomprun
 
-   subroutine f_esmf_cplcompfinalize(comp, rc)
-       !use ESMF_BaseMod    ! ESMF base class
+   subroutine f_esmf_cplcompfinalize(comp, importState, exportState, &
+                                        clock, phase, blockingFlag, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
-       type(ESMF_State) :: importstate
-       type(ESMF_State) :: exportstate
-       type(ESMF_Clock) :: clock
-       integer :: phase
-       integer :: rc     
+       type(ESMF_State), optional :: importState
+       type(ESMF_State), optional :: exportState
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: phase
+       type(ESMF_BlockingFlag), optional :: blockingFlag
+       integer, optional :: rc     
 
-       call ESMF_CplCompFinalize(comp, importstate, exportstate, &
-                                  clock, phase, rc)
+       call ESMF_CplCompFinalize(comp, importState, exportState, &
+                                  clock, phase, blockingFlag, rc)
 
    end subroutine f_esmf_cplcompfinalize
  
    subroutine f_esmf_cplcompset(comp, rc)
-       !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
-       integer :: rc     
+       integer, optional :: rc     
 
        call ESMF_CplCompSet(comp)
 
    end subroutine f_esmf_cplcompset
  
    subroutine f_esmf_cplcompget(comp, rc)
-       !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
-       integer :: rc     
+       integer, optional :: rc     
 
        call ESMF_CplCompGet(comp)
 
    end subroutine f_esmf_cplcompget
 
    subroutine f_esmf_cplcompvalidate(comp, options, rc)
-       !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
-       character(len=*) :: options
-       integer :: rc     
+       character(len=*), optional :: options
+       integer, optional :: rc     
 
        call ESMF_CplCompValidate(comp, options, rc)
 
    end subroutine f_esmf_cplcompvalidate
 
    subroutine f_esmf_cplcompprint(comp, options, rc)
-       !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
-       character(len=*) :: options
-       integer :: rc     
+       character(len=*), optional :: options
+       integer, optional :: rc     
 
        call ESMF_CplCompPrint(comp, options, rc)
 

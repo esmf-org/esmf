@@ -1,12 +1,12 @@
-// $Id: ESMC_LocalArray_F.C,v 1.8 2004/02/11 19:51:24 nscollins Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.17.2.1 2006/11/16 00:15:34 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
 //
@@ -17,20 +17,26 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
+#include "ESMC_Start.h"
+#include "ESMC_Base.h"
+#include "ESMC_LogErr.h"
+#include "ESMC_LocalArray.h"
 #include <stdio.h>
 #include <string.h>
-#include <iostream.h>
-#include "ESMC.h"
-#include "ESMC_Base.h"
-#include "ESMC_LocalArray.h"
 //------------------------------------------------------------------------------
-//BOP
+//BOPI
 // !DESCRIPTION:
 //
 // The code in this file implements the inter-language code which allows F90 to
 // call C++ for supporting {\tt ESMC\_LocalArray} class functions.
 //
-//EOP
+//EOPI
+
+#ifdef ESMC_DATA_ADDR_NEEDS_INDIR
+#define XD *
+#else
+#define XD
+#endif
 
 // the interface subroutine names MUST be in lower case
 extern "C" {
@@ -60,7 +66,8 @@ char *name = NULL;
  
      void FTN(c_esmc_localarraysetinternal)(ESMC_LocalArray **ptr, 
                                struct c_F90ptr *fptr,
-                               void *base, int *counts,
+                               void XD *base, 
+                               int *counts,
                                int *lbounds, int *ubounds, int *offsets,
                                ESMC_Logical *contig, ESMC_Logical *dealloc,
                                int *status) {
@@ -69,7 +76,7 @@ char *name = NULL;
               *status = ESMF_FAILURE;
               return;
           }
-         *status = (*ptr)->ESMC_LocalArraySetInfo(fptr, base, counts, 
+         *status = (*ptr)->ESMC_LocalArraySetInfo(fptr, XD base, counts, 
                                                   lbounds, ubounds, offsets, 
                                                   contig, dealloc);
      }
@@ -89,7 +96,7 @@ char *name = NULL;
      }
 
      void FTN(c_esmc_localarraygetinfo)(ESMC_LocalArray **ptr, 
-                               void *base, int *counts,
+                               void **base, int *counts,
                                int *lbounds, int *ubounds, int *offsets,
                                int *status) {
       
@@ -187,12 +194,12 @@ char *name = NULL;
          *status = ESMC_LocalArrayDestroy(*ptr);
      }
 
-     void FTN(c_esmc_localarraysetbaseaddr)(ESMC_LocalArray **ptr, float *base, int *status) {
+     void FTN(c_esmc_localarraysetbaseaddr)(ESMC_LocalArray **ptr, void XD *base, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
           }
-          *status = (*ptr)->ESMC_LocalArraySetBaseAddr((void *)(base));
+          *status = (*ptr)->ESMC_LocalArraySetBaseAddr(XD base);
      }
 
      void FTN(c_esmc_localarraygetbaseaddr)(ESMC_LocalArray **ptr, float **base, int *status) {
@@ -302,30 +309,197 @@ char *name = NULL;
              delete[] filetemp;
      }
 
-     void FTN(c_esmf_sizeprint)(char *p1, char *p2, int *rank) {
-         int psize = (int)(p2 - p1);
+     // compare actual pointer size computed at run time, vs. the
+     // compile-time fixed size specified in ESMC_Conf.h
+     void FTN(c_esmf_f90ptrsizeprint)(char *p1, char *p2, int *rank, int *rc) {
+         int rsize = (int)(p2 - p1);
 
-         int bytes = ESMF_F90_PTR_BASE_SIZE;
+         int fixed = ESMF_F90_PTR_BASE_SIZE;
          for (int i=1; i<*rank; i++)
-             bytes += ESMF_F90_PTR_PLUS_RANK;
+             fixed += ESMF_F90_PTR_PLUS_RANK;
 
-         if (psize != bytes) {
-            printf("FAIL: rank %d=%d, computed=%d (diff=%d)\n",
-                             *rank, psize, bytes, psize-bytes);
+         if (rsize != fixed) {
+            printf("No Match: rank %d=%d, computed=%d (diff=%d)\n",
+                             *rank, fixed, rsize, rsize-fixed);
             printf(" full details: \n");
-            printf("  rank %d: actual size is %d bytes, computed size is %d bytes (diff=%d)\n", 
-                             *rank, psize, bytes, psize-bytes);
+            printf("  rank %d: compiled-in size is %d bytes, run-time computed size is %d bytes (diff=%d)\n", 
+                             *rank, fixed, rsize, rsize-fixed);
             printf("  in platform specific conf.h file, ESMF_F90_PTR_BASE_SIZE = %d\n",
                              ESMF_F90_PTR_BASE_SIZE);
             printf("  increment per rank ESMF_F90_PTR_PLUS_RANK = %d\n",
                              ESMF_F90_PTR_PLUS_RANK);
+
+            *rc = ESMF_FAILURE;
 ;
-         } else
-            printf("rank %d Fortran 90 pointer is %d bytes, matches computed size ok\n", 
-                          *rank, psize);
+         } else {
+            printf("Match: rank %d Fortran 90 pointer is %d bytes, matches computed size ok\n", 
+                          *rank, fixed);
+            *rc = ESMF_SUCCESS;
+         } 
      }
 
 
-};
+     // subtract 2 pointers and return the actual number of bytes between them.
+     void FTN(c_esmf_f90ptrsizeget)(char *p1, char *p2, int *psize, int *rc) {
+
+         if (psize)
+             *psize = (int)(p2 - p1);
+         if (rc)
+             *rc = ESMF_SUCCESS;
+     }
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_localarrayserialize"
+//BOP
+// !IROUTINE:  c_ESMC_LocalArraySerialize - Serialize LocalArray object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_localarrayserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_LocalArray **localarray,       // in - localarray object
+      char *buf,                // in/out - a byte stream buffer
+      int *length,              // in/out - number of allocated bytes
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Serialize the contents of a localarray object.
+//     Warning!!  Not completely implemented yet.
+//
+//EOP
+
+  if (!localarray) {
+    //printf("uninitialized LocalArray object\n");
+    ESMC_LogDefault.ESMC_LogWrite("LocalArray object uninitialized", ESMC_LOG_INFO);
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+
+  *rc = (*localarray)->ESMC_LocalArraySerialize(buf, length, offset);
+
+  return;
+
+}  // end c_ESMC_LocalArraySerialize
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_localarraydeserialize"
+//BOP
+// !IROUTINE:  c_ESMC_LocalArrayDeserialize - Deserialize LocalArray object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_localarraydeserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_LocalArray **localarray,       // in/out - empty localarray object to fill in
+      char *buf,                // in - byte stream buffer
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Deserialize the contents of a localarray object.
+//
+//EOP
+
+  // create a new localarray object to deserialize into
+  *localarray = new ESMC_LocalArray;
+
+  (*localarray)->ESMC_LocalArrayDeserialize(buf, offset);
+
+  if (rc) *rc = ESMF_SUCCESS;
+
+  return;
+
+}  // end c_ESMC_LocalArrayDeserialize
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_localarrayserializenodata"
+//BOP
+// !IROUTINE:  c_ESMC_LocalArraySerializeNoData - Serialize LocalArray object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_localarrayserializenodata)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_LocalArray **localarray,       // in - localarray object
+      char *buf,                // in/out - a byte stream buffer
+      int *length,              // in/out - number of allocated bytes
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Serialize the contents of a localarray object, without preserving
+//     the data values.
+//
+//EOP
+
+  if (!localarray) {
+    //printf("uninitialized LocalArray object\n");
+    ESMC_LogDefault.ESMC_LogWrite("LocalArray object uninitialized", ESMC_LOG_INFO);
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+
+  *rc = (*localarray)->ESMC_LocalArraySerializeNoData(buf, length, offset);
+
+  return;
+
+}  // end c_ESMC_LocalArraySerializeNoData
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_localarraydeserializenodata"
+//BOP
+// !IROUTINE:  c_ESMC_LocalArrayDeserializeNoData - Deserialize LocalArray object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_localarraydeserializenodata)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list.
+// 
+// !ARGUMENTS:
+      ESMC_LocalArray **localarray,       // in/out - empty localarray object to fill in
+      char *buf,                // in - byte stream buffer
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Deserialize the contents of a localarray object, without preserving
+//     any of the data (counts explicitly set to 0).
+//
+//EOP
+
+  // create a new localarray object to deserialize into
+  *localarray = new ESMC_LocalArray;
+
+  (*localarray)->ESMC_LocalArrayDeserializeNoData(buf, offset);
+
+  if (rc) *rc = ESMF_SUCCESS;
+
+  return;
+
+}  // end c_ESMC_LocalArrayDeserializeNoData
+
+
+#undef  ESMC_METHOD
+
+}
 
 

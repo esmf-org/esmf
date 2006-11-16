@@ -1,13 +1,13 @@
 #if 0
-$Id: ESMF_TimeMgr.inc,v 1.5 2004/02/11 21:50:09 eschwab Exp $
+$Id: ESMF_TimeMgr.inc,v 1.7.6.1 2006/11/16 00:15:44 cdeluca Exp $
  
 Earth System Modeling Framework
-Copyright 2002-2003, University Corporation for Atmospheric Research,
+Copyright 2002-2008, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 NASA Goddard Space Flight Center.
-Licensed under the GPL.
+Licensed under the University of Illinois-NCSA License.
 
 Do not have C++ or F90 style comments in here because this file is processed
 by both C++ and F90 compilers.
@@ -35,6 +35,6 @@ by both C++ and F90 compilers.
 #define SECONDS_PER_HOUR 3600
 #define SECONDS_PER_MINUTE 60
 
-#define MAX_ALARMS 100
+#define ESMF_ALARM_BLOCK_SIZE 200
 
 #endif

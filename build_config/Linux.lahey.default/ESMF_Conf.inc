@@ -1,19 +1,19 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.2 2004/03/04 17:02:16 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.3.8.1 2006/11/16 00:15:06 cdeluca Exp $
 
 Earth System Modeling Framework
-Copyright 2002-2003, University Corporation for Atmospheric Research,
+Copyright 2002-2008, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 NASA Goddard Space Flight Center.
-Licensed under the GPL.
+Licensed under the University of Illinois-NCSA License.
 #endif
 
 #if 0
-the lahey compiler doesn't seem to pass the base address of the data
+the lahey compiler does not seem to pass the base address of the data
 when an array is passed from fortran to a C++.  instead they provide
-an intrinsic which does return the base address i'm looking for.
+an intrinsic which does return the base address i am looking for.
 the default macro is defined before, so undefine it before redefining it.
 #endif
 

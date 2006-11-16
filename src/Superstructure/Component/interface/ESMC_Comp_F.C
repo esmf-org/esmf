@@ -1,32 +1,32 @@
-// $Id: ESMC_Comp_F.C,v 1.20 2004/03/15 20:43:26 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.37.2.1 2006/11/16 00:15:54 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
 //
 //==============================================================================
 //
 // This file contains Fortran interface code to link F90 and C++.
+#define ESMF_FILENAME "ESMC_Comp_F.C"
 //
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
 #include <stdio.h>
 #include <string.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 #include "ESMC_Base.h"
+#include "ESMC_LogErr.h"
 #include "ESMC_Comp.h"
 #include "ESMC_FTable.h"
 
-#ifdef ESMF_ENABLE_VM
 #include "ESMC_VM.h"
-#endif
 
 #include "trim.h"
 //------------------------------------------------------------------------------
@@ -42,70 +42,166 @@
 //EOP
 
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_SetTypedEP"
 static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase, 
                         int nstate, enum ftype ftype, void *func, int *status) {
      char *name;
-     int *tablerc = new int;
+     int *tablerc;
+     int localrc;
      void *f90comp = ptr;
-     ESMC_FTable *tabptr = **(ESMC_FTable***)ptr;
+     ESMC_FTable *tabptr;
 
+     //printf("ptr = 0x%08x\n", (unsigned long)ptr);
+     //printf("*ptr = 0x%08x\n", (unsigned long)(*(int*)ptr));
+     if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                              "null pointer found", status);
+        return;
+     }
+
+     tabptr = **(ESMC_FTable***)ptr;
+     //printf("tabptr = 0x%08x\n", (unsigned long)(tabptr));
      newtrim(tname, slen, phase, &nstate, &name);
          
      //printf("SetTypedEP: setting function name = '%s'\n", name);
-     if (ftype == FT_VOIDPINTP)
-         *status = (tabptr)->ESMC_FTableSetFuncPtr(name, func, f90comp, tablerc);
-     else
-         *status = (tabptr)->ESMC_FTableSetFuncPtr(name, func, ftype);
+     if (ftype == FT_VOIDPINTP) {
+         // TODO: same as the register routine - you cannot delete tablerc
+         // yet - you have to wait until the table is deleted, and then the
+         // table does not know which of the stored args can be deleted and
+         // which cannot.  maybe the args need to all be allocated and all
+         // nuked at table destroy time.
+         tablerc = new int;
+         localrc = (tabptr)->ESMC_FTableSetFuncPtr(name, func, f90comp, tablerc);
+     } else
+         localrc = (tabptr)->ESMC_FTableSetFuncPtr(name, func, ftype);
 
+     if (status) *status = localrc;
      delete[] name;
 }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GetDP"
 static void ESMC_GetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     char *name = "localdata";
     enum dtype dtype;
+    int localrc;
 
-    *status = (**ptr)->ESMC_FTableGetDataPtr(name, datap, &dtype);
+     //printf("ptr = 0x%08x\n", (unsigned long)ptr);
+     //printf("*ptr = 0x%08x\n", (unsigned long)(*(int*)ptr));
+    if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                              "null pointer found", status);
+       return;
+    }
+
+    localrc = (**ptr)->ESMC_FTableGetDataPtr(name, datap, &dtype);
+    if (status) *status = localrc;
 }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_SetDP"
 static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     char *name = "localdata";
     enum dtype dtype = DT_VOIDP;
+    int localrc;
 
-    *status = (**ptr)->ESMC_FTableSetDataPtr(name, *datap, dtype);
+     //printf("ptr = 0x%08x\n", (unsigned long)ptr);
+     //printf("*ptr = 0x%08x\n", (unsigned long)(*(int*)ptr));
+    if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                              "null pointer found", status);
+        return;
+    }
+
+    localrc = (**ptr)->ESMC_FTableSetDataPtr(name, *datap, dtype);
+    if (status) *status = localrc;
 }
 
+
+extern "C" {
+static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargo);
+}
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_SetServ"
 extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
-     int rc, funcrc;
-     int *tablerc = new int;
-     void *f90comp = ptr;
-     ESMC_FTable *tabptr = **(ESMC_FTable***)ptr;
+     int localrc, funcrc;
+     int *tablerc;
+     ESMC_Comp *f90comp = (ESMC_Comp *)ptr;
+     ESMC_FTable *tabptr;
      
+     if (status) *status = ESMF_SUCCESS;  // assume success 'till problems found
+
+     //printf("ptr = 0x%08x\n", (unsigned long)ptr);
+     //printf("*ptr = 0x%08x\n", (unsigned long)(*(int*)ptr));
+     //if ((ptr == ESMC_NULL_POINTER)) {
+     if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                              "null pointer found", status);
+        return;
+     }
+     tabptr = **(ESMC_FTable***)ptr;
+     //printf("tabptr = 0x%08x\n", (unsigned long)(tabptr));
+
      // TODO: shouldn't need to expand the table here - should be buried
      // inside ftable code.
-     rc = (tabptr)->ESMC_FTableExtend(8, 2); // room for 8 funcs, 2 data
-     if (rc != ESMF_SUCCESS) {
-         *status = rc;
+     localrc = (tabptr)->ESMC_FTableExtend(8, 2); // room for 8 funcs, 2 data
+     if (localrc != ESMF_SUCCESS) {
+         if (status) *status = localrc;
          return;
      }
 
-     rc = (tabptr)->ESMC_FTableSetFuncPtr("register", (void *)func, 
+     // TODO: this is going to cause a memory leak, because the 'tablerc'
+     // variable is actually stored in the jump table as one of the arguments.
+     // i believe it is used to call a subroutine which has a return code,
+     // but then that code is ignored.  so there are two problems here:
+     // how to return the error(s), and how to delete the integer when the
+     // table is destroyed.  for now, it is a leak; small, and only shows up
+     // when you delete a component which does not happen often, thankfully.
+     tablerc = new int;
+     localrc = (tabptr)->ESMC_FTableSetFuncPtr("register", (void *)func, 
                                                            f90comp, tablerc);
-     if (rc != ESMF_SUCCESS) {
-         *status = rc;
+
+     // TODO: decide what to do if tablerc comes back
+     // with an error.  for now, ignore it and look at localrc only.
+   
+     if (localrc != ESMF_SUCCESS) {
+         if (status) *status = localrc;
          return;
      }
 
-     rc = (tabptr)->ESMC_FTableCallVFuncPtr("register", &funcrc);
-     if (rc != ESMF_SUCCESS) {
-         *status = rc;
+     localrc = (tabptr)->ESMC_FTableCallVFuncPtr("register", &funcrc);
+     if (localrc != ESMF_SUCCESS) {
+         if (status) *status = localrc;
          return;
      }
 
      if (funcrc != ESMF_SUCCESS) {
-         *status = funcrc;
+         if (status) *status = funcrc;
          return;
      }
-     *status = ESMF_SUCCESS;
+
+     // time to startup the VM for this component...     
+     ESMC_VM *vm_parent;
+     FTN(f_esmf_compgetvmparent)(f90comp, &vm_parent, &localrc); //get vm_parent
+     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+       status)) return;
+     ESMC_VMPlan *vmplan_p;
+     FTN(f_esmf_compgetvmplan)(f90comp, &vmplan_p, &localrc);    //get vmplan_p
+     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+       status)) return;
+     // parent VM and plan for child can now be used to startup the child VM
+     void *vm_info = vm_parent->ESMC_VMStartup(vmplan_p,
+       ESMC_FTableCallEntryPointVMHop, NULL, &localrc);
+     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+       status)) return;
+     // keep vm_info in a safe place (in parent component) 'till it's used again
+     FTN(f_esmf_compsetvminfo)(f90comp, &vm_info, &localrc);
+     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+       status)) return;
+     // ...now the component's VM is started up and placed on hold.
+     
      return;
   
      // TODO:  see if it is possible to make this simpler and call directly:
@@ -171,17 +267,27 @@ extern "C" {
          ESMC_SetDP(ptr, datap, status);
      }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMF_UserCompSetInternalState"
      void FTN(esmf_usercompsetinternalstate)(ESMC_FTable ***ptr, char *name, 
                                          void **datap, int *status, int slen) {
          char *tbuf; 
          enum dtype dtype = DT_VOIDP;
+         int localrc;
+
+         if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                              "null pointer found", status);
+            return;
+         }
 
          newtrim(name, slen, NULL, NULL, &tbuf);
          //printf("after newtrim, name = '%s'\n", tbuf);
 
-         *status = (**ptr)->ESMC_FTableSetDataPtr(tbuf, *datap, dtype);
+         localrc = (**ptr)->ESMC_FTableSetDataPtr(tbuf, *datap, dtype);
   
          delete[] tbuf;
+         if (status) *status = localrc;
      }
 
      // ---------- Get Internal State ---------------
@@ -194,42 +300,146 @@ extern "C" {
          ESMC_GetDP(ptr, datap, status);
      }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMF_UserCompGetInternalState"
      void FTN(esmf_usercompgetinternalstate)(ESMC_FTable ***ptr, char *name,
                                          void **datap, int *status, int slen) {
          char *tbuf; 
          enum dtype dtype;
+         int localrc;
+
+         if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                              "null pointer found", status);
+            return;
+         }
 
          newtrim(name, slen, NULL, NULL, &tbuf);
          //printf("after newtrim, name = '%s'\n", tbuf);
 
-         *status = (**ptr)->ESMC_FTableGetDataPtr(tbuf, datap, &dtype);
+         localrc = (**ptr)->ESMC_FTableGetDataPtr(tbuf, datap, &dtype);
   
          delete[] tbuf;
+         if (status) *status = localrc;
      }
 
 }
 
 
-#ifdef ESMF_ENABLE_VM
-// these interface subroutine names MUST be in lower case
+// VM-enabled CallBack loop     
 extern "C" {
 
-  void FTN(c_esmc_compreturn)(
-    ESMC_VM **ptr_vm_parent,  // p2 to the parent VM
-    ESMC_VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
-    void **vm_info,           // p2 to member which holds info
-    void **vm_cargo,          // p2 to member which holds cargo
-    int *status){             // return error code in status
-    // Things get a little confusing here with pointers, so I will define
-    // some temp. variables that make matters a little clearer I hope:
-    ESMC_VM &vm_parent = **ptr_vm_parent;     // reference to parent VM
-    ESMC_VMPlan &vmplan = **ptr_vmplan;       // reference to VMPlan
-    // Now call the vmachine_exit function which will block respective PETs
-    vm_parent.vmachine_exit(vmplan, *vm_info);
-    cargotype *cargo = (cargotype *)*vm_cargo;
-    delete cargo;
-    *status = ESMF_SUCCESS;
-  }
-
+     
+static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargo){
+  // This routine is the first level that gets instantiated in new VM
+  // The first argument must be of type (void *) and points to a derived
+  // ESMC_VMK class object. The second argument is also of type (void *)
+  // and points to a cargotype structure.
+  
+  // pull out info from cargo
+  char *name = ((cargotype *)cargo)->name;              // name of callback
+  ESMC_FTable *ftable = ((cargotype *)cargo)->ftable;   // pointer to ftable
+  
+  int esmfrc;   // ESMF return code of ESMC_FTableCallVFuncPtr()
+  int userrc;   // user return code from the registered component method 
+  
+  // call into user code through ESMF function table...
+  esmfrc = ftable->ESMC_FTableCallVFuncPtr(name, (ESMC_VM*)vm, &userrc);
+  // ...back from user code
+  
+  // put the return codes into cargo 
+  // TODO: If this PET is part of a threadgroup that was spawned out of a
+  // single parent PET then return codes must be returned as a single value to
+  // the parent in the cargo structure (btw, each child PET that's a thread
+  // has the same pointer to cargo. Naturally the above must be done in a
+  // threadsafe manner :-). 
+  ((cargotype *)cargo)->esmfrc = esmfrc;
+  ((cargotype *)cargo)->esmfrc = userrc;
+  
+  return NULL;
 }
-#endif
+
+// call a function through VM
+void FTN(c_esmc_ftablecallentrypointvm)(
+  ESMC_VM **ptr_vm_parent,  // p2 to the parent VM
+  ESMC_VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
+  void **vm_info,           // p2 to member which holds info returned by enter
+  void **vm_cargo,          // p2 to member which holds cargo
+  ESMC_FTable **ptr,        // p2 to the ftable of this component
+  char *type,               // string holding type of called entry point
+  int *phase,               // phase selector
+  int *status,              // return error code in status
+  int slen) {               // additional F90 argument associated with type
+       
+  // local variables
+  int localrc;              // local return code
+  char *name;               // trimmed type string
+
+  newtrim(type, slen, phase, NULL, &name);
+
+  // Things get a little confusing here with pointers, so I will define
+  // some temp. variables that make matters a little clearer I hope:
+  ESMC_VM *vm_parent = *ptr_vm_parent;      // pointer to parent VM
+  ESMC_VMPlan *vmplan = *ptr_vmplan;        // pointer to VMPlan
+  ESMC_FTable *ftable = *ptr;               // pointer to function table
+         
+  cargotype *cargo = new cargotype;
+  strcpy(cargo->name, name);   // copy trimmed type string
+  cargo->ftable = ftable;      // pointer to function table
+  cargo->esmfrc = ESMF_SUCCESS;// initialize return code to SUCCESS for all PETs
+  cargo->userrc = ESMF_SUCCESS;// initialize return code to SUCCESS for all PETs
+  *vm_cargo=(void*)cargo;      // store pointer to the cargo structure
+
+  // enter the child VM -> resurface in ESMC_FTableCallEntryPointVMHop()
+  localrc = vm_parent->ESMC_VMEnter(vmplan, *vm_info, (void*)cargo);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, status);
+        
+  // ... if the child VM uses threads (multi-threading or single-threading) 
+  // then this parent PET continues running concurrently to the child PET in the
+  // same VAS! In that case the return codes in cargo are not valid here!
+  // The status returned by VMEnter() indicates that success of entering the
+  // child VM, not failure or success of the callback.
+  // The return code of the callback code will be valid in all cases (threading
+  // or no threading) _after_ VMWait() returns.
+  
+  delete[] name;  // delete memory that "newtrim" allocated above
+}
+
+void FTN(c_esmc_compwait)(
+  ESMC_VM **ptr_vm_parent,  // p2 to the parent VM
+  ESMC_VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
+  void **vm_info,           // p2 to member which holds info
+  void **vm_cargo,          // p2 to member which holds cargo
+  int *callrc,              // return code of the user component method
+  int *status) {            // return error code in status
+
+  // Things get a little confusing here with pointers, so I will define
+  // some temp. variables that make matters a little clearer I hope:
+  ESMC_VM *vm_parent = *ptr_vm_parent;        // pointer to parent VM
+  ESMC_VMPlan *vmplan = *ptr_vmplan;          // pointer to VMPlan
+  cargotype *cargo = (cargotype *)*vm_cargo;  // pointer to cargo
+  
+  // initialize the return codes to failure
+  *status = ESMF_FAILURE;   // return code of ESMF callback code
+  *callrc = ESMF_FAILURE;   // return code of registered user code
+
+  // Now call the vmk_exit function which will block respective PETs
+  vm_parent->vmk_exit(static_cast<ESMC_VMKPlan *>(vmplan), *vm_info);
+  
+  // return with errors if there is no cargo to obtain error codes
+  if (cargo == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "No cargo structure to obtain error codes", status);
+    return;
+  }
+  
+  // obtain return codes out of cargo
+  *status = cargo->esmfrc;
+  *callrc = cargo->userrc;
+  
+  // delete cargo structure
+  delete cargo;
+}
+
+  
+} // extern "C"

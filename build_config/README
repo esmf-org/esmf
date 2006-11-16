@@ -9,7 +9,7 @@
  Laboratory, University of Michigan, National Centers for Environmental
  Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
  NASA Goddard Space Flight Center.
- Licensed under the GNU GPL.
+ Licensed under the GNU University of Illinois-NCSA License.
 
 ================================================================================
 
@@ -59,4 +59,4 @@ Each default directory contains the following files:
                   system and contains specific settings for this platform.
 
 ================================================================================
- $Id: README,v 1.26.2.1 2006/08/16 20:09:11 theurich Exp $
+ $Id: README,v 1.26.2.2 2006/11/16 00:15:04 cdeluca Exp $

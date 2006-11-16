@@ -1,12 +1,12 @@
-// $Id: ESMC_XPacket_F.C,v 1.4 2003/09/22 22:29:14 nscollins Exp $
+// $Id: ESMC_XPacket_F.C,v 1.6.8.1 2006/11/16 00:15:42 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
 //
@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 #include <stdio.h>
 #include <string.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_XPacket.h"
 //------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ extern "C" {
        // keep this for shallow classes, get rid of create/destroy above
        //void FTN(c_esmc_xpacketinit)(ESMC_XPacket **ptr, int *arg1, int *arg2,
        //                                            int *arg3, int *status) {
-       //    *status = (*ptr)->ESMC_XPacketInit(*arg1, *arg2, *arg3);
+       //    *status = (*ptr)->ESMC_XPacketSetDefault(*arg1, *arg2, *arg3);
        //}
 
        //void FTN(c_esmc_xpacketget)(ESMC_XPacket **ptr, 

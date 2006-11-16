@@ -1,12 +1,12 @@
-// $Id: ESMC_classUTest.C,v 1.2 2003/03/17 17:40:05 nscollins Exp $
+// $Id: ESMC_classUTest.C,v 1.3.8.1 2006/11/16 00:15:08 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 //-----------------------------------------------------------------------------
 //BOP
@@ -25,7 +25,7 @@
 //
  // insert any higher level, 3rd party or system includes here
  #include <stdio.h>
- #include <ESMC.h>
+ #include <ESMC_Start.h>
 
  // associated class definition file
  #include <ESMC_<Class>.h>
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_classUTest.C,v 1.2 2003/03/17 17:40:05 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_classUTest.C,v 1.3.8.1 2006/11/16 00:15:08 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])

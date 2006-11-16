@@ -1,14 +1,15 @@
-! $Id: ESMF_CommTable.F90,v 1.3 2004/01/28 21:46:49 nscollins Exp $
+! $Id: ESMF_CommTable.F90,v 1.9.4.1 2006/11/16 00:15:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_CommTable.F90"
 !
 !     ESMF CommTable Module
       module ESMF_CommTableMod
@@ -21,9 +22,8 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include "ESMF.h"
-!!#include "ESMF_Route.h"
 !==============================================================================
-!BOP
+!BOPI
 ! !MODULE: ESMF_CommTableMod - One line general statement about this class
 !
 ! !DESCRIPTION:
@@ -35,6 +35,8 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
+      use ESMF_UtilTypesMod
+      use ESMF_LogErrMod
       use ESMF_BaseMod    ! ESMF base class
       implicit none
 
@@ -78,19 +80,19 @@
 ! < list the rest of the public interfaces here >
 !
 !
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CommTable.F90,v 1.3 2004/01/28 21:46:49 nscollins Exp $'
+      '$Id: ESMF_CommTable.F90,v 1.9.4.1 2006/11/16 00:15:42 cdeluca Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_CommTableCreate 
 
@@ -101,7 +103,7 @@
 !     This interface provides a single entry point for CommTable create
 !     methods.
 !
-!EOP
+!EOPI
       end interface 
 !
 !------------------------------------------------------------------------------
@@ -117,19 +119,20 @@
 ! This section includes the CommTable Create and Destroy methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CommTableCreateNew"
+!BOPI
 ! !IROUTINE: ESMF_CommTableCreateNew - Create a new CommTable
 
 ! !INTERFACE:
-      function ESMF_CommTableCreateNew(arg1, arg2, arg3, rc)
+      function ESMF_CommTableCreateNew(mypet, petcount, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_CommTable) :: ESMF_CommTableCreateNew
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: arg1                        
-      integer, intent(in) :: arg2                        
-      character (len = *), intent(in), optional :: arg3  
+      integer, intent(in) :: mypet
+      integer, intent(in) :: petcount
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -138,18 +141,15 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[arg1] 
-!          Argument 1.
-!     \item[arg2]
-!          Argument 2.         
-!     \item[{[arg3]}] 
-!          Argument 3.
+!     \item[mypet] 
+!          The local PET number.
+!     \item[petcount]
+!          The total PET count in this VM.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
+!EOPI
 
         ! local variables
         type (ESMF_CommTable) :: commtable     ! new C++ CommTable
@@ -168,11 +168,10 @@
         endif
 
         ! Call C++ create code
-        call c_ESMC_CommTableCreate(arg1, arg2, arg3, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "CommTable create error"
-          return  
-        endif
+        call c_ESMC_CommTableCreate(commtable, mypet, petcount, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Set return values
         ESMF_CommTableCreateNew = commtable
@@ -182,7 +181,9 @@
         end function ESMF_CommTableCreateNew
 
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CommTableDestroy"
+!BOPI
 ! !IROUTINE: ESMF_CommTableDestroy - Free all resources associated with a CommTable 
 
 ! !INTERFACE:
@@ -204,8 +205,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
-! !REQUIREMENTS: 
+!EOPI
 
         ! local variables
         integer :: status                  ! local error status
@@ -223,10 +223,9 @@
 
         ! Call C++ destroy code
         call c_ESMC_CommTableDestroy(commtable, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "CommTable create error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! nullify pointer
         commtable%this = ESMF_NULL_POINTER
@@ -237,7 +236,9 @@
 
 
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CommTableGet"
+!BOPI
 ! !IROUTINE: ESMF_CommTableGet - Get values from a CommTable
 
 ! !INTERFACE:
@@ -265,8 +266,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
-! !REQUIREMENTS: 
+!EOPI
 
         ! local variables
         integer :: status                  ! local error status
@@ -292,17 +292,18 @@
 
         ! Call C++  code
         call c_ESMC_CommTableGet(commtable, value1, value2, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "CommTable Get error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_CommTableGet
 
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CommTableSet"
+!BOPI
 ! !IROUTINE: ESMF_CommTableSet - Set values in a CommTable
 
 ! !INTERFACE:
@@ -331,8 +332,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
-! !REQUIREMENTS: 
+!EOPI
 
         ! local variables
         integer :: status                  ! local error status
@@ -358,17 +358,18 @@
 
         ! Call C++  code
         call c_ESMC_CommTableSet(commtable, value1, value2, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "CommTable Set error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_CommTableSet
 
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CommTableValidate"
+!BOPI
 ! !IROUTINE: ESMF_CommTableValidate - Check internal consistency of a CommTable
 
 ! !INTERFACE:
@@ -392,9 +393,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
-! !REQUIREMENTS:  XXXn.n, YYYn.n
-!
+!EOPI
+
        character (len=6) :: defaultopts      ! default validate options
        integer :: status                     ! local error status
        logical :: rcpresent
@@ -415,10 +415,9 @@
            call c_ESMC_CommTableValidate(commtable, defaultopts, status)
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "CommTable validate error"
-         return
-       endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS
@@ -426,7 +425,9 @@
        end subroutine ESMF_CommTableValidate
 
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CommTablePrint"
+!BOPI
 ! !IROUTINE: ESMF_CommTablePrint - Print the contents of a CommTable
 
 ! !INTERFACE:
@@ -451,8 +452,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
+!EOPI
 
        character (len=6) :: defaultopts      ! default print options
        integer :: status                     ! local error status
@@ -474,10 +474,9 @@
            call c_ESMC_CommTablePrint(commtable, defaultopts, status)
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "CommTable print error"
-         return
-       endif
+       if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS

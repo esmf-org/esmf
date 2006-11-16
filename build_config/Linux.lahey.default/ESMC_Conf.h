@@ -1,16 +1,16 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.2 2004/02/25 02:58:31 eschwab Exp $"
+"$Id: ESMC_Conf.h,v 1.4.2.1 2006/11/16 00:15:06 cdeluca Exp $"
 "Defines the configuration for this machine"
 #endif
 
 #if 0
 Earth System Modeling Framework
-Copyright 2002-2003, University Corporation for Atmospheric Research,
+Copyright 2002-2008, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 NASA Goddard Space Flight Center.
-Licensed under the GPL.
+Licensed under the University of Illinois-NCSA License.
 #endif
 
 #if !defined(INCLUDED_CONF_H)
@@ -36,7 +36,6 @@ Licensed under the GPL.
 
 #define ESMC_SUBSTITUTE_CTRL_CHARS 1
 
-#define ESMC_POINTER_SIZE 4
 #undef ESMC_HAVE_OMP_THREADS 
 
 #define ESMC_HAVE_MPI 1
@@ -58,18 +57,21 @@ Licensed under the GPL.
 #endif
 
 #define ESMC_HAVE_SYS_UTSNAME_H
-
 #define ESMC_PRESENT(arg) ( (arg) != 0 )
+
+#define ESMC_DATA_ADDR_NEEDS_INDIR 1
 
 #if S32
 #define ESMF_IS_32BIT_MACHINE 1
 #define ESMF_F90_PTR_BASE_SIZE 28
 #define ESMF_F90_PTR_PLUS_RANK 16
+#define ESMC_POINTER_SIZE 4
 #endif
 #if S64
 #define ESMF_IS_64BIT_MACHINE 1
 #define ESMF_F90_PTR_BASE_SIZE xx
 #define ESMF_F90_PTR_PLUS_RANK xx
+#define ESMC_POINTER_SIZE 8
 #endif
 
 #endif

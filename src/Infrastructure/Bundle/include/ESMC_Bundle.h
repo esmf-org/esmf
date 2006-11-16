@@ -1,12 +1,12 @@
-// $Id: ESMC_Bundle.h,v 1.2 2003/10/25 12:03:27 cdeluca Exp $
+// $Id: ESMC_Bundle.h,v 1.4.6.1 2006/11/16 00:15:20 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMF Bundle C++ declaration include file
 //
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
 // 
 // !USES:
-#include "ESMC.h"
+#include "ESMC_Start.h"
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
 
 // !PUBLIC TYPES:
@@ -43,6 +43,16 @@
 extern "C" {
    void FTN(f_esmf_bundlecreate)(ESMC_Bundle *, int *rc);
    void FTN(f_esmf_bundledestroy)(ESMC_Bundle *, int *rc);
+
+   void FTN(c_esmc_bundleserialize)(ESMC_Status *bundlestatus,
+              ESMC_Status *gridstatus, int *field_count, int *pack_flag,
+              void *mapping, ESMC_Status *iostatus,
+              void *buffer, int *length, int *offset, int *localrc);
+   void FTN(c_esmc_bundledeserialize)(ESMC_Status *bundlestatus,
+              ESMC_Status *gridstatus, int *field_count, int *pack_flag,
+              void *mapping, ESMC_Status *iostatus,
+              void *buffer, int *offset, int *localrc);
+
 };
 
  // class declaration type

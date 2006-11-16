@@ -1,12 +1,12 @@
-! $Id: ESMF_TimeIntervalType.F90,v 1.1 2004/03/10 03:02:19 eschwab Exp $
+! $Id: ESMF_TimeIntervalType.F90,v 1.5.4.1 2006/11/16 00:15:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 !
@@ -29,16 +29,16 @@
 ! !MODULE: ESMF_TimeIntervalTypeMod
 !
 ! !DESCRIPTION:
-! Part of Time Manager F90 API wrapper of C++ implemenation.
+! Part of Time Manager Fortran API wrapper of C++ implemenation.
 !
-! Defines F90 types for corresponding C++ class {\tt ESMC\_TimeInterval}.
+! Defines Fortran types for corresponding C++ class {\tt ESMC\_TimeInterval}.
 !
 ! See {\tt ../include/ESMC\_TimeInterval.h} for complete description.
 !
 !------------------------------------------------------------------------------
 ! !USES:
       ! inherit from ESMF base class
-      use ESMF_BaseMod
+      use ESMF_UtilTypesMod
 
       ! inherit from base time class
       use ESMF_BaseTimeMod
@@ -57,14 +57,14 @@
 !------------------------------------------------------------------------------
 !     ! ESMF_TimeInterval
 !
-!     ! F90 class type to match C++ TimeInterval class in size only;
+!     ! Fortran class type to match C++ TimeInterval class in size only;
 !     !  all dereferencing within class is performed by C++ implementation
 
 !     ! Equivalent sequence and kind to C++:
 
       type ESMF_TimeInterval
       sequence                             ! match C++ storage order
-      private                              !   (members opaque on F90 side)
+      private                              !   (members opaque on Fortran side)
         type(ESMF_BaseTime)   :: baseTime  ! inherit base class
         type(ESMF_Time)       :: startTime ! start time for absolute calendar
 !                                              intervals
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeIntervalType.F90,v 1.1 2004/03/10 03:02:19 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalType.F90,v 1.5.4.1 2006/11/16 00:15:45 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       end module ESMF_TimeIntervalTypeMod

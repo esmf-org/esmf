@@ -1,12 +1,12 @@
-// $Id: ESMC_Alarm_F.C,v 1.23 2004/02/25 03:04:46 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.27.4.1 2006/11/16 00:15:44 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
 //
@@ -17,7 +17,6 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <ESMC.h>
 #include <ESMC_F90Interface.h>
 #include <ESMC_Alarm.h>
 //------------------------------------------------------------------------------
@@ -103,15 +102,15 @@ extern "C" {
                 ESMC_TimeInterval *ringInterval, ESMC_Time *stopTime,
                 ESMC_TimeInterval *ringDuration, int *ringTimeStepCount,
                 int *timeStepRingingCount, ESMC_Time *ringBegin,
-                ESMC_Time *refTime, bool *ringing, bool *ringingOnPrevTimeStep,
-                bool *enabled, bool *sticky, int *status) {
+                ESMC_Time *ringEnd, ESMC_Time *refTime, bool *ringing,
+                bool *ringingOnPrevTimeStep, bool *enabled, bool *sticky,
+                int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_AlarmGet(
-                                           *nameLen, // always present
-                                                     //  internal argument.
-                                            tempNameLen, // always present
-                                                         //  internal argument.
-                    ESMC_NOT_PRESENT_FILTER(tempName),
+			                 // always presnet internal arguments
+                                           *nameLen, 
+                                            tempNameLen,
+                                            tempName,
                     ESMC_NOT_PRESENT_FILTER(clock),
                     ESMC_NOT_PRESENT_FILTER(ringTime),
                     ESMC_NOT_PRESENT_FILTER(prevRingTime),
@@ -121,6 +120,7 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(ringTimeStepCount),
                     ESMC_NOT_PRESENT_FILTER(timeStepRingingCount),
                     ESMC_NOT_PRESENT_FILTER(ringBegin),
+                    ESMC_NOT_PRESENT_FILTER(ringEnd),
                     ESMC_NOT_PRESENT_FILTER(refTime),
                     ESMC_NOT_PRESENT_FILTER(ringing),
                     ESMC_NOT_PRESENT_FILTER(ringingOnPrevTimeStep),

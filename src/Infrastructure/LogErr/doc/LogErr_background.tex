@@ -1,25 +1,36 @@
-% $Id: LogErr_background.tex,v 1.1 2003/07/27 18:52:01 cdeluca Exp $
+% $Id: LogErr_background.tex,v 1.2.6.1 2006/11/16 00:15:35 cdeluca Exp $
+
+% Earth System Modeling Framework
+% Copyright 2002-2008, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
 
 \section{Background}
 
-Output data from programs usually consists of a combination of numerical data, stored
-in formats such as NetCDF, visual data, and diagnostics.  The log utility is intended to 
-organize diagnostic output.  Many programs use simple fortran {\tt write} statements,
-and the output resulting from such statements in the multiprocessor environment is 
-unpredictable and inconsistent at best.  The utility tries to make this behavior predictable
-across computing environments.  It also attempts to organize the diagnostic output so
-that searches and filters may be easily constructed.
+Output data from programs usually consists of a combination of numerical data,
+stored in formats such as NetCDF, visual data, and diagnostics.  The log 
+utility is intended to organize diagnostic output.  Many programs use simple 
+fortran {\tt write} statements, and the output resulting from such statements
+in the multiprocessor environment is unpredictable and inconsistent at best.  
+The utility tries to make this behavior predictable across computing 
+environments.  It also attempts to organize the diagnostic output so that 
+searches and filters may be easily constructed.
 
 \subsection{Location}
 
-This utility is part of the infrastructure.  This is an extremely low level object and
-will be used by most of the other objects in the project.  It will thus not depend on 
-the other objects in the library save perhaps the machine model.
+This utility is part of the infrastructure.  This is an extremely low level 
+object and will be used by most of the other objects in the project.  It will 
+thus not depend on the other objects in the library save perhaps the machine 
+model.
 
 \subsection{Scope}
 
-The log will be for diagnostic output.  The bandwidth is assumed to be moderate to small, i.e.
-it will not be used to output large streams of numerical model output data.  
+The log will be for diagnostic output.  The bandwidth is assumed to be moderate
+to small, i.e. it will not be used to output large streams of numerical model 
+output data.  
 
 
 

@@ -1,25 +1,27 @@
-// $Id: ESMC_BaseTime.C,v 1.30 2004/03/05 00:44:57 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.42.6.1 2006/11/16 00:15:46 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research,
+// Copyright 2002-2008, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
-
+// Licensed under the University of Illinois-NCSA License.
+//
 // ESMC BaseTime method code (body) file
-
+//
 //-------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt ESMC\_BaseTime} methods declared
-// in the companion file {\tt ESMC\_BaseTime.h}
+// The code in this file implements the C++ {\tt ESMC\_BaseTime} methods
+// declared in the companion file {\tt ESMC\_BaseTime.h}
 //
 //-------------------------------------------------------------------------
 //
- #include <iostream.h>
+ #define ESMC_FILENAME "ESMC_BaseTime.C"
+
+ #include <stdio.h>
  #include <stdlib.h>
  #include <limits.h>
  /*
@@ -28,6 +30,8 @@
  using std::cout;
  using std::endl;
  */
+ #include <ESMC_LogErr.h>
+ #include <ESMF_LogMacros.inc>
 
  // associated class definition file
  #include <ESMC_BaseTime.h>
@@ -35,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.30 2004/03/05 00:44:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.42.6.1 2006/11/16 00:15:46 cdeluca Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -61,21 +65,21 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I4 *h,       // out - integer hours
-      ESMF_KIND_I4 *m,       // out - integer minutes
-      ESMF_KIND_I4 *s,       // out - integer seconds (>= 32 bit)
-      ESMF_KIND_I8 *s_i8,    // out - integer seconds (large, >= 64 bit)
-      ESMF_KIND_I4 *ms,      // out - integer milliseconds
-      ESMF_KIND_I4 *us,      // out - integer microseconds
-      ESMF_KIND_I4 *ns,      // out - integer nanoseconds
-      ESMF_KIND_R8 *h_r8,    // out - floating point hours
-      ESMF_KIND_R8 *m_r8,    // out - floating point minutes
-      ESMF_KIND_R8 *s_r8,    // out - floating point seconds
-      ESMF_KIND_R8 *ms_r8,   // out - floating point milliseconds
-      ESMF_KIND_R8 *us_r8,   // out - floating point microseconds
-      ESMF_KIND_R8 *ns_r8,   // out - floating point nanoseconds
-      ESMF_KIND_I4 *sN,      // out - fractional seconds numerator
-      ESMF_KIND_I4 *sD) {    // out - fractional seconds denominator
+      ESMF_KIND_I4 *h,       // in - integer hours
+      ESMF_KIND_I4 *m,       // in - integer minutes
+      ESMF_KIND_I4 *s,       // in - integer seconds (>= 32 bit)
+      ESMF_KIND_I8 *s_i8,    // in - integer seconds (large, >= 64 bit)
+      ESMF_KIND_I4 *ms,      // in - integer milliseconds
+      ESMF_KIND_I4 *us,      // in - integer microseconds
+      ESMF_KIND_I4 *ns,      // in - integer nanoseconds
+      ESMF_KIND_R8 *h_r8,    // in - floating point hours
+      ESMF_KIND_R8 *m_r8,    // in - floating point minutes
+      ESMF_KIND_R8 *s_r8,    // in - floating point seconds
+      ESMF_KIND_R8 *ms_r8,   // in - floating point milliseconds
+      ESMF_KIND_R8 *us_r8,   // in - floating point microseconds
+      ESMF_KIND_R8 *ns_r8,   // in - floating point nanoseconds
+      ESMF_KIND_I4 *sN,      // in - fractional seconds numerator
+      ESMF_KIND_I4 *sD) {    // in - fractional seconds denominator
 //
 // !DESCRIPTION:
 //      Sets sub-day (non-calendar dependent) values of a {\tt ESMC\_BaseTime}.
@@ -84,32 +88,79 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO: fractional seconds
+    //
+    // whole seconds
+    //
 
+    // integer units
     if (h != ESMC_NULL_POINTER) {
-      this->s += ((ESMF_KIND_I8) *h) * SECONDS_PER_HOUR;
+      ESMC_Fraction time(((ESMF_KIND_I8) *h) * SECONDS_PER_HOUR);
+      *this += time;
     }
     if (m != ESMC_NULL_POINTER) {
-      this->s += ((ESMF_KIND_I8) *m) * SECONDS_PER_MINUTE;
+      ESMC_Fraction time(((ESMF_KIND_I8) *m) * SECONDS_PER_MINUTE);
+      *this += time;
     }
     if (s != ESMC_NULL_POINTER) {
-      this->s += *s;    // >= 32-bit
+      ESMC_Fraction time(*s);
+      *this += time;  // >= 32-bit
     } else if (s_i8 != ESMC_NULL_POINTER) {
-      this->s += *s_i8;   // >= 64-bit
+      ESMC_Fraction time(*s_i8);
+      *this += time;  // >= 64-bit
     }
 
-    //
     // floating point units
-    //
-
+    // TODO: include fractional part
     if (h_r8 != ESMC_NULL_POINTER) {
-      this->s += (ESMF_KIND_I8) (*h_r8 * SECONDS_PER_HOUR);
+      ESMC_Fraction time((ESMF_KIND_I8) (*h_r8 * SECONDS_PER_HOUR));
+      *this += time;
     }
     if (m_r8 != ESMC_NULL_POINTER) {
-      this->s += (ESMF_KIND_I8) (*m_r8 * SECONDS_PER_MINUTE);
+      ESMC_Fraction time((ESMF_KIND_I8) (*m_r8 * SECONDS_PER_MINUTE));
+      *this += time;
     }
     if (s_r8 != ESMC_NULL_POINTER) {
-      this->s += (ESMF_KIND_I8) *s_r8;
+      ESMC_Fraction time((ESMF_KIND_I8) *s_r8);
+      *this += time;
+    }
+
+    //
+    // fractional seconds
+    //
+
+    // integer units
+    if (ms != ESMC_NULL_POINTER) {
+      ESMC_Fraction fractional_time(0, *ms, 1000);
+      *this += fractional_time;
+    }
+    if (us != ESMC_NULL_POINTER) {
+      ESMC_Fraction fractional_time(0, *us, 1000000);
+      *this += fractional_time;
+    }
+    if (ns != ESMC_NULL_POINTER) {
+      ESMC_Fraction fractional_time(0, *ns, 1000000000);
+      *this += fractional_time;
+    }
+
+    // floating point units
+    // TODO: include fractional part
+    if (ms_r8 != ESMC_NULL_POINTER) {
+      ESMC_Fraction fractional_time(0, (ESMF_KIND_I4) *ms_r8, 1000);
+      *this += fractional_time;
+    }
+    if (us_r8 != ESMC_NULL_POINTER) {
+      ESMC_Fraction fractional_time(0, (ESMF_KIND_I4) *us_r8, 1000000);
+      *this += fractional_time;
+    }
+    if (ns_r8 != ESMC_NULL_POINTER) {
+      ESMC_Fraction fractional_time(0, (ESMF_KIND_I4) *ns_r8, 1000000000);
+      *this += fractional_time;
+    }
+
+    // integer numerator and denominator
+    if (sN != ESMC_NULL_POINTER && sD != ESMC_NULL_POINTER) {
+      ESMC_Fraction fractional_time(0, *sN, *sD);
+      *this += fractional_time;
     }
 
     return(ESMF_SUCCESS);
@@ -137,23 +188,22 @@
 //EOP
 // !REQUIREMENTS:  
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_BaseTimeSet()"
+
     // s, sN must be either both positive or both negative;
     //    sD always positive and >= 1
-    if ( ((s >= 0 && sN >= 0) || (s <= 0 && sN <= 0)) && sD >= 1 ) {
-        this->s  = s;
-        this->sN = sN;
-        this->sD = sD;
-
-        // normalize (share logic with += ?? )
-        ESMF_KIND_I4 w;
-        if (labs((w = this->sN/this->sD)) >= 1) {
-          this->s += w;
-          this->sN = this->sN % this->sD;
-        }
-
-        return(ESMF_SUCCESS);
+    if ( !(((s >= 0 && sN >= 0) || (s <= 0 && sN <= 0)) && sD >= 1) ) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "s=%lld and sN=%d not both positive or both negative, "
+                      "or sD=%d negative or less than one.", s, sN, sD); 
+      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+      return(ESMF_FAILURE);
     }
-    else return(ESMF_FAILURE);
+
+    ESMC_FractionSet(s, sN, sD);
+
+    return(ESMF_SUCCESS);
 
 }  // end ESMC_BaseTimeSet
 
@@ -168,23 +218,23 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 timeToConvert,  // in  - the time to convert (divide) into 
-                                   //         requested units
-      ESMF_KIND_I4 *h,             // out - integer hours
-      ESMF_KIND_I4 *m,             // out - integer minutes
-      ESMF_KIND_I4 *s,             // out - integer seconds (>= 32-bit)
-      ESMF_KIND_I8 *s_i8,          // out - integer seconds (large, >= 64-bit)
-      ESMF_KIND_I4 *ms,            // out - integer milliseconds
-      ESMF_KIND_I4 *us,            // out - integer microseconds
-      ESMF_KIND_I4 *ns,            // out - integer nanoseconds
-      ESMF_KIND_R8 *h_r8,          // out - floating point hours
-      ESMF_KIND_R8 *m_r8,          // out - floating point minutes
-      ESMF_KIND_R8 *s_r8,          // out - floating point seconds
-      ESMF_KIND_R8 *ms_r8,         // out - floating point milliseconds
-      ESMF_KIND_R8 *us_r8,         // out - floating point microseconds
-      ESMF_KIND_R8 *ns_r8,         // out - floating point nanoseconds
-      ESMF_KIND_I4 *sN,            // out - fractional seconds numerator
-      ESMF_KIND_I4 *sD) const {    // out - fractional seconds denominator
+      const ESMC_BaseTime *timeToConvert, // in  - the time to convert
+                                          //     (divide) into requested units
+      ESMF_KIND_I4 *h,              // out - integer hours
+      ESMF_KIND_I4 *m,              // out - integer minutes
+      ESMF_KIND_I4 *s,              // out - integer seconds (>= 32-bit)
+      ESMF_KIND_I8 *s_i8,           // out - integer seconds (large, >= 64-bit)
+      ESMF_KIND_I4 *ms,             // out - integer milliseconds
+      ESMF_KIND_I4 *us,             // out - integer microseconds
+      ESMF_KIND_I4 *ns,             // out - integer nanoseconds
+      ESMF_KIND_R8 *h_r8,           // out - floating point hours
+      ESMF_KIND_R8 *m_r8,           // out - floating point minutes
+      ESMF_KIND_R8 *s_r8,           // out - floating point seconds
+      ESMF_KIND_R8 *ms_r8,          // out - floating point milliseconds
+      ESMF_KIND_R8 *us_r8,          // out - floating point microseconds
+      ESMF_KIND_R8 *ns_r8,          // out - floating point nanoseconds
+      ESMF_KIND_I4 *sN,             // out - fractional seconds numerator
+      ESMF_KIND_I4 *sD) const {     // out - fractional seconds denominator
 
 //
 // !DESCRIPTION:
@@ -194,362 +244,187 @@
 //EOP
 // !REQUIREMENTS:  
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_BaseTimeGet()"
+
     int rc = ESMF_SUCCESS;
 
-    // TODO: fractional seconds
+    // validate input
+    if (timeToConvert == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; timeToConvert is NULL", &rc);
+      return(rc);
+    }
 
-    ESMF_KIND_I8 remainingTime = timeToConvert;
+    // make local copy for manipulation
+    ESMC_BaseTime remainingTime = *timeToConvert;
+    remainingTime.ESMC_FractionSimplify(); // ensure maximum whole seconds
+    ESMC_BaseTime saveRemainingTime = remainingTime;  // for float units below
+    ESMF_KIND_I8 remainingSeconds = remainingTime.ESMC_FractionGetw();
+
+    // get integer numerator and denominator
+    if (sN != ESMC_NULL_POINTER) {
+      *sN = remainingTime.ESMC_FractionGetn();
+    }
+    if (sD != ESMC_NULL_POINTER) {
+      *sD = remainingTime.ESMC_FractionGetd();
+    }
 
     if (h != ESMC_NULL_POINTER) {
-      ESMF_KIND_I8 hours = remainingTime / SECONDS_PER_HOUR;
-      if (hours < INT_MIN || hours > INT_MAX) return(ESMF_FAILURE);
+      ESMF_KIND_I8 hours = remainingSeconds / SECONDS_PER_HOUR;
+      if (hours < INT_MIN || hours > INT_MAX) {
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "For s=%lld, hours=%lld out-of-range with respect to "
+                        "machine limits (INT_MIN=%d to INT_MAX=%d).",
+                        remainingSeconds, hours, INT_MIN, INT_MAX);
+        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+        return (ESMF_FAILURE);
+      }
       *h = hours;
-      remainingTime %= SECONDS_PER_HOUR;  // remove hours
+      remainingSeconds %= SECONDS_PER_HOUR;  // remove hours
     }
     if (m != ESMC_NULL_POINTER) {
-      ESMF_KIND_I8 minutes = remainingTime / SECONDS_PER_MINUTE;
-      if (minutes < INT_MIN || minutes > INT_MAX) return(ESMF_FAILURE);
+      ESMF_KIND_I8 minutes = remainingSeconds / SECONDS_PER_MINUTE;
+      if (minutes < INT_MIN || minutes > INT_MAX) {
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "For s=%lld, minutes=%lld out-of-range with respect to "
+                        "machine limits (INT_MIN=%d to INT_MAX=%d).",
+                        remainingSeconds, minutes, INT_MIN, INT_MAX);
+        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+        return (ESMF_FAILURE);
+      }
       *m = minutes;
-      remainingTime %= SECONDS_PER_MINUTE;  // remove minutes
+      remainingSeconds %= SECONDS_PER_MINUTE;  // remove minutes
     }
     if (s != ESMC_NULL_POINTER) {
-      if (remainingTime < INT_MIN || remainingTime > INT_MAX)
-                                                     return(ESMF_FAILURE);
-      *s = remainingTime;    // >= 32 bit
+      if (remainingSeconds < INT_MIN || remainingSeconds > INT_MAX) {
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "s=%lld out-of-range with respect to "
+                        "machine limits (INT_MIN=%d to INT_MAX=%d).",
+                        remainingSeconds, INT_MIN, INT_MAX);
+        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+        return (ESMF_FAILURE);
+      }
+      *s = remainingSeconds;    // >= 32 bit
     }
     if (s_i8 != ESMC_NULL_POINTER) {
-      *s_i8 = remainingTime;   // >= 64 bit
+      *s_i8 = remainingSeconds;   // >= 64 bit
+    }
+    if (s != ESMC_NULL_POINTER || s_i8 != ESMC_NULL_POINTER) {
+      remainingSeconds = 0;  // remove seconds
+    }
+
+    // fractional seconds
+
+    // reset whole seconds part of remaining time
+    remainingTime.ESMC_FractionSetw(remainingSeconds);
+
+    if (ms != ESMC_NULL_POINTER) {
+      // convert remaining time to milliseconds
+      ESMC_Fraction msRemainingTime = remainingTime;
+      int rc = msRemainingTime.ESMC_FractionConvert(1000);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
+      *ms = msRemainingTime.ESMC_FractionGetn();
+
+      // remove total milliseconds from remainingTime
+      ESMC_Fraction milliseconds(0, *ms, 1000);
+      remainingTime -= milliseconds;
+    }
+    if (us != ESMC_NULL_POINTER) {
+      // convert remaining time to microseconds
+      ESMC_Fraction usRemainingTime = remainingTime;
+      int rc = usRemainingTime.ESMC_FractionConvert(1000000);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
+      *us = usRemainingTime.ESMC_FractionGetn();
+
+      // remove total microseconds from remainingTime
+      ESMC_Fraction microseconds(0, *us, 1000000);
+      remainingTime -= microseconds;
+    }
+    if (ns != ESMC_NULL_POINTER) {
+      // convert remaining time to nanoseconds
+      ESMC_Fraction nsRemainingTime = remainingTime;
+      int rc = nsRemainingTime.ESMC_FractionConvert(1000000000);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
+      *ns = nsRemainingTime.ESMC_FractionGetn();
     }
 
     //
     // floating point units
     //
+    // TODO:  include fractional part 
 
-    // reset remainingTime for floating point conversion
-    remainingTime = timeToConvert;
+    // reset remainingSeconds for floating point conversion
+    remainingTime = saveRemainingTime;
+    remainingSeconds = remainingTime.ESMC_FractionGetw();
 
     if (h_r8 != ESMC_NULL_POINTER) {
-      *h_r8 = (ESMF_KIND_R8) remainingTime / (ESMF_KIND_R8) SECONDS_PER_HOUR;
-      remainingTime %= SECONDS_PER_HOUR;  // remove hours
+      *h_r8 = (ESMF_KIND_R8) remainingSeconds / SECONDS_PER_HOUR;
+      remainingSeconds %= SECONDS_PER_HOUR;    // remove hours
     }
     if (m_r8 != ESMC_NULL_POINTER) {
-      *m_r8 = (ESMF_KIND_R8) remainingTime / (ESMF_KIND_R8) SECONDS_PER_MINUTE;
-      remainingTime %= SECONDS_PER_MINUTE;  // remove minutes
+      *m_r8 = (ESMF_KIND_R8) remainingSeconds / SECONDS_PER_MINUTE;
+      remainingSeconds %= SECONDS_PER_MINUTE;  // remove minutes
     }
     if (s_r8 != ESMC_NULL_POINTER) {
-      *s_r8 = (ESMF_KIND_R8) remainingTime;
+      *s_r8 = (ESMF_KIND_R8) remainingSeconds;
+      remainingSeconds = 0;   // remove seconds
+    }
+
+    // reset whole seconds part of remaining time
+    remainingTime.ESMC_FractionSetw(remainingSeconds);
+
+    if (ms_r8 != ESMC_NULL_POINTER) {
+      // convert remaining time to milliseconds
+      ESMC_Fraction msRemainingTime = remainingTime;
+
+      // TODO: use ESMC_FractionConvert() when n/d changed to ESMF_KIND_I8 ?
+
+      // get total milliseconds
+      ESMF_KIND_R8 w = msRemainingTime.ESMC_FractionGetw();
+      ESMF_KIND_R8 n = msRemainingTime.ESMC_FractionGetn();
+      ESMF_KIND_R8 d = msRemainingTime.ESMC_FractionGetd();
+      *ms_r8 = w * 1000 + (n * 1000) / d;
+
+      // remove total milliseconds from remainingTime
+      ESMC_Fraction milliseconds(0, (ESMF_KIND_I4)*ms_r8, 1000);
+      remainingTime -= milliseconds;
+    }
+    if (us_r8 != ESMC_NULL_POINTER) {
+      // convert remaining time to microseconds
+      ESMC_Fraction usRemainingTime = remainingTime;
+
+      // TODO: use ESMC_FractionConvert() when n/d changed to ESMF_KIND_I8 ?
+
+      // get total microseconds
+      ESMF_KIND_R8 w = usRemainingTime.ESMC_FractionGetw();
+      ESMF_KIND_R8 n = usRemainingTime.ESMC_FractionGetn();
+      ESMF_KIND_R8 d = usRemainingTime.ESMC_FractionGetd();
+      *us_r8 = w * 1000000 + (n * 1000000) / d;
+
+      // remove total microseconds from remainingTime
+      ESMC_Fraction microseconds(0, (ESMF_KIND_I4)*us_r8, 1000000);
+      remainingTime -= microseconds;
+    }
+    if (ns_r8 != ESMC_NULL_POINTER) {
+      // convert remaining time to nanoseconds
+      ESMC_Fraction nsRemainingTime = remainingTime;
+
+      // TODO: use ESMC_FractionConvert() when n/d changed to ESMF_KIND_I8 ?
+
+      // get total nanoseconds
+      ESMF_KIND_R8 w = nsRemainingTime.ESMC_FractionGetw();
+      ESMF_KIND_R8 n = nsRemainingTime.ESMC_FractionGetn();
+      ESMF_KIND_R8 d = nsRemainingTime.ESMC_FractionGetd();
+      *ns_r8 = w * 1000000000 + (n * 1000000000) / d;
     }
 
     return(rc);
 
 }  // end ESMC_BaseTimeGet
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseTime(==) - BaseTime equality comparison
-//
-// !INTERFACE:
-      bool ESMC_BaseTime::operator==(
-//
-// !RETURN VALUE:
-//    bool result
-//
-// !ARGUMENTS:
-      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
-//
-// !DESCRIPTION:
-//      Compare for equality the current object's (this) {\tt ESMC\_BaseTime}
-//      with given {\tt ESMC\_BaseTime}, return result
-//
-//EOP
-// !REQUIREMENTS:  
-
-    return(s == baseTime.s);
-    // TODO: compare equal sN/sD fractions when sD differs
-
-}  // end ESMC_BaseTime::operator==
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseTime(!=) - BaseTime inequality comparison
-//
-// !INTERFACE:
-      bool ESMC_BaseTime::operator!=(
-//
-// !RETURN VALUE:
-//    bool result
-//
-// !ARGUMENTS:
-      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
-//
-// !DESCRIPTION:
-//      Compare for inequality the current object's (this)
-//      {\tt ESMC\_BaseTime} with given {\tt ESMC\_BaseTime}, return result
-//
-//EOP
-// !REQUIREMENTS:  
-
-    return(s != baseTime.s);
-    // TODO:  compare unequal fractions
-
-}  // end ESMC_BaseTime::operator!=
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseTime(<) - BaseTime less than comparison
-//
-// !INTERFACE:
-      bool ESMC_BaseTime::operator<(
-//
-// !RETURN VALUE:
-//    bool result
-//
-// !ARGUMENTS:
-      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
-//
-// !DESCRIPTION:
-//      Compare for less than the current object's (this)
-//      {\tt ESMC\_BaseTime} with given {\tt ESMC\_BaseTime}, return result
-//
-//EOP
-// !REQUIREMENTS:  
-
-    return(s < baseTime.s);
-    // TODO:  compare fractions
-
-}  // end ESMC_BaseTime::operator<
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseTime(>) - BaseTime greater than comparison
-//
-// !INTERFACE:
-      bool ESMC_BaseTime::operator>(
-//
-// !RETURN VALUE:
-//    bool result
-//
-// !ARGUMENTS:
-      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
-//
-// !DESCRIPTION:
-//      Compare for greater than the current object's (this)
-//      {\tt ESMC\_BaseTime} with given {\tt ESMC\_BaseTime}, return result
-//
-//EOP
-// !REQUIREMENTS:  
-
-    return(s > baseTime.s);
-    // TODO:  compare fractions
-
-}  // end ESMC_BaseTime::operator>
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseTime(<=) - BaseTime less or equal than comparison
-//
-// !INTERFACE:
-      bool ESMC_BaseTime::operator<=(
-//
-// !RETURN VALUE:
-//    bool result
-//
-// !ARGUMENTS:
-      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
-//
-// !DESCRIPTION:
-//      Compare for less than or equal the current object's (this)
-//      {\tt ESMC\_BaseTime} with given {\tt ESMC\_BaseTime}, return result
-//
-//EOP
-// !REQUIREMENTS:  
-
-    return(s <= baseTime.s);
-    // TODO:  compare fractions
-
-}  // end ESMC_BaseTime::operator<=
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseTime(>=) - BaseTime greater than or equal comparison
-//
-// !INTERFACE:
-      bool ESMC_BaseTime::operator>=(
-//
-// !RETURN VALUE:
-//    bool result
-//
-// !ARGUMENTS:
-      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
-//
-// !DESCRIPTION:
-//      Compare for greater than or equal the current object's (this)
-//      {\tt ESMC\_BaseTime} with given {\tt ESMC\_BaseTime}, return result
-//
-//EOP
-// !REQUIREMENTS:  
-
-    return(s >= baseTime.s);
-    // TODO:  compare fractions
-
-}  // end ESMC_BaseTime::operator>=
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseTime(+) - increment BaseTime
-//
-// !INTERFACE:
-      ESMC_BaseTime ESMC_BaseTime::operator+(
-//
-// !RETURN VALUE:
-//    ESMC_BaseTime result
-//
-// !ARGUMENTS:
-      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime increment
-//
-// !DESCRIPTION:
-//      Increment current object's (this) {\tt ESMC\_BaseTime} with given
-//      {\tt ESMC\_BaseTime}, return result
-//
-//EOP
-// !REQUIREMENTS:  
-
-    ESMC_BaseTime sum = *this;
-
-    // assume positive values for now ??
-    // fractional part addition -- LCD (assume same denominator for now) ??
-    sum.sN += baseTime.sN;
-
-    // normalize (share logic with ESMC_BaseTimeSet() ?? )
-    ESMF_KIND_I4 w;
-    if (labs((w = sum.sN/sum.sD)) >= 1) {
-      sum.s += w;
-      sum.sN = sum.sN % sum.sD;
-    }
-
-    // whole part addition
-    sum.s += baseTime.s;
-
-    return(sum);
-
-}  // end ESMC_BaseTime::operator+
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseTime(-) - decrement BaseTime
-//
-// !INTERFACE:
-      ESMC_BaseTime ESMC_BaseTime::operator-(
-//
-// !RETURN VALUE:
-//    ESMC_BaseTime result
-//
-// !ARGUMENTS:
-      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime decrement
-//
-// !DESCRIPTION:
-//      Decrement current object's (this) {\tt ESMC\_BaseTime} with given
-//      {\tt ESMC\_BaseTime}, return result
-//
-//EOP
-// !REQUIREMENTS:  
-
-    ESMC_BaseTime diff = *this;
-
-    // assume positive values for now ??
-    // assume this > Time and both normalized for now ??
-    // fractional part subtraction -- LCD (assume same denominator for now) ??
-
-    // fractional part subtraction
-    if (diff.sN < baseTime.sN) {
-      // borrow
-      diff.sN += diff.sD;
-      diff.s--;
-    }
-    diff.sN -= baseTime.sN;
-
-    // whole part subtraction 
-    diff.s -= baseTime.s;
-
-    return(diff);
-
-}  // end ESMC_BaseTime::operator-
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseTime(+=) - increment BaseTime
-//
-// !INTERFACE:
-      ESMC_BaseTime& ESMC_BaseTime::operator+=(
-//
-// !RETURN VALUE:
-//    ESMC_BaseTime& result
-//
-// !ARGUMENTS:
-      const ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime increment
-//
-// !DESCRIPTION:
-//      Increment current object's (this) {\tt ESMC\_BaseTime} with given
-//      {\tt ESMC\_BaseTime}
-//EOP
-// !REQUIREMENTS:  
-
-    // assume positive values for now ??
-    // fractional part addition -- LCD (assume same denominator for now) ??
-    sN += baseTime.sN;
-
-    // normalize (share logic with ESMC_BaseTimeSet() ?? )
-    ESMF_KIND_I4 w;
-    if (labs((w = sN/sD)) >= 1) {
-      s += w;
-      sN = sN % sD;
-    }
-
-    // whole part addition
-    s += baseTime.s;
-
-    return(*this);
-
-}  // end ESMC_BaseTime::operator+=
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseTime(-=) - decrement BaseTime
-//
-// !INTERFACE:
-      ESMC_BaseTime& ESMC_BaseTime::operator-=(
-//
-// !RETURN VALUE:
-//    ESMC_BaseTime& result
-//
-// !ARGUMENTS:
-      const ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime decrement
-//
-// !DESCRIPTION:
-//      Decrement current object's (this) {\tt ESMC\_BaseTime} with given
-//      {\tt ESMC\_BaseTime}
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // assume positive values for now ??
-    // assume this > baseTime and both normalized for now ??
-    // fractional part subtraction -- LCD (assume same denominator for now) ??
-
-    // fractional part subtraction
-    if (sN < baseTime.sN) {
-      // borrow
-      sN += sD;
-      s--;
-    }
-    sN -= baseTime.sN;
-
-    // whole part subtraction 
-    s -= baseTime.s;
-
-    return(*this);
-
-}  // end ESMC_BaseTime::operator-=
 
 //-------------------------------------------------------------------------
 //BOP
@@ -562,19 +437,20 @@
 //    ESMC_BaseTime& result
 //
 // !ARGUMENTS:
-      const ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime
+      const ESMC_Fraction &fraction) {   // in - ESMC_Fraction
 //
 // !DESCRIPTION:
-//      Assign current object's (this) {\tt ESMC\_BaseTime} with given
-//      {\tt ESMC\_BaseTime}.  
+//      Assign current object's (this) {\tt ESMC\_Fraction} with given
+//      {\tt ESMC\_Fraction}.  
 //EOP
 // !REQUIREMENTS:  
 
     // TODO: should be implicit, but then won't support
-    //   ESMC_Time & ESMC_TimeInterval ?
-    s  = baseTime.s;
-    sN = baseTime.sN;
-    sD = baseTime.sD;
+    //   F90 ESMF_Time & ESMF_TimeInterval via ESMC_BaseTime_F.C interface
+    //   for increment/decrement
+
+    // use = operator in ESMC_Fraction class
+    ESMC_Fraction::operator=(fraction);
 
     return(*this);
 
@@ -656,10 +532,10 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // must have positive denominator
-    if (sD <= 0) return(ESMF_FAILURE);
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_BaseTimeValidate()"
 
-    return(ESMF_SUCCESS);
+    return(ESMC_FractionValidate());
 
 }  // end ESMC_BaseTimeValidate
 
@@ -682,11 +558,11 @@
 //EOP
 // !REQUIREMENTS:  
 
-    cout << "BaseTime -------------------------------" << endl;
-    cout << "s = "  << s  << endl;
-    cout << "sN = " << sN << endl;
-    cout << "sD = " << sD << endl;
-    cout << "end BaseTime ---------------------------" << endl << endl;
+    printf("BaseTime -------------------------------\n");
+    printf("s = %lld\n", ESMC_FractionGetw());
+    printf("sN = %d\n",  ESMC_FractionGetn());
+    printf("sD = %d\n",  ESMC_FractionGetd());
+    printf("end BaseTime ---------------------------\n\n");
 
     return(ESMF_SUCCESS);
 
@@ -711,9 +587,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    s  = 0;
-    sN = 0;
-    sD = 1;
+    ESMC_Fraction(0,0,1);
 
 }  // end ESMC_BaseTime
 
@@ -730,7 +604,7 @@
 // !ARGUMENTS:
       ESMF_KIND_I8 s,              // in - integer seconds
       ESMF_KIND_I4 sN,             // in - fractional seconds, numerator
-      ESMF_KIND_I4 sD) {           // in - fractional seconds, denominator
+      ESMF_KIND_I4 sD) :           // in - fractional seconds, denominator
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_BaseTime}
@@ -738,9 +612,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    this->s  = s;
-    this->sN = sN;
-    this->sD = sD;
+    ESMC_Fraction(s, sN, sD) {  // use base class constructor
 
 }  // end ESMC_BaseTime
 

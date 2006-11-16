@@ -1,199 +1,215 @@
-! $Id: ESMF_StateEx.F90,v 1.9 2004/02/23 16:11:02 nscollins Exp $
+! $Id: ESMF_StateEx.F90,v 1.20.4.1 2006/11/16 00:15:56 cdeluca Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+!
+    program ESMF_StateEx
 
-
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !EXAMPLE        String used by test script to count examples.
-!-------------------------------------------------------------------------
-
-!BOP
+!==============================================================================
+!BOC
+! !PROGRAM: ESMF_StateEx - State creation and operation
 !
 ! !DESCRIPTION:
-! See the following code fragments for examples of how to create {\tt States}.
-! Also see the Programming Model section of this document.
 !
-!EOP
-!BOC
-!
-! Example code showing various ways of creating States.
+! This program shows examples of State creation and manipulation
+!-----------------------------------------------------------------------------
 
-    program ESMF_StateExample
-
-!   ! ESMF Framework module
+    ! ESMF Framework module
     use ESMF_Mod
     implicit none
-!   ! Local variables
-    integer :: x, y, rc
-    character(ESMF_MAXSTR) :: compname, statename, bundlename, dataname
-    type(ESMF_Field) :: field1
+
+    ! Local variables
+    integer :: rc
+    character(ESMF_MAXSTR) :: statename, bundlename, dataname
+    !type(ESMF_Field) :: field1
     type(ESMF_Bundle) :: bundle1, bundle2
-    type(ESMF_State) :: state1, state2, state3, state4
+    type(ESMF_State) :: state1, state2, state3
 !EOC
     integer :: finalrc
     finalrc = ESMF_SUCCESS
-!BOC
+
+
+    call ESMF_Initialize(rc=rc)
+
 !-------------------------------------------------------------------------
-!   ! Example 1:
-!   !
-!   ! Creation of a state, might also be from a query of a component.
-!   !
+!BOE
+!\subsubsection{Empty State Create}
+!      
+!  Creation of an empty {\tt ESMF\_State}, which will be added to later.
+!EOE
  
     print *, "State Example 1: Import State"
 
-!   ! This will probably be called from inside the Component Init code
-    compname = "Atmosphere"
-    state1 = ESMF_StateCreate(compname, statetype=ESMF_STATEIMPORT, rc=rc)  
-    print *, "State Create returned, name = ", trim(compname)
+    ! This will probably be called from inside the Component Init code
+!BOC
+    statename = "Atmosphere"
+    state1 = ESMF_StateCreate(statename, statetype=ESMF_STATE_IMPORT, rc=rc)  
+!EOC
+    print *, "State Create returned, name = ", trim(statename)
 
     ! Data would be added here and the State reused inside the run
     !  routine of a sequential application.
 
     print *, "State Example 1 finished"
-!EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
-!BOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
 !-------------------------------------------------------------------------
-!   ! Example 2:
-!   !
-!   !  Create, Add Data, Query, then Destroy a State.
+!BOE
+!\subsubsection{Adding Items to a State}
+!   
+!  Creation of an empty {\tt ESMF\_State}, and adding an {\tt ESMF\_Bundle}
+!  to it.  Note that the {\tt ESMF\_Bundle} does not get destroyed when
+!  the {\tt ESMF\_State} is destroyed; the {\tt ESMF\_State} only contains
+!  a reference to the objects it contains.  It also does not make a copy;
+!  the original objects can be updated and code accessing them by using
+!  the {\tt ESMF\_State} will see the updated version.
+!EOE
+
+
+    ! Example 2:
+    !
+    !  Create, Add Data, Query, then Destroy a State.
  
     print *, "State Example 2: Export State"
 
-    compname = "Ocean"
-    state2 = ESMF_StateCreate(compname, statetype=ESMF_STATEEXPORT, rc=rc)  
-
-    print *, "State Create returned, name = ", trim(compname)
+!BOC
+    statename = "Ocean"
+    state2 = ESMF_StateCreate(statename, statetype=ESMF_STATE_EXPORT, rc=rc)  
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+
+    print *, "State Create returned, name = ", trim(statename)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     bundlename = "Temperature"
     bundle1 = ESMF_BundleCreate(name=bundlename, rc=rc)
     print *, "Bundle Create returned", rc
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_StateAddData(state2, bundle1, rc)
-    print *, "StateAddData returned", rc
+    call ESMF_StateAddBundle(state2, bundle1, rc)
+    print *, "StateAddBundle returned", rc
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
-!BOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
     ! Loop here, updating Bundle contents each time step
+
+!BOC
     call ESMF_StateDestroy(state2, rc)
-    print *, "State Destroy returned", rc
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    print *, "State Destroy returned", rc
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     call ESMF_BundleDestroy(bundle1, rc)
+!EOC
     print *, "Bundle Destroy returned", rc
     print *, "State Example 2 finished"
-!EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
-!BOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
 !-------------------------------------------------------------------------
-!   ! Example 3:
-!   !
-!   !  Create, Add Placeholder, Query, then Destroy a State.
-!   !  This example applies to a Gridded Component which potentially
-!   !  could create a large number of export items but it is unlikely
-!   !  that any other component would require all of them.  This allows
-!   !  the consuming component to mark those needed, and the producer
-!   !  only has to fill the data items requested.
- 
+!BOE
+!\subsubsection{Adding Placeholders to a State}
+!   
+! If a component could potentially produce a large number of optional
+! items, one strategy is to add the names only of those objects to the
+! {\tt ESMF\_State}.  Other components can call framework routines to
+! set the {\tt ESMF\_NEEDED} flag to indicate they require that data.
+! The original component can query this flag and then produce only the
+! data what is required by another component.
+!EOE
+
     print *, "State Example 3: Export State with Placeholder"
 
     ! The producing Component creates the menu of data items available.
-    compname = "Ocean"
-    state3 = ESMF_StateCreate(compname, statetype=ESMF_STATEEXPORT, rc=rc)  
-    print *, "State Create returned", rc, " name = ", trim(compname)
+!BOC
+    statename = "Ocean"
+    state3 = ESMF_StateCreate(statename, statetype=ESMF_STATE_EXPORT, rc=rc)  
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    print *, "State Create returned", rc, " name = ", trim(statename)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     dataname = "Downward wind"
-    call ESMF_StateAddData(state3, dataname, rc)
-    print *, "StateAddData returned", rc, " name = ", trim(dataname)
+    call ESMF_StateAddNameOnly(state3, dataname, rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    print *, "StateAddNameOnly returned", rc, " name = ", trim(dataname)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     dataname = "Humidity"
-    call ESMF_StateAddData(state3, dataname, rc)
-    print *, "StateAddData returned", rc, " name = ", trim(dataname)
+    call ESMF_StateAddNameOnly(state3, dataname, rc)
+!EOC
+    print *, "StateAddNameOnly returned", rc, " name = ", trim(dataname)
 
     ! See next example for how this is used.
 
     print *, "State Example 3 finished"
-!EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
-!BOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
 !-------------------------------------------------------------------------
-!   ! Example 4:
-!   !
-!   !  Mark Needed Flag
- 
+!BOE
+!\subsubsection{Marking an Item Needed}
+!   
+! How to set the {\tt NEEDED} state of an item.
+!EOE
+
     print *, "State Example 4: Get/Set Needed flags in Export State"
 
     ! Given state3 from the previous example, the Coupler or Application
     ! is given an opportunity to mark which data items are needed.
 
-    dataname = "Downward wind"
-    call ESMF_StateSetNeeded(state3, dataname, ESMF_STATEDATAISNEEDED, rc)
-    print *, "StateSetNeeded returned", rc
-!EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
 !BOC
+    dataname = "Downward wind"
+    call ESMF_StateSetNeeded(state3, dataname, ESMF_NEEDED, rc)
+!EOC
+    print *, "StateSetNeeded returned", rc
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
 !-------------------------------------------------------------------------
-!   ! Example 5:
-!   !
-!   !  Query Needed flags, and add Bundle data
+!BOE
+!\subsubsection{Creating a Needed Item}
+!   
+! Query an item for the {\tt NEEDED} status, and creating an item on demand.
+! Similar flags exist for "Ready", "Valid", and "Required for Restart",
+! to mark each data item as ready, having been validated, or needed if the
+! application is to be checkpointed and restarted.  The flags are supported
+! to help coordinate the data exchange between components.
+!EOE
+
+    !  Query Needed flags, and add Bundle data
  
     print *, "State Example 5: Get/Set Needed flags in Export State, continued"
 
     ! Given state3 from the previous examples, the producing Component
     ! can check the state to see what data items are required.
 
+!BOC
     dataname = "Downward wind"
     if (ESMF_StateIsNeeded(state3, dataname, rc)) then
 !EOC
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-      bundlename = dataname
-      bundle2 = ESMF_BundleCreate(name=bundlename, rc=rc)
-      print *, "Bundle Create returned", rc, "name = ", trim(bundlename)
+        bundlename = dataname
+        bundle2 = ESMF_BundleCreate(name=bundlename, rc=rc)
 !EOC
-      if (rc.NE.ESMF_SUCCESS) then
-         finalrc = ESMF_FAILURE
-      end if
+        print *, "Bundle Create returned", rc, "name = ", trim(bundlename)
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-      call ESMF_StateAddData(state3, bundle2, rc)
-      print *, "StateAddData returned", rc
+        call ESMF_StateAddBundle(state3, bundle2, rc)
 !EOC
-      if (rc.NE.ESMF_SUCCESS) then
-         finalrc = ESMF_FAILURE
-      end if
+        print *, "StateAddBundle returned", rc
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     else
-      print *, "Data marked as not needed", trim(dataname)
+        print *, "Data not marked as needed", trim(dataname)
     endif
+!EOC
     call ESMF_StateDestroy(state3, rc)
     print *, "State Destroy returned", rc
     print *, "State Example 5 finished"
@@ -204,16 +220,15 @@
 !   !  exchange between Components and Couplers.  Also "Required for 
 !   !  Restart".
 !-------------------------------------------------------------------------
-!EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    call ESMF_Finalize(rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
     if (finalrc.EQ.ESMF_SUCCESS) then
         print *, "PASS: ESMF_StateExample.F90"
     else
         print *, "FAIL: ESMF_StateExample.F90"
     end if
-!BOC
-    end program ESMF_StateExample
-!EOC
+
+    end program ESMF_StateEx
     

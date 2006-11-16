@@ -1,12 +1,12 @@
-// $Id: ESMC_Array_F.C,v 1.21 2004/02/11 21:55:36 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.36.2.1 2006/11/16 00:15:14 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
 //
@@ -17,15 +17,21 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <stdio.h>
-#include <string.h>
-#include <iostream.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 #include "ESMC_Base.h"
+#include "ESMC_LogErr.h"
 #include "ESMC_Array.h"
 #include "ESMC_DELayout.h"
+#include <stdio.h>
+#include <string.h>
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
+
+#ifdef ESMC_DATA_ADDR_NEEDS_INDIR
+#define XD *
+#else
+#define XD
+#endif
 
 //------------------------------------------------------------------------------
 //BOP
@@ -60,7 +66,7 @@ extern "C" {
      }
  
      void FTN(c_esmc_arraysetinfo)(ESMC_Array **ptr, 
-                               struct c_F90ptr *fptr, void *base, int *counts,
+                               struct c_F90ptr *fptr, void XD *base, int *counts,
                                int *lbounds, int *ubounds, int *offsets,
                                ESMC_Logical *contig, ESMC_Logical *dealloc,
 			       int *hwidth, int *status) {
@@ -70,7 +76,7 @@ extern "C" {
               return;
           }
 
-         *status = (*ptr)->ESMC_ArraySetInfo(fptr, base, counts, 
+         *status = (*ptr)->ESMC_ArraySetInfo(fptr, XD base, counts, 
                                             lbounds, ubounds, offsets, 
                                             *contig, *dealloc, *hwidth);
      }
@@ -113,6 +119,26 @@ extern "C" {
           }
 
          *status = (*ptr)->ESMC_ArrayGetUbounds(*rank, ubounds);
+     }
+
+     void FTN(c_esmc_arraygethwidth)(ESMC_Array **ptr, int *hwidth, int *status) {
+      
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
+
+         *status = (*ptr)->ESMC_ArrayGetHWidth(hwidth);
+     }
+
+     void FTN(c_esmc_arraygethwidthlist)(ESMC_Array **ptr, int *hwidth, int *status) {
+      
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
+
+         *status = (*ptr)->ESMC_ArrayGetHWidthList(hwidth);
      }
 
      void FTN(c_esmc_arraygetrank)(ESMC_Array **ptr, int *rank, int *status) {
@@ -173,6 +199,19 @@ extern "C" {
          *status = ESMC_ArrayDestroy(*ptr);
      }
 
+//     void FTN(c_esmc_arraycomputeaxisindex)(ESMC_Array **ptr, 
+//                                        ESMC_DELayout **delayout, 
+//                                        int *decompids, int *dlen, 
+//                                        int *status) {
+//          if ((ptr == NULL) || (*ptr == NULL)) {
+//              *status = ESMF_FAILURE;
+//              return;
+//          }
+//
+//          *status = (*ptr)->ESMC_ArrayComputeAxisIndex(*delayout, 
+//                                                       decompids, *dlen);
+//     }
+
      void FTN(c_esmc_arraysetaxisindex)(ESMC_Array **ptr, ESMC_DomainType *dt, 
                                         ESMC_AxisIndex *ai, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
@@ -193,6 +232,7 @@ extern "C" {
           *status = (*ptr)->ESMC_ArrayGetAxisIndex(*dt, ai);
      }
 
+// obsolete when arbitrary distribution stops needing this.  nsc 03nov05
      void FTN(c_esmc_arraygetallaxisindices)(ESMC_Array **ptr, 
                                      ESMC_AxisIndex *global, int *nDEs,
                                      int *rank, ESMC_AxisIndex *total,
@@ -232,13 +272,13 @@ extern "C" {
          }
      }
 
-     void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, void *base, int *status) {
+     void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, void XD *base, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
           }
 
-          *status = (*ptr)->ESMC_ArraySetBaseAddr((void *)(base));
+          *status = (*ptr)->ESMC_ArraySetBaseAddr(XD base);
      }
 
      void FTN(c_esmc_arraygetbaseaddr)(ESMC_Array **ptr, void **base, int *status) {
@@ -356,6 +396,156 @@ extern "C" {
              delete[] filetemp;
      }
 
-};
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayserialize"
+//BOP
+// !IROUTINE:  c_ESMC_ArraySerialize - Serialize Array object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_arrayserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Array **array,       // in - array object
+      char *buf,                // in/out - a byte stream buffer
+      int *length,              // in/out - number of allocated bytes
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Serialize the contents of a array object.
+//     Warning!!  Not completely implemented yet.
+//
+//EOP
+
+  if (!array) {
+    //printf("uninitialized Array object\n");
+    ESMC_LogDefault.ESMC_LogWrite("Array object uninitialized", ESMC_LOG_INFO);
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+
+  *rc = (*array)->ESMC_ArraySerialize(buf, length, offset);
+
+  return;
+
+}  // end c_ESMC_ArraySerialize
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraydeserialize"
+//BOP
+// !IROUTINE:  c_ESMC_ArrayDeserialize - Deserialize Array object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_arraydeserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Array **array,       // in/out - empty array object to fill in
+      char *buf,                // in - byte stream buffer
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Deserialize the contents of a array object.
+//
+//EOP
+
+  // create a new array object to deserialize into
+  *array = new ESMC_Array;
+
+  (*array)->ESMC_ArrayDeserialize(buf, offset);
+
+  if (rc) *rc = ESMF_SUCCESS;
+
+  return;
+
+}  // end c_ESMC_ArrayDeserialize
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayserializenodata"
+//BOP
+// !IROUTINE:  c_ESMC_ArraySerializeNoData - Serialize Array object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_arrayserializenodata)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Array **array,       // in - array object
+      char *buf,                // in/out - a byte stream buffer
+      int *length,              // in/out - number of allocated bytes
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Serialize the contents of a array object, without preserving
+//     the data values.
+//
+//EOP
+
+  if (!array) {
+    //printf("uninitialized Array object\n");
+    ESMC_LogDefault.ESMC_LogWrite("Array object uninitialized", ESMC_LOG_INFO);
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+
+  *rc = (*array)->ESMC_ArraySerializeNoData(buf, length, offset);
+
+  return;
+
+}  // end c_ESMC_ArraySerializeNoData
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraydeserializenodata"
+//BOP
+// !IROUTINE:  c_ESMC_ArrayDeserializeNoData - Deserialize Array object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_arraydeserializenodata)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list.
+// 
+// !ARGUMENTS:
+      ESMC_Array **array,       // in/out - empty array object to fill in
+      char *buf,                // in - byte stream buffer
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Deserialize the contents of a array object, without preserving
+//     any of the data (counts explicitly set to 0).
+//
+//EOP
+
+  // create a new array object to deserialize into
+  *array = new ESMC_Array;
+
+  (*array)->ESMC_ArrayDeserializeNoData(buf, offset);
+
+  if (rc) *rc = ESMF_SUCCESS;
+
+  return;
+
+}  // end c_ESMC_ArrayDeserializeNoData
+
+
+#undef  ESMC_METHOD
+}
 
 

@@ -1,13 +1,13 @@
 #if 0
-$Id: ESMC_LogErr.inc,v 1.1 2003/07/24 16:24:22 shep_smith Exp $
+$Id: ESMC_LogErr.inc,v 1.7.6.1 2006/11/16 00:15:36 cdeluca Exp $
 
 Earth System Modeling Framework
-Copyright 2002-2003, University Corporation for Atmospheric Research,
+Copyright 2002-2008, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 NASA Goddard Space Flight Center.
-Licensed under the GPL.
+Licensed under the University of Illinois-NCSA License.
 
 
 ESMF Error include file of constants for both FORTRAN or C++.
@@ -17,8 +17,7 @@ by both C++ and F90 compilers.
 
 #endif
 
-
-#include "ESMF_ErrConstants.inc"
+#include "ESMF_ErrReturnCodes.inc"
 #include "ESMF_LogConstants.inc"
-#include "ESMF_LogMacros.inc"
+
 

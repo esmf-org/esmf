@@ -1,14 +1,16 @@
-! $Id: ESMF_Bundle.F90,v 1.27 2004/03/09 21:30:10 svasquez Exp $
+! $Id: ESMF_Bundle.F90,v 1.81.2.1 2006/11/16 00:15:20 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Copyright 2002-2005, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
+!
+#define ESMF_FILENAME "ESMF_Bundle.F90"
 !
 !     ESMF Bundle Module
       module ESMF_BundleMod 
@@ -34,24 +36,31 @@
 
 !
 ! !USES:
+      use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod
-      use ESMF_IOMod
-      use ESMF_DataMapMod
+      
+      use ESMF_VMMod
+      
+      use ESMF_LogErrMod
+      use ESMF_IOSpecMod
+      use ESMF_ArrayDataMapMod
       use ESMF_GridTypesMod
       use ESMF_GridMod
-      use ESMF_ArrayBaseMod
+      use ESMF_ArrayMod
+      use ESMF_FieldDataMapMod
       use ESMF_FieldMod
+      use ESMF_BundleDataMapMod
       implicit none
 !
 ! !PRIVATE TYPES:
       private
 
 !------------------------------------------------------------------------------
-!     ! ESMF_PackFlag   
-!     !
-!     ! Data type to set the status of data in this Bundle; it can either be
-!     ! simply a collection of Fields which contain the data, or it can also 
-!     ! have a private packed data buffer associated directly with the Bundle.
+!! ESMF_PackFlag   
+!!
+!! Data type to set the status of data in this Bundle; it can either be
+!! simply a collection of Fields which contain the data, or it can also 
+!! have a private packed data buffer associated directly with the Bundle.
 
       type ESMF_PackFlag
       sequence
@@ -63,74 +72,106 @@
                                         ESMF_NO_PACKED_DATA = ESMF_PackFlag(2)
 
 !------------------------------------------------------------------------------
-!       ! ESMF_FieldInterleave
-!       !
-!       !  Data type to record the ordering information for multiple field
-!       !  data which is packed in a bundle.  Each has an associated
-!       !  {\tt ESMF\_DataMap} object to track the ordering of that 
-!       ! {\tt ESMF\_Field}'s data in the packed buffer.
-        type ESMF_FieldInterleave
+!! For ease of accessing data for an individual field for a packed array.
+
+      type ESMF_BundleFieldAccess
+      sequence
+      private
+         type(ESMF_InterleaveFlag) :: bfa_type
+         integer :: bfa_start
+         integer :: bfa_end
+         integer :: bfa_strides
+      end type
+
+
+!------------------------------------------------------------------------------
+!! ESMF_BundleFieldInterleave
+!!
+!!  Data type to record the ordering information for multiple field
+!!  data which is packed in a bundle.  Each has an associated
+!!  {\tt ESMF\_FieldDataMap} object to track the ordering of that 
+!!  {\tt ESMF\_Field}'s data in the packed buffer.
+
+        type ESMF_BundleFieldInterleave
         sequence
-        !private
-          integer, pointer :: field_order                 ! index field order
-          type(ESMF_DataMap), pointer :: field_dm         ! array of data maps
+        private
+          integer :: field_order                      ! index of this field
+          type(ESMF_FieldDataMap) :: field_dm         ! copy of this field's dm
+          type(ESMF_BundleFieldAccess) :: field_bfa   ! access info if packed
         end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_LocalBundle
+!! For bookkeeping information which must be identical in each constituent
+!! Field in order to optimize some of the communications calls.
+
+      type ESMF_BundleCongruentData
+      sequence
+      private
+        ! for starters:
+        integer :: datarank
+        type(ESMF_DataType) :: datatype
+        type(ESMF_DataKind) :: datakind
+        integer :: indexorders(ESMF_MAXDIM)
+        integer :: nonindexcounts(ESMF_MAXDIM) 
+        type(ESMF_Relloc) :: datahorzrelloc, datavertrelloc
+        integer :: haloWidth
+      end type
+
+
+!------------------------------------------------------------------------------
+!! ESMF_LocalBundle
 !
       type ESMF_LocalBundle
       sequence
       !private
         type(ESMF_Array) :: packed_data               ! local packed array
-#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
-        type(ESMF_GridType), pointer :: gridp => NULL() ! local data
-        type(ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT    ! is grid set 
-        type(ESMF_Status) :: arraystatus = ESMF_STATE_UNINIT   ! is array set 
-        integer :: accesscount = 0                    ! reserved for future use
-#else
-        type(ESMF_GridType), pointer :: gridp
         type(ESMF_Status) :: gridstatus
         type(ESMF_Status) :: arraystatus
         integer :: accesscount
-#endif
-      
       end type
 
 !------------------------------------------------------------------------------
-!     ESMF_BundleType
+!!     ESMF_BundleType
 !
       type ESMF_BundleType
       sequence
+      ! this data type is not private so the bundlecomm code can
+      ! reach directly in and get at the localdata without a loop
+      ! of subroutine calls.  but this causes problems with the 'pattern'
+      ! declaration below - the bundlecongruentdata derived type is
+      ! private and so it wants this to be private as well.
+      ! since pattern is not being used yet, comment it out below, but this
+      ! needs to be rationalized at some point soon.  perhaps the comm code
+      ! will have to go through a subroutine interface.  this is where
+      ! fortran needs a 'friend' type of access.
       !private
         type(ESMF_Base) :: base                   ! base class object
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
-        type(ESMF_Status) :: bundlestatus = ESMF_STATE_UNINIT
-        type(ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT     ! is grid set
-        type(ESMF_GridType), pointer :: gridp => NULL() ! shortcut
         type(ESMF_Field), dimension(:), pointer :: flist => NULL() 
-        integer :: field_count = 0                ! how many fields in here
 #else
+        type(ESMF_Field), dimension(:), pointer :: flist
+#endif
         type(ESMF_Status) :: bundlestatus
         type(ESMF_Status) :: gridstatus
-        type(ESMF_GridType), pointer :: gridp
-        type(ESMF_Field), dimension(:), pointer :: flist
-        integer :: field_count
-#endif
-        type(ESMF_Grid) :: grid                   ! associated global grid
-        type(ESMF_LocalBundle) :: localbundle     ! this differs per DE
-        type(ESMF_Packflag) :: pack_flag          ! is packed data present?
-        type(ESMF_FieldInterleave) :: fil         ! ordering in buffer
-        type(ESMF_IOSpec) :: iospec               ! iospec values
-        type(ESMF_Status) :: iostatus             ! if unset, inherit from gcomp
-      
+
+        type(ESMF_Grid) :: grid                  ! associated global grid
+        type(ESMF_LocalBundle) :: localbundle    ! this differs per DE
+        type(ESMF_Packflag) :: pack_flag         ! is packed data present?
+        type(ESMF_BundleFieldInterleave) :: fil  ! ordering in buffer
+        type(ESMF_BundleDataMap) :: mapping      ! map info
+        type(ESMF_IOSpec) :: iospec              ! iospec values
+        type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
+        logical :: isCongruent                   ! are all fields identical?
+        logical :: hasPattern                    ! first data field sets this
+        !type(ESMF_BundleCongruentData) :: pattern ! what they must match
+        integer :: field_count      
       end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_Bundle
+!! ESMF_Bundle
 
-!     ! The Bundle data structure that is passed between implementation and
-!     ! calling languages.
+!! The Bundle data structure that is passed between implementation and
+!! calling languages.
 
       type ESMF_Bundle
       sequence
@@ -146,8 +187,11 @@
 !
 ! !PUBLIC TYPES:
       public ESMF_Bundle, ESMF_PackFlag, ESMF_PACKED_DATA, ESMF_NO_PACKED_DATA
-      public ESMF_BundleType   ! intended for internal ESMF use only
-      public ESMF_LocalBundle, ESMF_FieldInterleave
+
+      ! intended for internal ESMF use only but public for BundleComms
+      public ESMF_BundleType           ! internal ESMF use only, for BundleComm
+      public ESMF_LocalBundle          ! internal ESMF use only, for BundleComm
+      public ESMF_BundleFieldInterleave ! internal ESMF use only, for BundleComm
 
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -155,19 +199,15 @@
        public ESMF_BundleCreate       ! Create a new Bundle
        public ESMF_BundleDestroy      ! Destroy a Bundle
 
-!      public ESMF_BundleAttachData   ! Associate data with a Bundle -
-!                                     !   reference (default) or copy
-!      public ESMF_BundleDetachData   ! Disassociate data with a Bundle
+       public ESMF_BundleGet          ! Get Bundle information
+       public ESMF_BundleGetFieldNames
 
-       public ESMF_BundleGetName      ! Get Bundle name
-
-       public ESMF_BundleSetAttribute       ! Set and Get Attributes
+       public ESMF_BundleSetAttribute       ! Set and Get attributes
        public ESMF_BundleGetAttribute       !   interface to Base class
 
        public ESMF_BundleGetAttributeCount  ! number of attribs
        public ESMF_BundleGetAttributeInfo   ! get type, length by name or number
 
-       public ESMF_BundleGetFieldCount ! Get count of Fields 
        public ESMF_BundleGetField      ! Get one or more Fields by name or number
        public ESMF_BundleAddField      ! Add one or more Fields 
 !      public ESMF_BundleRemoveField   ! Delete one or more Fields by name or number
@@ -176,12 +216,13 @@
 !                                     !   buffer
 
       public ESMF_BundleSetGrid           ! In empty Bundle, set Grid
-      public ESMF_BundleGetGrid           ! Return reference to Grid
 !      public ESMF_BundleGetGlobalGridInfo ! Return global grid info
 !      public ESMF_BundleGetLocalGridInfo  ! Return local grid info
 
 !      public ESMF_BundleGetGlobalDataInfo ! Return global data info
 !      public ESMF_BundleGetLocalDataInfo  ! Return local data info
+
+      public ESMF_BundleIsCongruent        ! private to framework
 
    ! These are the recommended entry points; the code itself is in Array:
    !public ESMF_BundleRedist   ! Redistribute existing arrays, matching grids
@@ -201,10 +242,12 @@
    !public ESMF_BundleAllReduce  ! Global reduction operation, return on each DE
 
 
-       public ESMF_BundleValidate     ! Check internal consistency
-       public ESMF_BundlePrint        ! Print contents of a Bundle
+    public ESMF_BundleSerialize    ! Convert to byte stream...
+    public ESMF_BundleDeserialize  ! ... and back into an object again
+    public ESMF_BundleValidate     ! Check internal consistency
+    public ESMF_BundlePrint        ! Print contents of a Bundle
 
-       public operator(.eq.), operator(.ne.)
+    public operator(.eq.), operator(.ne.)
 
 !  !subroutine ESMF_BundleGetDataMap
 !
@@ -292,16 +335,20 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Set a Bundle Attribute
+! !IROUTINE: ESMF_BundleSetAttribute - Set a Bundle attribute
 !
 ! !INTERFACE:
       interface ESMF_BundleSetAttribute 
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_BundleSetIntAttr
-        module procedure ESMF_BundleSetIntListAttr
-        module procedure ESMF_BundleSetRealAttr
-        module procedure ESMF_BundleSetRealListAttr
+        module procedure ESMF_BundleSetInt4Attr
+        module procedure ESMF_BundleSetInt4ListAttr
+        module procedure ESMF_BundleSetInt8Attr
+        module procedure ESMF_BundleSetInt8ListAttr
+        module procedure ESMF_BundleSetReal4Attr
+        module procedure ESMF_BundleSetReal4ListAttr
+        module procedure ESMF_BundleSetReal8Attr
+        module procedure ESMF_BundleSetReal8ListAttr
         module procedure ESMF_BundleSetLogicalAttr
         module procedure ESMF_BundleSetLogicalListAttr
         module procedure ESMF_BundleSetCharAttr
@@ -315,16 +362,20 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_BundleGetAttribute - Get a Bundle Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Get a Bundle attribute
 !
 ! !INTERFACE:
       interface ESMF_BundleGetAttribute 
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_BundleGetIntAttr
-        module procedure ESMF_BundleGetIntListAttr
-        module procedure ESMF_BundleGetRealAttr
-        module procedure ESMF_BundleGetRealListAttr
+        module procedure ESMF_BundleGetInt4Attr
+        module procedure ESMF_BundleGetInt4ListAttr
+        module procedure ESMF_BundleGetInt8Attr
+        module procedure ESMF_BundleGetInt8ListAttr
+        module procedure ESMF_BundleGetReal4Attr
+        module procedure ESMF_BundleGetReal4ListAttr
+        module procedure ESMF_BundleGetReal8Attr
+        module procedure ESMF_BundleGetReal8ListAttr
         module procedure ESMF_BundleGetLogicalAttr
         module procedure ESMF_BundleGetLogicalListAttr
         module procedure ESMF_BundleGetCharAttr
@@ -338,7 +389,7 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_BundleGetAttributeInfo - Get type, count from a Bundle Attribute
+! !IROUTINE: ESMF_BundleGetAttributeInfo - Get type, count from a Bundle attribute
 !
 ! !INTERFACE:
       interface ESMF_BundleGetAttributeInfo
@@ -388,6 +439,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAddOneField"
 !BOP
 ! !IROUTINE: ESMF_BundleAddField - Add a Field to a Bundle
 !
@@ -396,83 +449,87 @@ end function
       subroutine ESMF_BundleAddOneField(bundle, field, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       type(ESMF_Field), intent(in) :: field
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Add a single Field reference to an existing {\tt ESMF\_Bundle}.  The Field must have the
-!      same {\tt ESMF\_Grid} as the rest of the {\tt ESMF\_Field}s in the {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
-!      packed data, this will mean copying the data to add this field.
+!      Adds a single {\tt field} to an existing {\tt bundle}.  The
+!      {\tt field} must be associated with the same {\tt ESMF\_Grid} 
+!      as the other {\tt ESMF\_Field}s in the {\tt bundle}.   
+!      The {\tt field} is referenced by the {\tt bundle}, not copied.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           The {\tt ESMF\_Bundle} to add {\tt ESMF\_Field} to.
-!     \item [field]
+!           The {\tt ESMF\_Bundle} to add the {\tt ESMF\_Field} to.
+!     \item [field] 
 !           The {\tt ESMF\_Field} to add.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  FLD2.5.2
 
+      integer :: status                                ! Error status
+      logical :: dummy
       type(ESMF_Field) :: temp_list(1)
       type(ESMF_BundleType), pointer :: btype
 
       ! Initialize return code in case we return early.
       ! Otherwise, count on AddFieldList call to set rc
-      if(present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
 
       temp_list(1) = field
 
-      ! validate bundle before going further
-      if (.not. associated(bundle%btypep)) then
-        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
-        return
-      endif
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       btype => bundle%btypep
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
-        return
-      endif
     
       call ESMF_BundleTypeAddFieldList(btype, 1, temp_list, rc)
+
+      ! this resets the congruent flag as a side effect
+      dummy = ESMF_BundleIsCongruent(bundle, rc)
 
       end subroutine ESMF_BundleAddOneField
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAddFieldList"
 !BOP
 ! !IROUTINE: ESMF_BundleAddField - Add a list of Fields to a Bundle
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddField()
-      subroutine ESMF_BundleAddFieldList(bundle, fieldCount, fields, rc)
+      subroutine ESMF_BundleAddFieldList(bundle, fieldCount, fieldList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle        
+      type(ESMF_Bundle), intent(inout) :: bundle        
       integer, intent(in) :: fieldCount
-      type(ESMF_Field), dimension(:), intent(in) :: fields
+      type(ESMF_Field), dimension(:), intent(in) :: fieldList
       integer, intent(out), optional :: rc          
 !
 ! !DESCRIPTION:
-!      Add a {\tt ESMF\_Field} reference to an existing {\tt ESMF\_Bundle}.  
-!      The {\tt ESMF\_Field} must have the
-!      same {\tt ESMF\_Grid} as the rest of the {\tt ESMF\_Fields} in the 
-!      {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
-!      packed data, this will mean copying the data to add this field.
+!      Adds a {\tt fieldList} to an existing {\tt ESMF\_Bundle}.  
+!      The items added from the {\tt ESMF\_fieldList} must be associated 
+!      with the same {\tt ESMF\_Grid} as the other {\tt ESMF\_Field}s in the 
+!      {\tt bundle}.  The items in the {\tt fieldList} are referenced by
+!      the {\tt bundle}, not copied.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           {\tt ESMF\_Bundle} to add {\tt ESMF\_Field}s into.
+!           {\tt ESMF\_Bundle} to add {\tt ESMF\_Field}s to.
 !     \item [fieldCount]
-!           Number of fields to be added to the {\tt ESMF\_Bundle}.
-!           Must be equal to or less than the number of 
-!           {\tt ESMF\_Field}s in the following argument.
-!     \item [fields]
+!           Number of {\tt ESMF\_Field}s to be added to the 
+!           {\tt ESMF\_Bundle}; must be equal to or less than the 
+!           number of items in the {\tt fieldList}.
+!     \item [fieldList]
 !           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
 !           items will be added to the {\tt ESMF\_Bundle}.
 !     \item [{[rc]}]
@@ -480,126 +537,144 @@ end function
 !     \end{description}
 ! 
 !EOP
-! !REQUIREMENTS:  FLD2.5.2
 
+      integer :: status                                ! Error status
+      logical :: dummy
       type(ESMF_BundleType), pointer :: btype
 
       ! Initialize return code in case we return early.
       ! Otherwise, count on AddFieldList call to set rc
-      if(present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
 
-      ! validate bundle before going further
-      if (.not. associated(bundle%btypep)) then
-        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
-        return
-      endif
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       btype => bundle%btypep
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
-        return
-      endif
     
-      call ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, rc)
+      call ESMF_BundleTypeAddFieldList(btype, fieldCount, fieldList, rc)
       
+      ! this resets the congruent flag as a side effect
+      dummy = ESMF_BundleIsCongruent(bundle, rc)
+
       end subroutine ESMF_BundleAddFieldList
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleCreateNew"
 !BOP
 ! !IROUTINE: ESMF_BundleCreate - Create a Bundle from existing Fields
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleCreate()
-      function ESMF_BundleCreateNew(fieldCount, fields, packflag, name, iospec, rc)
+      function ESMF_BundleCreateNew(fieldCount, fieldList, &
+                                  packflag, bundleinterleave, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Bundle) :: ESMF_BundleCreateNew
 !
 ! !ARGUMENTS:
       integer, intent(in) :: fieldCount           
-      type(ESMF_Field), dimension (:) :: fields
+      type(ESMF_Field), dimension (:) :: fieldList
       type(ESMF_PackFlag), intent(in), optional :: packflag 
+      type(ESMF_InterleaveFlag), intent(in), optional :: bundleinterleave
       character (len = *), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!     Create a {\tt ESMF\_Bundle} from a list of existing
-!     gridded {\tt ESMF\_Fields}.  Optionally create a packed
-!     {\tt ESMF\_Array} which collects all {\tt ESMF\_Field} data into
-!     a single contiguous memory buffer.  All {\tt ESMF\_Field}s
-!     must share a common {\tt ESMF\_Grid}.  Return a new {\tt ESMF\_Bundle}.
+!   Creates an {\tt ESMF\_Bundle} from a list of existing
+!   {\tt ESMF\_Fields} stored in a {\tt fieldList}.  All items in 
+!   the {\tt fieldList} must be associated with the same 
+!   {\tt ESMF\_Grid}.  Returns a new {\tt ESMF\_Bundle}.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [fieldCount]
-!           Number of fields to be added to the {\tt ESMF\_Bundle}.
-!           Must be equal to or less than the number of 
-!           {\tt ESMF\_Field}s in the following argument.
-!     \item [fields]
-!           Array of existing {\tt ESMF\_Field}s.  The first {\tt ESMF\_FieldCount}
-!           items will be added to the {\tt ESMF\_Bundle}.
-!     \item [{[packflag]}]
-!           If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt ESMF\_Field}
-!           data in individual {\tt ESMF\_Array}s will be collected
-!           into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
-!           The default is {\tt ESMF\_NO\_PACKED\_DATA}.
-!     \item [{[name]}]
-!           {\tt ESMF\_Bundle} name.  A default name will be generated if
-!           one is not specified.
-!     \item [{[iospec]}]
-!           I/O specification.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item [fieldCount]
+!      Number of fields to be added to the new {\tt ESMF\_Bundle}.
+!      Must be equal to or less than the number of 
+!      {\tt ESMF\_Field}s in the {\tt fieldList}.
+!   \item [fieldList]
+!      Array of existing {\tt ESMF\_Field}s.  The first {\tt ESMF\_FieldCount}
+!      items will be added to the new {\tt ESMF\_Bundle}.
+!   \item [{[packflag]}]
+!      The packing option is not yet implemented.  
+!      See Section~\ref{sec:bundlerest}
+!      for a description of packing, and Section~\ref{opt:packflag} for 
+!      anticipated values.  The current implementation corresponds to the
+!      value {\tt ESMF\_NO\_PACKED\_DATA}, which means that every 
+!      {\tt ESMF\_Field} is referenced separately rather 
+!      than being copied into a single contiguous buffer.  
+!      This is the case no matter what value, if any, is passed in for
+!      this argument.
+!   \item [{[bundleinterleave]}]
+!      The interleave option is not yet implemented.  
+!      See Section~\ref{sec:bundlerest}
+!      for a brief description of interleaving, and 
+!      Section~\ref{opt:bundleinterleave}
+!      for anticipated values.  The flag is not applicable 
+!      to the current implementation,
+!      since it applies only to packed data (see the {\tt packflag} argument).
+!   \item [{[name]}]
+!      {\tt ESMF\_Bundle} name.  A default name is generated if
+!      one is not specified.
+!   \item [{[iospec]}]
+!      The {\tt ESMF\_IOSpec} is not yet used by {\tt ESMF\_Bundle}s.  Any 
+!      values passed in will be ignored.
+!   \item [{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS:  
 
       type(ESMF_BundleType), pointer :: btypep         ! Pointer to new bundle
+      logical :: dummy
       integer :: status                                ! Error status
-      logical :: rcpresent                             ! Return code present
 
-!     Initialize pointers
+      ! Initialize pointers
       nullify(btypep)
       nullify(ESMF_BundleCreateNew%btypep)
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      else
-        rcpresent = .FALSE.
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       allocate(btypep,  stat=status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
-      if(status .NE. 0) then
-        print *, "ERROR in ESMF_BundleCreateNew: Allocate"
-        return
+      if (ESMF_LogMsgFoundAllocError(status, "Bundle allocate", &
+                                       ESMF_CONTEXT, rc)) return
+
+      ! Call construction method to initialize bundle internals.
+      call ESMF_BundleConstructNew(btypep, fieldCount, fieldList, &
+                                   packflag, bundleinterleave, &
+                                   name, iospec, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) then
+          deallocate(btypep, stat=status)
+          return
       endif
 
-!     Call construction method to allocate and initialize bundle internals.
-      call ESMF_BundleConstructNew(btypep, fieldCount, fields, &
-                                              packflag, name, iospec, rc)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundleCreateNew: Bundle construct"
-        return
-      endif
-
-!     Set return values.
+      ! set the return bundle
       ESMF_BundleCreateNew%btypep => btypep
-      if(rcpresent) rc = ESMF_SUCCESS
+
+      ! this resets the congruent flag as a side effect
+      dummy = ESMF_BundleIsCongruent(ESMF_BundleCreateNew, rc)
+
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
 
 
       end function ESMF_BundleCreateNew
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleCreateNoFields"
 !BOP
 ! !IROUTINE: ESMF_BundleCreate - Create a Bundle with no Fields
 !
@@ -618,83 +693,72 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Create an empty {\tt ESMF\_Bundle}.
+!   Creates an {\tt ESMF\_Bundle} with no associated {\tt ESMF\_Fields}.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [{[grid]}]
-!           The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
-!           {\tt ESMF\_Bundle} must have.  If not specified now, the 
-!           grid associated with the first {\tt ESMF\_Field} added will be
-!           used as the {\tt ESMF\_Grid} for this {\tt ESMF\_Bundle}.
-!     \item [{[name]}]
-!           {\tt ESMF\_Bundle} name.  A default name will be generated if
-!           one is not specified.
-!     \item [{[iospec]}]
-!           I/O specification.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item [{[grid]}]
+!       The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
+!       {\tt ESMF\_Bundle} must be associated with.  If not specified now, the 
+!       grid associated with the first {\tt ESMF\_Field} added will be
+!       used as the reference grid for the {\tt ESMF\_Bundle}.
+!   \item [{[name]}]
+!       {\tt ESMF\_Bundle} name.  A default name is generated if
+!       one is not specified.
+!   \item [{[iospec]}]
+!       The {\tt ESMF\_IOSpec} is not yet used by {\tt ESMF\_Bundle}s.  Any 
+!       values passed in will be ignored.
+!   \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS:  
 
 
       type(ESMF_BundleType), pointer :: btypep   ! Pointer to new bundle
       integer :: status                          ! Error status
-      logical :: rcpresent                       ! Return code present
 
       ! Initialize pointers
       status = ESMF_FAILURE
-      rcpresent = .FALSE. 
       nullify(btypep)
       nullify(ESMF_BundleCreateNoFields%btypep)
 
       ! Initialize return code
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       allocate(btypep, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then
-        print *, "ERROR in ESMF_BundleCreateNew: Allocate"
-        return
-      endif
+      if (ESMF_LogMsgFoundAllocError(status, "Bundle allocate", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize bundle internals.
       call ESMF_BundleConstructNoFields(btypep, name, iospec, rc)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundleCreateNoFields: Bundle construct"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! If specified, set the Grid.  All Fields added to this Bundle
       !  must be based on this same Grid.
       
       if (present(grid)) then
           call ESMF_GridValidate(grid, rc=status)
-          if (status .ne. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_BundleCreate: bad Grid object"
-            return
-          endif
+          if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
           btypep%grid = grid
-          btypep%gridstatus = ESMF_STATE_READY
+          btypep%gridstatus = ESMF_STATUS_READY
       endif
 
       ! Set return values.
       ESMF_BundleCreateNoFields%btypep => btypep
-      if(rcpresent) rc = ESMF_SUCCESS
-
-
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_BundleCreateNoFields
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDestroy"
 !BOP
 ! !IROUTINE: ESMF_BundleDestroy - Free all resources associated with a Bundle
 !
@@ -706,352 +770,715 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with the {\tt ESMF\_Bundle}.
+!     Releases resources associated with the {\tt bundle}.  This
+!     method does not destroy the {\tt ESMF\_Field}s that the
+!     {\tt bundle} contains.  The
+!     {\tt bundle} should be destroyed before the {\tt ESMF\_Field}s
+!     within it are.
 !
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS:  FLD2.4
-
 
       ! Local variables
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       type(ESMF_BundleType), pointer :: btype
 
       ! Initialize return code
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif    
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! If already destroyed or never created, return ok
       btype => bundle%btypep
       if (.not. associated(btype)) then
-        if(rcpresent) rc = ESMF_FAILURE   ! should this really be an error?
+        if (present(rc)) rc = ESMF_FAILURE   ! should this really be an error?
         return
       endif
 
       ! Destruct all bundle internals and then free field memory.
       call ESMF_BundleDestruct(btype, status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundleDestroy from ESMF_BundleDestruct"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       deallocate(bundle%btypep, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then
-        print *, "ERROR in ESMF_BundleDestroy: Deallocate of Bundle class"
-        return
-      endif
+      if (ESMF_LogMsgFoundAllocError(status, "Bundle deallocate", &
+                                       ESMF_CONTEXT, rc)) return
       nullify(bundle%btypep)
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
 
       end subroutine ESMF_BundleDestroy
 
 
 !------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_BundleGetAllFields - Retrieve an array of Fields 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGet"
+!BOP
+! !IROUTINE: ESMF_BundleGet - Return information about a Bundle
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleGetAllFields(bundle, fieldptrs, count, rc)
+      subroutine ESMF_BundleGet(bundle, grid, fieldCount, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle
-      type(ESMF_Field), pointer, dimension (:) :: fieldptrs
-      integer, intent(out), optional :: count
+      type(ESMF_Grid), intent(out), optional :: grid
+      integer, intent(out), optional :: fieldCount
+      character (len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Return pointers to all fields in a {\tt ESMF\_Bundle}.
+!      Returns information about the {\tt bundle}.  
+!      If the {\tt ESMF\_Bundle} was originally created
+!      without specifying a name, a unique name will have been generated
+!      by the framework.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           The {\tt ESMF\_Bundle} to query for {\tt ESMF\_Field}.
-!     \item [fieldptrs]
-!           {\tt ESMF\_Field} pointer array.
-!     \item [{[count]}]
-!           Number of fields in the bundle.
+!           The {\tt ESMF\_Bundle} object to query.
+!     \item [{[grid]}]
+!           The {\tt ESMF\_Grid} associated with the {\tt bundle}.
+!     \item [{[fieldCount]}]
+!           Number of {\tt ESMF\_Field}s in the {\tt bundle}.
+!     \item [{[name]}]
+!           A character string where the {\tt bundle} name is returned.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+      type(ESMF_BundleType), pointer :: btype     ! internal data
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      btype => bundle%btypep
+
+      if (present(grid)) then
+          ! Check to be sure bundle has grid before trying to return it.
+          if (btype%gridstatus .ne. ESMF_STATUS_READY) then
+               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Bundle does not contains a Grid", &
+                                 ESMF_CONTEXT, rc)) return
+          endif
+          
+          ! OK to return grid
+          grid = btype%grid
+      endif
+
+      if (present(fieldCount)) then
+          ! Return Field count
+          fieldCount = bundle%btypep%field_count
+      endif
+
+      if (present(name)) then
+          call c_ESMC_GetName(btype%base, name, status)
+          if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+
+      end subroutine ESMF_BundleGet
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetAllFields"
+!BOPI
+! !IROUTINE: ESMF_BundleGetAllFields - Retrieve an array of Fields 
+!
+! !INTERFACE:
+      subroutine ESMF_BundleGetAllFields(bundle, fieldList, fieldCount, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Field), dimension (:), optional :: fieldList
+      integer, intent(out), optional :: fieldCount
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return all {\tt ESMF\_Field}s in an {\tt ESMF\_Bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           The {\tt ESMF\_Bundle} to query for the {\tt ESMF\_Field}s.
+!     \item [{[fieldList]}]
+!           {\tt ESMF\_Field} array.
+!     \item [{[fieldCount]}]
+!           Return the number of {\tt ESMF\_Field}s in the {\tt bundle}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  FLD2.5.6
-!
-!  TODO: code goes here
-!
+
+
+      integer :: status                           ! Error status
+      type(ESMF_BundleType), pointer :: btype     ! internal data
+      integer :: nitems                           ! items in return array
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      btype => bundle%btypep
+
+      ! Return Fields
+      if (present(fieldList)) then
+          nitems = size(fieldList)
+          if (nitems .lt. btype%field_count) then
+              if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                       "More Fields in Bundle than space in fieldList array", &
+                                        ESMF_CONTEXT, rc)) return
+          endif
+
+          fieldList(1:btype%field_count) = btype%flist(1:btype%field_count)
+      endif
+
+      ! Return Field count
+      if (present(fieldCount)) then
+          fieldCount = btype%field_count
+      endif
+
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
       end subroutine ESMF_BundleGetAllFields
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetInt4Attr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an integer Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetIntAttr(bundle, name, value, rc)
+      subroutine ESMF_BundleGetInt4Attr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character (len = *), intent(in) :: name
-      integer, intent(out) :: value
+      integer(ESMF_KIND_I4), intent(out) :: value
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt ESMF\_Bundle}.
-!
+!     Returns a 4-byte integer attribute from the {\tt bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
-!
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
-!
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The integer value of the named Attribute.
-!
+!           The integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_INTEGER, ESMF_I4, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleGetIntAttr
+      end subroutine ESMF_BundleGetInt4Attr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetInt4ListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an integer list Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetIntListAttr(bundle, name, count, value, rc)
+      subroutine ESMF_BundleGetInt4ListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      integer, dimension(:), intent(out) :: value
+      integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns an integer list attribute from a {\tt ESMF\_Bundle}.
+!     Returns an integer list attribute from the {\tt bundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The integer values of the named Attribute.
+!           The number of values in the list.
+!     \item [valueList]
+!           The integer values of the named attribute.
+!           The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_BundleGetAttribute: count longer than value list"
-          return
-      endif
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_INTEGER, ESMF_I4, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleGetIntListAttr
+      end subroutine ESMF_BundleGetInt4ListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetInt8Attr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a real Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetRealAttr(bundle, name, value, rc)
+      subroutine ESMF_BundleGetInt8Attr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character (len = *), intent(in) :: name
-      real, intent(out) :: value
+      integer(ESMF_KIND_I8), intent(out) :: value
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from a {\tt ESMF\_Bundle}.
-!
+!     Returns an 8-byte integer attribute from the {\tt bundle}.
+! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The real value of the named Attribute.
+!           The integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_INTEGER, ESMF_I8, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleGetRealAttr
+      end subroutine ESMF_BundleGetInt8Attr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetInt8ListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a real list Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetRealListAttr(bundle, name, count, value, rc)
+      subroutine ESMF_BundleGetInt8ListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      real, dimension(:), intent(out) :: value
+      integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from a {\tt ESMF\_Bundle}.
-! 
+!     Returns an 8-byte integer list attribute from the {\tt bundle}.
+!
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The real values of the named Attribute.
+!           The number of values in the list.
+!     \item [valueList]
+!           The integer values of the named attribute.
+!           The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_BundleGetAttribute: count longer than value list"
-          return
-      endif
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_INTEGER, ESMF_I8, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleGetRealListAttr
+      end subroutine ESMF_BundleGetInt8ListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetReal4Attr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a logical Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleGetAttribute()
+      subroutine ESMF_BundleGetReal4Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R4), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a 4-byte real attribute from the {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The real value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R4, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleGetReal4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetReal4ListAttr"
+!BOP
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleGetAttribute()
+      subroutine ESMF_BundleGetReal4ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns a 4-byte real list attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the list.
+!     \item [valueList]
+!           The real values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R4, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleGetReal4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetReal8Attr"
+!BOP
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleGetAttribute()
+      subroutine ESMF_BundleGetReal8Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R8), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an 8-byte real attribute from the {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The real value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleGetReal8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetReal8ListAttr"
+!BOP
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleGetAttribute()
+      subroutine ESMF_BundleGetReal8ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns an 8-byte real list attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the list.
+!     \item [valueList]
+!           The real values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleGetReal8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetLogicalAttr"
+!BOP
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a logical attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
@@ -1065,115 +1492,121 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an logical attribute from a {\tt ESMF\_Bundle}.
+!      Returns a logical attribute from the {\tt bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The logical value of the named Attribute.
+!           The logical value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_LOGICAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleGetLogicalAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetLogicalListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a logical list Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a logical list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetLogicalListAttr(bundle, name, count, value, rc)
+      subroutine ESMF_BundleGetLogicalListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(out) :: value
+      type(ESMF_Logical), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns an logical list attribute from a {\tt ESMF\_Bundle}.
+!      Returns a logical list attribute from the {\tt bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The logical values of the named Attribute.
+!           The number of values in the list.
+!     \item [valueList]
+!           The logical values of the named attribute.
+!           The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_BundleGetAttribute: count longer than value list"
-          return
-      endif
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleGetLogicalListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetCharAttr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a character Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a character attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
@@ -1187,49 +1620,50 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt ESMF\_Bundle}.
+!      Returns a character attribute from the {\tt bundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The character value of the named Attribute.
+!           The character value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetChar(bundle%btypep%base, name, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleGetCharAttr
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetAttributeCount"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttributeCount - Query the number of Attributes
+! !IROUTINE: ESMF_BundleGetAttributeCount - Query the number of attributes
 !
 ! !INTERFACE:
       subroutine ESMF_BundleGetAttributeCount(bundle, count, rc)
@@ -1241,138 +1675,166 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
+!      Returns the number of attributes associated with the given {\tt bundle}
+!      in the argument {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [count]
-!           The number of attributes on this object.
+!           The number of attributes associated with this object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetCount(bundle%btypep%base, count, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttributeCount"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleGetAttributeCount
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetAttrInfoByName"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttributeInfo - Query an Attribute by name
+! !IROUTINE: ESMF_BundleGetAttributeInfo - Query Bundle attributes by name
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttributeInfo()
-      subroutine ESMF_BundleGetAttrInfoByName(bundle, name, type, count, rc)
+      subroutine ESMF_BundleGetAttrInfoByName(bundle, name, datatype, &
+                                              datakind, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character(len=*), intent(in) :: name
-      type(ESMF_DataType), intent(out), optional :: type
+      type(ESMF_DataType), intent(out), optional :: datatype
+      type(ESMF_DataKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
+!      Returns information associated with the named attribute, 
+!      including {\tt datatype}, {\tt datakind} (if applicable),
+!      and item {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to query.
-!     \item [type]
-!           The type of the Attribute.
-!     \item [count]
-!           The number of items in this Attribute.  For character types,
+!           The name of the attribute to query.
+!     \item [{[datatype]}]
+!           The data type of the attribute. One of the values 
+!           {\tt ESMF\_DATA\_INTEGER}, {\tt ESMF\_DATA\_REAL},
+!           {\tt ESMF\_DATA\_LOGICAL}, or {\tt ESMF\_DATA\_CHARACTER}.
+!     \item [{[datakind]}]
+!           The datakind of the attribute, if attribute is type
+!           {\tt ESMF\_DATA\_INTEGER} or {\tt ESMF\_DATA\_REAL}.
+!           One of the values {\tt ESMF\_I4}, {\tt ESMF\_I8}, {\tt ESMF\_R4},
+!           or {\tt ESMF\_R8}.
+!           For all other types the value {\tt ESMF\_NOKIND} is returned.
+!     \item [{[count]}]
+!           The number of items in this attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       type(ESMF_DataType) :: localDt
+      type(ESMF_DataKind) :: localDk
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetAttrInfoName(bundle%btypep%base, name, &
-                                           localDt, localCount, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttributeInfo"
-        return
-      endif 
+                                           localDt, localDk, localCount, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if (present(type)) type = localDt
+      if (present(datatype)) datatype = localDt
+      if (present(datakind)) datakind = localDk
       if (present(count)) count = localCount
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleGetAttrInfoByName
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetAttrInfoByNum"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttributeInfo - Query an Attribute by number
+! !IROUTINE: ESMF_BundleGetAttributeInfo - Query Bundle attributes by index number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttributeInfo()
-      subroutine ESMF_BundleGetAttrInfoByNum(bundle, num, name, type, count, rc)
+      subroutine ESMF_BundleGetAttrInfoByNum(bundle, attributeIndex, name, &
+                                             datatype, datakind, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
-      integer, intent(in) :: num
+      integer, intent(in) :: attributeIndex
       character(len=*), intent(out), optional :: name
-      type(ESMF_DataType), intent(out), optional :: type
+      type(ESMF_DataType), intent(out), optional :: datatype
+      type(ESMF_DataKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
+!      Returns information associated with the indexed attribute, 
+!      including {\tt datatype}, {\tt datakind} (if applicable),
+!      and item {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
-!     \item [num]
-!           The number of the Attribute to query.
+!           An {\tt ESMF\_Bundle} object.
+!     \item [attributeIndex]
+!           The index number of the attribute to query.
 !     \item [name]
-!           Returns the name of the Attribute.
-!     \item [type]
-!           Returns the type of the Attribute.
-!     \item [count]
-!           Returns the number of items in this Attribute.  For character types,
+!           Returns the name of the attribute.
+!     \item [{[datatype]}]
+!           The data type of the attribute. One of the values 
+!           {\tt ESMF\_DATA\_INTEGER}, {\tt ESMF\_DATA\_REAL},
+!           {\tt ESMF\_DATA\_LOGICAL}, or {\tt ESMF\_DATA\_CHARACTER}.
+!     \item [{[datakind]}]
+!           The datakind of the attribute, if attribute is type
+!           {\tt ESMF\_DATA\_INTEGER} or {\tt ESMF\_DATA\_REAL}.
+!           One of the values {\tt ESMF\_I4}, {\tt ESMF\_I8}, {\tt ESMF\_R4},
+!           or {\tt ESMF\_R8}.
+!           For all other types the value {\tt ESMF\_NOKIND} is returned.
+!     \item [{[count]}]
+!           Returns the number of items in this attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1380,76 +1842,251 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       character(len=ESMF_MAXSTR) :: localName
       type(ESMF_DataType) :: localDt
+      type(ESMF_DataKind) :: localDk
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
-      call c_ESMC_AttributeGetAttrInfoNum(bundle%btypep%base, num, &
-                                       localName, localDt, localCount, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttributeInfo"
-        return
-      endif 
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetAttrInfoNum(bundle%btypep%base, attributeIndex, &
+                                          localName, localDt, localDk, &
+                                          localCount, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (present(name)) name = localName
-      if (present(type)) type = localDt
+      if (present(datatype)) datatype = localDt
+      if (present(datakind)) datakind = localDk
       if (present(count)) count = localCount
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleGetAttrInfoByNum
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleGetDataMap - Get packed array ordering
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleIsCongruent"
+!BOPI
+! !IROUTINE: ESMF_BundleIsCongruent - Is data in Bundle the same?
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleGetDataMap(bundle, datamap, rc)
+      function ESMF_BundleIsCongruent(bundle, rc)
+
+! !RETURN VALUE:
+      logical :: ESMF_BundleIsCongruent
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
-      type(ESMF_DataMap), intent(out) :: datamap
-      integer, intent(out), optional :: rc
+      type(ESMF_Bundle), intent(inout) :: bundle
+      integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!      For querying current ordering of packed {\tt ESMF\_DataArray} type.
-!      Information is returned in the {\tt ESMF\_DataMap} type, and then can
-!      be queried by {\tt ESMF\_DataMap} subroutines for details.
+!      Returns {\tt .TRUE.} if the data in all {\tt ESMF\_Fields} in the
+!      {\tt bundle} are completely congruent, meaning they have the same
+!      data rank, type, kind, index ordering, relative location in a cell, etc.
+!      This may allow more optimized communication by grouping data together
+!      and making fewer communcations calls.  Returns {\tt .FALSE.} if the
+!      data is not congruent.   A {\tt ESMF\_Bundle} with no data, or on error
+!      this routine returns {\tt .FALSE.}.
+!
+!      This routine also resets the internal bundle flag to a known state
+!      before returning.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           The {\tt Bundle} object to query.
-!     \item [datamap]
-!           The current order/interleaf.
+!           The {\tt ESMF\_Bundle} object to query.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS:  FLD2.5.8 (pri 2)
+
+      integer :: status                            ! Error status
+      integer :: i, newstart
+      type(ESMF_BundleType), pointer :: btype      ! internal data
+      type(ESMF_BundleCongruentData) :: pattern    ! values to compare against
+      type(ESMF_BundleCongruentData) :: candidate  ! values being compared
+      type(ESMF_Field), pointer :: fieldp
+      type(ESMF_Array) :: array
+      type(ESMF_FieldDataMap) :: datamap
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+      ESMF_BundleIsCongruent = .FALSE.
+      bundle%btypep%isCongruent = .FALSE.
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      btype => bundle%btypep
+
+      newstart = 1
+
+      ! find the first field with data and set the pattern to be matched
+      do i=1, btype%field_count
+       
+        fieldp => btype%flist(i)
+        call ESMF_FieldGet(fieldp, array=array, datamap=datamap, &
+                           horzRelloc=pattern%datahorzrelloc, &
+                           vertRelloc=pattern%datavertrelloc, &
+                           haloWidth=pattern%haloWidth, rc=status)
+        if (status .ne. ESMF_SUCCESS) cycle
 
 
-!
-!  TODO: code goes here
-!
-      end subroutine ESMF_BundleGetDataMap
+        ! if you get here, this field has an array.  check it for 
+        ! data types, etc.
+        call ESMF_ArrayGet(array, rank=pattern%datarank, &
+                           type=pattern%datatype, kind=pattern%datakind, &
+                           rc=status)
+        if (status .ne. ESMF_SUCCESS) cycle
+
+        call ESMF_FieldDataMapGet(datamap, dataIndexList=pattern%indexorders, &
+                                  counts=pattern%nonindexcounts, rc=status)
+        if (status .ne. ESMF_SUCCESS) cycle
+
+        newstart = i+1
+        exit
+
+      enddo
+  
+      ! if no fields had data, return now.
+      if (newstart .le. 1) then
+          rc = ESMF_SUCCESS
+          return
+      endif
+
+      ! now starting from the pattern field, compare the rest to see if they
+      ! match.  first nonmatch we can exit with return .FALSE.
+
+      ! set this here so we can just return if we find a mismatch
+      rc = ESMF_SUCCESS
+      do i=newstart, btype%field_count
+       
+        fieldp => btype%flist(i)
+        call ESMF_FieldGet(fieldp, array=array, datamap=datamap, &
+                           horzRelloc=candidate%datahorzrelloc, &
+                           vertRelloc=candidate%datavertrelloc, &
+                           haloWidth=candidate%haloWidth, rc=status)
+        if (status .ne. ESMF_SUCCESS) return
+
+        ! if you get here, this field has an array.  check it for 
+        ! data types, etc.
+        call ESMF_ArrayGet(array, rank=candidate%datarank, &
+                           type=candidate%datatype, kind=candidate%datakind, &
+                           rc=status)
+        if (status .ne. ESMF_SUCCESS) return
+
+        call ESMF_FieldDataMapGet(datamap, &
+                                  dataIndexList=candidate%indexorders, &
+                                  counts=candidate%nonindexcounts, rc=status)
+        if (status .ne. ESMF_SUCCESS) return
+
+        ! now we have all the info; compare and bail on first mismatch
+        if (pattern%datarank .ne. candidate%datarank ) return
+        if (pattern%datatype .ne. candidate%datatype ) return
+        if (pattern%datakind .ne. candidate%datakind ) return
+        if (pattern%haloWidth .ne. candidate%haloWidth) return
+        if (pattern%datahorzrelloc .ne. candidate%datahorzrelloc) return
+        ! TODO: if grid is 2d, then this is not set.  can it still be tested?
+        if (pattern%datavertrelloc .ne. candidate%datavertrelloc ) return
+
+        ! TODO: finish this
+        !do j=1, gridrank
+        !if (pattern%indexorders(ESMF_MAXDIM) .ne. &
+        !     candidate%indexorders(ESMF_MAXDIM)) return
+        !do j=1, datarank-gridrank 
+        !if (pattern%nonindexcounts(ESMF_MAXDIM) .ne. &
+        !     candidate%nonindexcounts(ESMF_MAXDIM)) return
+
+      enddo
+     
+      ! if you get here, all fields matched
+      ESMF_BundleIsCongruent = .TRUE.
+      btype%isCongruent = .TRUE.
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+
+      end function ESMF_BundleIsCongruent
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetDataMap"
+!BOPI
+! !IROUTINE: ESMF_BundleGetDataMap - Get data ordering
+!
+! !INTERFACE:
+      subroutine ESMF_BundleGetDataMap(bundle, bundledatamap, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_BundleDataMap), intent(out) :: bundledatamap
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Query the memory ordering of packed data associated 
+!   with a {\tt bundle}, where packed data refers to 
+!   constituent {\tt ESMF\_Field} data that has been
+!   copied into a contiguous array.  Note that packing is not yet 
+!   implemented, so this method is merely a placeholder.  
+!   The method will return a {\tt bundledatamap} which can be 
+!   queried by {\tt ESMF\_BundleDataMap} methods.  
+!   However, those queries will not yield meaningful information.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           The {\tt ESMF\_Bundle} object to query.
+!     \item [bundledatamap]
+!           The current order/interleaving.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+    integer :: status                           ! Error status
+    type(ESMF_BundleType), pointer :: btype
+
+    ! Initialize return code.  Assume failure until success assured.
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Validate bundle before going further
+    call ESMF_BundleValidate(bundle, rc=status)
+    if (ESMF_LogMsgFoundError(status, &
+                              ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rc)) return
+
+    btype => bundle%btypep
+
+    bundledatamap = btype%mapping
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_BundleGetDataMap
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetFieldByName"
 !BOP
 ! !IROUTINE: ESMF_BundleGetField - Retrieve a Field by name
 !
@@ -1464,73 +2101,62 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Return a {\tt ESMF\_Field} from a {\tt ESMF\_Bundle} by name.
+!      Returns a {\tt field} from a {\tt bundle} using
+!      the {\tt field}'s {\tt name}.
 !
 !     The arguments are:
 !     \begin{description}
 !
 !     \item [bundle]
 !           {\tt ESMF\_Bundle} to query for {\tt ESMF\_Field}.
-!
 !     \item [name]
 !           {\tt ESMF\_Field} name.
-!
 !     \item [field]
 !           Returned {\tt ESMF\_Field}.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  FLD2.5.6
 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       integer :: i                                ! temp var
       logical :: found                            ! did we find a match?
       character (len=ESMF_MAXSTR) :: temp_name
-      type(ESMF_Field) :: temp_field
+      !type(ESMF_Field) :: temp_field
       type(ESMF_BundleType), pointer :: btype
 
-!     Initialize return code.  Assume failure until success assured.
+      ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       found = .FALSE.
 
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       btype => bundle%btypep
 
-!     Validate bundle before using it.
-      if (.not. associated(btype)) then
-        print *, "ERROR in ESMF_BundleGetField: bad Bundle object"
-        return
-      endif
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleGetField: bad Bundle object"
-        return
-      endif
-
-!     Check for an empty Bundle first
+      ! Check for an empty Bundle first
       if(btype%field_count .eq. 0) then
-        print *, "ERROR in ESMF_BundleGetField: Empty Bundle"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Empty Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
-!     Check each field for a match
+      ! Check each field for a match
       do i = 1, btype%field_count
   
-       call ESMF_FieldGetName(btype%flist(i), temp_name, status)
-       if (status .eq. ESMF_FAILURE) then
-         print *, "ERROR in ESMF_BundleGetField: Error getting Field name from Field ", i
-         return
-       endif
+       call ESMF_FieldGet(btype%flist(i), name=temp_name, rc=status)
+       ! "Error getting Field name from Field ", i
+       if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
        if (name .eq. temp_name) then
            field = bundle%btypep%flist(i) 
@@ -1541,37 +2167,41 @@ end function
       enddo
 
       if (.not. found) then
-        print *, "ERROR in ESMF_BundleGetField: Field not found with name ", name
-        return
+        !"Field not found with name ", name
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Field not found with requested name", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleGetFieldByName
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetFieldByNum"
 !BOP
 ! !IROUTINE: ESMF_BundleGetField - Retrieve a Field by index number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetField()
-      subroutine ESMF_BundleGetFieldByNum(bundle, index, field, rc)
+      subroutine ESMF_BundleGetFieldByNum(bundle, fieldIndex, field, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle
-      integer, intent(in) :: index
+      integer, intent(in) :: fieldIndex
       type(ESMF_Field), intent(out) :: field
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Return a {\tt ESMF\_Field} from a {\tt ESMF\_Bundle} by index number.
+!      Returns a {\tt field} from a {\tt bundle} by index number.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !           {\tt ESMF\_Bundle} to query for {\tt ESMF\_Field}.
-!     \item [index]
-!           {\tt ESMF\_Field} index number; first {\tt ESMF\_Field} index is 1.
+!     \item [fieldIndex]
+!           {\tt ESMF\_Field} index number; first {\tt fieldIndex} is 1.
 !     \item [field]
 !           Returned {\tt ESMF\_Field}.
 !     \item [{[rc]}]
@@ -1579,143 +2209,77 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  FLD2.5.6
 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       logical :: found                            ! did we find a match?
       type(ESMF_BundleType), pointer :: btype
 
-!     Initialize return code.  Assume failure until success assured.
+      ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       found = .FALSE.
 
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       btype => bundle%btypep
 
-!     Validate bundle before using it.
-      if (.not. associated(btype)) then
-        print *, "ERROR in ESMF_BundleGetField: bad Bundle object"
-        return
-      endif
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleGetField: bad Bundle object"
-        return
-      endif
-
-!     Check for an empty Bundle first
+      ! Check for an empty Bundle first
       if(btype%field_count .eq. 0) then
-        print *, "ERROR in ESMF_BundleGetField: Empty Bundle"
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Empty Bundle", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Check for out of range index number
+      if ((fieldIndex .lt. 1) .or. (fieldIndex .gt. btype%field_count)) then
+        ! "ERROR in ESMF_BundleGetField: fieldIndex ", fieldIndex, &
+        !                "out of range. Min=1, max=", btype%field_count
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Index out of range", &
+                                 ESMF_CONTEXT, rc)) return
         return
       endif
 
-!     Check for out of range index number
-      if ((index .lt. 1) .or. (index .gt. btype%field_count)) then
-        print *, "ERROR in ESMF_BundleGetField: Index ", index, &
-                        "out of range. Min=1, max=", btype%field_count
-        return
-      endif
+      ! Fetch requested field
+      field = bundle%btypep%flist(fieldIndex) 
 
-!     Fetch requested field
-      field = bundle%btypep%flist(index) 
-
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleGetFieldByNum
 
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleGetFieldCount - Return a count of the Fields in a Bundle
-!
-! !INTERFACE:
-      subroutine ESMF_BundleGetFieldCount(bundle, count, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
-      integer, intent(out) :: count
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Returns the count of {\tt ESMF\_Fields} in an {\tt ESMF\_Bundle}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           {\tt ESMF\_Bundle} to query.
-!     \item [count]
-!           Returned {\tt ESMF\_Field} count.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-! 
-!EOP
-! !REQUIREMENTS:  FLD2.5.6, FLD2.6.3
-
-
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType), pointer :: btype     ! internal data
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif    
-
-!     Validate bundle before using it.
-      btype => bundle%btypep
-      if (.not. associated(btype)) then
-        print *, "ERROR in ESMF_BundleGetFieldCount: bad Bundle object"
-        return
-      endif
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleGetFieldCount: bad Bundle object"
-        return
-      endif
-
-!     Return Field count
-      count = bundle%btypep%field_count
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleGetFieldCount
-
-
-!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetFieldNames"
 !BOP
 ! !IROUTINE: ESMF_BundleGetFieldNames - Return all Field names in a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleGetFieldNames(bundle, namelist, namecount, rc)
+      subroutine ESMF_BundleGetFieldNames(bundle, nameList, nameCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle 
-      character (len = *), intent(inout) :: namelist(:) ! TODO: change to out 
-                                                        ! after adding code
-      integer, intent(out), optional :: namecount     
+      character (len = *), intent(out) :: nameList(:)
+      integer, intent(out), optional :: nameCount     
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Return an array of {\tt ESMF\_Field} names in a {\tt ESMF\_Bundle}.
+!      Returns an array of {\tt ESMF\_Field} names in an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
-!     \item [namelist]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [nameList]
 !           An array of character strings where each {\tt ESMF\_Field} name
-!           is returned. 
-!     \item [{[namecount]}]
+!           is returned.  Must be at least as long as {\tt nameCount}.
+!     \item [{[nameCount]}]
 !           A count of how many {\tt ESMF\_Field} names were returned.  Same as
 !           the number of {\tt ESMF\_Field}s in the {\tt ESMF\_Bundle}.
 !     \item [{[rc]}]
@@ -1723,84 +2287,38 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  FLD2.6.2
 
+      integer :: i, status
+      type(ESMF_BundleType), pointer :: bp
 
-!
-!  TODO: code goes here
-!
+      bp => bundle%btypep
+
+      if (present(nameCount)) nameCount = bp%field_count
+
+      if (size(nameList) .lt. bp%field_count) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                                  "nameList too short for number of fields", &
+                                  ESMF_CONTEXT, rc)
+          return
+      endif
+
+      do i=1, bp%field_count
+          call ESMF_FieldGet(bp%flist(i), name=nameList(i), rc=status)      
+          if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      enddo 
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
       end subroutine ESMF_BundleGetFieldNames
 
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleGetGrid - Return the Grid associated with this Bundle
-!
-! !INTERFACE:
-      subroutine ESMF_BundleGetGrid(bundle, grid, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
-      type(ESMF_Grid), intent(out) :: grid
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Returns the {\tt ESMF\_Grid} associated with this {\tt ESMF\_Bundle}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
-!     \item [grid]
-!           The {\tt ESMF\_Grid} associated with all {\tt ESMF\_Field}s in this 
-!           {\tt ESMF\_Bundle}.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD2.5.7
-
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType), pointer :: btype     ! internal data
-
-!     Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-!     Validate bundle before using it.
-      btype => bundle%btypep
-      if (.not. associated(btype)) then
-        print *, "ERROR in ESMF_BundleGetGrid: bad Bundle object"
-        return
-      endif
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleGetGrid: bad Bundle object"
-        return
-      endif
-      if (btype%gridstatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleGetGrid: no associated Grid"
-        return
-      endif
-
-!     OK to return grid
-      grid = btype%grid
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-
-      end subroutine ESMF_BundleGetGrid
-
-!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetGridCellCount"
 !BOPI
-! !IROUTINE: ESMF_BundleGetGridCellCount - Returns global and local grid cell count
+! !IROUTINE: ESMF_BundleGetGridCellCount - Return global and local grid cell count
 !
 ! !INTERFACE:
       subroutine ESMF_BundleGetGridCellCount(bundle, localcount, globalcount, rc)
@@ -1828,7 +2346,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: FLD2.6.4
 !
 !  TODO: code goes here
 !
@@ -1836,6 +2353,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetGridDimCount"
 !BOPI
 ! !IROUTINE: ESMF_BundleGetGridDimCount - Get dimensionality of Grid
 !
@@ -1853,7 +2372,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object to query.
+!           An {\tt ESMF\_Bundle} object to query.
 !     \item [dimcount]
 !           The number of dimensions.
 !     \item [{[rc]}]
@@ -1862,7 +2381,6 @@ end function
 !
 !
 !EOPI
-! !REQUIREMENTS: (none. added for completeness)
 
 
 !
@@ -1873,8 +2391,10 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetGridDimSize"
 !BOPI
-! !IROUTINE: ESMF_BundleGetGridDimSize - Returns the number of items in each dimension
+! !IROUTINE: ESMF_BundleGetGridDimSize - Return the number of items in each dimension
 !
 ! !INTERFACE:
       subroutine ESMF_BundleGetGridDimSize(bundle, locallist, globallist, rc)
@@ -1903,7 +2423,6 @@ end function
 !
 !
 !EOPI
-! !REQUIREMENTS: (none. added for completeness)
 
 
 !
@@ -1913,8 +2432,10 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetGridIndexOrder"
 !BOPI
-! !IROUTINE: ESMF_BundleGetGridIndexOrder - Returns the order of the indices
+! !IROUTINE: ESMF_BundleGetGridIndexOrder - Return the order of the indices
 !
 ! !INTERFACE:
       subroutine ESMF_BundleGetGridIndexOrder(bundle, indexorder, rc)
@@ -1938,7 +2459,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: (none. added for completeness)
 
 
 !
@@ -1948,8 +2468,10 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetGridPointCount"
 !BOPI
-! !IROUTINE: ESMF_BundleGetGridPointCount - Returns global and local grids point count
+! !IROUTINE: ESMF_BundleGetGridPointCount - Return global and local grids point count
 !
 ! !INTERFACE:
       subroutine ESMF_BundleGetGridPointCount(bundle, localcount, globalcount, rc)
@@ -1977,7 +2499,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: FLD2.6.4
 
 
 !
@@ -1987,202 +2508,140 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleGetName - Return the name of the Bundle
-!
-! !INTERFACE:
-      subroutine ESMF_BundleGetName(bundle, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
-      character (len = *), intent(out) :: name
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Returns the name of the {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} was originally created
-!      without specifying a name, a unique name will have been generated
-!      by the framework.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           The {\tt Bundle} object to query.
-!     \item [name]
-!           A character string where the {\tt Bundle} name is returned.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS:  FLD2.6.1 
-
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType), pointer :: btype     ! internal data
-
-!     Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-! TODO: make this a common subroutine; all entry points need to do this
-
-!     Validate bundle before using it.
-      btype => bundle%btypep
-      if (.not. associated(btype)) then
-        print *, "ERROR in ESMF_BundleGetName: bad Bundle object"
-        return
-      endif
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleGetName: bad Bundle object"
-        return
-      endif
-
-!     OK to query for name
-      call ESMF_GetName(btype%base, name, status)
-      if(status .NE. 0) then
-        print *, "ERROR in ESMF_BundleGetName"
-        return
-      endif
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-
-      end subroutine ESMF_BundleGetName
-
-
-!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundlePackData"
 !BOPI
 ! !IROUTINE: ESMF_BundlePackData - Pack Field data into a single Array
 !
 ! !INTERFACE:
-      subroutine ESMF_BundlePackData(bundle, datamap, rc)
+      subroutine ESMF_BundlePackData(bundle, bundledatamap, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle
-      type(ESMF_DataMap), intent(in), optional :: datamap 
+      type(ESMF_BundleDataMap), intent(in), optional :: bundledatamap 
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Packs the {\tt ESMF\_Field} data into a single {\tt ESMF\_Array}.  If new {\tt ESMF\_Field}s
-!      are added to a {\tt ESMF\_Bundle} which already has Packed data, the data will
-!      have to be copied into a new {\tt ESMF\_Array}.
+!    Packs the {\tt ESMF\_Field} data into a single {\tt ESMF\_Array}.  
+!    If new {\tt ESMF\_Field}s are added to an {\tt ESMF\_Bundle} which 
+!    already has Packed data, the data will be copied.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !           Existing {\tt ESMF\_Bundle}.
 !     \item [{[datamap]}]
-!           Ordering and Interleaving information.
+!           Ordering and interleaving information.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOPI
-! !REQUIREMENTS:  FLD2.1.1, FLD2.2, FLD2.5.9
 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: i                                ! temp var
-      type(ESMF_Array) :: pkarray                 ! Array for packed data
+      !integer :: i                               ! temp var
+      !type(ESMF_Array) :: pkarray                ! Array for packed data
       type(ESMF_BundleType), pointer :: btype     ! internal data
 
-!     Initialize return code.  Assume failure until success assured.
+      ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       btype => bundle%btypep
 
-!     Validate bundle before using it.
-      if (.not. associated(btype)) then
-        print *, "ERROR in ESMF_BundlePackGrid: bad Bundle object"
-        return
-      endif
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundlePackGrid: bad Bundle object"
-        return
-      endif
+      ! TODO: remove this when implemented.
+      if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "ESMF_BundlePackData", &
+                                 ESMF_CONTEXT, rc)) return
 
-!     pkarray = ESMF_ArrayCreate(arrayspec, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundlePackData: packed Array create"
-        return
-      endif
+      !pkarray = ESMF_ArrayCreate(arrayspec, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       btype%pack_flag = ESMF_PACKED_DATA
-!     btype%localbundle%packed_data = pkarray
+      !btype%localbundle%packed_data = pkarray
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if(present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundlePackData
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundlePrint"
 !BOP
-! !IROUTINE: ESMF_BundlePrint - Print diagnostic information about a Bundle
+! !IROUTINE: ESMF_BundlePrint - Print information about a Bundle
 !
 ! !INTERFACE:
       subroutine ESMF_BundlePrint(bundle, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle
-      character (len=*), intent(in) :: options
+      character (len=*), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Print information about a {\tt ESMF\_Bundle}.  The options control the
-!      type of information and level of detail.
+!      Prints diagnostic information about the {\tt bundle}
+!      to {\tt stdout}.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [{[options]}]
-!           The print options.
+!           Print options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  
 
 
-!
-!  TODO: code goes here
-!
       character(len=ESMF_MAXSTR) :: bname, fname
+      !character(len=ESMF_MAXSTR) :: msgbuf
       type(ESMF_BundleType), pointer :: btype
-      type(ESMF_Field) :: field
+      !type(ESMF_Field) :: field
       integer :: i
       integer :: status
 
-      print *, "Bundle print:"
+    !jw  call ESMF_LogWrite("Bundle Print:", ESMF_LOG_INFO)
+      write (*, *)  "Bundle print:"
+
+      if (.not. associated(bundle%btypep)) then
+      !jw  call ESMF_LogWrite("Empty or Uninitialized Bundle", ESMF_LOG_INFO)
+        write(*,*) "Empty or Uninitialized Bundle"
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
 
       btype => bundle%btypep
-      call ESMF_GetName(btype%base, bname, status)
-      print *, "  Bundle name = ", trim(bname)
+      call c_ESMC_GetName(btype%base, bname, status)
+    !jw  write (msgbuf, *)  "  Bundle name = ", trim(bname)
+    !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+      write (*, *)  "  Bundle name = ", trim(bname)
     
-      print *, "  Field count = ", btype%field_count
+    !jw  write (msgbuf, *)  "  Field count = ", btype%field_count
+    !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+      write (*, *)  "  Field count = ", btype%field_count
     
       do i = 1, btype%field_count
   
-       call ESMF_FieldGetName(btype%flist(i), fname, status)
-       if (status .eq. ESMF_FAILURE) then
-         print *, "ERROR in ESMF_BundlePrint: Error getting Field name from Field ", i
-         return
-       endif
+       call ESMF_FieldGet(btype%flist(i), name=fname, rc=status)
+       if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-       print *, "    Field", i, "name = ", trim(fname)
+     !jw  write (msgbuf, *)  "    Field", i, "name = ", trim(fname)
+     !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+       write (*, *)  "    Field", i, "name = ", trim(fname)
       enddo
 
       ! TODO: add more code here for printing more info
@@ -2190,7 +2649,9 @@ end function
       end subroutine ESMF_BundlePrint
 
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleRead"
+!BOPI
 ! !IROUTINE: ESMF_BundleRead - Create a Bundle from an external source
 !
 ! !INTERFACE:
@@ -2210,29 +2671,32 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [{[iospec]}]
 !           The file I/O specification.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 
-!EOP
-! !REQUIREMENTS:  (which req number is this?)
+!EOPI
 
 !
 !  TODO: code goes here
 !
       type(ESMF_Bundle) :: b
 
-      b%btypep%bundlestatus = ESMF_STATE_UNINIT
+      allocate(b%btypep)
+
+      b%btypep%bundlestatus = ESMF_STATUS_UNINIT
 
       ESMF_BundleRead = b
 
       end function ESMF_BundleRead
 
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleReadRestart"
+!BOPI
 ! !IROUTINE: ESMF_BundleReadRestart - Read back a saved Bundle
 !
 ! !INTERFACE:
@@ -2254,15 +2718,14 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [{[iospec]}]
 !           The I/O specification.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
-! !REQUIREMENTS:  FLD2.5.10
+!EOPI
 
 
 !
@@ -2270,14 +2733,18 @@ end function
 !
       type(ESMF_Bundle) :: b
 
-      b%btypep%bundlestatus = ESMF_STATE_UNINIT
+      allocate(b%btypep)
+
+      b%btypep%bundlestatus = ESMF_STATUS_UNINIT
 
       ESMF_BundleReadRestart = b
 
       end function ESMF_BundleReadRestart
 
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleRemoveField"
+!BOPI
 ! !IROUTINE: ESMF_BundleRemoveField - Remove a Field from a Bundle
 !
 ! !INTERFACE:
@@ -2290,72 +2757,776 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Delete a Field reference from an existing {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} 
-!      has packed data this will mean copying the data to remove this field.
+!      Deletes an {\tt ESMF\_Field} reference from an existing {\tt bundle}
+!      by {\tt name}.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           The {\tt ESMF\_Bundle} to remove {\tt ESMF\_Field} from.
+!           The {\tt ESMF\_Bundle} to remove the {\tt ESMF\_Field} from.
 !     \item [name]
-!           Name of {\tt ESMF\_Field} to remove.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS:  FLD2.5.2
-
-
-!
-!  TODO: code goes here
-!
-      print *, "ESMF_BundleRemoveField not implemented yet"
-
-      end subroutine ESMF_BundleRemoveField
-
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_BundleReorder - Alter memory interleave in packed data
-!
-! !INTERFACE:
-      subroutine ESMF_BundleReorder(bundle, datamap, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
-      type(ESMF_DataMap), intent(in) :: datamap
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!      Used to alter memory ordering of packed {\tt ESMF\_Data} array.  Implemented by 
-!      setting the desired options in an {\tt ESMF\_DataMap} type and then passing it in
-!      as a parameter to this routine.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           The {\tt ESMF\_Bundle} to operate on.
-!     \item [datamap]
-!           The new interleave/order.
+!           The name of the {\tt ESMF\_Field} to remove.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOPI
-! !REQUIREMENTS:  FLD2.2, FLD2.3
 
 
 !
 !  TODO: code goes here
 !
-      end subroutine ESMF_BundleReorder
+      if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "ESMF_BundleRemoveField", &
+                                 ESMF_CONTEXT, rc)) return
+
+      end subroutine ESMF_BundleRemoveField
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleReorder"
+!BOPI
+! !IROUTINE: ESMF_BundleReorder - Alter memory interleave in packed data
+!
+! !INTERFACE:
+      subroutine ESMF_BundleReorder(bundle, bundledatamap, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_BundleDataMap), intent(in) :: bundledatamap
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!   Used to alter memory ordering of packed {\tt ESMF\_Array} data.  
+!   Implemented by setting the desired options in an 
+!   {\tt ESMF\_BundleDataMap} type and then passing it in
+!   as a parameter to this routine.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [bundle]
+!       The {\tt ESMF\_Bundle} to operate on.
+!   \item [datamap]
+!       The new interleave/order.
+!   \item [{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!
+!EOPI
+
+
+!
+!  TODO: code goes here
+!
+      if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "ESMF_BundleReorder", &
+                                 ESMF_CONTEXT, rc)) return
+
+      end subroutine ESMF_BundleReorder
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetInt4Attr"
+!BOPI
+! !IROUTINE: ESMF_BundleSetAttribute - Set a 4-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleSetAttribute()
+      subroutine ESMF_BundleSetInt4Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I4), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a 4-byte integer attribute to the {\tt bundle}.  
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The integer value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I4, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSetInt4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetInt4ListAttr"
+!BOP
+! !IROUTINE: ESMF_BundleSetAttribute - Set a 4-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleSetAttribute()
+      subroutine ESMF_BundleSetInt4ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a 4-byte integer list attribute to the {\tt bundle}.  
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is given 
+!     by {\tt count}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [count]
+!           The number of integers in the {\tt valueList}.
+!     \item [valueList]
+!           The integer values of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+      integer :: status 
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I4, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSetInt4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetInt8Attr"
+!BOP
+! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleSetAttribute()
+      subroutine ESMF_BundleSetInt8Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I8), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an 8-byte integer attribute to the {\tt bundle}.  
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The integer value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSetInt8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetInt8ListAttr"
+!BOP
+! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleSetAttribute()
+      subroutine ESMF_BundleSetInt8ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a 8-byte integer list attribute to the {\tt bundle}.  
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is given 
+!     by {\tt count}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [count]
+!           The number of integers in the {\tt valueList}.
+!     \item [valueList]
+!           The integer values of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+      integer :: status
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSetInt8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetReal4Attr"
+!BOP
+! !IROUTINE: ESMF_BundleSetAttribute - Set a 4-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleSetAttribute()
+      subroutine ESMF_BundleSetReal4Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R4), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a 4-byte real attribute to the {\tt bundle}.  
+!      The attribute has a {\tt name} and a {\tt value}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The real value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R4, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSetReal4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetReal8Attr"
+!BOP
+! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleSetAttribute()
+      subroutine ESMF_BundleSetReal8Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R8), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an 8-byte real attribute to the {\tt bundle}.  
+!      The attribute has a {\tt name} and a {\tt value}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The real value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSetReal8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetReal4ListAttr"
+!BOP
+! !IROUTINE: ESMF_BundleSetAttribute - Set a 4-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleSetAttribute()
+      subroutine ESMF_BundleSetReal4ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a 4-byte real list attribute to the {\tt bundle}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is given 
+!     by {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [count]
+!           The number of reals in the {\tt valueList}.
+!     \item [value]
+!           The real values of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+      integer :: limit
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R4, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSetReal4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetReal8ListAttr"
+!BOP
+! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleSetAttribute()
+      subroutine ESMF_BundleSetReal8ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches an 8-byte real list attribute to the {\tt bundle}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is given 
+!     by {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [count]
+!           The number of reals in the {\tt valueList}.
+!     \item [value]
+!           The real values of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+      integer :: limit
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSetReal8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetLogicalAttr"
+!BOP
+! !IROUTINE: ESMF_BundleSetAttribute - Set a logical attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleSetAttribute()
+      subroutine ESMF_BundleSetLogicalAttr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      type(ESMF_Logical), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a logical attribute to the {\tt bundle}.
+!      The attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The logical true/false value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSetLogicalAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetLogicalListAttr"
+!BOP
+! !IROUTINE: ESMF_BundleSetAttribute - Set a logical list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleSetAttribute()
+      subroutine ESMF_BundleSetLogicalListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a logical list attribute to the {\tt bundle}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of logical items in the {\tt value} list is given 
+!     by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [count]
+!           The number of logicals in the {\tt valueList}.
+!     \item [valueList]
+!           The logical values of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+      integer :: limit
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSetLogicalListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetCharAttr"
+!BOP
+! !IROUTINE: ESMF_BundleSetAttribute - Set a character attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleSetAttribute()
+      subroutine ESMF_BundleSetCharAttr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      character (len = *), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a character attribute to the {\tt bundle}.
+!      The attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The character value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetChar(bundle%btypep%base, name, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSetCharAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetDataValues"
 !BOPI
 ! !IROUTINE: ESMF_BundleSetDataValues - Set contents of packed array
 !
@@ -2369,9 +3540,10 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Allows data values associated with a {\tt ESMF\_Bundle} to be set through the
-!      {\tt ESMF\_Bundle} interface instead of detaching data and setting it in a loop.
-!      Various restrictions on data types may be imposed.
+!     Allows data values associated with an {\tt ESMF\_Bundle} to be 
+!     set through the {\tt ESMF\_Bundle} interface instead of 
+!     detaching data and setting it in a loop.
+!     Various restrictions on data types may be imposed.
 ! 
 !
 !     The arguments are:
@@ -2388,440 +3560,25 @@ end function
 !
 !
 !EOPI
-! !REQUIREMENTS:  FLD2.5.5
 
 
 !
 !  TODO: code goes here
 !
+
+      if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "ESMF_BundleSetDataValues", &
+                                 ESMF_CONTEXT, rc)) return
+
       end subroutine ESMF_BundleSetDataValues
 
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set an integer Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetIntAttr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an integer attribute to a {\tt ESMF\_Bundle}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [value]
-!           The integer value of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleSetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetIntAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set an integer list Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetIntListAttr(bundle, name, count, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      integer, dimension(:), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an integer list attribute to a {\tt ESMF\_Bundle}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The integer values of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: limit
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-  
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_BundleGetAttribute: count longer than value list"
-          return
-      endif
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleSetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetIntListAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set a real Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetRealAttr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
-      character (len = *), intent(in) :: name
-      real, intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a real attribute to a {\tt ESMF\_Bundle}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [value]
-!           The real value of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleSetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetRealAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set a real list Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetRealListAttr(bundle, name, count, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      real, dimension(:), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a real list attribute to a {\tt ESMF\_Bundle}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The real values of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: limit
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_BundleGetAttribute: count longer than value list"
-          return
-      endif
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleSetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetRealListAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set a logical Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetLogicalAttr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
-      character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an logical attribute to a {\tt ESMF\_Bundle}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [value]
-!           The logical true/false value of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_LOGICAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleSetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetLogicalAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set a logical list Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetLogicalListAttr(bundle, name, count, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an logical list attribute to a {\tt ESMF\_Bundle}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The logical true/false values of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: limit
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_BundleGetAttribute: count longer than value list"
-          return
-      endif
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleSetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetLogicalListAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set a character Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetCharAttr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
-      character (len = *), intent(in) :: name
-      character (len = *), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a character attribute to a {\tt ESMF\_Bundle}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [value]
-!           The character value of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeSetChar(bundle%btypep%base, name, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleSetAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetCharAttr
-
-!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSetGrid"
 !BOP
 ! !IROUTINE: ESMF_BundleSetGrid - Associate a Grid with an empty Bundle
-!
+! 
 ! !INTERFACE:
       subroutine ESMF_BundleSetGrid(bundle, grid, rc)
 !
@@ -2831,132 +3588,127 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Sets the {\tt ESMF\_Grid} for an empty {\tt ESMF\_Bundle}.  All 
-!     {\tt ESMF\_Field}s added to this {\tt ESMF\_Bundle} must have this
-!     same {\tt ESMF\_Grid}.
+!   Sets the {\tt grid} for a {\tt bundle} that contains no {\tt ESMF\_Field}s. 
+!   All {\tt ESMF\_Field}s added to this {\tt bundle} must be
+!   associated with the same {\tt ESMF\_Grid}.  Returns an error if 
+!   there is already an {\tt ESMF\_Grid} associated with the {\tt bundle}.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
-!     \item [grid]
-!           The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
-!           {\tt ESMF\_Bundle} must have.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item [bundle]
+!        An {\tt ESMF\_Bundle} object.
+!   \item [grid]
+!        The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
+!        {\tt ESMF\_Bundle} must have.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS: FLD2.5.7
 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       type(ESMF_BundleType), pointer :: btype     ! internal data
 
-!     Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
-      ! Validate bundle before using it.
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       btype => bundle%btypep
-      if (.not. associated(btype)) then
-        print *, "ERROR in ESMF_BundleSetGrid: bad Bundle object"
-        return
-      endif
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleSetGrid: bad Bundle object"
-        return
-      endif
    
       ! here we will only let someone associate a grid with a bundle
       ! if there is not one already associated with it.  
-      if (btype%gridstatus .eq. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleSetGrid: A Grid is already associated with this Bundle"
-        return
+      if (btype%gridstatus .eq. ESMF_STATUS_READY) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Bundle is already associated with a Grid", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       ! OK to set grid, but validate it first
       call ESMF_GridValidate(grid, rc=status)
-      if (status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundleSetGrid: bad Grid object"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       btype%grid = grid
-      btype%gridstatus = ESMF_STATE_READY
+      btype%gridstatus = ESMF_STATUS_READY
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
 
       end subroutine ESMF_BundleSetGrid
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleValidate"
 !BOP
-! !IROUTINE: ESMF_BundleValidate - Perform internal consistency checks
+! !IROUTINE: ESMF_BundleValidate - Check validity of a Bundle
 !
 ! !INTERFACE:
       subroutine ESMF_BundleValidate(bundle, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle
-      character (len=*), intent(in), optional :: options
+      character (len=*), intent(in), optional :: options 
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Validates that the {\tt ESMF\_Bundles} is internally consistent.
-!      Returns error code if problems are found.
+!      Validates that the {\tt bundle} is internally consistent.
+!      Currently this method determines if the {\tt bundle} is uninitialized 
+!      or already destroyed.  The method returns an error code if problems 
+!      are found.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           {\tt ESMF\_Bundle} to validate.
 !     \item [{[options]}]
-!           The validate options.
+!           Validation options are not yet supported.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt bundle}
+!           is valid.
 !     \end{description}
 
 !EOP
-! !REQUIREMENTS:  FLD4.1
 
 
       ! Local variables
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       if (.not.associated(bundle%btypep)) then 
-          print *, "Uninitialized or Destroyed Bundle"
-          return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif 
 
-      if (bundle%btypep%bundlestatus .ne. ESMF_STATE_READY) then
-          print *, "Uninitialized or Destroyed Bundle"
-          return
+      if (bundle%btypep%bundlestatus .ne. ESMF_STATUS_READY) then
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif 
 
       ! TODO: add more code here
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleValidate
 
 
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleWrite"
+!BOPI
 ! !IROUTINE: ESMF_BundleWrite - Save a Bundle to an external destination
 !
 ! !INTERFACE:
@@ -2975,7 +3727,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [{[subarray]}]
 !           The subset to write.
 !     \item [{[iospec]}]
@@ -2984,18 +3736,23 @@ end function
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
-! !REQUIREMENTS:  FLD3.1, FLD3.2, FLD3.3, FLD3.4, FLD3.5
+!EOPI
 
 
 !
 !  TODO: code goes here
 !
+      if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "ESMF_BundleWrite", &
+                                 ESMF_CONTEXT, rc)) return
+
       end subroutine ESMF_BundleWrite
 
 
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleWriteRestart"
+!BOPI
 ! !IROUTINE: ESMF_BundleWriteRestart - Save Bundle in the quickest manner possible
 !
 ! !INTERFACE:
@@ -3015,23 +3772,28 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [{[iospec]}]
 !           The I/O specification.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
-! !REQUIREMENTS:  FLD2.5.10
+!EOPI
 
 
 !
 !  TODO: code goes here
 !
+      if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "ESMF_BundleWriteRestart", &
+                                 ESMF_CONTEXT, rc)) return
+
       end subroutine ESMF_BundleWriteRestart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleTypeAddFieldList"
 !BOPI
 ! !IROUTINE: ESMF_BundleTypeAddFieldList - Add a list of Fields to a Bundle.
 !
@@ -3045,63 +3807,117 @@ end function
       integer, intent(out), optional :: rc          
 !
 ! !DESCRIPTION:
-!      Add a Field reference to an existing {\tt ESMF\_Bundl}.  The {\tt ESMF\_Field} must have the
-!      same Grid as the rest of the {\tt ESMF\_Fields} in the {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
-!      packed data, this will mean copying the data to add this field.
+!  Add a Field reference to an existing {\tt ESMF\_Bundle}.  
+!  The {\tt ESMF\_Field} must have the
+!  same {\tt ESMF\_Grid} as the rest of the 
+!  {\tt ESMF\_Field}s in the {\tt ESMF\_Bundle}.
+!  If the {\tt ESMF\_Bundle} has
+!  packed data this will mean making a copy of the data.
+!  Note: packed data is currently not supported. 
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [btype]
-!           {\tt ESMF\_BundleType} to add {\tt ESMF\_Field}s into.
-!     \item [fieldCount]
-!           Number of fields to be added to the {\tt ESMF\_Bundle}.
-!           Must be equal to or less than the number of 
-!           {\tt ESMF\_Field}s in the following argument.
-!     \item [fields]
-!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
-!           items will be added to the {\tt ESMF\_Bundle}.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!  The arguments are:
+!  \begin{description}
+!  \item [btype]
+!        {\tt ESMF\_BundleType} to add {\tt ESMF\_Field}s into.
+!  \item [fieldCount]
+!        Number of fields to be added to the {\tt ESMF\_Bundle}.
+!        Must be equal to or less than the number of 
+!        {\tt ESMF\_Field}s in the following argument.
+!  \item [fields]
+!        Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
+!        items will be added to the {\tt ESMF\_Bundle}.
+!  \item [{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
 ! 
 !EOPI
       
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       integer :: i                                ! temp var
       type(ESMF_Field), dimension(:), pointer :: temp_flist  
                                                   ! list of fields
-      type(ESMF_Grid) :: grid
+      type(ESMF_Grid) :: testgrid, matchgrid
+      logical :: wasempty
 
       ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if(present(rc)) rc = ESMF_FAILURE
 
       ! Initial values
       nullify(temp_flist)
     
       ! early exit.
       if (fieldCount .le. 0) then
-          print *, "ERROR in ESMF_BundleAddField: called with 0 Fields"
-          return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                 "called with no Fields", &
+                                 ESMF_CONTEXT, rc)) return
       endif
       
-   
-! TODO: add consistency checks below
-!       loop over field count, get grid and check to see it's the same
+      ! validate fields before moving ahead
+      do i=1, fieldCount
+         call ESMF_FieldValidate(fields(i), rc=status)
+         if (ESMF_LogMsgFoundError(status, &
+                        "Invalid Field found when trying to add into Bundle", &
+                                   ESMF_CONTEXT, rc)) return
+      enddo
+
+      ! consistency checking.  logic is: 
+      !    if bundle has grid, use it to compare against
+      !    if bundle has no grid, find first field w/ grid and use it instead
+      !    if field has no grid, skip it 
+      !    if inconsistent grid found in list, exit w/ error leaving bundle
+      !       unchanged
+      !    if all ok, then if bundle had no grid originally, set it here 
+
+      nullify(matchgrid%ptr)
+      if (btype%gridstatus .eq. ESMF_STATUS_UNINIT) then
+          do i=1, fieldCount
+            ! an error here is not fatal; just means field has no grid yet.
+            call ESMF_FieldGet(fields(i), grid=testgrid, rc=status)
+            if (status .ne. ESMF_SUCCESS) cycle
+
+            ! use grid from first field in add list which contains one
+            matchgrid = testgrid
+            exit
+          enddo
+       else
+          ! use the grid already associated with the bundle 
+          matchgrid = btype%grid
+       endif
+  
+       ! if bundle has no grid, and all new fields have no grid, then 
+       ! we cannot do any grid consistency checks here.  so only continue
+       ! here if someone somewhere has a grid to compare against.
+       if (associated(matchgrid%ptr)) then
+          ! check matchgrid against each new grid in the add list
+          do i=1, fieldCount
+            call ESMF_FieldGet(fields(i), grid=testgrid, rc=status)
+            if (status .ne. ESMF_SUCCESS) cycle
+
+            if (.not.associated(matchgrid%ptr, testgrid%ptr)) then
+                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                   "Fields with inconsistent Grids cannot be added to Bundle", &
+                                 ESMF_CONTEXT, rc)) return
+            endif
+          enddo
+          ! if this is the first field added with a grid, set the bundle grid
+          if (btype%gridstatus .eq. ESMF_STATUS_UNINIT) then
+            btype%grid = matchgrid
+            btype%gridstatus = ESMF_STATUS_READY
+          endif
+      endif
+
+      ! if we get this far, either no one has any grids, or the grids
+      ! have passed the consistency check.  add them to the bundle.
 
       ! Add the fields in the list, checking for consistency.
       if (btype%field_count .eq. 0) then
         
+          wasempty = .TRUE. 
+
           allocate(btype%flist(fieldCount), stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleAddField: Fieldlist allocate"
-            return
-          endif
+          if (ESMF_LogMsgFoundAllocError(status, "Fieldlist allocate", &
+                                       ESMF_CONTEXT, rc)) return
          
           ! now add the fields to the new list
           do i=1, fieldCount
@@ -3110,12 +3926,13 @@ end function
 
           btype%field_count = fieldCount
       else
+
+          wasempty = .FALSE.
+
           ! make a list the right length
           allocate(temp_flist(btype%field_count + fieldCount), stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleConstructNew: temporary Fieldlist allocate"
-            return
-          endif
+          if (ESMF_LogMsgFoundAllocError(status, "temp Fieldlist allocate", &
+                                       ESMF_CONTEXT, rc)) return
 
           ! preserve old contents
           do i = 1, btype%field_count
@@ -3129,30 +3946,13 @@ end function
 
           ! delete old list
           deallocate(btype%flist, stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleConstructNew: Fieldlist deallocate"
-          endif
+          if (ESMF_LogMsgFoundAllocError(status, "Fieldlist deallocate", &
+                                       ESMF_CONTEXT, rc)) return
 
           ! and now make this the permanent list
           btype%flist => temp_flist
           btype%field_count = btype%field_count + fieldCount
 
-      endif
-
-      ! If no grid set yet, loop and set the first grid we find to be
-      !  associated with the bundle.  Note that Fields can be created
-      !  that don't have associated grids yet, so we have to be able to
-      !  deal consistently with that.
-      if (btype%gridstatus .eq. ESMF_STATE_UNINIT) then
-          do i=1, fieldCount
-            call ESMF_FieldGetGrid(btype%flist(i), grid, status)
-            if (status .ne. ESMF_SUCCESS) cycle
-
-            btype%grid = grid
-            btype%gridstatus = ESMF_STATE_READY
-            status = ESMF_SUCCESS
-            exit
-          enddo
       endif
 
       ! If packed data buffer requested, create or update it here.
@@ -3162,25 +3962,75 @@ end function
 
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      ! TODO: outstanding architectural issue:
+      ! unless all the fields are required to contain data before they are
+      ! added to the bundle, we cannot set the congruent flag yet -- it is
+      ! possible with the current interfaces to add empty fields to a bundle
+      ! and then add inconsistent grids to the fields -- which needs to be
+      ! avoided; but also the data can be added afterwards and there is no
+      ! obvious time to check for consistency/congruency.   the suggested
+      ! fix is that a field being added to a bundle must already contain both
+      ! a grid and the data array, so we can do the checking here.
+
+      ! all the handling below is to fool around with maintaining information
+      ! about whether the data fields inside this bundle are identical in
+      ! rank, data type, relloc, index order, etc.  if we know they already
+      ! are not, we can jump around the code to the continue.  otherwise we
+      ! have to test the new fields to make sure they match in datatype.
+
+      ! if already known that field data is not the same, then do not
+      ! bother to test recently added fields.  but if true, then compare
+      ! the fields to see if the types all match.   an optimization is to
+      ! only compare the newly added fields and not search the old ones.
+      if (btype%isCongruent) then
+          ! compare the last fieldCount fields against the congruent data
+          ! type stored in the bundle.  if the bundle is empty, set the
+          ! congruent info from the first one and then proceed from fields
+          ! 2 thru fieldCount.
+         
+          ! if not contradicted by the data, leave isCongruent .TRUE.
+          ! else at the first mismatch, set isCongruent to .FALSE. and
+          ! bail out of the loop.
+          if (wasempty) then
+              ! search the fields looking for one with data (it is possible
+              ! none have data - in which case we cannot change the flag)
+              ! the first one sets the congruent pattern which all others
+              ! must match to optimize the communication of this bundle
+              ! in the most extreme version.  (other optimizations are possible
+              ! with non-congruent bundles.
+              
+              ! if all empty, get out
+              ! if not, set the congruent datainfo here
+          endif
+          
+      endif
+
+      ! TODO: this code does nothing with the congruent flag right now.
+      ! this needs to be fixed before the bundle communication code can 
+      ! be considered robust.
+
+10 continue
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleTypeAddFieldList
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleTypeRepackData"
 !BOPI
 ! !IROUTINE: ESMF_BundleTypeRepackData - Pack Field data into a single Array
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleTypeRepackData(btype, datamap, rc)
+      subroutine ESMF_BundleTypeRepackData(btype, bundledatamap, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_BundleType), pointer :: btype
-      type(ESMF_DataMap), intent(in), optional :: datamap 
+      type(ESMF_BundleDataMap), intent(in), optional :: bundledatamap 
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !      Packs the {\tt ESMF\_Field} data into a single {\tt ESMF\_Array}.  If new {\tt ESMF\_Field}s
-!      are added to a {\tt ESMF\_Bundle} which already has Packed data, the data will
+!      are added to an {\tt ESMF\_Bundle} which already has Packed data, the data will
 !      have to be copied into a new {\tt ESMF\_Array}.
 !
 !     The arguments are:
@@ -3194,123 +4044,124 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  FLD2.1.1, FLD2.2, FLD2.5.9
 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: i                                ! temp var
-      type(ESMF_Array) :: pkarray                 ! Array for packed data
+      !type(ESMF_Array) :: pkarray                 ! Array for packed data
 
-!     Initialize return code.  Assume failure until success assured.
+      ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     pkarray = ESMF_ArrayCreate(arrayspec, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundlePackData: packed Array create"
-        return
-      endif
+      ! TODO: take this out when implemented
+      if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Packed Data not supported yet in Bundles", &
+                                ESMF_CONTEXT, rc)) return
+
+      !pkarray = ESMF_ArrayCreate(arrayspec, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       btype%pack_flag = ESMF_PACKED_DATA
-!     btype%localbundle%packed_data = pkarray
+      !btype%localbundle%packed_data = pkarray
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleTypeRepackData
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleConstructNew"
 !BOPI
 ! !IROUTINE: ESMF_BundleConstructNew - Construct the internals of a Bundle
 !
 ! !INTERFACE:
       subroutine ESMF_BundleConstructNew(btype, fieldCount, fields, &
-                                              packflag, name, iospec, rc)
+                                         packflag, bundleinterleave, &
+                                         name, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_BundleType), pointer :: btype 
       integer, intent(in) :: fieldCount           
       type(ESMF_Field), dimension (:) :: fields
       type(ESMF_PackFlag), intent(in), optional :: packflag 
+      type(ESMF_InterleaveFlag), intent(in), optional :: bundleinterleave
       character (len = *), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Constructs a {\tt ESMF\_Bundle} from a list of existing
-!     gridded {\tt ESMF\_Fields}.  This routine requires an existing
-!     {\tt ESMF\_Bundle} type as an input and fills in
-!     the internals.  {\tt ESMF\_BundleCreateNew()} does
-!     the allocation of an {\tt ESMF\_Bundle} type first and then
-!     calls this routine.
+!   Constructs an {\tt ESMF\_Bundle} from a list of existing
+!   gridded {\tt ESMF\_Fields}.  This routine requires an existing
+!   {\tt ESMF\_Bundle} type as an input and fills in
+!   the internals.  {\tt ESMF\_BundleCreateNew()} does
+!   the allocation of an {\tt ESMF\_Bundle} type first and then
+!   calls this routine.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [btype]
-!           Pointer to a {\tt ESMF\_Bundle} object.
-!     \item [fieldCount]
-!           Number of fields to be added to the {\tt ESMF\_Bundle}.
-!           Must be equal to or less than the number of
-!           {\tt ESMF\_Field}s in the following argument.
-!     \item [fields]
-!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
-!           items will be added to the {\tt ESMF\_Bundle}.
-!     \item [{[packflag]}]
-!           If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt ESMF\_Field}
-!           data in individual {\tt ESMF\_Array}s will be collected
-!           into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
-!           The default is {\tt ESMF\_NO\_PACKED\_DATA}.
-!     \item [{[name]}]
-!           {\tt ESMF\_Bundle} name.  A default name will be generated if
-!           one is not specified.
-!     \item [{[iospec]}]
-!           I/O specification.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item [btype]
+!      Pointer to an {\tt ESMF\_Bundle} object.
+!   \item [fieldCount]
+!      Number of fields to be added to the {\tt ESMF\_Bundle}.
+!      Must be equal to or less than the number of
+!      {\tt ESMF\_Field}s in the following argument.
+!   \item [fields]
+!      Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
+!      items will be added to the {\tt ESMF\_Bundle}.
+!   \item [{[packflag]}]
+!      If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt ESMF\_Field}
+!      data in individual {\tt ESMF\_Array}s will be collected
+!      into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
+!      The default is {\tt ESMF\_NO\_PACKED\_DATA}.
+!   \item [{[bundleinterleave]}]
+!      {\tt ESMF\_Interleave} type.  Controls whether the data in
+!      the packed bundle is interleaved by field or by item.
+!      Valid options are {\tt ESMF\_INTERLEAVE\_BY\_BLOCK} or
+!      {\tt ESMF\_INTERLEAVE\_BY\_ITEM}.  The default is by item.
+!   \item [{[name]}]
+!      {\tt ESMF\_Bundle} name.  A default name will be generated if
+!      one is not specified.
+!   \item [{[iospec]}]
+!      I/O specification.
+!   \item [{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
       
-      integer :: i                                ! temp var
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
-!     Initialize return code.  Assume failure until success assured.
+      ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Initialize the derived type contents.
+      ! Initialize the derived type contents.
       call ESMF_BundleConstructNoFields(btype, name, iospec, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundleConstructNew: Bundle construct"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-!     If specified, set packflag
+      ! If specified, set packflag and interleave
       if(present(packflag)) btype%pack_flag = packflag
+      if(present(bundleinterleave)) btype%fil%field_bfa%bfa_type = bundleinterleave
 
-!     Add the fields in the list, checking for consistency.
+      ! Add the fields in the list, checking for consistency.
       call ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundleConstructNew: Bundle construct"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleConstructNew
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleConstructNoFields"
 !BOPI
 ! !IROUTINE: ESMF_BundleConstructNoFields - Construct the internals of a Bundle
 !
@@ -3324,7 +4175,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Constructs the internals of a {\tt ESMF\_Bundle}, given an existing
+!     Constructs the internals of an {\tt ESMF\_Bundle}, given an existing
 !     {\tt ESMF\_Bundle} type as an input.
 !
 !     The arguments are:
@@ -3343,46 +4194,47 @@ end function
 !EOPI
       
       integer :: status                            ! Error status
-      logical :: rcpresent                         ! Return code present
-      character (len = ESMF_MAXSTR) :: defaultname ! Bundle name if not given
+      !character (len = ESMF_MAXSTR) :: defaultname ! Bundle name if not given
 
       ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
-      rcpresent =.FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
 
       ! Initialize the base object
+      btype%base%this = ESMF_NULL_POINTER
       call ESMF_BaseCreate(btype%base, "Bundle", name, 0, status)
-      if(status .NE. 0) then
-        print *, "ERROR in ESMF_BundleConstructNoFields: BaseCreate"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-
-      ! Initialize bundle contents
-      
-      btype%localbundle%gridstatus = ESMF_STATE_UNINIT
-      btype%localbundle%arraystatus = ESMF_STATE_UNINIT
-      btype%gridstatus = ESMF_STATE_UNINIT
+   
+      ! Initialize bundle contents.  An empty Bundle starts out with the
+      ! status flags uninitialized, and assumes all data is congruent.
+      ! As fields are added, the first non-compliant one turns the flag
+      ! to false, and after it is false, there is no way to set it back
+      ! to true.
+      btype%localbundle%gridstatus = ESMF_STATUS_UNINIT
+      btype%localbundle%arraystatus = ESMF_STATUS_UNINIT
+      btype%gridstatus = ESMF_STATUS_UNINIT
+      btype%isCongruent = .TRUE.
    
       btype%field_count = 0
       nullify(btype%flist)
       
       btype%pack_flag = ESMF_NO_PACKED_DATA
 !     nullify(btype%localbundle%packed_data)
-      btype%bundlestatus = ESMF_STATE_READY
+      btype%bundlestatus = ESMF_STATUS_READY
   
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleConstructNoFields
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDestruct"
 !BOPI
 ! !IROUTINE: ESMF_BundleDestruct - Free contents of a Bundle 
 !
@@ -3399,40 +4251,289 @@ end function
 !
 !     \begin{description}
 !     \item [btype]
-!           Pointer to a {\tt ESMF\_Bundle} object.
+!           Pointer to an {\tt ESMF\_Bundle} object.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
 
-      logical :: rcpresent                        ! Return code present
       integer :: status
 
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
+
+      btype%bundlestatus = ESMF_STATUS_INVALID
+      call ESMF_BaseDestroy(btype%base, status)
+
+      ! TODO: if packed array exists, add code to delete the array here.
+
+      if (associated(btype%flist)) then
+          deallocate(btype%flist, stat=status)
+          if (ESMF_LogMsgFoundAllocError(status, "Bundle deallocate", &
+                                         ESMF_CONTEXT, rc)) return
+
       endif
 
-     btype%bundlestatus = ESMF_STATE_INVALID
-     call ESMF_BaseDestroy(btype%base, status)
-
-     !
-     ! TODO: code goes here
-     !
+      if (present(rc)) rc = status
 
 
-     if (rcpresent) rc = status
+      end subroutine ESMF_BundleDestruct
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleSerialize"
+
+!BOPI
+! !IROUTINE: ESMF_BundleSerialize - Serialize bundle info into a byte stream
+!
+! !INTERFACE:
+      subroutine ESMF_BundleSerialize(bundle, buffer, length, offset, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle 
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: length
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes an {\tt ESMF\_Bundle} object and adds all the information needed
+!      to save the information to a file or recreate the object based on this
+!      information.   Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_BundleWrite()} and {\tt ESMF\_BundleRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           {\tt ESMF\_Bundle} object to be serialized.
+!     \item [buffer]
+!           Data buffer which will hold the serialized information.
+!     \item [length]
+!           Current length of buffer, in bytes.  If the serialization
+!           process needs more space it will allocate it and update
+!           this length.
+!     \item [offset]
+!           Current write offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc                     ! Error status
+      integer :: i
+      type(ESMF_BundleType), pointer :: bp   ! bundle type
+
+      ! shortcut to internals
+      bp => bundle%btypep
+
+#if 0
+        type(ESMF_Base) :: base                   ! base class object
+        type(ESMF_Field), dimension(:), pointer :: flist
+        type(ESMF_Status) :: bundlestatus
+        type(ESMF_Status) :: gridstatus
+        integer :: field_count
+        type(ESMF_Grid) :: grid                  ! associated global grid
+        type(ESMF_LocalBundle) :: localbundle    ! this differs per DE
+        type(ESMF_Packflag) :: pack_flag         ! is packed data present?
+        type(ESMF_BundleFieldInterleave) :: fil  ! ordering in buffer
+        type(ESMF_BundleDataMap) :: mapping      ! map info
+        type(ESMF_IOSpec) :: iospec              ! iospec values
+        type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
+#endif
+
+      call c_ESMC_BaseSerialize(bp%base, buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BundleSerialize(bp%bundlestatus, bp%gridstatus, &
+                                 bp%field_count, bp%pack_flag, &
+                                 bp%mapping, bp%iostatus, &
+                                 buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      if (bp%gridstatus .eq. ESMF_STATUS_READY) then
+          call ESMF_GridSerialize(bp%grid, buffer, length, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+
+      endif
+
+      ! TODO: decide if these need to be sent before or after
+      do i = 1, bp%field_count
+          call ESMF_FieldSerialize(bp%flist(i), buffer, length, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      enddo
+
+    ! TODO: if shallow, call C directly?
+      !call ESMF_BundleDataMapSerialize(bp%mapping, buffer, length, &
+      !                                offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+    ! TODO: if shallow, call C directly?
+      !call ESMF_IOSpecSerialize(bp%iospec, buffer, length, offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+     ! TODO: call C directly here?
+      !call ESMF_ArraySerialize(bp%localbundle%localdata, buffer, length, &
+      !                          offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSerialize
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDeserialize"
+
+!BOPI
+! !IROUTINE: ESMF_BundleDeserialize - Deserialize a byte stream into a Bundle
+!
+! !INTERFACE:
+      function ESMF_BundleDeserialize(vm, buffer, offset, rc) 
+!
+! !RETURN VALUE:
+      type(ESMF_Bundle) :: ESMF_BundleDeserialize   
+!
+! !ARGUMENTS:
+      type(ESMF_VM), intent(in) :: vm
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes a byte-stream buffer and reads the information needed to
+!      recreate a Bundle object.  Recursively calls the deserialize routines
+!      needed to recreate the subobjects.
+!      Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_BundleWrite()} and {\tt ESMF\_BundleRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [vm]
+!           Current VM in which this object should be created.
+!     \item [buffer]
+!           Data buffer which holds the serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           unread byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc, status             ! Error status, allocation status
+      integer :: i
+      type(ESMF_BundleType), pointer :: bp   ! bundle type
+
+      ! in case of error, make sure this is invalid.
+      nullify(ESMF_BundleDeserialize%btypep)
+
+      ! shortcut to internals
+      allocate(bp, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, &
+                                     "space for new Bundle object", &
+                                     ESMF_CONTEXT, rc)) return
 
 
-     end subroutine ESMF_BundleDestruct
+      call ESMF_BaseCreate(bp%base, "Bundle", "dummy", 0, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
+      ! this overwrites the name and adds attributes to the base obj.
+      call c_ESMC_BaseDeserialize(bp%base, buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
+      call c_ESMC_BundleDeserialize(bp%bundlestatus, bp%gridstatus, &
+                                 bp%field_count, bp%pack_flag, &
+                                 bp%mapping, bp%iostatus, &
+                                 buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
+      if (bp%gridstatus .eq. ESMF_STATUS_READY) then
+          bp%grid = ESMF_GridDeserialize(vm, buffer, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+
+      ! TODO: decide if these need to be sent before or after
+      allocate(bp%flist(bp%field_count), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, &
+                                     "Field list", &
+                                     ESMF_CONTEXT, rc)) return
+
+      do i = 1, bp%field_count
+          bp%flist(i) = ESMF_FieldDeserialize(vm, buffer, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      enddo
+
+    ! TODO: if shallow, call C directly?
+      !call ESMF_BundleDataMapDeserialize(bp%mapping, buffer, &
+      !                                offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+    ! TODO: if shallow, call C directly?
+      !call ESMF_IOSpecDeserialize(bp%iospec, buffer, offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+     ! TODO: call C directly here?
+      !call ESMF_ArrayDeserialize(bp%localbundle%localdata, buffer, &
+      !                          offset, localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                           ESMF_ERR_PASSTHRU, &
+      !                           ESMF_CONTEXT, rc)) return
+
+      ESMF_BundleDeserialize%btypep => bp
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_BundleDeserialize
+!------------------------------------------------------------------------------
 
 
       end module ESMF_BundleMod
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

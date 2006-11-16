@@ -1,12 +1,12 @@
-// $Id: ESMC_Calendar.h,v 1.37 2004/03/05 00:51:08 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.48.2.1 2006/11/16 00:15:44 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research,
+// Copyright 2002-2008, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 // ESMF Calendar C++ definition include file
 //
@@ -25,6 +25,7 @@
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.
+ #include <ESMC_Start.h>
  #include <ESMF_TimeMgr.inc>
 
 //-------------------------------------------------------------------------
@@ -38,8 +39,8 @@
 // the full code (bodies) for the {\tt Calendar} methods.
 //
 // The {\tt Calendar} class encapsulates the knowledge (attributes and
-// behavior) of all required calendar types:  Gregorian, Julian, no-leap,
-//  360-day, custom, and no-calendar.
+// behavior) of all required calendar types:  Gregorian, Julian, Julian Day,
+// no-leap, 360-day, custom, and no-calendar.
 //
 // The {\tt Calendar} class encapsulates the definition of all required
 // calendar types. For each calendar type, it contains the number of months
@@ -51,7 +52,7 @@
 // The {\tt Calendar} class defines two methods for converting in both
 // directions between the core {\tt BaseTime} class representation and a
 // calendar date.  Calculations of time intervals (deltas) between
-// timeiinstants is done by the base class {\tt BaseTime} in the core units
+// time instants is done by the base class {\tt BaseTime} in the core units
 // of seconds and fractional seconds.  Thus,  a calendar is only needed for
 // converting core time to calendar time and vice versa.
 //
@@ -76,12 +77,10 @@ class ESMC_TimeInterval;
 // TODO: replace with monthsPerYear property
 #define MONTHS_PER_YEAR 12
 
-// TODO: make function for Gregorian only?
-#define ESMC_IS_LEAP_YEAR(year)  ( (year%400 == 0) || ((year%4 == 0) && \
-                                                       (year%100 != 0)) )
-
 // (TMG 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.3.5)
+#define CALENDAR_TYPE_COUNT 7
 enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
+                        ESMC_CAL_JULIAN,
                         ESMC_CAL_JULIANDAY,
                         ESMC_CAL_NOLEAP,      // like Gregorian, except
                                               //   Feb always has 28 days
@@ -91,7 +90,8 @@ enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
                                               //   only
                         // Note: add new calendars between ESMC_CAL_GREGORIAN
                         // and ESMC_CAL_NOCALENDAR so Validate() doesn't need
-                        // to change
+                        // to change.  Also add to static intializers at top
+                        // of ESMC_Calendar.C
 
 // !PUBLIC TYPES:
  class ESMC_Calendar;
@@ -121,6 +121,14 @@ class ESMC_Calendar {
         ESMF_KIND_I4 dN;   // fractional number of days per year (numerator)
         ESMF_KIND_I4 dD;   //                                    (denominator)
     } daysPerYear;    // e.g. for Venus, d=0, dN=926, dD=1000
+
+    // array of calendar type name strings
+    static const char *const calendarTypeName[CALENDAR_TYPE_COUNT];
+
+    // one-of-each calendar type held automatically, as needed
+    static ESMC_Calendar *internalCalendar[CALENDAR_TYPE_COUNT];
+    static ESMC_Calendar *defaultCalendar;  // set-up upon ESMF_Initialize();
+                                            // defaults to ESMC_CAL_NOCALENDAR
 
     int               id;         // unique identifier. used for equality
                                   //    checks and to generate unique default
@@ -170,22 +178,26 @@ class ESMC_Calendar {
     //  (TMG 2.4.5, 2.5.6)
     int ESMC_CalendarConvertToTime(ESMF_KIND_I8 yy, int mm, int dd,
                                    ESMF_KIND_I8 d, ESMC_BaseTime *t) const;
-    int ESMC_CalendarConvertToDate(const ESMC_BaseTime *t,
-                             ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
-                             int *mm=0, int *dd=0,
-                             ESMF_KIND_I4 *d=0, ESMF_KIND_I8 *d_i8=0,
-                             ESMF_KIND_R8 *d_r8=0) const;
+    int ESMC_CalendarConvertToDate(ESMC_BaseTime *t,
+                                   ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
+                                   int *mm=0, int *dd=0,
+                                   ESMF_KIND_I4 *d=0, ESMF_KIND_I8 *d_i8=0,
+                                   ESMF_KIND_R8 *d_r8=0) const;
 
     ESMC_Time ESMC_CalendarIncrement(const ESMC_Time *time,
-                                     const ESMC_TimeInterval &timeInterval)
+                                     const ESMC_TimeInterval &timeinterval)
                                      const;
 
     ESMC_Time ESMC_CalendarDecrement(const ESMC_Time *time,
-                                     const ESMC_TimeInterval &timeInterval)
+                                     const ESMC_TimeInterval &timeinterval)
                                      const;
 
+    bool ESMC_CalendarIsLeapYear(ESMF_KIND_I8 yy, int *rc=0) const;
+
     bool operator==(const ESMC_Calendar &) const;
+    bool operator==(const ESMC_CalendarType &) const;
     bool operator!=(const ESMC_Calendar &) const;
+    bool operator!=(const ESMC_CalendarType &) const;
 
     // TODO:  add method to convert calendar interval to core time ?
 
@@ -203,7 +215,8 @@ class ESMC_Calendar {
     int ESMC_CalendarValidate(const char *options=0) const;
 
     // for testing/debugging
-    int ESMC_CalendarPrint(const char *options=0) const;
+    int ESMC_CalendarPrint(const char *options=0, 
+                           const ESMC_Time *time=0) const;
 
     // native C++ constructors/destructors
     ESMC_Calendar(void);
@@ -220,6 +233,9 @@ class ESMC_Calendar {
     friend ESMC_Calendar *ESMC_CalendarCreate(int, const char*,
                                               ESMC_CalendarType, int*);
 
+    // friend function to allocate and initialize internal calendar from heap
+    friend int ESMC_CalendarCreate(ESMC_CalendarType);
+
     // friend function to allocate and initialize custom calendar from heap
     friend ESMC_Calendar *ESMC_CalendarCreate(int, const char*,
                                               int*, int,
@@ -231,14 +247,23 @@ class ESMC_Calendar {
     // friend function to copy a calendar
     friend ESMC_Calendar *ESMC_CalendarCreate(ESMC_Calendar*, int*);
 
-    // friend function to de-allocate clock
+    // friend function to de-allocate calendar
     friend int ESMC_CalendarDestroy(ESMC_Calendar **);
+
+    // friend function to de-allocate all internal calendars
+    friend int ESMC_CalendarFinalize(void);
     
+    // friend functions to initialize and set the default calendar
+    friend int ESMC_CalendarInitialize(ESMC_CalendarType *);
+    friend int ESMC_CalendarSetDefault(ESMC_Calendar **);
+    friend int ESMC_CalendarSetDefault(ESMC_CalendarType *);
+
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private:
 
     friend class ESMC_Time;
+    friend class ESMC_TimeInterval;
 
 //
  // < declare private interface methods here >
@@ -260,6 +285,9 @@ class ESMC_Calendar {
                                                            ESMC_CAL_NOCALENDAR,
                                        int*              rc=0);
 
+    // friend function to allocate and initialize internal calendar from heap
+    int ESMC_CalendarCreate(ESMC_CalendarType calendarType);
+
     // friend function to allocate and initialize custom calendar from heap
     ESMC_Calendar *ESMC_CalendarCreate(int           nameLen,
                                        const char   *name=0,
@@ -277,10 +305,18 @@ class ESMC_Calendar {
     // friend function to de-allocate calendar
     int ESMC_CalendarDestroy(ESMC_Calendar **calendar);
 
+    // friend function to de-allocate all internal calendars
+    int ESMC_CalendarFinalize(void);
+
     // friend to restore state
     ESMC_Calendar *ESMC_CalendarReadRestart(int nameLen,
                                             const char*  name=0,
                                             ESMC_IOSpec* iospec=0,
                                             int*         rc=0);
+
+    // friend functions to initialize and set the default calendar
+    int ESMC_CalendarInitialize(ESMC_CalendarType *calendarType);
+    int ESMC_CalendarSetDefault(ESMC_Calendar **calendar);
+    int ESMC_CalendarSetDefault(ESMC_CalendarType *calendarType);
 
 #endif // ESMC_CALENDAR_H

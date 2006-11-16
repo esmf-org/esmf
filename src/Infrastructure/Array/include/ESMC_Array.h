@@ -1,12 +1,12 @@
-// $Id: ESMC_Array.h,v 1.24 2004/02/11 19:03:47 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.37.2.1 2006/11/16 00:15:14 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMF Array C++ declaration include file
 //
@@ -46,33 +46,20 @@
 
 // !PRIVATE TYPES:
 
-// private static data - address of fortran callback funcs
-extern "C" {
- void FTN(f_esmf_arrayf90allocate)(ESMC_Array**, int *, ESMC_DataType*,
-                                   ESMC_DataKind*, int*, int*, 
-                                   int *, int *, int *);
- void FTN(f_esmf_arrayf90deallocate)(ESMC_Array**, int*, ESMC_DataType*,
-                                     ESMC_DataKind *, int*);
-}
-
-
 // class declaration type
 class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
 
    private:
 
+    struct ESMC_AxisIndex ai_alloc[ESMF_MAXDIM]; // allocated space
     struct ESMC_AxisIndex ai_total[ESMF_MAXDIM]; // limits for whole array
     struct ESMC_AxisIndex ai_comp[ESMF_MAXDIM];  // for computational region
-    struct ESMC_AxisIndex ai_excl[ESMF_MAXDIM];  // never is sent or received
+    struct ESMC_AxisIndex ai_excl[ESMF_MAXDIM];  // data never sent or received
+    int hwidth[ESMF_MAXDIM][2];            // lower/upper halo widths / rank
+    int awidth[ESMF_MAXDIM][2];            // lower/upper alloc widths / rank
     
 // !PUBLIC MEMBER FUNCTIONS:
 //
-// pick one or the other of the init/create sections depending on
-//  whether this is a deep class (the class/derived type has pointers to
-//  other memory which must be allocated/deallocated) or a shallow class
-//  (the class/derived type is self-contained) and needs no destroy methods
-//  other than deleting the memory for the object/derived type itself.
-
   public:
     int ESMC_ArrayConstruct(int irank, ESMC_DataType dt, 
             ESMC_DataKind dk, int *counts, void *base, 
@@ -84,11 +71,21 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
     int ESMC_ArrayDestruct(void);
 
  // optional index values for subsetting and handling arrays standalone
-    int ESMC_ArrayGetAxisIndex(ESMC_DomainType dt, struct ESMC_AxisIndex *index) const;
-    int ESMC_ArraySetAxisIndex(ESMC_DomainType dt, struct ESMC_AxisIndex *index);
+    int ESMC_ArrayGetAxisIndex(ESMC_DomainType dt, 
+                               struct ESMC_AxisIndex *index) const;
+    int ESMC_ArraySetAxisIndex(ESMC_DomainType dt, 
+                               struct ESMC_AxisIndex *index);
+
+// obsolete?
+//    int ESMC_ArrayComputeAxisIndex(struct ESMC_DELayout *delayout, 
+//                                   int *decompids, int dlen);
+
+// not at right level; should move to arraycomm
+// (still used by arb distribution code for now; but remove it asap)
+
     int ESMC_ArrayGetAllAxisIndices(struct ESMC_AxisIndex *global, int nDEs,
-                 int rank, struct ESMC_AxisIndex *total,
-                 struct ESMC_AxisIndex *comp, struct ESMC_AxisIndex *excl) const; 
+             int rank, struct ESMC_AxisIndex *total,
+             struct ESMC_AxisIndex *comp, struct ESMC_AxisIndex *excl) const; 
 
     
  // accessor methods for class members
@@ -96,9 +93,13 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
     //int ESMC_ArraySet<Value>(<value type>  value);
     
  // required methods inherited and overridden from the ESMC_Base class
-    int ESMC_ArrayWrite(const char *options, const char *filename) const;
-    int ESMC_ArrayValidate(const char *options) const;
+    int ESMC_ArrayDeserialize(char *buffer, int *offset);
+    int ESMC_ArrayDeserializeNoData(char *buffer, int *offset);
     int ESMC_ArrayPrint(const char *options = NULL) const;
+    int ESMC_ArraySerialize(char *buffer, int *length, int *offset) const;
+    int ESMC_ArraySerializeNoData(char *buffer, int *length, int *offset) const;
+    int ESMC_ArrayValidate(const char *options) const;
+    int ESMC_ArrayWrite(const char *options, const char *filename) const;
 
  // native C++ constructors/destructors
 	ESMC_Array(void);
@@ -116,6 +117,14 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
                                                      return ESMF_SUCCESS;}
     ESMC_DataKind ESMC_ArrayGetKind(void) { return this->kind; }
 
+    int ESMC_ArrayGetHWidth(int *hw) { *hw = this->hwidth[0][0]; 
+                                                     return ESMF_SUCCESS; }
+    int ESMC_ArrayGetHWidthList(int *hw) { int *ip = hw;
+                                           for (int i = 0; i < rank; i++) 
+                                           {  *ip++ = this->hwidth[i][0]; 
+                                              *ip++ = this->hwidth[i][1]; }
+                                           return ESMF_SUCCESS;}
+
     int ESMC_ArraySetLengths(int n, int *l) { for (int i = 0; i < n; i++)
                                                   this->counts[i] = l[i]; 
                                               return ESMF_SUCCESS;}
@@ -128,8 +137,10 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
                                               return ESMF_SUCCESS;}
     int ESMC_ArrayGetLengths(int *ni, int *nj=NULL, int *nk=NULL, 
                                 int *nl=NULL, int *nm=NULL) { 
-           *ni = this->counts[0]; if (nj) *nj = this->counts[1]; 
-           if (nk) *nk = this->counts[2]; if (nl) *nl = this->counts[3]; 
+           *ni = this->counts[0]; 
+           if (nj) *nj = this->counts[1]; 
+           if (nk) *nk = this->counts[2]; 
+           if (nl) *nl = this->counts[3]; 
            if (nm) *nm = this->counts[4]; return ESMF_SUCCESS;}
 
     int ESMC_ArraySetBaseAddr(void *base_addr) { this->base_addr = base_addr; 
@@ -169,27 +180,22 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
     char *ESMC_ArrayGetName(void) { return ESMC_BaseGetName(); }
 
     // most important array methods
-    int ESMC_ArrayRedist(ESMC_DELayout *layout, int global_start[], 
+    int ESMC_ArrayRedist(ESMC_DELayout *delayout, int global_start[], 
                          int global_dimlengths[], int rank_trans[], 
                          int size_rank_trans, int olddecompids[], 
                          int decompids[], int size_decomp,
                           ESMC_Array *RedistArray);
-    int ESMC_ArrayHalo(ESMC_DELayout *layout,
+    int ESMC_ArrayHalo(ESMC_DELayout *delayout,
                        ESMC_AxisIndex *ai_global, int global_dimlengths[],
                        int decompids[], int size_decomp, ESMC_Logical periodic[]);
-    int ESMC_ArrayAllGather(ESMC_DELayout *layout, int decompids[],
-                            int size_decomp, int localAxisCounts[],
-                            int global_dimlengths[],
-                            int local_maxlength[], ESMC_Array **Array_out);
-    int ESMC_ArrayGather(ESMC_DELayout *layout, int decompids[], 
-                            int size_decomp, int global_dimlengths[],
-                            int local_maxlength[], int deid, ESMC_Array **Array_out);
-    int ESMC_ArrayScatter(ESMC_DELayout *layout,
-                            int decompids[], int size_decomp,
-                            int deid, ESMC_Array **Array_out);
+    int ESMC_ArrayGather(ESMC_DELayout *delayout, int decompids[], 
+                         int size_decomp, int local_axislengths[],
+                         int global_dimlengths[], int local_maxlength[],
+                         int deid, ESMC_Array **Array_out);
+    int ESMC_ArrayScatter(ESMC_DELayout *delayout,
+                          int decompids[], int size_decomp,
+                          int deid, ESMC_Array **Array_out);
     
- // < declare the rest of the public interface methods here >
-  
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private: 
@@ -222,6 +228,78 @@ ESMC_Array *ESMC_ArrayCreate_F(int rank, ESMC_DataType dt, ESMC_DataKind dk,
 ESMC_Array *ESMC_ArrayCreateNoData(int rank, ESMC_DataType dt, 
                                    ESMC_DataKind dk, ESMC_ArrayOrigin oflag,
                                    int *rc = NULL);
+
+
+// fortran accessible functions.
+#ifdef ESMC_DATA_ADDR_NEEDS_INDIR
+#define XD *
+#else
+#define XD
+#endif
+
+extern "C" {
+  void FTN(f_esmf_arrayf90allocate)(ESMC_Array**, int *, ESMC_DataType*,
+                                    ESMC_DataKind*, int*, int*, 
+                                    int *, int *, int *);
+  void FTN(f_esmf_arrayf90deallocate)(ESMC_Array**, int*, ESMC_DataType*,
+                                      ESMC_DataKind *, int*);
+
+  void FTN(c_esmc_arraycreateall)(ESMC_Array **ptr, int *rank, 
+                                  ESMC_DataType *dt, ESMC_DataKind *dk,
+                                  int *counts, int *lbounds, int *ubounds,
+                                  int *status);
+  void FTN(c_esmc_arraycreatenodata)(ESMC_Array **ptr, int *rank, 
+                                     ESMC_DataType *dt, ESMC_DataKind *dk, 
+                                     ESMC_ArrayOrigin *oflag, int *status);
+  void FTN(c_esmc_arraysetinfo)(ESMC_Array **ptr, 
+                            struct c_F90ptr *fptr, void XD *base, int *counts,
+                            int *lbounds, int *ubounds, int *offsets,
+                            ESMC_Logical *contig, ESMC_Logical *dealloc,
+			    int *hwidth, int *status);
+  void FTN(c_esmc_arraysetlengths)(ESMC_Array **ptr, int *rank, int *lengths, int *status);
+  void FTN(c_esmc_arraygetlengths)(ESMC_Array **ptr, int *rank, int *lengths, int *status);
+  void FTN(c_esmc_arraygetlbounds)(ESMC_Array **ptr, int *rank, int *lbounds, int *status);
+  void FTN(c_esmc_arraygetubounds)(ESMC_Array **ptr, int *rank, int *ubounds, int *status);
+  void FTN(c_esmc_arraygethwidth)(ESMC_Array **ptr, int *hwidth, int *status);
+  void FTN(c_esmc_arraygethwidthlist)(ESMC_Array **ptr, int *hwidth, int *status);
+  void FTN(c_esmc_arraygetrank)(ESMC_Array **ptr, int *rank, int *status);
+  void FTN(c_esmc_arraygettype)(ESMC_Array **ptr, int *type, int *status);
+  void FTN(c_esmc_arraygetkind)(ESMC_Array **ptr, int *kind, int *status);
+  void FTN(c_esmc_arraygetname)(ESMC_Array **ptr, char *name, int *status, int nlen);
+  void FTN(c_esmc_arraydestroy)(ESMC_Array **ptr, int *status);
+  void FTN(c_esmc_arraysetaxisindex)(ESMC_Array **ptr, ESMC_DomainType *dt, 
+                                     ESMC_AxisIndex *ai, int *status);
+  void FTN(c_esmc_arraygetaxisindex)(ESMC_Array **ptr, ESMC_DomainType *dt, 
+                                     ESMC_AxisIndex *ai, int *status);
+  void FTN(c_esmc_arraygetallaxisindices)(ESMC_Array **ptr, 
+                                  ESMC_AxisIndex *global, int *nDEs,
+                                  int *rank, ESMC_AxisIndex *total,
+                                  ESMC_AxisIndex *comp, ESMC_AxisIndex *excl,
+                                  int *status);
+  void FTN(c_esmc_arraygetallaxisindex)(ESMC_Array **ptr, ESMC_DomainType *dt, 
+                                  ESMC_AxisIndex *global, int *nDEs,
+                                  int *rank, ESMC_AxisIndex *ai,
+                                  int *status);
+  void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, void XD *base, int *status);
+  void FTN(c_esmc_arraygetbaseaddr)(ESMC_Array **ptr, void **base, int *status);
+  void FTN(c_esmc_arraysetf90ptr)(ESMC_Array **ptr, struct c_F90ptr *p, int *status);
+  void FTN(c_esmc_arraygetf90ptr)(ESMC_Array **ptr, struct c_F90ptr *p, int *status);
+  void FTN(c_esmc_arraysetdealloc)(ESMC_Array **ptr, int *status);
+  void FTN(c_esmc_arraysetnodealloc)(ESMC_Array **ptr, int *status);
+  void FTN(c_esmc_arrayneedsdealloc)(ESMC_Array **ptr, int flag, int *status);
+  void FTN(c_esmc_arrayprint)(ESMC_Array **ptr, char *opts, int *status, int clen);
+  void FTN(c_esmc_arraywrite)(ESMC_Array **ptr, char *opts, char *fname,
+                              int *status, int optlen, int flen);
+   void FTN(c_esmc_arrayserialize)(ESMC_Array **array, char *buf,
+                                   int *length, int *offset, int *rc);
+   void FTN(c_esmc_arraydeserialize)(ESMC_Array **array, char *buf,
+                                     int *offset, int *rc);
+   void FTN(c_esmc_arrayserializenodata)(ESMC_Array **array, char *buf,
+                                         int *length, int *offset, int *rc);
+   void FTN(c_esmc_arraydeserializenodata)(ESMC_Array **array, char *buf, 
+                                           int *offset, int *rc);
+
+}
 
 
  #endif  // ESMC_Array_H

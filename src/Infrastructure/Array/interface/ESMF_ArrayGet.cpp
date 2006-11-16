@@ -1,14 +1,15 @@
-! $Id: ESMF_ArrayGet.cpp,v 1.1 2004/03/16 18:02:19 nscollins Exp $
+! $Id: ESMF_ArrayGet.cpp,v 1.7.4.1 2006/11/16 00:15:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
+^define ESMF_FILENAME "ESMF_ArrayGet.F90"
 !
 !     ESMF Array module
       module ESMF_ArrayGetMod
@@ -29,9 +30,11 @@
 ^include "ESMF.h"
 !------------------------------------------------------------------------------
 ! !USES:
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod
+      use ESMF_LogErrMod
       use ESMF_LocalArrayMod
-      use ESMF_ArrayBaseMod
+      use ESMF_ArrayMod
       use ESMF_ArrayCreateMod
       implicit none
 
@@ -54,13 +57,12 @@ AllTypesMacro(ArrayType)
       public ESMF_ArraySetData
       public ESMF_ArrayGetData
 
-!EOP
       public operator(.eq.), operator(.ne.)
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayGet.cpp,v 1.1 2004/03/16 18:02:19 nscollins Exp $'
+      '$Id: ESMF_ArrayGet.cpp,v 1.7.4.1 2006/11/16 00:15:15 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -70,7 +72,7 @@ AllTypesMacro(ArrayType)
 
 !------------------------------------------------------------------------------
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayGetData -- Get a Fortran pointer to the data contents
 !
 ! !INTERFACE:
@@ -85,7 +87,7 @@ InterfaceMacro(ArrayGetData)
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_ArrayGetData} functions.   
 !  
-!EOP 
+!EOPI 
 end interface
 
 !==============================================================================

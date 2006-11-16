@@ -1,12 +1,12 @@
-% $Id: Grid_desc.tex,v 1.7 2003/11/17 20:48:46 jwolfe Exp $
+% $Id: Grid_desc.tex,v 1.22.2.1 2006/11/16 00:15:30 cdeluca Exp $
 %
 % Earth System Modeling Framework
-% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Copyright 2002-2008, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 % NASA Goddard Space Flight Center.
-% Licensed under the GPL.
+% Licensed under the University of Illinois-NCSA License.
 
 % <Describe class function and relation to other classes.>
 
@@ -16,88 +16,133 @@ any necessary grid information to the rest of the ESMF.  The ESMF Grid class
 is included in the Field class and the Gridded Component class
 and provides information needed in data communication methods like halo and
 redistribution.  It has methods to internally generate a variety of
-simple grids or read in more complicated grids provided by a user.  The
-ESMF Grid class supports multi-component coupling by providing a common
-structure necessary for Regridding.
+simple grids or read in more complicated grids provided by a user 
+(reading in grids is not yet implemented).  The ESMF Grid class supports
+multi-component coupling by providing a common structure necessary for regridding.
 
-A single Grid can have more than one related subGrid.  Each subGrid corresponds
-to a different representation of the Grid.  For example, a staggered Grid could
-have separate subGrids representing locations at the cell centers and cell 
-faces.  A vertical grid may also be represented as a subGrid.
+ESMF Grids are currently assumed to be two-dimensional, logically-rectangular
+horizontal grids, with an optional vertical grid whose coordinates are
+independent of those of the horizontal grid.  Each Grid is assigned a
+staggering in its create method call, which helps define the Grid according
+to typical Arakawa nomenclature.  The staggering of the Grid sets the possible
+relative locations ({\tt ESMF\_Rellocs}) for the Fields associated with that
+Grid.  This interaction between Grid and data placement is explained in detail
+in Section~\ref{sec:GridDataPlacement}.
 
-The following list the major options supported by the Grid class:
-\subsubsection{Grid Type Options}
-The following types of Grids are supported:
-\begin{description}
-   \item[ESMF\_GridType\_Unknown] unknown or undefined grid
-   \item[ESMF\_GridType\_LatLon] equally-spaced lat/lon grid
-   \item[ESMF\_GridType\_Mercator] Mercator lat/lon grid
-   \item[ESMF\_GridType\_Dipole] Displaced-pole dipole grid
-   \item[ESMF\_GridType\_Tripole] Tripolar grids
-   \item[ESMF\_GridType\_XY] Cartesian equally-space x-y grid
-   \item[ESMF\_GridType\_DataStream] Data stream
-   \item[ESMF\_GridType\_PhysFourier] Mixed Fourier Space/Phys Space grid
-   \item[ESMF\_GridType\_LatLonGauss] lat/lon grid with Gaussian latitudes
-   \item[ESMF\_GridType\_Reduced] reduced grid
-   \item[ESMF\_GridType\_SphericalSpectral] spectral space for spherical harmonics
-   \item[ESMF\_GridType\_Geodesic] spherical geodesic grid
-   \item[ESMF\_GridType\_CubedSphere] cubed sphere grid
-\end{description}
+ESMF differentiates between global data, which describes a complete set of data,
+and DE-local data, which describes a distributed or decomposed chuck of data
+located on a single DE.  The Grid class plays an integral role in this concept.
+A Grid is first instantiated, via a create call, on all DEs in its domain, but
+only in a global sense.  By that we mean it stores only information about the
+global Grid, such as the number of grid cells and the coordinate extents, but
+has not generated all the information that will end up distributed, such as the
+cell coordinates.  The Grid is then decomposed onto a given DELayout via an
+{\tt ESMF\_Distribute()} call.  At that point, the DE-local data types are
+created and computed, so that on each DE there resides necessary global Grid
+information as well as its own DE-local Grid data.  The DE-local data represented
+by an {\tt ESMF\_Field} is defined by the decomposition of the underlying
+{\tt ESMF\_Grid}.
 
-\subsubsection{Grid Stagger Options}
-The following Grid staggerings are supported:
-\begin{description}
-   \item[ESMF\_GridStagger\_Unknown] unknown or undefined staggering
-   \item[ESMF\_GridStagger\_A] Arakawa A (centered velocity)
-   \item[ESMF\_GridStagger\_B] Arakawa B (velocities at grid corner)
-   \item[ESMF\_GridStagger\_C] Arakawa C (velocities at cell faces)
-   \item[ESMF\_GridStagger\_D] Arakawa D
-   \item[ESMF\_GridStagger\_E] Arakawa E
-   \item[ESMF\_GridStagger\_Z] C grid equivalent for geodesic grid
-   \item[ESMF\_GridStagger\_VertCenter] vertical velocity at vertical midpoints
-   \item[ESMF\_GridStagger\_VertFace] vertical velocity/Pgrad at top(bottom)face
-\end{description}
+\subsubsection{Grids and Data Placement}
+\label{sec:GridDataPlacement}
+An {\tt ESMF\_Grid} will support data placement only at specific cell relative
+locations, defined by its staggering and following typical Arakawa nomenclature.
+In ESMF, there are nine possible relative locations for data on a typical
+horizontal Grid cell, though each staggering will use a subset of them.  These
+locations, with their corresponding {\tt ESMF\_Rellocs}, are illustrated in
+Figure~\ref{fig:GridDataLocations}.
+
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{GridDataLocations}}
+\caption{Possible horizontal data locations for a representative computational
+cell. }
+\label{fig:GridDataLocations}
+\end{figure}
+\end{center}
+
+{\tt ESMF\_Grids} are created with only those underlying structures, called
+subGrids, to support data at the specific cell locations defined by its given
+staggering.  For example, an Arakawa C grid has some computational fields
+defined at the cell centers and other fields defined at specific cell face
+centers.  An {\tt ESMF\_Grid} created with Arakawa C staggering will therefore
+make subGrids at the cell centers and specified cell faces (please see
+Section~\ref{sec:GridHorzStagger} for a complete list of implemented staggerings
+and their corresponding Rellocs).  An example of the data locations for an
+Arakawa C\_SE Grid is presented in Figure~\ref{fig:ArakawaC_SE}.
+
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{ArakawaC_SE}}
+\caption{Data locations for an Arakawa C\_SE Grid.}
+\label{fig:ArakawaC_SE}
+\end{figure}
+\end{center}
+
+A vertical grid is also represented as one or more subGrids, each corresponding
+to a specific relative location along the defined vertical axis.  The possible
+vertical relative locations are shown in Figure~\ref{fig:VertGridDataLocations}.
+
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{VertGridDataLocations}}
+\caption{Possible vertical data locations for a representative computational cell. }
+\label{fig:VertGridDataLocations}
+\end{figure}
+\end{center}
+
+Note that the locations in the figure are represented by horizontal planes.  The
+vertical relative location only defines the vertical coordinate of any point, and
+does not restrict the horizontal coordinates.  This means that the horizontal and
+vertical Rellocs are independent of each other and can be combined in any way.
+For a complete list of implemented vertical staggerings and their corresponding
+Rellocs, please see Section~\ref{sec:GridVertStagger}.
+
+The staggering of the Grid limits the relative locations of any ESMF data 
+class corresponding to it.  When an {\tt ESMF\_Field} is created, it must be
+assigned to one (or more, in the case of a horizontal Grid with a vertical
+subGrid) of the appropriate subGrids present in the {\tt ESMF\_Grid} from
+which it is being created.  Continuing the example above, an {\tt ESMF\_Field}
+created from a Grid with Arakawa C staggering would have to be defined at either the cell center or one of the prescribed cell faces. 
 
 
-\subsubsection{Grid Coordinate Ordering Options}
-The Grid class can be set to different default ordering of coordinates, for
-example KIJ.  The following Grid coordinate orderings are supported:
-\begin{description}
-   \item[ESMF\_CoordOrder\_Unknown] unknown or undefined coord ordering
-   \item[ESMF\_CoordOrder\_XYZ] IJK maps to XYZ
-   \item[ESMF\_CoordOrder\_XZY] IJK maps to XZY
-   \item[ESMF\_CoordOrder\_YXZ] IJK maps to YXZ
-   \item[ESMF\_CoordOrder\_YZX] IJK maps to YZX
-   \item[ESMF\_CoordOrder\_ZXY] IJK maps to ZXY
-   \item[ESMF\_CoordOrder\_ZYX] IJK maps to ZYX
-\end{description}
+\subsubsection{Grid Distribution}
 
-\subsubsection{Grid Coordinate System Options}
-The following Grid coordinate systems are supported:
-\begin{description}
-   \item[ESMF\_CoordSystem\_Unknown] unknown or undefined coord system
-   \item[ESMF\_CoordSystem\_User] user-defined coordinate system
-   \item[ESMF\_CoordSystem\_Spherical] spherical coordinates (lon,lat)
-   \item[ESMF\_CoordSystem\_Cartesian] Cartesian coordinates (x,y)
-   \item[ESMF\_CoordSystem\_Cylindrical] cylindrical coordinates
-   \item[ESMF\_CoordSystem\_LatFourier] mixed latitude/Fourier spectral space
-   \item[ESMF\_CoordSystem\_Spectral] wavenumber space
-   \item[ESMF\_CoordSystem\_Depth] vertical z coordinate depth (0 at top surface)
-   \item[ESMF\_CoordSystem\_Height] vertical z coordinate height (0 at bottom)
-   \item[ESMF\_CoordSystem\_Pressure] vertical pressure coordinate
-   \item[ESMF\_CoordSystem\_Sigma] vertical sigma coordinate
-   \item[ESMF\_CoordSystem\_Theta] vertical theta coordinate
-   \item[ESMF\_CoordSystem\_Eta] vertical eta coordinate
-   \item[ESMF\_CoordSystem\_Isopycnal] vertical density coordinate
-   \item[ESMF\_CoordSystem\_Hybrid] hybrid vertical coordinates
-   \item[ESMF\_CoordSystem\_Lagrangian] Lagrangian coordinates
-\end{description}
+The distribution (also referred to as decomposition) of the Grid on an
+{\tt ESMF\_DELayout} determines the distribution as well for all related
+ESMF data classes.  ESMF has currently implemented two different distribution
+strategies: block and arbitrary.  In block distribution, logically rectangular
+chunks of the global Grid are represented as local decomposition elements
+(DEs), as shown in Figure~\ref{fig:GridBlockDistribute}.
 
-\subsubsection{Grid Mask Options}
-The following Grid masks are supported:
-\begin{description}
-   \item[ESMF\_GridMaskKind\_Unknown] unknown or undefined mask type
-   \item[ESMF\_GridMaskKind\_Logical] logical mask
-   \item[ESMF\_GridMaskKind\_Mult] multiplicative mask
-   \item[ESMF\_GridMaskKind\_RegionID] integer assigning unique ID to each point
-\end{description}
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{GridBlockDistribution}}
+\caption{Illustration of Block Distribution of a Grid. }
+\label{fig:GridBlockDistribute}
+\end{figure}
+\end{center}
+
+In this distribution method, some of the geometry and connectivity of the global
+Grid are also true locally, in that most relative neighbor relationships are
+maintained.  In arbitrary distribution, on the other hand, this is not
+necessarily so, since the user specifies lists of individual points to
+be grouped as DEs, as shown in Figure~\ref{fig:GridArbitraryDistribute}.
+
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{GridArbitraryDistribution}}
+\caption{Illustration of Arbitrary Distribution of a Grid. }
+\label{fig:GridArbitraryDistribute}
+\end{figure}
+\end{center}
+
+This method of distribution maintains local lists of cells without any sense
+of their relationship to one another beyond their global index.  For that
+reason, some higher level communication methods (like halo) would be 
+inefficient for arbitrarily distributed Grids and their corresponding data
+classes.  ESMF has implemented this distribution primarily to support 
+components with column physics, which typically do not require much 
+communication.  Currently for these objects ESMF only supports redistribution
+between itself and a block distribution of the same global Grid to allow users
+to move data from one representation to the other.

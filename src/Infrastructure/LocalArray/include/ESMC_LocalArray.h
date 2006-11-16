@@ -1,12 +1,12 @@
-// $Id: ESMC_LocalArray.h,v 1.8 2004/02/12 18:09:11 nscollins Exp $
+// $Id: ESMC_LocalArray.h,v 1.14.2.1 2006/11/16 00:15:34 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMF Array C++ declaration include file
 //
@@ -55,13 +55,6 @@ struct c_F90ptr {
 #endif
 };
 
-// THIS MUST MATCH F90 DECLARATION in ../interface file
-struct ESMC_ArraySpec {
-    int rank;
-    ESMC_DataType type;
-    ESMC_DataKind kind;    
-};
-
 // !PRIVATE TYPES:
 
 // these must stay in sync with the F90 versions
@@ -77,12 +70,6 @@ typedef enum {
     ESMC_DATA_SPACE,
     ESMC_DATA_NONE
 } ESMC_DataCopy;
-
-typedef enum { 
-    ESMC_DOMAIN_TOTAL = 1, 
-    ESMC_DOMAIN_COMPUTATIONAL,
-    ESMC_DOMAIN_EXCLUSIVE
-} ESMC_DomainType;
 
 // this should be public -
 typedef enum { 
@@ -108,21 +95,23 @@ extern "C" {
 class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
 
    protected:
-    int rank;                      // dimensionality
+    int rank;                      // dimensionality (1, 2, ..., 7)
     ESMC_DataType type;            // int, real, etc.
-    ESMC_DataKind kind;            // short, long
-    ESMC_ArrayOrigin origin;       // was the create called from F90 or C++
+    ESMC_DataKind kind;            // short, long (*4, *8)
+    ESMC_ArrayOrigin origin;       // was the create called from F90 or C++?
     ESMC_Logical needs_dealloc;    // is array responsible for deallocation?
     ESMC_Logical iscontig;         // optimization possible if all contig
     void *base_addr;               // real start of memory
+    int byte_count;                // size (in bytes) of data region
     int offset[ESMF_MAXDIM];       // byte offset from base to 1st element/dim
     int lbound[ESMF_MAXDIM];       // used for fortran indexing
     int ubound[ESMF_MAXDIM];       // used for fortran indexing
     int counts[ESMF_MAXDIM];       // number of elements/dim
     int bytestride[ESMF_MAXDIM];   // byte spacing between elements/dim
     struct c_F90ptr f90dopev;      // opaque object which is real f90 ptr
-                                   // potentially these could be needed... 
-    
+                                   // this is memcpy'd to save and restore 
+                                   // contents are not interpreted by esmf
+
 // !PUBLIC MEMBER FUNCTIONS:
 //
 // pick one or the other of the init/create sections depending on
@@ -145,9 +134,13 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
     //int ESMC_ArraySet<Value>(<value type>  value);
     
  // required methods inherited and overridden from the ESMC_Base class
+    int ESMC_LocalArrayDeserialize(char *buffer, int *boffset);
+    int ESMC_LocalArrayDeserializeNoData(char *buffer, int *boffset);
+    int ESMC_LocalArrayPrint(const char *options = NULL) const;
+    int ESMC_LocalArraySerialize(char *buffer, int *length, int *boffset) const;
+    int ESMC_LocalArraySerializeNoData(char *buffer, int *length, int *boffset) const;
     int ESMC_LocalArrayWrite(const char *options, const char *filename) const;
     int ESMC_LocalArrayValidate(const char *options) const;
-    int ESMC_LocalArrayPrint(const char *options = NULL) const;
 
  // native C++ constructors/destructors
 	ESMC_LocalArray(void);
@@ -185,6 +178,9 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
                                                  return ESMF_SUCCESS;}
     int ESMC_LocalArrayGetBaseAddr(void **base) { *base = this->base_addr; 
                                             return ESMF_SUCCESS;}
+
+    int ESMC_LocalArrayGetByteCount(int *count) { *count = this->byte_count; 
+                                                   return ESMF_SUCCESS;}
 
     int ESMC_LocalArraySetOrigin(ESMC_ArrayOrigin o) { this->origin = o; 
                                                        return ESMF_SUCCESS;}
@@ -258,6 +254,20 @@ ESMC_LocalArray *ESMC_LocalArrayCreate_F(int rank, ESMC_DataType dt, ESMC_DataKi
 ESMC_LocalArray *ESMC_LocalArrayCreateNoData(int rank, ESMC_DataType dt, 
                                    ESMC_DataKind dk, ESMC_ArrayOrigin oflag,
                                    char *name = NULL, int *rc = NULL);
+
+// private static data - address of fortran callback funcs
+extern "C" {
+ void FTN(c_esmc_localarrayserialize)(ESMC_LocalArray**, char *, 
+                                      int *, int *, int *);
+ void FTN(c_esmc_localarrayserializenodata)(ESMC_LocalArray**, char *, 
+                                            int *, int *, int *);
+ void FTN(c_esmc_localarraydeserialize)(ESMC_LocalArray**, char *, 
+                                        int *, int *);
+ void FTN(c_esmc_localarraydeserializenodata)(ESMC_LocalArray**, char *, 
+                                              int *, int *);
+ void FTN(c_esmc_f90ptrsizeget)(char *, char *, int *, int *);
+ void FTN(c_esmc_f90ptrsizeprint)(char *, char *, int *, int *);
+}
 
 
  #endif  // ESMC_LocalArray_H

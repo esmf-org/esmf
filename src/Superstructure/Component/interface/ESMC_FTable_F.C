@@ -1,12 +1,12 @@
-// $Id: ESMC_FTable_F.C,v 1.11 2004/02/24 14:33:10 theurich Exp $
+// $Id: ESMC_FTable_F.C,v 1.19.2.1 2006/11/16 00:15:54 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
 //
@@ -19,15 +19,13 @@
 //------------------------------------------------------------------------------
 #include <stdio.h>
 #include <string.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_Comp.h"
 #include "ESMC_FTable.h"
 #include "ESMC_Array.h"
 
-#ifdef ESMF_ENABLE_VM
 #include "ESMC_VM.h"
-#endif
 
 #include "trim.h"
 //------------------------------------------------------------------------------
@@ -75,8 +73,15 @@ extern "C" {
 
          localrc = (*ptr)->ESMC_FTableCallVFuncPtr(name, &funcrc);
 
-         *status = funcrc;
-
+         if (status) {
+             if (localrc != ESMF_SUCCESS)
+                 *status = localrc;
+             else if (funcrc != ESMF_SUCCESS)
+                 *status = funcrc;
+             else
+                 *status = ESMF_SUCCESS;
+	}
+     
          delete[] name;
      }
 
@@ -120,7 +125,7 @@ extern "C" {
 
      void FTN(c_esmc_ftablesetstateargs)(ESMC_FTable **ptr, char *type,
                          int *phase, void *comp, 
-                         void *importstate, void *exportstate,
+                         void *importState, void *exportState,
 	                 void *clock, int *status, int slen) {
 
          char *fname;
@@ -131,8 +136,8 @@ extern "C" {
          //printf("after newtrim, name = '%s'\n", fname);
 
          alist[0] = (void *)comp;
-         alist[1] = (void *)importstate;
-         alist[2] = (void *)exportstate;
+         alist[1] = (void *)importState;
+         alist[2] = (void *)exportState;
          alist[3] = (void *)clock;
          alist[4] = (void *)status;
 
@@ -189,83 +194,6 @@ extern "C" {
          delete[] name;
      }
      
-   
-#ifdef ESMF_ENABLE_VM       
-// VM-enabled CallBack loop     
-     
-static void *ESMC_FTableCallEntryPointVMHop(vmachine &vmach, void *cargoin){
-  // This routine is the first level that gets instantiated in new VM
-  // The first argument must be of type (vmachine &). This is how the newly
-  // created vmachine gets handed to the instantiated code.
-  
-  char *name = ((cargotype *)cargoin)->name;
-  ESMC_FTable &ftable = *((cargotype *)cargoin)->ftable;  // reference to ftable
-  
-//debug:  printf("hi this is from ### do_stuff ###\n");
-//debug:  printf("name: %s, function table at: %p\n", name, &ftable);
-//debug:  printf("do_stuff, new vm is located at: %p\n", &vmach);
-//debug:  vmach.vmachine_print();
-  
-  // Need to call a special call function which adds the VM to the interface
-  ESMC_VM vm;
-  vm.ESMC_VMFillFromVmachine(vmach);
-  ESMC_VM *vmm = &vm;
-  int funcrc, localrc;
-  localrc = ftable.ESMC_FTableCallVFuncPtr(name, &vmm, &funcrc);
-  
-  return NULL;
-}
-
-// call a function through VM
-void FTN(c_esmc_ftablecallentrypointvm)(
-  ESMC_VM **ptr_vm_parent,  // p2 to the parent VM
-  ESMC_VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
-  void **vm_info,           // p2 to member which holds info returned by enter
-  void **vm_cargo,          // p2 to member which holds cargo
-  ESMC_FTable **ptr,        // p2 to the ftable of this component
-  char *type,               // string holding type of called entry point
-  int *phase,               // phase selector
-  int *status,              // return error code in status
-  int slen) {               // additional F90 argument associated with type
-       
-  // local variables
-  int funcrc;               // function return value
-  int localrc;              // local return value
-  char *name;               // trimmed type string
-
-  newtrim(type, slen, phase, NULL, &name);
-  //printf("after newtrim, name = '%s'\n", name);
-
-  // TODO: two return codes here - one is whether we could find
-  // the right function to call; the other is the actual return code
-  // from the user function itself.
-
-  // Things get a little confusing here with pointers, so I will define
-  // some temp. variables that make matters a little clearer I hope:
-  ESMC_VM &vm_parent = **ptr_vm_parent;     // reference to parent VM
-  ESMC_VMPlan &vmplan = **ptr_vmplan;       // reference to VMPlan
-  ESMC_FTable &ftable = **ptr;              // reference to function table
-
-//debug:  printf("o.k. buddy, I am in c_esmc_ftablecallentrypointvm...\n");
-//debug:  vm_parent.vmachine_print();
-//debug:  vmplan.vmplan_print();
-         
-  cargotype *cargo = new cargotype;
-  strcpy(cargo->name, name);   // copy trimmed type string
-  cargo->ftable = &ftable;     // reference to function table
-  *vm_cargo=(void*)cargo;      // store pointer to the cargo structure
-
-//debug:  printf("debug in c_esmc_ftablecallentrypointvm: vm_parent: %p\n", &vm_parent);
-         
-  *vm_info = vm_parent.vmachine_enter(vmplan, ESMC_FTableCallEntryPointVMHop,
-    (void*)cargo);
-//debug:  printf("returned from vmachine_enter\n");
-  
-  delete[] name;
-  *status = ESMF_SUCCESS;
-}
-#endif
-
 };
 
 

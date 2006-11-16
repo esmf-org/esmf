@@ -1,12 +1,12 @@
-// $Id: ESMC_Time_F.C,v 1.28 2004/02/25 03:04:46 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.35.4.1 2006/11/16 00:15:45 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research,
+// Copyright 2002-2008, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
 //
@@ -17,7 +17,6 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <ESMC.h>
 #include <ESMC_F90Interface.h>
 #include <ESMC_TimeInterval.h>
 #include <ESMC_Time.h>
@@ -50,7 +49,9 @@ extern "C" {
                                 ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
                                 ESMF_KIND_R8 *ns_r8,
                                 ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
-                                ESMC_Calendar **calendar, int *timeZone,
+                                ESMC_Calendar **calendar,
+                                ESMC_CalendarType *calendarType,
+                                int *timeZone,
                                 int *status) {
           int rc = (ptr)->ESMC_TimeSet(
                        ESMC_NOT_PRESENT_FILTER(yy),
@@ -75,32 +76,39 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(ns_r8),
                        ESMC_NOT_PRESENT_FILTER(sN),
                        ESMC_NOT_PRESENT_FILTER(sD),
-                                              *calendar,    // required
+                       ESMC_NOT_PRESENT_FILTER(calendar),
+                       ESMC_NOT_PRESENT_FILTER(calendarType),
                        ESMC_NOT_PRESENT_FILTER(timeZone) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_timeget)(ESMC_Time *ptr,
-                                ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
-                                int *mm, int *dd,
-                                ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
-                                ESMF_KIND_I4 *h,  ESMF_KIND_I4 *m,
-                                ESMF_KIND_I4 *s,  ESMF_KIND_I8 *s_i8,
-                                ESMF_KIND_I4 *ms, ESMF_KIND_I4 *us,
-                                ESMF_KIND_I4 *ns,
-                                ESMF_KIND_R8 *d_r8,  ESMF_KIND_R8 *h_r8,
-                                ESMF_KIND_R8 *m_r8,  ESMF_KIND_R8 *s_r8,
-                                ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
-                                ESMF_KIND_R8 *ns_r8,
-                                ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
-                                ESMC_Calendar **calendar, int *timeZone,
-                                int *timeStringLen, int *tempTimeStringLen, 
-                                char *tempTimeString, int *dayOfWeek,
-                                ESMC_Time *midMonth,
-                                ESMF_KIND_I4 *dayOfYear,
-                                ESMF_KIND_R8 *dayOfYear_r8,
-                                ESMC_TimeInterval *dayOfYear_intvl,
-                                int *status) {
+                              ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
+                              int *mm, int *dd,
+                              ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
+                              ESMF_KIND_I4 *h,  ESMF_KIND_I4 *m,
+                              ESMF_KIND_I4 *s,  ESMF_KIND_I8 *s_i8,
+                              ESMF_KIND_I4 *ms, ESMF_KIND_I4 *us,
+                              ESMF_KIND_I4 *ns,
+                              ESMF_KIND_R8 *d_r8,  ESMF_KIND_R8 *h_r8,
+                              ESMF_KIND_R8 *m_r8,  ESMF_KIND_R8 *s_r8,
+                              ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
+                              ESMF_KIND_R8 *ns_r8,
+                              ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
+                              ESMC_Calendar **calendar, 
+                              ESMC_CalendarType *calendarType, 
+                              int *timeZone,
+                              int *timeStringLen, int *tempTimeStringLen, 
+                              char *tempTimeString,
+                              int *timeStringLenISOFrac, 
+                              int *tempTimeStringLenISOFrac, 
+                              char *tempTimeStringISOFrac,
+                              int *dayOfWeek,
+                              ESMC_Time *midMonth,
+                              ESMF_KIND_I4 *dayOfYear,
+                              ESMF_KIND_R8 *dayOfYear_r8,
+                              ESMC_TimeInterval *dayOfYear_intvl,
+                              int *status) {
           int rc = (ptr)->ESMC_TimeGet(
                        ESMC_NOT_PRESENT_FILTER(yy),
                        ESMC_NOT_PRESENT_FILTER(yy_i8),
@@ -125,17 +133,29 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(sN),
                        ESMC_NOT_PRESENT_FILTER(sD),
                        ESMC_NOT_PRESENT_FILTER(calendar),
+                       ESMC_NOT_PRESENT_FILTER(calendarType),
                        ESMC_NOT_PRESENT_FILTER(timeZone),
                                           // always present internal arguments
                                               *timeStringLen,
                                                tempTimeStringLen, 
-                       ESMC_NOT_PRESENT_FILTER(tempTimeString),
+                                               tempTimeString,
+                                              *timeStringLenISOFrac,
+                                               tempTimeStringLenISOFrac, 
+                                               tempTimeStringISOFrac,
                        ESMC_NOT_PRESENT_FILTER(dayOfWeek),
                        ESMC_NOT_PRESENT_FILTER(midMonth),
                        ESMC_NOT_PRESENT_FILTER(dayOfYear),
                        ESMC_NOT_PRESENT_FILTER(dayOfYear_r8),
                        ESMC_NOT_PRESENT_FILTER(dayOfYear_intvl) );
           if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_timeisleapyear)(ESMC_Time *ptr,
+                                       int *esmf_timeIsLeapYear,
+                                       int *status) {
+           *esmf_timeIsLeapYear =
+                 (int) (ptr)->ESMC_TimeIsLeapYear(
+                              ESMC_NOT_PRESENT_FILTER(status) );
        }
 
        void FTN(c_esmc_timeissamecalendar)(ESMC_Time *ptr, ESMC_Time *time,
@@ -153,15 +173,15 @@ extern "C" {
        }
 
        void FTN(c_esmc_timeinc)(ESMC_Time *time,
-                                ESMC_TimeInterval *timeInterval,
+                                ESMC_TimeInterval *timeinterval,
                                 ESMC_Time *esmf_baseTimeInc) {
-           *esmf_baseTimeInc = (*time + *timeInterval);
+           *esmf_baseTimeInc = (*time + *timeinterval);
        }
 
        void FTN(c_esmc_timedec)(ESMC_Time *time,
-                                ESMC_TimeInterval *timeInterval,
+                                ESMC_TimeInterval *timeinterval,
                                 ESMC_Time *esmf_baseTimeDec) {
-           *esmf_baseTimeDec = (*time - *timeInterval);
+           *esmf_baseTimeDec = (*time - *timeinterval);
        }
 
        void FTN(c_esmc_timediff)(ESMC_Time *time1,

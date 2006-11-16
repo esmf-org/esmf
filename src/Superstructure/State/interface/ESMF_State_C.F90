@@ -1,12 +1,12 @@
-!  $Id: ESMF_State_C.F90,v 1.1 2003/10/22 20:09:42 cdeluca Exp $
+!  $Id: ESMF_State_C.F90,v 1.4.4.1 2006/11/16 00:15:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 !
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.1 2003/10/22 20:09:42 cdeluca Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.4.4.1 2006/11/16 00:15:56 cdeluca Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -40,6 +40,7 @@
 !EOP
 !------------------------------------------------------------------------------
    subroutine f_esmf_statecreate(state, name, rc)
+       use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
 
@@ -52,6 +53,7 @@
    end subroutine f_esmf_statecreate
 
    subroutine f_esmf_statedestroy(state, rc)
+       use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
 
@@ -63,6 +65,7 @@
    end subroutine f_esmf_statedestroy
 
    subroutine f_esmf_stateadddata(statep, name, func, rc)
+       use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
 
@@ -75,6 +78,7 @@
    end subroutine f_esmf_stateadddata
 
    subroutine f_esmf_stategetdata(statep, name, rc)
+       use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
 
@@ -86,7 +90,8 @@
 
    end subroutine f_esmf_stategetdata
 
-   subroutine f_esmf_stategetinfo(statep, name, rc)
+   subroutine f_esmf_stateget(statep, name, rc)
+       use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
 
@@ -94,9 +99,9 @@
        character(*) :: name
        integer :: rc     
 
-       !call ESMF_StateGetInfo(statep, rc)
+       !call ESMF_StateGet(statep, rc)
 
-   end subroutine f_esmf_stategetinfo
+   end subroutine f_esmf_stateget
 
 
    ! TODO: add rest of state entry points

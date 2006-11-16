@@ -1,25 +1,32 @@
-! $Id: ESMF_Xform.F90,v 1.2 2004/03/09 20:09:08 svasquez Exp $
+! $Id: ESMF_Xform.F90,v 1.10.2.1 2006/11/16 00:15:58 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_Xform.F90"
 !
 !     ESMF Xform module
       module ESMF_XformMod
 !
+! just in case protex must have something, give it a blank line.
+! otherwise, the rest of the file is BOPI/EOPI until xforms are implemented.
+!BOP
+
+!EOP
+#include "ESMF.h"
 !==============================================================================
 !
 ! This file contains the Transform class definition and all Transform
 ! class methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !MODULE: ESMF_XformMod - Object to encapsulate lists of transformations
 !
 ! !DESCRIPTION:
@@ -29,8 +36,10 @@
 !
 !
 ! !USES:
+      use ESMF_UtilTypesMod
+      use ESMF_LogErrMod
       use ESMF_BaseMod
-      use ESMF_IOMod
+      use ESMF_IOSpecMod
       !use ESMF_CompMod
       implicit none
 
@@ -65,12 +74,12 @@
       public ESMF_XformReadRestart
  
       public ESMF_XformPrint
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Xform.F90,v 1.2 2004/03/09 20:09:08 svasquez Exp $'
+      '$Id: ESMF_Xform.F90,v 1.10.2.1 2006/11/16 00:15:58 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -93,7 +102,10 @@
 ! This section includes the Transform Init method
 !
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XformInit"
+!------------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE: ESMF_XformInit -- Fill in an Xform's data
 
 ! !INTERFACE:
@@ -121,7 +133,7 @@
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !       \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 
@@ -149,8 +161,10 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XformSet"
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_XformSet - Set information in a Transform
 !
 ! !INTERFACE:
@@ -163,12 +177,14 @@
 ! !DESCRIPTION:
 !      Update or overwrite data inside a {\tt Transform}.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
 !
+        if (present(rc)) rc = ESMF_FAILURE
+
         end subroutine ESMF_XformSet
 
 !------------------------------------------------------------------------------
@@ -177,7 +193,10 @@
 ! Query for information from the xform.
 !
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XformGet"
+!------------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE: ESMF_XformGet - Get information from a Transform
 !
 ! !INTERFACE:
@@ -195,10 +214,12 @@
 !      only wants a single value, specify the argument by name.
 !      All the arguments after the xform input are optional to facilitate this.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
         name = xform%name
+        if (present(subr)) subr = 0
+        if (present(rc)) rc = ESMF_FAILURE
 
         end subroutine ESMF_XformGet
 
@@ -208,7 +229,10 @@
 ! This section is I/O for Xforms
 !
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XformWriteRestart"
+!------------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE: ESMF_XformWriteRestart - Save Transform state
 !
 ! !INTERFACE:
@@ -225,17 +249,22 @@
 !      same I/O interface as Read/Write, but the default options are to
 !      select the fastest way to save data to disk.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
 !
+        if (present(rc)) rc = ESMF_FAILURE
+
         end subroutine ESMF_XformWriteRestart
 
 
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XformReadRestart"
+!------------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE: ESMF_XformReadRestart - ReadRestart Transform state
 !
 ! !INTERFACE:
@@ -254,7 +283,7 @@
 !      Used to reinitialize
 !      all data associated with a Xform from the last call to WriteRestart.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !
@@ -262,29 +291,29 @@
 !
         type (ESMF_Xform) :: a 
 
-!       this is just to shut the compiler up
-        !type (ESMF_XformType), target :: b 
-        !a%xformp => b
-        !nullify(a%xformp)
-
 !
 ! TODO: add code here
 !
-
+        a%name = "undefined"
+	a%subrptr = ESMF_NULL_POINTER
         ESMF_XformReadRestart = a 
+        if (present(rc)) rc = ESMF_FAILURE
  
         end function ESMF_XformReadRestart
 
 
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XformPrint"
+!------------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE: ESMF_XformPrint - Print information about a Transform object
 !
 ! !INTERFACE:
       subroutine ESMF_XformPrint(xform, options, rc)
 !
 !
-! !ARGUMENTS:
+!ARGUMENTS:
       type(ESMF_Xform) :: xform
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
@@ -292,7 +321,7 @@
 ! !DESCRIPTION:
 !      Routine to print information about an xform.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !

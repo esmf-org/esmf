@@ -1,14 +1,15 @@
-// $Id: ESMC_CommTable.C,v 1.20 2003/07/02 16:49:56 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.27.2.1 2006/11/16 00:15:42 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMC CommTable method implementation (body) file
+#define ESMF_FILENAME "ESMC_CommTable.C"
 
 //-----------------------------------------------------------------------------
 //
@@ -22,18 +23,20 @@
 //-----------------------------------------------------------------------------
 //
  // insert any higher level, 3rd party or system includes here
- #include <ESMC.h>
+ #include <ESMC_Start.h>
  #include <stdio.h>
  #include <stdlib.h>
+ #include <string.h>
 
  // associated class definition file
  #include <ESMC_CommTable.h>
+ #include <ESMC_LogErr.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.20 2003/07/02 16:49:56 nscollins Exp $";
+            "$Id: ESMC_CommTable.C,v 1.27.2.1 2006/11/16 00:15:42 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -45,7 +48,9 @@
 //
 
 //-----------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableCreate"
+//BOPI
 // !IROUTINE:  ESMC_CommTableCreate - Create a new CommTable
 //
 // !INTERFACE:
@@ -55,7 +60,7 @@
 //     pointer to newly allocated ESMC_CommTable
 //
 // !ARGUMENTS:
-      int mydeid,               // in
+      int myvmid,               // in
       int partnercount,         // in
       int *rc) {                // out - return code
 //
@@ -67,19 +72,21 @@
 //      Note: this is a class helper function, not a class method
 //      (see declaration in ESMC_CommTable.h)
 //
-//EOP
+//EOPI
 // !REQUIREMENTS: 
 
     ESMC_CommTable *newc = new ESMC_CommTable;
 
-    *rc = newc->ESMC_CommTableConstruct(mydeid, partnercount);
+    *rc = newc->ESMC_CommTableConstruct(myvmid, partnercount);
 
     return newc;
 
  } // end ESMC_CommTableCreate
 
 //-----------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableDestroy"
+//BOPI
 // !IROUTINE:  ESMC_CommTableDestroy - free a CommTable created with Create
 //
 // !INTERFACE:
@@ -98,7 +105,7 @@
 //      Note: this is a class helper function, not a class method
 //      (see declaration in ESMC_CommTable.h)
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  
 
     return ESMF_FAILURE;
@@ -106,7 +113,9 @@
  } // end ESMC_CommTableDestroy
 
 //-----------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableConstruct"
+//BOPI
 // !IROUTINE:  ESMC_CommTableConstruct - fill in an already allocated CommTable
 //
 // !INTERFACE:
@@ -116,7 +125,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int mydeid,
+      int myvmid,
       int partnercount) {
 //
 // !DESCRIPTION:
@@ -127,11 +136,11 @@
 //      ESMF use only; end-users use ESMC_CommTableCreate, which calls
 //      ESMC_CommTableConstruct.  Define for deep classes only.
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  
     int i, *ip, rc;
 
-    myid = mydeid;
+    myid = myvmid;
     decount = partnercount;
     commcount = partnercount;
     commpartner = new int[commcount];
@@ -146,7 +155,7 @@
                             { 0,1 } };
 
           for (i=0; i<partnercount; i++)
-              commpartner[i] = ids[mydeid][i];
+              commpartner[i] = ids[myvmid][i];
         }
         break;
       case 4:
@@ -156,7 +165,7 @@
                             { 2,1,0,3 } };
 
           for (i=0; i<partnercount; i++)
-              commpartner[i] = ids[mydeid][i];
+              commpartner[i] = ids[myvmid][i];
         }
         break;
       case 6:
@@ -168,7 +177,7 @@
                             { 4,3,1,2,0,5 } };
 
           for (i=0; i<partnercount; i++)
-              commpartner[i] = ids[mydeid][i];
+              commpartner[i] = ids[myvmid][i];
         }
         break;
       case 8:
@@ -182,7 +191,7 @@
                             { 2,1,4,3,6,5,0,7 } };
 
           for (i=0; i<partnercount; i++)
-              commpartner[i] = ids[mydeid][i];
+              commpartner[i] = ids[myvmid][i];
         }
         break;
       case 12:
@@ -200,7 +209,7 @@
                               {  3, 5, 1, 6, 2, 4, 8, 7,10, 9, 0,11 } };
 
           for (i=0; i<partnercount; i++)
-              commpartner[i] = ids[mydeid][i];
+              commpartner[i] = ids[myvmid][i];
         }
         break;
       default:
@@ -218,17 +227,19 @@
  } // end ESMC_CommTableConstruct
 
 //-----------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableDestruct"
+//BOPI
 // !IROUTINE:  ESMC_CommTableDestruct - release resources associated w/a CommTable
 //
 // !INTERFACE:
-      int ESMC_CommTable::ESMC_CommTableDestruct(void) {
+      int ESMC_CommTable::ESMC_CommTableDestruct(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-//    none
+      void) {
 //
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
@@ -237,7 +248,7 @@
 //      use only; end-users use ESMC_CommTableDestroy, which calls
 //      ESMC_CommTableDestruct.  Define for deep classes only.
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  
 
     delete [] commpartner;
@@ -249,7 +260,9 @@
 
 
 //-----------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableGetCount"
+//BOPI
 // !IROUTINE:  ESMC_CommTableGetCount - get partner list count
 //
 // !INTERFACE:
@@ -264,7 +277,7 @@
 // !DESCRIPTION:
 //     Returns the value of CommTable member count.
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  
 
     *count = commcount;
@@ -274,7 +287,9 @@
  } // end ESMC_CommTableGetCount
 
 //-----------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableGetPartner"
+//BOPI
 // !IROUTINE:  ESMC_CommTableGetPartner - get partner list count
 //
 // !INTERFACE:
@@ -292,7 +307,7 @@
 //     Returns the nth communication partner, and flag saying if
 //     communication is needed.
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  
 
     if (entry < 0 || entry >= commcount) {
@@ -309,7 +324,9 @@
  } // end ESMC_CommTableGetCount
 
 //-----------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableSetPartner"
+//BOPI
 // !IROUTINE:  ESMC_CommTableSetPartner - set processor id to communicate with
 //
 // !INTERFACE:
@@ -324,17 +341,20 @@
 // !DESCRIPTION:
 //     Sets the CommTable member <Value> with the given value.
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  
  
-      int i;
+      int i, rc;
+      char msgbuf[ESMF_MAXSTR];
 
       if (partner < 0 || partner >= commcount) {
-          fprintf(stderr, "CommTable partner value out of range, %d not >= 0 and < %d\n",
+          sprintf(msgbuf, "CommTable partner value out of range, %d not >= 0 and < %d\n",
                         partner, commcount);
-          fprintf(stderr, "CommTable current values are:\n");
-          this->ESMC_CommTablePrint("");
-          return ESMF_FAILURE;
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+
+          //fprintf(stderr, "CommTable current values are:\n");
+          //this->ESMC_CommTablePrint("");
+          return(rc);  
       }
 
       for (i=0; i<commcount; i++) {
@@ -349,7 +369,9 @@
  } // end ESMC_CommTableSetPartner
 
 //-----------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableValidate"
+//BOPI
 // !IROUTINE:  ESMC_CommTableValidate - internal consistency check for a CommTable
 //
 // !INTERFACE:
@@ -365,7 +387,7 @@
 //      Validates that a CommTable is internally consistent.
 //      Returns error code if problems are found.  ESMC_Base class method.
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 //
 
@@ -375,7 +397,9 @@
 
 
 //-----------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTablePrint"
+//BOPI
 // !IROUTINE:  ESMC_CommTablePrint - print contents of a CommTable
 //
 // !INTERFACE:
@@ -391,15 +415,25 @@
 //      Print information about a CommTable.  The options control the
 //      type of information and level of detail.  ESMC_Base class method.
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
     int i;
+    char msgbuf[ESMF_MAXSTR];
+    bool brief;
 
-    printf(" myid=%d, decount=%d, commcount=%d\n", myid, decount, commcount);
+    brief = strcmp(options, "brief") ? false : true;
+
+    sprintf(msgbuf, " myid=%d, decount=%d, commcount=%d\n", myid, decount, commcount);
+    printf(msgbuf);
+    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     for (i=0; i<commcount; i++) {
-        printf(" %2d: partner=%2d, needed=%1d\n", 
-                   i, commpartner[i], commneeded[i]);
+        if ((commneeded[i] > 0) && !brief) {
+            sprintf(msgbuf, " %2d: partner=%2d, needed=%1d\n", 
+                             i, commpartner[i], commneeded[i]);
+            //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+            printf(msgbuf);
+        }
     }
 
     return ESMF_SUCCESS;
@@ -430,6 +464,8 @@ fill(int max, int size, int xpos, int ypos, int base, int *results)
 }
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableFill"
 //BOPI
 // !IROUTINE:  ESMC_CommTableFill - private routine for computing comm patterns
 //
@@ -467,7 +503,7 @@ fill(int max, int size, int xpos, int ypos, int base, int *results)
     // call the recursive routine to fill the table
     fill(npow2, npow2, 0, 0, 0, results);
 
-    // copy appropriate line back for this deid
+    // copy appropriate line back for this vmid
     for (i=0; i<npow2; i++) {
         if (results[myid * npow2 + i] < decount)
             commpartner[i] = results[myid * npow2 + i];
@@ -482,21 +518,23 @@ fill(int max, int size, int xpos, int ypos, int base, int *results)
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTable()"
+//BOPI
 // !IROUTINE:  ESMC_CommTable - native C++ constructor
 //
 // !INTERFACE:
-      ESMC_CommTable::ESMC_CommTable(void) {
+      ESMC_CommTable::ESMC_CommTable(
 //
 // !RETURN VALUE:
 //    none
 //
 // !ARGUMENTS:
-//    none
+      void) {
 //
 // !DESCRIPTION:
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:
 
     decount = 0;
@@ -507,22 +545,24 @@ fill(int max, int size, int xpos, int ypos, int base, int *results)
  } // end ESMC_CommTable
 
 //-----------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "~ESMC_CommTable()"
+//BOPI
 // !IROUTINE:  ~ESMC_CommTable - native C++ destructor
 //
 // !INTERFACE:
-      ESMC_CommTable::~ESMC_CommTable(void) {
+      ESMC_CommTable::~ESMC_CommTable(
 //
 // !RETURN VALUE:
 //    none
 //
 // !ARGUMENTS:
-//    none
+      void) {
 //
 // !DESCRIPTION:
 //      Calls standard ESMF deep or shallow methods for destruction
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
 //

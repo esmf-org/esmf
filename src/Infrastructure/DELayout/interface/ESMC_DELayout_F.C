@@ -1,15 +1,15 @@
-// $Id: ESMC_DELayout_F.C,v 1.7 2004/03/03 18:20:34 nscollins Exp $
+// $Id: ESMC_DELayout_F.C,v 1.25.4.1 2006/11/16 00:15:23 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-//
+#define ESMC_FILENAME "ESMC_DELayout_F.C"
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
@@ -17,223 +17,342 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <stdio.h>
-#include <string.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 #include "ESMC_Base.h"
+#include "ESMC_VM.h"
+
 #include "ESMC_DELayout.h"
+
+#include "ESMC_LogErr.h"                  // for LogErr
+#include "ESMF_LogMacros.inc"             // for LogErr
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
 //
 // The code in this file implements the inter-language code which
-//  allows F90 to call C++ for supporting {\tt ESMC\_DELayout} class functions.
+//  allows F90 to call C++ for supporting {\tt DELayout} class functions.
 //
 //EOP
+//-------------------------------------------------------------------------
+
 
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN(c_esmc_delayoutcreatedefault1d)(ESMC_DELayout **ptr,
-                                                int *status) {
-           *ptr = ESMC_DELayoutCreate(status);
-       }
+  // - ESMF-public methods:
 
-       void FTN(c_esmc_delayoutcreatefparent)(ESMC_DELayout **ptr, ESMC_DELayout **parent,
-					      int *parent_offsets, int *de_indices,
-					      int *ndim, int *lengths, ESMC_CommType 
-					      *commtypes, int *status) {
-  	   *ptr = ESMC_DELayoutCreate(*parent, parent_offsets, de_indices, *ndim, lengths, 
-				      commtypes, status);
-       }
+  void FTN(c_esmc_delayoutcreate)(ESMC_DELayout **ptr, ESMC_VM **vm,
+    int *deCountList, int *len_deCountList, int *petList, int *len_petList,
+    int *rc){
+    int localrc;
+    ESMC_Logical cyclic = ESMF_TRUE;  // TODO: fix API
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutcreate()"
+    *ptr = ESMC_DELayoutCreate(**vm, deCountList, *len_deCountList, petList,
+      *len_petList, &cyclic, &localrc);
+    // Use LogErr to handle return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
 
-       void FTN(c_esmc_delayoutcreatefde)(ESMC_DELayout **ptr, int *delist,
-					      int *ndim, int *lengths, ESMC_CommType 
-					      *commtypes, int *status) {
-  	   *ptr = ESMC_DELayoutCreate(delist, *ndim, lengths, commtypes, status);
-       }
+  void FTN(c_esmc_delayoutdestroy)(ESMC_DELayout **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutdestroy()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_DELayoutDestroy(ptr),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+       
+  void FTN(c_esmc_delayoutgetvm)(ESMC_DELayout **ptr, ESMC_VM **vm, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutgetvm()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetVM(
+      vm),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));  
+}
 
-       void FTN(c_esmc_delayoutdestroy)(ESMC_DELayout **ptr, int *status) {
-           *status = ESMC_DELayoutDestroy(*ptr);
-       }
+  void FTN(c_esmc_delayoutget)(ESMC_DELayout **ptr,
+    int *deCount, int *dimCount, int *localDeCount, int *localDeList,
+    int *len_localDeList, int *localDe, ESMC_Logical *oneToOneFlag, 
+    ESMC_Logical *logRectFlag, int *deCountPerDim, int *len_deCountPerDim,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutget()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGet(
+      ESMC_NOT_PRESENT_FILTER(deCount), 
+      ESMC_NOT_PRESENT_FILTER(dimCount), 
+      ESMC_NOT_PRESENT_FILTER(localDeCount),
+      localDeList, *len_localDeList, 
+      ESMC_NOT_PRESENT_FILTER(localDe), 
+      ESMC_NOT_PRESENT_FILTER(oneToOneFlag), 
+      ESMC_NOT_PRESENT_FILTER(logRectFlag),
+      deCountPerDim, *len_deCountPerDim),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
 
-       void FTN(c_esmc_delayoutgetnumdes)(ESMC_DELayout **ptr, int *ndes,
-                                          int *status) {
-           *status = (*ptr)->ESMC_DELayoutGetNumDEs(ndes);
-       }
+  void FTN(c_esmc_delayoutgetdelocalinfo)(ESMC_DELayout **ptr,
+    int *DEid, int *DEcoord, int *len_coord, int *DEcde, int *len_cde, 
+    int *DEcw, int *len_cw, int *nDEc, int *pid, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutgetdelocalinfo()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetDELocalInfo(
+      *DEid, DEcoord, *len_coord, DEcde, *len_cde, DEcw, *len_cw,
+      ESMC_NOT_PRESENT_FILTER(nDEc),
+      ESMC_NOT_PRESENT_FILTER(pid)), 
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
 
-       void FTN(c_esmc_delayoutgetsize)(ESMC_DELayout **ptr, int *nx, int *ny,
-                                        int *status) {
-           *status = (*ptr)->ESMC_DELayoutGetSize(nx, ny);
-       }
+  void FTN(c_esmc_delayoutgetdematchde)(ESMC_DELayout **ptr,
+    int *DEid, ESMC_DELayout **ptrMatch, int *deMatchCount, int *deMatchList,
+    int *len_deMatchList, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutgetdematch()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetDEMatchDE(
+      *DEid, **ptrMatch, 
+      ESMC_NOT_PRESENT_FILTER(deMatchCount),
+      deMatchList, *len_deMatchList),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
 
-       void FTN(c_esmc_delayoutgetdeposition)(ESMC_DELayout **ptr, int *x,
-                                              int *y, int *status) {
-           *status = (*ptr)->ESMC_DELayoutGetDEPosition(x, y);
-       }
+  void FTN(c_esmc_delayoutgetdematchpet)(ESMC_DELayout **ptr,
+    int *DEid, ESMC_VM **ptrMatch, int *petMatchCount, int *petMatchList,
+    int *len_petMatchList, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutgetdematch()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetDEMatchPET(
+      *DEid, **ptrMatch, 
+      ESMC_NOT_PRESENT_FILTER(petMatchCount),
+      petMatchList, *len_petMatchList),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
 
-       void FTN(c_esmc_delayoutgetdeid)(ESMC_DELayout **ptr, int *id,
-                                        int *status) {
-           *status = (*ptr)->ESMC_DELayoutGetDEID(id);
-       }
+  void FTN(c_esmc_delayoutprint)(ESMC_DELayout **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutprint()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutPrint(),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN(c_esmc_delayoutvalidate)(ESMC_DELayout **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutvalidate()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutValidate(),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
 
-       void FTN(c_esmc_delayoutgetdeidat)(ESMC_DELayout **ptr, int *x,
-                                  int *y, int *z, int *id, int *status) {
-           *status = (*ptr)->ESMC_DELayoutGetDEIDat(*x, *y, *z, id);
-       }
+  // - ESMF-private methods:
+       
+  void FTN(c_esmc_delayoutallfullreduce)(ESMC_DELayout **ptr, 
+    void ***datain, void *result, int *len, ESMC_DataKind *dtk,
+    ESMC_Operation *op, ESMC_Logical *oneToOneFlag, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutallfullreduce()"
+    int localrc;
+    if (*oneToOneFlag == ESMF_TRUE){
+      localrc = (*ptr)->ESMC_DELayoutAllFullReduce((void **)datain, result,
+        *len, *dtk, *op, *oneToOneFlag);
+    }else{
+      localrc = (*ptr)->ESMC_DELayoutAllFullReduce(*datain, result,
+        *len, *dtk, *op, *oneToOneFlag);
+    }
+    // Use LogErr to handle return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
 
-       void FTN(c_esmc_delayoutgetparentdeid)(ESMC_DELayout **child, int *cid, 
-                                            ESMC_DELayout **parent, int *pid,
-                                            int *status) {
-           *status = (*child)->ESMC_DELayoutGetParentDEID(*cid, *parent, pid);
-       }
+  void FTN(c_esmc_delayoutcopy)(ESMC_DELayout **ptr,
+    void ***datain, void ***dataout, int *blen, int *src, int *dest,
+    ESMC_Logical *oneToOneFlag, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutcopy()"
+    int localrc;
+    if (*oneToOneFlag == ESMF_TRUE){
+      localrc = (*ptr)->ESMC_DELayoutCopy((void **)datain, (void **)dataout,
+        *blen, *src, *dest, *oneToOneFlag);
+    }else{
+      localrc = (*ptr)->ESMC_DELayoutCopy(*datain, *dataout, *blen,
+        *src, *dest, *oneToOneFlag);
+    }
+    // Use LogErr to handle return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN(c_esmc_delayoutexchange)(ESMC_DELayout **ptr,
+    void ***datain1, void ***datain2, void ***dataout1, void ***dataout2, 
+    int *blen1, int *blen2, int *de1, int *de2,
+    ESMC_Logical *oneToOneFlag, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutexchange()"
+    int localrc;
+    if (*oneToOneFlag == ESMF_TRUE){
+      localrc = (*ptr)->ESMC_DELayoutExchange((void **)datain1, 
+        (void **)datain2, (void **)dataout1, (void **)dataout2,
+        *blen1, *blen2, *de1, *de2, *oneToOneFlag);
+    }else{
+      localrc = (*ptr)->ESMC_DELayoutExchange(*datain1, *datain2, *dataout1,
+        *dataout2, *blen1, *blen2, *de1, *de2, *oneToOneFlag);
+    }
+    // Use LogErr to handle return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN(c_esmc_delayoutgather)(ESMC_DELayout **ptr,
+    void ***datain, void ***dataout, int *blen, int *root, 
+    ESMC_Logical *oneToOneFlag, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutgather()"
+    int localrc;
+    if (*oneToOneFlag == ESMF_TRUE){
+      localrc = (*ptr)->ESMC_DELayoutGather((void **)datain, 
+        (void **)dataout, *blen, *root, *oneToOneFlag);
+    }else{
+      localrc = (*ptr)->ESMC_DELayoutGather(*datain, *dataout, *blen,
+        *root, *oneToOneFlag);
+    }
+    // Use LogErr to handle return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
 
-       void FTN(c_esmc_delayoutgetchilddeid)(ESMC_DELayout **parent, int *pid, 
-                                            ESMC_DELayout **child, int *cid,
-                                            int *status) {
-           *status = (*parent)->ESMC_DELayoutGetParentDEID(*pid, *child, cid);
-       }
+  void FTN(c_esmc_delayoutscatter)(ESMC_DELayout **ptr,
+    void ***datain, void ***dataout, int *blen, int *root, 
+    ESMC_Logical *oneToOneFlag, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutscatter()"
+    int localrc;
+    if (*oneToOneFlag == ESMF_TRUE){
+      localrc = (*ptr)->ESMC_DELayoutScatter((void **)datain, 
+        (void **)dataout, *blen, *root, *oneToOneFlag);
+    }else{      
+      localrc = (*ptr)->ESMC_DELayoutScatter(*datain, *dataout, *blen,
+        *root, *oneToOneFlag);
+    }
+    // Use LogErr to handle return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN(c_esmc_delayoutdatacreate)(void ***ptr, int *n, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutdatacreate()"
+    int localrc;
+    *ptr = ESMC_DELayoutDataCreate(*n, &localrc);
+    // Use LogErr to handle return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN(c_esmc_delayoutdataadd)(void ***ptr, void *a, int *index, 
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutdataadd()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_DELayoutDataAdd(*ptr, a, *index-1),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
 
-       void FTN(c_esmc_delayoutgetdeexists)(ESMC_DELayout **ptr, int *deid, 
-                                   ESMC_DELayout **other, ESMC_Logical *exists,
-                                   int *status) {
-           *status = (*ptr)->ESMC_DELayoutGetDEExists(*deid, *other, exists);
-       }
+  void FTN(c_esmc_delayoutdatadestroy)(void ***ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutdatadestroy()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_DELayoutDataDestroy(*ptr),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
 
-       void FTN(c_esmc_delayoutsetaxisindex)(ESMC_DELayout **ptr,
-                                           int *global_counts, 
-                                           int *size_gcount, int *decompids, 
-                                           int *size_decomp, 
-                                           ESMC_AxisIndex *AIPtr, int *status) {
-           *status = (*ptr)->ESMC_DELayoutSetAxisIndex(global_counts,
-                                           *size_gcount, decompids, *size_decomp,
-                                           AIPtr);
-       }
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutserialize"
+//BOP
+// !IROUTINE:  c_ESMC_DELayoutSerialize - Serialize DELayout object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_delayoutserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_DELayout **delayout,       // in/out - delayout object
+      char *buf,                // in/out - really a byte stream
+      int *length,              // in/out - number of allocated bytes
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Serialize the contents of a delayout object.
+//     Warning!!  Not completely implemented yet.
+//
+//EOP
 
-       void FTN(c_esmc_delayoutparse)(ESMC_DELayout **ptr, int *axis, int *count,
-                                      int *countsPerDE, int *status) { 
-           *status = (*ptr)->ESMC_DELayoutParse(*axis, *count, countsPerDE);
-       }
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError(
+      (*delayout)->ESMC_DELayoutSerialize(buf, length, offset),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
 
-       void FTN(c_esmc_delayoutgatherarrayi)(ESMC_DELayout **ptr,
-                                             int *global_dimlengths,
-                                             int *DistArray, int *decompids, 
-                                             int *size_decomp, 
-                                             int *localDimCounts, int *localMaxDimCount,
-                                             ESMC_AxisIndex *AIPtr, 
-                                             ESMC_AxisIndex *AIPtr2, 
-                                             int *GlobalArray, int *status) {
-           *status = (*ptr)->ESMC_DELayoutGatherArray((void *)DistArray, 
-                                             global_dimlengths, decompids, *size_decomp,
-                                             localDimCounts, localMaxDimCount,
-                                             AIPtr, AIPtr2, 
-                                             ESMF_I4, GlobalArray);
-       }
+}  // end c_ESMC_DELayoutSerialize
 
-       void FTN(c_esmc_delayoutgatherarrayr)(ESMC_DELayout **ptr,
-                                             int *global_dimlengths,
-                                             float *DistArray, int *decompids, 
-                                             int *size_decomp, 
-                                             int *localDimCounts, int *localMaxDimCount,
-                                             ESMC_AxisIndex *AIPtr, 
-                                             ESMC_AxisIndex *AIPtr2, 
-                                             float *GlobalArray, int *status) {
-           *status = (*ptr)->ESMC_DELayoutGatherArray(DistArray,
-                                             global_dimlengths, decompids, *size_decomp,
-                                             localDimCounts, localMaxDimCount,
-                                             AIPtr, AIPtr2, 
-                                             ESMF_R4, GlobalArray);
-       }
 
-       void FTN(c_esmc_delayoutgatherarrayr8)(ESMC_DELayout **ptr,
-                                             int *global_dimlengths,
-                                             double *DistArray, int *decompids, 
-                                             int *size_decomp, 
-                                             int *localDimCounts, int *localMaxDimCount,
-                                             ESMC_AxisIndex *AIPtr, 
-                                             ESMC_AxisIndex *AIPtr2, 
-                                             double *GlobalArray, int *status) {
-           *status = (*ptr)->ESMC_DELayoutGatherArray(DistArray,
-                                             global_dimlengths, decompids, *size_decomp, 
-                                             localDimCounts, localMaxDimCount,
-                                             AIPtr, AIPtr2, 
-                                             ESMF_R8, GlobalArray);
-       }
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutdeserialize"
+//BOP
+// !IROUTINE:  c_ESMC_DELayoutDeserialize - Deserialize DELayout object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_delayoutdeserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_DELayout **delayout,       // in/out - delayout object
+      char *buf,                // in/out - really a byte stream
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Deserialize the contents of a delayout object.
+//
+//EOP
+    int localrc;
 
-       void FTN(c_esmc_delayoutprint)(ESMC_DELayout **ptr, char *opts,
-                                      int *status){
-           if ((!ptr) || (*ptr == ESMC_NULL_POINTER)) {
-               *status = ESMF_FAILURE;
-               return;
-           }
-                 
-           *status = (*ptr)->ESMC_DELayoutPrint();
-           //*status = (*ptr)->ESMC_DELayoutPrint(opts);
-       }
+    (*delayout) = ESMC_DELayoutDeserialize(buf, offset);
+    if (*delayout == NULL) 
+        localrc = ESMF_FAILURE;
+    else
+        localrc = ESMF_SUCCESS;
 
-       void FTN(c_esmc_delayoutvalidate)(ESMC_DELayout **ptr, char *opts,
-                                      int *status){
-           if ((!ptr) || (*ptr == ESMC_NULL_POINTER)) {
-               *status = ESMF_FAILURE;
-               return;
-           }
-           *status = (*ptr)->ESMC_DELayoutValidate();
-           //*status = (*ptr)->ESMC_DELayoutValidate(opts);
-       }
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
 
-       void FTN(c_esmc_delayoutscatterna)(ESMC_DELayout **ptr,
-                                 void *sndarray, void *rcvarray, int *len,
-                                 ESMC_DataKind *type, int *srcdeid,
-                                 int *status) {
-           *status = (*ptr)->ESMC_DELayoutScatter(sndarray, rcvarray, *len,
-                                                  *type, *srcdeid);
-       }
+}  // end c_ESMC_DELayoutDeserialize
 
-       void FTN(c_esmc_delayoutscatterla)(ESMC_DELayout **ptr,
-                                 ESMC_LocalArray **sndarray,
-                                 ESMC_LocalArray **rcvarray, int *len,
-                                 int *srcdeid, int *status) {
-           *status = (*ptr)->ESMC_DELayoutScatter(*sndarray, *rcvarray, *len,
-                                                  *srcdeid);
-       }
 
-       void FTN(c_esmc_delayoutallreduce)(ESMC_DELayout **ptr, int *array,
-                                 int *result, int *len, int *op, int *status) {
-           *status = (*ptr)->ESMC_DELayoutAllReduce(array, result, *len,
-                                                  (ESMC_Op) *op);
-       }
 
-       void FTN(c_esmc_delayoutsendrecv)(ESMC_DELayout **ptr, void *sbuf,
-                                 void *rbuf, int *snum, int *rnum, int *sde_index, 
-				 int *rde_index, ESMC_DataKind *type, int *status) {
-           *status = (*ptr)->ESMC_DELayoutSendRecv(sbuf, rbuf, *snum, *rnum, 
-                                 *sde_index, *rde_index, *type);
-       }
+#undef  ESMC_METHOD
+}
 
-       void FTN(c_esmc_delayoutbarrier)(ESMC_DELayout **ptr, int *status) {
-           *status = (*ptr)->ESMC_DELayoutBarrier();
-       }
-
-       void FTN(c_esmc_delayoutbcast)(ESMC_DELayout **ptr, void *buf, int *num, 
-                                 int *srcde_index, ESMC_DataKind *type, int *status) {
-           *status = (*ptr)->ESMC_DELayoutBcast(buf, *num, *srcde_index, *type);
-       }
-
-       void FTN(c_esmc_delayoutallgathervna)(ESMC_DELayout **ptr,
-                                 void *sndarray, int *slen,
-                                 void *rcvarray, int *rlen, int *rcvdispls,
-                                 ESMC_DataKind *kind, int *status) {
-           *status = (*ptr)->ESMC_DELayoutAllGatherV(sndarray, *slen,
-                                                     rcvarray,  rlen, rcvdispls,
-                                                     *kind);
-       }
-
-       void FTN(c_esmc_delayoutallgathervla)(ESMC_DELayout **ptr,
-                          ESMC_LocalArray **sndarray, int *slen,
-                          ESMC_LocalArray **rcvarray, int *rlen, int *rcvdispls,
-                          int *status) {
-           *status = (*ptr)->ESMC_DELayoutAllGatherV(*sndarray, *slen,
-                                                     *rcvarray,  rlen, rcvdispls);
-       }
-
-};

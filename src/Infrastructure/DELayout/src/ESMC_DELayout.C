@@ -1,15 +1,19 @@
-// $Id: ESMC_DELayout.C,v 1.9 2004/03/03 18:20:35 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.42.2.1 2006/11/16 00:15:23 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
-
-// ESMC DELayout method code (body) file
-
+// Licensed under the University of Illinois-NCSA License.
+//
+//==============================================================================
+#define ESMC_FILENAME "ESMC_DELayout.C"
+//==============================================================================
+//
+// ESMC DELayout method implementation (body) file
+//
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
@@ -17,2630 +21,1874 @@
 // The code in this file implements the C++ DELayout methods declared
 // in the companion file ESMC_DELayout.h
 //
-// 
-//
 //-----------------------------------------------------------------------------
-//
-#include <iostream.h>  // cout
+
+// insert any higher level, 3rd party or system includes here
 #include <stdio.h>
-//#include <iostream>  // TODO: use when namespaces consistently implemented
-//using std::cout;
-//using std::cerr;
-//using std::endl;
-#include <new>         // new, bad_alloc
-#include <ESMC.h>
-#include <mpi.h>
+#include <string.h>
+#include <ESMC_Start.h>
+#include <ESMC_Base.h>  
+#include <ESMC_VM.h>  
 
- // associated class definition file
- #include <ESMC_DELayout.h>
+// associated class definition file
+#include <ESMC_DELayout.h>
 
-#define ESMF_MPI_TAG 1
-
- // single place to turn on and off debug messages; when real error & logging
- // is available replace this.
-static int verbose = 1;
-
+// LogErr headers
+#include "ESMC_LogErr.h"                  // for LogErr
+#include "ESMF_LogMacros.inc"             // for LogErr
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.9 2004/03/03 18:20:35 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.42.2.1 2006/11/16 00:15:23 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
-//
-//-----------------------------------------------------------------------------
+
 //-----------------------------------------------------------------------------
 //
 // This section includes all the DELayout routines
 //
 //-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutCreate()"
 //BOP
-// !IROUTINE:  ESMC_DELayoutCreate - Create a default DELayout
+// !IROUTINE:  ESMC_DELayoutCreate
 //
 // !INTERFACE:
-      ESMC_DELayout *ESMC_DELayoutCreate(
+ESMC_DELayout *ESMC_DELayoutCreate(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_DELayout
+//    ESMC_DELayout * to newly allocated ESMC_DELayout
 //
 // !ARGUMENTS:
-      int *rc) {                 // out - return code
+//
+  ESMC_VM &vm,              // reference to ESMC_VM object
+  int *nDEs,                // number of DEs
+  int ndim,                 // number of dimensions
+  int *DEtoPET,             // DEtoPET list
+  int len,                  // number of DEs in DEtoPET list
+  ESMC_Logical *cyclic_opt, // cyclic boundary option
+  int *rc){                 // return code
 //
 // !DESCRIPTION:
-//      Allocates memory for a new DELayout using a self-discovered
-//      PEList
 //
 //EOP
-
+//-----------------------------------------------------------------------------
   ESMC_DELayout *layout;
-
-  try {
-    layout = new ESMC_DELayout;
-      //cout << "ESMC_DELayoutCreate() successful\n";
-    *rc = layout->ESMC_DELayoutConstruct();
-    return(layout);
-  }
-  catch (...) {
-    // TODO:  call ESMF log/err handler
-    cerr << "ESMC_DELayoutCreate() memory allocation failed\n";
-    *rc = ESMF_FAILURE;
-    return(ESMC_NULL_POINTER);
-  }
- } // end ESMC_DELayoutCreate
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutCreate - Create a new DELayout from a parent DELayout
-//
-// !INTERFACE:
-      ESMC_DELayout *ESMC_DELayoutCreate(
-//
-// !RETURN VALUE:
-//     pointer to newly allocated ESMC_DELayout
-//
-// !ARGUMENTS:
-      ESMC_DELayout *parent,          // in - parent DELayout
-      int *parent_offsets,            // in - offsets from start of parent axes
-      int *de_indices,                // in - null-terminated list of parent DE 
-                                      //      indices for new delayout
-      int ndim,                       // in - number of dimensions
-      int *lengths,                   // in - number of DEs in each dimension
-      ESMC_CommType *commtypes,       // in - array of communication types
-      int *rc) {                      // out - return code
-//
-// !DESCRIPTION:
-//  Create a new {\tt ESMC\_DELayout} using a parent {\tt ESMC\_DELayout}'s {\tt ESMC\_DE}s. 
-//
-//EOP
-
-  ESMC_DELayout *layout;
-
-// TODO: ?? use exception handling when universally supported (pgCC doesn't)
-  try {
-    layout = new ESMC_DELayout;
-    //cout << "ESMC_DELayoutCreate() successful\n";
-    *rc = layout->ESMC_DELayoutConstruct(parent, parent_offsets, de_indices, 
-					 ndim, lengths, commtypes);
-    return(layout);
-  }
-  catch (...) {
-//  catch (bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
-// TODO:  call ESMF log/err handler
-    cerr << "ESMC_DELayoutCreate() memory allocation failed\n";
-    *rc = ESMF_FAILURE;
-    return(ESMC_NULL_POINTER);
-  }
-
- } // end ESMC_DELayoutCreate
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutCreate - Create a new DELayout from a PE List
-//
-// !INTERFACE:
-      ESMC_DELayout *ESMC_DELayoutCreate(
-//
-// !RETURN VALUE:
-//     pointer to newly allocated ESMC_DELayout
-//
-// !ARGUMENTS:
-      ESMC_PEList *pelist,       // in - PEList
-      int ndim, 		 // in - number of dimensions		
-      int *lengths,              // in - number of DEs in each dimension
-      ESMC_CommType *commtypes,  // in - array of communication types
-      int *rc) {                 // out - return code
-//
-// !DESCRIPTION:
-//      Allocates memory for a new {\tt ESMC\_DELayout}
-//      object and uses the internal routine {\tt ESMC\_DELayoutConstruct} to
-//      initialize it. There can be multiple overloaded methods with the 
-//      same name, but different argument lists.
-//
-//EOP
-
-
-  ESMC_DELayout *layout;
-
-// TODO: ?? use exception handling when universally supported (pgCC doesn't)
-#if 1
-  try {
-    layout = new ESMC_DELayout;
-//cout << "ESMC_DELayoutCreate() successful\n";
-    *rc = layout->ESMC_DELayoutConstruct(pelist, ndim, lengths, commtypes);
-    return(layout);
-  }
-//  catch (bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
-  catch (...) {
-// TODO:  call ESMF log/err handler
-    cerr << "ESMC_DELayoutCreate() memory allocation failed\n";
-    *rc = ESMF_FAILURE;
-    return(ESMC_NULL_POINTER);
-  }
-#endif
-
-#if 0
-// use this section if exception handling not supported
-// TODO:  IBM (blackforest) doesn't support "new (nothrow)"
-  if ((layout = new (nothrow) ESMC_DELayout) == 0) {
-// TODO:  call ESMF log/err handler
-    cerr << "ESMC_DELayoutCreate() memory allocation failed\n";
-    *rc = ESMF_FAILURE;
-    return(ESMC_NULL_POINTER);
-  }
-
-//cout << "ESMC_DELayoutCreate() successful\n";
-  *rc = layout->ESMC_DELayoutConstruct(pelist, ndim, lengths, commtypes);
-  return(layout);
-#endif
-
- } // end ESMC_DELayoutCreate
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutCreate - Create a new DELayout from a DE array
-//
-// !INTERFACE:
-      ESMC_DELayout *ESMC_DELayoutCreate(
-//
-// !RETURN VALUE:
-//     pointer to newly allocated ESMC_DELayout
-//
-// !ARGUMENTS:
-      int *delist,               // in - array of DE indices
-      int ndim, 		 // in - number of dimensions		
-      int *lengths,              // in - number of DEs in each dimension
-      ESMC_CommType *commtypes,  // in - array of communication types
-      int *rc) {                 // out - return code
-//
-// !DESCRIPTION:
-//      Allocates memory for a new {\tt ESMC\_DELayout}
-//      object and uses the internal routine {\tt ESMC\_DELayoutConstruct} to
-//      initialize it. There can be multiple overloaded methods with the 
-//      same name, but different argument lists.
-//
-//EOP
-
-//  TODO:  This is a malformed function, in that it needs to be a DE list
-//   *relative* to another layout, or maybe by simple implication to a 1xN
-//   layout which is a global or something.   for now that is what is assumed,
-//   but create by PE list or by DE numbers relative to another layout are
-//   the preferred ways to create another layout.
-
-  ESMC_DELayout *layout;
-
-// TODO: ?? use exception handling when universally supported (pgCC doesn't)
-#if 1
-  try {
-    layout = new ESMC_DELayout;
-//cout << "ESMC_DELayoutCreate() successful\n";
-    *rc = layout->ESMC_DELayoutConstruct(delist, ndim, lengths, commtypes);
-    return(layout);
-  }
-//  catch (bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
-  catch (...) {
-// TODO:  call ESMF log/err handler
-    cerr << "ESMC_DELayoutCreate() memory allocation failed\n";
-    *rc = ESMF_FAILURE;
-    return(ESMC_NULL_POINTER);
-  }
-#endif
-
-#if 0
-// use this section if exception handling not supported
-// TODO:  IBM (blackforest) doesn't support "new (nothrow)"
-  if ((layout = new (nothrow) ESMC_DELayout) == 0) {
-// TODO:  call ESMF log/err handler
-    cerr << "ESMC_DELayoutCreate() memory allocation failed\n";
-    *rc = ESMF_FAILURE;
-    return(ESMC_NULL_POINTER);
-  }
-
-//cout << "ESMC_DELayoutCreate() successful\n";
-  *rc = layout->ESMC_DELayoutConstruct(delist, ndim, lengths, commtypes);
-  return(layout);
-#endif
-
- } // end ESMC_DELayoutCreate
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutDestroy - free a DELayout created with Create
-//
-// !INTERFACE:
-      int ESMC_DELayoutDestroy(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_DELayout *layout) {  // in - ESMC_DELayout to destroy
-//
-// !DESCRIPTION:
-//      ESMF routine which destroys a DELayout object previously allocated
-//      via an {\tt ESMC\_DELayoutCreate} routine.  Define for deep classes only.
-//
-//EOP
-
-//cout << "ESMC_DELayoutDestroy, layout = " << layout << endl;
-  if (layout != ESMC_NULL_POINTER) {
-    //layout->ESMC_DELayoutDestruct(); constructor calls it!
-    delete layout;
-    layout = ESMC_NULL_POINTER;
-//cout << "ESMC_DELayoutDestroy() successful\n";
-    return(ESMF_SUCCESS);
-  } else {
-    return(ESMF_FAILURE);
-  }
-
- } // end ESMC_DELayoutDestroy
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutConstruct - Build a 1D DELayout from a
-//                                    self-discovered PEList
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutConstruct(void) {
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//      ESMC routine which fills in the contents of an already
-//      allocated DELayout object.  May need to do additional allocations
-//      as needed.  Must call the corresponding {\tt ESMC\_DELayoutDestruct}
-//      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use {\tt ESMC\_DELayoutCreate}, which calls
-//      {\tt ESMC\_DELayoutConstruct}.  Define for deep classes only.
-//
-//EOP
-// !REQUIREMENTS:  
-
-  //
-  // self discover the PEList by sharing our PE with all other DEs
-  //
-  // TODO: currently, this works only in the default case of all MPI DEs: no
-  //  threads
-  //
-  int i, myEsmfID;
-  MPI_Group mpigroup;
-
-  // Initialize comm, PE, DE, Machine
-  ESMC_DELayoutInit();
-
-  ndim = 1;
-  parent=ESMC_NULL_POINTER;
-
-  // get total number of DEs
-  comm.ESMC_CommGetNumDEs(&nDEs);
-  //cout << "DELayoutCreate(void) comm group size = " << nDEs << endl;
-
-  // Construct the sorted PE list object.  When this returns, peList is valid.
-  ESMC_DELayoutSetPEList();
-
-  // construct 1D array of ESMC_DE's
-  try {
-    // first, create array of (nx) pointers to ESMC_DE pointers
-    layout = new ESMC_DE**[nDEs];
-
-    // then allocate ny=1, nz=1 DEs
-    for (i=0; i<nDEs; i++) {
-      layout[i] = new ESMC_DE*[1];
-      layout[i][0] = new ESMC_DE[1];
-    }
-  }
-  catch(...) {
-//  catch(bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
-    // TODO:  call ESMF log/err handler
-    cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
-    return(ESMF_FAILURE);
-  }
-
-  this->length = new int[ESMF_MAXDECOMPDIM];
-  this->length[0] = nDEs;
-  for (i=1; i<ESMF_MAXDECOMPDIM; i++)
-      this->length[i] = 1;
-
-  ESMC_PE *pe;
-  for (i=0; i<nDEs; i++) {
-    // retrieve next PE from our list
-    peList->ESMC_PEListGetPE(i, &pe);
-
-    // then assign it to this DE
-    layout[i][0][0].ESMC_DESetPE(pe);
-
-    // assign local ESMF id in DE struct from 0 to nDEs - 1
-    layout[i][0][0].ESMC_DESetESMFID(i);
-
-    //layout[i][0][0].ESMC_DEPrint();
-  }
-
-  // TODO: create true child communicators 
-  MPI_Comm_group(MPI_COMM_WORLD, &mpigroup);
-  MPI_Comm_create(MPI_COMM_WORLD, mpigroup, &decomm.mpicomm);
-  // we need to call the comm with the child comms, not world
-
-  // TODO: revisit this, but for now make the default commtype MPI
-  this->commType = new ESMC_CommType[ESMF_MAXDECOMPDIM];
-  for (i=0; i<ESMF_MAXDECOMPDIM; i++)
-      this->commType[i] = ESMC_COMMTYPE_SHR;
-
-  if (verbose) {
-    //cout << "ESMC_DELayoutConstruct (default 1xN) successful\n";
-    //cout << "Create default 1xN Layout:" << endl;
-    //ESMC_DELayoutPrint();
-  }
-
-  return(ESMF_SUCCESS);
-
- } // end ESMC_DELayoutConstruct
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutConstruct - Build a new DELayout from a parent
-//                                   
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutConstruct(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_DELayout *inparent,       // in/out - parentDELayout
-      int *parent_offsets,           // in - offsets from start of parent axes
-      int *de_indices,               // in - null-ternminated list of parent DE 
-                                     //      indices for new delayout
-      int indim,                     // in - number of dimensions
-      int *lengths,                  // in - number of DE's in each dimension
-      ESMC_CommType *commtypes) {    // in - communication type
-//
-// !DESCRIPTION:
-//      ESMF routine which fills in the contents of an already
-//      allocated DELayout object.  May need to do additional allocations
-//      as needed.  Must call the corresponding {\tt ESMC\_DELayoutDestruct}
-//      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use {\tt ESMC\_DELayoutCreate}, which calls
-//      {\tt ESMC\_DELayoutConstruct}.  Define for deep classes only.
-//
-//EOP
-
-  int ii, nx, ny, nz;
-  int userwants;
-  this->ndim=indim;
-
-  // Initialize comm, PE, DE, Machine
-  ESMC_DELayoutInit();
-
-  // get total number of DEs
-  comm.ESMC_CommGetNumDEs(&nDEs);
-  //cout << "DELayout(parent) comm group size = " << nDEs << endl;
-
-  // do some error checks
-  userwants = 1;
-  for(ii=0; ii<ndim; ii++)  
-    userwants *= lengths[ii];
-   
-  if (userwants > nDEs) {
-    cout << "request needs " << userwants << " DEs, only " 
-         << nDEs << " available " << endl;
-    return ESMF_FAILURE;
-  }
-  //cout << "user wants " << userwants << " which is ok." << endl;
-
-  // TODO: This is NOT right - it should be a true child communicator.
-  decomm.mpicomm = MPI_COMM_WORLD;
-
-  this->length = new int[ESMF_MAXDECOMPDIM];
-  this->commType = new ESMC_CommType[ESMF_MAXDECOMPDIM];
-  this->nDEs = 1;   // must do this if mult below by len
-  for(ii=0; ii<ndim; ii++) {
-    this->commType[ii]=commtypes[ii];
-    this->length[ii]=lengths[ii];
-    this->nDEs*=this->length[ii];
-  }
-  for(ii=ndim; ii<ESMF_MAXDECOMPDIM; ii++) {
-    this->commType[ii]=ESMC_COMMTYPE_SHR;
-    this->length[ii]=1;
-   }
-
-  // now you can use all the dims, regardless of what ndim is.
-  nx=length[0];
-  ny=length[1];
-  nz=length[2];
-
-  // construct 3D array of ESMC_DE's
-
-  try {
-    // construct 3D array of ESMC_DE's
-
-    // first, create array of (nx) pointers to ESMC_DE pointers
-    layout = new ESMC_DE**[nx];
-
-    // then allocate an array of (ny) ESMC_DE pointers for each x pointer
-    for (int i=0; i<nx; i++) {
-      layout[i] = new ESMC_DE*[ny];
-      // finally allocate a Z array of ESMC_DE's for each y pointer
-      for (int j=0; j<ny; j++) {
-        layout[i][j] = new ESMC_DE[nz];
-      }
-    }
-  }
-  catch(...) {
-//  catch(bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
-// TODO:  call ESMF log/err handler
-    cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
-    return(ESMF_FAILURE);
-  }
-
-  // create a PE list object to hold the parent PE sub-list
-  int rc;
-  peList = ESMC_PEListCreate(nDEs, &rc); // assume #PEs = nDEs for now
-
-  //
-  // Assign parent DELayout DE's to DE's in new layout according to
-  // communication hint.  Assume parent layout is 1D; contained DE list
-  // consists of unique DE ids that are pre-sorted
-  // by fastest communication affinity (e.g. node, thread, process)
-  //
-  int ni, nj, nk;  // loop limits
-  int i, j, k;     // i outer loop, j inner loop (fastest)
-  int *x, *y, *z;  // layout coordinates to loop through
-
-  // TODO: Wire this correctly for communication types
-  commHint = ESMC_XFAST;
-
-  switch(commHint)
-  {
-    case ESMC_XFAST:
-    case ESMC_NOHINT:
-      ni = length[2];  z = &i; // 3rd fastest (for outer loop)
-      nj = length[1];  y = &j; // 2nd fastest (for middle loop)
-      nk = length[0];  x = &k; // fastest (for inner loop)
-      break;
-    case ESMC_YFAST:
-      ni = length[2]; z = &i;
-      nj = length[0]; x = &j;
-      nk = length[1]; y = &k;
-      break;
-    case ESMC_ZFAST:
-      ni = length[1]; y = &i;
-      nj = length[0]; x = &j;
-      nk = length[2]; z = &k;
-      break;
-    default:
-      break;
-  }
-
-//cout << "ESMC_DELayoutConstruct() ni, nj " << ni << ", " << nj << endl;
-
-  ESMC_DE de;
-  ESMC_PE *pe;
-  int index=0;
-  for (i=0; i<ni; i++) {
-    for(j=0; j<nj; j++) {
-      for(k=0; k<nk; k++) {
-
-        //cout << "ESMC_DELayoutConstruct(): " << i << ", " << j  << "\n";
-        //cout << "ESMC_DELayoutConstruct(): " << *x<< ", " << *y << "\n";
-
-        // parent DE cannot be reused by subsequent DELayoutCreate calls
-        rc = inparent->ESMC_DELayoutGetDE(de_indices[index], 0, 0, &de);
-        //cout << "index = " << index << ", ESMC_DELayoutGetDE(" 
-        //     << de_indices[index] << ") called, rc = " << rc << endl;
-
-        
-        if (rc == ESMF_SUCCESS) {
-          // assign DE in given parent layout to this DE in layout
-          // this makes a copy of the contents so we can now change it
-          // to have the right id's for the new layout
-          layout[*x][*y][*z] = de;
-
-          // copy PE sub-list from parent layout; determine from DE list
-          de.ESMC_DEGetPE(&pe);
-          peList->ESMC_PEListSetPE(index, pe);
-
-          layout[*x][*y][*z].ESMC_DESetESMFID(index);
-          index++;
-        }
-        else {
-          // TODO: log err
-          cout << "ESMC_DELayoutConstruct(): ESMC_DELayoutGetDE()" <<
-                  " returned ESMF_FAILURE" << endl;
-          return(ESMF_FAILURE);
-        }
-      }
-    }
-  }
-  //peList->ESMC_PEListPrint();
-
-  if (verbose) {
-    //cout << "ESMC_DELayoutConstruct (from Parent) successful\n";
-    //cout << "Create Layout from Parent:" << endl;
-    //ESMC_DELayoutPrint();
-  }
-  return(ESMF_SUCCESS);
-
- } // end ESMC_DELayoutConstruct
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutConstruct - Build a DELayout from a DE list
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutConstruct(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int *delist,                // in - array of DE indices
-      int indim,                  // in - number of dimensions
-      int *lengths,               // in - number of DEs in each dimension
-      ESMC_CommType *commtypes) { // in - array of communication types
-//
-// !DESCRIPTION:
-//      ESMF routine which fills in the contents of an already
-//      allocated DELayout object.  May need to do additional allocations
-//      as needed.  Must call the corresponding {\tt ESMC\_DELayoutDestruct}
-//      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use {\tt ESMC\_DELayoutCreate}, which calls
-//      {\tt ESMC\_DELayoutConstruct}.  Define for deep classes only.
-//
-//EOP
-// !REQUIREMENTS:  
-
-  int nx, ny, nz;
-  int i, j, k;
-  int userwants;
-
-  // Initialize comm, PE, DE, Machine
-  ESMC_DELayoutInit();
-
-  // get total number of DEs
-  comm.ESMC_CommGetNumDEs(&nDEs);
-  //cout << "DELayoutCreate(delist) comm group size = " << nDEs << endl;
-
-  // do some error checks
-  userwants = 1;
-  for(i=0; i<indim; i++)  
-    userwants *= lengths[i];
-   
-  if (userwants > nDEs) {
-    cout << "request needs " << userwants << " DEs, only " 
-         << nDEs << " available " << endl;
-    return ESMF_FAILURE;
-  }
-  //cout << "user wants " << userwants << " which is ok." << endl;
-
-  // TODO: This is NOT right - it should be a true child communicator.
-  decomm.mpicomm = MPI_COMM_WORLD;
-
-  // make space for the lists
-  this->length = new int[ESMF_MAXDECOMPDIM];
-  this->commType = new ESMC_CommType[ESMF_MAXDECOMPDIM];
-
-  nDEs = 1;
-  for (i=0; i<indim; i++) {
-      this->length[i] = lengths[i];
-      this->commType[i] = commtypes[i];
-      nDEs *= lengths[i];
-  }
-  for (i=indim; i<ESMF_MAXDECOMPDIM; i++) {
-      this->length[i] = 1;
-      this->commType[i] = ESMC_COMMTYPE_SHR;
-  }
-
-  // now all the lengths and commtypes are initialized, regardless of
-  // what ndim is.
-
-  // create the corresponding PE list
-  ESMC_DELayoutSetPEList();
-
-  //
-  // construct 3D array of ESMC_DE's
-  //
-
-  this->ndim=indim;
-  nx=length[0];
-  ny=length[1];
-  nz=length[2];
-
-  // TODO: this loop is now ok for 3D, but further down it's only 2D
-  try {
-
-    // first, create array of (nx) pointers to ESMC_DE pointers
-    layout = new ESMC_DE**[nx];
-
-    // then allocate an array of (ny) ESMC_DE pointers for each x pointer
-    for (i=0; i<nx; i++) {
-      layout[i] = new ESMC_DE*[ny];
-      // finally allocate a Z array of ESMC_DE's for each y pointer
-      // only 1 long, since this version of Construct is 2D
-      for (int j=0; j<ny; j++) {
-        layout[i][j] = new ESMC_DE[nz];
-      }
-    }
-  }
-  catch(...) {
-    // TODO:  call ESMF log/err handler
-    cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
-    return(ESMF_FAILURE);
-  }
-
-  //deList = delist;
-  commHint = ESMC_XFAST;
-
-  // TODO: ?? make commHint lookup table & share with Print()
-
-  //
-  // Assign DElist to DE's in layout according to communication hint.
-  // Assume given DE list consists of unique DE ids that are pre-sorted
-  // by fastest communication affinity (e.g. node, thread, process)
-  //
-  // TODO: this part is 2D only
-  //
-  int ni, nj, nk;  // loop limits
-                   // i outer loop, j inner loop (fastest)
-  int *x, *y, *z;  // layout coordinates to loop through
-  switch (commHint)
-  {
-    case ESMC_XFAST:
-    case ESMC_NOHINT:
-      ni = length[2];  z = &i; // 3rd fastest (for outer loop)
-      nj = length[1];  y = &j; // 2nd fastest (for middle loop)
-      nk = length[0];  x = &k; // fastest (for inner loop)
-      break;
-    case ESMC_YFAST:
-      ni = length[2]; z = &i;
-      nj = length[0]; x = &j;
-      nk = length[1]; y = &k;
-      break;
-    case ESMC_ZFAST:
-      ni = length[1]; y = &i;
-      nj = length[0]; x = &j;
-      nk = length[2]; z = &k;
-      break;
-    default:
-      break;
-  }
-
-//cout << "ESMC_DELayoutConstruct() ni, nj " << ni << ", " << nj << endl;
-
-  int DEix=0;
-  int PEix=0;
-  ESMC_PE *pe;
-  for (i=0; i<ni; i++) {
-    for(j=0; j<nj; j++) {
-      for(k=0; k<nk; k++) {
-        // assign DE in given list to this DE in layout
-//cout << "ESMC_DELayoutConstruct(): " << i << ", " << j  << "\n";
-//cout << "ESMC_DELayoutConstruct(): " << *x<< ", " << *y << "\n";
-        layout[*x][*y][*z].ESMC_DESetESMFID(delist[DEix++]);
-
-        // TODO: this is new code.  it should be well tested. 
-        peList->ESMC_PEListGetPE(PEix++, &pe);
-        layout[*x][*y][*z].ESMC_DESetPE(pe);
-
-        // TODO: and what was this?  it was commented out.
-        //layout[*x][*y][*z].ESMC_DESetPEID(delist[DEix++]);
-      }
-    }
-  }
-
-  if (verbose) {
-    //cout << "ESMC_DELayoutConstruct (from delist) successful\n";
-    //cout << "Create Layout from delist:" << endl;
-    //ESMC_DELayoutPrint();
-  }
-  return(ESMF_SUCCESS);
-
- } // end ESMC_DELayoutConstruct
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutConstruct - Build a DELayout from a PE List
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutConstruct(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_PEList *pelist,        // in - PEList
-      int indim,                  // in - number of dimensions
-      int *lengths,               // in - number of DEs in each dimension
-      ESMC_CommType *commtypes) { // in - communication type for each dimension
-//
-// !DESCRIPTION:
-//      ESMF routine which fills in the contents of an already
-//      allocated DELayout object.  May need to do additional allocations
-//      as needed.  Must call the corresponding {\tt ESMC\_DELayoutDestruct}
-//      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use {\tt ESMC\_DELayoutCreate}, which calls
-//      {\tt ESMC\_DELayoutConstruct}.  Define for deep classes only.
-//
-//EOP
-// !REQUIREMENTS:  
-
-  int nx, ny, nz;
-  int i;
-  int userwants;
-
-  // Initialize comm, PE, DE, Machine
-  ESMC_DELayoutInit();
-
-  // get total number of DEs
-  comm.ESMC_CommGetNumDEs(&nDEs);
-  //cout << "DELayoutCreate(pelist) comm group size = " << nDEs << endl;
-
-  // do some error checks
-  userwants = 1;
-  for(i=0; i<indim; i++)  
-    userwants *= lengths[i];
-   
-  if (userwants > nDEs) {
-    cout << "request needs " << userwants << " DEs, only " 
-         << nDEs << " available " << endl;
-    return ESMF_FAILURE;
-  }
-
-  this->ndim = indim;
+  // deal with optional variables
+  ESMC_Logical cyclic = ESMF_FALSE;
+  if (cyclic_opt != ESMC_NULL_POINTER)
+    cyclic = *cyclic_opt;
   
-  this->length = new int[ESMF_MAXDECOMPDIM];
-  this->commType = new ESMC_CommType[ESMF_MAXDECOMPDIM];
-
-  nDEs = 1;
-  for (i=0; i<ndim; i++) {
-    this->length[i] = lengths[i];
-    nDEs *= lengths[i];
+  
+  // CAUTION: todo: THIS IS A _NASTY_ HACK to make things happy on higher levels
+  // that rely on DELayout to be _always 2D! Here I promote a 1D layout request
+  // to 2D: N x 1. I write a message to LogErr to make people aware of this!!!
+  if (ndim==0){
+    // ESMC_LogDefault.ESMC_LogWrite("Promoting 1D DELayout to 2D",
+    //   ESMC_LOG_WARN);
+    ndim = 2;
+    nDEs = new int[2];  // this will leave a memor leak, but hey, its a hack!
+    nDEs[0] = vm.vmk_npets();
+    nDEs[1] = 1;
   }
-  for(i=ndim; i<ESMF_MAXDECOMPDIM; i++)
-    this->length[i] = 1;
+  if (ndim==1){
+    // ESMC_LogDefault.ESMC_LogWrite("Promoting 1D DELayout to 2D",
+    //  ESMC_LOG_WARN);
+    ndim = 2;
+    int firstDEdim = nDEs[0];
+    nDEs = new int[2];  // this will leave a memor leak, but hey, its a hack!
+    nDEs[0] = firstDEdim;
+    nDEs[1] = 1;
+  }
+  
 
-  peList = pelist;
-  commHint = ESMC_XFAST;
-
-  // TODO: This is NOT right - it should be a true child communicator.
-  decomm.mpicomm = MPI_COMM_WORLD;
-
-  // construct 3D array of ESMC_DE's
-
-// TODO: ?? use exception handling when universally supported (pgCC doesn't)
-#if 1
-  try {
-    // construct 3D array of ESMC_DE's
-
-    // first, create array of (length[0]) pointers to ESMC_DE pointers
-    layout = new ESMC_DE**[length[0]];
-
-    // then allocate an array of (length[1]) ESMC_DE pointers for each x pointer
-    for (i=0; i<length[0]; i++) {
-      layout[i] = new ESMC_DE*[length[1]];
-      // finally allocate an array of ESMC_DE's for each y pointer
-      for (int j=0; j<length[1]; j++) {
-        layout[i][j] = new ESMC_DE[length[2]];
-      }
+  // decide whether this is a 1D or an ND layout
+  if (ndim==0){
+    // special case of a 1D layout where deCount will equal petCount
+    try {
+      layout = new ESMC_DELayout;
+      *rc = layout->ESMC_DELayoutConstruct1D(vm, 0, DEtoPET, len, cyclic);
+      return(layout);
+    }
+    catch (...) {
+      // LogErr catches the allocation error
+      ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_DELayout.", rc);  
+      return(ESMC_NULL_POINTER);
+    }
+  }else if(ndim==1){
+    try {
+      layout = new ESMC_DELayout;
+      *rc = layout->ESMC_DELayoutConstruct1D(vm, *nDEs, DEtoPET, len, cyclic);
+      return(layout);
+    }
+    catch (...) {
+      // LogErr catches the allocation error
+      ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_DELayout.", rc);  
+      return(ESMC_NULL_POINTER);
+    }
+  }else{
+    try {
+      layout = new ESMC_DELayout;
+      *rc = layout->ESMC_DELayoutConstructND(vm, nDEs, ndim, DEtoPET, len,
+        cyclic);
+      return(layout);
+    }
+    catch (...) {
+      // LogErr catches the allocation error
+      ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_DELayout.", rc);  
+      return(ESMC_NULL_POINTER);
     }
   }
-//  catch(bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
-  catch(...) {
-// TODO:  call ESMF log/err handler
-    cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
-    return(ESMF_FAILURE);
-  }
-#endif
+}
+//-----------------------------------------------------------------------------
 
-
-  // TODO: ?? make commHint lookup table & share with Print()
-
-  // assign PE's to DE's in layout according to communication hint
-  int ni, nj, nk;
-  int j, k;
-  int *x, *y, *z;
-  switch (commHint)
-  {
-    case ESMC_XFAST:
-    case ESMC_NOHINT:
-      ni = length[2];  z = &i; // 3rd fastest (for outer loop)
-      nj = length[1];  y = &j; // 2nd fastest (for middle loop)
-      nk = length[0];  x = &k; // fastest (for inner loop)
-      break;
-    case ESMC_YFAST:
-      ni = length[2]; z = &i;
-      nj = length[0]; x = &j;
-      nk = length[1]; y = &k;
-      break;
-    case ESMC_ZFAST:
-      ni = length[1]; y = &i;
-      nj = length[0]; x = &j;
-      nk = length[2]; z = &k;
-      break;
-    default:
-      break;
-  }
-
-//cout << "ESMC_DELayoutConstruct() ni, nj, nk: "
-          //<< ni << ", " << nj << ", " << nk << endl;
-
-  int PEix=0;
-  ESMC_PE *pe;
-  for (i=0; i<ni; i++) {
-    for(j=0; j<nj; j++) {
-      for(k=0; k<nk; k++) {
-
-        // retrieve next PE from our list
-        peList->ESMC_PEListGetPE(PEix++, &pe);
-
-        // then assign it to this DE
-//cout << "ESMC_DELayoutConstruct(): " << i << ", " << j << ", " << k << "\n";
-//cout << "ESMC_DELayoutConstruct(): " << *x<< ", " << *y<< ", " << *z<< "\n";
-        layout[*x][*y][*z].ESMC_DESetPE(pe);
-      }
-    }
-  }
-
-  if (verbose) {
-    //cout << "ESMC_DELayoutConstruct (from pelist) successful\n";
-    //cout << "Create Layout from pelist:" << endl;
-    //ESMC_DELayoutPrint();
-  }
-  return(ESMF_SUCCESS);
-
- } // end ESMC_DELayoutConstruct
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutDestroy()"
 //BOP
-// !IROUTINE:  ESMC_DELayoutDestruct - release resources associated w/a DELayout
+// !IROUTINE:  ESMC_DELayoutDestroy
 //
 // !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutDestruct(void) {
+int ESMC_DELayoutDestroy(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-//    none
+//
+  ESMC_DELayout **layout){      // in - ESMC_DELayout to destroy
 //
 // !DESCRIPTION:
-//      ESMF routine which deallocates any space allocated by
-//      {\tt ESMF\_DELayoutConstruct}, does any additional cleanup before the
-//      original DELayout object is freed.  Intended for internal ESMF
-//      use only; end-users use {\tt ESMC\_DELayoutDestroy}, which calls
-//      {\tt ESMC\_DELayoutDestruct}.  Define for deep classes only.
 //
 //EOP
-
-//
-//  code goes here
-//
-//cout << "ESMC_DELayoutDestruct() invoked\n";
-
-  // first delete each array of (ny) ESMC_DE's for each x pointer
-  for (int i=0; i<length[0]; i++) {
-    for (int j=0; j<length[1]; j++) {
-      // delete array of ESMC_DE's in z direction
-      delete[] layout[i][j];
-    }
-    // then delete array of ny pointers
-    delete[] layout[i];
+//-----------------------------------------------------------------------------
+  if (*layout != ESMC_NULL_POINTER) {
+    (*layout)->ESMC_DELayoutDestruct();
+    delete (*layout);
+    *layout = ESMC_NULL_POINTER;
+    return(ESMF_SUCCESS);
+  }else{
+    ESMC_LogDefault.ESMC_LogWrite("Cannot delete bad DELayout object.", 
+      ESMC_LOG_ERROR);
+    return(ESMF_FAILURE);
   }
-  // finally delete the array of (nx) pointers
-  delete[] layout;
-
-  layout = 0;
-  peList = 0;
-  delete[] length;
-  length = ESMC_NULL_POINTER;
-  delete[] commType;
-  commType = ESMC_NULL_POINTER;
-  commHint = ESMC_NOHINT;
-
-  return(ESMF_SUCCESS);
-
- } // end ESMC_DELayoutDestruct
+}
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
-//BOPI
-// !IROUTINE:  ESMC_DELayoutSetPEList - Create a PE list
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutConstruct1D()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutConstruct1D
 //
 // !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutSetPEList(void) {
+int ESMC_DELayout::ESMC_DELayoutConstruct1D(ESMC_VM &vm, int nDEs,
+  int *DEtoPET, int len, ESMC_Logical cyclic){
 //
 // !RETURN VALUE:
 //    int error return code
 //
-// !ARGUMENTS:
-//    none
 //
 // !DESCRIPTION:
-//      Do an MPI communication to create a {\tt ESMC\_PE} list for all {\tt ESMC\_PE}s
-//      involved in this layout.
+//    Construct the internal information structure in a new ESMC\_DELayout
 //
-//EOPI
-
-  comm.ESMC_CommGetNumDEs(&nDEs);
-
-  // Get our PE ids
-  int mypeid=0, mycpuid=0, mynodeid=0;
-  myPE.ESMC_PEGetEsmfID(&mypeid);   // (mypeid != myDEid) anymore...
-  myPE.ESMC_PEGetCpuID(&mycpuid);
-  myPE.ESMC_PEGetNodeID(&mynodeid);
-  //cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
-  //     << mynodeid << "\n";
-
-  // prepare send buffer with our PE ids
-  //  TODO: ?? use MPI derived type to send whole PE object rather
-  //           than 3 ints. Then use resulting receive buffer as PE list array,
-  //           thereby avoiding a copy operation.
-  int sendbuf[3];
-  sendbuf[0] = mypeid;
-  sendbuf[1] = mycpuid;
-  sendbuf[2] = mynodeid;
-
-  // temporary global buffer used to perform all gather
-  int *gbuf=0;
-  try {
-    gbuf = new int[nDEs * 3 * sizeof(int)];
+//EOP
+//-----------------------------------------------------------------------------
+  myvm = &vm;                       // set the pointer onto this VM instance
+  int npets =  vm.vmk_npets(); // get number of PETs
+  if (nDEs==0){
+    // this will be a 1:1 Layout
+    ndes = npets;                   // number of DEs to be the same as PETs
+  }else{
+    // number of DEs has been supplied
+    ndes = nDEs;
   }
-  catch(...) {
-    // TODO:  call ESMF log/err handler
-    cerr << "ESMC_DELayoutConstruct() gbuf memory allocation failed\n";
-    return(ESMF_FAILURE);
+  des = new de_type[ndes];          // allocate as many DEs as there are PETs
+  // uniquely label the DEs in the layout 
+  for (int i=0; i<ndes; i++){
+    des[i].deid = i;                // default is to use basis zero
   }
-
-  // share/gather all PE IDs from all DEs
-  comm.ESMC_CommAllGather(sendbuf, gbuf, 3, ESMF_I4);
-  //cout << "DELayoutCreate(): exited ESMC_CommAllGather" << endl;
-
-  // create PE List from gathered IDs
-  // create a PE list object entirely on the heap
-  int rc;
-  peList = ESMC_PEListCreate(nDEs, &rc); // assume #PEs = nDEs
-                                         //   for now
-  for(int i=0; i<nDEs; i++) {
-    // populate PE list with gathered ids
-    peList->ESMC_PEListInit(i, gbuf[i*3], gbuf[i*3+1], gbuf[i*3+2]);
+  // now define connectivity between the DEs
+  if (ndes>1){
+    for (int i=0; i<ndes; i++){
+      if (i==0){
+        if (cyclic==ESMF_TRUE){
+          des[i].nconnect = 2;
+          des[i].connect_de = new int[2];
+          des[i].connect_w  = new int[2];
+          des[i].connect_de[0] = ndes-1;
+          des[i].connect_w[0] = ESMC_CWGHT_NORMAL;
+          des[i].connect_de[1] = 1;
+          des[i].connect_w[1] = ESMC_CWGHT_NORMAL;
+        }else{
+          des[i].nconnect = 1;
+          des[i].connect_de = new int[1];
+          des[i].connect_w  = new int[1];
+          des[i].connect_de[0] = 1;
+          des[i].connect_w[0] = ESMC_CWGHT_NORMAL;
+        }
+      }else if (i==ndes-1){
+        if (cyclic==ESMF_TRUE){
+          des[i].nconnect = 2;
+          des[i].connect_de = new int[2];
+          des[i].connect_w  = new int[2];
+          des[i].connect_de[0] = i-1;
+          des[i].connect_w[0] = ESMC_CWGHT_NORMAL;
+          des[i].connect_de[1] = 0;
+          des[i].connect_w[1] = ESMC_CWGHT_NORMAL;
+        }else{
+          des[i].nconnect = 1;
+          des[i].connect_de = new int[1];
+          des[i].connect_w  = new int[1];
+          des[i].connect_de[0] = 0;
+          des[i].connect_w[0] = ESMC_CWGHT_NORMAL;
+        }
+      }else{
+        des[i].nconnect = 2;
+        des[i].connect_de = new int[2];
+        des[i].connect_w  = new int[2];
+        des[i].connect_de[0] = i-1;
+        des[i].connect_w[0] = ESMC_CWGHT_NORMAL;
+        des[i].connect_de[1] = i+1;
+        des[i].connect_w[1] = ESMC_CWGHT_NORMAL;
+      }        
+    }
+  } else  {
+     des[0].nconnect = 1;
+     des[0].connect_de = new int[1];
+     des[0].connect_w  = new int[1];
+     des[0].connect_de[0] = 0;
+     des[0].connect_w[0] = ESMC_CWGHT_NORMAL;
   }
-
-  // done with gbuf, delete it
-  delete gbuf;
-
-  // sort PE list by fastest communication neighbors (node) to
-  //   prep assignment to layout
-  //   TODO: other sort criteria (different node types) ?
-  //peList->ESMC_PEListPrint();
-  peList->ESMC_PEListSort();
-  //peList->ESMC_PEListPrint();
-
+	
+  // Setup the dimensionality and coordinates of this layout. This information
+  // is only kept for external use!
+  ndim = 1; // this is a 1D logical rectangular routine
+  logRectFlag = ESMF_TRUE;
+  dims = new int[ndim];
+  dims[0] = ndes;
+  for (int i=0; i<ndes; i++){
+    des[i].coord = new int[ndim];
+    des[i].coord[0] = i;
+  }
+  // DE-to-PET mapping
+  if (len==ndes){
+    // DEtoPET mapping has been provided externally
+    for (int i=0; i<ndes; i++)
+      des[i].petid = DEtoPET[i];   // copy the mapping
+  }else{
+    // Use the mapper algorithm to find good DE-to-PET mapping
+    ESMC_DELayoutFindDEtoPET(npets);
+  }
+  // Issue warning if this is not a 1:1 layout. Do this because higher levels
+  // of ESMF are written with 1:1 in mind.
+  // TODO: remove this warning once all of ESMF accepts the more general case
+  // of multiple DEs per PET.
+  if (oneToOneFlag == ESMF_FALSE){
+    ESMC_LogDefault.ESMC_LogWrite("A layout without 1:1 DE:PET mapping was"
+      " created! This may cause problems in higher layers of ESMF!", 
+      ESMC_LOG_WARN);
+  }
+  // Issue warning if this is not logically rectangular
+  // TODO: remove this warning when non logRect layouts o.k.
+  if (logRectFlag == ESMF_FALSE){
+    ESMC_LogDefault.ESMC_LogWrite("A non logRect layout was"
+      " created! This may cause problems in higher layers of ESMF!", 
+      ESMC_LOG_WARN);
+  }
+  // Fill local part of layout object
+  int mypet = vm.vmk_mypet();    // get my PET id
+  ESMC_DELayoutFillLocal(mypet);
+  // Now that the layout is pretty much set up it is time to go through once
+  // more to set the correct pids to provide a means to identify the virtual
+  // memory space in which the DEs operate.
+  for (int i=0; i<ndes; i++)
+    des[i].pid = vm.vmk_pid(des[i].petid);
   return ESMF_SUCCESS;
 }
+//-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutConstructND()"
 //BOP
-// !IROUTINE:  ESMC_DELayoutInit - initializes a DELayout object
+// !IROUTINE:  ESMC_DELayoutConstructND
 //
 // !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutInit(
+int ESMC_DELayout::ESMC_DELayoutConstructND(ESMC_VM &vm, int *nDEs, 
+  int nndim, int *DEtoPET, int len, ESMC_Logical cyclic){
 //
 // !RETURN VALUE:
 //    int error return code
 //
-// !ARGUMENTS:
-      void) {
 //
 // !DESCRIPTION:
-//      ESMF routine which only initializes {\tt ESMC\_DELayout} values; it does not
-//      allocate any resources.  Define for shallow classes only,
-//      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like {\tt ESMC\_DELayoutCreate}.
+//    Construct the internal information structure in a new ESMC\_DELayout
 //
 //EOP
-// !REQUIREMENTS:  
-
-  // initialize to an empty layout 
-  layout = 0;
-  peList = 0;
-  commHint = ESMC_NOHINT;
-
-  //
-  // initialize my DE, PE, Comm, and Machine model
-  //
-  int argc = 0;    // TODO pass into DELayoutCreate ?
-  char **argv = 0; // TODO pass into DELayoutCreate ?
-  int myEsmfID;
-
-  myDE.ESMC_DESetType(ESMC_PROCESS); // TODO: auto determine proc or thread,
-                                     //       or get from config file ?
-  comm.ESMC_CommInit(&argc, &argv, &myDE); // computes unique ESMF DE id
-
-  // initialize machine to defaults TODO:  This is no longer set here.
-  //  A global Machine object has already been instantiated.  This is backwards
-  //  anyway - it should query the hardware with sysinfo() or similar calls
-  //  and not set them with static (and untrue) values.
-  //Mach.ESMC_MachineInit(256, 1024, 4, true, true, true, 1, 200, 2, 100);
-  myPE.ESMC_PEInit(&Machine);        // gets cpu, node ids from machine
-
-  Machine.ESMC_MachineGetCpuID(&myEsmfID);
-  myPE.ESMC_PESetEsmfID(myEsmfID);  
-
-//cout << "myDEid = " << myDEid << "\n";
-
-#if 0
-  // debug
-  int mypeid=0, mycpuid=0, mynodeid=0;
-  myPE.ESMC_PEGetEsmfID(&mypeid); //   (mypeid = myDEid)
-  myPE.ESMC_PEGetCpuID(&mycpuid);
-  myPE.ESMC_PEGetNodeID(&mynodeid);
-cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
-       << mynodeid << "\n";
-#endif
-
-  return(ESMF_SUCCESS);
-
- } // end ESMC_DELayoutInit
-
-#if 0
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGetConfig - get configuration info from a DELayout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_DELayoutConfig *config) const {  // out - resources
-//
-// !DESCRIPTION:
-//    Returns the set of resources the {\tt DELayout} object was configured with.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- } // end ESMC_DELayoutGetConfig
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutSetConfig - set configuration info for a DELayout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutSetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      const ESMC_DELayoutConfig *config) {     // in - resources
-//
-// !DESCRIPTION:
-//    Configures the {\tt ESMC\_DELayout} object with set of resources given.
-//
-//EOP
-// !REQUIREMENTS:  
-
- } // end ESMC_DELayoutSetConfig
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGet<Value> - get <Value> for a DELayout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGet<Value>(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      <value type> *value) const {     // out - value
-//
-// !DESCRIPTION:
-//     Returns the value of {\tt ESMC\_DELayout} member <Value>.
-//     Can be multiple routines, one per value
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- } // end ESMC_DELayoutGet<Value>
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutSet<Value> - set <Value> for a DELayout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutSet<Value>(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      <value type> value) {     // in - value
-//
-// !DESCRIPTION:
-//     Sets the {\tt ESMC\_DELayout} member <Value> with the given value.
-//     Can be multiple routines, one per value
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- } // end ESMC_DELayoutSet<Value>
-#endif
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGetNumDEs - get the total number of DEs in layout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetNumDEs(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int *ndes) const {     // out - total number of DEs in layout
-//
-// !DESCRIPTION:
-//    Returns the total number of {\tt ESMC\_DE}s in the layout
-//EOP
-// !REQUIREMENTS:  
-
-  *ndes = nDEs;
-  return(ESMF_SUCCESS);
-
- } // end ESMC_DELayoutGetNumDEs
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGetSize - get (nx,ny) size of 2D DELayout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetSize(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int *nx,             // out - number of DE's in x direction
-      int *ny) const {     // out - number of DE's in y direction
-//
-// !DESCRIPTION:
-//    returns overall x,y dimensions of 2D {\tt ESMC\_DELayout}
-//
-//EOP
-// !REQUIREMENTS:  
-
-  *nx = length[0];
-  *ny = length[1];
-
-  return(ESMF_SUCCESS);
-
- } // end ESMC_DELayoutGetSize
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGetSize - get (nx,ny,nz) size of DELayout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetSize(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int *nx,             // out - number of DE's in x direction
-      int *ny,             // out - number of DE's in y direction
-      int *nz) const {     // out - number of DE's in z direction
-//
-// !DESCRIPTION:
-//    returns overall x,y,z dimensions of {\tt ESMC\_DELayout}
-//
-//EOP
-// !REQUIREMENTS:  
-
-  *nx = length[0];
-  *ny = length[1];
-  *nz = length[2];
-
-  return(ESMF_SUCCESS);
-
- } // end ESMC_DELayoutGetSize
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGetDEPosition - get x,y position of my DE in 2D DELayout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetDEPosition(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int *x,             // out - x position of DE in layout
-      int *y) const {     // out - y position of DE in layout
-//
-// !DESCRIPTION:
-//    returns (x,y) position of my {\tt ESMC\_DE} in 2D layout
-//
-//EOP
-// !REQUIREMENTS:  
-
-  // linear search for DE TODO: compute once on initialization ?
-  for (int i=0; i<length[0]; i++) {
-    for (int j=0; j<length[1]; j++) {
-      if (myDE.esmfID == layout[i][j][0].esmfID) {
-        // found -- return (x,y) position
-        *x = i;
-        *y = j;
-        return(ESMF_SUCCESS);
+  myvm = &vm;                       // set the pointer onto this VM instance
+  int npets =  vm.vmk_npets(); // get number of PETs
+  ndim = nndim; // set the number of dimensions
+  // this is a N-dim logical rectangular routine
+  logRectFlag = ESMF_TRUE;
+  dims = new int[ndim];
+  for (int i=0; i<ndim; i++)
+    dims[i] = nDEs[i];
+  // determine how many DEs there are in this layout
+  ndes = 1;
+  for (int i=0; i<nndim; i++)
+    ndes *= nDEs[i];
+  des = new de_type[ndes];          // allocate as many DEs as there are PETs
+  // uniquely label the DEs in the layout 
+  for (int i=0; i<ndes; i++){
+    des[i].deid = i;                // default is to use basis zero
+  }
+  // Setup the dimensionality and coordinates of this layout. This information
+  // is only kept for external use!
+  for (int i=0; i<ndes; i++){
+    des[i].coord = new int[ndim];
+  }
+  for (int j=0; j<ndim; j++)
+    des[0].coord[j] = 0;
+  for (int i=1; i<ndes; i++){
+    int carryover = 1;
+    for (int j=0; j<ndim; j++){
+      des[i].coord[j] = des[i-1].coord[j] + carryover;
+      if (des[i].coord[j]==nDEs[j]){
+        des[i].coord[j] = 0;
+        carryover = 1;
+      }else{
+        carryover=0;
       }
     }
   }
-
-  // not found - return error
-  return(ESMF_FAILURE);
-
- } // end ESMC_DELayoutGetDEPosition
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGetDEPosition - get (x,y,z) position of DE in DELayout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetDEPosition(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_DE *de,        // in  - given DE
-      int *x,             // out - x position of DE in layout
-      int *y,             // out - y position of DE in layout
-      int *z) const {     // out - z position of DE in layout
-//
-// !DESCRIPTION:
-//    returns (x,y,z) position of given {\tt ESMC\_DE} in layout
-//
-//EOP
-// !REQUIREMENTS:  
-
-  // linear search for DE
-  for (int i=0; i<length[0]; i++) {
-    for (int j=0; j<length[1]; j++) {
-      for (int k=0; k<length[2]; k++) {
-        if (de->esmfID == layout[i][j][k].esmfID) {
-          // found -- return (x,y,z) position
-          *x = i;
-          *y = j;
-          *z = k;
-          return(ESMF_SUCCESS);
-        }
-      }
-    }
+  // TODO: define connectivity between the DEs
+  // For now don't connect any of the DEs
+  // however even without real connections the connect_de and connect_w arrays
+  // must be valid in order for the delete method to function correctly!
+  for (int i=0; i<ndes; i++){
+    des[i].nconnect = 0;
+    des[i].connect_de = new int[1];
+    des[i].connect_w  = new int[1];
   }
-
-  // not found - return error
-  return(ESMF_FAILURE);
-
- } // end ESMC_DELayoutGetDEPosition
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGetDE - get DE at position (x,y,z)
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetDE(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int x,               // in - x position of DE in layout
-      int y,               // in - y position of DE in layout
-      int z,               // in - z position of DE in layout
-      ESMC_DE *de) const { // out - DE at (x,y,z)
-//
-// !DESCRIPTION:
-//    returns {\tt ESMC\_DE} at position (x,y,z) in layout
-//
-//EOP
-// !REQUIREMENTS:  
-
-  if (x >= 0 && x < length[0] &&
-      y >= 0 && y < length[1] &&
-      z >= 0 && z < length[2] &&
-      de != 0) {
-    *de = layout[x][y][z];
-    return(ESMF_SUCCESS);
+  // DE-to-PET mapping
+  if (len==ndes){
+    // DEtoPET mapping has been provided externally
+    for (int i=0; i<ndes; i++)
+      des[i].petid = DEtoPET[i];   // copy the mapping
+    // nsc - if ndes is = npets, go ahead and set the 1:1 flag
+    // even if the user supplied the mapping.   6dec04
+    // TODO: gjt - this needs a bit more consideration than this, just 
+    // ndes == npets alone does not indicate 1:1!
+      if (ndes==npets) // 1:1 layout
+        oneToOneFlag = ESMF_TRUE;
+      else
+        oneToOneFlag = ESMF_FALSE;  // if there are more or less DEs than PETs
+  }else{
+    // Use the mapper algorithm to find good DE-to-PET mapping
+    ESMC_DELayoutFindDEtoPET(npets);
   }
-  else {
-    // TODO: log error
-    return(ESMF_FAILURE);
+  // Issue warning if this is not a 1:1 layout. Do this because higher levels
+  // of ESMF are written with 1:1 in mind.
+  // TODO: remove this warning once all of ESMF accepts the more general case
+  // of multiple DEs per PET.
+  if (oneToOneFlag == ESMF_FALSE){
+    ESMC_LogDefault.ESMC_LogWrite("A layout without 1:1 DE:PET mapping was"
+      " created! This may cause problems in higher layers of ESMF!", 
+      ESMC_LOG_WARN);
   }
-
- } // end ESMC_DELayoutGetDE
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGetDE - get DE with given ID
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetDE(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int deid,              // in  - given DE id
-      ESMC_DE **de) const {   // out - matching DE
-//
-// !DESCRIPTION:
-//    Returns {\tt ESMC\_DE} for given DE id
-//EOP
-// !REQUIREMENTS:  
-
-  int testid;
-
-  // linear search for DE id
-  for (int i=0; i<length[0]; i++) {
-    for (int j=0; j<length[1]; j++) {
-      for (int k=0; k<length[2]; k++) {
-        layout[i][j][k].ESMC_DEGetESMFID(&testid);
-        if (testid == deid) {
-          // found -- return this DE
-          *de = &layout[i][j][k];
-          return(ESMF_SUCCESS);
-        }
-      }
-    }
+  // Issue warning if this is not logically rectangular
+  // TODO: remove this warning when non logRect layouts o.k.
+  if (logRectFlag == ESMF_FALSE){
+    ESMC_LogDefault.ESMC_LogWrite("A non logRect layout was"
+      " created! This may cause problems in higher layers of ESMF!", 
+      ESMC_LOG_WARN);
   }
-
-  //cout << "id not found" << endl;
-  return(ESMF_FAILURE);
-
- } // end ESMC_DELayoutGetDE
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGetDEIDat - get DE ID at position (x,y,z)
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetDEIDat(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int x,               // in - x position of DE in layout
-      int y,               // in - y position of DE in layout
-      int z,               // in - z position of DE in layout
-      int *deid) const   { // out - DE ID at (x,y,z)
-//
-// !DESCRIPTION:
-//    returns {\tt ESMC\_DE} at position (x,y,z) in layout
-//
-//EOP
-// !REQUIREMENTS:  
-
-  if ((x >= 0 && x < length[0]) &&
-      (y >= 0 && y < length[1]) &&
-      (z >= 0 && z < length[2]) &&
-      (deid != NULL)) {
-       layout[x][y][z].ESMC_DEGetESMFID(deid);
-    return(ESMF_SUCCESS);
-  }
-  else {
-    // TODO: log error
-    if(deid != NULL)  
-       *deid = -1; 
-    return(ESMF_FAILURE);
-  }
-
- } // end ESMC_DELayoutGetDEIDat
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGetDEIDat - get DE ID at position (x,y)
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetDEIDat(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int x,               // in - x position of DE in layout
-      int y,               // in - y position of DE in layout
-      int *deid) const   { // out - DE ID at (x,y)
-//
-// !DESCRIPTION:
-//    returns {\tt ESMC\_DE} at position (x,y) in layout
-//
-//EOP
-// !REQUIREMENTS:  
-
-  if ((x >= 0 && x < length[0]) &&
-      (y >= 0 && y < length[1]) &&
-      (deid != NULL)) {
-       layout[x][y][0].ESMC_DEGetESMFID(deid);
-    return(ESMF_SUCCESS);
-  }
-  else {
-    // TODO: log error
-    if(deid != NULL)  
-       *deid = -1; 
-    return(ESMF_FAILURE);
-  }
-
- } // end ESMC_DELayoutGetDEIDat
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGetDEID - get ID of our DE
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetDEID(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int *deid) const {     // out - our DE id
-//
-// !DESCRIPTION:
-//    Returns our {\tt ESMC\_DE} id
-//EOP
-// !REQUIREMENTS:  
-
-  int peid, testid;
-
-  myPE.ESMC_PEGetEsmfID(&peid);
-  //cout << "ESMC_DELayoutGetDEID(): myPEid = " << peid << endl;
-
-  // linear search for DE TODO: compute once on initialization ?
-  for (int i=0; i<length[0]; i++) {
-    for (int j=0; j<length[1]; j++) {
-      for (int k=0; k<length[2]; k++) {
-        layout[i][j][k].PE->ESMC_PEGetEsmfID(&testid); // PE number, unique
-        if (peid == testid) {
-          // found -- return this id
-          layout[i][j][k].ESMC_DEGetESMFID(deid);
-          //cout << "ESMC_DELayoutGetDEID(): i,j,k, deid = " << i << j << k << *deid << endl;
-          return(ESMF_SUCCESS);
-        }
-      }
-    }
-  }
-
-  // old code.  DE id is no longer same as pe id
-  // TODO: make myDE point directly to proper layout item.
-  //myDE.ESMC_DEGetESMFID(deid);
-
-  //cout << "id not found" << endl;
-  return(ESMF_FAILURE);
-
- } // end ESMC_DELayoutGetDEID
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGetParentDEID - get corresponding Parent DE ID
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetParentDEID(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int childdeid,           // in - DE ID in child layout
-      ESMC_DELayout *inparent, // in - Parent which child was created from
-      int *parentdeid) const { // out - DE ID in parent layout
-//
-// !DESCRIPTION:
-//    Method applied to a Child layout.
-//    Input is a {\tt ESMC\_DE} ID from the Child layout, plus the Parent layout from
-//    which this child was created.  Returns the corresponding {\tt ESMC\_DE} ID number
-//    in the Parent's layout for the given Child ID.
-//EOP
-// !REQUIREMENTS:  
-
-  return this->ESMC_DELayoutGetSameDEID(childdeid, inparent, parentdeid);
-
- } // end ESMC_DELayoutGetParentDEID
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGetChildDEID - get corresponding Child DE ID
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetChildDEID(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int parentdeid,        // in - DE ID in parent layout
-      ESMC_DELayout *child,  // in - Child layout created from this Parent
-      int *childdeid) const {  // out - DE ID in child layout 
-//
-// !DESCRIPTION:
-//    Method applied to a Parent layout.
-//    Input is a {\tt ESMC\_DE} ID from the Parent layout, plus a Child layout created
-//    from this parent.  Returns the corresponding {\tt ESMC\_DE} ID number
-//    in the Child's layout for the given Parent ID.
-//EOP
-// !REQUIREMENTS:  
-
-  int esmfid;
-
-  return this->ESMC_DELayoutGetSameDEID(parentdeid, child, childdeid);
-
- } // end ESMC_DELayoutGetChildDEID
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGetDEExists - does a DE exist in other layout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetDEExists(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int deid,               // in - DE ID in "this" layout
-      ESMC_DELayout *other,   // in - Other layout - must be parent/child
-      ESMC_Logical *exists) const {   // out - true/false
-//
-// !DESCRIPTION:
-//    Method applied to a layout which has a child or parent relationship
-//    with the "other" layout.   {\tt ESMC\_DE} ID is relative to the "this" layout,
-//    boolean return is whether the same {\tt ESMC\_DE} ID is valid in the other layout.
-//EOP
-// !REQUIREMENTS:  
-  
-  int rc, dummy;
-
-  rc = this->ESMC_DELayoutGetSameDEID(deid, other, &dummy);
-  if (rc == ESMF_FAILURE) 
-      *exists = ESMF_FALSE;
-  else
-      *exists = ESMF_TRUE;
-
+  // Fill local part of layout object
+  int mypet = vm.vmk_mypet();    // get my PET id
+  ESMC_DELayoutFillLocal(mypet);
+  // Now that the layout is pretty much set up it is time to go through once
+  // more to set the correct pids to provide a means to identify the virtual
+  // memory space in which the DEs operate.
+  for (int i=0; i<ndes; i++)
+    des[i].pid = vm.vmk_pid(des[i].petid);
   return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
 
- } // end ESMC_DELayoutGetDEExists
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutDestruct()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutDestruct
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutDestruct(void){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Destruct the internal information structure in a new ESMC\_DELayout
+//
+//EOP
+//-----------------------------------------------------------------------------
+  for (int i=0; i<ndes; i++){
+    delete [] des[i].connect_de;
+    delete [] des[i].connect_w;
+    delete [] des[i].coord;
+  }
+  delete [] des;
+  delete [] mydes;
+  if (logRectFlag == ESMF_TRUE)
+    delete [] dims;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGetVM()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutGetVM
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutGetVM(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  ESMC_VM **vm){              // out - VM this layout is defined on
+//
+// !DESCRIPTION:
+//    Get VM of this DELayout object
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *vm = myvm;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGet()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutGet
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutGet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  int  *nDEs,                 // out - Total number of DEs
+  int  *ndim,                 // out - Number of dimensions in coordinate tuple
+  int  *nmyDEs,               // out - number of DEs for my PET instance
+  int  *myDEs,                // out - list DEs for my PET instance
+  int  len_myDEs,             // in  - number of elements in myDEs list
+  int *localDe,               // out - local DE id for 1-to-1 layouts
+  ESMC_Logical *oneToOneFlag, // out - 1-to-1 layout flag
+  ESMC_Logical *logRectFlag,  // out - logical rectangular layout flag
+  int  *deCountPerDim,        // out - list of dimension sizes
+  int  len_deCountPerDim){    // in  - number of elements in deCountPerDim list
+//
+// !DESCRIPTION:
+//    Get information about a DELayout object
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int i;
+  if (nDEs != ESMC_NULL_POINTER)
+    *nDEs = ndes;
+  if (ndim != ESMC_NULL_POINTER)
+    *ndim = this->ndim;
+  if (nmyDEs != ESMC_NULL_POINTER)
+    *nmyDEs = nmydes;
+  if (len_myDEs >= nmydes)
+    for (i=0; i<nmydes; i++)
+      myDEs[i] = mydes[i];
+  if (oneToOneFlag != ESMC_NULL_POINTER)
+    *oneToOneFlag = this->oneToOneFlag;
+  if (localDe != ESMC_NULL_POINTER){
+    if (this->nmydes >= 1)  // if there are at least 1 DE on this PET return 1st
+      *localDe = mydes[0];
+    else{
+      *localDe = -1;    // mark invalid
+      return ESMC_RC_CANNOT_GET;
+    }
+  }
+  if (logRectFlag != ESMC_NULL_POINTER)
+    *logRectFlag = this->logRectFlag;
+  if (len_deCountPerDim >= this->ndim){
+    if (this->logRectFlag == ESMF_TRUE){
+      for (i=0; i<this->ndim; i++)
+        deCountPerDim[i] = dims[i];
+      for (i=this->ndim; i<len_deCountPerDim; i++)
+        deCountPerDim[i] = 1;
+    }else{
+      for (i=0; i<len_deCountPerDim; i++)
+        deCountPerDim[i] = -1;    // mark invalid
+      return ESMC_RC_CANNOT_GET; 
+    }
+  }
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGetDELocalInfo()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutGetDELocalInfo
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutGetDELocalInfo(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  int  DEid,              // in  - DE id of DE to be queried
+  int  *DEcoord,          // out - DE's coordinate tuple
+  int  len_coord,         // in  - dimensions in DEcoord
+  int  *DEcde,            // out - DE's connection table
+  int  len_cde,           // in  - dimensions in DEcde
+  int  *DEcw,             // out - DE's connection weight table
+  int  len_cw,            // in  - dimensions in DEcw
+  int  *nDEc,             // out - DE's number of connections
+  int  *pid               // out - pid for this DE
+  ){              
+//
+// !DESCRIPTION:
+//    Get information about a DELayout object
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int i;
+  if (DEid < 0 || DEid >= ndes){
+    // DEid out of range
+    return ESMC_RC_ARG_OUTOFRANGE;
+  }
+  if (len_coord >= ndim) {
+    for (i=0; i<ndim; i++)
+      DEcoord[i] = des[DEid].coord[i];
+    for (i=ndim; i<len_coord; i++)
+      DEcoord[i] = 0;
+  }
+  if (len_cde >= des[DEid].nconnect) {
+    for (i=0; i<des[DEid].nconnect; i++)
+      DEcde[i] = des[DEid].connect_de[i];
+    for (i=des[DEid].nconnect; i<len_cde; i++)
+      DEcde[i] = 0;
+  }
+  if (len_cw >= des[DEid].nconnect) {
+    for (i=0; i<des[DEid].nconnect; i++)
+      DEcw[i] = des[DEid].connect_w[i];
+    for (i=des[DEid].nconnect; i<len_cw; i++)
+      DEcw[i] = 0;
+  }
+  if (nDEc != ESMC_NULL_POINTER)
+    *nDEc = des[DEid].nconnect;
+  if (pid != ESMC_NULL_POINTER)
+    *pid = des[DEid].pid;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGetDEMatchDE()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutGetDEMatchDE
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutGetDEMatchDE(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  int DEid,                     // in  - DE id of DE to be queried
+  ESMC_DELayout &layoutMatch,// in  - layout to match against
+  int *deMatchCount,            // out - number of matching DEs in layoutMatch
+  int *deMatchList,             // out - list of matching DEs in layoutMatch
+  int len_deMatchList           // in  - size of deMatchList
+  ){              
+//
+// !DESCRIPTION:
+//    Get information about a DELayout object
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int *tempMatchList = new int[layoutMatch.ndes]; // maximum number of DEs
+  int tempMatchCount = 0;
+  int comparePID = des[DEid].pid;
+  int j=0;
+  for (int i=0; i<layoutMatch.ndes; i++)
+    if (layoutMatch.des[i].pid == comparePID){
+      tempMatchList[j] = i;
+      ++j;
+    }
+  // now j is equal to the number of DEs in layoutMatch which operate in the 
+  // same virtual memory space as "DEid" does in this layout.
+  if (deMatchCount != ESMC_NULL_POINTER)
+    *deMatchCount = j;
+  if (len_deMatchList >= j)
+    for (int i=0; i<j; i++)
+      deMatchList[i] = tempMatchList[i];
+  delete [] tempMatchList;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGetDEMatchPET()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutGetDEMatchPET
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutGetDEMatchPET(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  int DEid,                     // in  - DE id of DE to be matched
+  ESMC_VM &vmMatch,             // in  - vm to match against
+  int *petMatchCount,           // out - number of matching PETs in vmMatch
+  int *petMatchList,            // out - list of matching PETs in vmMatch
+  int len_petMatchList          // in  - size of petMatchList
+  ){              
+//
+// !DESCRIPTION:
+//    Match DEid in the current DELayout object against the PETs in the 
+//    provided vmMatch VM. Return number of matched PETs and a list of the
+//    matching pet id's that operate in the same virtual address space in which
+//    DEid lies.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int npets = vmMatch.vmk_npets();  // maximum number of PETs in vmMatch
+  int *tempMatchList = new int[npets];
+  int tempMatchCount = 0;
+  int comparePID = des[DEid].pid; // this is the virtual address space id
+  int j=0;
+  for (int i=0; i<npets; i++)
+    if (vmMatch.vmk_pid(i) == comparePID){
+      tempMatchList[j] = i;
+      ++j;
+    }
+  // now j is equal to the number of PETs in vmMatch which operate in the 
+  // same virtual address space as "DEid" does in this layout.
+  if (petMatchCount != ESMC_NULL_POINTER)
+    *petMatchCount = j;
+  if (len_petMatchList >= j)
+    for (int i=0; i<j; i++)
+      petMatchList[i] = tempMatchList[i];
+  delete [] tempMatchList;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutPrint()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutPrint
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutPrint(){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Print details of DELayout object 
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // print info about the ESMC_DELayout object
+  printf("--- ESMC_DELayoutPrint start ---\n");
+  printf("myvm = %p\n", myvm);
+  printf("ndes = %d\n", ndes);
+  for (int i=0; i<ndes; i++){
+    printf("  des[%d]: de=%d, pet=%d, vas=%d, nconnect=%d\n", i, 
+      des[i].deid, des[i].petid, des[i].pid, des[i].nconnect);
+    for (int j=0; j<des[i].nconnect; j++)
+      printf("      connect_de[%d]=%d, weight=%d\n", j, des[i].connect_de[j],
+        des[i].connect_w[j]);
+  }
+  printf("nmydes=%d\n", nmydes);
+  for (int i=0; i<nmydes; i++)
+    printf("  mydes[%d]=%d\n", i, mydes[i]);
+  printf("ndim = %d\n", ndim);
+  for (int i=0; i<ndes; i++){
+    printf("[%d]: ", i);
+    int j;
+    for (j=0; j<ndim-1; j++)
+      printf("%d, ", des[i].coord[j]);
+    printf("%d\n", des[i].coord[j]);
+  }
+  printf("--- ESMC_DELayoutPrint end ---\n");
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutSerialize"
 //BOPI
-// !IROUTINE:  ESMC_DELayoutGetSameDEID - return same DE ID from another layout
+// !IROUTINE:  ESMC_DELayoutSerialize - Turn delayout information into a byte stream
 //
 // !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetSameDEID(
+      int ESMC_DELayout::ESMC_DELayoutSerialize(
 //
 // !RETURN VALUE:
-//    int error return code
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-      int srcid,               // in - DE ID in this layout 
-      ESMC_DELayout *other,    // in - parent or child layout of 'this'
-      int *otherid) const {    // out - DE ID in other layout
+      char *buffer,          // inout - byte stream to fill
+      int *length,           // inout - buf length; realloc'd here if needed
+      int *offset) {         // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
 //
 // !DESCRIPTION:
-//    Common code for either GetParent or GetChild {\tt ESMC\_DE} ID.  This is a
-//    private method - go through the other interfaces for external access.
-//EOP
-// !REQUIREMENTS:  
+//    Turn info in delayout class into a stream of bytes.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+    int fixedpart, nbytes, rc;
+    int i, j;
+    char *cp;
+    int *ip;
+    ESMC_Logical *lp;
+    ESMC_VM **vp;
+    de_type *dep;
 
-  int esmfid, newid;
-  int i, j, k;
-
-  // TODO: this may not always work.  the DE ESMF id's in the layout are not
-  // yet always set, and sometimes the PE id's aren't set.  it needs lots of
-  // testing...
-  for(i=0; i<length[0]; i++) {
-    for (j=0; j<length[1]; j++) {
-      for (k=0; k<length[2]; k++) {
-        // TODO:  right now, the DE information in the layout is empty
-        //  except for the PE pointer.  All DE information is kept in myDE
-        //  locally each proc.  the init code needs another allgather to
-        //  spread the de info to each layout array.   right now the layout
-        //  array has the right shape but is basically empty except for
-        //  the PE info.
-
-        layout[i][j][k].ESMC_DEGetESMFID(&newid);      // DE number, 0 based
-        if (newid == srcid) {
-            if (layout[i][j][k].PE == ESMC_NULL_POINTER) {
-                *otherid = -1;
-                return ESMF_FAILURE;
-            }
-            layout[i][j][k].PE->ESMC_PEGetEsmfID(&esmfid); // PE number, unique
-            // have to break out of 3 loops; this is simplest way.
-            // also bypasses the 'not found' code.
-            goto found;
-        }
-            
-        //  
-      }
+    // TODO: we cannot reallocate from C++ if the original buffer is
+    //  allocated on the f90 side.  change the code to make the allocate
+    //  happen in C++; then this will be fine.  (for now make sure buffer
+    //  is always big enough so realloc is not needed.)
+    fixedpart = sizeof(ESMC_DELayout);
+    if ((*length - *offset) < fixedpart) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                             "Buffer too short to add a DELayout object", &rc);
+        return ESMF_FAILURE; 
     }
-  }
 
- //printf("DE ID %d not found in layout\n", srcid);
- return ESMF_FAILURE;
+    // fixedpart = sizeof(ESMC_DELayout);
+    // if ((*length - *offset) < fixedpart) {
+    //     buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
+    //     *length += 2 * fixedpart;
+    //  }
 
- found:
-  // Now find corresponding DE in second layout which matches this
-  // same esmfid.
-  for(i=0; i<other->length[0]; i++) {
-    for (j=0; j<other->length[1]; j++) {
-      for (k=0; k<other->length[2]; k++) {
-        other->layout[i][j][k].PE->ESMC_PEGetEsmfID(&newid);  // PE number
-        if (esmfid == newid) {
-           other->layout[i][j][k].ESMC_DEGetESMFID(otherid);  // DE number
-           goto done;
-        }
-      }
-    }
-  }
- //printf("PE ID %d not found in other layout\n", esmfid);
- return ESMF_FAILURE;
+    // first set the base part of the object
+    rc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset);
 
- done:
-  return(ESMF_SUCCESS);
-
- } // end ESMC_DELayoutGetSameDEID
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGetXXX - is current PE part of given layout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetXXX(void) const { 
-
-//
-// !RETURN VALUE:
-//    int error return code 
-//
-
-// !DESCRIPTION:
-//   If current PE is part of this given layout, returns {\tt ESMF\_SUCCESS}.
-//   If not, returns {\tt ESMF\_FAILURE} for no without printing an error message.
-
-//EOP
-// !REQUIREMENTS:  
-
-  int peid, testid;
-
-  myPE.ESMC_PEGetEsmfID(&peid);
-
-  // linear search for DE TODO: compute once on initialization ?
-  for (int i=0; i<length[0]; i++) {
-    for (int j=0; j<length[1]; j++) {
-      for (int k=0; k<length[2]; k++) {
-        layout[i][j][k].PE->ESMC_PEGetEsmfID(&testid); // PE number, unique
-        if (peid == testid) {
-          //cout << "pe found" << endl;
-          return(ESMF_SUCCESS);
-        }
-      }
-    }
-  }
-
-  //cout << "pe not found" << endl;
-  return(ESMF_FAILURE);
-
- } // end ESMC_DELayoutGetXXX
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutSetAxisIndex - set an axis index from a layout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutSetAxisIndex(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int global_counts[],      // in  - total (global) number of
-                                //       elements per axis (array)
-      int size_gcount,          // in  - size of global_counts array
-      int decompids[],          // in  - decomposition identifier for each
-                                //       axis (array)
-      int size_decomp,          // in  - size of decomp array
-      ESMC_AxisIndex *AIPtr) {  // out - pointer to array of AxisIndex
-                                //       structures
-//
-// !DESCRIPTION:
-//    returns an array of AxisIndex types representing the decomposition of
-//    an arbitrary number of axis by a layout
-//
-//EOP
-// !REQUIREMENTS:
-
-// check and make sure global_counts and decompids arrays are the same size
-  if (size_gcount != size_decomp) {
-    return(ESMF_FAILURE);
-  }
-
-  int x, y;
-  this->ESMC_DELayoutGetDEPosition( &x, &y);
-  // loop to set AxisIndex array
-  for (int i=0; i<size_gcount; i++, AIPtr++) {
-    // AIPtr->decomp = decompids[i];   jw
-    // check if decomp is out of bounds
-    if ((decompids[i] < 0) || (decompids[i] > 2)) {
-      return(ESMF_FAILURE);
-    }
-    // if decomp is 0, no decomposition of the axis
-    if (decompids[i] == 0) {
-      AIPtr->min = 0;
-      AIPtr->max = global_counts[i]-1;
-      AIPtr->stride = global_counts[i]; // jw?
-    }
-    // if decomp is 1, use nxDELayout
-    if (decompids[i] == 1) {
-      int n1 = (global_counts[i]+length[0]-1)/length[0]; // round to nearest
-      AIPtr->min = 0;
-      AIPtr->max = n1-1;
-      AIPtr->stride = n1;    // jw?
-    }
-    // if decomp is 2, use nyDELayout
-    if (decompids[i] == 2) {
-      int n2 = (global_counts[i]+length[1]-1)/length[1]; // round to nearest
-      AIPtr->min = 0;
-      AIPtr->max = n2-1;
-      AIPtr->stride = n2;   // jw?
-    }
-  }
-   
-  return(ESMF_SUCCESS);
-
- } // end ESMC_DELayoutSetAxisIndex
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutParse - parse a total count over DEs in a layout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutParse(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int axis,                 // in  - the axis number
-      int count,                // in  - total number of elements
-      int *countsPerDE) {       // out - array of number of elements per DE
-                                //       for the axis
-//
-// !DESCRIPTION:
-//    returns an array of element counts per DE along an axis, used to provide
-//    a consistent decomposition scheme
-//
-//EOP
-// !REQUIREMENTS:
-
-  int nx, ny, nDEs;
-  this->ESMC_DELayoutGetSize( &nx, &ny);
-
-// check and make sure axis number is valid
-  if (axis == 1)
-    nDEs = nx;
-  else if (axis == 2)
-    nDEs = ny;
-  else
-    return(ESMF_FAILURE);
-
-  // loop to set countsPerDE array
-  int total=0; 
-  for (int i=0; i<nDEs; i++) {
-    countsPerDE[i] = ((count*(i+1)+nDEs/2)/nDEs) - total; // round to nearest
-    total = total + countsPerDE[i];
-  }
-   
-  return(ESMF_SUCCESS);
-
- } // end ESMC_DELayoutParse
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutGatherArray - all gather a distributed array
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGatherArray(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void *DistArray,           // in  - distributed array
-      int global_dimlength[],    // in
-      int decompids[],           // in  - decomposition identifier for each
-                                 //       axis for the array
-      int size_decomp,           // in  - size of decomp arrays
-      int localDimCounts[],      // in  -
-      int localMaxDimCount[],    // in  -
-      ESMC_AxisIndex *AIPtr,     // in  - pointer to array of AxisIndex
-                                 //       structures for exclusive data
-      ESMC_AxisIndex *AIPtr2,    // in  - pointer to array of AxisIndex
-                                 //       structures for total data
-      ESMC_DataKind datatype,    // in  - real, integer, *4, *8
-      void *GlobalArray) {       // out - global array
-//
-// !DESCRIPTION:
-//    returns an array of AxisIndex types representing the decomposition of
-//    an arbitrary number of axis by a layout
-//
-//EOP
-
-  int rc = ESMF_FAILURE;
-  int i, j, k, l, m;     // general counter vars
-
-  // get layout size
-  int nx, ny;
-  this->ESMC_DELayoutGetSize(&nx, &ny);
-  int nde = nx*ny;
-  int rankx, ranky;
-  int bytesperitem = ESMC_DataKindSize(datatype);
- 
-
-  // switch based on array rank
-  switch (size_decomp) {
-    case 1:
-      cout << "no code to handle array rank " << size_decomp << " yet\n";
-    break;
-    case 2:
-      {
-        // figure out which ranks are decomposed and figure out the
-        // number of separate data chunks per rank and size of data
-        // chunks
-        int rmax[2];
-        int rsize[2];
-        int rsize_tot[2];
-        int rskip[2];
-        int rbreak[1];
-        int rbcount = 0;
-        for (i=0; i<size_decomp; i++) {
-          rmax[i] = global_dimlength[i];
-          rsize[i] = AIPtr[i].max - AIPtr[i].min + 1;
-          rsize_tot[i] = AIPtr2[i].max - AIPtr2[i].min + 1;
-          if (decompids[i] == 0) {
-            rbreak[rbcount]=i;
-            rbcount++;
-          }
-          if (decompids[i] == 1) {
-            rankx = i;
-          }
-          if (decompids[i] == 2) {
-            ranky = i;
-            rbreak[rbcount]=i;
-            rbcount++;
-          }
-        }
-        rskip[0] = 1;
-        for (i=1; i<size_decomp; i++) {
-          rskip[i] = rskip[i-1]*rmax[i-1];
-        }
-        // loop over ranks, skipping the first decomposed one, loading
-        // up chunks of data to gather
-        int k, j_tot, jMax, displsX, displsY;
-        void *sendbuf, *recvbuf;
-        int sendcount;
-        int* recvcounts = new int[nde];
-        int* displs = new int[nde];
-        if (localMaxDimCount == NULL) {
-          jMax = rsize[rbreak[0]];
-        } else {
-          jMax = localMaxDimCount[rbreak[0]];
-        }
-        for (int j=0; j<jMax; j++) {
-          j_tot = j + AIPtr[ranky].min;
-          sendbuf = DistArray;  // void * at this point, cast to char * to increment
-          sendbuf = (void *)((char *)sendbuf + 
-                        (j_tot*rsize_tot[rankx] + AIPtr[rankx].min) * bytesperitem);
-  
-          sendcount = rsize[rankx];
-          if (j >= rsize[rbreak[0]]) {
-            sendcount = 0;
-          }
-          recvbuf = GlobalArray;   // ditto comment above
-          recvbuf = (void *)((char *)recvbuf + (j*rmax[rankx]) * bytesperitem);
-          displsY = 0;
-          for (int ky=0; ky<ny; ky++) {
-            displsX = 0;
-            for (int kx=0; kx<nx; kx++) {
-              k = ky*nx + kx;
-              if (localDimCounts == NULL) {
-                recvcounts[k] = rsize[rankx];
-              } else {
-                recvcounts[k] = localDimCounts[rankx*nde + k];
-                if (j >= localDimCounts[ranky*nde + k]) recvcounts[k] = 0;
-              }
-              displs[k] = displsX + displsY;
-              displsX  += recvcounts[k];
-            }
-            if (localDimCounts == NULL) {
-              displsY += rsize[ranky] * rskip[ranky];
-            } else {
-              displsY += localDimCounts[ranky*nde + k] * rskip[ranky];
-            }
-          }
-          // call layout gather routine
-          comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
-                                   displs, datatype);
-        }
-        delete [] recvcounts;
-        delete [] displs;
-      }
-    break;
-    case 3:
-      {
-        // figure out which ranks are decomposed and figure out the
-        // number of separate data chunks per rank and size of data
-        // chunks
-        int rmax[3];
-        int rsize[3];
-        int rskip[3];
-        int rbreak[2];
-        int rbcount = 0;
-        for (i=0; i<size_decomp; i++) {
-          rmax[i] = global_dimlength[i];
-          rsize[i] = AIPtr[i].max - AIPtr[i].min + 1;
-          if (decompids[i] == 0) {
-            rbreak[rbcount]=i;
-            rbcount++;
-          }
-          if (decompids[i] == 1) {
-            rankx = i;
-          }
-          if (decompids[i] == 2) {
-            ranky = i;
-            rbreak[rbcount]=i;
-            rbcount++;
-          }
-        }
-        rskip[0] = 1;
-        for (i=1; i<size_decomp; i++) {
-          rskip[i] = rskip[i-1]*rmax[i-1];
-        }
-        // loop over ranks, skipping the first decomposed one, loading
-        // up chunks of data to gather
-        int k, iMax, jMax, displsX, displsY;
-        void *sendbuf, *recvbuf;
-        int sendcount;
-        int* recvcounts = new int[nde];
-        int* displs = new int[nde];
-        if (localMaxDimCount == NULL) {
-          iMax = rsize[rbreak[1]];
-        } else {
-          iMax = localMaxDimCount[rbreak[1]];
-        }
-        if (localMaxDimCount == NULL) {
-          jMax = rsize[rbreak[0]];
-        } else {
-          jMax = localMaxDimCount[rbreak[0]];
-        }
-        for (i=0; i<iMax; i++) {
-          for (int j=0; j<jMax; j++) {
-            sendbuf = DistArray;  // void * must be cast to char * to increment
-            sendbuf = (void *)((char *)sendbuf + 
-                    (j*rsize[rankx] + i*rsize[rankx]*rsize[rbreak[0]]) * bytesperitem);
-            sendcount = rsize[rankx];
-            if (i >= rsize[rbreak[1]] || j >= rsize[rbreak[0]]) {
-              sendcount = 0;
-            }
-            recvbuf = GlobalArray;   // ditto comment above
-            recvbuf = (void *)((char *)recvbuf + 
-                       (j*rmax[rankx] + i*rmax[rankx]*rmax[rbreak[0]]) * bytesperitem);
-            displsY = 0;
-            for (int ky=0; ky<ny; ky++) {
-              displsX = 0;
-              for (int kx=0; kx<nx; kx++) {
-                k = ky*nx + kx;
-                if (localDimCounts == NULL) {
-                  recvcounts[k] = rsize[rankx];
-                } else {
-                  recvcounts[k] = localDimCounts[rankx*nde + k];
-                  if (j >= localDimCounts[ranky*nde + k]) recvcounts[k] = 0;
-                }
-                displs[k] = displsX + displsY;
-                displsX  += recvcounts[k];
-              }
-              if (localDimCounts == NULL) {
-                displsY += rsize[ranky] * rskip[ranky];
-              } else {
-                displsY += localDimCounts[ranky*nde + k] * rskip[ranky];
-              }
-            }
-          // call layout gather routine
-          comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
-                                   displs, datatype);
-          }
-        }
-        delete [] recvcounts;
-        delete [] displs;
-      }
-    break;
-    case 4:
-    case 5:
-    default:
-      cout << "no code to handle array rank " << size_decomp << " yet\n";
-    break;
-  }
-
-  rc = ESMF_SUCCESS;
-  return rc;
-
- } // end ESMC_DELayoutGatherArray
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutSendRecv - send / receive operation within a delayout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutSendRecv(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void *sbuf,               // in  - send array
-      void *rbuf,               // in  - receive array
-      int snum,                 // in  - send array length
-      int rnum,                 // in  - receive array length
-      int sde_index,            // in  - send de index
-      int rde_index,            // in  - receive de index
-      ESMC_DataKind type) {     // in  - datatype of buffers
-
-//
-// !DESCRIPTION:
-//    Performs a send and receive data transfer between {\tt ESMC\_DE}s
-//    on a single {\tt ESMC\_DELayout}.
-//
-//EOP
-
-  int rc;
-  MPI_Datatype mpidatatype;
-  MPI_Status status;
-
-  mpidatatype = comm.ESMC_DataKindToMPI[type];
-
-  // If we're both sending and receiving from our own process,
-  // then do a straight memory copy and don't call message passing.
-  
-  // TODO: this is not the right test - we need to test our current
-  // address space against the address spaces of both the send and 
-  // receive index numbers, not the indicies against each other.
-  // so this is commented out for now, but it can be a bit performance
-  // win if the source and destination are local, so it should be
-  // revisited again.
-  //if (rde_index == sde_index) {
-  //   if (snum != rnum) { 
-  //      printf("sending bytes != receiving bytes in DELayoutSendRecv\n");
-  //      return ESMF_FAILURE;
-  //   }
-  //   memcpy(rbuf, sbuf, snum*sizeof(float));
-  //   rc = ESMF_SUCCESS;
-    
-  //} else {
-      if (MPI_Sendrecv(sbuf, snum, mpidatatype, rde_index, ESMF_MPI_TAG, 
-		       rbuf, rnum, mpidatatype, sde_index, MPI_ANY_TAG, 
-		       decomm.mpicomm, &status) == MPI_SUCCESS) {
-        rc = ESMF_SUCCESS;
-      }
-      else {
-        printf("Failure in MPI_Sendrecv \n");
-        return ESMF_FAILURE;
-      }
-  //}
-
-  return(rc);
-
- } // end ESMC_DELayoutSendRecv
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutBerrier - synchronize a set of processes
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutBarrier(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void) {                   // no args
-
-//
-// !DESCRIPTION:
-//    Synchronize all processes in an {\tt ESMC\_DELayout}.
-//
-//EOP
-
-  int rc;
-  MPI_Status status;
-
-  // TODO: make this only the local communicator
-  MPI_Barrier(MPI_COMM_WORLD);
-
-  return(ESMF_SUCCESS);
-
- } // end ESMC_DELayoutBarrier
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutBcast - broadcast from a source DE to an entire layout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutBcast(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:  
-      void *buf,                // in  - buffer     
-      int num,                  // in  - buffer length
-      int srcde_index,         // in  - index of src de
-      ESMC_DataKind type) {     // in  - data type of buffer
-
-//
-// !DESCRIPTION:
-//    Broadcasts data from a source {\tt ESMC\_DE} to all other {\tt ESMC\_DE}s in
-//    the {\tt ESMC\_DELayout}.  
-//
-//EOP
-
-  int rc;
-  MPI_Datatype mpidatatype;
-  MPI_Status status;
-
-  mpidatatype = comm.ESMC_DataKindToMPI[type];
-
-  if (MPI_Bcast(buf, num, mpidatatype, srcde_index, 
-                decomm.mpicomm) == MPI_SUCCESS) {
-    rc = ESMF_SUCCESS;
-  }
-  else {
-    printf("Failure in MPI_Bcast \n");
-    return ESMF_FAILURE;
-  }
-  return(rc);
-
- } // end ESMC_DELayoutBcast
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutValidate - internal consistency check for a DELayout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutValidate(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void) const {    // in - validate options
-//
-// !DESCRIPTION:
-//      Validates that a {\tt ESMC\_DELayout} is internally consistent.
-//      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
-//
-//EOP
-
-  // TODO: add object specific validation here
-
-  // for now, at least validate the base class
-  return ESMC_Validate();
-
- } // end ESMC_DELayoutValidate
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutPrint - print contents of a DELayout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutPrint(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void) const {     //  in - print options
-//
-// !DESCRIPTION:
-//      Print information about a {\tt ESMC\_DELayout}.  The options control the
-//      type of information and level of detail.  {\tt ESMC\_Base} class method.
-//
-//EOP
-
-  cout << "DELayout ndim=" << ndim << " nx,ny,nz=" << length[0] << "," << length[1] << "," << length[2] << endl;
-  //cout << "commHint = " << commHint << "\n";
-
-  int i,j,k;
-  int ni,nj,nk;
-  int *x, *y, *z;
-
-  // TODO:  ?? create commHint lookup table & share with Construct()
-
-  switch (commHint)
-  {
-    case ESMC_XFAST:
-    case (ESMC_NOHINT):
-      ni = length[2]; z = &i; // outer loop
-      nj = length[1]; y = &j; // middle loop
-      nk = length[0]; x = &k; // inner loop
-      cout << "No hint or X fast, i=z, j=y, k=x;";
-      break;
-    case (ESMC_YFAST):
-      ni = length[2]; z = &i;
-      nj = length[0]; x = &j;
-      nk = length[1]; y = &k;
-      cout << "Y fast, i=z, j=x, k=y;";
-      break;
-    case (ESMC_ZFAST):
-      ni = length[1]; y = &i;
-      nj = length[0]; x = &j;
-      nk = length[2]; z = &k;
-      cout << "Z fast i=y, j=x, k=z;";
-      break;
-  }
-
-  cout <<  "  ni,nj,nk = " <<  ni << "," << nj << "," << nk << endl;
 #if 0
-// right now the output from here is too voluminous.  figure out
-// what info is really useful and only output that.
-  for(i=0; i<ni; i++) {
-    for (j=0; j<nj; j++) {
-      for (k=0; k<nk; k++) {
-        //cout << "layout[" << i << "][" << j << "][" << k << "] = ";
-        cout << "layout[" << *x<< "][" << *y<< "][" << *z<< "]: ";
-        layout[*x][*y][*z].ESMC_DEPrint();
-      }
-    }
-  }
-  cout << "myDE: ";
-  myDE.ESMC_DEPrint();
-  cout << "myPE: ";
-  myPE.ESMC_PEPrint();
+/ DE type used internally in the ESMC_DELayout class
+typedef struct{
+  int deid;         // DE's external id number (in case not base zero)
+  int petid;        // Id of the PET associated with this DE
+  int pid;          // absolute process ID, specifying virtual memory space
+  int nconnect;     // number of connections from this DE
+  int *connect_de;  // connected DEs
+  int *connect_w;   // connection weight
+  int *coord;       // coordinates of this DE in the layout
+}de_type;
+
+// class definition
+class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
+    ESMC_VM *myvm;  // ptr to this PET's VM instance this layout is running on
+    int ndes;       // number of DEs
+    de_type *des;   // list that holds all of this layout's DE info
+    int nmydes;     // number of DEs associated with instantiating PET
+    int *mydes;     // list that holds all of the des indices for this instance
+    int ndim;       // dimensionality of this layout
+    ESMC_Logical oneToOneFlag;  // indicate whether this is a 1-to-1 layout
+    ESMC_Logical logRectFlag;   // indicate whether this is logical rectangular
+    int *dims;      // sizes of dimensions in a logical rectangular layout
 #endif
 
-  cout << "end of DELayout Print" << endl;
-  return(ESMF_SUCCESS);
+    cp = (char *)(buffer + *offset);
+    
+    // TODO: for now, send NULL as the vm, because i do not know how to
+    // serialize a VM.   probably sending an integer VM ID number would be
+    // what we want in the long run.
+    vp = (ESMC_VM **)cp;   
+    *vp++ = NULL;     
 
- } // end ESMC_DELayoutPrint
+    ip = (int *)vp;
+    *ip++ = ndes;
+    // ndim must be available before decoding the next loop, so it has
+    // to be sent now.
+    *ip++ = ndim;
+
+    for (i=0, dep=des; i<ndes; i++, dep++) {
+        *ip++ = dep->deid;
+        *ip++ = dep->petid;
+        *ip++ = dep->pid;
+        *ip++ = dep->nconnect;
+        for (j=0; j<dep->nconnect; j++) {
+            *ip++ = dep->connect_de[j];
+            *ip++ = dep->connect_w[j];
+        }
+        for (j=0; j<ndim; j++) 
+            *ip++ = dep->coord[j];
+    }
+  
+    *ip++ = nmydes;
+    for (i=0; i<nmydes; i++) 
+        *ip++ = mydes[i];
+
+    // this has to come before dims, since they are not allocated unless
+    // logRectFlag is true.
+    lp = (ESMC_Logical *)ip;
+    *lp++ = oneToOneFlag;
+    *lp++ = logRectFlag;
+    
+    ip = (int *)lp;
+    if (logRectFlag == ESMF_TRUE)
+        for (i=0; i<ndim; i++) 
+            *ip++ = dims[i];
+
+    cp = (char *)ip;
+
+    *offset = (cp - buffer);
+   
+    return ESMF_SUCCESS;
+
+ } // end ESMC_Serialize
+//-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayout - native C++ constructor
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutDeserialize"
+//BOPI
+// !IROUTINE:  ESMC_DELayoutDeserialize - Turn a byte stream into an object
 //
 // !INTERFACE:
-      ESMC_DELayout::ESMC_DELayout(
+      ESMC_DELayout *ESMC_DELayoutDeserialize(
 //
 // !RETURN VALUE:
-//    none
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-      void) {  // in
+      char *buffer,          // in - byte stream to read
+      int *offset) {         // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
 //
 // !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for initialization
-//      with default or passed-in values
+//    Turn a stream of bytes into an object.
 //
-//EOP
+//EOPI
+//-----------------------------------------------------------------------------
+    ESMC_DELayout *a = new ESMC_DELayout;
+    int fixedpart, nbytes, rc;
+    int i, j;
+    char *cp;
+    int *ip;
+    ESMC_Logical *lp;
+    ESMC_VM **vp;
+    de_type *dep;
 
-//cout << "ESMC_DELayout constructor invoked\n";
+    // first get the base part of the object
+    rc = a->ESMC_Base::ESMC_Deserialize(buffer, offset);
 
-  // Initialize comm, PE, DE, Machine
-  ESMC_DELayoutInit();
+    // now the rest
+    cp = (char *)(buffer + *offset);
+    
+    vp = (ESMC_VM **)cp;
+    a->myvm = *vp++; 
 
- } // end ESMC_DELayout
+    ip = (int *)vp;
+    a->ndes = *ip++;
+
+    // ndim must be known before this loop.
+    a->ndim = *ip++;
+    a->des = new de_type[a->ndes];
+    for (i=0, dep=a->des; i<a->ndes; i++, dep++) {
+        dep->deid = *ip++;
+        dep->petid = *ip++;
+        dep->pid = *ip++;
+        dep->nconnect = *ip++;
+
+        dep->connect_de = new int[dep->nconnect];
+        dep->connect_w = new int[dep->nconnect];
+        dep->coord = new int[a->ndim];
+        for (j=0; j<dep->nconnect; j++) {
+            dep->connect_de[j] = *ip++;
+            dep->connect_w[j] = *ip++;
+        }
+        for (j=0; j<a->ndim; j++) 
+            dep->coord[j] = *ip++;
+    }
+  
+    a->nmydes = *ip++;
+    a->mydes = new int[a->nmydes];
+    for (i=0; i<a->nmydes; i++) 
+        a->mydes[i] = *ip++;
+  
+    // decode flags first, because dims is not sent unless logRectFlag is true.
+    lp = (ESMC_Logical *)ip;
+    a->oneToOneFlag = *lp++;
+    a->logRectFlag = *lp++;
+
+    ip = (int *)lp;
+    if (a->logRectFlag == ESMF_TRUE) {
+        a->dims = new int[a->ndim];
+        for (i=0; i<a->ndim; i++) 
+            a->dims[i] = *ip++;
+    } else
+        a->dims = NULL;
+
+    cp = (char *)ip;
+
+    *offset = (cp - buffer);
+   
+    return a;
+
+ } // end ESMC_DELayoutDeserialize
+//-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutValidate()"
 //BOP
-// !IROUTINE:  ~ESMC_DELayout - native C++ destructor
+// !IROUTINE:  ESMC_DELayoutValidate
 //
 // !INTERFACE:
-      ESMC_DELayout::~ESMC_DELayout(void) {
+int ESMC_DELayout::ESMC_DELayoutValidate(){
 //
 // !RETURN VALUE:
-//    none
+//    int error return code
 //
-// !ARGUMENTS:
-//    none
 //
 // !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for destruction
+//    Validate details of DELayout object 
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+//-----------------------------------------------------------------------------
+  int rc = ESMF_SUCCESS;
 
-//cout << "~ESMC_DELayout() invoked\n";
-  ESMC_DELayoutDestruct();
+  // validate info about the ESMC_DELayout object
+  //printf("--- ESMC_DELayoutValidate start ---\n");
+  //printf("myvm = %p\n", myvm);
+  //printf("ndes = %d\n", ndes);
+  //for (int i=0; i<ndes; i++){
+  //  printf("  des[%d]: deid=%d, petid=%d, pid=%d, nconnect=%d\n", i, 
+  //    des[i].deid, des[i].petid, des[i].pid, des[i].nconnect);
+  //  for (int j=0; j<des[i].nconnect; j++)
+  //    printf("      connect_de[%d]=%d, weight=%d\n", j, des[i].connect_de[j],
+  //      des[i].connect_w[j]);
+  //}
+  //printf("nmydes=%d\n", nmydes);
+  //for (int i=0; i<nmydes; i++)
+  //  printf("  mydes[%d]=%d\n", i, mydes[i]);
+  //printf("ndim = %d\n", ndim);
+  //for (int i=0; i<ndes; i++){
+  //  printf("[%d]: ", i);
+  //  int j;
+  //  for (j=0; j<ndim-1; j++)
+  //    printf("%d, ", des[i].coord[j]);
+  //  printf("%d\n", des[i].coord[j]);
+  // }
+  // printf("--- ESMC_DELayoutValidate end ---\n");
+ 
+  // for now, validate at least the base object
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+  // rc = this->ESMC_Validate();
 
- } // end ~ESMC_DELayout
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutCopy()"
 //BOP
-// !IROUTINE:  ESMC_DELayoutScatter - Perform MPI-like scatter of data array from one DE to all others in layout
+// !IROUTINE:  ESMC_DELayoutCopy
 //
 // !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutScatter(
+int ESMC_DELayout::ESMC_DELayoutCopy(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      void *sndArray,      // in  - send data array
-      void *rcvArray,      // out - received data array
-      int len,             // in  - data array chunk size
-      ESMC_DataKind type,  // in  - array data type
-      int srcDEid) {       // in  - src DE performing the scatter
+//
+  void **srcdata, // input array
+  void **destdata,// output array
+  int blen,       // size in bytes that need to be copied from src to dest
+  int srcDE,      // input DE
+  int destDE,     // output DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
 //
 // !DESCRIPTION:
-//    Perform MPI-like scatter of a data array from one DE to all others
-//    in the layout.
 //
 //EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-  // TODO: make comm public and invoke directly rather than at DELayout level ?
-  //       (does not depend on any DELayout knowledge)
-
-  ESMC_DE *srcDE;
-  int rc;
-
-  // perform scatter operation across all DEs in the layout
-  rc = ESMC_DELayoutGetDE(srcDEid, &srcDE);
-  rc = comm.ESMC_CommScatter(sndArray, rcvArray, len, type, srcDE);
-  if (rc != ESMF_SUCCESS) {
-    cout << "ESMC_DELayoutScatter() error" << endl;
-  }
-
-  return(rc);
-
- } // end ESMC_DELayoutScatter
-
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutScatter - Perform MPI-like scatter of local array from one DE to all others in layout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutScatter(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_LocalArray *sndArray,  // in  - send data array
-      ESMC_LocalArray *rcvArray,  // out - received data array
-      int len,                    // in  - data array chunk size
-      int srcDEid) {              // in  - src DE performing the scatter
-//
-// !DESCRIPTION:
-//    Perform MPI-like scatter of a local array from one DE to all others
-//    in the layout.
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-  // TODO: make comm public and invoke directly rather than at DELayout level ?
-  //       (does not depend on any DELayout knowledge)
-
-  void *sArray, *rArray;
-  ESMC_DataKind type;
-  ESMC_DE *srcDE;
-  int rc;
-
-  if (sndArray == ESMC_NULL_POINTER || rcvArray == ESMC_NULL_POINTER) {
-    return(ESMF_FAILURE);
-  }
-
-  // get DE identified by srcDEid
-  rc = ESMC_DELayoutGetDE(srcDEid, &srcDE);
-
-  // get local array types (assume send and receive kinds are the same)
-  type = sndArray->ESMC_LocalArrayGetKind();
-
-  //cout << "ESMC_DELayoutScatter(): ESMC_LocalArrayGetKind() returned" << type << endl;
-
-  // get local array base addresses
-  sndArray->ESMC_LocalArrayGetBaseAddr(&sArray);
-  rcvArray->ESMC_LocalArrayGetBaseAddr(&rArray);
-
-  // perform scatter operation across all DEs in the layout
-  rc = comm.ESMC_CommScatter(sArray, rArray, len, type, srcDE);
-  if (rc != ESMF_SUCCESS) {
-    cout << "ESMC_DELayoutScatter() error" << endl;
-  }
-
-  return(rc);
-
- } // end ESMC_DELayoutScatter
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutAllGatherV - Perform MPI-like Allgatherv of equally-sized data arrays across a layout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutAllGatherV(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void *sndArray,           // in  - integer send data array
-      int   sndLen,             // in  - length of send data array
-      void *rcvArray,           // out - gathered data array
-      int  *rcvLen,             // in  - array of receive data array lengths
-      int  *rcvDispls,          // in  - array of rcvArray displacements
-      ESMC_DataKind kind) {     // in  - data kind of the arrays
-//
-// !DESCRIPTION:
-//    Perform MPI-like Allgatherv of data arrays
-//    across all {\tt ESMC\_DE}s in a layout
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-  // TODO: make comm public and invoke directly rather than at DELayout level ?
-  //       (does not depend on any DELayout knowledge)
-
-  // perform Allgatherv operation across all DEs in the layout
-  int rc;
-  rc = comm.ESMC_CommAllGatherV(sndArray, sndLen, rcvArray, rcvLen, rcvDispls,
-                                kind);
-  if (rc != ESMF_SUCCESS) {
-    cout << "ESMC_DELayoutAllGatherV() error" << endl;
-  }
-
-  return(rc);
-
- } // end ESMC_DELayoutAllGatherV
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutAllGatherV - Perform MPI-like Allgatherv of equally-sized local data arrays across a layout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutAllGatherV(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_LocalArray *sndArray,    // in  - integer send data array
-      int  sndLen,                  // in  - length of send data array
-      ESMC_LocalArray *rcvArray,    // out - gathered data array
-      int *rcvLen,                  // in  - array of receive data array lengths
-      int *rcvDispls) {             // in  - array of rcvArray displacements
-//
-// !DESCRIPTION:
-//    Perform MPI-like Allgatherv of local data arrays
-//    across all {\tt ESMC\_DE}s in a layout
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-  // TODO: make comm public and invoke directly rather than at DELayout level ?
-  //       (does not depend on any DELayout knowledge)
-
-  void *sArray, *rArray;
-  ESMC_DataKind kind;
-  int rc;
-
-  if (sndArray == ESMC_NULL_POINTER || rcvArray == ESMC_NULL_POINTER) {
-    return(ESMF_FAILURE);
-  }
-
-  // get local array kinds (assume send and receive kinds are the same)
-  kind = sndArray->ESMC_LocalArrayGetKind();
-
-  // get local array base addresses
-  sndArray->ESMC_LocalArrayGetBaseAddr(&sArray);
-  rcvArray->ESMC_LocalArrayGetBaseAddr(&rArray);
-
-  // perform Allgatherv operation across all DEs in the layout
-  rc = comm.ESMC_CommAllGatherV(sArray, sndLen, rArray, rcvLen, rcvDispls,
-                                kind);
-  if (rc != ESMF_SUCCESS) {
-    cout << "ESMC_DELayoutAllGatherV() error" << endl;
-  }
-
-  return(rc);
-
- } // end ESMC_DELayoutAllGatherV
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_DELayoutAllReduce - reduce 1D integer data array across layout
-//
-// !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutAllReduce(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int *dataArray,          // in  - 1D integer data array
-      int *result,             // out - single integer value
-      int arrayLen,            // in  - length of dataArray
-      ESMC_Op op)  {         // in  - reduction operation (sum, min, max ...)
-//
-// !DESCRIPTION:
-//      performs requested reduction operation on given data array across
-//      all {\tt ESMC\_DE}s in layout
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-  // TODO: make comm public and invoke directly rather than at DELayout level ?
-  //       (does not depend on any DELayout knowledge)
-
-  // TODO: put this loop logic in ESMC_Comm ?
-  // perform reduction operation within our DE (given dataArray)
-  int localResult = 0;
-  for(int i=0; i<arrayLen; i++) {
-    switch (op)
-    {
-      case ESMC_SUM:
-        localResult += dataArray[i];
-        break;
-      default:
-        break;
+  // local reference to VM
+  ESMC_VM &vm = *myvm;
+  int mypet = vm.vmk_mypet();
+  int srcpet = des[srcDE].petid;      // PETid where srcDE lives
+  int destpet = des[destDE].petid;    // PETid where destDE lives
+  if (srcpet==mypet && destpet==mypet){
+    // srcDE and destDE are on my PET
+    if (oneToOneFlag==ESMF_TRUE){
+      memcpy(destdata, srcdata, blen);
+    }else{
+      int i, j;
+      for (i=0; i<nmydes; i++)
+        if (mydes[i]==srcDE) break;
+      for (j=0; j<nmydes; j++)
+        if (mydes[j]==destDE) break;
+      // now i is this PETs srcDE index and j is this PETs destDE index
+      memcpy(destdata[j], srcdata[i], blen);
+    }
+  }else if (srcpet==mypet){
+    // srcDE is on my PET, but destDE is on another PET
+    if (oneToOneFlag==ESMF_TRUE){
+      vm.vmk_send(srcdata, blen, destpet);
+    }else{
+      int i;
+      for (i=0; i<nmydes; i++)
+        if (mydes[i]==srcDE) break;
+      vm.vmk_send(srcdata[i], blen, destpet);
+    }
+  }else if (destpet==mypet){
+    // srcDE is on my PET, but destDE is on another PET
+    if (oneToOneFlag==ESMF_TRUE){
+      vm.vmk_recv(destdata, blen, srcpet);
+    }else{
+      int i;
+      for (i=0; i<nmydes; i++)
+        if (mydes[i]==destDE) break;
+      vm.vmk_recv(destdata[i], blen, srcpet);
     }
   }
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
 
-   cout << "ESMC_DELayoutAllReduce localResult = " << localResult << endl;
 
-  // perform reduction operation across all DEs in the layout
-  int rc;
-  rc = comm.ESMC_CommAllReduce(&localResult, result, 1, ESMF_I4, op);
-  if (rc != ESMF_SUCCESS) {
-    cout << "ESMC_DELayoutAllReduce(1D) error" << endl;
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutCopy()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutCopy
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutCopy(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcdata,   // input array
+  void **destdata,  // output array
+  int len,          // size in elements that need to be copied from src to dest
+  ESMC_DataKind dtk,// data type kind
+  int srcDE,        // input DE
+  int destDE,       // output DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int blen = len * ESMC_DataKindSize(dtk);
+  return ESMC_DELayoutCopy(srcdata, destdata, blen, srcDE, destDE, 
+    oneToOneFlag);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutExchange()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutExchange
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutExchange(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcData1,    // input array
+  void **srcData2,    // input array
+  void **dstData1,    // output array
+  void **dstData2,    // output array
+  int blen1,          // size in bytes to copy from srcData1 to dstData2
+  int blen2,          // size in bytes to copy from srcData2 to dstData1
+  int de1,            // de for data1
+  int de2,            // de for data2
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  if (de1<=de2){
+    ESMC_DELayoutCopy(srcData1, dstData2, blen1, de1, de2, oneToOneFlag);
+    ESMC_DELayoutCopy(srcData2, dstData1, blen2, de2, de1, oneToOneFlag);
+  }else{
+    ESMC_DELayoutCopy(srcData2, dstData1, blen2, de2, de1, oneToOneFlag);
+    ESMC_DELayoutCopy(srcData1, dstData2, blen1, de1, de2, oneToOneFlag);
   }
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
 
-  return(rc);
 
- } // end ESMC_DELayoutAllReduce
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutExchange()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutExchange
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutExchange(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcData1,    // input array
+  void **srcData2,    // input array
+  void **dstData1,    // output array
+  void **dstData2,    // output array
+  int len1,           // size in elements to copy from srcData1 to dstData2
+  int len2,           // size in elements to copy from srcData2 to dstData1
+  ESMC_DataKind dtk1, // data type kind
+  ESMC_DataKind dtk2, // data type kind
+  int de1,            // de for data1
+  int de2,            // de for data2
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int blen1 = len1 * ESMC_DataKindSize(dtk1);
+  int blen2 = len2 * ESMC_DataKindSize(dtk2);
+  return ESMC_DELayoutExchange(srcData1, srcData2, dstData1, dstData2, 
+    blen1, blen2, de1, de2, oneToOneFlag);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutBcast()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutBcast
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutBcast(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **data,    // data 
+  int blen,       // message size in bytes
+  int rootDE,     // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // very crude implementation of a layout wide bcast
+  for (int i=0; i<ndes; i++)
+    ESMC_DELayoutCopy(data, data, blen, rootDE, i, ESMF_TRUE);
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutBcast()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutBcast
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutBcast(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **data,    // data 
+  int len,       // message size in bytes
+  ESMC_DataKind dtk,// data type kind
+  int rootDE,     // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int blen = len * ESMC_DataKindSize(dtk);
+  // very crude implementation of a layout wide bcast
+  for (int i=0; i<ndes; i++)
+    ESMC_DELayoutCopy(data, data, blen, rootDE, i, oneToOneFlag);
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutScatter()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutScatter
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutScatter(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcdata, // input array
+  void **destdata,// output array
+  int blen,       // message size in bytes
+  int rootDE,     // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local reference to VM
+  ESMC_VM &vm = *myvm;
+  // very crude implementation of a layout wide scatter
+  int mypet = vm.vmk_mypet();
+  if (des[rootDE].petid==mypet){
+    // my PET holds the rootDE
+    if (oneToOneFlag==ESMF_TRUE){
+      char *tempdata = (char *)srcdata;
+      for (int i=0; i<ndes; i++){
+        ESMC_DELayoutCopy((void **)tempdata, destdata, blen, rootDE, i,
+          ESMF_TRUE);
+        tempdata += blen;
+      }
+    }else{
+      int j;
+      for (j=0; j<nmydes; j++)
+        if (mydes[j]==rootDE) break;
+      void *rootdata = srcdata[j]; // backup the correct start of rootDE's data
+      char *tempdata = (char *)srcdata[j];
+      for (int i=0; i<ndes; i++){
+        ESMC_DELayoutCopy(srcdata, destdata, blen, rootDE, i, ESMF_FALSE);
+        tempdata += blen;
+        srcdata[j] = tempdata;
+      }
+      srcdata[j] = rootdata;  // restore correct start of root's src data
+    }
+  }else{
+    if (oneToOneFlag==ESMF_TRUE){
+      for (int i=0; i<ndes; i++)
+        ESMC_DELayoutCopy(srcdata, destdata, blen, rootDE, i, ESMF_TRUE);
+    }else{
+      for (int i=0; i<ndes; i++)
+        ESMC_DELayoutCopy(srcdata, destdata, blen, rootDE, i, ESMF_FALSE);
+    }
+  }
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutScatter()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutScatter
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutScatter(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcdata,   // input array
+  void **destdata,  // output array
+  int len,          // message size in elements
+  ESMC_DataKind dtk,// data type kind
+  int rootDE,       // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int blen = len * ESMC_DataKindSize(dtk);
+  return ESMC_DELayoutScatter(srcdata, destdata, blen, rootDE, oneToOneFlag);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGather()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutGather
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutGather(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcdata, // input array
+  void **destdata,// output array
+  int blen,       // message size in bytes
+  int rootDE,     // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local reference to VM
+  ESMC_VM &vm = *myvm;
+  // very crude implementation of a layout wide gather
+  int mypet = vm.vmk_mypet();
+  if (des[rootDE].petid==mypet){
+    // my PET holds the rootDE -> receive chunks from all other DEs
+    if (oneToOneFlag==ESMF_TRUE){
+      char *tempdata = (char *)destdata;
+      for (int i=0; i<ndes; i++){
+        ESMC_DELayoutCopy(srcdata, (void **)tempdata, blen, i, rootDE,
+          ESMF_TRUE);
+        tempdata += blen;
+      }
+    }else{
+      int j;
+      for (j=0; j<nmydes; j++)
+        if (mydes[j]==rootDE) break;
+      void *rootdata = destdata[j]; // backup the correct start of rootDE's data
+      char *tempdata = (char *)destdata[j];
+      for (int i=0; i<ndes; i++){
+        ESMC_DELayoutCopy(srcdata, destdata, blen, i, rootDE, ESMF_FALSE);
+        tempdata += blen;
+        destdata[j] = tempdata;
+      }
+      destdata[j] = rootdata;  // restore correct start of root's destdata
+    }
+  }else{
+    if (oneToOneFlag==ESMF_TRUE){
+      for (int i=0; i<ndes; i++)
+        ESMC_DELayoutCopy(srcdata, destdata, blen, i, rootDE, ESMF_TRUE);
+    }else{
+      for (int i=0; i<ndes; i++)
+        ESMC_DELayoutCopy(srcdata, destdata, blen, i, rootDE, ESMF_FALSE);
+    }
+  }
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGather()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutGather
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutGather(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcdata,   // input array
+  void **destdata,  // output array
+  int len,          // message size in bytes
+  ESMC_DataKind dtk,// data type kind
+  int rootDE,       // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int blen = len * ESMC_DataKindSize(dtk);
+  return ESMC_DELayoutGather(srcdata, destdata, blen, rootDE, oneToOneFlag);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGatherV()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutGatherV
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutGatherV(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcdata, // input array
+  void **destdata,// output array
+  int *blen,      // array of message sizes in bytes for each DE
+                  // - the PET that holds rootDE must provide all blen elementes
+                  // - all other PETs only need to fill elements for their DEs
+  int *bdestdispl,// displacement vector for destdata for each DE mes. in bytes
+  int rootDE,     // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local reference to VM
+  ESMC_VM &vm = *myvm;
+  // very crude implementation of a layout wide gather
+  int mypet = vm.vmk_mypet();
+  if (des[rootDE].petid==mypet){
+    // my PET holds the rootDE -> receive chunks from all other DEs
+    if (oneToOneFlag==ESMF_TRUE){
+      char *tempdata;
+      for (int i=0; i<ndes; i++){
+        tempdata = (char *)destdata + bdestdispl[i];
+        ESMC_DELayoutCopy(srcdata, (void **)tempdata, blen[i], i, rootDE,
+          ESMF_TRUE);
+      }
+    }else{
+      int j;
+      for (j=0; j<nmydes; j++)
+        if (mydes[j]==rootDE) break;
+      void *rootdata = destdata[j]; // backup the correct start of rootDE's data
+      for (int i=0; i<ndes; i++){
+        destdata[j] = (char *)rootdata + bdestdispl[i];;
+        ESMC_DELayoutCopy(srcdata, destdata, blen[i], i, rootDE, ESMF_FALSE);
+      }
+      destdata[j] = rootdata;  // restore correct start of root's destdata
+    }
+  }else{
+    if (oneToOneFlag==ESMF_TRUE){
+      for (int i=0; i<ndes; i++)
+        ESMC_DELayoutCopy(srcdata, destdata, blen[i], i, rootDE, ESMF_TRUE);
+    }else{
+      for (int i=0; i<ndes; i++)
+        ESMC_DELayoutCopy(srcdata, destdata, blen[i], i, rootDE, ESMF_FALSE);
+    }
+  }
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGatherV()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutGatherV
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutGatherV(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcdata, // input array
+  void **destdata,// output array
+  int *len,       // array of message sizes in elements for each DE
+                  // - the PET that holds rootDE must provide all blen elementes
+                  // - all other PETs only need to fill elements for their DEs
+  int *destdispl, // displacement vector for destdata for each DE mes. in elem.
+  ESMC_DataKind dtk,// data type kind
+  int rootDE,     // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int rc;
+  int *blen = new int[ndes];
+  int *bdestdispl = new int[ndes];
+  int dtk_size = ESMC_DataKindSize(dtk);
+  for (int i=0; i<ndes; i++){
+    blen[i] = len[i] * dtk_size;
+    bdestdispl[i] = destdispl[i] * dtk_size;
+  }
+  rc =  ESMC_DELayoutGatherV(srcdata, destdata, blen, bdestdispl, rootDE,
+    oneToOneFlag);
+  delete [] blen;
+  delete [] bdestdispl;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutAllFullReduce()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutAllFullReduce
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutAllFullReduce(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcdata,     // input array
+  void *result,       // result
+  int len,            // number of elements in each DE
+  ESMC_DataKind dtk,  // data type kind
+  ESMC_Operation op,  // reduction operation
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//    Reduce data into a single value
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local reference to VM
+  ESMC_VM &vm = *myvm;
+  // very crude implementation of a layout wide FullReduce
+  int mypet = vm.vmk_mypet();
+  void *localresult;
+  int local_i4;
+  float local_r4;
+  double local_r8;
+  // first reduce across all of this PET's DEs
+  switch (op){
+  case ESMF_SUM:
+    switch (dtk){
+    case ESMF_I4:
+      {
+        localresult = (void *)&local_i4;
+        local_i4 = 0;
+        if (oneToOneFlag==ESMF_TRUE){
+          int *tempdata = (int *)srcdata;
+          for (int j=0; j<len; j++){
+            // looping over all the elements in this DE
+            local_i4 += tempdata[j];
+          }
+        }else{
+          for (int i=0; i<nmydes; i++){
+            // looping over all of my DEs
+            int *tempdata = (int *)srcdata[i];
+            for (int j=0; j<len; j++){
+              // looping over all the elements in this DE
+              local_i4 += tempdata[j];
+            }
+          }
+        }
+      }
+      break;
+    case ESMF_R4:
+      {
+        localresult = (void *)&local_r4;
+        local_r4 = 0.;
+        if (oneToOneFlag==ESMF_TRUE){
+          float *tempdata = (float *)srcdata;
+          for (int j=0; j<len; j++){
+            // looping over all the elements in this DE
+            local_r4 += tempdata[j];
+          }
+        }else{
+          for (int i=0; i<nmydes; i++){
+            // looping over all of my DEs
+            float *tempdata = (float *)srcdata[i];
+            for (int j=0; j<len; j++){
+              // looping over all the elements in this DE
+              local_r4 += tempdata[j];
+            }
+          }
+        }
+      }
+      break;
+    case ESMF_R8:
+      {
+        localresult = (void *)&local_r8;
+        local_r8 = 0.;
+        if (oneToOneFlag==ESMF_TRUE){
+          double *tempdata = (double *)srcdata;
+          for (int j=0; j<len; j++){
+            // looping over all the elements in this DE
+            local_r8 += tempdata[j];
+          }
+        }else{
+          for (int i=0; i<nmydes; i++){
+            // looping over all of my DEs
+            double *tempdata = (double *)srcdata[i];
+            for (int j=0; j<len; j++){
+              // looping over all the elements in this DE
+              local_r8 += tempdata[j];
+            }
+          }
+        }
+      }
+      break;
+    }
+    break;
+  case ESMF_MIN:
+    ESMC_LogDefault.ESMC_LogWrite("ESMF_MIN is not yet implemented.", 
+      ESMC_LOG_ERROR);
+    break;
+  case ESMF_MAX:
+    ESMC_LogDefault.ESMC_LogWrite("ESMF_MAX is not yet implemented.", 
+      ESMC_LOG_ERROR);
+    break;
+  }
+  // now each PET holds the reduced result for all its DEs
+  // next is to allreduce this result across the entire VM
+  vmType vmt = vmI4;
+  switch (dtk){
+  case ESMF_I4:
+    vmt = vmI4;
+    break;
+  case ESMF_R4:
+    vmt = vmR4;
+    break;
+  case ESMF_R8:
+    vmt = vmR8;
+    break;
+  }
+  vm.vmk_allreduce(localresult, result, 1, vmt, (vmOp)op);
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutFindDEtoPET()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutFindDEtoPET
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutFindDEtoPET(int npets){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Find best DE-to-PET mapping for the layout
+//
+//EOP
+//-----------------------------------------------------------------------------
+// TODO: Use the connectivity info to find best DE-to-PET mapping!
+// For now I simply connect in sequence...
+  if (ndes==npets){
+    // 1:1 layout
+    oneToOneFlag = ESMF_TRUE;
+    for (int i=0; i<ndes; i++)
+      des[i].petid = i;   // default 1:1 DE-to-PET mapping
+  }else{
+    // not a 1:1 layout
+    oneToOneFlag = ESMF_FALSE;
+    // first find how many DEs will be placed onto a certain PET
+    int *ndepet = new int[npets];
+    for (int i=0; i<npets; i++)
+      ndepet[i] = 0;
+    int i = 0;
+    for (int j=0; j<ndes; j++){
+      ++ndepet[i];
+      ++i;
+      if (i>=npets) i=0;
+    }
+    // now associate the DEs with their PETs
+    i=0;
+    int k=0;
+    for (int j=0; j<ndes; j++){
+      des[j].petid = i;
+      ++k;
+      if (k>=ndepet[i]){
+        k=0;
+        ++i;
+      }
+    }
+    delete [] ndepet;
+  }
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutFillLocal()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutFillLocal
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutFillLocal(int mypet){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Fill local part of layout object
+//
+//EOP
+//-----------------------------------------------------------------------------
+  nmydes = 0;               // reset local de count
+  for (int i=0; i<ndes; i++)
+    if (des[i].petid == mypet) ++nmydes;
+  mydes = new int[nmydes];  // allocate space to hold ids of all of my DEs
+  int j=0;
+  for (int i=0; i<ndes; i++)
+    if (des[i].petid == mypet){
+      mydes[j]=i;
+      ++j;
+    }
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutDataCreate()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutDataCreate
+//
+// !INTERFACE:
+void **ESMC_DELayoutDataCreate(
+//
+// !RETURN VALUE:
+//    void* to newly allocated memory
+//
+// !ARGUMENTS:
+//
+  int n,                    // number of DE data on this PET
+  int *rc){                 // return code
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  void **array;
+  try {
+    array = new void*[n];
+    *rc = ESMF_SUCCESS;
+    return(array);
+  }
+  catch (...) {
+    // LogErr catches the allocation error
+    ESMC_LogDefault.ESMC_LogMsgAllocError("for new DELayoutData object.", rc);  
+    return(ESMC_NULL_POINTER);
+  }
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutDataAdd()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutDataAdd
+//
+// !INTERFACE:
+int ESMC_DELayoutDataAdd(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **ptr,               // in - DELayout data reference array
+  void *a,                  // in - DELayout data reference to be added
+  int index){               // in - DELayout data reference index
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  ptr[index] = a;
+  return(ESMF_SUCCESS);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutDataDestroy()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutDataDestroy
+//
+// !INTERFACE:
+int ESMC_DELayoutDataDestroy(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **ptr){              // in - DELayout data references to destroy
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  delete [] ptr;  
+  return(ESMF_SUCCESS);
+}
+//-----------------------------------------------------------------------------

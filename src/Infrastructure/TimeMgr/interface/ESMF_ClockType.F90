@@ -1,12 +1,12 @@
-! $Id: ESMF_ClockType.F90,v 1.2 2004/02/18 01:42:50 eschwab Exp $
+! $Id: ESMF_ClockType.F90,v 1.5.4.1 2006/11/16 00:15:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 !
@@ -29,14 +29,15 @@
 ! !MODULE: ESMF_ClockTypeMod
 !
 ! !DESCRIPTION:
-! Part of Time Manager F90 API wrapper of C++ implemenation.
+! Part of Time Manager Fortran API wrapper of C++ implemenation.
 !
-! Defines F90 types for corresponding C++ class {\tt ESMC\_Clock}.
+! Defines Fortran types for corresponding C++ class {\tt ESMC\_Clock}.
 !
 ! See {\tt ../include/ESMC\_Clock.h} for complete description.
 !
 !------------------------------------------------------------------------------
 ! !USES:
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod
       implicit none
 
@@ -69,7 +70,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ClockType.F90,v 1.2 2004/02/18 01:42:50 eschwab Exp $'
+      '$Id: ESMF_ClockType.F90,v 1.5.4.1 2006/11/16 00:15:45 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       end module ESMF_ClockTypeMod

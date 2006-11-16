@@ -1,12 +1,12 @@
-// $Id: ESMC_XPacketUTest.C,v 1.1 2003/04/09 23:48:44 flanigan Exp $
+// $Id: ESMC_XPacketUTest.C,v 1.3.8.1 2006/11/16 00:15:43 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 //-----------------------------------------------------------------------------
 //BOP
@@ -27,16 +27,13 @@
  #include <stdio.h>
  #include <ESMC.h>
 
- // associated class definition file
- #include <ESMC_XPacket.h>
-
  // ESMC_Test function
  #include <ESMC_Test.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_XPacketUTest.C,v 1.1 2003/04/09 23:48:44 flanigan Exp $";
+ static const char *const version = "$Id: ESMC_XPacketUTest.C,v 1.3.8.1 2006/11/16 00:15:43 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -74,7 +71,7 @@
 
    // test initialization of members of statically allocated ESMC_XPacket
    //   may want to read back values via Get methods for comparison
-   rc = xpacket_ptr->ESMC_XPacketInit(args);
+   rc = xpacket_ptr->ESMC_XPacketSetDefault(args);
    sprintf(failMsg, "rc = %d, args = %f", rc, args);
    ESMC_Test((rc==ESMF_SUCCESS),
               failMsg, &result, ESMF_SRCLINE);

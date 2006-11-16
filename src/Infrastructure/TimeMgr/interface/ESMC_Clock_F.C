@@ -1,12 +1,12 @@
-// $Id: ESMC_Clock_F.C,v 1.31 2004/02/25 03:04:46 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.37.4.1 2006/11/16 00:15:45 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
 //
@@ -17,7 +17,6 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <ESMC.h>
 #include <ESMC_F90Interface.h>
 #include <ESMC_Clock.h>
 //------------------------------------------------------------------------------
@@ -82,6 +81,7 @@ extern "C" {
                                  ESMC_Time *refTime,
                                  ESMC_Time *currTime,
                                  ESMF_KIND_I8 *advanceCount,
+                                 ESMC_Direction *direction,
                                  int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockSet(
@@ -95,7 +95,8 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(runTimeStepCount),
                     ESMC_NOT_PRESENT_FILTER(refTime),
                     ESMC_NOT_PRESENT_FILTER(currTime),
-                    ESMC_NOT_PRESENT_FILTER(advanceCount) );
+                    ESMC_NOT_PRESENT_FILTER(advanceCount),
+                    ESMC_NOT_PRESENT_FILTER(direction) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
@@ -114,17 +115,18 @@ extern "C" {
                                  ESMC_TimeInterval *currSimTime,
                                  ESMC_TimeInterval *prevSimTime,
                                  ESMC_Calendar **calendar, 
+                                 ESMC_CalendarType *calendarType, 
                                  int *timeZone,
                                  ESMF_KIND_I8 *advanceCount,
                                  int *alarmCount,
+                                 ESMC_Direction *direction,
                                  int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockGet(
-                                           *nameLen,   // always present 
-                                                       //   internal argument.
-                                            tempNameLen,  // always present
-                                                          //  internal argument.
-                    ESMC_NOT_PRESENT_FILTER(tempName),
+			                  // always present internal arguments.
+                                           *nameLen,
+                                            tempNameLen,
+                                            tempName,
                     ESMC_NOT_PRESENT_FILTER(timeStep),
                     ESMC_NOT_PRESENT_FILTER(startTime),
                     ESMC_NOT_PRESENT_FILTER(stopTime),
@@ -136,9 +138,11 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(currSimTime),
                     ESMC_NOT_PRESENT_FILTER(prevSimTime),
                     ESMC_NOT_PRESENT_FILTER(calendar),
+                    ESMC_NOT_PRESENT_FILTER(calendarType),
                     ESMC_NOT_PRESENT_FILTER(timeZone),
                     ESMC_NOT_PRESENT_FILTER(advanceCount),
-                    ESMC_NOT_PRESENT_FILTER(alarmCount) );
+                    ESMC_NOT_PRESENT_FILTER(alarmCount),
+                    ESMC_NOT_PRESENT_FILTER(direction) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
@@ -203,6 +207,42 @@ extern "C" {
           ESMF_CHECK_POINTER(*ptr, status)
           *esmf_clockIsStopTime = (int) (*ptr)->ESMC_ClockIsStopTime(
                                              ESMC_NOT_PRESENT_FILTER(status) );
+       }
+
+       void FTN(c_esmc_clockstoptimeenable)(ESMC_Clock **ptr,
+                                            ESMC_Time *stopTime, int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
+          int rc = (*ptr)->ESMC_ClockStopTimeEnable(
+                                         ESMC_NOT_PRESENT_FILTER(stopTime) );
+          if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_clockstoptimedisable)(ESMC_Clock **ptr, int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
+          int rc = (*ptr)->ESMC_ClockStopTimeDisable();
+          if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_clockisstoptimeenabled)(ESMC_Clock **ptr, 
+                               int *esmf_clockIsStopTimeEnabled, int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
+          *esmf_clockIsStopTimeEnabled =
+                         (int) (*ptr)->ESMC_ClockIsStopTimeEnabled(
+                                             ESMC_NOT_PRESENT_FILTER(status) );
+       }
+
+       void FTN(c_esmc_clockisdone)(ESMC_Clock **ptr, 
+                                    int *esmf_clockIsDone, int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
+          *esmf_clockIsDone = (int) (*ptr)->ESMC_ClockIsDone(
+                                            ESMC_NOT_PRESENT_FILTER(status) );
+       }
+
+       void FTN(c_esmc_clockisreverse)(ESMC_Clock **ptr, 
+                                    int *esmf_clockIsReverse, int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
+          *esmf_clockIsReverse = (int) (*ptr)->ESMC_ClockIsReverse(
+                                            ESMC_NOT_PRESENT_FILTER(status) );
        }
 
        void FTN(c_esmc_clockgetnexttime)(ESMC_Clock **ptr,

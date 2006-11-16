@@ -1,12 +1,12 @@
-// $Id: ESMC_CommTable_F.C,v 1.3 2003/03/25 17:39:13 nscollins Exp $
+// $Id: ESMC_CommTable_F.C,v 1.5.2.1 2006/11/16 00:15:41 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
 //
@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 #include <stdio.h>
 #include <string.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_CommTable.h"
 //------------------------------------------------------------------------------
@@ -36,9 +36,9 @@
 extern "C" {
 
        // keep these for deep classes, or see init below for shallow
-       void FTN(c_esmc_commtablecreate)(ESMC_CommTable **ptr, int *mydeid,
+       void FTN(c_esmc_commtablecreate)(ESMC_CommTable **ptr, int *myvmid,
                                                    int *cnt, int *status) {
-           *ptr = ESMC_CommTableCreate(*mydeid, *cnt, status);
+           *ptr = ESMC_CommTableCreate(*myvmid, *cnt, status);
        }
 
        void FTN(c_esmc_commtabledestroy)(ESMC_CommTable **ptr, int *status) {

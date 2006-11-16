@@ -1,12 +1,12 @@
-! $Id: ESMF_TimeType.F90,v 1.1 2004/03/10 03:02:19 eschwab Exp $
+! $Id: ESMF_TimeType.F90,v 1.2.8.1 2006/11/16 00:15:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 !
@@ -29,9 +29,9 @@
 ! !MODULE: ESMF_TimeTypeMod
 !
 ! !DESCRIPTION:
-! Part of Time Manager F90 API wrapper of C++ implemenation.
+! Part of Time Manager Fortran API wrapper of C++ implemenation.
 !
-! Defines F90 types for corresponding C++ class {\tt ESMC\_Time}.
+! Defines Fortran types for corresponding C++ class {\tt ESMC\_Time}.
 !
 ! See {\tt ../include/ESMC\_Time.h} for complete description.
 !
@@ -53,14 +53,14 @@
 !------------------------------------------------------------------------------
 !     ! ESMF_Time
 !
-!     ! F90 class type to match C++ Time class in size only;
+!     ! Fortran class type to match C++ Time class in size only;
 !     !  all dereferencing within class is performed by C++ implementation
 
 !     ! Equivalent sequence and kind to C++:
 
       type ESMF_Time
-      sequence                                  ! match C++ storage order
-      private                                   !  (members opaque on F90 side)
+      sequence                              ! match C++ storage order
+      private                               !  (members opaque on Fortran side)
       type(ESMF_BaseTime)          :: baseTime  ! inherit base class
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
       type(ESMF_Calendar), pointer :: calendar => NULL() ! associated calendar
@@ -83,7 +83,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeType.F90,v 1.1 2004/03/10 03:02:19 eschwab Exp $'
+      '$Id: ESMF_TimeType.F90,v 1.2.8.1 2006/11/16 00:15:45 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       end module ESMF_TimeTypeMod

@@ -1,12 +1,12 @@
-! $Id: ESMF_RegridUTest.F90,v 1.2 2003/12/03 23:16:20 jwolfe Exp $
+! $Id: ESMF_RegridUTest.F90,v 1.16.2.1 2006/11/16 00:15:41 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 !
@@ -28,16 +28,16 @@
 !
 !-----------------------------------------------------------------------------
 ! !USES:
-      use ESMF_Mod
       use ESMF_TestMod    ! test methods
-      use ESMF_RegridMod  ! the class to test
+      use ESMF_Mod
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridUTest.F90,v 1.2 2003/12/03 23:16:20 jwolfe Exp $'
+      '$Id: ESMF_RegridUTest.F90,v 1.16.2.1 2006/11/16 00:15:41 cdeluca Exp $'
 !------------------------------------------------------------------------------
+      type(ESMF_VM):: vm
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -47,82 +47,207 @@
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
+      character(ESMF_MAXSTR) :: name
 
-      ! instantiate a Regrid 
-      type(ESMF_Regrid) :: regrid
-      type(ESMF_RegridConfig) config_set
-      type(ESMF_RegridConfig) :: config_get
-      character(ESMF_MAXSTR) :: validate_options
-      character(ESMF_MAXSTR) :: print_options
+      !character(ESMF_MAXSTR) :: validate_options
+      !character(ESMF_MAXSTR) :: print_options
 
-      ! test dynamic allocation of ESMF_Regrid
-      regrid = ESMF_RegridCreate(args, rc)
-      write(failMsg, *) "rc =", rc, ", args =", args
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
+      ! Local variables
+      type(ESMF_Field) :: humidity1, humidity2
+      type(ESMF_DELayout) :: delayout
+      type(ESMF_ArraySpec) :: arrayspec
+      type(ESMF_Grid) :: grid1, grid2
+      real(ESMF_KIND_R8) :: min(2), max(2)
+      integer :: counts(ESMF_MAXGRIDDIM)
+      integer :: npets, countsPerDE1(4), countsPerDE2(2)
+      real(ESMF_KIND_R8) :: delta1(40), delta2(50)
+      type(ESMF_GridHorzStagger) :: horz_stagger
+      type(ESMF_RouteHandle) :: routehandle
+
+
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+
+      if (.not. ESMF_TestMinPETs(8, ESMF_SRCLINE)) goto 10
+
+
+      ! Query for Global VM and create a layout with the right breakdown
+      
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      call ESMF_VMGetGlobal(vm, rc=rc)
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      delayout = ESMF_DELayoutCreate(vm, (/ npets/2, 2 /), rc=rc)
+      write(failMsg, *) "creating a delayout rc =", rc
+      write(name, *) "Creating a DELayout"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Set up a 2D real arrayspec
+      call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
+                             kind=ESMF_R8)
+      write(failMsg, *) "setting an arrayspec rc =", rc
+      write(name, *) "Initializing an ArraySpec"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Add a "humidity" field to the export state.
+      countsPerDE1 = (/ 15, 15, 15, 15 /)
+      countsPerDE2 = (/ 40, 0 /)
+
+      counts(1) = 60
+      counts(2) = 40
+      min(1) = 0.0
+      max(1) = 60.0
+      min(2) = 0.0
+      max(2) = 50.0
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
+
+      grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
+                                  minGlobalCoordPerDim=min, &
+                                  maxGlobalCoordPerDim=max, &
+                                  horzStagger=horz_stagger, &
+                                  name="source grid", rc=rc)
+      write(failMsg, *) "grid create rc =", rc 
+      write(name, *) "Creating an XY Uniform Grid"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      call ESMF_GridDistribute(grid1, delayout=delayout, &
+                                 countsPerDEDim1=countsPerDE1, &
+                                 countsPerDEDim2=countsPerDE2, &
+                                 rc=rc)
+      write(failMsg, *) "grid distribute rc =", rc
+      write(name, *) "Distributing the Grid"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Create the field and have it create the array internally
+      humidity1 = ESMF_FieldCreate(grid1, arrayspec, &
+                                   horzRelloc=ESMF_CELL_CENTER, &
+                                   haloWidth=0, name="humidity1", rc=rc)
+      write(failMsg, *) "field create rc =", rc
+      write(name, *) "field create rc =", rc
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Add a "humidity" field to the import state.
+      countsPerDE1 = (/ 10, 6, 12, 12 /)
+      countsPerDE2 = (/ 0, 50 /)
+      min(1) = 0.0
+      delta1 = (/ 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.3, 1.4, &
+                    1.4, 1.5, 1.6, 1.6, 1.6, 1.8, 1.8, 1.7, 1.7, 1.6, &
+                    1.6, 1.6, 1.8, 1.8, 2.0, 2.0, 2.2, 2.2, 2.2, 2.2, &
+                    2.0, 1.7, 1.5, 1.3, 1.2, 1.1, 1.0, 1.0, 1.0, 0.9 /)
+      min(2) = 0.0
+      delta2 = (/ 0.8, 0.8, 0.8, 0.8, 0.8, 0.7, 0.7, 0.6, 0.7, 0.8, &
+                    0.9, 0.9, 0.9, 0.9, 1.0, 1.0, 1.0, 1.0, 0.9, 1.0, &
+                    1.0, 1.0, 1.0, 1.1, 1.2, 1.3, 1.3, 1.3, 1.4, 1.4, &
+                    1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
+                    1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
+      min(1) = 0.0
+      min(2) = 0.0
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
+
+      grid2 = ESMF_GridCreateHorzXY(minGlobalCoordPerDim=min, &
+                                      delta1=delta1, delta2=delta2, &
+                                      horzStagger=horz_stagger, &
+                                      name="source grid", rc=rc)
+      write(failMsg, *) "grid create rc =", rc
+      write(name, *) "grid create rc =", rc
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      call ESMF_GridDistribute(grid2, delayout=delayout, &
+                                 countsPerDEDim1=countsPerDE1, &
+                                 countsPerDEDim2=countsPerDE2, &
+                                 rc=rc)
+      write(failMsg, *) "grid distribute rc =", rc
+      write(name, *) "grid distribute rc =", rc
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Create the field and have it create the array internally
+      humidity2 = ESMF_FieldCreate(grid2, arrayspec, &
+                                     horzRelloc=ESMF_CELL_NFACE, &
+                                     haloWidth=0, name="humidity2", rc=rc)
+      write(failMsg, *) "field create rc =", rc
+      write(name, *) "field create rc =", rc
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+
+      !call ESMF_FieldPrint(humidity1, rc=rc)
+      !call ESMF_FieldPrint(humidity2, rc=rc)
+      !------------------------------------------------------------------------
+      ! Up to here the tests are all part of the set up.  From here on,
+      ! the tests are really regrid tests.
+      !------------------------------------------------------------------------
+      
+      !------------------------------------------------------------------------
+      ! These are fields on different Grids - call RegridStore to set
+      ! up the Regrid structure
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      print *, "ready to call regrid store"
+      call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
+                                 routehandle, &
+                                 regridmethod=ESMF_REGRID_METHOD_BILINEAR, &
+                                 rc=rc)
+      print *, "back from regrid store"
+      write(failMsg, *) "regrid store rc =", rc
+      write(name, *) "regrid store rc =", rc
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      print *, "ready to call regrid run"
+      call ESMF_FieldRegrid(humidity1, humidity2, routehandle, rc=rc)
+      print *, "back from regrid run"
+      write(failMsg, *) "regrid run rc =", rc
+      write(name, *) "regrid run rc =", rc
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !call ESMF_FieldPrint(humidity1, rc=rc)
+      !call ESMF_FieldPrint(humidity2, rc=rc)
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      print *, "ready to call regrid release"
+      call ESMF_FieldRegridRelease(routehandle, rc=rc)
+      print *, "back from regrid release"
+      write(failMsg, *) "regrid release rc =", rc
+      write(name, *) "regrid release rc =", rc
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     
-      ! test internal dynamic allocation within statically allocated
-      !   ESMF_Regrid
-      call ESMF_RegridConstruct(regrid, args, rc)
-      write(failMsg, *) "rc =", rc, ", args =", args
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
+#ifdef ESMF_EXHAUSTIVE
+      ! add more tests here.
 
-      ! test setting of configuration values
-      call ESMF_RegridSetConfig(regrid, config_set, rc)
-      write(failMsg, *) "rc =", rc, ", config_set =", config_set
-      call ESMF_Test((rc.eq.ESMF_SUCCESS),  &
-                      failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
+                                 routehandle, &
+                                 regridmethod=ESMF_REGRID_METHOD_NEAR_NBR, &
+                                 rc=rc)
+      write(failMsg, *) "regrid store, bad method rc =", rc
+      write(name, *) "regrid store, bad method rc =", rc
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      ! test getting of configuration values,
-      !  compare to values set previously
-      call ESMF_RegridGetConfig(regrid, config_get, rc)
-      write(failMsg, *) "rc =", rc, ", config_get =", config_get
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. config_get .eq. config_set), &
-                      failMsg, result, ESMF_SRCLINE)
+#endif
 
-      ! test setting of ESMF_Regrid members values
-      !<value type> :: value_set
-      !call ESMF_RegridSet<Value>(regrid, value_set, rc)
-      !write(failMsg, *) "rc =", rc, ", value_set =", value_set
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-      !                failMsg, result, ESMF_SRCLINE)
+10    continue
 
-      ! test getting of ESMF_Regrid members values,
-      !   compare to values set previously
-      !<value type> :: value_get
-      !call ESMF_RegridGet<Value>(regrid, value_get, rc)
-      !write(failMsg, *) "rc =", rc, ", value_get =", value_get
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS .and. value_get .eq. value_set), &
-      !                failMsg, result, ESMF_SRCLINE)
-    
-      ! test validate method via option string
-      call ESMF_RegridValidate(regrid, validate_options, rc)
-      write(failMsg, *) "rc =", rc, ", validate_options =", validate_options
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
-
-      ! test print method via option string
-      call ESMF_RegridPrint(regrid, print_options, rc)
-      write(failMsg, *) "rc =", rc, ", print_options =", print_options
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
-
-      ! test internal dynamic deallocation within statically allocated 
-      !   ESMF_Regrid
-      call ESMF_RegridDestruct(regrid, rc)
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
-
-      ! test dynamic deallocation of ESMF_Regrid
-      !   also tests destructor
-      call ESMF_RegridDestroy(regrid, rc)
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
-
+      ! TODO: we would like to set the program return value for use by
+      ! the makefile, but is there no way to do this in F90?
       ! return number of failures to environment; 0 = success (all pass)
-      ! return result  ! TODO: no way to do this in F90 ?
+
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
   
       end program ESMF_RegridTest

@@ -1,12 +1,12 @@
-% $Id: State_refdoc.ctex,v 1.4 2003/12/16 22:21:23 svasquez Exp $
+% $Id: State_refdoc.ctex,v 1.9.6.1 2006/11/16 00:15:56 cdeluca Exp $
 %
 % Earth System Modeling Framework
-% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Copyright 2002-2008, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 % NASA Goddard Space Flight Center.
-% Licensed under the GPL.
+% Licensed under the University of Illinois-NCSA License.
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -54,16 +54,25 @@
 \input{../Superstructure/State/doc/State_desc}
 #endif
 
+\subsection{State Options}
+#ifdef STANDALONE
+\input{State_options}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/State/doc/State_options}
+#endif
+
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{State_usage}
 \input{ESMF_StateEx_fapi}
+\input{ESMF_StateReconcileEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/State/doc/State_usage}
 \input{../Superstructure/State/doc/ESMF_StateEx_fapi}
+\input{../Superstructure/State/doc/ESMF_StateReconcileEx_fapi}
 #endif
 
-\subsection{Restrictions}
+\subsection{Restrictions and Future Work}
 #ifdef STANDALONE
 \input{State_rest}
 #elif defined(CONSTITUENT)
@@ -85,18 +94,25 @@
 \input{../Superstructure/State/doc/State_obj}
 #endif
 
-%\subsection{Global Parameters}
-%#ifdef STANDALONE
-%\input{State_fparam}
-%#elif defined(CONSTITUENT)
-%\input{../Superstructure/State/doc/State_fparam}
-%#endif
-
-\subsection{Class API}
+\subsection{Class API: Basic State Methods}
 #ifdef STANDALONE
 \input{ESMF_State_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/State/doc/ESMF_State_fapi}
+#endif
+
+\subsection{Class API: State Overloads for Fortran Arrays}
+#ifdef STANDALONE
+\input{ESMF_StateGet_fapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/State/doc/ESMF_StateGet_fapi}
+#endif
+
+\subsection{Class API: State Communications}
+#ifdef STANDALONE
+\input{ESMF_StateReconcile_fapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/State/doc/ESMF_StateReconcile_fapi}
 #endif
 
 #ifdef STANDALONE

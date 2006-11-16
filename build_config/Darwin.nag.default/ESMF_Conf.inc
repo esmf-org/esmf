@@ -1,17 +1,22 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.1 2003/10/17 19:34:56 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.3.4.1 2006/11/16 00:15:04 cdeluca Exp $
 
 Earth System Modeling Framework
-Copyright 2002-2003, University Corporation for Atmospheric Research,
+Copyright 2002-2008, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 NASA Goddard Space Flight Center.
-Licensed under the GPL.
+Licensed under the University of Illinois-NCSA License.
 #endif
 
 #if 0
-currently an empty file.  available if #defines needed
-on a per-system basis for F90 code
+In the ESMF_Config.F90 source file, if EOL is defined
+as achar(10) (which is the newline character), 
+the file cannot be compiled (it will not parse). 
+If a bug fix for this is released, the next #define can
+be removed.
 #endif
+
+#define ESMF_HAS_ACHAR_BUG 1
 

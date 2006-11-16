@@ -1,12 +1,12 @@
-% $Id: Perf_fex.tex,v 1.5 2003/08/14 21:59:05 ekluz Exp $
+% $Id: Perf_fex.tex,v 1.6.8.1 2006/11/16 00:15:37 cdeluca Exp $
 %
 % Earth System Modeling Framework
-% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Copyright 2002-2008, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 % NASA Goddard Space Flight Center.
-% Licensed under the GPL.
+% Licensed under the University of Illinois-NCSA License.
 
 %\subsection{F90 Use and Examples}
 
@@ -17,9 +17,9 @@
 \begin{verbatim}
    type(ESMF_Perf) :: perf
 
-   call ESMF_LogSet(aLog)
+   call ESMF_LogSet(log)
    call ESMF_LogOpenFile(ESMF_Log_World,ESMF_SINGLE_LOG_FILE,"Performance_analysis.txt")
-   perf = PerfCreate(aLog)
+   perf = PerfCreate(log)
 
    do time = 1, 9999999
 !$OMP PARALELL DO PRIVATE (I)
@@ -40,7 +40,7 @@
 \begin{verbatim}
    type(ESMF_Perf) :: perf
 
-   call ESMF_LogSet(aLog)
+   call ESMF_LogSet(log)
    call ESMF_LogOpenFile(ESMF_Log_World,ESMF_SINGLE_LOG_FILE,"Performance_analysis.txt")
    perf = ESMF_PerfCreate( alog, monitor=.false.)
 
@@ -64,9 +64,9 @@ for some code segments}
 \begin{verbatim}
    type(ESMF_Perf) :: perf
 
-   call ESMF_LogSet(aLog)
+   call ESMF_LogSet(log)
    call ESMF_LogOpenFile(ESMF_Log_World,ESMF_SINGLE_LOG_FILE,"Performance_analysis.txt")
-   perf = ESMF_PerfCreate( aLog, doHW=.true.)
+   perf = ESMF_PerfCreate( log, doHW=.true.)
 
    do time = 1, 9999999
 !$OMP PARALELL DO PRIVATE (I)
@@ -97,7 +97,7 @@ for some code segments}
 .
 .
 .
-   call ESMF_LogSet(aLog)
+   call ESMF_LogSet(log)
    call ESMF_LogOpenFile(ESMF_Log_World,ESMF_SINGLE_LOG_FILE,"Performance_analysis.txt")
 ! At each ESMF_PerfStart and ESMF_PerfEnd, a barrier will on the given pe_list will be done
 ! Also sizes and times for any MPI messages between the Start and End will be output.

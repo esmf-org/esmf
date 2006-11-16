@@ -1,14 +1,15 @@
-!  $Id: ESMF_Alloc_C.F90,v 1.5 2004/03/16 18:11:52 nscollins Exp $
+!  $Id: ESMF_Alloc_C.F90,v 1.9.4.1 2006/11/16 00:15:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_Alloc_C.F90"
 !
 ! F77 interface files for C++ layer calling into F90 implementation layer.
 !  This cannot use any F90 syntax, including modules, or allocatable 
@@ -23,12 +24,13 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Alloc_C.F90,v 1.5 2004/03/16 18:11:52 nscollins Exp $'
+!      '$Id: ESMF_Alloc_C.F90,v 1.9.4.1 2006/11/16 00:15:15 cdeluca Exp $'
 !==============================================================================
    subroutine f_esmf_arrayf90allocate(array, rank, type, kind, counts, &
                                       lbounds, ubounds, hwidth, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
-       use ESMF_ArrayBaseMod
+       use ESMF_ArrayMod
        use ESMF_ArrayCreateMod
      type(ESMF_Array) :: array
      integer :: rank
@@ -47,8 +49,9 @@
    end subroutine f_esmf_arrayf90allocate
 
    subroutine f_esmf_arrayf90deallocate(array, rank, type, kind, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
-       use ESMF_ArrayBaseMod
+       use ESMF_ArrayMod
        use ESMF_ArrayCreateMod
      type(ESMF_Array) :: array
      integer :: rank

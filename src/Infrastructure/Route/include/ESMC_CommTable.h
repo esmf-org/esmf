@@ -1,12 +1,12 @@
-// $Id: ESMC_CommTable.h,v 1.9 2003/07/02 17:14:55 nscollins Exp $
+// $Id: ESMC_CommTable.h,v 1.10.2.1 2006/11/16 00:15:41 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMF CommTable C++ declaration include file
 //
@@ -67,7 +67,7 @@
  // the following methods apply to deep classes only
  // ESMC_CommTableCreate and ESMC_CommTableDestroy are declared below,
  // outside the ESMC_CommTable declaration
-    int ESMC_CommTableConstruct(int mydeid, int partnercount);
+    int ESMC_CommTableConstruct(int myvmid, int partnercount);
     int ESMC_CommTableDestruct(void); 
 
  // accessor methods for class members

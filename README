@@ -10,7 +10,7 @@
  Laboratory, University of Michigan, National Centers for Environmental
  Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
  NASA Goddard Space Flight Center.
- Licensed under the GNU GPL.
+ Licensed under the GNU University of Illinois-NCSA License.
 
 ================================================================================
 
@@ -562,4 +562,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.69.2.12 2006/11/03 21:51:01 theurich Exp $
+ $Id: README,v 1.69.2.13 2006/11/16 00:15:01 cdeluca Exp $

@@ -1,12 +1,12 @@
-// $Id: ESMC_CplComp.h,v 1.4 2003/11/07 21:55:34 nscollins Exp $
+// $Id: ESMC_CplComp.h,v 1.11.2.1 2006/11/16 00:15:54 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMF Component C++ declaration include file
 //
@@ -40,9 +40,8 @@
 //-----------------------------------------------------------------------------
 // 
 // !USES:
-#include "ESMC.h"
+#include "ESMC_Start.h"
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
-#include "ESMC_DELayout.h"
 #include "ESMC_Time.h"
 #include "ESMC_Clock.h"
 #include "ESMC_Grid.h"
@@ -51,44 +50,37 @@
 #include "ESMC_Comp.h"
 
 // !PUBLIC TYPES:
- class ESMC_CplCompConfig;
  class ESMC_CplComp;
 
 // !PRIVATE TYPES:
 
- // class configuration type
- class ESMC_CplCompConfig {
-   private:
- //   < insert resource items here >
- };
-
  // class declaration type
- class ESMC_CplComp : public ESMC_Base {    // inherits from ESMC_Base class
+ class ESMC_CplComp {    // just a cover for the F90 class, no need for Base
 
   private:
-    void *fortranclass;
+    ESMC_F90ClassHolder fortranclass;
     
 // !PUBLIC MEMBER FUNCTIONS:
 //
   public:
   int ESMC_CplCompSetServices(void (*)(ESMC_CplComp *, int *));
 
-  int ESMC_CplCompInitialize(ESMC_State *importstate, ESMC_State *exportstate, 
-                              ESMC_Clock *clock, int phase);
-  int ESMC_CplCompRun(ESMC_State *importstate, ESMC_State *exportstate, 
-                       ESMC_Clock *clock, int phase);
-  int ESMC_CplCompFinalize(ESMC_State *importstate, ESMC_State *exportstate, 
-                            ESMC_Clock *clock, int phase);
+  int ESMC_CplCompInitialize(ESMC_State *importState, ESMC_State *exportState, 
+                             ESMC_Clock *clock, int phase, 
+                             ESMC_BlockingFlag blockingFlag);
+  int ESMC_CplCompRun(ESMC_State *importState, ESMC_State *exportState, 
+                      ESMC_Clock *clock, int phase, 
+                      ESMC_BlockingFlag blockingFlag);
+  int ESMC_CplCompFinalize(ESMC_State *importState, ESMC_State *exportState, 
+                           ESMC_Clock *clock, int phase, 
+                           ESMC_BlockingFlag blockingFlag);
 
- // optional configuration methods
-  int ESMC_CplCompGetConfig(ESMC_CplCompConfig *config) const;
-  int ESMC_CplCompSetConfig(ESMC_CplCompConfig *config);
 
  // accessor methods for class members.  these need more options.
   int ESMC_CplCompGet(char *name) const;
   int ESMC_CplCompSet(const char *name);
     
- // required methods inherited and overridden from the ESMC_Base class
+  // standard routines
   int ESMC_CplCompValidate(const char *options) const;
   int ESMC_CplCompPrint(const char *options) const;
 
@@ -114,26 +106,29 @@
 // were a method, the ESMC_CplComp object on whose behalf it was being invoked
 // an ESMC_CplComp object.
 
- ESMC_CplComp *ESMC_CplCompCreate(char *name, ESMC_DELayout *layout,
-                                      char *configfile, int *rc);
+ ESMC_CplComp *ESMC_CplCompCreate(char *name, char *configFile, 
+                                  ESMC_Clock *clock, int *rc);
  int ESMC_CplCompDestroy(ESMC_CplComp *comp);
 
 
 // prototypes for fortran interface routines
 extern "C" {
  void FTN(f_esmf_cplcompcreate)(ESMC_CplComp *comp, char *name, 
-                         ESMC_DELayout *layout, ESMC_Config *config, 
-                         char *configfile, int *rc, int nlen, int clen);
+                         ESMC_Config *config, char *configFile, 
+                         ESMC_Clock *clock, int *rc, int nlen, int clen);
  void FTN(f_esmf_cplcompdestroy)(ESMC_CplComp *comp, int *rc);
  void FTN(f_esmf_cplcompinitialize)(ESMC_CplComp *ccomp, 
-                         ESMC_State *importstate, ESMC_State *exportstate, 
-                         ESMC_Clock *clock, int *phase, int *rc);
+                         ESMC_State *importState, ESMC_State *exportState, 
+                         ESMC_Clock *clock, int *phase, 
+                         ESMC_BlockingFlag *blockingFlag, int *rc);
  void FTN(f_esmf_cplcomprun)(ESMC_CplComp *ccomp, 
-                         ESMC_State *importstate, ESMC_State *exportstate, 
-                         ESMC_Clock *clock, int *phase, int *rc);
+                         ESMC_State *importState, ESMC_State *exportState, 
+                         ESMC_Clock *clock, int *phase,
+                         ESMC_BlockingFlag *blockingFlag, int *rc);
  void FTN(f_esmf_cplcompfinalize)(ESMC_CplComp *ccomp, 
-                         ESMC_State *importstate, ESMC_State *exportstate, 
-                         ESMC_Clock *clock, int *phase, int *rc);
+                         ESMC_State *importState, ESMC_State *exportState, 
+                         ESMC_Clock *clock, int *phase, 
+                         ESMC_BlockingFlag *blockingFlag, int *rc);
  void FTN(f_esmf_cplcompget)(const ESMC_CplComp *ccomp, int *rc);
  void FTN(f_esmf_cplcompset)(ESMC_CplComp *ccomp, int *rc);
  void FTN(f_esmf_cplcompvalidate)(const ESMC_CplComp *ccomp, const char *options, int *rc, int olen);

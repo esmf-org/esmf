@@ -1,24 +1,24 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.3 2004/02/06 23:29:26 nscollins Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.10.4.1 2006/11/16 00:15:24 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 !
-      program ESMF_DELayoutCreateTest
+      program ESMF_DELayoutUTest
 
 !------------------------------------------------------------------------------
-! INCLUDES
-#include <ESMF.h>
-!
+ 
+#include <ESMF_Macros.inc>
+
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_DELayoutCreateTest - tests parent-sublayout create methods
+! !PROGRAM: ESMF_DELayoutTest - This unit test file verifies DELayout methods.
 !
 ! !DESCRIPTION:
 !
@@ -26,211 +26,127 @@
 ! The companion file ESMF\_DELayout.F90 contains the definitions for the
 ! DELayout methods.
 !
-! run with 8 MPI processes
 !-----------------------------------------------------------------------------
 ! !USES:
-      use ESMF_Mod         ! the ESMF framework
       use ESMF_TestMod     ! test methods
+      use ESMF_Mod
+
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.3 2004/02/06 23:29:26 nscollins Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.10.4.1 2006/11/16 00:15:24 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc
-
-      ! individual test name
-      character(ESMF_MAXSTR) :: name
+      integer :: rc_loop, rc = 1
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
+      character(ESMF_MAXSTR) :: name
 
-      ! instantiate a DELayout
-      type(ESMF_DELayout) :: layout1D, layout0, layout1, layout2, layout3
-
-      ! number of DEs in default 1D layout
-      integer :: numDEs
+!     !LOCAL VARIABLES:
+      type(ESMF_VM):: vm, vm1
+      type(ESMF_DELayout):: delayout
+      integer:: npets, ndes, i, n, nsum, isum
+      integer, allocatable:: list(:)
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-! always run. When the environment variable, EXHAUSTIVE, is set to ON then
+! always run. When the environment variable, EXHAUSTIVE, is set to ON then 
 ! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
 ! to OFF, then only the sanity unit tests.
 ! Special strings (Non-exhaustive and exhaustive) have been
 ! added to allow a script to count the number and types of unit tests.
-!-------------------------------------------------------------------------------
+!------------------------------------------------------------------------------- 
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
-      call ESMF_Initialize(rc)
+      call ESMF_VMGetGlobal(vm, rc)
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
 
+      !------------------------------------------------------------------------
       !NEX_UTest
-      ! test dynamic allocation of default 1D ESMF_DELayout
-      layout1D = ESMF_DELayoutCreate(rc)
-      write(name, *) "ESMF_DELayoutCreateDefault1D"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !NEX_UTest
-      ! test getting of number of DEs discovered in creating 1D layout
-      call ESMF_DELayoutGetNumDEs(layout1D, numDEs, rc)
-      !print *, "layout1D numDEs = ", numDEs
-      write(name, *) "ESMF_DELayoutGetNumDEs"
-      write(failMsg, *) "rc =", rc, ", numDEs =", numDEs
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! if uni-processor test, bail-out
-      if (numDEs.eq.1) then
-        ! print *, "uni-processor test, bailing out ..."
-        goto 10
-      endif
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "1D default DELayout Create Test"
+      delayout = ESMF_DELayoutCreate(vm, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
+      !------------------------------------------------------------------------
       !EX_UTest
-      ! test print method via option string
-      call ESMF_DELayoutPrint(layout1D, rc=rc)
-      write(name, *) "ESMF_DELayoutPrint"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "DELayout Get Test"
+      call ESMF_DELayoutGet(delayout, deCount=ndes, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify deCount against petCount"
+      call ESMF_Test((ndes.eq.npets), name, failMsg, result, ESMF_SRCLINE)
+      
+      allocate(list(npets)) ! cannot find more PETs than there are!
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "DELayout Get DEMatchPET Test"
+      call ESMF_DELayoutGetDEMatchPET(delayout, 0, vm, n, list, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      nsum = 0
+      isum = 0
+      rc=ESMF_SUCCESS
+      do i=0, ndes-1
+
+        call ESMF_DELayoutGetDEMatchPET(delayout, i, vm, n, list, rc=rc_loop)
+        if (rc_loop.ne.ESMF_SUCCESS) rc=rc_loop
+
+        nsum = nsum + n
+        isum = isum + (i - list(1))
+        
+      enddo  
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "DELayout Get DEMatchPET Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      deallocate(list)
+      nsum = nsum / ndes
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify matches"
+      call ESMF_Test(((nsum.eq.1).and.(isum.eq.0)), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "DELayout Get VM Test"
+      call ESMF_DELayoutGetVM(delayout, vm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+      call ESMF_VMPrint(vm1)
+      call ESMF_VMPrint(vm)
+
 #endif
 
+      !------------------------------------------------------------------------
       !NEX_UTest
-      layout0 = ESMF_DELayoutCreate(layout1D, 2, (/2,4/), (/0,0/), &
-                                    de_indices=(/0,1,2,3,4,5,6,7/), rc=rc)
-      write(name, *) "ESMF_DELayoutCreateFromParent non-exclusive"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "1D default DELayout Destroy Test"
+      call ESMF_DELayoutDestroy(delayout, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      !NEX_UTest
-      ! test getting of number of DEs in creating 2D layout
-      call ESMF_DELayoutGetNumDEs(layout0, numDEs, rc)
-      !print *, "layout0 numDEs = ", numDEs
-      write(name, *) "ESMF_DELayoutGetNumDEs"
-      write(failMsg, *) "rc =", rc, ", numDEs =", numDEs
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
 
-#ifdef ESMF_EXHAUSTIVE
-      !EX_UTest
-      layout1 = ESMF_DELayoutCreate(layout1D, 2, (/2,2/), (/0,0/), &
-                                    de_indices=(/0,1,2,3/), rc=rc)
-      write(name, *) "ESMF_DELayoutCreate2D exclusive -- 1st call"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
 
-      !EX_UTest
-      ! test getting of number of DEs in creating 2D layout
-      call ESMF_DELayoutGetNumDEs(layout1, numDEs, rc)
-      !print *, "layout1 numDEs = ", numDEs
-      write(name, *) "ESMF_DELayoutGetNumDEs"
-      write(failMsg, *) "rc =", rc, ", numDEs =", numDEs
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !EX_UTest
-      layout2 = ESMF_DELayoutCreate(layout1D, 2, (/1,3/), (/0,0/), &
-                                    de_indices=(/5,6,7/), rc=rc)
-      write(name, *) "ESMF_DELayoutCreate2D exclusive -- 2nd call"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !EX_UTest
-      ! test getting of number of DEs in creating 2D layout
-      call ESMF_DELayoutGetNumDEs(layout2, numDEs, rc)
-      !print *, "layout2 numDEs = ", numDEs
-      write(name, *) "ESMF_DELayoutGetNumDEs"
-      write(failMsg, *) "rc =", rc, ", numDEs =", numDEs
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !EX_UTest
-      layout3 = ESMF_DELayoutCreate(layout1D, 2, (/1,1/), (/0,0/), &
-                                    de_indices=(/4/), rc=rc)
-      write(name, *) "ESMF_DELayoutCreate2D exclusive -- 3rd call"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !EX_UTest
-      ! test getting of number of DEs in creating 2D layout
-      call ESMF_DELayoutGetNumDEs(layout3, numDEs, rc)
-      !print *, "layout3 numDEs = ", numDEs
-      write(name, *) "ESMF_DELayoutGetNumDEs"
-      write(failMsg, *) "rc =", rc, ", numDEs =", numDEs
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !EX_UTest
-      ! test print method via option string
-      call ESMF_DELayoutPrint(layout1D, rc=rc)
-      write(name, *) "ESMF_DELayoutPrint"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-#endif
-
-      !NEX_UTest
-      ! test dynamic deallocation of ESMF_DELayout
-      !   also tests destructor
-      call ESMF_DELayoutDestroy(layout1D, rc)
-      write(name, *) "ESMF_DELayoutDestroy layout1D"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !NEX_UTest
-      call ESMF_DELayoutDestroy(layout0, rc)
-      write(name, *) "ESMF_DELayoutDestroy layout0"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-#ifdef ESMF_EXHAUSTIVE
-      !EX_UTest
-      call ESMF_DELayoutDestroy(layout1, rc)
-      write(name, *) "ESMF_DELayoutDestroy layout1"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !EX_UTest
-      call ESMF_DELayoutDestroy(layout2, rc)
-      write(name, *) "ESMF_DELayoutDestroy layout2"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !EX_UTest
-      call ESMF_DELayoutDestroy(layout3, rc)
-      write(name, *) "ESMF_DELayoutDestroy layout3"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-#endif
-
-      ! return number of failures to environment; 0 = success (all pass)
-      ! return result  ! TODO: no way to do this in F90 ?
-
-10    continue
-
-      !NEX_UTest
-      ! entire test pass/fail result
-      write(name, *) "ESMF_DELayoutCreateTest"
-      write(failMsg, *) "ESMF_DELayoutCreateTest failed one or more tests" 
-      call ESMF_Test((result.eq.0), &
-                      name, failMsg, result, ESMF_SRCLINE)
- 
-
-      call ESMF_Finalize(rc)
-
-      end program ESMF_DELayoutCreateTest
+      end program ESMF_DELayoutUTest

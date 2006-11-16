@@ -1,12 +1,12 @@
-! $Id: ESMF.F90,v 1.8 2004/03/16 18:12:42 nscollins Exp $
+! $Id: ESMF.F90,v 1.29.4.1 2006/11/16 00:15:55 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 !
@@ -14,11 +14,12 @@
 
 module ESMF_Mod
 
-    use ESMF_BaseMod
-    use ESMF_IOMod
+    use ESMF_UtilTypesMod
+    use ESMF_UtilMod
 
-    !use ESMF_LogErrMod
-    use ESMF_MachineMod
+    use ESMF_LogErrMod
+    use ESMF_BaseMod
+    use ESMF_IOSpecMod
 
     use ESMF_FractionMod
     use ESMF_BaseTimeMod
@@ -28,15 +29,17 @@ module ESMF_Mod
     use ESMF_AlarmMod
     use ESMF_ClockMod
 
+    use ESMF_ArraySpecMod
     use ESMF_LocalArrayMod
-    use ESMF_DataMapMod
+    use ESMF_ArrayDataMapMod
     
+    use ESMF_VMMod 
     use ESMF_DELayoutMod
 
     use ESMF_ConfigMod
     ! use ESMF_PerfProf
 
-    use ESMF_ArrayBaseMod
+    use ESMF_ArrayMod
     use ESMF_ArrayCreateMod
     use ESMF_ArrayGetMod
 
@@ -53,10 +56,14 @@ module ESMF_Mod
     use ESMF_RouteMod
     use ESMF_RHandleMod
 
+    use ESMF_FieldDataMapMod
     use ESMF_ArrayCommMod
 
     use ESMF_FieldMod
     use ESMF_FieldGetMod
+    use ESMF_FieldSetMod
+    use ESMF_FieldCreateMod
+    use ESMF_BundleDataMapMod
     use ESMF_BundleMod
     use ESMF_BundleGetMod
 
@@ -67,15 +74,14 @@ module ESMF_Mod
     use ESMF_BundleCommMod
 
     use ESMF_XformMod
+    use ESMF_StateTypesMod
     use ESMF_StateMod
     use ESMF_StateGetMod
+    use ESMF_StateReconcileMod
     use ESMF_CompMod
     use ESMF_GridCompMod
     use ESMF_CplCompMod
     
-#ifdef ESMF_ENABLE_VM
-    use ESMF_VMMod
-    use ESMF_newDELayoutMod
-#endif
+    use ESMF_InitMod
 
 end module ESMF_Mod

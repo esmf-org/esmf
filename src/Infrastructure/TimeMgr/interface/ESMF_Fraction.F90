@@ -1,12 +1,12 @@
-! $Id: ESMF_Fraction.F90,v 1.8 2003/09/22 22:31:45 nscollins Exp $
+! $Id: ESMF_Fraction.F90,v 1.12.4.1 2006/11/16 00:15:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 ! ESMF Fraction Module
 !
@@ -29,15 +29,16 @@
 ! !MODULE: ESMF_FractionMod
 !
 ! !DESCRIPTION:
-! Part of ESMF F90 API wrapper of C++ implementation.
+! Part of ESMF Fortran API wrapper of C++ implementation.
 !
-! Defines F90 wrapper entry points for corresponding
+! Defines Fortran wrapper entry points for corresponding
 ! C++ implementaion of class {\tt ESMC\_Fraction}.
 !
 ! See {\tt ../include/ESMC\_Fraction.h} for complete description.
 !
 !------------------------------------------------------------------------------
 ! !USES:
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod
       implicit none
 !
@@ -47,13 +48,14 @@
 !------------------------------------------------------------------------------
 !     ! ESMF_Fraction
 !
-!     ! F90 class type to match C++ Fraction class in size only;
+!     ! Fortran class type to match C++ Fraction class in size only;
 !     !  all dereferencing within class is performed by C++ implementation
 
       type ESMF_Fraction
       sequence
       private
-        integer :: numerator    ! Integer fraction (exact) n/d; numerator
+        integer :: whole        ! Integer (whole) seconds (signed)
+        integer :: numerator    ! Integer fraction (exact) n/d; numerator (signed)
         integer :: denominator  ! Integer fraction (exact) n/d; denominator
       end type
 !
@@ -71,7 +73,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Fraction.F90,v 1.8 2003/09/22 22:31:45 nscollins Exp $'
+      '$Id: ESMF_Fraction.F90,v 1.12.4.1 2006/11/16 00:15:45 cdeluca Exp $'
 
 !==============================================================================
 

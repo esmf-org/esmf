@@ -1,22 +1,46 @@
-% $Id: AppDriver_usage.tex,v 1.3 2003/11/12 23:13:06 nscollins Exp $
+% $Id: AppDriver_usage.tex,v 1.7.6.1 2006/11/16 00:15:50 cdeluca Exp $
 %
 % Earth System Modeling Framework
-% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Copyright 2002-2008, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 % NASA Goddard Space Flight Center.
-% Licensed under the GPL.
+% Licensed under the University of Illinois-NCSA License.
 
 %\subsection{Usage}
 
-The Application Driver directory contains subdirectories with sample
-source files, each of which shows an example of using ESMF in a
-different way.  The user decides on which strategy they want to follow
-and then copies the files from the corresponding subdirectory into
-their own directory. Some of the files can be used unchanged, others
-are {\tt template} files which have the rough outline of the code but
-need significant amounts of application-specific code added in order 
-to perform the desired computation.
+ESMF encourages application organization in which there is a single 
+top-level Gridded Component.  This provides a simple, clear sequence
+of operations at the highest level, and also enables the entire 
+application to be treated as a sub-Gridded Component of another, larger 
+application if desired.  When an application is organized in this fashion 
+the standard AppDriver can probably be used without much modification.  
+
+Examples of program organization using the AppDriver can be found in the 
+{\tt src/Superstructure/AppDriver} directory.  A set of subdirectories 
+within the AppDriver directory follows the naming convention:
+\begin{verbatim}
+<seq|concur>_<pairwise|hub>_<f|c>driver_<spmd|mpmd>
+\end{verbatim}
+
+The examples that are currently implemented are 
+{\tt seq\_pairwise\_fdriver\_spmd}, which
+has sequential component execution, a pairwise coupler, a main program
+in Fortran, and all processors launching the same executable; and
+{\tt concur\_pairwise\_fdriver\_spmd}, which 
+has concurrent component execution, a pairwise coupler, a main program
+in Fortran, and all processors launching the same executable.
 
 
+The example {\tt seq\_pairwise\_fdriver\_spmd} is the simplest of the
+examples, and so it is also copied automatically into a top-level 
+{\tt quick\_start} directory at compilation time.  
+
+The user can copy the AppDriver files into
+their own local directory. Some of the files can be used unchanged.
+Others are template files which have the rough outline of the code but
+need additional application-specific code added in order to perform a
+meaningful function.  The {\tt README} file in the AppDriver 
+subdirectory or {\tt quick\_start} directory contains instructions about 
+which files to change.

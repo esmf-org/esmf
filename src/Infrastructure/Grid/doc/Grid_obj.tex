@@ -1,12 +1,12 @@
-% $Id: Grid_obj.tex,v 1.5 2004/02/27 22:09:26 cdeluca Exp $
+% $Id: Grid_obj.tex,v 1.11.2.1 2006/11/16 00:15:30 cdeluca Exp $
 %
 % Earth System Modeling Framework
-% Copyright 2002-2003, University Corporation for Atmospheric Research,
+% Copyright 2002-2008, University Corporation for Atmospheric Research,
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 % Laboratory, University of Michigan, National Centers for Environmental
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 % NASA Goddard Space Flight Center.
-% Licensed under the GPL.
+% Licensed under the University of Illinois-NCSA License.
 
 \subsection{Object Model}
 
@@ -16,16 +16,18 @@ for a translation table that lists the symbols in the diagram and their
 meaning.
 
 \begin{center}
-\includegraphics{Grid_obj.eps}   
+\includegraphics{Grid_obj}   
 \end{center}
 
-Each Grid contains a Distributed Grid and a Physical Grid. The Physical Grid
-maintains information about the global coordinates. In general this data is
-described implicitly by specifying the grid type and the corresponding
-parameters. However it is possible that the Physical Grid must be completely
-enumerated, perhaps in the case of assimilated data or unstructured data. The
-Distributed Grid defines an index space that corresponds to cells in 
-the Physical
-Grid and is decomposed among DEs in a DELayout.
+Each Grid contains at least one Distributed Grid and a related Physical Grid.
+The Physical Grid maintains information about the global coordinates.  In
+general the coordinates are described implicitly by specifying the grid type
+and the corresponding parameters.  However it is possible that the Physical
+Grid must be completely enumerated, perhaps in the case of assimilated data
+or unstructured data.  The Distributed Grid defines an index space that
+corresponds to cells in the Physical Grid and is decomposed among DEs in a
+DELayout.  Please see Sections~\ref{sec:DistGridClasses} and
+~\ref{sec:PhysGridClasses} for more information about the private
+DistGrid and PhysGrid classes.
 
 

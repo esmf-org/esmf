@@ -1,13 +1,13 @@
 #if 0
-! $Id: ESMF_ArrayGetMacros.h,v 1.1 2004/03/16 18:02:19 nscollins Exp $
+! $Id: ESMF_ArrayGetMacros.h,v 1.5.8.1 2006/11/16 00:15:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 !
@@ -37,8 +37,11 @@
 #define ArrayGetDataDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
-!BOPI @\
+!BOP @\
+! !IROUTINE: ESMF_ArrayGetData - Retrieve a Fortran pointer to Array data @\
+! @\
 ! !INTERFACE: @\
+!      ! Private name; call using ESMF_ArrayGetData() @\
 !      subroutine ESMF_ArrayGetData<rank><type><kind>(array, fptr, docopy, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -48,13 +51,17 @@
 !      integer, intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
-!      Return a Fortran pointer to the existing data buffer, @\
+!      Given an {\tt ESMF\_Array} @\
+!      return a Fortran pointer to the existing data buffer, @\
 !      or return a Fortran pointer to a new copy of the data. @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 ! The arguments are: @\
 !  \begin{description} @\
 !  \item[array] @\
-!    An {\tt ESMF\_Array} type.
+!    An {\tt ESMF\_Array}. @\
 !  \item[farr] @\
 !    An allocatable (but currently unallocated) Fortran array pointer.  @\
 !  \item[docopy] @\
@@ -65,12 +72,15 @@
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
 ! @\
-!EOPI @\
+!EOP @\
  @\
 
 #define ArrayGetDataMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD "ESMF_ArrayGetData##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_ArrayGetData" @\
       subroutine ESMF_ArrayGetData##mrank##D##mtypekind(array, fptr, docopy, rc) @\
  @\
       type(ESMF_Array) :: array @\
@@ -83,7 +93,7 @@
         logical :: copyreq                  ! did user specify copy? @\
  @\
         type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap     ! for passing f90 ptr to C++ @\
-        integer :: rank, lb(mrank), ub(mrank)  ! size info for the array @\
+        integer :: lb(mrank), ub(mrank)  ! size info for the array @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
  @\
         ! initialize return code; assume failure until success is certain @\
@@ -103,28 +113,23 @@
         endif @\
  @\
         call c_ESMC_ArrayGetF90Ptr(array, wrap, status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array - get pointer error" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         ! Allocate a new buffer if requested and return a copy @\
         if (copyreq) then @\
           call c_ESMC_ArrayGetLbounds(array, mrank, lb, status) @\
-          if (status .ne. ESMF_SUCCESS) then @\
-            print *, "Array - cannot retrieve array dim sizes" @\
-            return @\
-          endif @\
+          if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
           call c_ESMC_ArrayGetUbounds(array, mrank, ub, status) @\
-          if (status .ne. ESMF_SUCCESS) then @\
-            print *, "Array - cannot retrieve array dim sizes" @\
-            return @\
-          endif @\
+          if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
           allocate(localp( mrng ), stat=status) @\
-          if (status .ne. 0) then     ! f90 status, not ESMF @\
-            print *, "Array do_copy allocate error" @\
-            return @\
-          endif @\
+          if (ESMF_LogMsgFoundAllocError(status, "Array local copy", & @\
+                                       ESMF_CONTEXT, rc)) return @\
           ! this must do a contents assignment @\
           localp = wrap % ptr##mrank##D##mtypekind @\
           fptr => localp  @\

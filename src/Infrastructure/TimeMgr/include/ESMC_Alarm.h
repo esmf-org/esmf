@@ -1,12 +1,12 @@
-// $Id: ESMC_Alarm.h,v 1.25 2004/02/18 01:47:10 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.33.2.1 2006/11/16 00:15:44 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research,
+// Copyright 2002-2008, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 // ESMF Alarm C++ definition include file
 //
@@ -25,8 +25,9 @@
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.
+ #include <ESMC_Start.h>
  #include <ESMF_TimeMgr.inc>
- #include <pthread.h>
+ #include "ESMF_Pthread.h"
 
 //-------------------------------------------------------------------------
 //BOP
@@ -75,7 +76,7 @@
 //
 // !USES:
  #include <ESMC_Base.h>
- #include <ESMC_IO.h>    // IOSpec class for ReadRestart()/WriteRestart()
+ #include <ESMC_IOSpec.h>    // IOSpec class for ReadRestart()/WriteRestart()
  #include <ESMC_TimeInterval.h>
  #include <ESMC_Time.h>
  class ESMC_Clock;
@@ -88,6 +89,7 @@
 
 // !PUBLIC TYPES:
  class ESMC_Alarm;
+ typedef ESMC_Alarm* ESMC_AlarmPtr;
 
 // !PRIVATE TYPES:
  // class configuration type:  not needed for Alarm
@@ -104,9 +106,15 @@ class ESMC_Alarm {
     ESMC_TimeInterval ringInterval; // (TMG 4.5.2) for periodic alarming
     ESMC_TimeInterval ringDuration; // how long alarm stays on
     ESMC_Time         ringTime;     // (TMG 4.5.1) next time to ring
+    ESMC_Time         firstRingTime;    // the first ring time
+                                        //   (save for reverse mode)
     ESMC_Time         prevRingTime; // previous alarm time 
     ESMC_Time         stopTime;     // when alarm intervals end.
     ESMC_Time         ringBegin;    // note time when alarm turns on.
+    ESMC_Time         ringEnd;      // save time when alarm is turned off via
+                                    //   ESMC_RingerOff().  For reverse mode.
+                                    //   TODO: make array for variable
+                                    //   turn off durations.
     ESMC_Time         refTime;      // reference time.
     int               ringTimeStepCount;      // how long alarm rings;
                                               //  mutually exclusive with
@@ -119,15 +127,16 @@ class ESMC_Alarm {
     bool              ringingOnCurrTimeStep; // was ringing immedidately after
                                              // current clock timestep.
                                              // (could have been turned off
-                                             //  later due to TurnOff or
+                                             //  later due to RingerOff or
                                              //  Disable commands or
                                              //  non-sticky alarm expiration).
     bool              ringingOnPrevTimeStep; // was ringing immediately after
                                              // previous clock timestep.
     bool              enabled;    // able to ring (TMG 4.5.3)
-    bool              sticky;     // must be turned off via ESMC_AlarmTurnOff(),
+    bool              sticky;     // must be turned off via
+                                  //   ESMC_AlarmRingerOff(),
                                   //  otherwise will turn self off after
-                                  //  ringDuration.
+                                  //  ringDuration or ringTimeStepCount.
     int               id;         // unique identifier. used for equality
                                   //    checks and to generate unique default
                                   //    names.
@@ -174,6 +183,7 @@ class ESMC_Alarm {
                       int               *ringTimeStepCount=0,
                       int               *timeStepRingingCount=0,
                       ESMC_Time         *ringBegin=0,
+                      ESMC_Time         *ringEnd=0,
                       ESMC_Time         *refTime=0,
                       bool              *ringing=0,
                       bool              *ringingOnPrevTimeStep=0,
@@ -182,21 +192,21 @@ class ESMC_Alarm {
 
     int  ESMC_AlarmEnable(void);    // TMG4.5.3
     int  ESMC_AlarmDisable(void);
-    bool ESMC_AlarmIsEnabled(int *rc) const;
+    bool ESMC_AlarmIsEnabled(int *rc=0) const;
 
     int  ESMC_AlarmRingerOn(void);    // TMG4.6: manually turn on/off
     int  ESMC_AlarmRingerOff(void);
-    bool ESMC_AlarmIsRinging(int *rc) const;
+    bool ESMC_AlarmIsRinging(int *rc=0) const;
                                          // TMG 4.4: synchronous query for apps
-    bool ESMC_AlarmWillRingNext(ESMC_TimeInterval *timeStep, int *rc) const;
-    bool ESMC_AlarmWasPrevRinging(int *rc) const;
+    bool ESMC_AlarmWillRingNext(ESMC_TimeInterval *timeStep, int *rc=0) const;
+    bool ESMC_AlarmWasPrevRinging(int *rc=0) const;
 
     int  ESMC_AlarmSticky(void);
     int  ESMC_AlarmNotSticky(ESMC_TimeInterval *ringDuration=0,
                              int *ringTimeStepCount=0);
-    bool ESMC_AlarmIsSticky(int *rc) const;
+    bool ESMC_AlarmIsSticky(int *rc=0) const;
 
-    bool ESMC_AlarmCheckRingTime(int *rc);
+    bool ESMC_AlarmCheckRingTime(int *rc=0);
                          // associated clock should invoke after advance:
                          // TMG4.4, 4.6
                          // Check for crossing ringTime in either positive or
@@ -247,6 +257,12 @@ class ESMC_Alarm {
   private:
 //
  // < declare private interface methods here >
+
+    // check if time to turn on alarm
+    bool ESMC_AlarmCheckTurnOn(bool timeStepPositive);
+
+    // reconstruct ringBegin during ESMF_MODE_REVERSE
+    int ESMC_AlarmResetRingBegin(bool timeStepPositive);
 
     // friend class alarm
     friend class ESMC_Clock;

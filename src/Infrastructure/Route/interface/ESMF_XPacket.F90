@@ -1,14 +1,15 @@
-! $Id: ESMF_XPacket.F90,v 1.7 2004/01/28 21:46:50 nscollins Exp $
+! $Id: ESMF_XPacket.F90,v 1.14.4.1 2006/11/16 00:15:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_XPacket.F90"
 !
 !     ESMF XPacket Module
       module ESMF_XPacketMod
@@ -23,18 +24,20 @@
 #include "ESMF.h"
 !#include "ESMF_Route.h"
 !==============================================================================
-!BOP
-! !MODULE: ESMF_XPacketMod - One line general statement about this class
+!BOPI
+! !MODULE: ESMF_XPacketMod - Multi-dimensional description of a rectangular block of memory
 !
 ! !DESCRIPTION:
 !
 ! The code in this file implements the F90 wrapper code for the C++
-!  implementation of the {\tt XPacket} class ...
-!
-! < Insert a paragraph or two explaining the function of this class. >
+!  implementation of the {\tt XPacket} class.  An XPacket is a compact
+!  description of the information needed to move a logically rectangular
+!  subblock of memory which is embedded in a larger block.
 !
 !------------------------------------------------------------------------------
 ! !USES:
+      use ESMF_UtilTypesMod
+      use ESMF_LogErrMod
       use ESMF_BaseMod    ! ESMF base class
       implicit none
 
@@ -64,95 +67,28 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-      public ESMF_XPacketInit                   ! shallow class
-
       public ESMF_XPacketGet                    ! get and set values
       public ESMF_XPacketSet
+      public ESMF_XPacketSetDefault
+      public ESMF_XPacketPrint
  
 !
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_XPacket.F90,v 1.7 2004/01/28 21:46:50 nscollins Exp $'
+      '$Id: ESMF_XPacket.F90,v 1.14.4.1 2006/11/16 00:15:42 cdeluca Exp $'
 
 !==============================================================================
 
       contains
 
 !==============================================================================
-!
-! This section includes the XPacket Init methods.
-!
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XPacketGet"
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_XPacketInit - Initialize a XPacket 
-
-! !INTERFACE:
-      subroutine ESMF_XPacketInit(xpacket, rank, offset, contig_length, stride, rep_count, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_XPacket), intent(inout) :: xpacket   
-      integer, intent(in) :: rank
-      integer, intent(in) :: offset
-      integer, intent(in) :: contig_length
-      integer, intent(in) :: stride(:)
-      integer, intent(in) :: rep_count(:)
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     ESMF routine which only initializes {\tt XPacket} values; it does not
-!     allocate any resources. 
-!
-!  The arguments are:
-!     \begin{description}
-!     \item[xpacket]
-!          Class to be initialized.
-!     \item[rank] 
-!          Argument 1.
-!     \item[offset]
-!          Argument 2.         
-!     \item[contig\_length] 
-!          Argument 3.
-!     \item[stride] 
-!          Argument 4.
-!     \item[rep\_count]
-!          Argument 5.         
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-        ! local variables
-        integer :: status                  ! local error status
-        logical :: rcpresent               ! did user specify rc?
-
-        ! Set initial values
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.   
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
- 
-        xpacket%rank = rank
-        xpacket%offset = offset
-        xpacket%contig_length = contig_length
-        xpacket%stride = stride
-        xpacket%rep_count = rep_count
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_XPacketInit
-
-
-!------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_XPacketGet - Get values from a XPacket
 
 ! !INTERFACE:
@@ -166,12 +102,12 @@
 
 !
 ! !DESCRIPTION:
-!     Returns the value of XPacket attribute <Value>.
+!     Query an {\tt ESMF\_XPacket}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[xpacket] 
-!          Class to be queried.
+!          {\tt ESMF\_XPacket} to be queried.
 !     \item[{[value1]}]
 !          Value to be retrieved.         
 !     \item[{[value2]}]
@@ -180,8 +116,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
-! !REQUIREMENTS: 
+!EOPI
 
         ! local variables
         integer :: status                  ! local error status
@@ -208,17 +143,59 @@
         ! Call C++  code
         !call c_ESMC_XPacketGet(xpacket, value1, value2, status)
         status = ESMF_FAILURE
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "XPacket Get error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_XPacketGet
 
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XPacketPrint"
+!BOPI
+! !IROUTINE:  ESMF_XPacketPrint - Print the contents of a XPacket
+
+! !INTERFACE:
+      subroutine ESMF_XPacketPrint(xpacket, options, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_XPacket), intent(in) :: xpacket
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Print information about an {\tt ESMF\_XPacket}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [xpacket]
+!           {\tt ESMF\_XPacket} to print.
+!     \item [{[options]}]
+!           Standard print options.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+        if (present(rc)) rc = ESMF_FAILURE
+
+        print *, "XPacket Print:"
+        print *, "  Rank=", xpacket%rank, " Left=", xpacket%offset, &
+                 " Right=", xpacket%contig_length
+        print *, "  Strides=", xpacket%stride, " Nums=", xpacket%rep_count
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_XPacketPrint
+ 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XPacketSet"
+!BOPI
 ! !IROUTINE: ESMF_XPacketSet - Set values in a XPacket
 
 ! !INTERFACE:
@@ -247,7 +224,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -275,50 +252,86 @@
         ! Call C++  code
         !call c_ESMC_XPacketSet(xpacket, value1, value2, status)
         status = ESMF_FAILURE
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "XPacket Set error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_XPacketSet
 
-
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_XPacketPrint - Print the contents of a XPacket
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XPacketSetDefault"
+!BOPI
+! !IROUTINE: ESMF_XPacketSetDefault - Initialize an XPacket 
 
 ! !INTERFACE:
-      subroutine ESMF_XPacketPrint(xpacket, options, rc)
-!
+      subroutine ESMF_XPacketSetDefault(xpacket, rank, offset, contig_length, &
+                                        stride, rep_count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_XPacket), intent(in) :: xpacket
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc
+      type(ESMF_XPacket), intent(inout) :: xpacket   
+      integer, intent(in) :: rank
+      integer, intent(in) :: offset
+      integer, intent(in) :: contig_length
+      integer, intent(in) :: stride(:)
+      integer, intent(in) :: rep_count(:)
+      integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
-!     Routine to print information about an XPacket.
+!     Set the initial values in an {\tt ESMF\_XPacket}.
 !
-!EOP
-! !REQUIREMENTS:
-
-        integer :: status
-
-
-        if (present(rc)) rc = ESMF_FAILURE
-
-        print *, "XPacket Print:"
-        print *, "  Rank=", xpacket%rank, " Left=", xpacket%offset, &
-                 " Right=", xpacket%contig_length
-        print *, "  Strides=", xpacket%stride, " Nums=", xpacket%rep_count
-
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_XPacketPrint
+!  The arguments are:
+!     \begin{description}
+!     \item[xpacket]
+!          {\tt ESMF\_XPacket} to be set.
+!     \item[rank] 
+!          Data rank.
+!     \item[offset]
+!          Item offset into buffer.
+!     \item[contig\_length] 
+!          Number of contiguous items.
+!     \item[stride] 
+!          Number of items to skip in each dimension to return to the start
+!          of the next group of contiguous items.
+!     \item[rep\_count]
+!          Number of times to repeat the copy operation per dimension.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
+!EOPI
+
+        ! local variables
+        integer :: status, i               ! local error status
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+ 
+        xpacket%rank          = rank
+        xpacket%offset        = offset
+        xpacket%contig_length = contig_length
+        xpacket%stride        = 0
+        xpacket%rep_count     = 0
+        do i = 1,rank
+          xpacket%stride(i)    = stride(i)
+          xpacket%rep_count(i) = rep_count(i)
+        enddo
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_XPacketSetDefault
+
+
 
 !------------------------------------------------------------------------------
 

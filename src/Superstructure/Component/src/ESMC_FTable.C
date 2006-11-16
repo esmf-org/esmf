@@ -1,14 +1,15 @@
-// $Id: ESMC_FTable.C,v 1.5 2004/02/24 14:40:21 theurich Exp $
+// $Id: ESMC_FTable.C,v 1.21.2.1 2006/11/16 00:15:55 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMC Function table implementation (body) file
+#define ESMF_FILENAME "ESMC_FTable.C"
 
 //-----------------------------------------------------------------------------
 //
@@ -23,7 +24,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
+#include "ESMC_LogErr.h"
+#include "ESMC_Comp.h"
+#include "ESMC_GridComp.h"
+#include "ESMC_CplComp.h"
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -45,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.5 2004/02/24 14:40:21 theurich Exp $";
+           "$Id: ESMC_FTable.C,v 1.21.2.1 2006/11/16 00:15:55 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -58,6 +63,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableExtend"
 //BOP
 // !IROUTINE:  ESMC_FTableExtend - make space for additional functions/data
 //
@@ -78,13 +85,11 @@
 
     // TODO: allocate space for N items, rounded up?
     if (nfuncp > funcalloc) {
-        funcs = (struct funcinfo *)realloc((void *)funcs, 
-                                                  nfuncp * sizeof(funcinfo));
+        funcs = (funcinfo *)realloc((void *)funcs, nfuncp * sizeof(funcinfo));
         funcalloc = nfuncp; 
     }
     if (ndatap > dataalloc) {
-        data = (struct datainfo *)realloc((void *)data, 
-                                                 ndatap * sizeof(datainfo));
+        data = (datainfo *)realloc((void *)data, ndatap * sizeof(datainfo));
         dataalloc = ndatap;
     }
 
@@ -95,6 +100,8 @@
  } // end ESMC_FTableExtend
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableQuery"
 //BOP
 // !IROUTINE:  ESMC_FTableQuery - return count of functions/data
 //
@@ -124,6 +131,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableSetFuncPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableSetFuncPtr - set function pointer, no extra args
 //
@@ -143,24 +152,43 @@
 //EOP
 // !REQUIREMENTS:  
 
+    int i, thisfunc;
+    //char msgbuf[ESMF_MAXSTR];
 
- // TODO: test this code
-    if (funccount >= funcalloc) {
- 	funcs = (struct funcinfo *)realloc((void *)funcs, (funccount+4) * sizeof(struct funcinfo));
-        funcalloc = funccount+4;
+    // look for the name already existing in the table.  if found
+    // replace it.  otherwise add it to the end.
+    for (i=0; i<funccount; i++) {
+        if (!strcmp(name, funcs[i].funcname))
+           break;
     }
-    funcs[funccount].funcptr = func;
-    funcs[funccount].funcname = new char[strlen(name)+1];
-    strcpy(funcs[funccount].funcname, name);
-    funcs[funccount].ftype = FT_VOID;
+
+    // we found the function, or we got to the end of the table.
+    // either way we are ready to add it.
+
+    thisfunc = i;
+
+    // extend the table if needed
+    if (thisfunc >= funcalloc) {
+        funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
+        funcalloc = thisfunc+4;
+    }
+    funcs[thisfunc].funcptr = func;
+    funcs[thisfunc].ftype = FT_VOID;
+    // do these only if not replacing an existing entry.
+    if (thisfunc == funccount) {
+        funcs[thisfunc].funcname = new char[strlen(name)+1];
+        strcpy(funcs[thisfunc].funcname, name);
+        funccount++;
+    }
    
-    funccount++;
 
     return ESMF_SUCCESS;
 
  } // end ESMC_FTableSetFuncPtr
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableSetFuncPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableSetFuncPtr - set function pointer, type; no args yet.
 //
@@ -183,27 +211,43 @@
 //EOP
 // !REQUIREMENTS:  
 
+    int i, thisfunc;
+    //char msgbuf[ESMF_MAXSTR];
 
- // TODO: search table for existing function with same name and 
- //        overwrite it, instead of just adding again to end of table.
-
- // TODO: test this code
-    if (funccount >= funcalloc) {
- 	funcs = (struct funcinfo *)realloc((void *)funcs, (funccount+4) * sizeof(struct funcinfo));
-        funcalloc = funccount+4;
+    // look for the name already existing in the table.  if found
+    // replace it.  otherwise add it to the end.
+    for (i=0; i<funccount; i++) {
+        if (!strcmp(name, funcs[i].funcname))
+           break;
     }
-    funcs[funccount].funcptr = func;
-    funcs[funccount].funcname = new char[strlen(name)+1];
-    strcpy(funcs[funccount].funcname, name);
-    funcs[funccount].ftype = ftype;
+
+    // we found the function, or we got to the end of the table.
+    // either way we are ready to add it.
+
+    thisfunc = i;
+
+    // extend the table if needed
+    if (thisfunc >= funcalloc) {
+        funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
+        funcalloc = thisfunc+4;
+    }
+    funcs[thisfunc].funcptr = func;
+    funcs[thisfunc].ftype = ftype;
+    // do these only if not replacing an existing entry.
+    if (thisfunc == funccount) {
+        funcs[thisfunc].funcname = new char[strlen(name)+1];
+        strcpy(funcs[thisfunc].funcname, name);
+        funccount++;
+    }
    
-    funccount++;
 
     return ESMF_SUCCESS;
 
  } // end ESMC_FTableSetFuncPtr
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableSetFuncPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableSetFuncPtr - set voidp, intp specifically
 //
@@ -226,27 +270,45 @@
 //EOP
 // !REQUIREMENTS:  
 
-    int i;
+    int i, thisfunc;
+    //char msgbuf[ESMF_MAXSTR];
 
- // TODO: test this code
-    if (funccount >= funcalloc) {
- 	funcs = (struct funcinfo *)realloc((void *)funcs, (funccount+4) * sizeof(struct funcinfo));
-        funcalloc = funccount+4;
+    // look for the name already existing in the table.  if found
+    // replace it.  otherwise add it to the end.
+    for (i=0; i<funccount; i++) {
+        if (!strcmp(name, funcs[i].funcname))
+           break;
     }
-    funcs[funccount].funcptr = func;
-    funcs[funccount].funcname = new char[strlen(name)+1];
-    strcpy(funcs[funccount].funcname, name);
-    funcs[funccount].ftype = FT_VOIDPINTP;
-    funcs[funccount].funcarg[0] = arg1;
-    funcs[funccount].funcarg[1] = (void *)arg2;
+
+    // we found the function, or we got to the end of the table.
+    // either way we are ready to add it.
+
+    thisfunc = i;
+
+    // extend the table if needed
+    if (thisfunc >= funcalloc) {
+        funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
+        funcalloc = thisfunc+4;
+    }
+    funcs[thisfunc].funcptr = func;
+    funcs[thisfunc].ftype = FT_VOIDPINTP;
+    funcs[thisfunc].funcarg[0] = arg1;
+    funcs[thisfunc].funcarg[1] = (void *)arg2;
+    // do these only if not replacing an existing entry.
+    if (thisfunc == funccount) {
+        funcs[thisfunc].funcname = new char[strlen(name)+1];
+        strcpy(funcs[thisfunc].funcname, name);
+        funccount++;
+    }
    
-    funccount++;
 
     return ESMF_SUCCESS;
 
  } // end ESMC_FTableSetFuncPtr
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableSetFuncPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableSetFuncPtr - set function pointer, arg list
 //
@@ -269,27 +331,45 @@
 //EOP
 // !REQUIREMENTS:  
 
-    int i;
+    int i, thisfunc;
+    //char msgbuf[ESMF_MAXSTR];
 
- // TODO: test this code
-    if (funccount >= funcalloc) {
- 	funcs = (struct funcinfo *)realloc((void *)funcs, (funccount+4) * sizeof(struct funcinfo));
-        funcalloc = funccount+4;
+    // look for the name already existing in the table.  if found
+    // replace it.  otherwise add it to the end.
+    for (i=0; i<funccount; i++) {
+        if (!strcmp(name, funcs[i].funcname))
+           break;
     }
-    funcs[funccount].funcptr = func;
-    funcs[funccount].funcname = new char[strlen(name)+1];
-    strcpy(funcs[funccount].funcname, name);
-    funcs[funccount].ftype = ftype;
+
+    // we found the function, or we got to the end of the table.
+    // either way we are ready to add it.
+
+    thisfunc = i;
+
+    // extend the table if needed
+    if (thisfunc >= funcalloc) {
+        funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
+        funcalloc = thisfunc+4;
+    }
+    funcs[thisfunc].funcptr = func;
+    funcs[thisfunc].ftype = ftype;
     for(i=0; i<acount; i++)
-        funcs[funccount].funcarg[i] = arglist[i];
+        funcs[thisfunc].funcarg[i] = arglist[i];
+    // do these only if not replacing an existing entry.
+    if (thisfunc == funccount) {
+        funcs[thisfunc].funcname = new char[strlen(name)+1];
+        strcpy(funcs[thisfunc].funcname, name);
+        funccount++;
+    }
    
-    funccount++;
 
     return ESMF_SUCCESS;
 
  } // end ESMC_FTableSetFuncPtr
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableSetFuncArgs"
 //BOP
 // !IROUTINE:  ESMC_FTableSetFuncArgs - set arglist for existing function
 //
@@ -310,11 +390,12 @@
 //EOP
 // !REQUIREMENTS:  
 
-    int i, j;
+    int i, j, status;
+    char msgbuf[ESMF_MAXSTR];
 
     for (i=0; i<funccount; i++) {
         if (strcmp(name, funcs[i].funcname))
-	   continue;
+           continue;
    
         for(j=0; j<acount; j++)
             funcs[i].funcarg[j] = arglist[j];
@@ -322,12 +403,17 @@
         return ESMF_SUCCESS;
     }
 
-    printf("Error: function '%s' not found\n", name);
-    return ESMF_FAILURE;
+   
+    sprintf(msgbuf, "Error: function '%s' not found\n", name);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, msgbuf, &status);
+
+    return status;
 
  } // end ESMC_FTableSetFuncArgs
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableSetDataPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableSetDataPtr - set data pointer
 //
@@ -350,7 +436,7 @@
 
  // TODO: test this code
     if (datacount >= dataalloc) {
- 	data = (struct datainfo *)realloc((void *)data, (datacount+4) * sizeof(struct datainfo));
+        data = (datainfo *)realloc((void *)data, (datacount+4) * sizeof(datainfo));
         dataalloc = datacount+4;
     }
     data[datacount].dataptr = datap;
@@ -366,6 +452,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableGetFuncPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableGetFuncPtr - get function pointer from name
 //
@@ -390,7 +478,7 @@
 
     for (i=0; i<funccount; i++) {
         if (strcmp(name, funcs[i].funcname))
-	   continue;
+           continue;
    
         *func = funcs[i].funcptr;
         *ftype = funcs[i].ftype;
@@ -403,6 +491,8 @@
  } // end ESMC_FTableGetFuncPtr
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableGetDataPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableGetDataPtr - get data pointer from name
 //
@@ -427,7 +517,7 @@
 
     for (i=0; i<datacount; i++) {
         if (strcmp(namep, data[i].dataname))
-	   continue;
+           continue;
 
         *datap = data[i].dataptr;
         *dtype = data[i].dtype;
@@ -442,6 +532,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableCallVFuncPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableCallVFuncPtr - call a function w/ proper args
 //
@@ -461,12 +553,12 @@
 //EOP
 // !REQUIREMENTS:  
 
-    int i;
+    int i, status;
 
     *rc = ESMF_FAILURE;
     for (i=0; i<funccount; i++) {
         if (strcmp(name, funcs[i].funcname))
-	   continue;
+           continue;
    
         switch (funcs[i].ftype) {
           case FT_VOID: {
@@ -541,8 +633,9 @@
             break;
           }
           default:
-            fprintf(stderr, "unknown function type\n");
-            return ESMF_FAILURE;
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                         "unknown function type", &status);
+            return status;
         }
 
         return ESMF_SUCCESS;
@@ -553,8 +646,9 @@
  } // end ESMC_FTableCallVFuncPtr
 
  
-#ifdef ESMF_ENABLE_VM 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableCallVFuncPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableCallVFuncPtr - call a function w/ proper args
 //
@@ -565,9 +659,9 @@
 //    integer return code
 //
 // !ARGUMENTS:
-      char *name,         // in, function name
-      ESMC_VM **vm,       // in, p3 to this PET's VM instance
-      int *rc) {          // out, function return
+      char *name,           // in, function name
+      ESMC_VM *vm_pointer,  // in, pointer to this PET's VM instance
+      int *rc) {            // out, function return
 //
 // !DESCRIPTION:
 //    Calls the named function pointer
@@ -575,12 +669,14 @@
 //EOP
 // !REQUIREMENTS:  
 
-    int i;
-
+    int i, status;
+    ESMC_VM *vmm = vm_pointer;
+    ESMC_VM **vm = &vmm;
+    
     *rc = ESMF_FAILURE;
     for (i=0; i<funccount; i++) {
         if (strcmp(name, funcs[i].funcname))
-	   continue;
+           continue;
    
         switch (funcs[i].ftype) {
           case FT_VOID: {
@@ -627,36 +723,114 @@
             break;
           }
           case FT_COMP1STAT: {
-            C1SFuncVM vf;
+            C1SFunc vf;
 //printf("calling out of case FT_COMP1STAT VM\n");
-            vf = (C1SFuncVM)funcs[i].funcptr;
-            (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
-                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3], vm);
+            int rrc;
+            void *comp;
+            ESMC_CompType ctype;
+            // Replicate the component object on the heap for this thread
+            FTN(f_esmf_compget)((ESMC_Comp *)funcs[i].funcarg[0], &ctype, &rrc);
+            if (ctype == ESMF_COMPTYPE_GRID)
+              comp = (void *) new ESMC_GridComp;
+            else if (ctype == ESMF_COMPTYPE_CPL)
+              comp = (void *) new ESMC_CplComp;
+            else
+              comp = NULL;
+            FTN(f_esmf_compreplicate)((ESMC_Comp *)comp, 
+              (ESMC_Comp *)funcs[i].funcarg[0], vm, &rrc);
+            // Callback: prepare prototype, call, store return code
+            vf = (C1SFunc)funcs[i].funcptr;
+            (*vf)(comp, funcs[i].funcarg[1],
+                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3]);
             *rc = *(int *)(funcs[i].funcarg[3]);
+            // Update the original with any changes made by the child
+            FTN(f_esmf_compcopy)((ESMC_Comp *)funcs[i].funcarg[0], 
+                                 (ESMC_Comp *)comp, &rrc);
+            // Delete the heap copy of the component object for this thread
+            FTN(f_esmf_compdelete)((ESMC_Comp *)comp, &rrc);
+            delete (ESMC_Comp *)comp;
             break;
           }
           case FT_COMP2STAT: {
-            C2SFuncVM vf;
 //printf("calling out of case FT_COMP2STAT VM\n");
-            vf = (C2SFuncVM)funcs[i].funcptr;
-            (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
-                  funcs[i].funcarg[2], funcs[i].funcarg[3],
-                 (int *)funcs[i].funcarg[4], vm);
+            C2SFunc vf = (C2SFunc)funcs[i].funcptr;
+            int rrc;
+            void *comp;
+            int mypet = vm_pointer->vmk_mypet();
+            if (vm_pointer->vmk_nthreads(mypet) > 1){
+              // mypet is part of a thread group
+              ESMC_CompType ctype;
+              // Replicate the component object on the heap for this thread
+              FTN(f_esmf_compget)((ESMC_Comp *)funcs[i].funcarg[0], &ctype,
+                &rrc);
+              if (ctype == ESMF_COMPTYPE_GRID)
+                comp = (void *) new ESMC_GridComp;
+              else if (ctype == ESMF_COMPTYPE_CPL)
+                comp = (void *) new ESMC_CplComp;
+              else
+                comp = NULL;
+              // replicate the component object for each thread
+              FTN(f_esmf_compreplicate)((ESMC_Comp *)comp,
+                (ESMC_Comp *)funcs[i].funcarg[0], vm, &rrc);
+              // call-back into user code with reference to comp object copy
+              (*vf)(comp, funcs[i].funcarg[1],
+                funcs[i].funcarg[2], funcs[i].funcarg[3],
+                (int *)funcs[i].funcarg[4]);
+              // Update the original with any changes made by the child
+              // todo: how can this be done correctly merging all the copies
+              // todo: into a single object?
+              //FTN(f_esmf_compcopy)((ESMC_Comp *)funcs[i].funcarg[0],
+              //  (ESMC_Comp *)comp, &rrc);
+              // Delete the heap copy of the component object for this thread
+              FTN(f_esmf_compdelete)((ESMC_Comp *)comp, &rrc);
+              delete (ESMC_Comp *)comp;
+            }else{
+              // mypet is a single-threaded process within this VM
+              // insert the current vm object into component object
+              FTN(f_esmf_compinsertvm)((ESMC_Comp *)funcs[i].funcarg[0], vm,
+                &rrc);
+              // call-back into user code with reference to actual comp object
+              (*vf)((void *)funcs[i].funcarg[0], funcs[i].funcarg[1],
+                funcs[i].funcarg[2], funcs[i].funcarg[3],
+                (int *)funcs[i].funcarg[4]);
+            }
+            // ensure that the return value is set correctly
             *rc = *(int *)(funcs[i].funcarg[4]);
             break;
           }
           case FT_COMPSLIST: {
-            CSLFuncVM vf;
+            CSLFunc vf;
 //printf("calling out of case FT_COMPSLIST VM\n");
-            vf = (CSLFuncVM)funcs[i].funcptr;
-            (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
-                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3], vm);
+            int rrc;
+            void *comp;
+            ESMC_CompType ctype;
+            // Replicate the component object on the heap for this thread
+            FTN(f_esmf_compget)((ESMC_Comp *)funcs[i].funcarg[0], &ctype, &rrc);
+            if (ctype == ESMF_COMPTYPE_GRID)
+              comp = (void *) new ESMC_GridComp;
+            else if (ctype == ESMF_COMPTYPE_CPL)
+              comp = (void *) new ESMC_CplComp;
+            else
+              comp = NULL;
+            FTN(f_esmf_compreplicate)((ESMC_Comp *)comp, 
+              (ESMC_Comp *)funcs[i].funcarg[0], vm, &rrc);
+            // Callback: prepare prototype, call, store return code
+            vf = (CSLFunc)funcs[i].funcptr;
+            (*vf)(comp, funcs[i].funcarg[1],
+                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3]);
             *rc = *(int *)(funcs[i].funcarg[3]);
+            // Update the original with any changes made by the child
+            FTN(f_esmf_compcopy)((ESMC_Comp *)funcs[i].funcarg[0], 
+                                 (ESMC_Comp *)comp, &rrc);
+            // Delete the heap copy of the component object for this thread
+            FTN(f_esmf_compdelete)((ESMC_Comp *)comp, &rrc);
+            delete (ESMC_Comp *)comp;
             break;
           }
           default:
-            fprintf(stderr, "unknown function type\n");
-            return ESMF_FAILURE;
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                         "unknown function type", &status);
+            return status;
         }
 
         return ESMF_SUCCESS;
@@ -665,9 +839,10 @@
     return ESMF_FAILURE;
 
  } // end ESMC_FTableCallVFuncPtr
-#endif
  
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableValidate"
 //BOP
 // !IROUTINE:  ESMC_FTableValidate - internal consistency check for a Component
 //
@@ -696,6 +871,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTablePrint"
 //BOP
 // !IROUTINE:  ESMC_FTablePrint - print contents of a Component
 //
@@ -724,6 +901,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTable()"
 //BOP
 // !IROUTINE:  ESMC_FTable - native C++ constructor
 //
@@ -742,20 +921,19 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//
-//  code goes here
-//
     //printf("in ftable constructor\n");
     funccount = 0;
     funcalloc = 0;
-    funcs = 0;
+    funcs = NULL;
     datacount = 0;
     dataalloc = 0; 
-    data = 0;
+    data = NULL;
 
  } // end ESMC_FTable
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "~ESMC_FTable()"
 //BOP
 // !IROUTINE:  ~ESMC_FTable - native C++ destructor
 //
@@ -773,16 +951,21 @@
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
+  
+    int i;
 
-//
-//  code goes here
-//
     //printf("in ftable destructor\n");
-    if (funcs)
-        delete[] funcs;
+    //if (funcs) delete[] funcs;
+    //if (data) delete[] data;
 
-    if (data)
-	delete[] data;
+    for (i=0; i<funccount; i++)
+        funcs[i].~funcinfo();
+        
+    for (i=0; i<datacount; i++)
+        data[i].~datainfo();
+
+    if (funcs) free(funcs);
+    if (data) free(data);
 
     funccount = 0;
     funcalloc = 0;
@@ -792,3 +975,4 @@
     data = 0;
 
  } // end ~ESMC_FTable
+

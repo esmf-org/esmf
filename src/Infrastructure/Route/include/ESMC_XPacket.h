@@ -1,12 +1,12 @@
-// $Id: ESMC_XPacket.h,v 1.38.2.3 2006/08/04 18:25:14 theurich Exp $
+// $Id: ESMC_XPacket.h,v 1.38.2.4 2006/11/16 00:15:41 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMF XPacket C++ declaration include file
 //

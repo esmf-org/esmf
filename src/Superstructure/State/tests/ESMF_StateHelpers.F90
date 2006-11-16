@@ -1,4 +1,4 @@
-! $Id: ESMF_StateHelpers.F90,v 1.1.2.1 2006/08/28 18:04:45 theurich Exp $
+! $Id: ESMF_StateHelpers.F90,v 1.1.2.2 2006/11/16 00:15:57 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -6,7 +6,7 @@
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 
 #define ESMF_FILENAME "ESMF_StateHelpers.F90"

@@ -1,12 +1,12 @@
-// $Id: ESMC_FTable.h,v 1.7 2004/02/24 14:36:44 theurich Exp $
+// $Id: ESMC_FTable.h,v 1.15.2.1 2006/11/16 00:15:54 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMF FTable C++ declaration include file
 //
@@ -42,9 +42,8 @@
 //  This function does NOT inherit from the base class; it is embedded
 //  in other classes which inherit from base.
 
-#ifdef ESMF_ENABLE_VM
 #include "ESMC_VM.h"
-#endif
+
 
 // !PUBLIC TYPES:
  class ESMC_FTable;
@@ -71,7 +70,6 @@ typedef void (*C1SFunc)(void *, void *, void *, int *);
 typedef void (*C2SFunc)(void *, void *, void *, void *, int *);
 typedef void (*CSLFunc)(void *, void *, void *, int *);
 
-#ifdef ESMF_ENABLE_VM
 typedef void (*VoidFuncVM)(void *);
 typedef void (*IntFuncVM)(int, void *);
 typedef void (*Int2FuncVM)(int, int, void *);
@@ -81,20 +79,41 @@ typedef void (*VoidPtrIntPtrFuncVM)(void *, int *, void *);
 typedef void (*C1SFuncVM)(void *, void *, void *, int *, void *);
 typedef void (*C2SFuncVM)(void *, void *, void *, void *, int *, void *);
 typedef void (*CSLFuncVM)(void *, void *, void *, int *, void *);
-#endif
 
-struct funcinfo {
+class funcinfo {
+ private:
+   static const int numargs = 16;
+ protected:
    char *funcname;
    void *funcptr;
-   void *funcarg[16];
+   void *funcarg[numargs];
    enum ftype ftype;
+ public:
+   funcinfo() { funcname = NULL;
+                funcptr = NULL;
+                for (int i=0; i<numargs; i++) funcarg[i] = NULL; 
+                ftype = FT_VOID; }
+  ~funcinfo() { if (funcname != NULL) delete[] funcname; }
+               
+   // assignment and copy
+   //funcinfo(const funcinfo& rhs) { }  // copy strings and args, not ptr
+   //funcinfo& operator=(const funcinfo& rhs) { }
+ friend class ESMC_FTable;
 };
 
 enum dtype { DT_VOIDP=1 };
-struct datainfo {
+class datainfo {
+ private:
+ protected:
    char *dataname;
    void *dataptr;
    enum dtype dtype;
+ public:
+   datainfo() { dataname = NULL; dataptr = NULL; dtype=DT_VOIDP; }
+  ~datainfo() { if (dataname != NULL) delete[] dataname; } 
+   //datainfo(const datainfo& rhs) { }  // copy strings and type, not ptr
+   //datainfo& operator=(const datainfo& rhs) { }
+ friend class ESMC_FTable;
 };
 
  // class declaration type
@@ -103,10 +122,10 @@ class ESMC_FTable {
    private:
     int funccount;
     int funcalloc;
-    struct funcinfo *funcs;
+    funcinfo *funcs;
     int datacount;
     int dataalloc;
-    struct datainfo *data;
+    datainfo *data;
 
    public:
 
@@ -123,9 +142,7 @@ class ESMC_FTable {
 
     int ESMC_FTableExtend(int nfuncp, int ndatap);
     int ESMC_FTableCallVFuncPtr(char *name, int *funcrc);
-#ifdef ESMF_ENABLE_VM
-    int ESMC_FTableCallVFuncPtr(char *name, ESMC_VM **vm, int *funcrc);
-#endif
+    int ESMC_FTableCallVFuncPtr(char *name, ESMC_VM *vm, int *funcrc);
     
     int ESMC_FTableValidate(const char*) const;
     int ESMC_FTablePrint(const char*) const;
@@ -148,11 +165,12 @@ class ESMC_FTable {
 
  };   // end class ESMC_FTable
 
-#ifdef ESMF_ENABLE_VM
 typedef struct{
   char name[160];         // trimmed type string
   ESMC_FTable *ftable;    // pointer to function table
-}cargotype;
-#endif
+  int esmfrc;             // return code of esmf call back method
+  int userrc;             // return code of registered user method
+} cargotype;
 
  #endif  // ESMC_FTable_H
+

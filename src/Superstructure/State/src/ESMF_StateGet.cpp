@@ -1,14 +1,15 @@
-! $Id: ESMF_StateGet.cpp,v 1.1 2004/03/16 18:28:45 nscollins Exp $
+! $Id: ESMF_StateGet.cpp,v 1.6.4.1 2006/11/16 00:15:57 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
+^define ESMF_FILENAME "ESMF_StateGet.F90"
 !
 !     ESMF StateGet module
       module ESMF_StateGetMod
@@ -28,9 +29,11 @@
 ^include "ESMF.h"
 !------------------------------------------------------------------------------
 ! !USES:
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod
+      use ESMF_LogErrMod
       use ESMF_LocalArrayMod
-      use ESMF_ArrayBaseMod
+      use ESMF_ArrayMod
       use ESMF_ArrayGetMod
       use ESMF_FieldMod
       use ESMF_BundleMod
@@ -46,11 +49,10 @@
 
       public ESMF_StateGetDataPointer
  
-!EOP
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateGet.cpp,v 1.1 2004/03/16 18:28:45 nscollins Exp $'
+      '$Id: ESMF_StateGet.cpp,v 1.6.4.1 2006/11/16 00:15:57 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -61,7 +63,7 @@
 
 !------------------------------------------------------------------------------
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetDataPointer -- Get an F90 pointer to the data contents
 
 ! !INTERFACE:
@@ -76,7 +78,7 @@ InterfaceMacro(StateGetDataPointer)
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_StateGetDataPointer} subroutines.   
 !  
-!EOP 
+!EOPI
 end interface
 
 !==============================================================================

@@ -1,12 +1,12 @@
-! $Id: ESMF_BaseUTest.F90,v 1.8 2004/03/08 16:21:56 nscollins Exp $
+! $Id: ESMF_BaseUTest.F90,v 1.19.4.1 2006/11/16 00:15:20 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 !
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BaseUTest.F90,v 1.8 2004/03/08 16:21:56 nscollins Exp $'
+      '$Id: ESMF_BaseUTest.F90,v 1.19.4.1 2006/11/16 00:15:20 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -67,7 +67,8 @@
 !  added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
 
-      call ESMF_Initialize(rc)
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+
 
       !NEX_UTest
       ! test creation of base objects
@@ -77,8 +78,28 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-
+                      
       !NEX_UTest
+      ! destroy base object
+      call ESMF_BaseDestroy(base, rc)
+      write(name, *) "ESMF_Destroy"
+      write(failMsg, *) "rc =", rc
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+
+#ifdef ESMF_EXHAUSTIVE
+
+      !EX_UTest
+      ! test creation of base objects
+      call ESMF_BaseCreate(base, "Base", "test object", 0, rc)
+      write(name, *) "ESMF_BaseCreate"
+      write(failMsg, *) "rc =", rc
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      !EX_UTest
       ! test setting of ESMF_Base members values
       name_set = "fred"
       call ESMF_SetName(base, name_set, "Base", rc)
@@ -87,7 +108,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      !NEX_UTest
+      !EX_UTest
       ! test getting of ESMF_Base members values,
       !   compare to values set previously
       call ESMF_GetName(base, name_get, rc)
@@ -97,13 +118,16 @@
                       name, failMsg, result, ESMF_SRCLINE)
     
       ! test validate method via option string
-      !call ESMF_Validate(base, validate_options, rc)
-      !write(name, *) "ESMF_Validate"
-      !write(failMsg, *) "rc =",rc,", validate_options =", trim(validate_options)
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-      !                name, failMsg, result, ESMF_SRCLINE)
+      ! commented out because it crashes
+      ! Bug report 969866 opened
+      !EX_UTest
+      call ESMF_BaseValidate(base, validate_options, rc)
+      write(name, *) "ESMF_BaseValidate"
+      write(failMsg, *) "rc =",rc,", validate_options =", trim(validate_options)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
-      !NEX_UTest
+      !EX_UTest
       ! test print method via option string
       print_options = "brief"
       call ESMF_BasePrint(base, print_options, rc)
@@ -115,7 +139,7 @@
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
 
-      !NEX_UTest
+      !EX_UTest
       ! destroy base object
       call ESMF_BaseDestroy(base, rc)
       write(name, *) "ESMF_Destroy"
@@ -123,7 +147,10 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+#endif
 
-      call ESMF_Finalize(rc)
+      ! This calls finalize before returning, so it must be the last
+      ! ESMF-related thing the test does.
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
   
       end program ESMF_BaseUTest

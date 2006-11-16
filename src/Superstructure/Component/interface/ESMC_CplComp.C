@@ -1,12 +1,12 @@
-// $Id: ESMC_CplComp.C,v 1.1 2003/09/23 15:19:26 nscollins Exp $
+// $Id: ESMC_CplComp.C,v 1.7.2.1 2006/11/16 00:15:54 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMC Component method implementation (body) file
 
@@ -23,7 +23,7 @@
  // insert any higher level, 3rd party or system includes here
 #include <string.h>
 #include <stdio.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_CplComp.C,v 1.1 2003/09/23 15:19:26 nscollins Exp $";
+           "$Id: ESMC_CplComp.C,v 1.7.2.1 2006/11/16 00:15:54 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -69,9 +69,9 @@
 //
 // !ARGUMENTS:
       char *name,
-      ESMC_DELayout *layout,
-      enum ESMC_ModelType mtype,
-      char *configfile,
+      enum ESMC_GridCompType mtype,
+      char *configFile,
+      ESMC_Clock *clock,
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -86,9 +86,13 @@
 
     ESMC_CplComp *comp;
 
+    // the null is because we have no C++ interfaces to the config object yet
+    // the null must be given in form of a variable in order to satisfy
+    // fortran's pass by reference! *gjt*
+    void *null = NULL;
     comp = new ESMC_CplComp;
-    FTN(f_esmf_cplcompcreate)(comp, name, layout, NULL, configfile, 
-                             rc, strlen(name), strlen(configfile));
+    FTN(f_esmf_cplcompcreate)(comp, name, (ESMC_Config*)null, configFile, clock,
+      rc, strlen(name), strlen(configFile));
 
     return comp;
 
@@ -137,10 +141,11 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_State *importstate,   // in/out: required data
-      ESMC_State *exportstate,   // in/out: produced data
+      ESMC_State *importState,   // in/out: required data
+      ESMC_State *exportState,   // in/out: produced data
       ESMC_Clock *clock,         // in: model clock
-      int phase)  {              // in: if > 0, which phase of init to invoke
+      int phase,                 // in: if > 0, which phase of init to invoke
+      ESMC_BlockingFlag blockingFlag) {  // in: run sync or async
 //
 // !DESCRIPTION:
 //    Invokes the Initialize routine for an {\tt ESMC\_Component}.
@@ -149,8 +154,8 @@
 
     int rc;
 
-    FTN(f_esmf_cplcompinitialize)(this, importstate, exportstate, clock, 
-                                   &phase, &rc);
+    FTN(f_esmf_cplcompinitialize)(this, importState, exportState, clock, 
+                                   &phase, &blockingFlag, &rc);
 
     return rc;
 
@@ -167,10 +172,11 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_State *importstate,   // in/out: required data
-      ESMC_State *exportstate,   // in/out: produced data
+      ESMC_State *importState,   // in/out: required data
+      ESMC_State *exportState,   // in/out: produced data
       ESMC_Clock *clock,         // in: model clock
-      int phase)  {              // in: if > 0, which phase of run to invoke
+      int phase,                 // in: if > 0, which phase of init to invoke
+      ESMC_BlockingFlag blockingFlag) {  // in: run sync or async
 //
 // !DESCRIPTION:
 //    Invokes the Run routine for an {\tt ESMC\_Component}.
@@ -179,7 +185,8 @@
 
     int rc;
 
-    FTN(f_esmf_cplcomprun)(this, importstate, exportstate, clock, &phase, &rc);
+    FTN(f_esmf_cplcomprun)(this, importState, exportState, clock, &phase, 
+                           &blockingFlag, &rc);
 
     return rc;
 
@@ -196,10 +203,11 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_State *importstate,   // in/out: required data
-      ESMC_State *exportstate,   // in/out: produced data
+      ESMC_State *importState,   // in/out: required data
+      ESMC_State *exportState,   // in/out: produced data
       ESMC_Clock *clock,         // in: model clock
-      int phase)  {              // in: if > 0, which phase of finalize to invoke
+      int phase,                 // in: if > 0, which phase of init to invoke
+      ESMC_BlockingFlag blockingFlag) {  // in: run sync or async
 //
 // !DESCRIPTION:
 //    Invokes the Finalize routine for an {\tt ESMC\_Component}.
@@ -208,8 +216,8 @@
 
     int rc;
 
-    FTN(f_esmf_cplcompfinalize)(this, importstate, exportstate, clock, 
-                                 &phase, &rc);
+    FTN(f_esmf_cplcompfinalize)(this, importState, exportState, clock, 
+                                 &phase, &blockingFlag, &rc);
 
     return rc;
 

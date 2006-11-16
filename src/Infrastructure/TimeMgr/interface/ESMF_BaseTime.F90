@@ -1,12 +1,12 @@
-! $Id: ESMF_BaseTime.F90,v 1.13 2004/02/11 21:48:54 eschwab Exp $
+! $Id: ESMF_BaseTime.F90,v 1.16.4.1 2006/11/16 00:15:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 !
@@ -28,7 +28,7 @@
 ! !MODULE: ESMF_BaseTimeMod - Base ESMF time definition 
 !
 ! !DESCRIPTION:
-! Part of Time Manager F90 API wrapper of C++ implemenation.
+! Part of Time Manager Fortran API wrapper of C++ implemenation.
 !
 ! This module serves only as the common Time definition inherited
 ! by {\tt ESMF\_TimeInterval} and {\tt ESMF\_Time}.
@@ -37,6 +37,7 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod    ! ESMF Base class
       implicit none
 !
@@ -76,7 +77,7 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-! None exposed at F90 API layer; inherited through
+! None exposed at Fortran API layer; inherited through
 ! ESMF_TimeInterval and ESMF_Time
 !
 !EOPI
@@ -84,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BaseTime.F90,v 1.13 2004/02/11 21:48:54 eschwab Exp $'
+      '$Id: ESMF_BaseTime.F90,v 1.16.4.1 2006/11/16 00:15:45 cdeluca Exp $'
 
 !------------------------------------------------------------------------------
 

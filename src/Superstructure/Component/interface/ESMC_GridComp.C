@@ -1,12 +1,12 @@
-// $Id: ESMC_GridComp.C,v 1.3 2003/11/09 00:07:55 nscollins Exp $
+// $Id: ESMC_GridComp.C,v 1.11.2.1 2006/11/16 00:15:54 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMC Component method implementation (body) file
 
@@ -23,7 +23,7 @@
  // insert any higher level, 3rd party or system includes here
 #include <string.h>
 #include <stdio.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_GridComp.C,v 1.3 2003/11/09 00:07:55 nscollins Exp $";
+           "$Id: ESMC_GridComp.C,v 1.11.2.1 2006/11/16 00:15:54 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -86,6 +86,62 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 
 //----------------------------------------------------------------------------- 
 //BOP
+// !IROUTINE:  ESMC_GridCompSetEntryPoint - set pointers for GridComp Functions
+//
+// !INTERFACE:
+      int ESMC_GridComp::ESMC_GridCompSetEntryPoint(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *functionType,                          // in: function type
+      void (*functionPtr)(ESMC_GridComp *, ESMC_State *,
+                          ESMC_State *, ESMC_Clock *),   // in: function pointer
+      int phase) {                                       // in: phase
+//
+// !DESCRIPTION:
+//  Intended to be invoked by an {\tt ESMC\_GridComp} during the registration process.
+//  An {\tt ESMC\_GridComp} invokes {\tt ESMC\_GridCompSetEntryPoint} for each of 
+//  the predefined init, run, and finalize functions, to assocate the internal function
+//  to be called for each function.  If multiple phases for init, run, or finalize
+//  are needed, this can be called with phase numbers.
+//
+//  After this function returns, the framework now knows how to call
+//  the initialize, run, and finalize functions for this child {\tt ESMC\_GridComp}.
+//  The return code equals {\tt ESMC\_SUCCESS} if there are no errors.
+//    
+//  The arguments are:
+//  \begin{description}
+//   \item[functionType]
+//    One of a set of predefined function types - e.g. {\tt ESMC\_SetInit}, 
+//    {\tt ESMC\_SetRun}, {\tt ESMC\_SetFinal}.
+//   \item[functionPtr]
+//    The pointer to the {\tt gridcomp} function to be associated with the
+//    {\tt functionType}.
+//   \item[{[phase]}] 
+//    For {\tt ESMC\_GridComp}s which need to initialize or run or finalize 
+//    with mutiple phases, the phase number which corresponds to this function name.
+//    For single phase function use the parameter {\tt ESMF\_SINGLEPHASE}.
+//    The {\tt ESMC\_GridComp} writer must document the requirements of the
+//    {\tt ESMC\_GridComp} for how and when the multiple phases are expected to be
+//    called.
+//  \end{description}
+//
+//EOP
+// !REQUIREMENTS:  
+
+    int rc;
+
+    FTN(esmf_gridcompsetentrypoint)(this, (char *)functionType, (void *)functionPtr,
+                                    &phase, &rc, strlen(functionType));
+
+    return rc;
+
+} // end ESMC_GridCompSetEntryPoint
+
+//----------------------------------------------------------------------------- 
+//BOP
 // !IROUTINE:  ESMC_GridCompCreate - Create a new Component
 //
 // !INTERFACE:
@@ -96,10 +152,10 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //
 // !ARGUMENTS:
       char *name,
-      ESMC_DELayout *layout,
-      enum ESMC_ModelType mtype,
+      enum ESMC_GridCompType mtype,
       ESMC_Grid *grid,
-      char *configfile,
+      char *configFile,
+      ESMC_Clock *clock,
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -114,9 +170,13 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 
     ESMC_GridComp *comp;
 
+    // the null is there because we have no C++ interface to config yet
+    // the null must be given in form of a variable in order to satisfy
+    // fortran's pass by reference! *gjt*
+    void *null = NULL;
     comp = new ESMC_GridComp;
-    FTN(f_esmf_gridcompcreate)(comp, name, layout, &mtype, grid, NULL, 
-                         configfile, rc, strlen(name), strlen(configfile));
+    FTN(f_esmf_gridcompcreate)(comp, name, &mtype, grid, (ESMC_Config*)null,
+      configFile, clock, rc, strlen(name), strlen(configFile));
 
     return comp;
 
@@ -165,10 +225,11 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_State *importstate,   // in/out: required data
-      ESMC_State *exportstate,   // in/out: produced data
+      ESMC_State *importState,   // in/out: required data
+      ESMC_State *exportState,   // in/out: produced data
       ESMC_Clock *clock,         // in: model clock
-      int phase)  {              // in: if > 0, which phase of init to invoke
+      int phase,                 // in: if > 0, which phase of init to invoke
+      ESMC_BlockingFlag blockingFlag) {  // in: run sync or async
 //
 // !DESCRIPTION:
 //    Invokes the Initialize routine for an {\tt ESMC\_Component}.
@@ -177,8 +238,8 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 
     int rc;
 
-    FTN(f_esmf_gridcompinitialize)(this, importstate, exportstate, clock, 
-                                   &phase, &rc);
+    FTN(f_esmf_gridcompinitialize)(this, importState, exportState, clock, 
+                                   &phase, &blockingFlag, &rc);
 
     return rc;
 
@@ -195,10 +256,11 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_State *importstate,   // in/out: required data
-      ESMC_State *exportstate,   // in/out: produced data
+      ESMC_State *importState,   // in/out: required data
+      ESMC_State *exportState,   // in/out: produced data
       ESMC_Clock *clock,         // in: model clock
-      int phase)  {              // in: if > 0, which phase of run to invoke
+      int phase,                 // in: if > 0, which phase of init to invoke
+      ESMC_BlockingFlag blockingFlag) {  // in: run sync or async
 //
 // !DESCRIPTION:
 //    Invokes the Run routine for an {\tt ESMC\_Component}.
@@ -207,7 +269,8 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 
     int rc;
 
-    FTN(f_esmf_gridcomprun)(this, importstate, exportstate, clock, &phase, &rc);
+    FTN(f_esmf_gridcomprun)(this, importState, exportState, clock, 
+                            &phase, &blockingFlag, &rc);
 
     return rc;
 
@@ -224,10 +287,11 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_State *importstate,   // in/out: required data
-      ESMC_State *exportstate,   // in/out: produced data
+      ESMC_State *importState,   // in/out: required data
+      ESMC_State *exportState,   // in/out: produced data
       ESMC_Clock *clock,         // in: model clock
-      int phase)  {              // in: if > 0, which phase of finalize to invoke
+      int phase,                 // in: if > 0, which phase of init to invoke
+      ESMC_BlockingFlag blockingFlag) {  // in: run sync or async
 //
 // !DESCRIPTION:
 //    Invokes the Finalize routine for an {\tt ESMC\_Component}.
@@ -236,8 +300,8 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 
     int rc;
 
-    FTN(f_esmf_gridcompfinalize)(this, importstate, exportstate, clock, 
-                                 &phase, &rc);
+    FTN(f_esmf_gridcompfinalize)(this, importState, exportState, clock, 
+                                 &phase, &blockingFlag, &rc);
 
     return rc;
 

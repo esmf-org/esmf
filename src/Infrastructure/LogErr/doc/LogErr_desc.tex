@@ -1,27 +1,50 @@
-% $Id: LogErr_desc.tex,v 1.4 2004/03/16 20:04:11 cdeluca Exp $
-%
+% $Id: LogErr_desc.tex,v 1.20.2.1 2006/11/16 00:15:35 cdeluca Exp $
+
 % Earth System Modeling Framework
-% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Copyright 2002-2008, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 % NASA Goddard Space Flight Center.
-% Licensed under the GPL.
+% Licensed under the University of Illinois-NCSA License.
+
 
 %\subsection{Description}
 
-The Log class consists of a variety of methods for writing error, warning, 
-and other messages to files or to standard out.  Options include the ability 
-to write to a single file or multiple files, to write from a root PE or 
-from all active PEs, and to halt at errors, at warnings, or never.  The 
-verbosity of ouput can be adjusted with a flag.  Multiple 
-Logs can be created within an application.  Logs may be given
-user-specified names, or, if desired, a default {\tt ESMF\_Log\_World} can 
-be used.  
+The Log class consists of a variety of methods for writing error, warning, and
+informational messages to files.  A default Log is created at ESMF
+initialization.  Other Logs can be created later in the code by the user.  Most
+LogErr methods take a Log as an optional argument and apply to the default Log
+when another Log is not specified.  A set of standard return codes and
+associated messages are provided for error handling.  
 
-Log provides capabilities to write to a file immediately or store entries 
-in a buffer for writing either when the buffer is full, or when the user
-calls an {\tt ESMF_LogFlush()} command.  The user can specify the number 
-of entries that a Log should contain when it is flushed.  For buffered output, 
-it's also possible to specify whether Log entries should be ordered or not.  
+LogErr provides capabilities to store message entries in a buffer, which is 
+flushed to a file, either when the buffer is full, or when the user calls an 
+{\tt ESMF\_LogFlush()} method.  Currently, the default is for the Log to flush
+after every ten entries.  This can easily be changed by using the 
+{\tt ESMF\_LogSet()} method and setting the {\tt maxElements} property to 
+another value.  The {\tt ESMF\_LogFlush()} method is automatically called when 
+the program exits by any means (program completion, halt on error, or when the
+Log is closed).
+
+The user has the capability to halt the program on an error or on a warning by
+using the {\tt ESMF\_LogSet()} method with the {\tt halt} property.  When the 
+{\tt halt} property is set to {\tt ESMF\_LOG\_HALTWARNING}, the program will 
+stop on any and all warning or errors.  When the {\tt halt} property is set to 
+{\tt ESMF\_LOG\_HALTERROR}, the program will only halt only on errors.  Lastly,
+the user can choose to never halt by setting the {\tt halt} property to 
+{\tt ESMF\_LOG\_HALTNEVER}; this is the default.
+
+LogErr will automatically put the PET number into the Log.  Also, the user can 
+either specify {\tt ESMF\_LOG\_SINGLE} which writes all the entries to a single 
+Log or {\tt ESMF\_LOG\_MULTI} which writes entries to multiple Logs according to 
+the PET number.  To distinguish Logs from each other when using 
+{\tt ESMF\_LOG\_MULTI}, the PET number (in the format {\tt PETx.}) will be 
+prepended to the file name where x is the PET number.
+ 
+Other options that are planned for LogErr are to adjust the verbosity of ouput, 
+and to optionally write to {\tt stdout} instead of file(s).
+
+
+
 

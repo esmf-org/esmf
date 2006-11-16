@@ -1,12 +1,12 @@
-// $Id: ESMC_State.h,v 1.3 2004/02/11 23:18:39 nscollins Exp $
+// $Id: ESMC_State.h,v 1.6.6.1 2006/11/16 00:15:56 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMF State C++ declaration include file
 //
@@ -54,12 +54,12 @@
 // !PRIVATE TYPES:
 
 typedef enum ESMC_StateType { 
-                ESMC_StateImport=1, ESMC_StateExport, 
-                ESMC_StateImpExp, ESMC_StateUnknown };
+      ESMC_StateImport=1, ESMC_StateExport, 
+      ESMC_StateImpExp, ESMC_StateUnknown } ESMC_StateType;
 
-typedef enum ESMC_Objtype { Bundle=1, Field=2, Array=3 };
-typedef enum ESMC_Needed { Needed=1, NotNeeded=2 };
-typedef enum ESMC_Ready { ReadyToRead=1, ReadyToWrite=2 };
+typedef enum ESMC_Objtype { Bundle=1, Field=2, Array=3 } ESMC_Objtype;
+typedef enum ESMC_Needed { Needed=1, NotNeeded=2 } ESMC_Needed;
+typedef enum ESMC_Ready { ReadyToRead=1, ReadyToWrite=2 } ESMC_Ready;
 
  // class declaration type
  class ESMC_State : public ESMC_Base {    // inherits from ESMC_Base class
@@ -117,8 +117,30 @@ typedef enum ESMC_Ready { ReadyToRead=1, ReadyToWrite=2 };
  int ESMC_StateDestroy(ESMC_State *state);
 
  extern "C" {
-      void FTN(f_esmf_statecreate)(ESMC_State *state, char *statename, int *rc);
-      void FTN(f_esmf_statedestroy)(ESMC_State *state, int *rc);
+
+  void FTN(c_esmc_stateserialize)(int *statestatus, int *st, 
+              int *needed_default, int *ready_default, int *stvalid_default, 
+              int *reqrestart_default, int *alloccount, int *datacount, 
+              void *buffer, int *length, int *offset, int *localrc);
+
+  void FTN(c_esmc_statedeserialize)(int *statestatus, int *st, 
+              int *needed_default, int *ready_default, int *stvalid_default, 
+              int *reqrestart_default, int *alloccount, int *datacount, 
+              void *buffer, int *offset, int *localrc);
+
+  void FTN(c_esmc_stateitemserialize)(int *otype, char *namep, 
+               int *indirect_index, int *needed, int *ready, 
+               int *valid, int *reqrestart, 
+               void *buffer, int *length, int *offset, int *localrc, int clen);
+
+  void FTN(c_esmc_stateitemdeserialize)(int *otype, char *namep, 
+              int *indirect_index, int *needed, int *ready, int *valid, 
+              int *reqrestart, 
+              void *buffer, int *offset, int *localrc, int clen);
+
+  void FTN(f_esmf_statecreate)(ESMC_State *state, char *statename, int *rc);
+  void FTN(f_esmf_statedestroy)(ESMC_State *state, int *rc);
+
 #if 0
       TODO: finish these prototypes
       void FTN(f_esmf_statecreate)(char *statename, statetype, compname,

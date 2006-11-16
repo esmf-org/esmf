@@ -1,29 +1,39 @@
-% $Id: State_desc.tex,v 1.2 2003/10/23 13:20:56 cdeluca Exp $
+% $Id: State_desc.tex,v 1.5.6.1 2006/11/16 00:15:56 cdeluca Exp $
 %
 % Earth System Modeling Framework
-% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Copyright 2002-2008, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 % NASA Goddard Space Flight Center.
-% Licensed under the GPL.
+% Licensed under the University of Illinois-NCSA License.
 
 %\subsection{Description}
 
-A State object contains the data and sufficient
-description information needed to communicate intermediate results
-between multiple Gridded Components and/or Coupling Components.
-If a Gridded Component object needs data
-from another Component to run, it queries its associated
-Import State for the data.  If a Gridded Component creates data
-needed by another Component, it puts that data into its
-Export State.  A Coupler Component can read one or more Export States,
-operate on the data as required, and can create one or more Import States.
-Couplers can be written to couple individual pairs of States, or
-a single Coupler can couple many-to-many States.
+A State contains the data and metadata to be transferred between 
+ESMF components.  It is an important class, because it defines a 
+standard for how data is represented in Earth science components.  The 
+State construct is a rational compromise between a fully prescribed 
+interface - one that would dictate what specific fields should be 
+transferred between components - and an interface in which data structures
+are completely ad hoc.
 
- 
+There are two types of States, import and export.
+An import State contains data that is necessary for a Gridded Component
+or Coupler Component to execute, and an export State contains the data
+that a Gridded Component or Coupler Component can make available.
 
+States can contain Bundles, Fields, Arrays, and other States.  They
+cannot directly contain Fortran arrays.   Objects in a State must span
+the VM on which they are running.  For sequentially executing components
+which run on the same set of PETs this happens by calling the object
+create methods on each PET creating the object in unison.   For
+concurrently executing components which are running on subsets of PETs,
+an additional method is provided by the ESMF to broadcast information
+about objects which were created in subcomponents.
 
-
+State methods include creation and deletion, adding and retrieving 
+data items, adding and retrieving attributes, and performing queries.  
+An additional method, reconciliation, makes objects created on a subset
+of the current PETs available to all PETs in the current VM.
 

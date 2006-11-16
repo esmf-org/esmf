@@ -1,18 +1,18 @@
-! $Id: ESMF_CommTableUTest.F90,v 1.2 2003/04/25 20:49:41 nscollins Exp $
+! $Id: ESMF_CommTableUTest.F90,v 1.4.4.1 2006/11/16 00:15:43 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
 !
       program ESMF_CommTableTest
 
-#include "ESMF_Macros.inc"
+#include "ESMF.h"
 
 !------------------------------------------------------------------------------
 !
@@ -34,8 +34,8 @@
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter :: version = &
-      '$Id: ESMF_CommTableUTest.F90,v 1.2 2003/04/25 20:49:41 nscollins Exp $'
+    character(*), parameter :: version = &
+    '$Id: ESMF_CommTableUTest.F90,v 1.4.4.1 2006/11/16 00:15:43 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,60 +54,73 @@
       type(ESMF_CommTable) :: rtable
  
       ! local args needed to create/construct objects
-      integer :: mydeid
-      integer :: decount
+      type(ESMF_VM) :: vm
+      integer :: myvmid
+      integer :: vmcount
 
-      mydeid = 1
-      decount = 4
+      !character(32) :: validate_options
+      character(32) :: print_options
 
+
+      print_options = ""
+
+      !------------------------------------------------------------------------
+
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+
+      if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) goto 10
+
+      ! get the VM PET count
+      call ESMF_VMGetGlobal(vm, rc=rc)
+      call ESMF_VMGet(vm, petcount=vmcount, localpet=myvmid, rc=rc)
+
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
       ! test dynamic allocation of ESMF_CommTable
-      rtable = ESMF_CommTableCreate(mydeid, decount, rc)
+      rtable = ESMF_CommTableCreate(myvmid, vmcount, rc)
       write(name, *) "ESMF_CommTableCreate"
-      write(failMsg, *) "rc =", rc, ", args =", mydeid, decount
+      write(failMsg, *) "rc =", rc, ", args =", myvmid, vmcount
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
     
-      ! test internal dynamic allocation within statically allocated
-      !   ESMF_CommTable
-      call ESMF_CommTableConstruct(rtable, mydeid, decount, rc)
-      write(name, *) "ESMF_CommTableConstruct"
-      write(failMsg, *) "rc =", rc, ", args =", mydeid, decount
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
+      !------------------------------------------------------------------------
+      !
       ! test validate method via option string
-      character(ESMF_MAXSTR) :: validate_options
-      call ESMF_CommTableValidate(rtable, validate_options, rc)
-      write(name, *) "ESMF_CommTableValidate"
-      write(failMsg, *) "rc =", rc, ", validate_options =", validate_options
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      !call ESMF_CommTableValidate(rtable, validate_options, rc)
+      !write(name, *) "ESMF_CommTableValidate"
+      !write(failMsg, *) "rc =", rc, ", validate_options =", validate_options
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+      !                name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
       ! test print method via option string
-      character(ESMF_MAXSTR) :: print_options
       call ESMF_CommTablePrint(rtable, print_options, rc)
       write(name, *) "ESMF_CommTablePrint"
-      write(failMsg, *) "rc =", rc, ", print_options =", print_options
+      write(failMsg, *) "rc =", rc, ", print_options =", trim(print_options)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      ! test internal dynamic deallocation within statically allocated 
-      !   ESMF_CommTable
-      call ESMF_CommTableDestruct(rtable, rc)
-      write(name, *) "ESMF_CommTableDestruct"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
-
+      !------------------------------------------------------------------------
+      !
       ! test dynamic deallocation of ESMF_CommTable
       !   also tests destructor
-      call ESMF_CommTableDestroy(rtable, rc)
-      write(name, *) "ESMF_CommTableDestroy"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      !call ESMF_CommTableDestroy(rtable, rc)
+      !write(name, *) "ESMF_CommTableDestroy"
+      !write(failMsg, *) "rc =", rc
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+      !                name, failMsg, result, ESMF_SRCLINE)
 
-      ! return number of failures to environment; 0 = success (all pass)
-      ! return result  ! TODO: no way to do this in F90 ?
+      !------------------------------------------------------------------------
+#ifdef ESMF_EXHAUSTIVE
+
+#endif
+      !------------------------------------------------------------------------
+
+10    continue
+
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
+
   
       end program ESMF_CommTableTest

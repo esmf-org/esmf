@@ -1,12 +1,12 @@
-// $Id: ESMC_BaseTime.h,v 1.22 2004/03/05 00:44:57 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.29.2.1 2006/11/16 00:15:44 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research,
+// Copyright 2002-2008, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 // ESMF BaseTime C++ definition include file
 //
@@ -25,8 +25,9 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
+ #include <ESMC_Start.h>
  #include <ESMF_TimeMgr.inc>
- #include <pthread.h>
+ #include "ESMF_Pthread.h"
 
 //-------------------------------------------------------------------------
 //BOP
@@ -57,7 +58,7 @@
 // Any rational fractional second is expressed using two additional integers:
 // a numerator and a denominator.  Both the whole seconds and fractional
 // numerator are signed to handle negative time intervals and instants.
-// For arithmetic consistency both must carry the same sign (both positve
+// For arithmetic consistency both must carry the same sign (both positive
 // or both negative), except, of course, for zero values.  The fractional
 // seconds element (numerator) is \htmlref{normalized}{glos:Normalized}
 // (bounded) with respect to whole seconds. If the absolute value of the
@@ -81,8 +82,10 @@
 // the common comparison logic between {\tt TimeIntervals} and {\tt Time} and
 // hence are defined here for sharing.
 //
-// Methods or possibly a separate class will be included to handle fractional
-// arithmetic.  An pre-developed open source package would be preferable.
+// The separate class ESMC_Fraction is inherited to handle fractional
+// arithmetic.  ESMC_BaseTime encapsulates common time-specific knowledge,
+// whereas ESMC_Fraction is time-knowledge independent; it simply performs
+// generic fractional arithmetic, manipulations and comparisons.
 //
 // For ease in calendar conversions, a time value of zero (both whole and
 // numerator) will correspond to the Julian date of zero.
@@ -105,8 +108,9 @@
 //-------------------------------------------------------------------------
 //
 // !USES:
-#include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
-#include <ESMC_IO.h>    // IOSpec class for ReadRestart()/WriteRestart()
+#include <ESMC_Base.h>   // all classes inherit from the ESMC Base class.
+#include <ESMC_IOSpec.h> // IOSpec class for ReadRestart()/WriteRestart()
+#include <ESMC_Fraction.h>
 
 // !PUBLIC TYPES:
  class ESMC_BaseTime;
@@ -115,16 +119,11 @@
  // class configuration type:  not needed for ESMC_BaseTime
 
  // class definition type
-class ESMC_BaseTime {
+class ESMC_BaseTime : public ESMC_Fraction { // it is a fraction !
 //class ESMC_BaseTime : public ESMC_Base { // TODO: inherit from ESMC_Base class
                                            // when fully aligned with F90 equiv
 
   protected:
-
-    ESMF_KIND_I8 s;   // Integer seconds (signed)
-    ESMF_KIND_I4 sN;  // Integer fractional seconds (exact) n/d; numerator
-                       //                                         (signed)
-    ESMF_KIND_I4 sD;  // Integer fractional seconds (exact) n/d; denominator
 
     // TODO:  move ESMC_Calendar* here to define seconds per day ? then could
     //        add D (Julian Days) to Get()/Set() below, and remove secondsPerDay
@@ -149,7 +148,7 @@ class ESMC_BaseTime {
 
     int ESMC_BaseTimeSet(ESMF_KIND_I8 S, int sN, int sD);
 
-    int ESMC_BaseTimeGet(ESMF_KIND_I8 timeToConvert,
+    int ESMC_BaseTimeGet(const ESMC_BaseTime *timeToConvert,
                          ESMF_KIND_I4 *h=0, ESMF_KIND_I4 *m=0,
                          ESMF_KIND_I4 *s=0, ESMF_KIND_I8 *s_i8=0,
                          ESMF_KIND_I4 *ms=0, ESMF_KIND_I4 *us=0,
@@ -163,24 +162,10 @@ class ESMC_BaseTime {
     // ESMC_BaseTime doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
 
-    // comparison methods (TMG 1.5.3, 2.4.3, 7.2)
-    bool operator==(const ESMC_BaseTime &) const; 
-    bool operator!=(const ESMC_BaseTime &) const; 
-    bool operator< (const ESMC_BaseTime &) const; 
-    bool operator> (const ESMC_BaseTime &) const; 
-    bool operator<=(const ESMC_BaseTime &) const; 
-    bool operator>=(const ESMC_BaseTime &) const; 
-
-    // increment, decrement methods (TMG 1.5.4, 2.4.4, 2.4.5, 2.4.6, 5.1, 5.2,
-    //                                   7.2)
-    ESMC_BaseTime  operator+ (const ESMC_BaseTime &) const;
-    ESMC_BaseTime  operator- (const ESMC_BaseTime &) const;
-    ESMC_BaseTime& operator+=(const ESMC_BaseTime &);
-    ESMC_BaseTime& operator-=(const ESMC_BaseTime &);
-
-    // explicit assignment operator to support ESMC_Time & ESMC_TimeInterval
-    // TODO:  should be implicit ?
-    ESMC_BaseTime& operator=(const ESMC_BaseTime &);
+    // TODO: should be implicit, but then won't support
+    //   F90 ESMF_Time & ESMF_TimeInterval via ESMC_BaseTime_F.C interface
+    //   for increment/decrement
+    ESMC_BaseTime& operator=(const ESMC_Fraction &);
 
     // required methods inherited and overridden from the ESMC_Base class
 

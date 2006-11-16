@@ -1,12 +1,12 @@
-// $Id: ESMC_Clock.h,v 1.35 2004/02/18 21:28:50 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.43.2.1 2006/11/16 00:15:44 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research,
+// Copyright 2002-2008, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMF Clock C++ definition include file
 //
@@ -25,8 +25,9 @@
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.
+ #include <ESMC_Start.h>
  #include <ESMF_TimeMgr.inc>
- #include <pthread.h>
+ #include "ESMF_Pthread.h"
 
 //-------------------------------------------------------------------------
 //BOP
@@ -64,8 +65,8 @@
 //-------------------------------------------------------------------------
 //
 // !USES:
- #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
- #include <ESMC_IO.h>    // IOSpec class for ReadRestart()/WriteRestart()
+ #include <ESMC_Base.h>    // all classes inherit from the ESMC Base class.
+ #include <ESMC_IOSpec.h>  // IOSpec class for ReadRestart()/WriteRestart()
  #include <ESMC_TimeInterval.h>
  #include <ESMC_Time.h>
  #include <ESMC_Alarm.h>
@@ -94,10 +95,16 @@
                                                 //   ESMC_ClockAdvance has
                                                 //   been called (number of
                                                 //   time steps taken so far)
-    int               alarmCount;               // number of defined alarms
-    ESMC_Alarm       *alarmList[MAX_ALARMS];    // associated alarms
 
-    bool              stopTimeSet;  // true if optional property set
+    ESMC_Direction    direction;                // forward (default) or reverse
+
+    int               alarmCount;               // number of defined alarms
+    int               alarmListCapacity;        // max number of defined alarms
+                                                //  before a reallocation is
+                                                //  necessary
+    ESMC_Alarm      **alarmList;                // associated alarm array
+
+    bool              stopTimeEnabled;  // true if optional property set
 
     int               id;         // unique identifier. used for equality
                                   //    checks and to generate unique default
@@ -128,7 +135,8 @@
 // TODO: add overload for ESMF_KIND_R8  *runTimeStepCount=0,
                       ESMC_Time         *refTime=0,    // (TMG 3.1, 3.4.4)
                       ESMC_Time         *currTime=0,
-                      ESMF_KIND_I8      *advanceCount=0);
+                      ESMF_KIND_I8      *advanceCount=0,
+                      ESMC_Direction    *direction=0);
 
     int ESMC_ClockGet(int                nameLen,
                       int               *tempNameLen,
@@ -144,9 +152,11 @@
                       ESMC_TimeInterval *currSimTime=0, 
                       ESMC_TimeInterval *prevSimTime=0, 
                       ESMC_Calendar    **calendar=0,
+                      ESMC_CalendarType *calendarType=0,
                       int               *timeZone=0,
                       ESMF_KIND_I8      *advanceCount=0, 
-                      int               *alarmCount=0);
+                      int               *alarmCount=0,
+                      ESMC_Direction    *direction=0);
 
     int ESMC_ClockAdvance(ESMC_TimeInterval *timeStep=0,
                           char *ringingAlarmList1stElementPtr=0, 
@@ -157,7 +167,13 @@
     // TMG3.4.1  after increment, for each alarm,
     //           calls ESMC_Alarm::CheckActive()
 
-    bool ESMC_ClockIsStopTime(int *rc) const;    // TMG3.5.6
+    bool ESMC_ClockIsStopTime(int *rc=0) const;           // TMG3.5.6
+    int  ESMC_ClockStopTimeEnable(ESMC_Time *stopTime=0); // WRF
+    int  ESMC_ClockStopTimeDisable(void);                 // WRF
+    bool ESMC_ClockIsStopTimeEnabled(int *rc=0) const;    // WRF
+
+    bool ESMC_ClockIsDone(int *rc=0) const;           // TMG3.5.7
+    bool ESMC_ClockIsReverse(int *rc=0) const;        // TMG3.4.6
 
     int ESMC_ClockGetNextTime(ESMC_Time         *nextTime,
                               ESMC_TimeInterval *timeStep=0);
@@ -173,6 +189,9 @@
 
     int ESMC_ClockSyncToRealTime(void); // TMG3.4.5
     // (see ESMC_Time::SyncToRealTime()
+
+    // to suuport copying of the alarmList
+    ESMC_Clock& operator=(const ESMC_Clock &);
 
     bool operator==(const ESMC_Clock &) const;
     bool operator!=(const ESMC_Clock &) const;

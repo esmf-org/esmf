@@ -1,12 +1,12 @@
-// $Id: ESMC_Comp.C,v 1.17 2004/03/08 16:22:56 nscollins Exp $
+// $Id: ESMC_Comp.C,v 1.25.8.1 2006/11/16 00:15:54 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 
 // ESMC Component method implementation (body) file
 
@@ -23,13 +23,8 @@
  // insert any higher level, 3rd party or system includes here
 #include <string.h>
 #include <stdio.h>
-#include "ESMC_Machine.h"
-#include "ESMC.h"
+#include "ESMC_Start.h"
 
-// public globals, to be filled in by ESMC_Initialize()
-//  and used by MPI_Init().   set once, treat as read-only!
-int globalargc;
-char **globalargv;
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -57,7 +52,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.17 2004/03/08 16:22:56 nscollins Exp $";
+           "$Id: ESMC_Comp.C,v 1.25.8.1 2006/11/16 00:15:54 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -80,9 +75,8 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //
 // !ARGUMENTS:
       char *name,
-      ESMC_DELayout *layout,
       enum ESMC_CompType ctype,
-      enum ESMC_ModelType mtype,
+      enum ESMC_GridCompType mtype,
       char *filepath,
       int *rc) {           // out - return code
 //
@@ -101,7 +95,8 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 
     // TODO: make this match the correct calling convention
 
-    //f_esmf_compcreate(&comp, name, layout, ctype, mtype, filepath, rc)
+    comp = new ESMC_Comp;
+    //f_esmf_compcreate(&comp, name, ctype, mtype, NULL, filepath, &rc)
 
     *rc = ESMF_FAILURE;
     return NULL;
@@ -382,88 +377,4 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //
 
  } // end ~ESMC_Comp
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_Initialize - Initialize the ESMF Framework
-//
-// !INTERFACE:
-      int ESMC_Initialize(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void) {
-//
-// !DESCRIPTION:
-//
-//EOP
-
-    int rc;
-    ESMC_MainLanguage l = ESMF_MAIN_C;
-
-    globalargc = 0;
-    globalargv = NULL;
-
-    FTN(f_esmf_frameworkinitialize)((int*)&l, &rc);
-
-    return rc;
-
- } // end ESMC_Initialize
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_Initialize - Initialize the ESMF Framework
-//
-// !INTERFACE:
-      int ESMC_Initialize(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int argc, char **argv) {     // in - the arguments to the program
-//
-// !DESCRIPTION:
-//
-//EOP
-
-    int rc;
-    ESMC_MainLanguage l = ESMF_MAIN_C;
-
-    // make this public so the mpi init code in Machine can grab them.
-    globalargc = argc;
-    globalargv = argv;
-
-    FTN(f_esmf_frameworkinitialize)((int*)&l, &rc);
-
-    return rc;
-
- } // end ESMC_Initialize
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_Finalize - Finalize the ESMF Framework
-//
-// !INTERFACE:
-      int ESMC_Finalize(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void) {
-//
-// !DESCRIPTION:
-//
-//EOP
-
-    int rc;
-
-    FTN(f_esmf_frameworkfinalize)(&rc);
-
-    return rc;
-
- } // end ESMC_FrameworkFinallize
 

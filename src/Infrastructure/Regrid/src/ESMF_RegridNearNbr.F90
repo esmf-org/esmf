@@ -1,14 +1,16 @@
-! $Id: ESMF_RegridNearNbr.F90,v 1.10 2004/01/28 21:46:49 nscollins Exp $
+! $Id: ESMF_RegridNearNbr.F90,v 1.18.4.1 2006/11/16 00:15:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
+! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
+!
+#define ESMF_FILENAME "ESMF_RegridNearNbr.F90"
 !
 !     ESMF Nearest-Neighbor Distance-weighted Regrid Module
       module ESMF_RegridNearNbrMod
@@ -20,7 +22,7 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include "ESMF.h"
+#include <ESMF.h>
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_RegridNearNbrMod - Nearest-neighbor distance-weighted regrid
@@ -32,9 +34,9 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod      ! ESMF base   class
-      use ESMF_ArrayBaseMod ! ESMF array  class
-      use ESMF_ArrayExpandMod ! ESMF array  class
+      use ESMF_ArrayMod     ! ESMF array  class
       use ESMF_DistGridMod  ! ESMF distributed grid class
       use ESMF_PhysGridMod  ! ESMF physical grid class
       use ESMF_GridMod      ! ESMF grid   class
@@ -58,14 +60,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridNearNbr.F90,v 1.10 2004/01/28 21:46:49 nscollins Exp $'
+      '$Id: ESMF_RegridNearNbr.F90,v 1.18.4.1 2006/11/16 00:15:40 cdeluca Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_RegridConstructNearNbr
 
@@ -77,7 +79,7 @@
 !     This interface provides a single entry to the Regrid construct methods 
 !     specifically for a nearest-neighbor distance-weighted regridding. 
 !
-!EOP
+!EOPI
       end interface
 !
 !==============================================================================
@@ -89,7 +91,9 @@
 ! This section includes the nearest-neighbor Regrid construct methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridConsByFieldNearNbr"
+!BOPI
 ! !IROUTINE: ESMF_RegridConsByFieldNearNbr - Constructs nearest-neighbor Regrid structure for a field pair
 
 ! !INTERFACE:
@@ -110,7 +114,7 @@
       integer, intent(in), optional :: &
          num_nbrs       ! number of near neighbors to use in interpolation
 
-      integer, intent(out) :: rc
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Given a source field and destination field (and their attached
@@ -134,51 +138,54 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
+
+      !integer ::           &
+      !  i,j,n,iDE,iter,   &! loop counters
+      !  iii,jjj,          &! more loop counters
+      !  inbr,nnbrs,       &! number of neighbors
+      !  tot_dst_DEs,      &! total num DEs in destination grid distribution
+      !  tot_src_DEs,      &! total num DEs in source      grid distribution
+      !  loc_dst_DEs,      &! num of local DEs in dest   distribution
+      !  loc_src_DEs,      &! num of local DEs in source distribution
+      !  nx_src,           &! dimension size of local DE in i-direction
+      !  ny_src,           &! dimension size of local DE in j-direction
+      !  noverlap_src_DEs, &! num overlapping source DEs
+      !  ib_dst, ie_dst,   &! beg, end of exclusive domain in i-dir of dest grid
+      !  jb_dst, je_dst,   &! beg, end of exclusive domain in j-dir of dest grid
 
       integer ::           &
-         i,j,n,iDE,iter,   &! loop counters
-         iii,jjj,          &! more loop counters
-         inbr,nnbrs,       &! number of neighbors
-         tot_dst_DEs,      &! total num DEs in destination grid distribution
-         tot_src_DEs,      &! total num DEs in source      grid distribution
-         loc_dst_DEs,      &! num of local DEs in dest   distribution
-         loc_src_DEs,      &! num of local DEs in source distribution
-         nx_src,           &! dimension size of local DE in i-direction
-         ny_src,           &! dimension size of local DE in j-direction
-         noverlap_src_DEs, &! num overlapping source DEs
-         ib_dst, ie_dst,   &! beg, end of exclusive domain in i-dir of dest grid
-         jb_dst, je_dst,   &! beg, end of exclusive domain in j-dir of dest grid
-         status             ! error flag
+         localrc            ! error flag
 
-      integer, dimension(:,:), allocatable :: &
-         srcAdd             ! src neighbor addresses (nnbr,3)
+      !integer, dimension(:,:), allocatable :: &
+      !   srcAdd             ! src neighbor addresses (nnbr,3)
 
-      integer, dimension(:,:,:), allocatable :: &
-         dstadd             ! address in dest grid (i,j,DE)
+      !integer, dimension(:,:,:), allocatable :: &
+      !   dstadd             ! address in dest grid (i,j,DE)
          
-      real(ESMF_KIND_R8), dimension(:), allocatable :: &
-         weights,          &! normalized distance to each neighbor
-         wgtstmp            ! temp for consistency with AddLink call
+      !real(ESMF_KIND_R8), dimension(:), allocatable :: &
+      !   weights,          &! normalized distance to each neighbor
+      !   wgtstmp            ! temp for consistency with AddLink call
 
-      real(ESMF_KIND_R8) :: &
-         distance,         &! distance to current neighbor
-         x1, y1,           &! dst grid x,y coordinates
-         x2, y2             ! src grid x,y coordinates
+      !real(ESMF_KIND_R8) :: &
+      !   distance,         &! distance to current neighbor
+      !   x1, y1,           &! dst grid x,y coordinates
+      !   x2, y2             ! src grid x,y coordinates
 
-      real (ESMF_KIND_R8), dimension(:,:,:), allocatable :: &
-         src_center_x,      &! cell center x-coord for gathered source grid
-         src_center_y        ! cell center y-coord for gathered source grid
+      !real (ESMF_KIND_R8), dimension(:,:,:), allocatable :: &
+      !   src_center_x,      &! cell center x-coord for gathered source grid
+      !   src_center_y        ! cell center y-coord for gathered source grid
 
 !
 !     Construct an empty regrid structure
 !
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-      rc = ESMF_SUCCESS
-      status = ESMF_SUCCESS
-
-      call ESMF_RegridConstructEmpty(ESMF_RegridConsByFieldNearNbr, status)
-      if (status /= ESMF_SUCCESS) rc = ESMF_FAILURE
+      call ESMF_RegridConstructEmpty(ESMF_RegridConsByFieldNearNbr, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       !
       ! Set name and field pointers
@@ -187,9 +194,11 @@
       !call ESMF_RegridTypeSet(ESMF_RegridConsByFieldNearNbr,          &
       !                        name=name, src_field = src_field,       &
       !                                   dst_field = dst_field,       &
-      !                                   method = ESMF_RegridMethod_NearNbr, &
-      !                                   rc = status)
-      if (status /= ESMF_SUCCESS) rc = ESMF_FAILURE
+      !                                   method = ESMF_REGRID_METHOD_NEAR_NBR, &
+      !                                   rc = localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       
       !
       ! Extract some grid information for use in this regrid.
@@ -199,7 +208,7 @@
       !Get grid associated with this field
       !dst_grid = ?
       !src_grid = ?
-      !call ESMF_GridGet(dst_grid, coord_system=coord_system, status)
+      !call ESMF_GridGet(dst_grid, coord_system=coord_system, localrc)
       !Check that src grid in same coord system
 
 
@@ -298,7 +307,7 @@
       !               y2 = src_center_y(iii,jjj,n)
       !
       !               distance = ESMF_GridComputeDistance(x1,y1,x2,y2,&
-      !                                               coord_system,status)
+      !                                               coord_system, localrc)
 
 !
 !                     check to see if this is closer than the other
@@ -370,7 +379,9 @@
       end function ESMF_RegridConsByFieldNearNbr
 
 !------------------------------------------------------------------------------
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridConsByBundleNearNbr"
+!BOPI
 ! !IROUTINE: ESMF_RegridConsByBundleNearNbr - Constructs nearest-neighbor Regrid structure for a bundle pair
 
 ! !INTERFACE:
@@ -410,7 +421,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       !TODO: Insert code here
       type (ESMF_RegridType) :: temp

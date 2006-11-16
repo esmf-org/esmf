@@ -1,12 +1,12 @@
-% $Id: LogErr_refdoc.ctex,v 1.9 2004/03/16 20:04:12 cdeluca Exp $
+% $Id: LogErr_refdoc.ctex,v 1.20.4.1 2006/11/16 00:15:35 cdeluca Exp $
 %
 % Earth System Modeling Framework
-% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Copyright 2002-2008, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 % NASA Goddard Space Flight Center.
-% Licensed under the GPL.
+% Licensed under the University of Illinois-NCSA License.
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -21,7 +21,7 @@
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{\Large {\bf LogErr Reference}}
-\newcommand{\myauthors}{\large Shep Smithline and Erik Kluzek}
+\newcommand{\myauthors}{\large Shep Smithline,Erik Kluzek and Chuck Panaccione}
 #endif
 
 #ifdef STANDALONE
@@ -49,16 +49,23 @@
 \input{../Infrastructure/LogErr/doc/LogErr_desc}
 #endif
 
+\subsection{LogErr Options}
+#ifdef STANDALONE
+\input{LogErr_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/LogErr/doc/LogErr_options}
+#endif
+
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{LogErr_usage}
-\input{LogErr_fex}
+\input{ESMF_LogErrEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/LogErr/doc/LogErr_usage}
-\input{../Infrastructure/LogErr/doc/LogErr_fex}
+\input{../Infrastructure/LogErr/doc/ESMF_LogErrEx_fapi}
 #endif
 
-\subsection{Restrictions}
+\subsection{Restrictions and Future Work}
 #ifdef STANDALONE
 \input{LogErr_rest}
 #elif defined(CONSTITUENT)
@@ -72,26 +79,19 @@
 \input{../Infrastructure/LogErr/doc/LogErr_implnotes}
 #endif
 
-\subsection{Global Parameters and Definitions}
+\subsection{Object Model}
 #ifdef STANDALONE
-\input{Log_param}
-\input{Err_param}
+\input{LogErr_obj.tex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/Log_param}
-\input{../Infrastructure/LogErr/doc/Err_param}
+\input{../Infrastructure/LogErr/doc/LogErr_obj.tex}
 #endif
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{ESMF_LogErr_fapi}
+\input{../../Util/doc/ESMF_LogErr_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/ESMF_LogErr_fapi}
+\input{../Infrastructure/Util/doc/ESMF_LogErr_fapi}
 #endif
-
-%#ifdef STANDALONE
-%\section{Review Status}
-%\input{LogErr_desrev}
-%#endif
 
 %#ifdef STANDALONE
 %\section{Glossary}

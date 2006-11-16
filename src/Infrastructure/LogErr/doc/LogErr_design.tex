@@ -1,22 +1,46 @@
-% $Id: LogErr_design.tex,v 1.3 2004/03/16 20:04:12 cdeluca Exp $
+% $Id: LogErr_design.tex,v 1.8.6.1 2006/11/16 00:15:35 cdeluca Exp $
+
+% Earth System Modeling Framework
+% Copyright 2002-2008, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
 
 %\subsection{Design/Implementation}
 
 ACTIONS
 
-1. The user opens a Log file and retrieves an  ESMF_Log handle via ESMF_LogOpen.
-2. The user sets the parameters of the Log file via ESMF_LogSet.
-3. The user gets the parameters of the Log file via ESMF_LogGet.
-4. The user writes to a buffer or writes directly to the Log file via ESMF_LogWrite depending on the settings.
+1. A default log will be initialized when {\tt ESMF} starts.
+
+2. The user sets the parameters of the Log file via {\tt ESMF\_LogSet}.
+
+3. The user gets the parameters of the Log file via {\tt ESMF\_LogGet}.
+
+4. The user writes to a buffer or writes directly to the Log file via 
+   {\tt ESMF\_LogWrite} depending on the settings.
+
 5. The user can flush the array via ESMF_LogFlush.
-6. The user can have up to ESMF_LOG_MAXARRAYS "files" or distinct "streams" open.
-7. There can be up to max_elements write messages in a single Log.
-8. The user closes the Log file via ESMF_LogClose.
-9. The user can re-open a previously closed log using ESMF_LogReopen
+
+6. PET numbers will be automnatically added to the log entries.
+
+7. The user can specify {\tt ESMF\_LOG\_SINGLE} which writes all entries from
+all PET numbers to a single file or {\tt ESMF\_LOG\_MULTI} which writes 
+entries to multiple files according to its PET number.
+
+8. The Log closes automatically when ESMF shuts down.
+
 
 ASSUMPTIONS
 
-1. Prior to closing, ESMF_LogFlush is always executed.
-2. Prior to halting, ESMF_LogFlush is always executed.
-3. If the number of elements in an ESMF_Log exceeds max_elements, a message is written to file and the buffer flushes.
+1. Prior to closing, {\tt ESMF\_LogFlush} is always executed.
+
+2. Prior to halting, {\tt ESMF\_LogFlush} is always executed and the {\tt Log}
+   will show that a halt occured.
+
+3. If the number of elements in an {\tt ESMF\_Log} exceeds {\tt maxElements, 
+   then the buffer flushes automatically and resets.
+
+
 

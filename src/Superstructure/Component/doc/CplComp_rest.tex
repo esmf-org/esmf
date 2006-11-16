@@ -1,0 +1,32 @@
+% $Id: CplComp_rest.tex,v 1.4.6.1 2006/11/16 00:15:53 cdeluca Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2008, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+%\subsubsection{Restrictions and Future Work}
+
+\begin{enumerate}
+
+\item {\bf No Transforms.}  Components must exchange data through 
+{\tt ESMF\_State} objects.  The input data are available at the time 
+the component code is called, and data to be returned to another 
+component are available
+when that code returns.  {\tt ESMF\_Xform} objects provide a way for
+a component to prepare data to be transformed and sent to another 
+component from within the execution of the component code.
+Transforms are not implemented in this version of the framework.
+
+\item {\bf No automatic unit conversions.}  The ESMF framework does not 
+currently contain tools for performing unit conversions, operations that 
+are fairly standard within Coupler Components.
+
+\item {\bf No accumulator.}  The ESMF does not have an accumulator tool, to
+perform time averaging of fields for coupling.  This is likely to be developed
+in the near term.
+
+\end{enumerate}

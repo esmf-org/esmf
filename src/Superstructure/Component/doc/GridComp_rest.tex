@@ -1,0 +1,42 @@
+% $Id: GridComp_rest.tex,v 1.4.6.1 2006/11/16 00:15:54 cdeluca Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2008, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+%\subsubsection{Restrictions and Future Work}
+
+\begin{enumerate}
+
+\item {\bf No Transforms.}  Components must exchange data through   
+{\tt ESMF\_State} objects.  The input data are available at the time 
+the user Component code is called, and data to be returned to another 
+Component are available when that code returns.  
+{\tt ESMF\_Xform} objects provide a way for
+a Component to prepare data to be transformed and 
+sent to another Component from within the execution of 
+the user Component code.
+Transforms are not implemented in this version of the framework.
+
+\item {\bf Data isolation.} 
+Gridded Components must only communicate with other
+components via data in State objects.  They must 
+not make direct references to data in other States.
+
+\item {\bf Namespace isolation.}
+If possible, Gridded Components should attempt to make 
+all data private, so public names do not interfere with data 
+in other components.
+
+\item {\bf Single execution mode.}
+It is not expected that a single Gridded Component be able 
+to function in both sequential and concurrent modes, although 
+Gridded Components of different types can be nested. For example,
+a concurrently called Gridded Component can contain several nested 
+sequential Gridded Components. 
+
+\end{enumerate}

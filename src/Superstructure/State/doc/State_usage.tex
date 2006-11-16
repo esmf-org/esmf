@@ -1,29 +1,105 @@
-% $Id: State_usage.tex,v 1.2 2003/10/23 13:20:56 cdeluca Exp $
+% $Id: State_usage.tex,v 1.5.6.1 2006/11/16 00:15:56 cdeluca Exp $
 %
 % Earth System Modeling Framework
-% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Copyright 2002-2008, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 % NASA Goddard Space Flight Center.
-% Licensed under the GPL.
+% Licensed under the University of Illinois-NCSA License.
 
 %\subsection{Use and Examples}
 
-A State object encapsulates all data being communicated into and
-out of a Gridded Component.  No private communication
-of data between Components is permitted in order to maintain the
-independence of Components; to enable Components to be replaced
-without rewriting the internal code inside the Component.
+A Gridded Component generally has one associated import 
+State and one export State.  Generally the States 
+associated with a Gridded Component will be created by 
+the Gridded Component's parent component.
+In many cases, the States will be created containing 
+no data.  Both the empty States and the
+newly created Gridded Component are passed
+by the parent component into the Gridded Component's initialize 
+method.  This is where the States get prepared for use 
+and the import State is first filled with data.
 
-States can be create and deleted, have data added or deleted from them,
-and queried for various kinds of information.
+States can be created without the Fields, Arrays, Bundles,
+and other States they will eventually contain in a number 
+of ways.  They can be created with names as placeholders where 
+these data items will eventually be.  When the States are passed 
+into the Gridded Component's initialize method, Field,
+Bundle, and Array create calls can be made in that method
+to replace the name placeholders with real data objects.
 
-Transform methods operate on States, doing regridding, interpolation,
-summation, averaging, transposes, and other operations needed to
-make the export State of one Component suitable for import to another
-Component.
+States can also be filled with data items that do not yet 
+have data allocated.  Fields, Bundles, and Arrays each have 
+methods that support their creation without actual data 
+allocation - the grid and metadata are set up but no
+Fortran array of data values is allocated.  In this approach, 
+when a State is passed into its associated Gridded Component's 
+initialize method, the incomplete Arrays, Fields, and 
+Bundles within the State can allocate or reference data 
+inside the initialize method.
 
-The CF naming convention for data should be followed.
+States are passed through the interfaces of the Gridded 
+and Coupler Components' run methods in order to carry data 
+between the components.  While we expect
+a Gridded Component's import State to be filled with data 
+during initialization, its export State will typically be
+filled over the course of its run method.  At the end of
+a Gridded Component's run method, the filled export State 
+is passed out through the argument list into a Coupler 
+Component's run method.  We recommend the convention that 
+it enters the Coupler Component as the Coupler Component's
+import State.  Here is it transformed into a form
+that another Gridded Component requires, and passed out
+of the Coupler Component as its export State.  It can then
+be passed into the run method of a recipient Gridded Component
+as that component's import State.
+
+While the above sounds complicated, the rule is simple:
+a State going into a component is an import State, and a 
+State leaving a component is an export State.
+
+Data items within a State can be marked needed or not needed,
+depending on whether they are required for a particular 
+application configuration.  If the item is marked not needed,
+the user can make the Gridded Component's initialize method 
+clever enough to not allocate the data for that item at all
+and not compute it within the Gridded Component code.
+For example, some diagnostics may not be desired for all 
+runs.
+
+Other flags will eventually be available for data items within 
+a State, such as data ready for reading or writing, data valid or 
+invalid, and data required for restart or not.  These are not
+yet fully implemented, so only the default value for each value 
+can be set at this time.
+
+Objects inside States are normally created in {\tt unison} where
+each PET executing a component makes the same object create call.
+If the object contains data, like a Field, each PET may have a
+different local chunk of the entire dataset but each Field has
+the same name and is logically one part of a single distributed 
+object.   As States are passed between components if any object
+in a State was not created in unison on all the current PETs 
+then some PETs have no object to pass into a
+communication method (e.g. regrid or data redistribution).
+A State method called reconcile must be called to broadcast 
+information about these objects to all PETs in a component;
+after which all PETs have a single uniform view of all objects.  
+
+If components are running in sequential mode on all available PETs
+and States are being passed between them there is no need to make
+the reconcile call since all PETs have a uniform view of the objects.
+However, if components are running on a subset of the PETs, as is
+usually the case when running in concurrent mode, then when States
+are passed into components which contain a superset of those PETs,
+for example, a Coupler Component, all PETs must call reconcile
+on the States before using them in any ESMF communication methods.
+The reconcile process broadcasts metadata information about objects
+which exist only on a subset of the PETs.  On PETs missing those
+objects it creates a {\it proxy} object which contains any
+attributes of the original object plus enough information for it
+to be a data source or destination for a regrid or data redistribution
+operation. 
 
 

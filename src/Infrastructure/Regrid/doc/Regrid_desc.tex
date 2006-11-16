@@ -1,13 +1,25 @@
-% $Id: Regrid_desc.tex,v 1.1 2003/01/23 18:18:25 nscollins Exp $
+% $Id: Regrid_desc.tex,v 1.7.2.1 2006/11/16 00:15:39 cdeluca Exp $
 %
 % Earth System Modeling Framework
-% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Copyright 2002-2008, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 % NASA Goddard Space Flight Center.
-% Licensed under the GPL.
+% Licensed under the University of Illinois-NCSA License.
 
-% <Describe class function and relation to other classes.>
 
-The Regrid class provides methods called by the Bundle and Field classes.
+Bundle, Field, and Array classes all have regrid methods that transform their
+data from one {\tt ESMF\_Grid} to another.  Regrid operations compute addresses
+and interpolation weights for remapping between different grids.  All
+the information necessary to perform a regridding, including {\tt ESMF\_Routes}
+to collect non-local data and the addresses and weights, are contained in the
+{\tt ESMF\_RouteHandle} which is returned to the user.  Since interpolation
+weights are based solely on the grids' geometries and addresses are stored
+as offsets, regrids can be shared by data classes providing
+they have the same {\tt ESMF\_Rellocs}.  Some of the algorithms and 
+implementation in ESMF's regridding routines are adapted from a software package
+called SCRIP that was developed at the Los Alamos National Laboratory by Phil
+Jones.  However, SCRIP is a serial code and the ESMF regridding routines have
+been parallelized.
+

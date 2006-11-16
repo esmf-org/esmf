@@ -1,12 +1,12 @@
-% $Id: PhysGrid_desc.tex,v 1.3 2003/11/13 23:44:45 jwolfe Exp $
+% $Id: PhysGrid_desc.tex,v 1.5.8.1 2006/11/16 00:15:38 cdeluca Exp $
 %
 % Earth System Modeling Framework
-% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Copyright 2002-2008, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 % NASA Goddard Space Flight Center.
-% Licensed under the GPL.
+% Licensed under the University of Illinois-NCSA License.
 
 % <Describe class function and relation to other classes.>
 
@@ -23,10 +23,10 @@ blahblah
 are named and can be of different types, including logical masks,
 multiplicative masks, and integer region IDs.  The defined types include:
 \begin{description}
-\item[ESMF\_GridMaskKind\_Unknown]
-\item[ESMF\_GridMaskKind\_Logical]
-\item[ESMF\_GridMaskKind\_Mult]
-\item[ESMF\_GridMaskKind\_RegionID]
+\item[ESMF\_GridMaskType\_Unknown]
+\item[ESMF\_GridMaskType\_Logical]
+\item[ESMF\_GridMaskType\_Mult]
+\item[ESMF\_GridMaskType\_RegionID]
 \end{description}
 \item {\bf PhysCoord} A physical coordinate carries information describing
 coordinate attributes like names and flags for special properties of a
@@ -55,9 +55,9 @@ types include:
 \item {\bf PhysRegion} Physical locations for a set of points defining regions of
 the grid (e.g. cell vertices or domains of influence).  Region types include:
 \begin{description}
-\item[ESMF\_RegionKind\_Unknown]
-\item[ESMF\_RegionKind\_Polygon]
-\item[ESMF\_RegionKind\_Ellipse]
+\item[ESMF\_RegionType\_Unknown]
+\item[ESMF\_RegionType\_Polygon]
+\item[ESMF\_RegionType\_Ellipse]
 \end{description}
 \end{itemize}
 

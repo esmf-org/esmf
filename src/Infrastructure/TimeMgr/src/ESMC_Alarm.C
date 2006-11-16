@@ -1,12 +1,12 @@
-// $Id: ESMC_Alarm.C,v 1.54.4.1 2006/09/12 14:52:45 samsoncheung Exp $
+// $Id: ESMC_Alarm.C,v 1.54.4.2 2006/11/16 00:15:45 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 // ESMC Alarm method code (body) file
 //
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.54.4.1 2006/09/12 14:52:45 samsoncheung Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.54.4.2 2006/11/16 00:15:45 cdeluca Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter

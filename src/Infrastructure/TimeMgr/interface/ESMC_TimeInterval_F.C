@@ -1,12 +1,12 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.29 2004/03/10 03:05:01 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.38.4.1 2006/11/16 00:15:45 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
 //
@@ -17,7 +17,6 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <ESMC.h>
 #include <ESMC_F90Interface.h>
 #include <ESMC_TimeInterval.h>
 //------------------------------------------------------------------------------
@@ -36,7 +35,7 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN(c_esmc_timeintervalset)(ESMC_TimeInterval *ptr,
+       void FTN(c_esmc_timeintervalsetdur)(ESMC_TimeInterval *ptr,
                                  ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
                                  ESMF_KIND_I4 *mm, ESMF_KIND_I8 *mm_i8,
                                  ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
@@ -49,8 +48,52 @@ extern "C" {
                                  ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
                                  ESMF_KIND_R8 *ns_r8,
                                  ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
-                                 ESMC_Time *startTime, ESMC_Time *endTime,
-                                 ESMC_Calendar **calendar, int *status) {
+                                 int *status) {
+          int rc = (ptr)->ESMC_TimeIntervalSet(
+                       ESMC_NOT_PRESENT_FILTER(yy),
+                       ESMC_NOT_PRESENT_FILTER(yy_i8),
+                       ESMC_NOT_PRESENT_FILTER(mm),
+                       ESMC_NOT_PRESENT_FILTER(mm_i8),
+                       ESMC_NOT_PRESENT_FILTER(d),
+                       ESMC_NOT_PRESENT_FILTER(d_i8),
+                       ESMC_NOT_PRESENT_FILTER(h),
+                       ESMC_NOT_PRESENT_FILTER(m),
+                       ESMC_NOT_PRESENT_FILTER(s),
+                       ESMC_NOT_PRESENT_FILTER(s_i8),
+                       ESMC_NOT_PRESENT_FILTER(ms),
+                       ESMC_NOT_PRESENT_FILTER(us),
+                       ESMC_NOT_PRESENT_FILTER(ns),
+                       ESMC_NOT_PRESENT_FILTER(d_r8),
+                       ESMC_NOT_PRESENT_FILTER(h_r8),
+                       ESMC_NOT_PRESENT_FILTER(m_r8),
+                       ESMC_NOT_PRESENT_FILTER(s_r8),
+                       ESMC_NOT_PRESENT_FILTER(ms_r8),
+                       ESMC_NOT_PRESENT_FILTER(us_r8),
+                       ESMC_NOT_PRESENT_FILTER(ns_r8),
+                       ESMC_NOT_PRESENT_FILTER(sN),
+                       ESMC_NOT_PRESENT_FILTER(sD),
+                       ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER, 
+                       ESMC_NULL_POINTER, 
+                       ESMC_NULL_POINTER );
+          if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_timeintervalsetdurstart)(ESMC_TimeInterval *ptr,
+                                 ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
+                                 ESMF_KIND_I4 *mm, ESMF_KIND_I8 *mm_i8,
+                                 ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
+                                 ESMF_KIND_I4 *h,  ESMF_KIND_I4 *m,
+                                 ESMF_KIND_I4 *s,  ESMF_KIND_I8 *s_i8,
+                                 ESMF_KIND_I4 *ms, ESMF_KIND_I4 *us,
+                                 ESMF_KIND_I4 *ns,
+                                 ESMF_KIND_R8 *d_r8,  ESMF_KIND_R8 *h_r8,
+                                 ESMF_KIND_R8 *m_r8,  ESMF_KIND_R8 *s_r8,
+                                 ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
+                                 ESMF_KIND_R8 *ns_r8,
+                                 ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
+                                 ESMC_Time *startTime,
+                                 int *status) {
           int rc = (ptr)->ESMC_TimeIntervalSet(
                        ESMC_NOT_PRESENT_FILTER(yy),
                        ESMC_NOT_PRESENT_FILTER(yy_i8),
@@ -75,12 +118,13 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(sN),
                        ESMC_NOT_PRESENT_FILTER(sD),
                        ESMC_NOT_PRESENT_FILTER(startTime),
-                       ESMC_NOT_PRESENT_FILTER(endTime),
-                       ESMC_NOT_PRESENT_FILTER(calendar) );
+                       ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_timeintervalget)(ESMC_TimeInterval *ptr,
+       void FTN(c_esmc_timeintervalsetdurcal)(ESMC_TimeInterval *ptr,
                                  ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
                                  ESMF_KIND_I4 *mm, ESMF_KIND_I8 *mm_i8,
                                  ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
@@ -93,11 +137,104 @@ extern "C" {
                                  ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
                                  ESMF_KIND_R8 *ns_r8,
                                  ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
-                                 ESMC_Time *startTime, ESMC_Time *endTime,
-                                 ESMC_Calendar **calendar, 
-                                 ESMC_Time *startTimeIn, ESMC_Time *endTimeIn,
-                                 ESMC_Calendar **calendarIn, 
-                                 char *timeString, int *status) {
+                                 ESMC_Calendar **calendar,
+                                 int *status) {
+          int rc = (ptr)->ESMC_TimeIntervalSet(
+                       ESMC_NOT_PRESENT_FILTER(yy),
+                       ESMC_NOT_PRESENT_FILTER(yy_i8),
+                       ESMC_NOT_PRESENT_FILTER(mm),
+                       ESMC_NOT_PRESENT_FILTER(mm_i8),
+                       ESMC_NOT_PRESENT_FILTER(d),
+                       ESMC_NOT_PRESENT_FILTER(d_i8),
+                       ESMC_NOT_PRESENT_FILTER(h),
+                       ESMC_NOT_PRESENT_FILTER(m),
+                       ESMC_NOT_PRESENT_FILTER(s),
+                       ESMC_NOT_PRESENT_FILTER(s_i8),
+                       ESMC_NOT_PRESENT_FILTER(ms),
+                       ESMC_NOT_PRESENT_FILTER(us),
+                       ESMC_NOT_PRESENT_FILTER(ns),
+                       ESMC_NOT_PRESENT_FILTER(d_r8),
+                       ESMC_NOT_PRESENT_FILTER(h_r8),
+                       ESMC_NOT_PRESENT_FILTER(m_r8),
+                       ESMC_NOT_PRESENT_FILTER(s_r8),
+                       ESMC_NOT_PRESENT_FILTER(ms_r8),
+                       ESMC_NOT_PRESENT_FILTER(us_r8),
+                       ESMC_NOT_PRESENT_FILTER(ns_r8),
+                       ESMC_NOT_PRESENT_FILTER(sN),
+                       ESMC_NOT_PRESENT_FILTER(sD),
+                       ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER,
+                       ESMC_NOT_PRESENT_FILTER(calendar),
+                       ESMC_NULL_POINTER );
+          if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_timeintervalsetdurcaltyp)(ESMC_TimeInterval *ptr,
+                                 ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
+                                 ESMF_KIND_I4 *mm, ESMF_KIND_I8 *mm_i8,
+                                 ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
+                                 ESMF_KIND_I4 *h,  ESMF_KIND_I4 *m,
+                                 ESMF_KIND_I4 *s,  ESMF_KIND_I8 *s_i8,
+                                 ESMF_KIND_I4 *ms, ESMF_KIND_I4 *us,
+                                 ESMF_KIND_I4 *ns,
+                                 ESMF_KIND_R8 *d_r8,  ESMF_KIND_R8 *h_r8,
+                                 ESMF_KIND_R8 *m_r8,  ESMF_KIND_R8 *s_r8,
+                                 ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
+                                 ESMF_KIND_R8 *ns_r8,
+                                 ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
+                                 ESMC_CalendarType *calendarType,
+                                 int *status) {
+          int rc = (ptr)->ESMC_TimeIntervalSet(
+                       ESMC_NOT_PRESENT_FILTER(yy),
+                       ESMC_NOT_PRESENT_FILTER(yy_i8),
+                       ESMC_NOT_PRESENT_FILTER(mm),
+                       ESMC_NOT_PRESENT_FILTER(mm_i8),
+                       ESMC_NOT_PRESENT_FILTER(d),
+                       ESMC_NOT_PRESENT_FILTER(d_i8),
+                       ESMC_NOT_PRESENT_FILTER(h),
+                       ESMC_NOT_PRESENT_FILTER(m),
+                       ESMC_NOT_PRESENT_FILTER(s),
+                       ESMC_NOT_PRESENT_FILTER(s_i8),
+                       ESMC_NOT_PRESENT_FILTER(ms),
+                       ESMC_NOT_PRESENT_FILTER(us),
+                       ESMC_NOT_PRESENT_FILTER(ns),
+                       ESMC_NOT_PRESENT_FILTER(d_r8),
+                       ESMC_NOT_PRESENT_FILTER(h_r8),
+                       ESMC_NOT_PRESENT_FILTER(m_r8),
+                       ESMC_NOT_PRESENT_FILTER(s_r8),
+                       ESMC_NOT_PRESENT_FILTER(ms_r8),
+                       ESMC_NOT_PRESENT_FILTER(us_r8),
+                       ESMC_NOT_PRESENT_FILTER(ns_r8),
+                       ESMC_NOT_PRESENT_FILTER(sN),
+                       ESMC_NOT_PRESENT_FILTER(sD),
+                       ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER,
+                       ESMC_NOT_PRESENT_FILTER(calendarType) );
+          if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_timeintervalgetdur)(ESMC_TimeInterval *ptr,
+                                 ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
+                                 ESMF_KIND_I4 *mm, ESMF_KIND_I8 *mm_i8,
+                                 ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
+                                 ESMF_KIND_I4 *h,  ESMF_KIND_I4 *m,
+                                 ESMF_KIND_I4 *s,  ESMF_KIND_I8 *s_i8,
+                                 ESMF_KIND_I4 *ms, ESMF_KIND_I4 *us,
+                                 ESMF_KIND_I4 *ns,
+                                 ESMF_KIND_R8 *d_r8,  ESMF_KIND_R8 *h_r8,
+                                 ESMF_KIND_R8 *m_r8,  ESMF_KIND_R8 *s_r8,
+                                 ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
+                                 ESMF_KIND_R8 *ns_r8,
+                                 ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
+                                 ESMC_Time *startTime,
+                                 ESMC_Calendar **calendar,
+                                 ESMC_CalendarType *calendarType,
+                                 int *timeStringLen, int *tempTimeStringLen,
+                                 char *tempTimeString,
+                                 int *timeStringLenISOFrac,
+                                 int *tempTimeStringLenISOFrac,
+                                 char *tempTimeStringISOFrac, int *status) {
           int rc = (ptr)->ESMC_TimeIntervalGet(
                        ESMC_NOT_PRESENT_FILTER(yy),
                        ESMC_NOT_PRESENT_FILTER(yy_i8),
@@ -122,103 +259,346 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(sN),
                        ESMC_NOT_PRESENT_FILTER(sD),
                        ESMC_NOT_PRESENT_FILTER(startTime),
-                       ESMC_NOT_PRESENT_FILTER(endTime),
+                       ESMC_NULL_POINTER,
                        ESMC_NOT_PRESENT_FILTER(calendar), 
+                       ESMC_NOT_PRESENT_FILTER(calendarType), 
+                       ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER,
+                                          // always present internal arguments
+                                              *timeStringLen,
+	                                       tempTimeStringLen,
+                                               tempTimeString,
+                                              *timeStringLenISOFrac,
+	                                       tempTimeStringLenISOFrac,
+                                               tempTimeStringISOFrac);
+          if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_timeintervalgetdurstart)(ESMC_TimeInterval *ptr,
+                                 ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
+                                 ESMF_KIND_I4 *mm, ESMF_KIND_I8 *mm_i8,
+                                 ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
+                                 ESMF_KIND_I4 *h,  ESMF_KIND_I4 *m,
+                                 ESMF_KIND_I4 *s,  ESMF_KIND_I8 *s_i8,
+                                 ESMF_KIND_I4 *ms, ESMF_KIND_I4 *us,
+                                 ESMF_KIND_I4 *ns,
+                                 ESMF_KIND_R8 *d_r8,  ESMF_KIND_R8 *h_r8,
+                                 ESMF_KIND_R8 *m_r8,  ESMF_KIND_R8 *s_r8,
+                                 ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
+                                 ESMF_KIND_R8 *ns_r8,
+                                 ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
+                                 ESMC_Time *startTime,
+                                 ESMC_Calendar **calendar, 
+                                 ESMC_CalendarType *calendarType, 
+                                 ESMC_Time *startTimeIn,
+                                 int *timeStringLen, int *tempTimeStringLen,
+                                 char *tempTimeString,
+                                 int *timeStringLenISOFrac,
+                                 int *tempTimeStringLenISOFrac,
+                                 char *tempTimeStringISOFrac, int *status) {
+          int rc = (ptr)->ESMC_TimeIntervalGet(
+                       ESMC_NOT_PRESENT_FILTER(yy),
+                       ESMC_NOT_PRESENT_FILTER(yy_i8),
+                       ESMC_NOT_PRESENT_FILTER(mm),
+                       ESMC_NOT_PRESENT_FILTER(mm_i8),
+                       ESMC_NOT_PRESENT_FILTER(d),
+                       ESMC_NOT_PRESENT_FILTER(d_i8),
+                       ESMC_NOT_PRESENT_FILTER(h),
+                       ESMC_NOT_PRESENT_FILTER(m),
+                       ESMC_NOT_PRESENT_FILTER(s),
+                       ESMC_NOT_PRESENT_FILTER(s_i8),
+                       ESMC_NOT_PRESENT_FILTER(ms),
+                       ESMC_NOT_PRESENT_FILTER(us),
+                       ESMC_NOT_PRESENT_FILTER(ns),
+                       ESMC_NOT_PRESENT_FILTER(d_r8),
+                       ESMC_NOT_PRESENT_FILTER(h_r8),
+                       ESMC_NOT_PRESENT_FILTER(m_r8),
+                       ESMC_NOT_PRESENT_FILTER(s_r8),
+                       ESMC_NOT_PRESENT_FILTER(ms_r8),
+                       ESMC_NOT_PRESENT_FILTER(us_r8),
+                       ESMC_NOT_PRESENT_FILTER(ns_r8),
+                       ESMC_NOT_PRESENT_FILTER(sN),
+                       ESMC_NOT_PRESENT_FILTER(sD),
+                       ESMC_NOT_PRESENT_FILTER(startTime),
+                       ESMC_NULL_POINTER,
+                       ESMC_NOT_PRESENT_FILTER(calendar), 
+                       ESMC_NOT_PRESENT_FILTER(calendarType), 
                        ESMC_NOT_PRESENT_FILTER(startTimeIn),
-                       ESMC_NOT_PRESENT_FILTER(endTimeIn),
+                       ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER,
+                                          // always present internal arguments
+                                              *timeStringLen,
+	                                       tempTimeStringLen,
+                                               tempTimeString,
+                                              *timeStringLenISOFrac,
+	                                       tempTimeStringLenISOFrac,
+                                               tempTimeStringISOFrac);
+          if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_timeintervalgetdurcal)(ESMC_TimeInterval *ptr,
+                                 ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
+                                 ESMF_KIND_I4 *mm, ESMF_KIND_I8 *mm_i8,
+                                 ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
+                                 ESMF_KIND_I4 *h,  ESMF_KIND_I4 *m,
+                                 ESMF_KIND_I4 *s,  ESMF_KIND_I8 *s_i8,
+                                 ESMF_KIND_I4 *ms, ESMF_KIND_I4 *us,
+                                 ESMF_KIND_I4 *ns,
+                                 ESMF_KIND_R8 *d_r8,  ESMF_KIND_R8 *h_r8,
+                                 ESMF_KIND_R8 *m_r8,  ESMF_KIND_R8 *s_r8,
+                                 ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
+                                 ESMF_KIND_R8 *ns_r8,
+                                 ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
+                                 ESMC_Time *startTime,
+                                 ESMC_Calendar **calendar, 
+                                 ESMC_CalendarType *calendarType, 
+                                 ESMC_Calendar **calendarIn, 
+                                 int *timeStringLen, int *tempTimeStringLen,
+                                 char *tempTimeString,
+                                 int *timeStringLenISOFrac,
+                                 int *tempTimeStringLenISOFrac,
+                                 char *tempTimeStringISOFrac, int *status) {
+          int rc = (ptr)->ESMC_TimeIntervalGet(
+                       ESMC_NOT_PRESENT_FILTER(yy),
+                       ESMC_NOT_PRESENT_FILTER(yy_i8),
+                       ESMC_NOT_PRESENT_FILTER(mm),
+                       ESMC_NOT_PRESENT_FILTER(mm_i8),
+                       ESMC_NOT_PRESENT_FILTER(d),
+                       ESMC_NOT_PRESENT_FILTER(d_i8),
+                       ESMC_NOT_PRESENT_FILTER(h),
+                       ESMC_NOT_PRESENT_FILTER(m),
+                       ESMC_NOT_PRESENT_FILTER(s),
+                       ESMC_NOT_PRESENT_FILTER(s_i8),
+                       ESMC_NOT_PRESENT_FILTER(ms),
+                       ESMC_NOT_PRESENT_FILTER(us),
+                       ESMC_NOT_PRESENT_FILTER(ns),
+                       ESMC_NOT_PRESENT_FILTER(d_r8),
+                       ESMC_NOT_PRESENT_FILTER(h_r8),
+                       ESMC_NOT_PRESENT_FILTER(m_r8),
+                       ESMC_NOT_PRESENT_FILTER(s_r8),
+                       ESMC_NOT_PRESENT_FILTER(ms_r8),
+                       ESMC_NOT_PRESENT_FILTER(us_r8),
+                       ESMC_NOT_PRESENT_FILTER(ns_r8),
+                       ESMC_NOT_PRESENT_FILTER(sN),
+                       ESMC_NOT_PRESENT_FILTER(sD),
+                       ESMC_NOT_PRESENT_FILTER(startTime),
+                       ESMC_NULL_POINTER,
+                       ESMC_NOT_PRESENT_FILTER(calendar), 
+                       ESMC_NOT_PRESENT_FILTER(calendarType), 
+                       ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER,
                        ESMC_NOT_PRESENT_FILTER(calendarIn),
-                       ESMC_NOT_PRESENT_FILTER(timeString) );
+                       ESMC_NULL_POINTER,
+                                          // always present internal arguments
+                                              *timeStringLen,
+	                                       tempTimeStringLen,
+                                               tempTimeString,
+                                              *timeStringLenISOFrac,
+	                                       tempTimeStringLenISOFrac,
+                                               tempTimeStringISOFrac);
+          if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_timeintervalgetdurcaltyp)(ESMC_TimeInterval *ptr,
+                                 ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
+                                 ESMF_KIND_I4 *mm, ESMF_KIND_I8 *mm_i8,
+                                 ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
+                                 ESMF_KIND_I4 *h,  ESMF_KIND_I4 *m,
+                                 ESMF_KIND_I4 *s,  ESMF_KIND_I8 *s_i8,
+                                 ESMF_KIND_I4 *ms, ESMF_KIND_I4 *us,
+                                 ESMF_KIND_I4 *ns,
+                                 ESMF_KIND_R8 *d_r8,  ESMF_KIND_R8 *h_r8,
+                                 ESMF_KIND_R8 *m_r8,  ESMF_KIND_R8 *s_r8,
+                                 ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
+                                 ESMF_KIND_R8 *ns_r8,
+                                 ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
+                                 ESMC_Time *startTime,
+                                 ESMC_Calendar **calendar, 
+                                 ESMC_CalendarType *calendarType, 
+                                 ESMC_CalendarType *calendarTypeIn, 
+                                 int *timeStringLen, int *tempTimeStringLen,
+                                 char *tempTimeString,
+                                 int *timeStringLenISOFrac,
+                                 int *tempTimeStringLenISOFrac,
+                                 char *tempTimeStringISOFrac, int *status) {
+          int rc = (ptr)->ESMC_TimeIntervalGet(
+                       ESMC_NOT_PRESENT_FILTER(yy),
+                       ESMC_NOT_PRESENT_FILTER(yy_i8),
+                       ESMC_NOT_PRESENT_FILTER(mm),
+                       ESMC_NOT_PRESENT_FILTER(mm_i8),
+                       ESMC_NOT_PRESENT_FILTER(d),
+                       ESMC_NOT_PRESENT_FILTER(d_i8),
+                       ESMC_NOT_PRESENT_FILTER(h),
+                       ESMC_NOT_PRESENT_FILTER(m),
+                       ESMC_NOT_PRESENT_FILTER(s),
+                       ESMC_NOT_PRESENT_FILTER(s_i8),
+                       ESMC_NOT_PRESENT_FILTER(ms),
+                       ESMC_NOT_PRESENT_FILTER(us),
+                       ESMC_NOT_PRESENT_FILTER(ns),
+                       ESMC_NOT_PRESENT_FILTER(d_r8),
+                       ESMC_NOT_PRESENT_FILTER(h_r8),
+                       ESMC_NOT_PRESENT_FILTER(m_r8),
+                       ESMC_NOT_PRESENT_FILTER(s_r8),
+                       ESMC_NOT_PRESENT_FILTER(ms_r8),
+                       ESMC_NOT_PRESENT_FILTER(us_r8),
+                       ESMC_NOT_PRESENT_FILTER(ns_r8),
+                       ESMC_NOT_PRESENT_FILTER(sN),
+                       ESMC_NOT_PRESENT_FILTER(sD),
+                       ESMC_NOT_PRESENT_FILTER(startTime),
+                       ESMC_NULL_POINTER,
+                       ESMC_NOT_PRESENT_FILTER(calendar), 
+                       ESMC_NOT_PRESENT_FILTER(calendarType), 
+                       ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER,
+                       ESMC_NOT_PRESENT_FILTER(calendarTypeIn),
+                                          // always present internal arguments
+                                              *timeStringLen,
+	                                       tempTimeStringLen,
+                                               tempTimeString,
+                                              *timeStringLenISOFrac,
+	                                       tempTimeStringLenISOFrac,
+                                               tempTimeStringISOFrac);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_timeintervalabsvalue)(ESMC_TimeInterval *ptr,
-                                    ESMC_TimeInterval *timeIntervalAbsValue) {
-           *timeIntervalAbsValue = (ptr)->ESMC_TimeIntervalAbsValue();
+                                    ESMC_TimeInterval *timeintervalAbsValue) {
+           *timeintervalAbsValue = (ptr)->ESMC_TimeIntervalAbsValue();
        }
 
        void FTN(c_esmc_timeintervalnegabsvalue)(ESMC_TimeInterval *ptr,
-                                  ESMC_TimeInterval *timeIntervalNegAbsValue) {
-           *timeIntervalNegAbsValue = (ptr)->ESMC_TimeIntervalNegAbsValue();
+                                  ESMC_TimeInterval *timeintervalNegAbsValue) {
+           *timeintervalNegAbsValue = (ptr)->ESMC_TimeIntervalNegAbsValue();
        }
 
-       void FTN(c_esmc_timeintervalrquot)(ESMC_TimeInterval *timeInterval1,
-                                          ESMC_TimeInterval *timeInterval2,
-                                          ESMF_KIND_R8 *timeIntervalRQuot) {
-           *timeIntervalRQuot = (*timeInterval1 / *timeInterval2);
+       void FTN(c_esmc_timeintervalrquot)(ESMC_TimeInterval *timeinterval1,
+                                          ESMC_TimeInterval *timeinterval2,
+                                          ESMF_KIND_R8 *timeintervalRQuot) {
+           *timeintervalRQuot = (*timeinterval1 / *timeinterval2);
        }
 
-       void FTN(c_esmc_timeintervalquoti)(ESMC_TimeInterval *timeInterval,
+       void FTN(c_esmc_timeintervalquoti)(ESMC_TimeInterval *timeinterval,
                                         ESMF_KIND_I4 *divisor,
-                                        ESMC_TimeInterval *timeIntervalQuotI) {
-           *timeIntervalQuotI = (*timeInterval / *divisor);
+                                        ESMC_TimeInterval *timeintervalQuotI) {
+           *timeintervalQuotI = (*timeinterval / *divisor);
        }
 
-       void FTN(c_esmc_timeintervalquotr)(ESMC_TimeInterval *timeInterval,
+       void FTN(c_esmc_timeintervalquotr)(ESMC_TimeInterval *timeinterval,
                                         ESMF_KIND_R8 *divisor,
-                                        ESMC_TimeInterval *timeIntervalQuotR) {
-           *timeIntervalQuotR = (*timeInterval / *divisor);
+                                        ESMC_TimeInterval *timeintervalQuotR) {
+           *timeintervalQuotR = (*timeinterval / *divisor);
        }
 
-       void FTN(c_esmc_timeintervalfquot)(ESMC_TimeInterval *timeInterval1,
-                                          ESMC_TimeInterval *timeInterval2,
-                                          ESMC_Fraction *timeIntervalFQuot) {
-           *timeIntervalFQuot = 
-                        timeInterval1->ESMC_TimeIntervalDiv(*timeInterval2);
+       void FTN(c_esmc_timeintervalfquot)(ESMC_TimeInterval *timeinterval1,
+                                          ESMC_TimeInterval *timeinterval2,
+                                          ESMC_Fraction *timeintervalFQuot) {
+           *timeintervalFQuot = 
+                        timeinterval1->ESMC_TimeIntervalDiv(*timeinterval2);
        }
 
-       void FTN(c_esmc_timeintervalremainder)(ESMC_TimeInterval *timeInterval1,
-                                              ESMC_TimeInterval *timeInterval2,
-                                    ESMC_TimeInterval *timeIntervalRemainder) {
-           *timeIntervalRemainder = (*timeInterval1 % *timeInterval2);
+       void FTN(c_esmc_timeintervalremainder)(ESMC_TimeInterval *timeinterval1,
+                                              ESMC_TimeInterval *timeinterval2,
+                                    ESMC_TimeInterval *timeintervalRemainder) {
+           *timeintervalRemainder = (*timeinterval1 % *timeinterval2);
        }
 
-       void FTN(c_esmc_timeintervalprodti)(ESMC_TimeInterval *timeInterval,
+       void FTN(c_esmc_timeintervalprodti)(ESMC_TimeInterval *timeinterval,
                                         ESMF_KIND_I4 *multiplier,
-                                        ESMC_TimeInterval *timeIntervalProdTI) {
-           *timeIntervalProdTI = (*timeInterval * *multiplier);
+                                        ESMC_TimeInterval *timeintervalProdTI) {
+           *timeintervalProdTI = (*timeinterval * *multiplier);
        }
 
        void FTN(c_esmc_timeintervalprodit)(ESMF_KIND_I4 *multiplier,
-                                        ESMC_TimeInterval *timeInterval,
-                                        ESMC_TimeInterval *timeIntervalProdIT) {
-           *timeIntervalProdIT = (*multiplier * *timeInterval);
+                                        ESMC_TimeInterval *timeinterval,
+                                        ESMC_TimeInterval *timeintervalProdIT) {
+           *timeintervalProdIT = (*multiplier * *timeinterval);
        }
 
-       void FTN(c_esmc_timeintervalprodtf)(ESMC_TimeInterval *timeInterval,
+       void FTN(c_esmc_timeintervalprodtf)(ESMC_TimeInterval *timeinterval,
                                         ESMC_Fraction *multiplier,
-                                        ESMC_TimeInterval *timeIntervalProdTF) {
-           *timeIntervalProdTF = (*timeInterval * *multiplier);
+                                        ESMC_TimeInterval *timeintervalProdTF) {
+           *timeintervalProdTF = (*timeinterval * *multiplier);
        }
 
        void FTN(c_esmc_timeintervalprodft)(ESMC_Fraction *multiplier,
-                                        ESMC_TimeInterval *timeInterval,
-                                        ESMC_TimeInterval *timeIntervalProdFT) {
-           *timeIntervalProdFT = (*multiplier * *timeInterval);
+                                        ESMC_TimeInterval *timeinterval,
+                                        ESMC_TimeInterval *timeintervalProdFT) {
+           *timeintervalProdFT = (*multiplier * *timeinterval);
        }
 
-       void FTN(c_esmc_timeintervalprodtr)(ESMC_TimeInterval *timeInterval,
+       void FTN(c_esmc_timeintervalprodtr)(ESMC_TimeInterval *timeinterval,
                                         ESMF_KIND_R8 *multiplier,
-                                        ESMC_TimeInterval *timeIntervalProdTR) {
-           *timeIntervalProdTR = (*timeInterval * *multiplier);
+                                        ESMC_TimeInterval *timeintervalProdTR) {
+           *timeintervalProdTR = (*timeinterval * *multiplier);
        }
 
        void FTN(c_esmc_timeintervalprodrt)(ESMF_KIND_R8 *multiplier,
-                                        ESMC_TimeInterval *timeInterval,
-                                        ESMC_TimeInterval *timeIntervalProdRT) {
-           *timeIntervalProdRT = (*multiplier * *timeInterval);
+                                        ESMC_TimeInterval *timeinterval,
+                                        ESMC_TimeInterval *timeintervalProdRT) {
+           *timeintervalProdRT = (*multiplier * *timeinterval);
        }
 
-       void FTN(c_esmc_timeintervalsum)(ESMC_TimeInterval *timeInterval1,
-                                 ESMC_TimeInterval *timeInterval2,
-                                 ESMC_TimeInterval *esmf_timeIntervalSum) {
-           *esmf_timeIntervalSum = (*timeInterval1 + *timeInterval2);
+       void FTN(c_esmc_timeintervalsum)(ESMC_TimeInterval *timeinterval1,
+                                 ESMC_TimeInterval *timeinterval2,
+                                 ESMC_TimeInterval *esmf_timeintervalSum) {
+           *esmf_timeintervalSum = (*timeinterval1 + *timeinterval2);
        }
 
-       void FTN(c_esmc_timeintervaldiff)(ESMC_TimeInterval *timeInterval1,
-                                 ESMC_TimeInterval *timeInterval2,
-                                 ESMC_TimeInterval *esmf_timeIntervalDiff) {
-           *esmf_timeIntervalDiff = (*timeInterval1 - *timeInterval2);
+       void FTN(c_esmc_timeintervaldiff)(ESMC_TimeInterval *timeinterval1,
+                                 ESMC_TimeInterval *timeinterval2,
+                                 ESMC_TimeInterval *esmf_timeintervalDiff) {
+           *esmf_timeintervalDiff = (*timeinterval1 - *timeinterval2);
        }
+
+       void FTN(c_esmc_timeintervalnegate)(ESMC_TimeInterval *timeinterval,
+                                 ESMC_TimeInterval *esmf_timeintervalNegate) {
+           *esmf_timeintervalNegate = (-(*timeinterval));
+       }
+
+       //
+       // overloaded comparison operators
+       //
+
+       void FTN(c_esmc_timeintervaleq)(ESMC_TimeInterval *timeinterval1,
+                                       ESMC_TimeInterval *timeinterval2,
+                                       int *esmf_timeintervalEQ) {
+           *esmf_timeintervalEQ = (int) (*timeinterval1 == *timeinterval2);
+       }
+
+       void FTN(c_esmc_timeintervalne)(ESMC_TimeInterval *timeinterval1,
+                                       ESMC_TimeInterval *timeinterval2,
+                                       int *esmf_timeintervalNE) {
+           *esmf_timeintervalNE = (int) (*timeinterval1 != *timeinterval2);
+       }
+
+       void FTN(c_esmc_timeintervallt)(ESMC_TimeInterval *timeinterval1,
+                                       ESMC_TimeInterval *timeinterval2,
+                                       int *esmf_timeintervalLT) {
+           *esmf_timeintervalLT = (int) (*timeinterval1 < *timeinterval2);
+       }
+
+       void FTN(c_esmc_timeintervalgt)(ESMC_TimeInterval *timeinterval1,
+                                       ESMC_TimeInterval *timeinterval2,
+                                       int *esmf_timeintervalGT) {
+           *esmf_timeintervalGT = (int) (*timeinterval1 > *timeinterval2);
+       }
+
+       void FTN(c_esmc_timeintervalle)(ESMC_TimeInterval *timeinterval1,
+                                       ESMC_TimeInterval *timeinterval2,
+                                       int *esmf_timeintervalLE) {
+           *esmf_timeintervalLE = (int) (*timeinterval1 <= *timeinterval2);
+       }
+
+       void FTN(c_esmc_timeintervalge)(ESMC_TimeInterval *timeinterval1,
+                                       ESMC_TimeInterval *timeinterval2,
+                                       int *esmf_timeintervalGE) {
+           *esmf_timeintervalGE = (int) (*timeinterval1 >= *timeinterval2);
+       }
+
 
        void FTN(c_esmc_timeintervalreadrestart)(ESMC_TimeInterval *ptr,
                                                 int *nameLen,

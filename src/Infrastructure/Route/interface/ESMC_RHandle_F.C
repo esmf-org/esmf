@@ -1,12 +1,12 @@
-// $Id: ESMC_RHandle_F.C,v 1.11 2004/03/04 18:13:03 nscollins Exp $
+// $Id: ESMC_RHandle_F.C,v 1.14.2.1 2006/11/16 00:15:42 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
-// Licensed under the GPL.
+// Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
 //
@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 #include <stdio.h>
 #include <string.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_RHandle.h"
 #include "ESMC_LocalArray.h"
@@ -125,31 +125,179 @@ extern "C" {
            *status = ESMC_RouteHandleDestroy(*ptr);
        }
 
+
        // the int needs to be an enum, the label needs to be added and handled
-       void FTN(c_esmc_routehandleget)(ESMC_RouteHandle **ptr, 
-                                       ESMC_HandleType *htype, 
-                                       ESMC_Route **r1, ESMC_Route **r2, 
-                                       ESMC_TransformValues **tv,
-                                       // char **label,   not null terminated
-                                       int *status) {
+       void FTN(c_esmc_routehandleget)(ESMC_RouteHandle **ptr, int *htype, 
+                               int *rt_count,  ESMC_HandleMapping *rmaptype,
+                               int *which_rt, ESMC_Route **r, 
+                               int *tv_count, ESMC_HandleMapping *tvmaptype,
+			       int *which_tv, ESMC_TransformValues **tv,
+                               char *label, int *status, int labellen) {
            if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
            }
-           *status = (*ptr)->ESMC_RouteHandleGet(htype, r1, r2, tv, (char **)(NULL));
+           *status = (*ptr)->ESMC_RouteHandleGet((ESMC_HandleType *)htype, 
+                                       rt_count, rmaptype, *which_rt, r, 
+                                       tv_count, tvmaptype, *which_tv, tv, 
+                                       (char **)(NULL));
+       }
+
+       // get a specific route
+       void FTN(c_esmc_routehandlegetroute)(ESMC_RouteHandle **ptr, 
+                                            int *which_rt, ESMC_Route **r,
+                                            int *status) {
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           *r = (*ptr)->ESMC_RouteHandleGetRoute(*which_rt);
+           *status = (*r != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
+       }
+
+       // get a specific tv
+       void FTN(c_esmc_routehandlegettvalues)(ESMC_RouteHandle **ptr, 
+                                              int *which_tv, 
+                                              ESMC_TransformValues **tv, 
+                                              int *status) {
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           *tv = (*ptr)->ESMC_RouteHandleGetTValues(*which_tv);
+           *status = (*tv != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
+       }
+
+       // get just interesting numbers
+       void FTN(c_esmc_routehandlegetinfo)(ESMC_RouteHandle **ptr, int *htype, 
+                                 int *rt_count, ESMC_HandleMapping *rmaptype,
+                                 int *tv_count, ESMC_HandleMapping *tvmaptype,
+                                 int *status) {
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           *status = (*ptr)->ESMC_RouteHandleGet((ESMC_HandleType *)htype, 
+                                                 rt_count, rmaptype, 0, NULL,
+                                                 tv_count, tvmaptype, 0, NULL,
+                                                 (char **)(NULL));
        }
 
        void FTN(c_esmc_routehandleset)(ESMC_RouteHandle **ptr, 
-                                       ESMC_HandleType *htype, 
-                                       ESMC_Route **r1, ESMC_Route **r2, 
+                                       int *htype, int *rt_count, 
+                                       ESMC_HandleMapping *rmaptype, 
+                                       int *which_rt, ESMC_Route **r, 
+                                       int *tv_count, 
+                                       ESMC_HandleMapping *tvmaptype, 
+                                       int *which_tv,
                                        ESMC_TransformValues **tv,
-                                       // char **label,   not null terminated
-                                       int *status) {
+                                       char *label,   // not null terminated
+                                       int *status, int labellen) {
+
            if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
            }
-           *status = (*ptr)->ESMC_RouteHandleSet(*htype, *r1, *r2, *tv, (char*)(NULL));
+           *status = (*ptr)->ESMC_RouteHandleSet(*(ESMC_HandleType *)htype, 
+                                                 *rt_count, *rmaptype,
+                                                 *which_rt, *r, *tv_count,
+                                                 *tvmaptype, *which_tv, *tv, 
+                                                 (char*)(NULL));
+       }
+
+       void FTN(c_esmc_routehandlesettype)(ESMC_RouteHandle **ptr, 
+                                           int *h, int *status)
+       {
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           *status = (*ptr)->ESMC_RouteHandleSetType(*(ESMC_HandleType *)h);
+       }
+
+       void FTN(c_esmc_routehandlesetroutecount)(ESMC_RouteHandle **ptr, 
+                                                 int *rtcount, int *status)
+       {
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           *status = (*ptr)->ESMC_RouteHandleSetRouteCount(*rtcount);
+       }
+
+       void FTN(c_esmc_routehandlesetrmaptype)(ESMC_RouteHandle **ptr, 
+					           ESMC_HandleMapping *rmaptype,
+                                                   int *status)
+       {
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           *status = (*ptr)->ESMC_RouteHandleSetRMapType(*rmaptype);
+       }
+
+       void FTN(c_esmc_routehandlesetroute)(ESMC_RouteHandle **ptr, 
+                                            int *which_rt, ESMC_Route **rh,
+                                            int *status)
+       {
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           *status = (*ptr)->ESMC_RouteHandleSetRoute(*which_rt, *rh);
+       }
+
+       void FTN(c_esmc_routehandlesettvcount)(ESMC_RouteHandle **ptr, 
+	 				      int *tvcount, int *status)
+       {
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           *status = (*ptr)->ESMC_RouteHandleSetTVCount(*tvcount);
+       }
+
+       void FTN(c_esmc_routehandlesettvmaptype)(ESMC_RouteHandle **ptr, 
+                                                ESMC_HandleMapping *tvmaptype,
+                                                int *status)
+       {
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           *status = (*ptr)->ESMC_RouteHandleSetTVMapType(*tvmaptype);
+       }
+
+       void FTN(c_esmc_routehandlesettvalues)(ESMC_RouteHandle **ptr, 
+                                              int *which_tv, 
+                                              ESMC_TransformValues **tv,
+                                              int *status)
+       {
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           *status = (*ptr)->ESMC_RouteHandleSetTValues(*which_tv, *tv);
+       }
+
+       void FTN(c_esmc_routehandlesetlabel)(ESMC_RouteHandle **ptr, 
+                                            char *label, int *status, 
+                                            int labellen)
+       {
+           char *tlabel;
+
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+
+           tlabel = new char[labellen+1];
+           strncpy(tlabel, label, labellen);
+           tlabel[labellen] = '\0';
+
+           *status = (*ptr)->ESMC_RouteHandleSetLabel(tlabel);
+  
+           delete [] tlabel;
        }
 
        void FTN(c_esmc_routehandlevalidate)(ESMC_RouteHandle **ptr, char *opts,
