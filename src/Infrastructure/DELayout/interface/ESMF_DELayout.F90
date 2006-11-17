@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.50.2.5 2006/11/16 22:16:06 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.50.2.6 2006/11/17 05:53:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research, 
@@ -150,7 +150,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.50.2.5 2006/11/16 22:16:06 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.50.2.6 2006/11/17 05:53:17 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -425,9 +425,8 @@ contains
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutCreate(delayout, vm, &
-      opt_deCountList(lbound(opt_deCountList,1)), len_deCountList, &
-      opt_petList(lbound(opt_petList,1)), len_petList, localrc)
+    call c_ESMC_DELayoutCreate(delayout, vm, opt_deCountList(1), len_deCountList, &
+      opt_petList(1), len_petList, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -577,10 +576,8 @@ contains
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutGet(delayout, deCount, dimCount, localDeCount, &
-      opt_localDeList(lbound(opt_localDeList,1)), len_localDeList, localDe, &
-      oneToOneFlag, logRectFlag, &
-      opt_deCountPerDim(lbound(opt_deCountPerDim,1)), len_deCountPerDim, &
-      localrc)
+      opt_localDeList(1), len_localDeList, localDe, oneToOneFlag, logRectFlag, &
+      opt_deCountPerDim(1), len_deCountPerDim, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -675,10 +672,8 @@ contains
       opt_DEcw => dummy
     endif
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutGetDELocalInfo(delayout, de, &
-      opt_DEcoord(lbound(opt_DEcoord,1)), len_coord, &
-      opt_DEcde(lbound(opt_DEcde,1)), len_cde, opt_DEcw(lbound(opt_DEcw,1)), &
-      len_cw, connectionCount, pid, localrc)
+    call c_ESMC_DELayoutGetDELocalInfo(delayout, de, opt_DEcoord(1), len_coord, &
+      opt_DEcde(1), len_cde, opt_DEcw(1), len_cw, connectionCount, pid, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -765,8 +760,7 @@ contains
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutGetDEMatchDE(delayout, de, delayoutMatch, &
-      deMatchCount, opt_deMatchList(lbound(opt_deMatchList,1)), &
-      len_deMatchList, localrc)
+      deMatchCount, opt_deMatchList(1), len_deMatchList, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -846,8 +840,7 @@ contains
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutGetDEMatchPET(delayout, de, vmMatch, &
-      petMatchCount, opt_petMatchList(lbound(opt_petMatchList,1)), &
-      len_petMatchList, localrc)
+      petMatchCount, opt_petMatchList(1), len_petMatchList, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
