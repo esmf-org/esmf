@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.226.2.2 2006/11/16 06:14:48 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.226.2.3 2006/11/17 05:56:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -110,7 +110,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.226.2.2 2006/11/16 06:14:48 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.226.2.3 2006/11/17 05:56:04 theurich Exp $'
 
 !==============================================================================
 !
@@ -6012,7 +6012,7 @@
       integer, dimension(:), allocatable :: decompIDs, newNDEs, oldNDEs
       integer, dimension(:), allocatable :: newCountPerDE1, newCountPerDE2
       integer, dimension(:), allocatable :: oldCountPerDE1, oldCountPerDE2
-      integer, dimension(:), allocatable :: petlist, petTrack
+      integer, dimension(:), allocatable :: petList, petListHelper, petTrack
       type(ESMF_DELayout) :: newDELayout, oldDELayout
       type(ESMF_GridClass), pointer :: gp
 
@@ -6154,6 +6154,7 @@
 
       ! now allocate a petlist and more for the new delayout
       allocate(       petlist(0:npets2-1), &
+                      petListHelper(1:npets2), &
                       petTrack(0:npets-1), &
                newCountPerDE1(newNDEs(1)), &
                newCountPerDE2(newNDEs(2)), stat=localrc)
@@ -6196,6 +6197,10 @@
           petlist(newDEId) = petId
         enddo
       enddo
+      
+      do i = 1, npets2
+        petListHelper(i) = petlist(i-1)
+      enddo
 
       newCountPerDE1 = 0
       newCountPerDE2 = 0
@@ -6211,8 +6216,10 @@
   !    endif
 
       ! create new delayout from the vm and petlist
-      newDELayout = ESMF_DELayoutCreate(vm, deCountList=newNDEs, petList=petlist, &
-                                        rc=localrc)
+      ! the use of petListHelper is a work-around for PGI 5.x issue with
+      ! assumed-shape arrays *gjt*
+      newDELayout = ESMF_DELayoutCreate(vm, deCountList=newNDEs, &
+        petList=petListHelper, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -6243,6 +6250,9 @@
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
                                      ESMF_CONTEXT, rc)) return
       deallocate(       petlist, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(       petListHelper, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
                                      ESMF_CONTEXT, rc)) return
       deallocate(      petTrack, stat=localrc)
