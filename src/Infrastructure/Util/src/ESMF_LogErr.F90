@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.18 2006/11/16 05:21:21 cdeluca Exp $
+! $Id: ESMF_LogErr.F90,v 1.19 2006/11/17 04:45:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -47,19 +47,6 @@
     use ESMF_UtilTypesMod
 
 implicit none
-
-    interface 
-      subroutine f_ESMF_VMGlobalGet(localPet, petCount)
-        integer, intent(out), optional  :: localPet
-        integer, intent(out), optional  :: petCount
-      end subroutine f_ESMF_VMGlobalGet
-    end interface
-
-    interface 
-      subroutine f_ESMF_VMAbort(rc)
-        integer, intent(out), optional :: rc    
-      end subroutine f_ESMF_VMAbort
-    end interface
 
 !
 !------------------------------------------------------------------------------
@@ -998,6 +985,13 @@ end subroutine ESMF_LogMsgSetError
 !      \end{description}
 ! 
 !EOP
+    interface 
+      subroutine f_ESMF_VMGlobalGet(localPet, petCount)
+        integer, intent(out), optional  :: localPet
+        integer, intent(out), optional  :: petCount
+      end subroutine f_ESMF_VMGlobalGet
+    end interface
+
     integer 				                   :: status, i, j, rc2
     type(ESMF_LOGENTRY), dimension(:), pointer             :: localbuf
     character(len=32)                                      :: fname
@@ -1317,6 +1311,11 @@ end subroutine ESMF_LogSet
 !      \end{description}
 ! 
 !EOP
+    interface 
+      subroutine f_ESMF_VMAbort(rc)
+        integer, intent(out), optional :: rc    
+      end subroutine f_ESMF_VMAbort
+    end interface
     
     character(len=10)               :: t
     character(len=8)                :: d
