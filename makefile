@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.73 2006/11/16 22:17:49 cdeluca Exp $
+# $Id: makefile,v 1.74 2006/11/17 18:53:35 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -149,17 +149,6 @@ info:   script_info
 	-@echo Machine characteristics: `uname -a`
 	-@echo "=============================================================="
 	-@echo " "
-#
-#
-MINFO = $(ESMF_DIR)/build_config/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_SITE)/machineinfo.h
-info_h:
-	-@$(ESMF_RM) MINFO $(MINFO)
-	-@echo  "static char *machineinfo = \"  " >> MINFO
-	-@$(MAKE) -s info >> MINFO 2>&1  
-	-@cat MINFO | $(ESMF_SED) -e 's/$$/  \\n\\/' > $(MINFO)
-	-@echo  " \"; " >> $(MINFO)
-	-@$(ESMF_RM) MINFO
-
 #
 #
 MKINFO = $(ESMF_LIBDIR)/esmf.mk
