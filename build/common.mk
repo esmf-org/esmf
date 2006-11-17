@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.166 2006/11/16 22:17:49 cdeluca Exp $
+#  $Id: common.mk,v 1.167 2006/11/17 16:59:12 cdeluca Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2382,12 +2382,6 @@ export TEXINPUTS_VALUE
 #-------------------------------------------------------------------------------
 #  dvi rules
 #-------------------------------------------------------------------------------
-%_desdoc.dvi : %_desdoc.ctex $(DESDOC_DEP_FILES)
-	@echo "========================================="
-	@echo "_desdoc.dvi rule from common.mk"
-	@echo "========================================="
-	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
-	$(DO_LATEX) $* des
 
 %_refdoc.dvi : %_refdoc.ctex $(REFDOC_DEP_FILES)
 	@echo "========================================="
@@ -2395,13 +2389,6 @@ export TEXINPUTS_VALUE
 	@echo "========================================="
 	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	$(DO_LATEX) $* ref
-
-%_reqdoc.dvi : %_reqdoc.ctex $(REQDOC_DEP_FILES)
-	@echo "========================================="
-	@echo "_reqdoc.dvi rule from common.mk"
-	@echo "========================================="
-	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
-	$(DO_LATEX) $* req
 
 #-------------------------------------------------------------------------------
 #  pdf rules
@@ -2417,17 +2404,6 @@ $(ESMF_DOCDIR)/%.pdf: %.dvi
 #-------------------------------------------------------------------------------
 #  html rules
 #-------------------------------------------------------------------------------
-$(ESMF_DOCDIR)/%_desdoc: %_desdoc.ctex $(DESDOC_DEP_FILES)
-	@echo "========================================="
-	@echo "_%desdoc from %.ctex rule from common.mk"
-	@echo "========================================="
-	@if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
-	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
-	fi;
-	$(DO_L2H) $* des
-	$(ESMF_RM) .latex2html-init
-	$(ESMF_MV) -f $(@F) $(ESMF_DOCDIR)
-
 
 $(ESMF_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
 	@echo "========================================="
@@ -2437,17 +2413,6 @@ $(ESMF_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
 	fi;
 	$(DO_L2H) $* ref
-	$(ESMF_RM) .latex2html-init
-	$(ESMF_MV) $(@F) $(ESMF_DOCDIR)
-
-$(ESMF_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
-	@echo "========================================="
-	@echo "_%reqdoc from %.ctex rule from common.mk"
-	@echo "========================================="
-	@if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
-	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
-	fi;
-	$(DO_L2H) $* req
 	$(ESMF_RM) .latex2html-init
 	$(ESMF_MV) $(@F) $(ESMF_DOCDIR)
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2006/05/20 23:01:29 cdeluca Exp $
+# $Id: makefile,v 1.2 2006/11/17 16:59:13 cdeluca Exp $
 
 All: onedoc
 
@@ -32,8 +32,6 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REQDOC_DEP_FILES = 
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
 
 

@@ -1,6 +1,6 @@
 #! /usr/bin/env perl -w
 #
-# $Id: test_for_docs.pl,v 1.7 2006/03/07 20:48:00 svasquez Exp $
+# $Id: test_for_docs.pl,v 1.8 2006/11/17 16:59:13 cdeluca Exp $
 #
 # test_for_docs.pl
 # 
@@ -48,7 +48,6 @@ sub GetNewDocs($);
 #  file name, not the extension.  
 #  
 @esmf_docs     = ("ESMF_refdoc",
-		  "ESMF_reqdoc",
 		  "ESMF_usrdoc");
 
 #

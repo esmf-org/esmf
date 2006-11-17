@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2006/11/16 23:55:56 cdeluca Exp $ 
+# $Id: makefile,v 1.16 2006/11/17 16:59:13 cdeluca Exp $ 
 
 ALL: onedoc
 
@@ -44,9 +44,8 @@ REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 include $(ESMF_DIR)/makefile
 
-DIRS	  = 
-CLEANDIRS   = Grid_desdoc Grid_reqdoc Grid_refdoc $(HTMLFILES)
-CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              Grid_desdoc.tex Grid_reqdoc.tex Grid_refdoc.tex $(PDFFILES)
+DIRS	    = 
+CLEANDIRS   = Grid_refdoc $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) Grid_refdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 

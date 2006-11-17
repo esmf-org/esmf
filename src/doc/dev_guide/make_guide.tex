@@ -1,4 +1,4 @@
-% CVS $Id: make_guide.tex,v 1.2 2006/08/04 22:20:49 cdeluca Exp $
+% CVS $Id: make_guide.tex,v 1.3 2006/11/17 16:59:13 cdeluca Exp $
 
 \subsection{Makefile Conventions} 	 
 
@@ -36,8 +36,7 @@ occurs.
 \end{description} 
 
 \subsubsection{Document Building Rules} 
-The makefile rules for building the
-reference, requirements and design documents are now located in:
+The makefile rules for building documents are now located in:
 \begin{verbatim} build/common.mk \end{verbatim} 
 The rules exist
 as pattern rules and are controlled by the variables set in a doc
@@ -55,8 +54,6 @@ Variables that can be set in the individual doc/makefiles are called
 
 Document file dependencies are set with: 
 \begin{description} 
-\item [REQDOC\_DEP\_FILES] 
-\item [DESDOC\_DEP\_FILES] 
 \item [REFDOC\_DEP\_FILES]
 \end{description}
 

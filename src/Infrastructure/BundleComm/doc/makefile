@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2006/01/26 21:39:04 nscollins Exp $ 
+# $Id: makefile,v 1.4 2006/11/17 16:59:13 cdeluca Exp $ 
 
 ALL: onedoc 
 
@@ -31,12 +31,9 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 
 include $(ESMF_DIR)/makefile
 
-DIRS	  = 
-
-CLEANDIRS   = BundleComm_desdoc BundleComm_reqdoc BundleComm_refdoc $(HTMLFILES)
-CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              BundleComm_desdoc.tex BundleComm_reqdoc.tex \
-              BundleComm_refdoc.tex $(PDFFILES)
+DIRS	    = 
+CLEANDIRS   = BundleComm_refdoc $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) BundleComm_refdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 
 

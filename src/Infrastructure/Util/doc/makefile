@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2006/09/22 23:55:42 theurich Exp $
+# $Id: makefile,v 1.5 2006/11/17 16:59:13 cdeluca Exp $
 
 ALL: onedoc
 
@@ -40,8 +40,6 @@ TEXFILES_TO_MAKE += ESMF_ErrReturnCodes.tex
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpfull.
 #
-REQDOC_DEP_FILES = 
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 include $(ESMF_DIR)/makefile
