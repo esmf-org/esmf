@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.167 2006/11/17 16:59:12 cdeluca Exp $
+#  $Id: common.mk,v 1.168 2006/11/17 18:54:22 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -89,9 +89,7 @@ $(error Deprecated environment variable ESMF_H_INSTALL detected. Please see READ
 endif
 
 #-------------------------------------------------------------------------------
-# If environment variables are not set give them literal value "default".
-# The following lists _all_ valid environment variables except ESMF_DIR
-# which has been set by this point in main makefile.
+# Set defaults for environment variables that are not set
 #-------------------------------------------------------------------------------
 
 ifndef ESMF_BUILD
@@ -135,7 +133,7 @@ export ESMF_SITE = default
 endif
 
 ifndef ESMF_PTHREADS
-export ESMF_PTHREADS = default
+export ESMF_PTHREADS = $(ESMF_PTHREADSDEFAULT)
 endif
 
 ifndef ESMF_TESTWITHTHREADS
@@ -216,10 +214,6 @@ ifneq ($(ESMF_EXHAUSTIVE),ON)
 export ESMF_EXHAUSTIVE = OFF
 endif
 
-ifneq ($(ESMF_PTHREADS),OFF)
-export ESMF_PTHREADS = ON
-endif
-
 ifneq ($(ESMF_TESTWITHTHREADS),ON)
 export ESMF_TESTWITHTHREADS = OFF
 endif
@@ -288,11 +282,9 @@ endif
 # TODO: in general ESMF_BUILD is respected - most generated files are created
 # underneath ESMF_BUILD and not ESMF_DIR.  but there are exceptions.
 # the ones i know about are:  
-# - in the build_config/platform-specific directories is a config file 
-# called 'machineinfo.h' which is generated at build time.  this 
-# build_config dir is included in compiles, so if the machineinfo.h file
-# (and conf.h) are moved, a -I flag will also have to be updated to point to
-# the new location.  the complication is that since this a per-platform file
+# - in the build_config/platform-specific directories are config header files, 
+# so if these config files are moved, a -I flag will also have to be updated to 
+# point to the new location.  the complication is that since these are per-platform files
 # and since we promise to support building for multiple architectures from
 # the same source tree, these files cannot go into a generic include dir.
 # - the 'storeh:' target copies include files into src/include under the
@@ -395,6 +387,8 @@ endif
 # the ESMF_xxxDEFAULT values are only used if ESMF_xxx is not defined in
 # user's environment.
 #-------------------------------------------------------------------------------
+ESMF_PTHREADSDEFAULT        = ON
+
 ESMF_ARDEFAULT              = ar
 ESMF_ARCREATEFLAGSDEFAULT   = cr
 ESMF_AREXTRACTFLAGSDEFAULT  = -x
@@ -872,7 +866,7 @@ libf:$(LIBNAME)($(OBJSF))
 
 # Build all of ESMF from the top.  This target can be called from any
 # subdir and it will go up to the top dir and build from there.
-lib:  info info_h build_libs info_mk
+lib:  info build_libs info_mk
 
 build_libs: chkdir_lib include cppfiles
 	cd $(ESMF_DIR) ;\
