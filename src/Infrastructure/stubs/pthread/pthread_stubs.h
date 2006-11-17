@@ -1,7 +1,7 @@
-// $Id: pthread_stubs.h,v 1.2.4.2 2006/11/16 18:48:40 theurich Exp $
+// $Id: pthread_stubs.h,v 1.2.4.3 2006/11/17 18:42:02 theurich Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2008, University Corporation for Atmospheric Research, 
+// Copyright 2002-2006, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
