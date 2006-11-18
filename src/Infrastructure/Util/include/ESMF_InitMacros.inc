@@ -1,13 +1,13 @@
 #if 0
-$Id: ESMF_InitMacros.inc,v 1.2 2006/11/16 05:21:21 cdeluca Exp $
+$Id: ESMF_InitMacros.inc,v 1.3 2006/11/18 00:29:37 oehmke Exp $
 
 Earth System Modeling Framework
-Copyright 2002-2008, University Corporation for Atmospheric Research,
+Copyright 2002-2003, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 NASA Goddard Space Flight Center.
-Licensed under the University of Illinois-NCSA License.
+Licensed under the GPL.
 
 Do not have C++ or F90 style comments in here because this file is processed
 by both C++ and F90 compilers.
@@ -27,7 +27,7 @@ automatic initialization of types.
 #endif
 
 
-
+#define ESMF_INITMACROS_ON
 #ifdef ESMF_INITMACROS_ON
 
 #define ESMF_INIT_DEFINED 76838410
@@ -37,7 +37,7 @@ automatic initialization of types.
 #ifdef ESMF_NO_INITIALIZERS
 #define ESMF_INIT_DECLARE integer (ESMF_KIND_I8) :: isInit
 #define ESMF_INIT_CHECK_SHALLOW(type,var) \
-             if (var%isInit .ne. ESMF_INIT_DEFINED) call \
+             if (type##GetInitVal(var) .ne. ESMF_INIT_DEFINED) call \
                  type##Init(var)
 #else
 #define ESMF_INIT_DECLARE integer (ESMF_KIND_I8) :: isInit = ESMF_INIT_DEFINED
@@ -48,9 +48,9 @@ automatic initialization of types.
 #define ESMF_INIT_SET_CREATED(var) var%isInit=ESMF_INIT_CREATED
 #define ESMF_INIT_SET_DELETED(var) var%isInit=ESMF_INIT_DELETED
 
-#define ESMF_INIT_CHECK_DEEP(var, rc)                                 \
-            if (ESMF_LogMsgFoundError(ESMF_InitCheckDeep(var%isInit), \
-                ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+#define ESMF_INIT_CHECK_DEEP(type,var, rc)                               \
+    if (ESMF_LogMsgFoundError(ESMF_InitCheckDeep(type##GetInitVal(var)), \
+        ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
 #else
 
@@ -60,17 +60,17 @@ automatic initialization of types.
 #define ESMF_INIT_DELETED 12594838
 
 #ifdef ESMF_NO_INITIALIZERS
-#define ESMF_INIT_DECLARE 
+#define ESMF_INIT_DECLARE integer (ESMF_KIND_I8) :: isInit
 #define ESMF_INIT_CHECK_SHALLOW(type,var) 
 #else
-#define ESMF_INIT_DECLARE 
+#define ESMF_INIT_DECLARE integer (ESMF_KIND_I8) :: isInit = ESMF_INIT_DEFINED
 #define ESMF_INIT_CHECK_SHALLOW(var,type)
 #endif
 
 #define ESMF_INIT_SET_DEFINED(var) 
 #define ESMF_INIT_SET_CREATED(var) 
 #define ESMF_INIT_SET_DELETED(var) 
-#define ESMF_INIT_CHECK_DEEP(var, rc)
+#define ESMF_INIT_CHECK_DEEP(type, var, rc)
 
 #endif
 
