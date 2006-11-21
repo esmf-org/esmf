@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.48.2.10 2006/09/19 06:01:26 theurich Exp $
+# $Id: build_rules.mk,v 1.48.2.11 2006/11/21 21:15:55 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -95,6 +95,18 @@ ESMF_CXXCOMPILEOPTS       += -size_lp64
 ESMF_CXXLINKOPTS          += -size_lp64
 ESMF_F90COMPILEOPTS       += -size_lp64
 ESMF_F90LINKOPTS          += -size_lp64
+endif
+
+############################################################
+# Construct the ABISTRING
+#
+ifeq ($(ESMF_MACHINE),ia64)
+ifeq ($(ESMF_ABI),32)
+ESMF_ABISTRING := $(ESMF_ABI)_$(ESMF_MACHINE)
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_ABISTRING := $(ESMF_ABI)_$(ESMF_MACHINE)
+endif
 endif
 
 ############################################################

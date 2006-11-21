@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.25.2.13 2006/11/10 18:57:01 theurich Exp $
+# $Id: build_rules.mk,v 1.25.2.14 2006/11/21 21:15:55 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -78,6 +78,18 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = $(ESMF_DIR)/scripts/version.pgf90 $(ESMF_F90COMPILER)
 ESMF_CXXCOMPILER_VERSION    = $(ESMF_DIR)/scripts/version.pgCC $(ESMF_CXXCOMPILER)
+
+############################################################
+# Construct the ABISTRING
+#
+ifeq ($(ESMF_MACHINE),x86_64)
+ifeq ($(ESMF_ABI),32)
+ESMF_ABISTRING := $(ESMF_ABI)_$(ESMF_MACHINE)
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_ABISTRING := small_x86_64
+endif
+endif
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
