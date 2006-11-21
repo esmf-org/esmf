@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.48.2.11 2006/11/21 21:15:55 theurich Exp $
+# $Id: build_rules.mk,v 1.48.2.12 2006/11/21 21:52:18 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -102,10 +102,10 @@ endif
 #
 ifeq ($(ESMF_MACHINE),ia64)
 ifeq ($(ESMF_ABI),32)
-ESMF_ABISTRING := $(ESMF_ABI)_$(ESMF_MACHINE)
+ESMF_ABISTRING := $(ESMF_MACHINE)_32
 endif
 ifeq ($(ESMF_ABI),64)
-ESMF_ABISTRING := $(ESMF_ABI)_$(ESMF_MACHINE)
+ESMF_ABISTRING := $(ESMF_MACHINE)_64
 endif
 endif
 
