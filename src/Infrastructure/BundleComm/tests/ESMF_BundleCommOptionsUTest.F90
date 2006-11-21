@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.5 2006/11/16 05:20:56 cdeluca Exp $
+! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.6 2006/11/21 22:02:59 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.5 2006/11/16 05:20:56 cdeluca Exp $'
+      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.6 2006/11/21 22:02:59 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -968,6 +968,8 @@ contains
       else
           status = ESMF_SUCCESS
       endif
+
+      deallocate(calc)
 
    ! code comes directly here on error
 10 continue
