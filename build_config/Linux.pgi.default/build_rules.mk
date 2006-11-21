@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.25.2.14 2006/11/21 21:15:55 theurich Exp $
+# $Id: build_rules.mk,v 1.25.2.15 2006/11/21 22:41:43 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -84,11 +84,21 @@ ESMF_CXXCOMPILER_VERSION    = $(ESMF_DIR)/scripts/version.pgCC $(ESMF_CXXCOMPILE
 #
 ifeq ($(ESMF_MACHINE),x86_64)
 ifeq ($(ESMF_ABI),32)
-ESMF_ABISTRING := $(ESMF_ABI)_$(ESMF_MACHINE)
+ESMF_ABISTRING := $(ESMF_MACHINE)_32
 endif
 ifeq ($(ESMF_ABI),64)
-ESMF_ABISTRING := small_x86_64
+ESMF_ABISTRING := x86_64_small
 endif
+endif
+
+############################################################
+# Set memory model compiler flags according to ABISTRING
+#
+ifeq ($(ESMF_ABISTRING),x86_64_medium)
+ESMF_F90COMPILEOPTS     += -mcmodel=medium
+ESMF_F90LINKOPTS        += -mcmodel=medium
+ESMF_CXXCOMPILEOPTS     += -mcmodel=medium
+ESMF_CXXLINKOPTS        += -mcmodel=medium
 endif
 
 ############################################################
