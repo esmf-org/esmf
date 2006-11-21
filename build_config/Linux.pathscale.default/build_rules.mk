@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5.4.6 2006/09/19 06:01:26 theurich Exp $
+# $Id: build_rules.mk,v 1.5.4.7 2006/11/21 22:03:11 theurich Exp $
 #
 # Linux.pathscale.default
 #
@@ -80,19 +80,25 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -version
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -version
 
 ############################################################
-# Chose ABI flags
+# Construct the ABISTRING
 #
+ifeq ($(ESMF_MACHINE),x86_64)
 ifeq ($(ESMF_ABI),32)
-ESMF_CXXCOMPILEOPTS       += -m32
-ESMF_CXXLINKOPTS          += -m64
-ESMF_F90COMPILEOPTS       += -m64
-ESMF_F90LINKOPTS          += -m64
+ESMF_ABISTRING := $(ESMF_MACHINE)_32
 endif
 ifeq ($(ESMF_ABI),64)
-ESMF_CXXCOMPILEOPTS       += -m64
-ESMF_CXXLINKOPTS          += -m64
-ESMF_F90COMPILEOPTS       += -m64
-ESMF_F90LINKOPTS          += -m64
+ESMF_ABISTRING := x86_64_small
+endif
+endif
+
+############################################################
+# Set memory model compiler flags according to ABISTRING
+#
+ifeq ($(ESMF_ABISTRING),x86_64_medium)
+ESMF_F90COMPILEOPTS     += -mcmodel=medium
+ESMF_F90LINKOPTS        += -mcmodel=medium
+ESMF_CXXCOMPILEOPTS     += -mcmodel=medium
+ESMF_CXXLINKOPTS        += -mcmodel=medium
 endif
 
 ############################################################
