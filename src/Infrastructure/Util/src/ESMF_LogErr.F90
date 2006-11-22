@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.13.2.7 2006/11/17 18:14:18 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.13.2.8 2006/11/22 01:00:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -918,8 +918,9 @@ end subroutine ESMF_LogMsgSetError
 !            the PET number to be added and keep the total file name
 !            length under 32 characters.
 !      \item [{[logtype]}]
-!            Specifies {\tt ESMF\_LOG\_SINGLE}, {\tt ESMF\_LOG\_MULTI} or
-!            {\tt ESMF\_LOG\_NONE}.
+!            Set the logtype. See section \ref{opt:logtype} for a list of 
+!            valid options.
+!            If not specified, defaults to {\tt ESMF\_LOG\_MULTI}.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
