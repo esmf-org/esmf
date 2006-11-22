@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.9.2.6 2006/11/21 22:41:43 theurich Exp $"
+"$Id: ESMC_Conf.h,v 1.9.2.7 2006/11/22 04:02:52 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -101,8 +101,8 @@ extern char pghpf_0c_;
 #endif
 #if Sx86_64_medium
 #define ESMF_IS_64BIT_MACHINE 1
-#define ESMF_F90_PTR_BASE_SIZE 88
-#define ESMF_F90_PTR_PLUS_RANK 24
+#define ESMF_F90_PTR_BASE_SIZE 144
+#define ESMF_F90_PTR_PLUS_RANK 48
 #define ESMC_POINTER_SIZE 8
 #endif
 
