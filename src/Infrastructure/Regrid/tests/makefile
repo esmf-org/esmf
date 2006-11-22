@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.10 2004/02/13 15:37:35 nscollins Exp $
+# $Id: makefile,v 1.36.2.1 2006/11/22 20:34:45 donstark Exp $
 
-ALL:  build_tests
+ALL:  build_unit_tests
+run:  run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -15,35 +16,117 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/Regrid/tests
 
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_RegridUTest 
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_RegridUTest \
+		$(ESMF_TESTDIR)/ESMF_RegridOptionsUTest \
+		$(ESMF_TESTDIR)/ESMF_RegridBandingUTest \
+		$(ESMF_TESTDIR)/ESMF_RegridBugsUTest \
+		$(ESMF_TESTDIR)/ESMF_RegridTimeUTest \
+		$(ESMF_TESTDIR)/ESMF_RegridToolUTest
 
-TESTS_RUN     = RUN_ESMF_RegridUTest 
+TESTS_RUN     = RUN_ESMF_RegridToolUTest \
+		RUN_ESMF_RegridTimeUTest \
+		RUN_ESMF_RegridUTest \
+		RUN_ESMF_RegridOptionsUTest \
+		RUN_ESMF_RegridBandingUTest \
+		RUN_ESMF_RegridBugsUTest \
+		RUN_ESMF_RegridTimeUTest
 
-TESTS_RUN_UNI = RUN_ESMF_RegridUTestUNI 
+TESTS_RUN_UNI = RUN_ESMF_RegridToolUTestUNI \
+		RUN_ESMF_RegridTimeUTestUNI \
+		RUN_ESMF_RegridUTestUNI \
+	        RUN_ESMF_RegridOptionsUTestUNI \
+	        RUN_ESMF_RegridBandingUTestUNI  \
+	        RUN_ESMF_RegridBugsUTestUNI
 
-TESTS_RM      = 
 
 include $(ESMF_DIR)/makefile
 
 
 DIRS =
 
-CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod *.txt NULL core $(TESTS_BUILD)
+CLEANDIRS   = 
+CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
-#
-#
-#
-$(ESMF_TESTDIR)/ESMF_RegridUTest: chkopts ESMF_RegridUTest.o
-	-$(SL_C_LINKER) -o $(ESMF_TESTDIR)/ESMF_RegridUTest ESMF_RegridUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} ESMF_RegridTest.o
 
+#
+# Regrid Unit Test
+#
 RUN_ESMF_RegridUTest:
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_RegridUTest > $(ESMF_TESTDIR)/ESMF_RegridUTest.stdout
+	$(MAKE) TNAME=Regrid NP=8 ftest
 
 RUN_ESMF_RegridUTestUNI:
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_RegridUTest > $(ESMF_TESTDIR)/ESMF_RegridUTest.stdout
+	$(MAKE) TNAME=Regrid NP=1 ftest
 
-ESMF_RegridUTest.rm:
-	echo "ESMF_RegridTest.rm target called here."
+
+#
+# RegridOptions Unit Test
+#
+RUN_ESMF_RegridOptionsUTest:
+	$(MAKE) TNAME=RegridOptions NP=8 ftest
+
+RUN_ESMF_RegridOptionsUTestUNI:
+	$(MAKE) TNAME=RegridOptions NP=1 ftest
+
+
+
+
+#
+# Regrid Banding Unit Test
+#
+RUN_ESMF_RegridBandingUTest:
+	$(MAKE) TNAME=RegridBanding NP=8 ftest
+
+RUN_ESMF_RegridBandingUTestUNI:
+	$(MAKE) TNAME=RegridBanding NP=1 ftest
+
+
+#
+# Regrid Bugs Unit Test
+#
+RUN_ESMF_RegridBugsUTest:
+	$(MAKE) TNAME=RegridBugs NP=8 ftest
+
+RUN_ESMF_RegridBugsUTestUNI:
+	$(MAKE) TNAME=RegridBugs NP=1 ftest
+
+
+#
+# RegridTime Unit Test
+#
+RUN_ESMF_RegridTimeUTest:
+	$(MAKE) TNAME=RegridTime NP=8 ftest
+
+RUN_ESMF_RegridTimeUTestUNI:
+	$(MAKE) TNAME=RegridTime NP=1 ftest
+
+
+#
+# RegridTool Unit Test
+#
+
+
+UTEST_RegridTool_OBJS = ESMF_RegridSubroutines.o
+
+ESMF_RegridToolUTest.o: ESMF_RegridSubroutines.o
+
+
+RUN_ESMF_RegridToolUTest:
+	cp -f ESMF_RegridTestList.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridFunction.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridMethod.rc $(ESMF_TESTDIR)
+	cp -f ESMF_GridHorzStagger.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridDELayout.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridHalo.rc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=RegridTool NP=8 ftest
+
+RUN_ESMF_RegridToolUTestUNI:
+	cp -f ESMF_RegridTestList.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridFunction.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridMethod.rc $(ESMF_TESTDIR)
+	cp -f ESMF_GridHorzStagger.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridDELayout.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridHalo.rc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=RegridTool NP=1 ftest
+
+
