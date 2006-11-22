@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.56.2.3 2006/11/16 06:15:18 cdeluca Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.56.2.4 2006/11/22 21:45:49 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -56,6 +56,7 @@
 
       ! TODO:  these should really be in Base or somewhere else
       real(ESMF_KIND_R8), parameter ::  pi            = 3.1416d0
+      real(ESMF_KIND_R8), parameter ::  c360          = 360.0d0
       real(ESMF_KIND_R8), parameter ::  pi2           = 2.0d0 * pi
       real(ESMF_KIND_R8), parameter ::  offset        = 1.0d-12
       real(ESMF_KIND_R8), parameter :: northThreshold =  1.48d0
@@ -81,7 +82,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.56.2.3 2006/11/16 06:15:18 cdeluca Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.56.2.4 2006/11/22 21:45:49 donstark Exp $'
 
 !==============================================================================
 
@@ -314,6 +315,11 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      call ESMF_GridGet(dstGrid, horzCoordSystem=coordSystem, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       if (hasDstData) then
         allocate(dstLocalCoordArray (2), &
                  dstLocalCornerArray(2), stat=localrc)
@@ -336,6 +342,17 @@
                                ESMF_DATA_COPY, localrc)
         call ESMF_ArrayGetData(dstLocalCornerArray(2), dstLocalCornerY, &
                                ESMF_DATA_COPY, localrc)
+
+        if (coordSystem.eq.ESMF_COORD_SYSTEM_SPHERICAL) then
+        ! convert destination longitudes to 0,360 interval
+          where (dstLocalCoordX < 0.0d0)                                &
+               dstLocalCoordX = modulo( dstLocalCoordX, -c360 ) + c360
+          dstLocalCoordX = modulo( dstLocalCoordX, c360 )
+
+          where (dstLocalCornerX < 0.0d0)                               &
+               dstLocalCornerX = modulo( dstLocalCornerX, -c360) + c360
+          dstLocalCornerX = modulo( dstLocalCornerX, c360 )
+        endif
       endif
 
       ! get source grid info
@@ -372,19 +389,36 @@
                                   ESMF_CONTEXT, rc)) return
 
         call ESMF_ArrayGetData(srcLocalCoordArray(1), srcLocalCoordX, &
-                               ESMF_DATA_REF, localrc)
+                               ESMF_DATA_COPY, localrc)
         call ESMF_ArrayGetData(srcLocalCoordArray(2), srcLocalCoordY, &
-                               ESMF_DATA_REF, localrc)
+                               ESMF_DATA_COPY, localrc)
         call ESMF_ArrayGetData(srcLocalCornerArray(1), srcLocalCornerX, &
-                               ESMF_DATA_REF, localrc)
+                               ESMF_DATA_COPY, localrc)
         call ESMF_ArrayGetData(srcLocalCornerArray(2), srcLocalCornerY, &
-                               ESMF_DATA_REF, localrc)
+                               ESMF_DATA_COPY, localrc)
         call ESMF_GridGetCellMask(srcGrid, srcMaskArray, relloc=srcRelLoc, &
                                   rc=localrc)
         call ESMF_ArrayGetData(srcMaskArray, srcLocalMask, ESMF_DATA_REF, &
                                localrc)
+        if (coordSystem.eq.ESMF_COORD_SYSTEM_SPHERICAL) then
+        ! convert source longitudes to 0,360 interval
+          where (srcLocalCoordX < 0.0d0)  srcLocalCoordX =  &
+                                        modulo( srcLocalCoordX, -c360 ) + c360
+          srcLocalCoordX = modulo( srcLocalCoordX, c360 )
+
+          where (srcLocalCornerX < 0.0d0)  srcLocalCornerX =  &
+                                        modulo( srcLocalCornerX, -c360 ) + c360
+          srcLocalCornerX = modulo( srcLocalCornerX, c360 )
+        endif
       endif
 
+!---------------------------------------------------------------------------
+! if the coordinate system is spherical check that both the source and destination 
+! grids live on the same branch. If they don't shift both grids to the 0-360 range.
+!---------------------------------------------------------------------------
+      if (coordSystem.eq.ESMF_COORD_SYSTEM_SPHERICAL) then
+! debug
+      endif
       ! Calculate two separate Routes:
       !    the first will be used in the code to gather the data for running
       !              the regrid, saved in routehandle
@@ -398,6 +432,7 @@
                          dstArray=dstArray, dstDataMap=dstDataMap, &
                          hasSrcData=hasSrcData, hasDstData=hasDstData, &
                          total=.false., rc=localrc)
+!error checking here
       call ESMF_RouteHandleSet(rh, which_route=routeIndex, &
                                route=route, rc=localrc)
 
@@ -492,10 +527,6 @@
           dstLocalCoordY  =  dstLocalCoordY*pi/180.0d0
           dstLocalCornerX = dstLocalCornerX*pi/180.0d0
           dstLocalCornerY = dstLocalCornerY*pi/180.0d0
-        ! convert destination longitudes to 0,2pi interval
-          where (dstLocalCoordX < 0.0d0)  dstLocalCoordX =  &
-                                        modulo( dstLocalCoordX, -pi2 ) + pi2
-          dstLocalCoordX = modulo( dstLocalCoordX, pi2 )
         endif
 
         ! These are computed later - initialize to zero
@@ -528,6 +559,10 @@
           where (srcGatheredCoordX < 0.0d0)  srcGatheredCoordX =  &
                                         modulo( srcGatheredCoordX, -pi2 ) + pi2
           srcGatheredCoordX = modulo( srcGatheredCoordX, pi2 )
+
+          where (srcGatheredCornerX < 0.0d0)  srcGatheredCornerX =  &
+                                        modulo( srcGatheredCornerX, -pi2 ) + pi2
+          srcGatheredCornerX = modulo( srcGatheredCornerX, pi2 )
         endif
 
         ! These are computed later - initialize to zero here
