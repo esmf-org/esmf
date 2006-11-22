@@ -1,4 +1,4 @@
-! $Id: ESMF_InitMacrosUTest.F90,v 1.3 2006/11/20 03:24:56 oehmke Exp $
+! $Id: ESMF_InitMacrosUTest.F90,v 1.4 2006/11/22 06:34:52 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InitMacrosUTest.F90,v 1.3 2006/11/20 03:24:56 oehmke Exp $'
+      '$Id: ESMF_InitMacrosUTest.F90,v 1.4 2006/11/22 06:34:52 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -80,36 +80,36 @@
       ! add tests here
 
       ! Shallow type test
-!      ESMF_INIT_CHECK_SHALLOW(ESMF_Shallow,s)
-!      write(name,*) "Testing ESMF_INIT_CHECK_SHALLOW"
-!      write(failMsg,*) "Did not initialize value"
-!      call ESMF_Test((s%num .eq. 4), name, failMsg, result, ESMF_SRCLINE)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_ShallowGetInitVal,ESMF_ShallowInit,s)
+      write(name,*) "Testing ESMF_INIT_CHECK_SHALLOW"
+      write(failMsg,*) "Did not initialize value"
+      call ESMF_Test((s%num .eq. 4), name, failMsg, result, ESMF_SRCLINE)
 
 
 
       ! Deep type tests     
       !! Test Undefined Check
-!      call DeepTest(d,rc)
-!      write(name,*) "Testing undefined object in ESMF_INIT_CHECK_DEEP"
-!      write(failMsg,*) "Did not recognize undefined state"
-!      call ESMF_Test((rc .eq. ESMF_RC_OBJ_NOT_CREATED),name,failMsg, &
-!                 result,ESMF_SRCLINE)
+      call DeepTest(d,rc)
+      write(name,*) "Testing undefined object in ESMF_INIT_CHECK_DEEP"
+      write(failMsg,*) "Did not recognize undefined state"
+      call ESMF_Test((rc .eq. ESMF_RC_OBJ_NOT_CREATED),name,failMsg, &
+                 result,ESMF_SRCLINE)
 
       !! Test Created Check
-!      d=ESMF_DeepCreate()
-!      call DeepTest(d,rc)
-!      write(name,*) "Testing created object in ESMF_INIT_CHECK_DEEP"
-!      write(failMsg,*) "Did not recognize created state"
-!      call ESMF_Test((rc .eq. ESMF_SUCCESS),name,failMsg, &
-!                     result,ESMF_SRCLINE)         
+      d=ESMF_DeepCreate()
+      call DeepTest(d,rc)
+      write(name,*) "Testing created object in ESMF_INIT_CHECK_DEEP"
+      write(failMsg,*) "Did not recognize created state"
+      call ESMF_Test((rc .eq. ESMF_SUCCESS),name,failMsg, &
+                     result,ESMF_SRCLINE)         
 
       !! Test Deleted Check
-!      call ESMF_DeepDestroy(d)
-!      call DeepTest(d,rc)
-!      write(name,*) "Testing deleted object in ESMF_INIT_CHECK_DEEP"
-!      write(failMsg,*) "Did not recognize deleted state"
-!      call ESMF_Test((rc .eq. ESMF_RC_OBJ_DELETED),name,failMsg, &
-!                result,ESMF_SRCLINE)
+      call ESMF_DeepDestroy(d)
+      call DeepTest(d,rc)
+      write(name,*) "Testing deleted object in ESMF_INIT_CHECK_DEEP"
+      write(failMsg,*) "Did not recognize deleted state"
+      call ESMF_Test((rc .eq. ESMF_RC_OBJ_DELETED),name,failMsg, &
+                result,ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
 
@@ -120,13 +120,13 @@
       ! ESMF-related thing the test does.
       call ESMF_TestEnd(result, ESMF_SRCLINE)
 
-!      contains 
-!         subroutine DeepTest(d,rc)
-!           type(ESMF_Deep), intent(in) :: d
-!           integer, intent(inout) :: rc
-!
-!            ESMF_INIT_CHECK_DEEP(ESMF_Deep,d,rc)
-!   
-!         end subroutine DeepTest
+      contains 
+         subroutine DeepTest(d,rc)
+           type(ESMF_Deep), intent(in) :: d
+           integer, intent(inout) :: rc
+
+            ESMF_INIT_CHECK_DEEP(ESMF_DeepGetInitVal,d,rc)
+   
+         end subroutine DeepTest
  
       end program ESMF_InitMacrosTest

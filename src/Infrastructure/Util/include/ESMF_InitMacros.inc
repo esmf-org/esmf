@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_InitMacros.inc,v 1.4 2006/11/20 03:24:56 oehmke Exp $
+$Id: ESMF_InitMacros.inc,v 1.5 2006/11/22 06:34:52 oehmke Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -27,50 +27,49 @@ automatic initialization of types.
 #endif
 
 
-
-#ifdef ESMF_INITMACROS_ON
-
+#define ESMF_INIT_TYPE integer (ESMF_KIND_I8)
+#define ESMF_INIT_GET(var) var%isInit
 #define ESMF_INIT_DEFINED 76838410
 #define ESMF_INIT_CREATED 82949521
 #define ESMF_INIT_DELETED 12594838
 
+
+
+#define ESMF_INITMACROS_ON
+#ifdef ESMF_INITMACROS_ON
+
 #ifdef ESMF_NO_INITIALIZERS
-#define ESMF_INIT_DECLARE integer (ESMF_KIND_I8) :: isInit
-#define ESMF_INIT_CHECK_SHALLOW(type,var) \
-             if (type##GetInitVal(var) .ne. ESMF_INIT_DEFINED) call \
-                 type##Init(var)
+#define ESMF_INIT_DECLARE  ESMF_INIT_TYPE :: isInit
+#define ESMF_INIT_CHECK_SHALLOW(fget,finit,var) \
+             if (fget(var) .ne. ESMF_INIT_DEFINED) call \
+                 finit(var)
 #else
-#define ESMF_INIT_DECLARE integer (ESMF_KIND_I8) :: isInit = ESMF_INIT_DEFINED
-#define ESMF_INIT_CHECK_SHALLOW(var,type)
+#define ESMF_INIT_DECLARE ESMF_INIT_TYPE :: isInit = ESMF_INIT_DEFINED
+#define ESMF_INIT_CHECK_SHALLOW(fget,finit,var)
 #endif
 
 #define ESMF_INIT_SET_DEFINED(var) var%isInit=ESMF_INIT_DEFINED
 #define ESMF_INIT_SET_CREATED(var) var%isInit=ESMF_INIT_CREATED
 #define ESMF_INIT_SET_DELETED(var) var%isInit=ESMF_INIT_DELETED
 
-#define ESMF_INIT_CHECK_DEEP(type,var, rc)                               \
-    if (ESMF_LogMsgFoundError(ESMF_InitCheckDeep(type##GetInitVal(var)), \
+#define ESMF_INIT_CHECK_DEEP(fget,var, rc)                               \
+    if (ESMF_LogMsgFoundError(ESMF_InitCheckDeep(fget(var)), \
         ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
 #else
 
-
-#define ESMF_INIT_DEFINED 76838410
-#define ESMF_INIT_CREATED 82949521
-#define ESMF_INIT_DELETED 12594838
-
 #ifdef ESMF_NO_INITIALIZERS
-#define ESMF_INIT_DECLARE integer (ESMF_KIND_I8) :: isInit
-#define ESMF_INIT_CHECK_SHALLOW(type,var) 
+#define ESMF_INIT_DECLARE ESMF_INIT_TYPE :: isInit
+#define ESMF_INIT_CHECK_SHALLOW(fget,finit,var) 
 #else
-#define ESMF_INIT_DECLARE integer (ESMF_KIND_I8) :: isInit = ESMF_INIT_DEFINED
-#define ESMF_INIT_CHECK_SHALLOW(var,type)
+#define ESMF_INIT_DECLARE ESMF_INIT_TYPE :: isInit = ESMF_INIT_DEFINED
+#define ESMF_INIT_CHECK_SHALLOW(fget,finit,var)
 #endif
 
 #define ESMF_INIT_SET_DEFINED(var) 
 #define ESMF_INIT_SET_CREATED(var) 
 #define ESMF_INIT_SET_DELETED(var) 
-#define ESMF_INIT_CHECK_DEEP(type, var, rc)
+#define ESMF_INIT_CHECK_DEEP(fget, var, rc)
 
 #endif
 

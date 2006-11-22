@@ -1,4 +1,4 @@
-! $Id: ESMF_InitMacros.F90,v 1.3 2006/11/16 05:21:21 cdeluca Exp $
+! $Id: ESMF_InitMacros.F90,v 1.4 2006/11/22 06:34:52 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@ contains
 	integer                                         :: ESMF_InitCheckDeep
 ! !ARGUMENTS:
 !	
-	integer (ESMF_KIND_I8), intent(in)              :: isInit
+	ESMF_INIT_TYPE, intent(in)              :: isInit
 	
 ! !DESCRIPTION:
 !      This function takes a classes' isInit component (declared by

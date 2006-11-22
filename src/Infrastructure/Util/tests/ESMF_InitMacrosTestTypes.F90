@@ -1,4 +1,4 @@
-! $Id: ESMF_InitMacrosTestTypes.F90,v 1.1 2006/11/18 00:28:35 oehmke Exp $
+! $Id: ESMF_InitMacrosTestTypes.F90,v 1.2 2006/11/22 06:34:52 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -74,9 +74,9 @@ contains
    ! Function for getting init value from shallow type
    function ESMF_ShallowGetInitVal(s)
       type(ESMF_Shallow) :: s
-      integer (ESMF_KIND_I8) :: ESMF_ShallowGetInitVal 
+      ESMF_INIT_TYPE :: ESMF_ShallowGetInitVal 
        
-       ESMF_ShallowGetInitVal = s%isInit 
+       ESMF_ShallowGetInitVal = ESMF_INIT_GET(s) 
 
    end function ESMF_ShallowGetInitVal
 
@@ -95,9 +95,9 @@ contains
    ! Function for getting init value from deep type
    function ESMF_DeepGetInitVal(s)
       type(ESMF_Deep) :: s
-      integer (ESMF_KIND_I8) :: ESMF_DeepGetInitVal 
+      ESMF_INIT_TYPE :: ESMF_DeepGetInitVal 
        
-       ESMF_DeepGetInitVal = s%isInit 
+       ESMF_DeepGetInitVal = ESMF_INIT_GET(s) 
 
    end function ESMF_DeepGetInitVal
 
