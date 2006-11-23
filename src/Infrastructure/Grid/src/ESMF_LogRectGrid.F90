@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.151.2.4 2006/11/16 06:14:49 cdeluca Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.151.2.5 2006/11/23 18:54:10 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -37,6 +37,7 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
+
       use ESMF_UtilTypesMod   ! ESMF base class
       use ESMF_UtilMod        ! ESMF base class
       use ESMF_BaseMod        ! ESMF base class
@@ -53,6 +54,9 @@
       use ESMF_PhysGridMod    ! ESMF physical grid class
       use ESMF_GridTypesMod   ! ESMF basic grid types and primitives
       use ESMF_VMMod
+
+
+!     use ESMF_GridMod; only ESMF_GridGet        ! ESMF grid
       implicit none
 
 !------------------------------------------------------------------------------
@@ -128,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.151.2.4 2006/11/16 06:14:49 cdeluca Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.151.2.5 2006/11/23 18:54:10 donstark Exp $'
 
 !==============================================================================
 !
@@ -8771,6 +8775,7 @@
       type(ESMF_LocalArray) :: array
       type(ESMF_RelLoc) :: srcRellocUse, dstRellocUse
       type(ESMF_DELayout) :: srcDELayout
+      type(ESMF_CoordSystem) :: coordsystem, temp
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -8780,6 +8785,7 @@
       dstRellocUse = ESMF_CELL_CENTER
       if (present(srcRelloc)) srcRellocUse = srcRelloc
       if (present(dstRelloc)) dstRellocUse = dstRelloc
+
 
       ! allocate local min/max arrays to the rank of the dst Grid.
       ! Must still do this even if this DE does not have any dst data for
@@ -8791,6 +8797,8 @@
                                      ESMF_CONTEXT, rc)) return
       localMinPerDim =  9876543.0d0          ! TODO: use ESMF_Huge once it is
       localMaxPerDim = -9876543.0d0          !       defined
+
+      call ESMF_LRGridGet(dstGrid, horzCoordSystem=coordSystem, rc=localrc)
 
       ! If this DE does not have any destination data, then there is nothing to
       ! receive.  However, it cannot simply return because it may be involved in
@@ -8828,6 +8836,21 @@
         call ESMF_LRGridGlobalToDELocalAI(srcGrid, horzRelLoc=srcRellocUse, &
                                           globalAI2D=gridAI, &
                                           localAI2D=localAI, rc=localrc)
+
+        if (coordSystem.eq.ESMF_COORD_SYSTEM_SPHERICAL) then
+        ! if spherical grid, shift localMinPerDim,localMaxPerDim and boxes to
+        ! fix branch cut problem.
+          if ( localMinPerDim(1) < 0.0d0)                             &
+               localMinPerDim(1) = modulo( localMinPerDim(1), -360.0d0 ) + 360.0d0
+          localMinPerDim(1) = modulo( localMinPerDim(1), 360.0d0 )
+          if ( localMaxPerDim(1) < 0.0d0)                                &
+               localMaxPerDim(1) = modulo( localMaxPerDim(1), -360.0d0 ) + 360.0d0
+          localMaxPerDim(1) = modulo( localMaxPerDim(1), 360.0d0 )
+
+          where ( boxes(:,:,1) < 0.0d0)                                &
+               boxes(:,:,1) = modulo( boxes(:,:,1), -360.0d0 ) + 360.0d0
+          boxes(:,:,1) = modulo( boxes(:,:,1), 360.0d0 )
+        endif
 
         ! loop through bounding boxes, looking for overlap with our "box"
         ! go through list of DEs to calculate the number of domains
@@ -8909,9 +8932,16 @@
           endif
           call ESMF_VMBroadcast(parentVM, point, 2, thisPET, rc=localrc)
           if (hasSrcData) then
+          ! set argument for spherical case
+            temp = srcGrid%ptr%physGrids(physId)%ptr%coordSystem
+            if (coordSystem.eq.ESMF_COORD_SYSTEM_SPHERICAL)       &
+              srcGrid%ptr%physGrids(physId)%ptr%coordSystem = ESMF_COORD_SYSTEM_SPHERICAL
+
             call ESMF_PhysGridSearchMyDERowCol(srcGrid%ptr%physGrids(physId), &
                                                localIndex, point, &
                                                option='min', total=total, rc=rc)
+
+            srcGrid%ptr%physGrids(physId)%ptr%coordSystem = temp
           endif
           call ESMF_VMGather(parentVM, localIndex, globalMinIndex, 2, thisPET, &
                              rc=localrc)
@@ -8921,9 +8951,16 @@
           endif
           call ESMF_VMBroadcast(parentVM, point, 2, thisPET, rc=localrc)
           if (hasSrcData) then
+          ! set argument for spherical case
+            temp = srcGrid%ptr%physGrids(physId)%ptr%coordSystem
+            if (coordSystem.eq.ESMF_COORD_SYSTEM_SPHERICAL)       &
+              srcGrid%ptr%physGrids(physId)%ptr%coordSystem = ESMF_COORD_SYSTEM_SPHERICAL
+
             call ESMF_PhysGridSearchMyDERowCol(srcGrid%ptr%physGrids(physId), &
                                                localIndex, point, &
                                                option='max', total=total, rc=rc)
+
+            srcGrid%ptr%physGrids(physId)%ptr%coordSystem = temp
           endif
           call ESMF_VMGather(parentVM, localIndex, globalMaxIndex, 2, thisPET, &
                              rc=localrc)
@@ -9138,6 +9175,7 @@
       type(ESMF_AxisIndex), dimension(:), pointer :: myGlobalAI, myLocalAI, thisAI
       type(ESMF_LocalArray) :: array
       type(ESMF_RelLoc) :: srcRellocUse, dstRellocUse
+      type(ESMF_CoordSystem) :: coordsystem,temp
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -9147,6 +9185,9 @@
       dstRellocUse = ESMF_CELL_CENTER
       if (present(srcRelloc)) srcRellocUse = srcRelloc
       if (present(dstRelloc)) dstRellocUse = dstRelloc
+
+
+      call ESMF_LRGridGet(dstGrid, horzCoordSystem=coordSystem, rc=localrc)
 
       ! get set of bounding boxes from the destination grid
       call ESMF_GridGetBoundingBoxes(dstGrid%ptr, array, localrc)
@@ -9174,6 +9215,7 @@
                                      globalAIPerDim=myGlobalAI, &
                                      total=total, reorder=.false., rc=localrc)
 
+
       ! translate myGlobalAI to local index
       call ESMF_LRGridGlobalToDELocalAI(srcGrid, horzRelLoc=srcRellocUse, &
                                         globalAI1D=myGlobalAI, &
@@ -9181,6 +9223,21 @@
 
       ! get pointer to the actual bounding boxes data
       call ESMF_LocalArrayGetData(array, boxes, rc=localrc)
+
+      ! if spherical grid, shift localMinPerDim,localMaxPerDim and boxes to 
+      ! fix branch cut problem.
+      if (coordSystem.eq.ESMF_COORD_SYSTEM_SPHERICAL) then
+        if ( localMinPerDim(1) < 0.0d0)                             &
+               localMinPerDim(1) = modulo( localMinPerDim(1), -360.0d0 ) + 360.0d0
+        localMinPerDim(1) = modulo( localMinPerDim(1), 360.0d0 )
+        if ( localMaxPerDim(1) < 0.0d0)                                &
+               localMaxPerDim(1) = modulo( localMaxPerDim(1), -360.0d0 ) + 360.0d0
+        localMaxPerDim(1) = modulo( localMaxPerDim(1), 360.0d0 )
+
+        where ( boxes(:,:,1) < 0.0d0)                                &
+               boxes(:,:,1) = modulo( boxes(:,:,1), -360.0d0 ) + 360.0d0
+        boxes(:,:,1) = modulo( boxes(:,:,1), 360.0d0 )
+      endif
 
       ! loop through bounding boxes, looking for overlap with our "box".
       ! go through list of DEs to calculate the number of domains
@@ -9250,16 +9307,30 @@
           ! that point in my source Grid
           point(1) = min(boxes(j,1,1),boxes(j,4,1))
           point(2) = min(boxes(j,1,2),boxes(j,2,2))
+          ! set argument for spherical case
+          temp = srcGrid%ptr%physGrids(physId)%ptr%coordSystem
+          if (coordSystem.eq.ESMF_COORD_SYSTEM_SPHERICAL)       &
+            srcGrid%ptr%physGrids(physId)%ptr%coordSystem = ESMF_COORD_SYSTEM_SPHERICAL
+
           call ESMF_PhysGridSearchMyDERowCol(srcGrid%ptr%physGrids(physId), &
                                              localIndex, point, &
                                              option='min', total=total, rc=rc)
+          srcGrid%ptr%physGrids(physId)%ptr%coordSystem = temp
+          
           globalMinIndex((j-1)*2 + 1) = localIndex(1)
           globalMinIndex((j-1)*2 + 2) = localIndex(2)
           point(1) = max(boxes(j,2,1),boxes(j,3,1))
           point(2) = max(boxes(j,3,2),boxes(j,4,2))
+          ! set argument for spherical case
+          temp = srcGrid%ptr%physGrids(physId)%ptr%coordSystem
+          if (coordSystem.eq.ESMF_COORD_SYSTEM_SPHERICAL)       &
+            srcGrid%ptr%physGrids(physId)%ptr%coordSystem = ESMF_COORD_SYSTEM_SPHERICAL
+
           call ESMF_PhysGridSearchMyDERowCol(srcGrid%ptr%physGrids(physId), &
                                              localIndex, point, &
                                              option='max', total=total, rc=rc)
+          srcGrid%ptr%physGrids(physId)%ptr%coordSystem = temp
+
           globalMaxIndex((j-1)*2 + 1) = localIndex(1)
           globalMaxIndex((j-1)*2 + 2) = localIndex(2)
         enddo
