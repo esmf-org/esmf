@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.97.2.2 2006/11/16 06:15:10 cdeluca Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.97.2.3 2006/11/23 18:58:20 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -324,7 +324,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.97.2.2 2006/11/16 06:15:10 cdeluca Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.97.2.3 2006/11/23 18:58:20 donstark Exp $'
 
 !==============================================================================
 !
@@ -2289,6 +2289,13 @@
 
       call ESMF_ArrayGetData(physgrid%ptr%regions%vertices(1), cornerX, &
                              ESMF_DATA_REF, rc)
+      ! shift cornerX
+      if (physgrid%ptr%coordSystem.eq.ESMF_COORD_SYSTEM_SPHERICAL) then
+        where ( cornerX < 0.0d0)                                &
+               cornerX = modulo( cornerX, -360.0d0 ) + 360.0d0
+        cornerX = modulo( cornerX, 360.0d0 )
+      endif
+
       call ESMF_ArrayGetData(physgrid%ptr%regions%vertices(2), cornerY, &
                              ESMF_DATA_REF, rc)
 
