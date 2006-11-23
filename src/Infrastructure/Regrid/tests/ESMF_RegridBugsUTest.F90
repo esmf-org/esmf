@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBugsUTest.F90,v 1.1.2.1 2006/11/22 20:33:14 donstark Exp $
+! $Id: ESMF_RegridBugsUTest.F90,v 1.1.2.2 2006/11/23 18:47:20 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridBugsUTest.F90,v 1.1.2.1 2006/11/22 20:33:14 donstark Exp $'
+      '$Id: ESMF_RegridBugsUTest.F90,v 1.1.2.2 2006/11/23 18:47:20 donstark Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -59,7 +59,7 @@
 
       ! Local variables
       Integer :: i, j, ixS, iyS, ixD, iyD
-      Integer :: cellCounts(2)
+      Integer :: cellCounts(2), decount(2)
       Integer :: npets, myDE
       real(ESMF_KIND_R8) :: error, calc, maxError, maxPerError
       real(ESMF_KIND_R8) :: minCValue, maxCValue
@@ -68,22 +68,24 @@
       real(ESMF_KIND_R8), dimension(:,:), pointer :: Sfptr,Dfptr
 
       ! Parameters
-      integer, parameter :: slons = 12, slats = 19, dlons = 9, dlats = 13
       real(ESMF_KIND_R8), parameter :: pi = 3.1415927d0
       real(ESMF_KIND_R8), parameter :: d2r = pi/180.0d0,r2d = 180.0d0/pi,pi2 = 360.0d0
 !
       real(ESMF_KIND_R8), pointer, dimension(:,:) :: localX,localY,DlocalX,DlocalY
       Type (ESMF_Array), dimension(2) :: dstlocalcoord, srclocalcoord
-!
-      real(ESMF_KIND_R8), parameter ::      &
-               SvLat(slats) = (/-90.,-80.,-70.,-60.,-50.,-40.,-30.,-20.,-10., &
-                           0.,10.,20.,30.,40.,50.,60.,70.,80.,90./)
-      real(ESMF_KIND_R8), parameter ::      &
-               DvLat(dlats) = (/-60.,-55.,-50.,-45.,-40.,-35.,-30.,-25.,-20.,-15.,-10.,-5.,0. /)
+      ! Source Grid
+      integer, parameter :: slons = 12, slats = 19
+      real(ESMF_KIND_R8), parameter :: SvLat(slats) = (/-90.,-80.,-70.,-60.,-50.,     &
+                -40.,-30.,-20.,-10.,0.,10.,20.,30.,40.,50.,60.,70.,80.,90./)
+      real(ESMF_KIND_R8), parameter :: SvLon(slons) =  (/0.,30.,60.,90.,120.,150.,    &
+                180.,210.,240.,270.,300.,330./)
+      ! Destination Grid
+      integer, parameter :: dlons = 11, dlats = 13
+      real(ESMF_KIND_R8), parameter ::  DvLat(dlats) = (/-60.,-55.,-50.,-45.,-40.,    &
+                -35.,-30.,-25.,-20.,-15.,-10.,-5.,0. /)
+      real(ESMF_KIND_R8), parameter :: DvLon(dlons) = (/-110.,-100.,-90.,-80.,-70.,   &
+                -60.,-50.,-40.,-30.,-20.,-10./)
 
-      real(ESMF_KIND_R8), parameter :: SvLon(slons) =   &
-                        (/0.,30.,60.,90.,120.,150.,180.,210.,240.,270.,300.,330./)
-      real(ESMF_KIND_R8), parameter :: DvLon(dlons) = (/30.,40.,50.,60.,70.,80.,90.,100.,110./)
 
       !------------------------------------------------------------------------
       !  Start program
@@ -105,7 +107,12 @@
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
-      delayout = ESMF_DELayoutCreate(vm, (/ npets/2, 2 /), rc=rc)
+      if (npets .eq. 1) then
+        decount(:) = (/ 1, 1 /)
+      else
+        decount(:) = (/ 2, npets/2 /)
+      endif
+      delayout = ESMF_DELayoutCreate(vm, decount, rc=rc)
       write(failMsg, *) "Failed creating a delayout rc =", rc
       write(name, *) "Creating a DELayout"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
