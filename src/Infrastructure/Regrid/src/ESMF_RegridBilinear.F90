@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.90.2.2 2006/11/16 06:15:18 cdeluca Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.90.2.3 2006/11/23 18:49:07 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.90.2.2 2006/11/16 06:15:18 cdeluca Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.90.2.3 2006/11/23 18:49:07 donstark Exp $'
 
 !==============================================================================
 
@@ -222,6 +222,11 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      call ESMF_GridGet(dstGrid, horzCoordSystem=coordSystem, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       if (hasDstData) then
         allocate(dstLocalCoordArray(2), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "dstLocalCoordArray", &
@@ -235,10 +240,18 @@
                                   ESMF_CONTEXT, rc)) return
 
         call ESMF_ArrayGetData(dstLocalCoordArray(1), dstLocalCoordX, &
-                               ESMF_DATA_REF, localrc)
+                               ESMF_DATA_COPY, localrc)
         call ESMF_ArrayGetData(dstLocalCoordArray(2), dstLocalCoordY, &
-                               ESMF_DATA_REF, localrc)
+                               ESMF_DATA_COPY, localrc)
+
+        if (coordSystem.eq.ESMF_COORD_SYSTEM_SPHERICAL) then
+        ! convert destination longitudes to 0,360 interval
+          where (dstLocalCoordX < 0.0d0)                                &
+               dstLocalCoordX = modulo( dstLocalCoordX, -360.0d0 ) + 360.0d0
+          dstLocalCoordX = modulo( dstLocalCoordX, 360.0d0 )
+        endif
       endif
+
 
       ! get source grid info
       call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcRelLoc, rc=localrc)
@@ -250,6 +263,11 @@
       call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=srcRelLoc, &
                                    localCellCountPerDim=srcCounts(1:2), &
                                    reorder=.false., rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_GridGet(srcGrid, horzCoordSystem=coordSystem, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -274,6 +292,14 @@
                                   rc=localrc)
         call ESMF_ArrayGetData(srcMaskArray, srcLocalMask, ESMF_DATA_REF, &
                                localrc)
+        if (coordSystem.eq.ESMF_COORD_SYSTEM_SPHERICAL) then
+        ! convert source longitudes to 0,360 interval
+          where (srcLocalCoordX < 0.0d0)  srcLocalCoordX =  &
+                                        modulo( srcLocalCoordX, -360.0d0 ) + 360.0d0
+          srcLocalCoordX = modulo( srcLocalCoordX, 360.0d0 )
+        endif
+
+
 !      else    ! TODO -- is this necessary?
 !        allocate(srcLocalCoordX(srcCounts(1),srcCounts(2)), &
 !                 srcLocalCoordY(srcCounts(1),srcCounts(2)), &
@@ -337,7 +363,14 @@
                  srcGatheredCoordY(size), &
                  srcGatheredMask  (size), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "src gathered arrays", &
-                                       ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rc)) return
+
+          if (coordSystem .eq. ESMF_COORD_SYSTEM_SPHERICAL) then
+          ! convert destination longitudes to 0,360 interval
+            where (srcGatheredCoordX < 0.0d0)  srcGatheredCoordX =  &
+                                        modulo( srcGatheredCoordX, -360.0d0 ) + 360.0d0
+            srcGatheredCoordX = modulo( srcGatheredCoordX, 360.0d0 )
+          endif
       !else
       !  ! TODO: make route run routines take a nullified pointers.
       !  allocate(srcGatheredCoordX(0), &
