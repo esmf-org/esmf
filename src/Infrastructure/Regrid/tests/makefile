@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.36.2.2 2006/11/23 18:45:12 donstark Exp $
+# $Id: makefile,v 1.36.2.3 2006/11/24 06:24:53 donstark Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -35,7 +35,6 @@ TESTS_RUN_UNI = RUN_ESMF_RegridToolUTestUNI \
 		RUN_ESMF_RegridUTestUNI \
 	        RUN_ESMF_RegridOptionsUTestUNI \
 	        RUN_ESMF_RegridBandingUTestUNI  \
-		RUN_ESMF_RegridBugsUTestUNI \
 	        RUN_ESMF_RegridBugsUTestUNI
 
 
