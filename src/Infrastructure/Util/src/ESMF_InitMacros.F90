@@ -1,4 +1,4 @@
-! $Id: ESMF_InitMacros.F90,v 1.5 2006/11/26 06:02:28 oehmke Exp $
+! $Id: ESMF_InitMacros.F90,v 1.6 2006/11/26 22:15:36 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 
 
 ! !PUBLIC MEMBER FUNCTIONS:
-   public ESMF_InitCheckDeep,ESMF_IMErr
+   public ESMF_IMErr
 
 
 contains
@@ -83,14 +83,14 @@ end function ESMF_InitCheckDeep
 ! !IROUTINE: ESMF_IMErr - Init Macros Error Handling
 
 ! !INTERFACE: 
-	function ESMF_IMErr(rcToCheck, line, file, method, &
+	function ESMF_IMErr(isInit, line, file, method, &
                                        rc)
 !
 ! !RETURN VALUE:
 	logical                                         ::ESMF_IMErr
 ! !ARGUMENTS:
 !	
-	integer, intent(in)                             :: rcToCheck
+	ESMF_INIT_TYPE, intent(in)              :: isInit
 	integer, intent(in), optional                   :: line
 	character(len=*), intent(in), optional          :: file
 	character(len=*), intent(in), optional	        :: method
@@ -98,17 +98,17 @@ end function ESMF_InitCheckDeep
 	
 
 ! !DESCRIPTION:
-!      This function returns a logical true for ESMF return codes that indicate
-!      an error.  A predefined error message will added to the {\tt ESMF\_Log} 
-!      along with
+!      This function returns a logical true for ESMF initialization
+!      codes that indicate an error.  A predefined error message will
+!      be added to the {\tt ESMF\_Log} along with
 !      a user added {\tt line}, {\tt file} and {\tt method}.  
-!      Additionally, {\tt rcToReturn} will be set to {\tt rcToCheck}.
+!      Additionally, {\tt rc} will be set to an appropriate return code.
 !
 !      The arguments are:
 !      \begin{description}
 ! 	
-!      \item [rcToCheck]
-!            Return code to check.
+!      \item [isInit]
+!            Initialization code to check.
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
 !            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
@@ -117,7 +117,7 @@ end function ESMF_InitCheckDeep
 !      \item [{[method]}]
 !            User-provided method string.
 !      \item [{[rc]}]
-!            If specified, copy the {\tt rcToCheck} value to {\tt rc}.
+!            If specified, put the return code into {\tt rc}.
 !            This is not the return code for this function; it allows
 !            the calling code to do an assignment of the error code
 !            at the same time it is testing the value.
@@ -128,12 +128,12 @@ end function ESMF_InitCheckDeep
 !EOP
 	
 
-    ESMF_IMErr=ESMF_LogMsgFoundError(rcToCheck,"Bad Object", &
+    ESMF_IMErr=ESMF_LogMsgFoundError(ESMF_InitCheckDeep(isInit), &
+                                   "Bad Object", &
                                    line, file, method, &
                                    rc)
        
 end function ESMF_IMErr
-
 
 
 end module ESMF_InitMacrosMod
