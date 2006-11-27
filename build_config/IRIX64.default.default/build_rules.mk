@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.27 2006/09/22 23:55:39 theurich Exp $
+# $Id: build_rules.mk,v 1.28 2006/11/27 19:00:38 theurich Exp $
 # 
 # IRIX64.default.default
 #
@@ -62,6 +62,11 @@ ESMF_CXXLINKOPTS          += -64
 ESMF_F90COMPILEOPTS       += -64
 ESMF_F90LINKOPTS          += -64
 endif
+
+############################################################
+# OpenMP on IRIX64 is incompatible with Pthreads thus turn off by default
+#
+ESMF_PTHREADSDEFAULT       = OFF
 
 ############################################################
 # Special compiler flags
