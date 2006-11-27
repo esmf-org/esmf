@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.168 2006/11/17 18:54:22 theurich Exp $
+#  $Id: common.mk,v 1.169 2006/11/27 19:22:31 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -173,7 +173,7 @@ endif
 endif
 
 ifeq ($(ESMF_ABI),default)
-# default is 64-bit for all architectures
+# start with 64-bit default for all architectures
 export ESMF_ABI = 64
 ifeq ($(ESMF_OS),Linux)
 # default on Linux is 32-bit
@@ -186,16 +186,15 @@ ifeq ($(ESMF_MACHINE),x86_64)
 #and x86_64
 export ESMF_ABI = 64
 endif
-ifeq ($(ESMF_COMPILER),x1cross)
-#and x1cross compiler
-export ESMF_ABI = 64
-endif
 endif
 ifeq ($(ESMF_OS),Darwin)
 # default on Darwin is 32-bit
 export ESMF_ABI = 32
 endif
 endif
+
+# by default ABISTRING is simply ABI
+ESMF_ABISTRING = $(ESMF_ABI)
 
 ifeq ($(ESMF_COMPILER),default)
 ifeq ($(ESMF_OS),Darwin)
@@ -647,16 +646,8 @@ CPPFLAGS       += -DESMF_EXHAUSTIVE
 endif
 
 #-------------------------------------------------------------------------------
-# add in any FPPDEFS defined in the system dep files, and add a definition
-#  for the selected word size (32/64) by defining the syms S32 or S64.
+# Add ESMF_ABISTRING to preprocessor flags
 #-------------------------------------------------------------------------------
-ESMF_ABISTRING := $(ESMF_ABI)
-ifeq ($(ESMF_MACHINE),x86_64)
-ESMF_ABISTRING := $(ESMF_ABI)_$(ESMF_MACHINE)
-endif
-ifeq ($(ESMF_MACHINE),ia64)
-ESMF_ABISTRING := $(ESMF_ABI)_$(ESMF_MACHINE)
-endif
 
 CPPFLAGS        +=-DS$(ESMF_ABISTRING)=1
 
