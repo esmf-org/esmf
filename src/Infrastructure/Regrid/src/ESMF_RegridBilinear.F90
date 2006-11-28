@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.90.2.3 2006/11/23 18:49:07 donstark Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.90.2.4 2006/11/28 00:29:50 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.90.2.3 2006/11/23 18:49:07 donstark Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.90.2.4 2006/11/28 00:29:50 donstark Exp $'
 
 !==============================================================================
 
@@ -246,9 +246,9 @@
 
         if (coordSystem.eq.ESMF_COORD_SYSTEM_SPHERICAL) then
         ! convert destination longitudes to 0,360 interval
-          where (dstLocalCoordX < 0.0d0)                                &
-               dstLocalCoordX = modulo( dstLocalCoordX, -360.0d0 ) + 360.0d0
-          dstLocalCoordX = modulo( dstLocalCoordX, 360.0d0 )
+!         where (dstLocalCoordX < 0.0d0)                                &
+!              dstLocalCoordX = modulo( dstLocalCoordX, -360.0d0 ) + 360.0d0
+!         dstLocalCoordX = modulo( dstLocalCoordX, 360.0d0 )
         endif
       endif
 
@@ -294,9 +294,9 @@
                                localrc)
         if (coordSystem.eq.ESMF_COORD_SYSTEM_SPHERICAL) then
         ! convert source longitudes to 0,360 interval
-          where (srcLocalCoordX < 0.0d0)  srcLocalCoordX =  &
-                                        modulo( srcLocalCoordX, -360.0d0 ) + 360.0d0
-          srcLocalCoordX = modulo( srcLocalCoordX, 360.0d0 )
+!         where (srcLocalCoordX < 0.0d0)  srcLocalCoordX =  &
+!                                       modulo( srcLocalCoordX, -360.0d0 ) + 360.0d0
+!         srcLocalCoordX = modulo( srcLocalCoordX, 360.0d0 )
         endif
 
 
@@ -367,9 +367,9 @@
 
           if (coordSystem .eq. ESMF_COORD_SYSTEM_SPHERICAL) then
           ! convert destination longitudes to 0,360 interval
-            where (srcGatheredCoordX < 0.0d0)  srcGatheredCoordX =  &
-                                        modulo( srcGatheredCoordX, -360.0d0 ) + 360.0d0
-            srcGatheredCoordX = modulo( srcGatheredCoordX, 360.0d0 )
+!           where (srcGatheredCoordX < 0.0d0)  srcGatheredCoordX =  &
+!                                       modulo( srcGatheredCoordX, -360.0d0 ) + 360.0d0
+!           srcGatheredCoordX = modulo( srcGatheredCoordX, 360.0d0 )
           endif
       !else
       !  ! TODO: make route run routines take a nullified pointers.
