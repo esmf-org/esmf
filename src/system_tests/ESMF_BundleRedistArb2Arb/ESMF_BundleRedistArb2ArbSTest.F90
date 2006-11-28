@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistArb2ArbSTest.F90,v 1.2 2006/10/03 19:02:35 theurich Exp $
+! $Id: ESMF_BundleRedistArb2ArbSTest.F90,v 1.3 2006/11/28 22:52:40 samsoncheung Exp $
 !
 ! System test BundleRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -118,8 +118,8 @@
      max(2) = 50.0
      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
 
-     ! make two identical grids, except one is distributed in the normal
-     ! block style and the second is distributed in arbitrary style
+     ! make two identical grids, both are distributed in arbitrary style
+     ! with slightly different delayout.
      grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=min, &
                              maxGlobalCoordPerDim=max, &
@@ -184,7 +184,7 @@
                               myIndices=myIndices2, rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
-     ! Set up a 1D (for the arbitrarily distributed Field) and a 2D real array
+     ! Set up a 1D (for the arbitrarily distributed Bundle) and a 1D real array
      call ESMF_ArraySpecSet(arrayspec1, rank=1, type=ESMF_DATA_REAL, &
                             kind=ESMF_R8)
      if (status .ne. ESMF_SUCCESS) goto 20
@@ -203,6 +203,7 @@
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Create the field and have it create the array internally for each grid
+     ! and add the Fields to the Bundle corresponding to the Grid.
      humidity1 = ESMF_FieldCreate(grid1, arrayspec1, &
                                   horzRelloc=ESMF_CELL_CENTER, &
                                   haloWidth=0, name="humidity1", rc=status)
