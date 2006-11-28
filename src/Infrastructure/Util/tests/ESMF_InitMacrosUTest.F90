@@ -1,4 +1,4 @@
-! $Id: ESMF_InitMacrosUTest.F90,v 1.4 2006/11/22 06:34:52 oehmke Exp $
+! $Id: ESMF_InitMacrosUTest.F90,v 1.5 2006/11/28 17:51:57 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InitMacrosUTest.F90,v 1.4 2006/11/22 06:34:52 oehmke Exp $'
+      '$Id: ESMF_InitMacrosUTest.F90,v 1.5 2006/11/28 17:51:57 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -79,6 +79,7 @@
 
       ! add tests here
 
+#ifdef ESMF_INITMACROS_ON
       ! Shallow type test
       ESMF_INIT_CHECK_SHALLOW(ESMF_ShallowGetInitVal,ESMF_ShallowInit,s)
       write(name,*) "Testing ESMF_INIT_CHECK_SHALLOW"
@@ -113,6 +114,8 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
+
+#endif
 
 #endif
 
