@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.77 2006/11/16 05:21:22 cdeluca Exp $
+// $Id: ESMC_VMKernel.C,v 1.78 2006/11/29 22:52:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -249,7 +249,7 @@ void ESMC_VMK::vmk_obtain_args(void){
 }
 
 
-void ESMC_VMK::vmk_init(void){
+void ESMC_VMK::vmk_init(MPI_Comm mpiCommunicator){
   // initialize the physical machine and a default (all MPI) virtual machine
   // initialize signal handling -> this MUST happen before MPI_Init is called!!
   struct sigaction action;
@@ -283,8 +283,8 @@ void ESMC_VMK::vmk_init(void){
   } 
   // so now MPI is for sure initialized...
   int rank, size;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  MPI_Comm_size(MPI_COMM_WORLD, &size);
+  MPI_Comm_rank(mpiCommunicator, &rank);
+  MPI_Comm_size(mpiCommunicator, &size);
   // since this method is only supposed to be called my the main_vmachine 
   // and the main_vmachine is all MPI pets we can do the following:
   npets=size;           // user is required to start with #processes=#cores!!!!
@@ -297,9 +297,9 @@ void ESMC_VMK::vmk_init(void){
 #endif
   // no threading in default global VM
   nothreadsflag = 1;
-  // set up private MPI_COMM_WORLD Group and Comm
-  MPI_Comm_group(MPI_COMM_WORLD, &mpi_g);
-  MPI_Comm_create(MPI_COMM_WORLD, mpi_g, &mpi_c);
+  // set up private Group and Comm objects across "mpiCommunicator"
+  MPI_Comm_group(mpiCommunicator, &mpi_g);
+  MPI_Comm_create(mpiCommunicator, mpi_g, &mpi_c);
   // ... and copy them into the class static default variables...
   default_mpi_g = mpi_g;
   default_mpi_c = mpi_c;
@@ -414,7 +414,7 @@ void ESMC_VMK::vmk_abort(void){
   int finalized;
   MPI_Finalized(&finalized);
   if (!finalized)
-    MPI_Abort(MPI_COMM_WORLD, 0);
+    MPI_Abort(default_mpi_c, 0);
 }
 
 
@@ -992,7 +992,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   for (int i=0; i<vmp->spawnflag[mypet]; i++){
     if (vmp->myvms == NULL){
       fprintf(stderr, "VM_ERROR: No vm objects provided.\n");
-      MPI_Abort(MPI_COMM_WORLD, 0);
+      MPI_Abort(default_mpi_c, 0);
     } 
     sarg[i].myvm = vmp->myvms[i];
   }

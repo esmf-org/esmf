@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.38 2006/11/16 05:21:22 cdeluca Exp $
+// $Id: ESMC_VMKernel.h,v 1.39 2006/11/29 22:52:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -168,7 +168,7 @@ class ESMC_VMK{
     static int *cpuid; // cpuid associated with certain core (multi-core cpus)
     static int *ssiid; // single system inmage id to which this core belongs
   public:
-    // static MPI info, MPI_COMM_WORLD Group and Comm of the default ESMC_VMK
+    // static MPI info, Group and Comm of the default ESMC_VMK
     // and the thread level that the MPI implementation supports.
     static MPI_Group default_mpi_g;
     static MPI_Comm default_mpi_c;
@@ -183,7 +183,7 @@ class ESMC_VMK{
     void vmk_commhandle_add(vmk_commhandle *commhandle);
     int vmk_commhandle_del(vmk_commhandle *commhandle);
   public:
-    void vmk_init(void);
+    void vmk_init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD);
       // initialize the physical machine and a default (all MPI) virtual machine
     void vmk_finalize(int finalizeMpi=1);
       // finalize default (all MPI) virtual machine

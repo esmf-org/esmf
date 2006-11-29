@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.59 2006/11/16 05:21:22 cdeluca Exp $
+// $Id: ESMC_VM_F.C,v 1.60 2006/11/29 22:52:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -413,11 +413,21 @@ extern "C" {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
   }
 
-  void FTN(c_esmc_vminitialize)(ESMC_VM **ptr, int *rc){
+  void FTN(c_esmc_vminitialize)(ESMC_VM **ptr, int *mpiCommunicator, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vminitialize()"
     int localrc;
-    *ptr = ESMC_VMInitialize(&localrc);
+    MPI_Comm localMpiComm;
+    if (ESMC_NOT_PRESENT_FILTER(mpiCommunicator)){
+      int localMpiCommFortran = *mpiCommunicator;
+#ifdef ESMF_DONT_HAVE_MPI_COMM_F2C
+      localMpiComm = (MPI_Comm)localMpiCommFortran; // best guess in this case
+#else
+      localMpiComm = MPI_Comm_f2c(localMpiCommFortran);
+#endif
+    }else
+      localMpiComm = MPI_COMM_WORLD;  // this is the default
+    *ptr = ESMC_VMInitialize(localMpiComm, &localrc);
     //ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
     // Cannot use LogErr here because LogErr initializes _after_ VM
     *rc = localrc;

@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.78 2006/11/16 05:21:22 cdeluca Exp $
+! $Id: ESMF_VM.F90,v 1.79 2006/11/29 22:52:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -171,7 +171,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.78 2006/11/16 05:21:22 cdeluca Exp $"
+      "$Id: ESMF_VM.F90,v 1.79 2006/11/29 22:52:38 theurich Exp $"
 
 !==============================================================================
 
@@ -5697,9 +5697,10 @@ module ESMF_VMMod
 ! !IROUTINE: ESMF_VMInitialize - Initialize the Global VM
 
 ! !INTERFACE:
-  subroutine ESMF_VMInitialize(rc)
+  subroutine ESMF_VMInitialize(mpiCommunicator, rc)
 !
 ! !ARGUMENTS:
+    integer, intent(in),  optional :: mpiCommunicator
     integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
@@ -5707,6 +5708,10 @@ module ESMF_VMMod
 !
 !   The arguments are:
 !   \begin{description}
+!   \item[{[mpiCommunicator]}] 
+!        MPI communicator defining the group of processes on which the
+!        ESMF application is running.
+!        If not sepcified, defaults to {\tt ESMF\_COMM\_WORLD}
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5720,7 +5725,7 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMInitialize(GlobalVM, localrc)
+    call c_ESMC_VMInitialize(GlobalVM, mpiCommunicator, localrc)
 
     ! Use LogErr to handle return code
     !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &

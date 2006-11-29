@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.32 2006/11/16 05:21:22 cdeluca Exp $
+// $Id: ESMC_VM.h,v 1.33 2006/11/29 22:52:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 ///EOP
 //-------------------------------------------------------------------------
 
-#include <ESMC_VMKernel.h>    // inherit from ESMC_VMK class
+#include "ESMC_VMKernel.h"    // inherit from ESMC_VMK class
 
 
 typedef struct{
@@ -47,7 +47,7 @@ typedef struct{
   int localID;    // local ID of the VM within VAS context
 }ESMC_VMId;
 
-#include <ESMC_Base.h>        // cannot move Base.h before def. of ESMC_VMId 
+#include "ESMC_Base.h"        // cannot move Base.h before def. of ESMC_VMId 
 
 // external ESMC_VMId methods:
 ESMC_VMId ESMC_VMIdCreate(int *rc);      // allocates memory for vmKey member
@@ -101,9 +101,13 @@ void     ESMC_VMGetArgs(int *argc, char ***argv, int *rc);  // Command line args
 ESMC_VM *ESMC_VMGetGlobal(int *rc);   // Return pointer to global VM
 ESMC_VM *ESMC_VMGetCurrent(int *rc);  // Return pointer to VM of current context
 ESMC_VMId *ESMC_VMGetCurrentID(int *rc);// Return ID of the current VM context.
-ESMC_VM *ESMC_VMInitialize(int *rc);  // Initialize global ESMC_VMK
-void     ESMC_VMFinalize(ESMC_Logical *keepMpiFlag, int *rc); // Shut down and
-                                                 // clean up global ESMC_VMK
+ESMC_VM *ESMC_VMInitialize(MPI_Comm mpiCommunicator, int *rc);  // Initialize
+                                                                // global
+                                                                // ESMC_VMK
+void     ESMC_VMFinalize(ESMC_Logical *keepMpiFlag, int *rc);   // Shut down and
+                                                                // clean up
+                                                                // global
+                                                                // ESMC_VMK
 void     ESMC_VMAbort(int *rc);       // Abort and clean up global ESMC_VMK
     
 

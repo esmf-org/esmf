@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.40 2006/11/16 05:21:24 cdeluca Exp $
+! $Id: ESMF_Init.F90,v 1.41 2006/11/29 22:52:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -95,15 +95,16 @@
 !
 ! !INTERFACE:
       subroutine ESMF_Initialize(defaultConfigFileName, defaultCalendar, &
-                                 defaultLogFileName, defaultLogType, vm, rc)
+        defaultLogFileName, defaultLogType, mpiCommunicator, vm, rc)
 !
 ! !ARGUMENTS:
       character(len=*),        intent(in),  optional :: defaultConfigFileName
-      type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar  
+      type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar
       character(len=*),        intent(in),  optional :: defaultLogFileName
-      type(ESMF_LogType),      intent(in),  optional :: defaultLogType  
-      type(ESMF_VM),           intent(out), optional :: vm   
-      integer,                 intent(out), optional :: rc     
+      type(ESMF_LogType),      intent(in),  optional :: defaultLogType
+      integer,                 intent(in),  optional :: mpiCommunicator
+      type(ESMF_VM),           intent(out), optional :: vm
+      integer,                 intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -137,6 +138,10 @@
 !           If not specified, defaults to {\tt ESMF\_ErrorLog}.
 !     \item [{[defaultLogType]}]
 !           Sets the default Log Type to be used by ESMF Log Manager.
+!     \item [{[mpiCommunicator]}]
+!           MPI communicator defining the group of processes on which the
+!           ESMF application is running.
+!           If not sepcified, defaults to {\tt ESMF\_COMM\_WORLD}
 !     \item [{[vm]}]
 !           Returns the global {\tt ESMF\_VM} that was created 
 !           during initialization.
@@ -151,16 +156,20 @@
 
       ! assume failure until success
       if (present(rc)) rc = ESMF_FAILURE
-
-      call ESMF_FrameworkInternalInit(ESMF_MAIN_F90, defaultConfigFileName, &
-        defaultCalendar, defaultLogFileName, defaultLogType, rc=localrc)
+      
+      ! initialize the framework
+      call ESMF_FrameworkInternalInit(lang=ESMF_MAIN_F90, &
+        defaultConfigFileName=defaultConfigFileName, &
+        defaultCalendar=defaultCalendar, defaultLogFileName=defaultLogFileName,&
+        defaultLogType=defaultLogType, mpiCommunicator=mpiCommunicator, &
+        rc=localrc)
                                       
-      ! LogErr not yet initialized -> explicit print on error
+      ! on failure LogErr is not initialized -> explicit print on error
       if (localrc .ne. ESMF_SUCCESS) then
         print *, "Error initializing framework"
         return 
       endif 
-      ! LogErr is assumed to be functioning
+      ! on success LogErr is assumed to be functioning
       
       ! obtain global VM
       call ESMF_VMGetGlobal(localvm, rc=localrc)
@@ -183,8 +192,8 @@
 !
 ! !INTERFACE:
       subroutine ESMF_FrameworkInternalInit(lang, defaultConfigFileName, &
-                                       defaultCalendar, defaultLogFileName, &
-                                       defaultLogType, rc)
+        defaultCalendar, defaultLogFileName, defaultLogType, &
+        mpiCommunicator, rc)
 !
 ! !ARGUMENTS:
       integer,                 intent(in)            :: lang     
@@ -192,6 +201,7 @@
       type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar     
       character(len=*),        intent(in),  optional :: defaultLogFileName
       type(ESMF_LogType),      intent(in),  optional :: defaultLogType  
+      integer,                 intent(in),  optional :: mpiCommunicator
       integer,                 intent(out), optional :: rc     
 
 !
@@ -214,6 +224,10 @@
 !     \item [{[defaultLogType]}]
 !           Sets the default Log Type to be used by ESMF Log Manager.
 !           If not specified, defaults to "ESMF\_LOG\_MULTI".
+!     \item [{[mpiCommunicator]}]
+!           MPI communicator defining the group of processes on which the
+!           ESMF application is running.
+!           If not sepcified, defaults to {\tt ESMF\_COMM\_WORLD}
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -238,13 +252,17 @@
       endif
 
       ! Initialize the VM. This creates the GlobalVM.
-      ! Note that ESMF_VMInitialize _must_ be called before any other
-      ! mechanism calls MPI_Init. This is because MPI_Init on some systems
-      ! will spawn helper threads which might have signal handlers installed
-      ! incompatible with vmachine. ESMF_VMInitialize must install correct
+      ! Note that if VMKernel threading is to be used ESMF_VMInitialize() _must_
+      ! be called before any other mechanism calls MPI_Init. This is because 
+      ! MPI_Init() on some systems will spawn helper threads which might have 
+      ! signal handlers installed incompatible with VMKernel. Calling
+      ! ESMF_VMInitialize() with and un-initialized MPI will install correct 
       ! signal handlers _before_ possible helper threads are spawned by 
-      ! MPI_Init.
-      call ESMF_VMInitialize(status)
+      ! MPI_Init().
+      ! If, however, VMKernel threading is not used it is fine to come in with
+      ! a user initialized MPI, and thus we support this mode as well!
+      call ESMF_VMInitialize(mpiCommunicator=mpiCommunicator, rc=status)
+      ! error handling without LogErr because it's not initialized yet
       if (status .ne. ESMF_SUCCESS) then
           print *, "Error initializing VM"
           return

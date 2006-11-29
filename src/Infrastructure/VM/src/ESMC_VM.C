@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.44 2006/11/16 05:21:22 cdeluca Exp $
+// $Id: ESMC_VM.C,v 1.45 2006/11/29 22:52:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.44 2006/11/16 05:21:22 cdeluca Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.45 2006/11/29 22:52:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -883,6 +883,7 @@ ESMC_VM *ESMC_VMInitialize(
 //
 // !ARGUMENTS:
 //
+  MPI_Comm mpiCommunicator,
   int *rc){   // return code
 //
 // !DESCRIPTION:
@@ -893,7 +894,7 @@ ESMC_VM *ESMC_VMInitialize(
 //-----------------------------------------------------------------------------
   *rc = ESMF_FAILURE;         // assume failure
   GlobalVM = new ESMC_VM;
-  GlobalVM->vmk_init();       // set up default ESMC_VMK (all MPI)
+  GlobalVM->vmk_init(mpiCommunicator);  // set up default ESMC_VMK (all MPI)
   if (GlobalVM==NULL){
     ESMC_LogDefault.ESMC_LogWrite("vmk_init returned invalid GlobalVM",
       ESMC_LOG_ERROR);
