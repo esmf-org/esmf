@@ -1,0 +1,89 @@
+
+%\subsubsection{ESMF\_RegridDistrb}
+%
+%{\sf DESCRIPTION:\\}
+%Regrid options for Field data motion supported by ESMF.
+%
+%Valid values are:
+%\begin{description}
+%   \item [ESMF\_REGRIDDISTRB\_BOTH]
+%         Redistribute both source and destination Fields.
+%   \item [ESMF\_REGRIDDISTRB\_DEST]
+%         Redistribute destination Field.
+%   \item [ESMF\_REGRIDDISTRB\_NONE]
+%         No data motion required or undefined.
+%   \item [ESMF\_REGRIDDISTRB\_SOURCE]
+%         Redistribute source Field.
+%\end{description}
+
+
+\subsubsection{ESMF\_RegridMethod}
+
+{\sf DESCRIPTION:\\}
+General Regrid methods supported by ESMF.
+
+Valid values are:
+\begin{description}
+%  \item [ESMF\_REGRID\_METHOD\_ADJOINT]
+%        Create adjoint of existing regrid
+%  \item[ESMF\_REGRID\_METHOD\_BICUBIC ]
+
+\item [ESMF\_REGRID\_METHOD\_BILINEAR]
+     Bilinear regridding using a local bilinear approximation to interpolate
+     to a point in a quadrilateral grid.  For more details, please see
+     Section~\ref{sec:BilinearRegrid}.  NOTE: This is applicable only for
+     logically-rectangular or block-structured logically-rectangular grids.
+
+%\item[ESMF\_REGRID\_METHOD\_CONSERV1 and ESMF\_REGRID\_METHOD\_CONSERV2]
+\item[ESMF\_REGRID\_METHOD\_CONSERV1]
+     First-order conservative remapping. It currently only supports spherical 
+     grids specified in degrees.  For algorithm details, please see
+     Section~\ref{sec:ConserveRegrid}.
+
+%  \item [ESMF\_REGRID\_METHOD\_FILE]
+%        Read a regrid from a file
+%  \item [ESMF\_REGRID\_METHOD\_FOURIER]
+%        Fourier transform.
+%  \item [ESMF\_REGRID\_METHOD\_INDEX]
+%        Index-space regrid (shift, stencil).
+%  \item [ESMF\_REGRID\_METHOD\_LEGENDRE]
+%        Legendre transform.
+\item[ESMF\_REGRID\_METHOD\_LINEAR  ]
+     This is a standard linear regridding algorithm for 1-d grids only.  In ESMF,
+     it is used to regrid between vertical grids.
+
+%  \item [ESMF\_REGRID\_METHOD\_NEARNBR]
+%        Nearest-neighbor dist-weighted avg
+\item [ESMF\_REGRID\_METHOD\_NONE]
+     No regridding or undefined regrid.
+%  \item [ESMF\_REGRID\_METHOD\_RASTER]
+%        Regrid by rasterizing domain.
+%  \item [ESMF\_REGRID\_METHOD\_REGRIDCOPY]
+%        Copy existing regrid
+%  \item [ESMF\_REGRID\_METHOD\_SHIFT]
+%        Shift addresses of existing regrid
+%  \item [ESMF\_REGRID\_METHOD\_SPLINE]
+%        Cubic spline for 1-d regridding
+%  \item [ESMF\_REGRID\_METHOD\_USER]
+%        User-supplied method
+\end{description}
+
+
+
+\subsubsection{ESMF\_RegridNormOpt}
+
+{\sf DESCRIPTION:\\}
+Regrid normalization options supported by ESMF, for conservative regridding only.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_REGRID\_NORM\_DSTAREA]
+         The Regrid weights are normalized by the destination area of each cell. 
+   \item [ESMF\_REGRID\_NORM\_FRACAREA]
+         The Regrid weights are normalized by the area of the source grid
+         overlapped by each cell (default).
+   \item [ESMF\_REGRID\_NORM\_NONE]
+         No normalization applied to Regrid weights.
+   \item [ESMF\_REGRID\_NORM\_UNKNOWN]
+         Unknown or undefined normalization.
+\end{description}
