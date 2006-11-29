@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiEx.F90,v 1.3 2006/11/16 05:21:22 cdeluca Exp $
+! $Id: ESMF_VMUserMpiEx.F90,v 1.4 2006/11/29 22:41:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@
 !------------------------------------------------------------------------------
 !BOE
 !
-! \subsubsection{VMGet MPI Communicator Example}
+! \subsubsection{ESMF inside user MPI application}
 !
 ! The following example code demonstrates how ESMF can be used inside of a 
 ! user application that explicitly calls MPI\_Init() and MPI\_Finalize().
@@ -30,7 +30,9 @@ program ESMF_VMUserMpiEx
   use ESMF_Mod
   
   implicit none
-  !include 'mpif.h'
+#ifndef ESMF_MPIUNI     
+  include 'mpif.h'
+#endif
   
   ! local variables
   integer:: rc, ierr
