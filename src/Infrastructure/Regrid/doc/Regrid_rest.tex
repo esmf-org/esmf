@@ -1,9 +1,71 @@
-% $Id: Regrid_rest.tex,v 1.1 2003/01/23 18:18:27 nscollins Exp $
+% $Id: Regrid_rest.tex,v 1.5.2.1 2006/11/29 23:34:18 donstark Exp $
 
-%\subsubsection{Restrictions}
+%\subsubsection{Restrictions and Future Work}
 
-% <List class restrictions due to design or implementation strategies.>
+\begin{enumerate}
 
-The Regrid class will not support ...  <to be completed>
+\item {\bf Support is limited to 1D and 2D regridding.}  Regridding
+support is limited to two dimensions.
+
+\item {\bf Masks are not implemented.}  Regridding methods take
+masks in their argument lists, but they currently are not used or
+applied.
+
+\item {\bf Regridding only fills computational domains.}  Currently,
+regridded values are not automatically applied to halo or ghost
+domains.  Users must manually call Halo after regridding in order
+to do so.  This also means that Grid periodicity will not affect
+regridding results without manual Halo calls.
+
+\item {\bf Special pole treatment is not implemented.}
+Conservative regridding methods do not yet have the special pole
+treatment completed.  Please see the conservative regrid algorithm
+description (Section~\ref{sec:ConserveRegrid}) for further details.
+
+\item {\bf Interpolation weights are not available to users.}  
+Currently, there is no method to allow users access to the interpolation
+weights for any desired manipulations.
+
+\item {\bf Spherical coordinates are not shifted.}
+Regrid methods do not yet shift longitude coordinates
+(or their equivalent) from the source Grid to place them on the same
+360 degree (or 2*pi) range as the destination Grid.  For Grids that
+cover the entire sphere and assume a periodic longitude boundary,
+this may produce errors along the Grid edges even though they share
+the same 360 degree range.
+
+\item {\bf Conservative regridding with Spherical coordinates requires 
+units to be in degrees.} The conservative regridding method, when applied to 
+a spherical grid has no way to check for the type of units used and therefore
+requires that the grid is specified in degrees rather than radians. 
+
+\item {\bf Future regrid methods.}  The following methods will
+be added:
+ \begin{description}
+   \item [ESMF\_REGRID\_METHOD\_ADJOINT]
+         Create adjoint of existing regrid
+   \item [ESMF\_REGRID\_METHOD\_FILE]
+         Read a regrid from a file
+   \item [ESMF\_REGRID\_METHOD\_FOURIER]
+         Fourier transform
+   \item [ESMF\_REGRID\_METHOD\_INDEX]
+         Index-space regrid (shift, stencil)
+   \item [ESMF\_REGRID\_METHOD\_LEGENDRE]
+         Legendre transform
+   \item [ESMF\_REGRID\_METHOD\_NEARNBR]
+         Nearest-neighbor dist-weighted avg
+   \item [ESMF\_REGRID\_METHOD\_RASTER]
+         Regrid by rasterizing domain
+   \item [ESMF\_REGRID\_METHOD\_REGRIDCOPY]
+         Copy existing regrid
+   \item [ESMF\_REGRID\_METHOD\_SHIFT]
+         Shift addresses of existing regrid
+   \item [ESMF\_REGRID\_METHOD\_SPLINE]
+         Cubic spline for 1-d regridding
+   \item [ESMF\_REGRID\_METHOD\_USER]
+         User-supplied method
+  \end{description}
+
+\end{enumerate}
 
 
