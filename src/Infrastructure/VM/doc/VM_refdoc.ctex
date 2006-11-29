@@ -1,4 +1,4 @@
-% $Id: VM_refdoc.ctex,v 1.16 2006/11/16 05:21:21 cdeluca Exp $ 
+% $Id: VM_refdoc.ctex,v 1.17 2006/11/29 22:51:14 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -67,6 +67,8 @@
 \input{VM_usage}
 \input{ESMF_VMDefaultBasicsEx_fapi}
 \input{ESMF_VMGetMPICommunicatorEx_fapi}
+\input{ESMF_VMUserMpiEx_fapi}
+\input{ESMF_VMUserMpiCommEx_fapi}
 \input{ESMF_VMSendVMRecvEx_fapi}
 \input{ESMF_VMScatterVMGatherEx_fapi}
 \input{ESMF_VMAllFullReduceEx_fapi}
@@ -75,6 +77,8 @@
 \input{../Infrastructure/VM/doc/VM_usage}
 \input{../Infrastructure/VM/doc/ESMF_VMDefaultBasicsEx_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMGetMPICommunicatorEx_fapi}
+\input{../Infrastructure/VM/doc/ESMF_VMUserMpiEx_fapi}
+\input{../Infrastructure/VM/doc/ESMF_VMUserMpiCommEx_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMSendVMRecvEx_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMScatterVMGatherEx_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMAllFullReduceEx_fapi}
