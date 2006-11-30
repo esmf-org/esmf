@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.35.2.7 2006/11/22 01:00:21 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.35.2.8 2006/11/30 18:37:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research, 
@@ -131,13 +131,14 @@
 !           Name of the default configuration file for the entire application.
 !     \item [{[defaultCalendar]}]
 !           Sets the default calendar to be used by ESMF Time Manager.
+!           See section \ref{opt:calendartype} for a list of valid options.
 !           If not specified, defaults to {\tt ESMF\_CAL\_NOCALENDAR}.
 !     \item [{[defaultLogFileName]}]
 !           Name of the default log file for warning and error messages.
 !           If not specified, defaults to {\tt ESMF\_ErrorLog}.
 !     \item [{[defaultLogType]}]
-!           Sets the default Log Type to be used by ESMF Log Manager. See 
-!           section \ref{opt:logtype} for a list of valid options.
+!           Sets the default Log Type to be used by ESMF Log Manager.
+!           See section \ref{opt:logtype} for a list of valid options.
 !           If not specified, defaults to {\tt ESMF\_LOG\_MULTI}.
 !     \item [{[vm]}]
 !           Returns the global {\tt ESMF\_VM} that was created 
