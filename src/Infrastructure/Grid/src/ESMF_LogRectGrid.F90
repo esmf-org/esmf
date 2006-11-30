@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.151.2.5 2006/11/23 18:54:10 donstark Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.151.2.6 2006/11/30 00:05:59 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -132,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.151.2.5 2006/11/23 18:54:10 donstark Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.151.2.6 2006/11/30 00:05:59 donstark Exp $'
 
 !==============================================================================
 !
@@ -331,11 +331,13 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[coord1]
-!          Array of physical vertex coordinates in the first direction.
+!          Array of physical vertex coordinates in the first direction. The prefered 
+!          coordinate units are degrees.
 !          Note that there must be 1 more vertex coordinate in each dimension
 !          than the number of cells.
 !     \item[coord2]
-!          Array of physical vertex coordinates in the second direction.
+!          Array of physical vertex coordinates in the second direction. The prefered
+!          coordinate units are degrees.
 !          Note that there must be 1 more vertex coordinate in each dimension
 !          than the number of cells.
 !     \item[{[horzstagger]}]
@@ -452,14 +454,17 @@
 !     \item[minGlobalCoordsPerDim]
 !          Array of minimum physical coordinate in each direction.
 !          Note this is the vertex coordinate and not the cell center.
+!          The prefered coordinate units are degrees.
 !     \item[delta1]
 !          Array of physical increments between nodes in the first direction.
 !          These are cell widths, and there should be as many as there are
 !          cells in the grid.
+!          The prefered coordinate units are degrees.
 !     \item[delta2]
 !          Array of physical increments between nodes in the second direction.
 !          These are cell widths, and there should be as many as there are
 !          cells in the grid.
+!          The prefered coordinate units are degrees.
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal Grid
 !          stagger.  If none is specified, the default is 
@@ -587,9 +592,11 @@
 !     \item[minGlobalCoordPerDim]
 !          Array of minimum physical coordinates in each dimension.
 !          Note these are the vertex coordinates and not the cell centers.
+!          The prefered coordinate units are degrees.
 !     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum physical coordinates in each direction.
 !          Note these are the vertex coordinates and not the cell centers.
+!          The prefered coordinate units are degrees.
 !     \item[{[deltaPerDim]}]
 !          Array of constant physical increments in each direction.
 !     \item[{[horzstagger]}]
