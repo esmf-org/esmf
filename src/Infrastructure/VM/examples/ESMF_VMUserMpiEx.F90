@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiEx.F90,v 1.4 2006/11/29 22:41:17 theurich Exp $
+! $Id: ESMF_VMUserMpiEx.F90,v 1.5 2006/11/30 00:51:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -41,18 +41,26 @@ program ESMF_VMUserMpiEx
   finalrc = ESMF_SUCCESS
   ! user code initializes MPI
 #ifndef ESMF_MPIUNI     
+!BOC
   call MPI_Init(ierr)
+!EOC
   if (ierr/=0) finalrc = ESMF_FAILURE
 #endif
   ! user code initializes ESMF
+!BOC
   call ESMF_Initialize(rc=rc)
+!EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   ! user code finalizes ESMF
+!BOC
   call ESMF_Finalize(terminationflag=ESMF_KEEPMPI, rc=rc)
+!EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   ! user code finalizes MPI
 #ifndef ESMF_MPIUNI     
+!BOC
   call MPI_Finalize(ierr)
+!EOC
   if (ierr/=0) finalrc = ESMF_FAILURE
 #endif
   ! print result
