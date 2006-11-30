@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.28 2006/11/16 05:21:08 cdeluca Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.29 2006/11/30 19:30:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -97,8 +97,7 @@
 !BOE
 !\subsubsection{User Created Log}
 ! This example shows how to use a user created Log.  This example uses
-! cpp macros.  For this example, a single Log is used so all PETs write to the
-! same Log.
+! cpp macros.
 !EOE
 
 !BOC

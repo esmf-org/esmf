@@ -1,20 +1,16 @@
-% $Id: LogErr_usage.tex,v 1.23 2006/01/05 00:38:33 eschwab Exp $
+% $Id: LogErr_usage.tex,v 1.24 2006/11/30 19:30:18 theurich Exp $
 
 %\subsection{Use and Examples}
 
-A default Log is created at {\tt ESMF\_Initialize()}.  ESMF handles the 
-initialization and finalization of the default Log so the user can immediately
-start using it.  A single default Log is opened in the directory that 
-initializes the default Log.  If a Log is not present, a new one is created.
-If multiple Log objects are desired, they must be explicitly created or opened 
-using {\tt ESMF\_LogOpen()}.
+By default {\tt ESMF\_Initialize()} opens a default Log in 
+{\tt ESMF\_LOG\_MULTI} mode. ESMF handles the initialization and finalization
+of the default Log so the user can immediately start using it. If additional Log
+objects are desired, they must be explicitly created or opened using
+{\tt ESMF\_LogOpen()}.
 
-If a user wants to use a new or different Log, the user must call
-{\tt ESMF\_LogOpen()} and pass in a Log object and filename to open a Log file.
-
-Additionally,  the user can specify single or multi Logs by setting the
-{\tt logtype} property in the {\tt ESMF\_LogInitialize()} or 
-{\tt ESMF\_Open()} method to {\tt ESMF\_LOG\_SINGLE} or {\tt ESMF\_LOG\_MULTI}.
+{\tt ESMF\_LogOpen()} requires a Log object and filename argument. Additionally,
+the user can specify single or multi Logs by setting the {\tt logtype} property
+to {\tt ESMF\_LOG\_SINGLE} or {\tt ESMF\_LOG\_MULTI}.
 This is useful as the PET numbers are automatically added to the Log entries.
 A single Log will put all entries, regardless of PET number, into a single
 log while a multi Log will create multiple Logs with the PET number prepended
@@ -62,19 +58,7 @@ parameters into the method.  The user does not have to specify line number as
 it is a value supplied by cpp.
 
 An example of Log output is given below running with {\tt logtype} 
-property set to {\tt ESMF\_LOG\_SINGLE} using the default Log:
-
-(Log file {\tt PET0.ESMF\_LogFile})
-\begin{verbatim}
-20041105 163418.472210 INFO      PET0     Running with ESMF Version 2.2.1   
-20041105 163419.186153 ERROR     PET1     ESMF_Field.F90             812  
-ESMF_FieldGet No Grid or Bad Grid attached to Field
-\end{verbatim}
-
-The results are all put into the default Log file {\tt PET0.ESMF\_LogFile}.
-
-The next example shows same messages running with the {\tt logtype} 
-property set to {\tt ESMF\_LOG\_MULTI} using the default Log:
+property set to {\tt ESMF\_LOG\_MULTI} (default) using the default Log:
 
 (Log file {\tt PET0.ESMF\_LogFile})
 \begin{verbatim}
@@ -86,9 +70,6 @@ property set to {\tt ESMF\_LOG\_MULTI} using the default Log:
 20041105 163419.186153 ERROR     PET1     ESMF_Field.F90             812  
 ESMF_FieldGet No Grid or Bad Grid attached to Field
 \end{verbatim}
-
-Note in this example that a separate file is created for each PET when using
-{\tt ESMF\_LOG\_MULTI}.
 
 The first entry shows date and time stamp.  The time is given in microsecond 
 precision.  The next item shown is the type of message (INFO in this case).  
@@ -102,7 +83,3 @@ message is written.
 When done writing messages, the default Log is closed by calling 
 {\tt ESMF\_LogFinalize()}  or {\tt ESMF\_LogClose()} for user created Logs.  
 Both methods will release the assigned unit number.
-
-
-
-
