@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.59 2006/12/04 22:52:54 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.60 2006/12/04 23:21:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -130,7 +130,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.59 2006/12/04 22:52:54 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.60 2006/12/04 23:21:34 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -307,7 +307,7 @@ end function
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DELayoutCreateDefault)
  
-    ! Return successfullyfully
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DELayoutCreateDefault
@@ -395,7 +395,7 @@ end function
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DELayoutCreateFromPetMap)
  
-    ! Return successfullyfully
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DELayoutCreateFromPetMap
@@ -534,7 +534,7 @@ end function
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DELayoutCreateHintWeights)
  
-    ! Return successfullyfully
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DELayoutCreateHintWeights
@@ -678,7 +678,7 @@ end function
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DELayoutCreateDeprecated)
  
-    ! Return successfullyfully
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DELayoutCreateDeprecated
@@ -733,7 +733,7 @@ end function
     ! Set init code
     ESMF_INIT_SET_DELETED(delayout)
  
-    ! Return successfullyfully
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_DELayoutDestroy
@@ -891,7 +891,7 @@ end function
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! Return successfullyfully
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_DELayoutGet
@@ -1420,7 +1420,7 @@ end function
 !    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! Return successfullyfully
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
       
   end subroutine ESMF_DELayoutServiceComplete
@@ -1488,7 +1488,7 @@ end function
 !    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
  
-    ! Return successfullyfully
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
       
   end function ESMF_DELayoutServiceOffer
