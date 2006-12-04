@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.58 2006/11/16 05:20:57 cdeluca Exp $
+! $Id: ESMF_DELayout.F90,v 1.59 2006/12/04 22:52:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,6 +35,7 @@ module ESMF_DELayoutMod
 
 ! !USES:
   use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error handling
   use ESMF_VMMod            ! ESMF VM
@@ -55,11 +56,8 @@ module ESMF_DELayoutMod
   type ESMF_DELayout
   sequence
   private
-#ifndef ESMF_NO_INITIALIZERS
-    type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
-#else
     type(ESMF_Pointer) :: this
-#endif
+    ESMF_INIT_DECLARE
   end type
 
 !------------------------------------------------------------------------------
@@ -114,6 +112,7 @@ module ESMF_DELayoutMod
   public ESMF_DELayoutSerialize
   public ESMF_DELayoutDeserialize
 
+  public ESMF_DELayoutGetInit
 
 ! - depricated methods
   public ESMF_DELayoutGetVM
@@ -131,7 +130,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.58 2006/11/16 05:20:57 cdeluca Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.59 2006/12/04 22:52:54 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -270,9 +269,12 @@ end function
     type(ESMF_InterfaceInt) :: deGroupingArg
     type(ESMF_InterfaceInt) :: petListArg
 
-    ! initialize return code; assume failure until success is certain
+    ! Initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with optional array arguments
     deGroupingArg = ESMF_InterfaceIntCreate(deGrouping, rc=status)
@@ -282,27 +284,30 @@ end function
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! mark this DELayout as invalid
+    ! Mark this DELayout as invalid
     delayout%this = ESMF_NULL_POINTER
 
-    ! call into the C++ interface, which will sort out optional arguments
+    ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateDefault(delayout, deCount, deGroupingArg, &
       dePinFlag, petListArg, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DELayoutCreateDefault = delayout 
     
-    ! garbage collection
+    ! Garbage collection
     call ESMF_InterfaceIntDestroy(deGroupingArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(petListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DELayoutCreateDefault)
  
-    ! return successfully
+    ! Return successfullyfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DELayoutCreateDefault
@@ -365,26 +370,32 @@ end function
     type(ESMF_DELayout)     :: delayout     ! opaque pointer to new C++ DELayout  
     integer                 :: len_petMap   ! number of elements in petMap
 
-    ! initialize return code; assume failure until success is certain
+    ! Initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
-    ! set arguments
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
+    ! Set arguments
     len_petMap = size(petMap)
 
-    ! mark this DELayout as invalid
+    ! Mark this DELayout as invalid
     delayout%this = ESMF_NULL_POINTER
 
-    ! call into the C++ interface, which will sort out optional arguments
+    ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap(1), len_petMap, &
       dePinFlag, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DELayoutCreateFromPetMap = delayout 
     
-    ! return successfully
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DELayoutCreateFromPetMap)
+ 
+    ! Return successfullyfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DELayoutCreateFromPetMap
@@ -483,9 +494,12 @@ end function
     type(ESMF_InterfaceInt) :: deGroupingArg
     type(ESMF_InterfaceInt) :: petListArg
 
-    ! initialize return code; assume failure until success is certain
+    ! Initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with optional array arguments
     deGroupingArg = ESMF_InterfaceIntCreate(deGrouping, rc=status)
@@ -495,21 +509,21 @@ end function
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! mark this DELayout as invalid
+    ! Mark this DELayout as invalid
     delayout%this = ESMF_NULL_POINTER
 
   !TODO: use the correct C++ implementation once it is available
 
-    ! call into the C++ interface, which will sort out optional arguments
+    ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateDefault(delayout, deCount, deGroupingArg, &
       dePinFlag, petListArg, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DELayoutCreateHintWeights = delayout 
  
-    ! garbage collection
+    ! Garbage collection
     call ESMF_InterfaceIntDestroy(deGroupingArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -517,7 +531,10 @@ end function
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    ! return successfully
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DELayoutCreateHintWeights)
+ 
+    ! Return successfullyfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DELayoutCreateHintWeights
@@ -625,7 +642,10 @@ end function
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! mark this DELayout as invalid
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vmObject, rc)
+    
+    ! Mark this DELayout as invalid
     delayout%this = ESMF_NULL_POINTER
 
     ! Deal with optional array arguments
@@ -652,8 +672,14 @@ end function
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DELayoutCreateDeprecated = delayout 
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DELayoutCreateDeprecated)
+ 
+    ! Return successfullyfully
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DELayoutCreateDeprecated
 !------------------------------------------------------------------------------
@@ -689,19 +715,25 @@ end function
 !------------------------------------------------------------------------------
     integer                 :: status       ! local error status
 
-    ! initialize return code; assume failure until success is certain
+    ! Initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! call into the C++ interface, which will sort out optional arguments
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutDestroy(delayout, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! mark this DELayout as invalid
+    ! Mark this DELayout as invalid
     delayout%this = ESMF_NULL_POINTER
 
-    ! return successfully
+    ! Set init code
+    ESMF_INIT_SET_DELETED(delayout)
+ 
+    ! Return successfullyfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_DELayoutDestroy
@@ -800,9 +832,12 @@ end function
     integer, pointer        :: opt_vasLocalDeList(:)  ! optional argument
     integer                 :: len_vasLocalDeList   ! number of elem. in opt. arg
 
-    ! initialize return code; assume failure until success is certain
+    ! Initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     
     ! Deal with not implemented features
     if (present(compCapacity)) then
@@ -848,7 +883,7 @@ end function
       opt_vasLocalDeList => dummy
     endif
 
-    ! call into the C++ interface, which will sort out optional arguments
+    ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutGet(delayout, vm, deCount, opt_petMap(1), &
       len_petMap, opt_vasMap(1), len_vasMap, oneToOneFlag, dePinFlag, &
       localDeCount, opt_localDeList(1), len_localDeList, vasLocalDeCount, &
@@ -856,7 +891,7 @@ end function
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! return successfully
+    ! Return successfullyfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_DELayoutGet
@@ -936,6 +971,9 @@ end function
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    
     ! Deal with optional array arguments
     if (present(localDeList)) then
       len_localDeList = size(localDeList)
@@ -1025,6 +1063,9 @@ end function
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    
     ! Deal with optional array arguments
     if (present(coord)) then
       len_coord = size(coord)
@@ -1123,6 +1164,10 @@ end function
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayoutMatch, rc)
+    
     ! Deal with optional array arguments
     if (present(deMatchList)) then
       len_deMatchList = size(deMatchList)
@@ -1201,6 +1246,10 @@ end function
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vmMatch, rc)
+    
     ! Deal with optional array arguments
     if (present(petMatchList)) then
       len_petMatchList = size(petMatchList)
@@ -1259,6 +1308,9 @@ end function
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutGetVM(delayout, vm, localrc)
 
@@ -1307,6 +1359,9 @@ end function
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutPrint(delayout, localrc)
     
@@ -1352,17 +1407,20 @@ end function
 !------------------------------------------------------------------------------
     integer                 :: status       ! local error status
 
-    ! initialize return code; assume failure until success is certain
+    ! Initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
-    ! call into the C++ interface, which will sort out optional arguments
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutServiceComplete(delayout, de, status)
 !TODO: enable LogErr once it is thread-safe
 !    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! return successfully
+    ! Return successfullyfully
     if (present(rc)) rc = ESMF_SUCCESS
       
   end subroutine ESMF_DELayoutServiceComplete
@@ -1416,18 +1474,21 @@ end function
     integer                 :: status       ! local error status
     type(ESMF_DELayoutServiceReply) :: reply
 
-    ! initialize return code; assume failure until success is certain
+    ! Initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
-    ! call into the C++ interface, which will sort out optional arguments
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutServiceOffer(delayout, de, reply, status)
     ESMF_DELayoutServiceOffer = reply
 !TODO: enable LogErr once it is thread-safe
 !    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
  
-    ! return successfully
+    ! Return successfullyfully
     if (present(rc)) rc = ESMF_SUCCESS
       
   end function ESMF_DELayoutServiceOffer
@@ -1437,7 +1498,7 @@ end function
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutValidate()"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_DELayoutValidate - Validate DELayout internals
 
 ! !INTERFACE:
@@ -1450,8 +1511,7 @@ end function
 !
 ! !DESCRIPTION:
 !      Validates that the {\tt delayout} is internally consistent.
-!      The method returns an error code if problems 
-!      are found.  
+!      The method returns an error code if problems are found.  
 !
 !     The arguments are:
 !     \begin{description}
@@ -1461,26 +1521,26 @@ end function
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
-
-    if (delayout%this .eq. ESMF_NULL_POINTER) then
-      call ESMF_LogWrite("Uninitialized DELayout object", ESMF_LOG_INFO)
-      rc = ESMF_FAILURE
-      return
-    endif
-
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutValidate(delayout, localrc)
     
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_DELayoutValidate
 !------------------------------------------------------------------------------
@@ -1542,6 +1602,10 @@ end function
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vmMatch, rc)
+    
     ! Deal with optional array arguments
     if (present(petMatchList)) then
       len_petMatchList = size(petMatchList)
@@ -1608,6 +1672,9 @@ end function
 
     integer :: localrc                     ! Error status
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    
     call c_ESMC_DELayoutSerialize(delayout, buffer(1), length, offset, localrc)
 
     ! Use LogErr to handle return code
@@ -1666,6 +1733,42 @@ end function
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     end function ESMF_DELayoutDeserialize
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGetInit"
+!BOPI
+! !IROUTINE: ESMF_DELayoutGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+      function ESMF_DELayoutGetInit(delayout) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_DELayoutGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout), intent(in), optional :: delayout
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [delayout]
+!           DELayout object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(delayout)) then
+      ESMF_DELayoutGetInit = ESMF_INIT_GET(delayout)
+    else
+      ESMF_DELayoutGetInit = ESMF_INIT_CREATED
+    endif
+
+    end function ESMF_DELayoutGetInit
 !------------------------------------------------------------------------------
 
 
