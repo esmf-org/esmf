@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.79 2006/11/29 22:52:38 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.80 2006/12/04 23:41:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -33,9 +33,10 @@ module ESMF_VMMod
 !
 !------------------------------------------------------------------------------
 ! !USES:
-  use ESMF_UtilTypesMod
-  use ESMF_LogErrMod
-  use ESMF_BaseMod                          ! ESMF base class
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error handling
       
   implicit none
 
@@ -49,36 +50,34 @@ module ESMF_VMMod
   type ESMF_CommHandle
   sequence
   private
-#ifndef ESMF_NO_INITIALIZERS
-    type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
-#else
     type(ESMF_Pointer) :: this
-#endif
+    ESMF_INIT_DECLARE
   end type
       
-  integer, parameter :: ESMF_TEST_COMPLETE = 1, ESMF_WAIT_COMPLETE = 2
-
 !------------------------------------------------------------------------------
 
   ! F90 class type to hold pointer to C++ object
   type ESMF_VM
-    sequence
-    private
-      type(ESMF_Pointer) :: this
+  sequence
+  private
+    type(ESMF_Pointer) :: this
+    ESMF_INIT_DECLARE
   end type
 
   ! F90 class type to hold pointer to C++ object
   type ESMF_VMPlan
-    sequence
-    private
-      type(ESMF_Pointer) :: this
+  sequence
+  private
+    type(ESMF_Pointer) :: this
+    ESMF_INIT_DECLARE
   end type
 
   ! F90 class type to hold pointer to C++ object
   type ESMF_VMId
-    sequence
-    private
-      type(ESMF_Pointer) :: this
+  sequence
+  private
+    type(ESMF_Pointer) :: this
+    ESMF_INIT_DECLARE
   end type
 
 !------------------------------------------------------------------------------
@@ -102,7 +101,6 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! !PUBLIC PARAMETERS:
       
-  public ESMF_TEST_COMPLETE, ESMF_WAIT_COMPLETE
   public ESMF_PREF_INTRA_PROCESS_SHMHACK
   public ESMF_PREF_INTRA_PROCESS_PTHREAD
   public ESMF_PREF_INTRA_SSI_POSIXIPC
@@ -145,18 +143,24 @@ module ESMF_VMMod
   public ESMF_VMSendVMId
   public ESMF_VMSendRecv
   public ESMF_VMThreadBarrier
+  public ESMF_VMValidate
   public ESMF_VMWait
   public ESMF_VMWaitQueue
   public ESMF_VMWtime
   public ESMF_VMWtimeDelay
   public ESMF_VMWtimePrec
+  
+  public ESMF_CommHandleValidate
+  
 ! - ESMF-private methods:
   public ESMF_VMInitialize
   public ESMF_VMFinalize
   public ESMF_VMAbort
   public ESMF_VMShutdown
+  public ESMF_VMGetInit
   public ESMF_VMPlanConstruct
   public ESMF_VMPlanDestruct
+  public ESMF_VMPlanGetInit
   public ESMF_VMPlanMaxPEs
   public ESMF_VMPlanMaxThreads
   public ESMF_VMPlanMinThreads
@@ -165,13 +169,15 @@ module ESMF_VMMod
   public ESMF_VMIdCreate
   public ESMF_VMIdDestroy
 
+  public ESMF_CommHandleGetInit
+
 !EOPI
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.79 2006/11/29 22:52:38 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.80 2006/12/04 23:41:53 theurich Exp $"
 
 !==============================================================================
 
@@ -499,10 +505,12 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    !integer :: size
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -522,7 +530,7 @@ module ESMF_VMMod
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
+      
   end subroutine ESMF_VMAllFullReduceI4
 !------------------------------------------------------------------------------
 
@@ -600,10 +608,12 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    !integer :: size
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -701,10 +711,12 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    !integer :: size
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -799,7 +811,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -812,9 +827,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMAllGatherNB(vm, sendData(1), recvData(1), size, &
         localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -896,7 +913,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -909,9 +929,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMAllGatherNB(vm, sendData, recvData, size, localcommhandle, &
         localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -993,7 +1015,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -1006,9 +1031,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMAllGatherNB(vm, sendData(1), recvData(1), size, &
         localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -1090,7 +1117,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -1103,9 +1133,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMAllGatherNB(vm, sendData(1), recvData(1), size, &
         localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -1197,6 +1229,9 @@ module ESMF_VMMod
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -1302,6 +1337,9 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
@@ -1406,6 +1444,9 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
@@ -1506,6 +1547,9 @@ module ESMF_VMMod
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -1608,6 +1652,9 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
@@ -1708,6 +1755,9 @@ module ESMF_VMMod
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -1818,6 +1868,9 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
@@ -1926,6 +1979,9 @@ module ESMF_VMMod
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -2036,6 +2092,9 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
@@ -2091,6 +2150,9 @@ module ESMF_VMMod
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMBarrier(vm, localrc)
@@ -2173,7 +2235,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -2186,9 +2251,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, root, localcommhandle, &
         localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -2270,7 +2337,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -2284,9 +2354,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, root, localcommhandle, &
         localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -2368,7 +2440,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -2381,9 +2456,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, root, localcommhandle, &
         localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -2465,7 +2542,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -2478,9 +2558,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, root, localcommhandle, &
         localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -2565,7 +2647,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -2578,9 +2663,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -2665,7 +2752,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -2678,9 +2768,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -2765,7 +2857,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -2778,9 +2873,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -2865,7 +2962,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -2878,9 +2978,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -2952,6 +3054,9 @@ module ESMF_VMMod
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
@@ -3120,6 +3225,9 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGetVMId(vm, vmId, localrc)
 
@@ -3187,6 +3295,9 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGetPETLocalInfo(vm, pet, peCount, ssiId, threadCount, &
       threadId, vas, localrc)
@@ -3231,6 +3342,9 @@ module ESMF_VMMod
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMPrint(vm, localrc) 
@@ -3308,7 +3422,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -3320,9 +3437,11 @@ module ESMF_VMMod
       call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
     else
       call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -3399,7 +3518,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -3411,9 +3533,11 @@ module ESMF_VMMod
       call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
     else
       call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -3490,7 +3614,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -3502,9 +3629,11 @@ module ESMF_VMMod
       call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
     else
       call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -3581,7 +3710,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -3593,9 +3725,11 @@ module ESMF_VMMod
       call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
     else
       call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -3672,7 +3806,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -3684,9 +3821,11 @@ module ESMF_VMMod
       call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
     else
       call c_ESMC_VMRecvNB(vm, recvData, size, src, localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -3775,10 +3914,12 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    !integer :: size
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -3880,10 +4021,12 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    !integer :: size
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -3985,10 +4128,12 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    !integer :: size
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -4086,7 +4231,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -4099,9 +4247,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -4186,7 +4336,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -4199,9 +4352,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -4286,7 +4441,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -4299,9 +4457,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -4386,7 +4546,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -4399,9 +4562,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -4478,7 +4643,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -4490,9 +4658,11 @@ module ESMF_VMMod
       call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
     else
       call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -4569,7 +4739,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -4581,9 +4754,11 @@ module ESMF_VMMod
       call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
     else
       call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -4660,7 +4835,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -4672,9 +4850,11 @@ module ESMF_VMMod
       call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
     else
       call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -4751,7 +4931,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -4763,9 +4946,11 @@ module ESMF_VMMod
       call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
     else
       call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -4842,7 +5027,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -4854,9 +5042,11 @@ module ESMF_VMMod
       call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
     else
       call c_ESMC_VMSendNB(vm, sendData, size, dst, localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -4944,7 +5134,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -4959,9 +5152,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dst, &
         recvData(1), recvSize, src, localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -5049,7 +5244,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -5064,9 +5262,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dst, &
         recvData(1), recvSize, src, localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -5154,7 +5354,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -5169,9 +5372,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dst, &
         recvData(1), recvSize, src, localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -5259,7 +5464,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -5274,9 +5482,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dst, &
         recvData(1), recvSize, src, localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -5364,7 +5574,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! decide whether this is blocking or non-blocking
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
@@ -5379,9 +5592,11 @@ module ESMF_VMMod
     else
       call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
         recvData, recvSize, src, localcommhandle, localrc)
-      ! check if we need to pass back the commhandle
+      ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
       endif
     endif
 
@@ -5427,6 +5642,9 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMThreadBarrier(vm, localrc)
 
@@ -5435,6 +5653,58 @@ module ESMF_VMMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMThreadBarrier
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMValidate()"
+!BOP
+! !IROUTINE: ESMF_VMValidate - Validate VM internals
+
+! !INTERFACE:
+  subroutine ESMF_VMValidate(vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),  intent(in)              :: vm
+    integer,        intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Validates that the {\tt vm} is internally consistent.
+!      The method returns an error code if problems are found.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[vm] 
+!          Specified {\tt ESMF\_VM} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments.
+    !todo: call c_ESMC_VMValidate(vm, localrc)
+    localrc = ESMF_SUCCESS  ! remove when todo is done.
+    
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_VMValidate
 !------------------------------------------------------------------------------
 
 
@@ -5475,15 +5745,13 @@ module ESMF_VMMod
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_CommHandleGetInit, commhandle, rc)
 
     ! Call into the C++ interface
-    if (commhandle%this /= ESMF_NULL_POINTER) then
-      call c_ESMC_VMWait(vm, commhandle, localrc)
-    else
-      call ESMF_LogWrite("Must provide valid commhandle for wait call", &
-        ESMF_LOG_ERROR, &
-        ESMF_CONTEXT)
-    endif
+    call c_ESMC_VMWait(vm, commhandle, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5526,6 +5794,9 @@ module ESMF_VMMod
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface
     call c_ESMC_VMWaitQueue(vm, localrc)
@@ -5732,7 +6003,16 @@ module ESMF_VMMod
     !  ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Cannot use LogErr here because LogErr initializes _after_ VM
-    if (present(rc)) rc = localrc
+    if (localrc /= ESMF_SUCCESS) then
+      if (present(rc)) rc = localrc
+      return
+    endif
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(GlobalVM)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMInitialize
 !------------------------------------------------------------------------------
@@ -5777,8 +6057,17 @@ module ESMF_VMMod
     !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     !  ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Cannot use LogErr here because LogErr finalizes _before_ VM
-    if (present(rc)) rc = localrc
+    ! Cannot use LogErr here because LogErr initializes _after_ VM
+    if (localrc /= ESMF_SUCCESS) then
+      if (present(rc)) rc = localrc
+      return
+    endif
+    
+    ! Set init code
+    ESMF_INIT_SET_DELETED(GlobalVM)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMFinalize
 !------------------------------------------------------------------------------
@@ -5859,6 +6148,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
+
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMShutdown(vm, vmplan, vm_info, localrc)
     
@@ -5867,6 +6160,42 @@ module ESMF_VMMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMShutdown
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGetInit"
+!BOPI
+! !IROUTINE: ESMF_VMGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+      function ESMF_VMGetInit(vm) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_VMGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_VM), intent(in), optional :: vm
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [vm]
+!           VM object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(vm)) then
+      ESMF_VMGetInit = ESMF_INIT_GET(vm)
+    else
+      ESMF_VMGetInit = ESMF_INIT_CREATED
+    endif
+
+    end function ESMF_VMGetInit
 !------------------------------------------------------------------------------
 
 
@@ -5918,14 +6247,23 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMPlanConstruct(vmplan, vm, npetlist, petlist, contextflag, &
       localrc)
-
+      
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(vmplan)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
   end subroutine ESMF_VMPlanConstruct
 !------------------------------------------------------------------------------
 
@@ -5962,14 +6300,59 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
+    
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMPlanDestruct(vmplan, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
+      
+    ! Set init code
+    ESMF_INIT_SET_DELETED(vmplan)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
   end subroutine ESMF_VMPlanDestruct
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanGetInit"
+!BOPI
+! !IROUTINE: ESMF_VMPlanGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+      function ESMF_VMPlanGetInit(vmplan) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_VMPlanGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_VMPlan), intent(in), optional :: vmplan
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [vmplan]
+!           VMPlan object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(vmplan)) then
+      ESMF_VMPlanGetInit = ESMF_INIT_GET(vmplan)
+    else
+      ESMF_VMPlanGetInit = ESMF_INIT_CREATED
+    endif
+
+    end function ESMF_VMPlanGetInit
 !------------------------------------------------------------------------------
 
 
@@ -6026,6 +6409,10 @@ module ESMF_VMMod
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMPlanMaxPEs(vmplan, vm, max, &
@@ -6094,6 +6481,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMPlanMaxThreads(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
@@ -6161,6 +6552,10 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMPlanMinThreads(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
@@ -6174,7 +6569,9 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-
+!==============================================================================
+! ESMF_VMId methods:
+!==============================================================================
 
 
 ! -------------------------- ESMF-private method ------------------------------
@@ -6452,6 +6849,100 @@ module ESMF_VMMod
 
   end subroutine ESMF_VMSendVMId
 !------------------------------------------------------------------------------
+
+
+!==============================================================================
+! ESMF_CommHandle methods:
+!==============================================================================
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CommHandleValidate()"
+!BOP
+! !IROUTINE: ESMF_CommHandleValidate - Validate CommHandle internals
+
+! !INTERFACE:
+  subroutine ESMF_CommHandleValidate(commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CommHandle),  intent(in)              :: commhandle
+    integer,                intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Validates that the {\tt commhandle} is internally consistent.
+!      The method returns an error code if problems are found.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[commhandle] 
+!          Specified {\tt ESMF\_CommHandle} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CommHandleGetInit, commhandle, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments.
+    !todo: call c_ESMC_CommHandleValidate(commhandle, localrc)
+    localrc = ESMF_SUCCESS  ! remove when todo is done.
+    
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_CommHandleValidate
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CommHandleGetInit"
+!BOPI
+! !IROUTINE: ESMF_CommHandleGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+      function ESMF_CommHandleGetInit(commhandle) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_CommHandleGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_CommHandle), intent(in), optional :: commhandle
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [commhandle]
+!           CommHandle object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(commhandle)) then
+      ESMF_CommHandleGetInit = ESMF_INIT_GET(commhandle)
+    else
+      ESMF_CommHandleGetInit = ESMF_INIT_CREATED
+    endif
+
+    end function ESMF_CommHandleGetInit
+!------------------------------------------------------------------------------
+
 
 
 

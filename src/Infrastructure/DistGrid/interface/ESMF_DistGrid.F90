@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.8 2006/11/16 05:20:58 cdeluca Exp $
+! $Id: ESMF_DistGrid.F90,v 1.9 2006/12/04 23:41:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,6 +35,7 @@ module ESMF_DistGridMod
 
 ! !USES:
   use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error handling
   use ESMF_VMMod            ! ESMF VM
@@ -56,11 +57,8 @@ module ESMF_DistGridMod
   type ESMF_DistGrid
   sequence
   private
-#ifndef ESMF_NO_INITIALIZERS
-    type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
-#else
     type(ESMF_Pointer) :: this
-#endif
+    ESMF_INIT_DECLARE
   end type
 
 !------------------------------------------------------------------------------
@@ -96,16 +94,22 @@ module ESMF_DistGridMod
   
   public ESMF_DistGridGet
   public ESMF_DistGridPrint
+  public ESMF_DistGridValidate
   
   public ESMF_Connection
   public ESMF_ConnectionTransform
+
+! - ESMF-private methods:
+  public ESMF_DistGridGetInit
+  
+  
 !EOPI
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.8 2006/11/16 05:20:58 cdeluca Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.9 2006/12/04 23:41:53 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -308,6 +312,10 @@ contains
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
     ! Deal with (optional) array arguments
     minCornerArg = ESMF_InterfaceIntCreate(minCorner, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -337,7 +345,7 @@ contains
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! mark this DistGrid as invalid
+    ! Mark this DistGrid as invalid
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
@@ -367,10 +375,13 @@ contains
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DistGridCreateRD = distgrid 
  
-    ! return successfully
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRD)
+ 
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateRD
@@ -517,6 +528,10 @@ contains
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
     ! Deal with (optional) array arguments
     minCornerArg = ESMF_InterfaceIntCreate(minCorner, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -539,7 +554,7 @@ contains
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! mark this DistGrid as invalid
+    ! Mark this DistGrid as invalid
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
@@ -569,10 +584,13 @@ contains
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DistGridCreateDB = distgrid 
  
-    ! return successfully
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDB)
+ 
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateDB
@@ -717,6 +735,9 @@ contains
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
     ! Deal with (optional) array arguments
     minCornerArg = ESMF_InterfaceIntCreate(minCorner, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -746,7 +767,7 @@ contains
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! mark this DistGrid as invalid
+    ! Mark this DistGrid as invalid
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
@@ -776,10 +797,13 @@ contains
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DistGridCreateRDFA = distgrid 
  
-    ! return successfully
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRDFA)
+ 
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateRDFA
@@ -920,6 +944,9 @@ contains
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
     
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
     ! Initialize the pointer to NULL
     distgrid%this = ESMF_NULL_POINTER
 
@@ -931,8 +958,14 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DistGridCreateDBFA = distgrid 
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBFA)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateDBFA
 !------------------------------------------------------------------------------
@@ -1087,6 +1120,10 @@ contains
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
     ! Deal with (optional) array arguments
     minCornerArg = ESMF_InterfaceIntCreate(farray2D=minCorner, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -1118,7 +1155,7 @@ contains
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! mark this DistGrid as invalid
+    ! Mark this DistGrid as invalid
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
@@ -1149,10 +1186,13 @@ contains
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DistGridCreateRDP = distgrid 
  
-    ! return successfully
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRDP)
+ 
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateRDP
@@ -1305,6 +1345,10 @@ contains
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
     
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
     ! Initialize the pointer to NULL
     distgrid%this = ESMF_NULL_POINTER
 
@@ -1316,8 +1360,14 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DistGridCreateDBP = distgrid 
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBP)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateDBP
 !------------------------------------------------------------------------------
@@ -1463,6 +1513,9 @@ contains
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
     
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
     ! Initialize the pointer to NULL
     distgrid%this = ESMF_NULL_POINTER
 
@@ -1474,8 +1527,14 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DistGridCreateRDPFA = distgrid
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRDPFA)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateRDPFA
 !------------------------------------------------------------------------------
@@ -1619,6 +1678,9 @@ contains
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
     
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
     ! Initialize the pointer to NULL
     distgrid%this = ESMF_NULL_POINTER
 
@@ -1630,8 +1692,14 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DistGridCreateDBPFA = distgrid
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBPFA)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateDBPFA
 !------------------------------------------------------------------------------
@@ -1712,6 +1780,9 @@ contains
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
     
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
     ! Initialize the pointer to NULL
     distgrid%this = ESMF_NULL_POINTER
 
@@ -1723,8 +1794,14 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DistGridCreateDecount = distgrid 
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDecount)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateDecount
 !------------------------------------------------------------------------------
@@ -1813,6 +1890,9 @@ contains
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
     
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
     ! Initialize the pointer to NULL
     distgrid%this = ESMF_NULL_POINTER
 
@@ -1824,8 +1904,14 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DistGridCreateDecountPatch = distgrid 
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDecountPatch)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateDecountPatch
 !------------------------------------------------------------------------------
@@ -1901,6 +1987,10 @@ contains
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
     
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
     ! Initialize the pointer to NULL
     distgrid%this = ESMF_NULL_POINTER
 
@@ -1912,8 +2002,14 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DistGridCreateDelayout = distgrid 
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDelayout)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateDelayout
 !------------------------------------------------------------------------------
@@ -2000,6 +2096,10 @@ contains
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
     
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
     ! Initialize the pointer to NULL
     distgrid%this = ESMF_NULL_POINTER
 
@@ -2011,8 +2111,14 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! set return value
+    ! Set return value
     ESMF_DistGridCreatePatch = distgrid 
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreatePatch)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreatePatch
 !------------------------------------------------------------------------------
@@ -2052,15 +2158,21 @@ contains
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
+    
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DistGridDestroy(distgrid, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    ! mark this DistGrid as invalid
+    ! Mark this DistGrid as invalid
     distgrid%this = ESMF_NULL_POINTER
 
-    ! return successfully
+    ! Set init code
+    ESMF_INIT_SET_DELETED(distgrid)
+ 
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_DistGridDestroy
@@ -2127,6 +2239,9 @@ contains
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Deal with (optional) array arguments
     patchListArg = ESMF_InterfaceIntCreate(patchList, rc=status)
@@ -2205,6 +2320,9 @@ contains
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
+    
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_DELayoutGetVM(delayout, vm, localrc)
 
@@ -2261,6 +2379,9 @@ contains
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Deal with (optional) array arguments
     indexListArg = ESMF_InterfaceIntCreate(indexList, rc=status)
@@ -2340,6 +2461,9 @@ contains
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
+    
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_DELayoutGetVM(delayout, vm, localrc)
 
@@ -2389,6 +2513,9 @@ contains
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
+    
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DistGridPrint(distgrid, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -2398,6 +2525,94 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_DistGridPrint
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridValidate()"
+!BOP
+! !IROUTINE: ESMF_DistGridValidate - Validate DistGrid internals
+
+! !INTERFACE:
+  subroutine ESMF_DistGridValidate(distgrid, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid),  intent(in)              :: distgrid
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Validates that the {\tt distgrid} is internally consistent.
+!      The method returns an error code if problems are found.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Specified {\tt ESMF\_DistGrid} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments.
+    !todo: call c_ESMC_DistGridValidate(vm, localrc)
+    localrc = ESMF_SUCCESS  ! remove when todo is done.
+    
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_DistGridValidate
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridGetInit"
+!BOPI
+! !IROUTINE: ESMF_DistGridGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+      function ESMF_DistGridGetInit(distgrid) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_DistGridGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_DistGrid), intent(in), optional :: distgrid
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [distgrid]
+!           DistGrid object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(distgrid)) then
+      ESMF_DistGridGetInit = ESMF_INIT_GET(distgrid)
+    else
+      ESMF_DistGridGetInit = ESMF_INIT_CREATED
+    endif
+
+    end function ESMF_DistGridGetInit
 !------------------------------------------------------------------------------
 
 
