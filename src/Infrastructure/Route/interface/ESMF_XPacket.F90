@@ -1,4 +1,4 @@
-! $Id: ESMF_XPacket.F90,v 1.15 2006/11/16 05:21:16 cdeluca Exp $
+! $Id: ESMF_XPacket.F90,v 1.16 2006/12/04 18:41:54 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,6 +37,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_UtilTypesMod
+      use ESMF_InitMacrosMod
       use ESMF_LogErrMod
       use ESMF_BaseMod    ! ESMF base class
       implicit none
@@ -58,6 +59,7 @@
         integer :: contig_length
         integer :: stride(ESMF_MAXDIM)
         integer :: rep_count(ESMF_MAXDIM)
+	ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -67,6 +69,11 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
+
+      public ESMF_XPacketInit
+      public ESMF_XPacketValidate
+      public ESMF_XPacketGetInit
+
       public ESMF_XPacketGet                    ! get and set values
       public ESMF_XPacketSet
       public ESMF_XPacketSetDefault
@@ -78,11 +85,48 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_XPacket.F90,v 1.15 2006/11/16 05:21:16 cdeluca Exp $'
+      '$Id: ESMF_XPacket.F90,v 1.16 2006/12/04 18:41:54 peggyli Exp $'
 
 !==============================================================================
 
       contains
+
+!==============================================================================
+!
+! XPacket Initialiation and Validation functions
+!
+!------------------------------------------------------------------------------
+function ESMF_XPacketGetInit(s)
+  type(ESMF_XPacket), intent(in):: s
+  ESMF_INIT_TYPE::ESMF_XPacketGetInit
+
+  ESMF_XPacketGetInit=ESMF_INIT_GET(s)
+
+end function ESMF_XPacketGetInit
+
+
+subroutine ESMF_XPacketInit(s)
+  type(ESMF_XPacket) :: s
+
+!  s%rank=0
+!  s%offset=0
+!  s%contig_length=0
+!  s%stride=0
+!  s%rep_count=0
+
+  ESMF_INIT_SET_DEFINED(s)
+
+end subroutine ESMF_XPacketInit
+
+subroutine ESMF_XPacketValidate(s,rc)
+  type(ESMF_XPacket), intent(in):: s
+  integer, intent(out), optional::rc
+
+  ESMF_INIT_CHECK_SHALLOW(ESMF_XPacketGetInit,ESMF_XPacketInit,s)
+
+  if (present(rc)) rc=ESMF_SUCCESS
+
+end subroutine ESMF_XPacketValidate
 
 !==============================================================================
 #undef  ESMF_METHOD
@@ -132,6 +176,8 @@
           rc = ESMF_FAILURE
         endif
 
+        ESMF_INIT_CHECK_SHALLOW(ESMF_XPacketGetInit,ESMF_XPacketInit,xpacket)
+
         if (present(value1)) then
           ! code to be added here
         endif
@@ -141,6 +187,7 @@
         endif
 
         ! Call C++  code
+	! This function is not implemented yet -- P.Li 11/27/06
         !call c_ESMC_XPacketGet(xpacket, value1, value2, status)
         status = ESMF_FAILURE
         if (ESMF_LogMsgFoundError(status, &
@@ -162,7 +209,7 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_XPacket), intent(in) :: xpacket
+      type(ESMF_XPacket), intent(inout) :: xpacket
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
@@ -182,6 +229,8 @@
 !EOPI
 
         if (present(rc)) rc = ESMF_FAILURE
+	
+        ESMF_INIT_CHECK_SHALLOW(ESMF_XPacketGetInit,ESMF_XPacketInit,xpacket)
 
         print *, "XPacket Print:"
         print *, "  Rank=", xpacket%rank, " Left=", xpacket%offset, &
@@ -241,6 +290,8 @@
           rc = ESMF_FAILURE
         endif
 
+        ESMF_INIT_CHECK_SHALLOW(ESMF_XPacketGetInit,ESMF_XPacketInit,xpacket)
+
         if (present(value1)) then
           ! code to be added here
         endif
@@ -250,6 +301,7 @@
         endif
 
         ! Call C++  code
+	! This function is not implemented yet - 11/27/2006
         !call c_ESMC_XPacketSet(xpacket, value1, value2, status)
         status = ESMF_FAILURE
         if (ESMF_LogMsgFoundError(status, &
@@ -316,6 +368,8 @@
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
+        ESMF_INIT_CHECK_SHALLOW(ESMF_XPacketGetInit,ESMF_XPacketInit,xpacket)
  
         xpacket%rank          = rank
         xpacket%offset        = offset

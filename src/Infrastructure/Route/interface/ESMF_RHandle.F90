@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.28 2006/11/16 05:21:16 cdeluca Exp $
+! $Id: ESMF_RHandle.F90,v 1.29 2006/12/04 18:41:54 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -36,6 +36,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_UtilTypesMod
+      use ESMF_InitMacrosMod
       use ESMF_LogErrMod
       use ESMF_BaseMod
       use ESMF_LocalArrayMod
@@ -55,6 +56,7 @@
       type ESMF_TransformValues      
       sequence
         type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
+	ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -62,6 +64,8 @@
 !
 !     !  Simple derived types which allows us to pass the entire F90 dope 
 !     !  vector across the language boundary uninterpreted.
+!     !  Since these two types were not used as input arguments of a function
+!     !  No initialization routines are added -- P.Li 12/3/2006
 
       type ESMF_TVWrapperR8
       sequence
@@ -107,6 +111,7 @@
 #else
         type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
 #endif
+	ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -123,6 +128,8 @@
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 
+      public ESMF_TransformValuesGetInit
+
       public ESMF_TransformValuesCreate           ! interface only, deep class
       public ESMF_TransformValuesDestroy          ! interface only, deep class
 
@@ -133,6 +140,8 @@
       public ESMF_TransformValuesValidate
       public ESMF_TransformValuesPrint
  
+      public ESMF_RouteHandleGetInit
+
       public ESMF_RouteHandleCreate               ! interface only, deep class
       public ESMF_RouteHandleDestroy              ! interface only, deep class
       
@@ -149,11 +158,24 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.28 2006/11/16 05:21:16 cdeluca Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.29 2006/12/04 18:41:54 peggyli Exp $'
 
 !==============================================================================
 
       contains
+
+!==============================================================================
+!
+! TransformValues GetInit function
+!
+!------------------------------------------------------------------------------
+function ESMF_TransformValuesGetInit(d)
+  type(ESMF_TransformValues), intent(in):: d
+  ESMF_INIT_TYPE::ESMF_TransformValuesGetInit
+
+  ESMF_TransformValuesGetInit=ESMF_INIT_GET(d)
+
+end function ESMF_TransformValuesGetInit
 
 !==============================================================================
 !
@@ -218,6 +240,8 @@
 
         if (present(rc)) rc = ESMF_SUCCESS
 
+	ESMF_INIT_SET_CREATED(ESMF_TransformValuesCreate)
+
         end function ESMF_TransformValuesCreate
 
 !------------------------------------------------------------------------------
@@ -264,6 +288,8 @@
 
         ! nullify pointer
         tv%this = ESMF_NULL_POINTER
+
+	ESMF_INIT_SET_DELETED(tv)
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -322,6 +348,8 @@
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
+
+        ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
 
         ! Call C++  code to get all current values
         call c_ESMC_TransformValuesGet(tv, curnumlist, cursrc, &
@@ -402,6 +430,8 @@
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
+
+        ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
 
         ! Call C++  code to get all current values
         call c_ESMC_TransformValuesGetF90Ptr(tv, curnumlist, srcwrap, &
@@ -484,6 +514,8 @@
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
 
+        ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
+
         ! Get old values and only replace the ones specified.
         call c_ESMC_TransformValuesGet(tv, curnumlist, cursrc, &
                                        curdst, curweights, status)
@@ -559,6 +591,8 @@
        status = ESMF_FAILURE
        if (present(rc)) rc = ESMF_FAILURE
 
+       ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
+
        defaultopts = "quick"
 
        if(present(options)) then
@@ -613,6 +647,8 @@
        status = ESMF_FAILURE
        if (present(rc)) rc = ESMF_FAILURE
 
+       ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
+
        defaultopts = "brief"
 
        if(present(options)) then
@@ -631,6 +667,18 @@
        end subroutine ESMF_TransformValuesPrint
 
 !------------------------------------------------------------------------------
+!==============================================================================
+!
+! RouteHandle GetInit function
+!
+!------------------------------------------------------------------------------
+function ESMF_RouteHandleGetInit(d)
+  type(ESMF_RouteHandle), intent(in):: d
+  ESMF_INIT_TYPE::ESMF_RouteHandleGetInit
+
+  ESMF_RouteHandleGetInit=ESMF_INIT_GET(d)
+
+end function ESMF_RouteHandleGetInit
 
 !==============================================================================
 !
@@ -684,6 +732,8 @@
         ESMF_RouteHandleCreate = rhandle
 
         if (present(rc)) rc = ESMF_SUCCESS
+
+	ESMF_INIT_SET_CREATED(ESMF_RouteHandleCreate)
 
         end function ESMF_RouteHandleCreate
 
@@ -739,6 +789,8 @@
         rhandle%this = ESMF_NULL_POINTER
 
         if (present(rc)) rc = ESMF_SUCCESS
+
+	ESMF_INIT_SET_DELETED(rhandle)
 
         end subroutine ESMF_RouteHandleDestroy
 
@@ -861,6 +913,8 @@
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
+
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
 
         ! Call C++  code
         ! TODO: handle label string going through the interface
@@ -1057,6 +1111,8 @@
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
 
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+
         if (present(htype)) then
             call c_ESMC_RouteHandleSetType(rhandle, htype, status)
             if (ESMF_LogMsgFoundError(status, &
@@ -1166,6 +1222,8 @@
        status = ESMF_FAILURE
        if (present(rc)) rc = ESMF_FAILURE
 
+       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+
        defaultopts = "quick"
 
        ! See if this has been created yet or not.
@@ -1227,6 +1285,8 @@
        ! Initialize return code; assume failure until success is certain       
        status = ESMF_FAILURE
        if (present(rc)) rc = ESMF_FAILURE
+
+       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
 
        defaultopts = "brief"
 

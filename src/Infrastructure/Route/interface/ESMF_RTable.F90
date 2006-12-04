@@ -1,4 +1,4 @@
-! $Id: ESMF_RTable.F90,v 1.10 2006/11/16 05:21:16 cdeluca Exp $
+! $Id: ESMF_RTable.F90,v 1.11 2006/12/04 18:41:54 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,6 +37,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_UtilTypesMod
+      use ESMF_InitMacrosMod
       use ESMF_LogErrMod
       use ESMF_BaseMod    ! ESMF base class
       implicit none
@@ -54,6 +55,7 @@
       sequence
       private
         type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
+	ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -63,6 +65,8 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
+
+      public ESMF_RTableGetInit
 
       public ESMF_RTableCreate                 ! interface only, deep class
       public ESMF_RTableDestroy                ! interface only, deep class
@@ -79,7 +83,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RTable.F90,v 1.10 2006/11/16 05:21:16 cdeluca Exp $'
+      '$Id: ESMF_RTable.F90,v 1.11 2006/12/04 18:41:54 peggyli Exp $'
 
 !==============================================================================
 !
@@ -103,6 +107,19 @@
 !==============================================================================
 
       contains
+
+!==============================================================================
+!
+! RTable Initialiation and Validation functions
+!
+!------------------------------------------------------------------------------
+function ESMF_RTableGetInit(d)
+  type(ESMF_RTable), intent(in):: d
+  ESMF_INIT_TYPE::ESMF_RTableGetInit
+
+  ESMF_RTableGetInit=ESMF_INIT_GET(d)
+
+end function ESMF_RTableGetInit
 
 !==============================================================================
 !
@@ -168,6 +185,8 @@
 
         if (rcpresent) rc = ESMF_SUCCESS
 
+	ESMF_INIT_SET_CREATED(ESMF_RTableCreateNew)
+
         end function ESMF_RTableCreateNew
 
 !------------------------------------------------------------------------------
@@ -221,6 +240,8 @@
         rtable%this = ESMF_NULL_POINTER
 
         if (rcpresent) rc = ESMF_SUCCESS
+
+	ESMF_INIT_SET_DELETED(rtable)
 
         end subroutine ESMF_RTableDestroy
 
@@ -281,6 +302,7 @@
         endif
 
         ! Call C++  code
+	! This function is not implemented yet -- P.Li 11/27/06
         call c_ESMC_RTableGet(rtable, value1, value2, status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -300,7 +322,7 @@
       subroutine ESMF_RTablePrint(rtable, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_RTable), intent(in) :: rtable      
+      type(ESMF_RTable), intent(inout) :: rtable      
       character (len=*), intent(in), optional :: options      
       integer, intent(out), optional :: rc           
 !
@@ -331,6 +353,9 @@
          rcpresent = .TRUE.  
          rc = ESMF_FAILURE
        endif
+
+       ! Check initialization
+       ESMF_INIT_CHECK_DEEP(ESMF_RTableGetInit,rtable,rc)
 
        defaultopts = "brief"
 
@@ -405,6 +430,7 @@
         endif
 
         ! Call C++  code
+	! This function is not implemented yet -- P.Li 11/27/06
         call c_ESMC_RTableSet(rtable, value1, value2, status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -424,7 +450,7 @@
       subroutine ESMF_RTableValidate(rtable, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_RTable), intent(in) :: rtable       
+      type(ESMF_RTable), intent(inout) :: rtable       
       character (len=*), intent(in), optional :: options    
       integer, intent(out), optional :: rc            
 !
@@ -454,6 +480,9 @@
          rcpresent = .TRUE.  
          rc = ESMF_FAILURE
        endif
+
+       ! Check initialization
+       ESMF_INIT_CHECK_DEEP(ESMF_RTableGetInit,rtable,rc)
 
        defaultopts = "quick"
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.81 2006/11/16 05:21:16 cdeluca Exp $
+! $Id: ESMF_Route.F90,v 1.82 2006/12/04 18:41:54 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -34,6 +34,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_UtilTypesMod
+      use ESMF_InitMacrosMod
       use ESMF_LogErrMod
       use ESMF_BaseMod       
       use ESMF_VMMod
@@ -55,12 +56,13 @@
       sequence
       private
         type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
+	ESMF_INIT_DECLARE
       end type
 
       type ESMF_RouteOptions 
       sequence
       private
-          integer :: option
+        integer :: option
       end type
 
       ! must match C++ code, must increase by powers of 2
@@ -80,7 +82,8 @@
                                               ESMF_RouteOptions(64)
       type(ESMF_RouteOptions), parameter :: ESMF_ROUTE_OPTION_DEFAULT = &
                                               ESMF_RouteOptions(64+4+1)
-
+					      
+      
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_Route, ESMF_RouteOptions
@@ -92,6 +95,8 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
+      public ESMF_RouteGetInit
+
       public ESMF_RouteCreate                 ! interface only, deep class
       public ESMF_RouteDestroy                ! interface only, deep class
 
@@ -141,11 +146,25 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.81 2006/11/16 05:21:16 cdeluca Exp $'
+      '$Id: ESMF_Route.F90,v 1.82 2006/12/04 18:41:54 peggyli Exp $'
 
 !==============================================================================
 !
       contains
+
+!==============================================================================
+!
+! Route Initialiation and Validation functions
+!
+!------------------------------------------------------------------------------
+function ESMF_RouteGetInit(d)
+  type(ESMF_Route), intent(in):: d
+  ESMF_INIT_TYPE::ESMF_RouteGetInit
+
+  ESMF_RouteGetInit=ESMF_INIT_GET(d)
+
+end function ESMF_RouteGetInit
+
 
 !==============================================================================
 !
@@ -233,6 +252,8 @@ end subroutine rias
 
         if (present(rc)) rc = ESMF_SUCCESS
 
+	ESMF_INIT_SET_CREATED(ESMF_RouteCreate)
+
         end function ESMF_RouteCreate
 
 !------------------------------------------------------------------------------
@@ -279,6 +300,8 @@ end subroutine rias
 
         ! logerr routine already set rc
 
+	ESMF_INIT_SET_DELETED(route)
+
         end subroutine ESMF_RouteDestroy
 
 
@@ -292,7 +315,7 @@ end subroutine rias
       subroutine ESMF_RouteGet(route, value1, value2, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       integer, intent(out), optional :: value1
       integer, intent(out), optional :: value2
       integer, intent(out), optional :: rc             
@@ -329,7 +352,10 @@ end subroutine rias
           ! code to be added here
         endif
 
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+
         ! Call C++  code
+	! This function is not implemented yet -- P.Li 11/27/06
 !       call c_ESMC_RouteGet(route, value1, value2, status)
         status = ESMF_FAILURE  ! not implemented yet
         if (ESMF_LogMsgFoundError(status, &
@@ -351,7 +377,7 @@ end subroutine rias
       subroutine ESMF_RouteGetRecvItems(route, nitems, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       integer, intent(out) :: nitems
       integer, intent(out), optional :: rc            
 
@@ -389,6 +415,8 @@ end subroutine rias
           rc = ESMF_FAILURE
         endif
 
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+
         ! Call C++  code
         call c_ESMC_RouteGetRecvItems(route, nitems, status)
         if (ESMF_LogMsgFoundError(status, &
@@ -412,10 +440,10 @@ end subroutine rias
                                              hasSrcData, hasDstData, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Route),      intent(in   ) :: route
+      type(ESMF_Route),      intent(inout) :: route
       integer,               intent(in   ) :: rank
-      type(ESMF_DELayout),   intent(in   ) :: srcDELayout
-      type(ESMF_DELayout),   intent(in   ) :: dstDELayout
+      type(ESMF_DELayout),   intent(inout) :: srcDELayout
+      type(ESMF_DELayout),   intent(inout) :: dstDELayout
       type(ESMF_DomainList), intent(inout) :: srcDomainList
       type(ESMF_DomainList), intent(inout) :: dstDomainList
       logical,               intent(in   ), optional :: hasSrcData
@@ -466,6 +494,10 @@ end subroutine rias
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,srcDELayout,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,dstDELayout,rc)
 
       hasDstDataUse = .true.
       hasDstDataX   = ESMF_TRUE
@@ -552,7 +584,7 @@ end subroutine rias
                                           delayout, periodic, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       integer, intent(in) :: rank
       integer, intent(in) :: my_DE
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_exc
@@ -560,7 +592,7 @@ end subroutine rias
       integer, intent(in) :: AI_count
       integer, dimension(:,:), intent(in) :: global_start
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: global_count
-      type(ESMF_DELayout), intent(in) :: delayout
+      type(ESMF_DELayout), intent(inout) :: delayout
       type(ESMF_Logical), intent(in) :: periodic(:)
       integer, intent(out), optional :: rc
 
@@ -619,6 +651,9 @@ end subroutine rias
           rc = ESMF_FAILURE
         endif
 
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,layout,rc)
+
         ! Translate AxisIndices from F90 to C++
         do j=1,rank
           do i=1,AI_count
@@ -666,16 +701,16 @@ end subroutine rias
                                             myDstGlobalTotalAIperRank, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       integer, intent(in) :: rank
       type(ESMF_Logical), intent(in) :: hasSrcData
-      type(ESMF_DELayout), intent(in) :: srcDElayout
+      type(ESMF_DELayout), intent(inout) :: srcDElayout
       integer, intent(in) :: mySrcDE
       type(ESMF_AxisIndex), dimension(:), pointer :: mySrcGlobalTotalAIperRank
       type(ESMF_AxisIndex), dimension(:,:), pointer :: &
                                                      srcGlobalCompAIperDEperRank
       type(ESMF_Logical), intent(in) :: hasDstData
-      type(ESMF_DELayout), intent(in) :: dstDElayout
+      type(ESMF_DELayout), intent(inout) :: dstDElayout
       integer, intent(in) :: myDstDE
       type(ESMF_AxisIndex), dimension(:), pointer :: myDstGlobalTotalAIperRank
       type(ESMF_AxisIndex), dimension(:,:), pointer :: &
@@ -744,6 +779,10 @@ end subroutine rias
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,srcDELayout,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,dstDELayout,rc)
 
         ! TODO get DE counts from layouts
         ! TODO make sure DE counts are the same as the first rank 
@@ -836,7 +875,7 @@ end subroutine rias
                                              srcGlobalCount, srcDElayout, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       integer, intent(in) :: rank
       type(ESMF_Logical), intent(in) :: hasDstData
       integer, intent(in) :: dstMyDE
@@ -846,7 +885,7 @@ end subroutine rias
       integer, dimension(:), intent(in) :: dstAICountPerDE
       integer, dimension(:,:), intent(in) :: dstGlobalStart
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dstGlobalCount
-      type(ESMF_DELayout), intent(in) :: dstDElayout
+      type(ESMF_DELayout), intent(inout) :: dstDElayout
       type(ESMF_Logical), intent(in) :: hasSrcData
       integer, intent(in) :: srcMyDE
       logical, intent(in) :: srcVector
@@ -855,7 +894,7 @@ end subroutine rias
       integer, dimension(:), intent(in) :: srcAICountPerDE
       integer, dimension(:,:), intent(in) :: srcGlobalStart
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: srcGlobalCount
-      type(ESMF_DELayout), intent(in) :: srcDElayout
+      type(ESMF_DELayout), intent(inout) :: srcDElayout
       integer, intent(out), optional :: rc
 
 !
@@ -931,6 +970,10 @@ end subroutine rias
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,srcDELayout,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,dstDELayout,rc)
 
         ! set some sizes to pass to C++ code
         dstAICount = size(dstCompAI,1)
@@ -1022,7 +1065,7 @@ end subroutine rias
                                              srcGlobalCount, srcDElayout, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       integer, intent(in) :: rank
       type(ESMF_Logical), intent(in) :: hasDstData
       integer, intent(in) :: dstMyDE
@@ -1030,14 +1073,14 @@ end subroutine rias
       integer, dimension(:), intent(in) :: dstAICountPerDE
       integer, dimension(:,:), intent(in) :: dstGlobalStart
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dstGlobalCount
-      type(ESMF_DELayout), intent(in) :: dstDElayout
+      type(ESMF_DELayout), intent(inout) :: dstDElayout
       type(ESMF_Logical), intent(in) :: hasSrcData
       integer, intent(in) :: srcMyDE
       type(ESMF_AxisIndex), dimension(:,:), pointer :: srcCompAI
       integer, dimension(:), intent(in) :: srcAICountPerDE
       integer, dimension(:,:), intent(in) :: srcGlobalStart
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: srcGlobalCount
-      type(ESMF_DELayout), intent(in) :: srcDElayout
+      type(ESMF_DELayout), intent(inout) :: srcDElayout
       integer, intent(out), optional :: rc
 
 !
@@ -1101,6 +1144,10 @@ end subroutine rias
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,srcDELayout,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,dstDELayout,rc)
 
         ! set some sizes to pass to C++ code
         dstAICount = size(dstCompAI,1)
@@ -1170,7 +1217,7 @@ end subroutine rias
 
 
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       integer, intent(in) :: rank
       integer, intent(in) :: my_DE_dst
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_exc
@@ -1178,14 +1225,14 @@ end subroutine rias
       integer, intent(in) :: AI_dst_count
       integer, dimension(:,:), intent(in) :: dst_global_start
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dst_global_count
-      type(ESMF_DELayout), intent(in) :: dstDElayout
+      type(ESMF_DELayout), intent(inout) :: dstDElayout
       integer, intent(in) :: my_DE_src
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_tot
       integer, intent(in) :: AI_src_count
       integer, dimension(:,:), intent(in) :: src_global_start
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: src_global_count
-      type(ESMF_DELayout), intent(in) :: srcDElayout
+      type(ESMF_DELayout), intent(inout) :: srcDElayout
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1257,6 +1304,11 @@ end subroutine rias
           rc = ESMF_FAILURE
         endif
 
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,srcDELayout,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,dstDELayout,rc)
+
+
         ! Translate AxisIndices from F90 to C++
         do j=1,rank
           do i=1,AI_dst_count
@@ -1314,7 +1366,7 @@ end subroutine rias
       subroutine ESMF_RouteSet(route, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       type(ESMF_RouteOptions), intent(in) :: options
       integer, intent(out), optional :: rc            
 
@@ -1348,6 +1400,8 @@ end subroutine rias
           rc = ESMF_FAILURE
         endif
 
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+
         ! Call C++  code
         call c_ESMC_RouteSet(route, options, status)
         if (ESMF_LogMsgFoundError(status, &
@@ -1368,7 +1422,7 @@ end subroutine rias
       subroutine ESMF_RouteSetRecvItems(route, nitems, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       integer, intent(in) :: nitems
       integer, intent(out), optional :: rc            
 
@@ -1406,6 +1460,8 @@ end subroutine rias
           rc = ESMF_FAILURE
         endif
 
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+
         ! Call C++  code
         call c_ESMC_RouteSetRecvItems(route, nitems, status)
         if (ESMF_LogMsgFoundError(status, &
@@ -1426,9 +1482,9 @@ end subroutine rias
       subroutine ESMF_RouteSetRecv(route, srcPET, xp, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       integer, intent(in) :: srcPET
-      type(ESMF_XPacket), intent(in) :: xp
+      type(ESMF_XPacket), intent(inout) :: xp
       integer, intent(out), optional :: rc            
 
 !
@@ -1465,6 +1521,11 @@ end subroutine rias
           rc = ESMF_FAILURE
         endif
 
+	! Check initialization
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_XPacketGetInit,xp,rc)
+
+
         ! Call C++  code
         call c_ESMC_RouteSetRecv(route, srcPET, xp, status)
         if (ESMF_LogMsgFoundError(status, &
@@ -1487,7 +1548,7 @@ end subroutine rias
 ! !ARGUMENTS:
       type(ESMF_Route), intent(inout) :: route
       integer, intent(in) :: destPET
-      type(ESMF_XPacket), intent(in) :: xp
+      type(ESMF_XPacket), intent(inout) :: xp
       integer, intent(out), optional :: rc            
 
 !
@@ -1524,6 +1585,11 @@ end subroutine rias
           rc = ESMF_FAILURE
         endif
 
+	! Check initialization
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_XPacketGetInit,xp,rc)
+
+
         ! Call C++  code
         call c_ESMC_RouteSetSend(route, destPET, xp, status)
         if (ESMF_LogMsgFoundError(status, &
@@ -1544,7 +1610,7 @@ end subroutine rias
       subroutine ESMF_RoutePrint(route, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route      
+      type(ESMF_Route), intent(inout) :: route      
       character (len=*), intent(in), optional :: options      
       integer, intent(out), optional :: rc           
 !
@@ -1577,6 +1643,9 @@ end subroutine rias
          rc = ESMF_FAILURE
        endif
 
+       ! Check initialization
+       ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+
        defaultopts = "brief"
 
        if(present(options)) then
@@ -1604,7 +1673,7 @@ end subroutine rias
       subroutine ESMF_RouteRun(route, srcArray, dstArray, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       type(ESMF_LocalArray), intent(inout), optional :: srcarray
       type(ESMF_LocalArray), intent(inout), optional :: dstarray
       integer, intent(out), optional :: rc            
@@ -1645,6 +1714,14 @@ end subroutine rias
           rc = ESMF_FAILURE
         endif
 
+	! Check initialization
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+	if (present(srcarray)) then
+	   ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,srcarray,rc)
+        endif
+	if (present(dstarray)) then
+	  ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,dstarray,rc)
+        endif
         if ((.not.present(srcarray)) .and. (.not.present(dstarray))) then
             ! nothing to do here
             status = ESMF_SUCCESS
@@ -1674,7 +1751,7 @@ end subroutine rias
       subroutine ESMF_RouteRunList(route, srcArrayList, dstArrayList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       type(ESMF_LocalArray), intent(inout), optional :: srcArrayList(:)
       type(ESMF_LocalArray), intent(inout), optional :: dstArrayList(:)
       integer, intent(out), optional :: rc            
@@ -1703,6 +1780,7 @@ end subroutine rias
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
         integer :: srcCount, dstCount
+	integer :: i
         type(ESMF_LocalArray) :: empty(1)
 
         ! Set initial values
@@ -1716,6 +1794,9 @@ end subroutine rias
           rc = ESMF_FAILURE
         endif
 
+	! Check initialization
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+
         ! Pass exact counts into c interface.
         srcCount = 0
         dstCount = 0
@@ -1725,6 +1806,18 @@ end subroutine rias
         if (present(dstArrayList)) then
           dstCount = size(srcArrayList)
         endif
+
+	! Check initialization
+	if (srcCount .ne. 0) then
+  	  do i=1,srcCount,1
+	    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,srcarrayList(i),rc)
+	  end do
+	end if
+	if (dstCount .ne. 0) then
+  	  do i=1,dstCount,1
+	    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,dstarrayList(i),rc)
+	  end do
+	end if
 
         if ((srcCount .eq. 0) .and. (dstCount .eq. 0)) then
             ! nothing to do here
@@ -1758,7 +1851,7 @@ end subroutine rias
       subroutine ESMF_RouteRunF90PtrI411D(route, srcarray, dstarray, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       integer(ESMF_KIND_I4), pointer, optional :: srcarray(:)
       integer(ESMF_KIND_I4), pointer, optional :: dstarray(:)
       integer, intent(out), optional :: rc            
@@ -1797,6 +1890,9 @@ end subroutine rias
           rc = ESMF_FAILURE
         endif
 
+	! Check initialization
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+
         ! Call C++  code
         if (associated(srcarray)) then
           if (associated(dstarray)) then
@@ -1829,7 +1925,7 @@ end subroutine rias
       subroutine ESMF_RouteRunF90PtrI421D(route, srcarray, dstarray, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       integer(ESMF_KIND_I4), pointer, optional :: srcarray(:,:)
       integer(ESMF_KIND_I4), pointer, optional :: dstarray(:)
       integer, intent(out), optional :: rc            
@@ -1868,6 +1964,9 @@ end subroutine rias
           rc = ESMF_FAILURE
         endif
 
+	! Check initialization
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+
         ! Call C++  code
         if (associated(srcarray)) then
           if (associated(dstarray)) then
@@ -1900,7 +1999,7 @@ end subroutine rias
       subroutine ESMF_RouteRunF90PtrR811D(route, srcarray, dstarray, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       real(ESMF_KIND_R8), pointer, optional :: srcarray(:)
       real(ESMF_KIND_R8), pointer, optional :: dstarray(:)
       integer, intent(out), optional :: rc            
@@ -1939,6 +2038,9 @@ end subroutine rias
           rc = ESMF_FAILURE
         endif
 
+	! Check initialization
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+
         ! Call C++  code
         if (associated(srcarray)) then
           if (associated(dstarray)) then
@@ -1971,7 +2073,7 @@ end subroutine rias
       subroutine ESMF_RouteRunF90PtrR821D(route, srcarray, dstarray, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       real(ESMF_KIND_R8), pointer, optional :: srcarray(:,:)
       real(ESMF_KIND_R8), pointer, optional :: dstarray(:)
       integer, intent(out), optional :: rc            
@@ -2010,6 +2112,10 @@ end subroutine rias
           rc = ESMF_FAILURE
         endif
 
+	! Check initialization
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+
+
         ! Call C++  code
         if (associated(srcarray)) then
           if (associated(dstarray)) then
@@ -2042,7 +2148,7 @@ end subroutine rias
       subroutine ESMF_RouteRunF90PtrR832D(route, srcarray, dstarray, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Route), intent(inout) :: route
       real(ESMF_KIND_R8), pointer, optional :: srcarray(:,:,:)
       real(ESMF_KIND_R8), pointer, optional :: dstarray(:,:)
       integer, intent(out), optional :: rc            
@@ -2081,6 +2187,9 @@ end subroutine rias
           rc = ESMF_FAILURE
         endif
 
+	! Check initialization
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+
         ! Call C++  code
         if (associated(srcarray)) then
           if (associated(dstarray)) then
@@ -2115,7 +2224,7 @@ end subroutine rias
                                            options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route       
+      type(ESMF_Route), intent(inout) :: route       
       integer, intent(in), optional :: srcbufcount            
       integer, intent(in), optional :: srcbufsizes(:)
       integer, intent(in), optional :: dstbufcount            
@@ -2162,6 +2271,8 @@ end subroutine rias
        ! Initialize return code; assume failure until success is certain       
        if (present(rc)) rc = ESMF_FAILURE
 
+       ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+
        ! Set the source defaults if not specified
        if (present(srcbufcount)) then
            srcnumbufs = srcbufcount
@@ -2193,7 +2304,6 @@ end subroutine rias
        else
            optstring = "quick"
        endif
-
 
        ! now make the call
        call c_ESMC_RouteValidate(route, srcnumbufs, srcitemcounts, &

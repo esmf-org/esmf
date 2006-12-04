@@ -1,4 +1,4 @@
-! $Id: ESMF_CommTable.F90,v 1.10 2006/11/16 05:21:16 cdeluca Exp $
+! $Id: ESMF_CommTable.F90,v 1.11 2006/12/04 18:41:54 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -36,6 +36,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_UtilTypesMod
+      use ESMF_InitMacrosMod
       use ESMF_LogErrMod
       use ESMF_BaseMod    ! ESMF base class
       implicit none
@@ -52,6 +53,7 @@
       sequence
       private
         type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
+	ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -68,6 +70,8 @@
 !  other than deleting the memory for the object/derived type itself.
 
 ! the following routines apply to deep classes only
+      public ESMF_CommTableGetInit
+
       public ESMF_CommTableCreate                 ! interface only, deep class
       public ESMF_CommTableDestroy                ! interface only, deep class
 
@@ -85,7 +89,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CommTable.F90,v 1.10 2006/11/16 05:21:16 cdeluca Exp $'
+      '$Id: ESMF_CommTable.F90,v 1.11 2006/12/04 18:41:54 peggyli Exp $'
 
 !==============================================================================
 !
@@ -114,6 +118,18 @@
 
       contains
 
+!==============================================================================
+!
+! Route Initialiation function
+!
+!------------------------------------------------------------------------------
+function ESMF_CommTableGetInit(d)
+  type(ESMF_CommTable), intent(in):: d
+  ESMF_INIT_TYPE::ESMF_CommTableGetInit
+
+  ESMF_CommTableGetInit=ESMF_INIT_GET(d)
+
+end function ESMF_CommTableGetInit
 !==============================================================================
 !
 ! This section includes the CommTable Create and Destroy methods.
@@ -178,6 +194,8 @@
 
         if (rcpresent) rc = ESMF_SUCCESS
 
+	ESMF_INIT_SET_CREATED(ESMF_CommTableCreateNew)
+
         end function ESMF_CommTableCreateNew
 
 !------------------------------------------------------------------------------
@@ -232,6 +250,8 @@
 
         if (rcpresent) rc = ESMF_SUCCESS
 
+	ESMF_INIT_SET_DELETED(commtable)
+
         end subroutine ESMF_CommTableDestroy
 
 
@@ -245,7 +265,7 @@
       subroutine ESMF_CommTableGet(commtable, value1, value2, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CommTable), intent(in) :: commtable
+      type(ESMF_CommTable), intent(inout) :: commtable
       integer, intent(out), optional :: value1
       integer, intent(out), optional :: value2
       integer, intent(out), optional :: rc             
@@ -282,6 +302,8 @@
           rc = ESMF_FAILURE
         endif
 
+        ESMF_INIT_CHECK_DEEP(ESMF_CommTableGetInit,commtable,rc)
+
         if (present(value1)) then
           ! code to be added here
         endif
@@ -310,7 +332,7 @@
       subroutine ESMF_CommTableSet(CommTable, value1, value2, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CommTable), intent(in) :: commtable
+      type(ESMF_CommTable), intent(inout) :: commtable
       integer, intent(in), optional :: value1
       integer, intent(in), optional :: value2
       integer, intent(out), optional :: rc            
@@ -348,6 +370,8 @@
           rc = ESMF_FAILURE
         endif
 
+        ESMF_INIT_CHECK_DEEP(ESMF_CommTableGetInit,commtable,rc)
+
         if (present(value1)) then
           ! code to be added here
         endif
@@ -376,7 +400,7 @@
       subroutine ESMF_CommTableValidate(commtable, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CommTable), intent(in) :: commtable       
+      type(ESMF_CommTable), intent(inout) :: commtable       
       character (len=*), intent(in), optional :: options    
       integer, intent(out), optional :: rc            
 !
@@ -407,6 +431,8 @@
          rc = ESMF_FAILURE
        endif
 
+       ESMF_INIT_CHECK_DEEP(ESMF_CommTableGetInit,commtable,rc)
+
        defaultopts = "quick"
 
        if(present(options)) then
@@ -434,7 +460,7 @@
       subroutine ESMF_CommTablePrint(commtable, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CommTable), intent(in) :: commtable      
+      type(ESMF_CommTable), intent(inout) :: commtable      
       character (len=*), intent(in), optional :: options      
       integer, intent(out), optional :: rc           
 !
@@ -465,6 +491,8 @@
          rcpresent = .TRUE.  
          rc = ESMF_FAILURE
        endif
+
+       ESMF_INIT_CHECK_DEEP(ESMF_CommTableGetInit,commtable,rc)
 
        defaultopts = "brief"
 
