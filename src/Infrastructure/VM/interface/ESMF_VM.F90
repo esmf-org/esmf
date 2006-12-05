@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.80 2006/12/04 23:41:53 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.81 2006/12/05 20:47:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -77,7 +77,6 @@ module ESMF_VMMod
   sequence
   private
     type(ESMF_Pointer) :: this
-    ESMF_INIT_DECLARE
   end type
 
 !------------------------------------------------------------------------------
@@ -112,7 +111,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! !PRIVATE MODULE VARIABLES:
 
-  type(ESMF_VM) :: GlobalVM     ! This is a reference to the global VM
+  type(ESMF_VM), save :: GlobalVM     ! This is a reference to the global VM
   public GlobalVM
   
 !------------------------------------------------------------------------------
@@ -158,9 +157,14 @@ module ESMF_VMMod
   public ESMF_VMAbort
   public ESMF_VMShutdown
   public ESMF_VMGetInit
+  public ESMF_VMSetInitCreated
+  public ESMF_VMGetThis
+  public ESMF_VMSetThis
   public ESMF_VMPlanConstruct
   public ESMF_VMPlanDestruct
   public ESMF_VMPlanGetInit
+  public ESMF_VMPlanGetThis
+  public ESMF_VMPlanSetThis
   public ESMF_VMPlanMaxPEs
   public ESMF_VMPlanMaxThreads
   public ESMF_VMPlanMinThreads
@@ -177,7 +181,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.80 2006/12/04 23:41:53 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.81 2006/12/05 20:47:36 theurich Exp $"
 
 !==============================================================================
 
@@ -6199,6 +6203,141 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSetInitCreated()"
+!BOPI
+! !IROUTINE: ESMF_VMSetInitCreated - Set VM init code to "CREATED"
+
+! !INTERFACE:
+  subroutine ESMF_VMSetInitCreated(vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),  intent(in)              :: vm
+    integer,        intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in VM object to "CREATED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[vm] 
+!          Specified {\tt ESMF\_VM} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(vm)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_VMSetInitCreated
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGetThis()"
+!BOPI
+! !IROUTINE: ESMF_VMGetThis - Internal access routine for C++ pointer
+
+! !INTERFACE:
+  subroutine ESMF_VMGetThis(vm, this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),      intent(in)              :: vm
+    type(ESMF_Pointer), intent(out)             :: this
+    integer,            intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Internal access routine for C++ pointer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[vm] 
+!          Specified {\tt ESMF\_VM} object.
+!     \item[this] 
+!          C++ pointer.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Copy C++ pointer
+    this = vm%this
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_VMGetThis
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSetThis()"
+!BOPI
+! !IROUTINE: ESMF_VMSetThis - Set C++ pointer in VM
+
+! !INTERFACE:
+  subroutine ESMF_VMSetThis(vm, this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),      intent(inout)           :: vm
+    type(ESMF_Pointer), intent(in)              :: this
+    integer,            intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Set C++ pointer in VM.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[vm] 
+!          Specified {\tt ESMF\_VM} object.
+!     \item[this] 
+!          C++ pointer.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Copy C++ pointer
+    vm%this = this
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_VMSetThis
+!------------------------------------------------------------------------------
+
+
 !==============================================================================
 ! ESMF_VMPlan methods:
 !==============================================================================
@@ -6353,6 +6492,98 @@ module ESMF_VMMod
     endif
 
     end function ESMF_VMPlanGetInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanGetThis()"
+!BOPI
+! !IROUTINE: ESMF_VMPlanGetThis - Internal access routine for C++ pointer
+
+! !INTERFACE:
+  subroutine ESMF_VMPlanGetThis(vmplan, this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMPlan),  intent(in)              :: vmplan
+    type(ESMF_Pointer), intent(out)             :: this
+    integer,            intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Internal access routine for C++ pointer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[vmplan] 
+!          Specified {\tt ESMF\_VMPlan} object.
+!     \item[this] 
+!          C++ pointer.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Copy C++ pointer
+    this = vmplan%this
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_VMPlanGetThis
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanSetThis()"
+!BOPI
+! !IROUTINE: ESMF_VMPlanSetThis - Set C++ pointer in VMPlan
+
+! !INTERFACE:
+  subroutine ESMF_VMPlanSetThis(vmplan, this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMPlan),  intent(inout)           :: vmplan
+    type(ESMF_Pointer), intent(in)              :: this
+    integer,            intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Set C++ pointer in VMPlan.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[vmplan] 
+!          Specified {\tt ESMF\_VMPlan} object.
+!     \item[this] 
+!          C++ pointer.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Copy C++ pointer
+    vmplan%this = this
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_VMPlanSetThis
 !------------------------------------------------------------------------------
 
 
