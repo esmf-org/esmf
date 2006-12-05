@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.11 2006/11/16 05:20:59 cdeluca Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.12 2006/12/05 23:05:35 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc @\
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc  @\
       integer, intent(in), optional :: haloWidth @\
-      type(ESMF_FieldDataMap), intent(in), optional :: datamap @\
+      type(ESMF_FieldDataMap), intent(inout), optional :: datamap @\
       character (len=*), intent(in), optional :: name  @\
       type(ESMF_IOSpec), intent(in), optional :: iospec @\
       integer, intent(out), optional :: rc @\
@@ -129,6 +129,10 @@
           rcpresent = .TRUE. @\
           rc = ESMF_FAILURE @\
         endif @\
+ @\
+        ! check variables @\
+        if (present(datamap))  & @\
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap) @\
  @\
         ! Test to see if pointer not associated, and fail if so. @\
         if (.not.associated(fptr)) then @\
@@ -156,6 +160,9 @@
                                   ESMF_CONTEXT, rc)) return @\
  @\
         ESMF_FieldCreateDPtr##mrank##D##mtypekind%ftypep => ftype  @\
+ @\
+        ESMF_INIT_SET_CREATED(ESMF_FieldCreateDPtr##mrank##D##mtypekind) @\
+
         if (rcpresent) rc = status @\
  @\
         end function ESMF_FieldCreateDPtr##mrank##D##mtypekind  @\
@@ -268,7 +275,7 @@
       integer, intent(in), optional :: haloWidth @\
       integer, dimension(:), intent(in), optional :: lbounds @\
       integer, dimension(:), intent(in), optional :: ubounds @\
-      type(ESMF_FieldDataMap), intent(in), optional :: datamap @\
+      type(ESMF_FieldDataMap), intent(inout), optional :: datamap @\
       character (len=*), intent(in), optional :: name  @\
       type(ESMF_IOSpec), intent(in), optional :: iospec @\
       integer, intent(out), optional :: rc @\
@@ -287,6 +294,10 @@
           rcpresent = .TRUE. @\
           rc = ESMF_FAILURE @\
         endif @\
+ @\
+        ! check variables @\
+        if (present(datamap))  & @\
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap) @\
  @\
         ! Test to see if pointer not already associated, and fail if so. @\
         if (associated(fptr)) then @\
@@ -316,6 +327,7 @@
         call ESMF_FieldGetDataPointer(ESMF_FieldCreateEPtr##mrank##D##mtypekind, & @\
                                       fptr, ESMF_DATA_REF, rc=status) @\
  @\
+        ESMF_INIT_SET_CREATED(ESMF_FieldCreateEPtr##mrank##D##mtypekind) @\
         if (rcpresent) rc = status @\
  @\
         end function ESMF_FieldCreateEPtr##mrank##D##mtypekind  @\

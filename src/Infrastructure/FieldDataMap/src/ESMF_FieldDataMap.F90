@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.29 2006/11/16 05:21:00 cdeluca Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.30 2006/12/05 23:06:20 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,6 +55,7 @@
       use ESMF_LogErrMod
       use ESMF_IOSpecMod
       use ESMF_InternArrayDataMapMod
+      use ESMF_InitMacrosMod
 
 ! !PUBLIC TYPES:
       implicit none
@@ -85,6 +86,7 @@
         type(ESMF_InterleaveType) :: interleave         ! if > scalar
         type(ESMF_RelLoc) :: horzRelloc                 ! data item loc/cell
         type(ESMF_RelLoc) :: vertRelloc                 ! data item loc/cell
+        ESMF_INIT_DECLARE
 
       end type
 
@@ -97,6 +99,9 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
+      public ESMF_FieldDataMapInit
+      public ESMF_FieldDataMapGetInit
+
       public ESMF_FieldDataMapSetDefault
       public ESMF_FieldDataMapSetInvalid
 
@@ -114,7 +119,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.29 2006/11/16 05:21:00 cdeluca Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.30 2006/12/05 23:06:20 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -156,6 +161,68 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldDataMapGetInit"
+!BOPI
+! !IROUTINE:  ESMF_FieldDataMapGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_FieldDataMapGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_FieldDataMap), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_FieldDataMapGetInit
+!
+! !DESCRIPTION:
+!     Get the initialization status of the shallow class {\tt fielddatamap}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_FieldDataMap} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_FieldDataMapGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_FieldDataMapGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_FieldDataMapGetInit
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldDataMapInit"
+!BOPI
+! !IROUTINE:  ESMF_FieldDataMapInit - Initialize LocalField
+
+! !INTERFACE:
+    subroutine ESMF_FieldDataMapInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_FieldDataMap) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt fielddatamap}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_FieldDataMap} of which being initialized.
+!     \end{description}
+!
+!EOPI
+
+        s%status = ESMF_STATUS_UNINIT
+
+        ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_FieldDataMapInit
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldDataMapGet"
 !BOP
 ! !IROUTINE: ESMF_FieldDataMapGet - Get values from a FieldDataMap 
@@ -165,7 +232,7 @@
                                       horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap), intent(in) :: fielddatamap  
+      type(ESMF_FieldDataMap), intent(inout) :: fielddatamap  
       integer, intent(out), optional :: dataRank    
       integer, dimension(:), intent(out), optional :: dataIndexList
       integer, dimension(:), intent(out), optional :: counts 
@@ -218,6 +285,9 @@
           rc = ESMF_FAILURE
         endif
 
+        ! check variables
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
+                                ESMF_FieldDataMapInit,fielddatamap)
 
         ! get any values from the internal array fielddatamap
         call ESMF_ArrayDataMapGet(fielddatamap%adm, dataRank, dataIndexList, &
@@ -368,6 +438,10 @@
           rc = ESMF_FAILURE
         endif
 
+        ! check variables
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
+                                ESMF_FieldDataMapInit,fielddatamap)
+        
 
         ! set the internal array map
         call ESMF_ArrayDataMapSet(fielddatamap%adm, dataRank, dataIndexList, &
@@ -458,6 +532,10 @@
         else
           rcpresent = .FALSE.
         endif
+
+        ! check variables
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
+                                ESMF_FieldDataMapInit,fielddatamap)
 
         ! initialize the contents of the internal array fielddatamap
         call ESMF_ArrayDataMapSetDefault(fielddatamap%adm, dataRank, dataIndexList, &
@@ -550,6 +628,10 @@
             rcpresent = .FALSE.
         endif
 
+        ! check variables
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
+                                ESMF_FieldDataMapInit,fielddatamap)
+
         ! initialize the contents of the internal array fielddatamap
         call ESMF_ArrayDataMapSetDefault(fielddatamap%adm, indexorder, &
                                          counts, status)
@@ -626,7 +708,7 @@
       subroutine ESMF_FieldDataMapValidate(fielddatamap, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap), intent(in) :: fielddatamap
+      type(ESMF_FieldDataMap), intent(inout) :: fielddatamap
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
@@ -660,6 +742,10 @@
           rc = ESMF_FAILURE
         endif
 
+        ! check variables
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
+                                ESMF_FieldDataMapInit,fielddatamap)
+
 
         if (fielddatamap%status .ne. ESMF_STATUS_READY) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -680,7 +766,7 @@
       subroutine ESMF_FieldDataMapWriteRestart(fielddatamap, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap), intent(in) :: fielddatamap
+      type(ESMF_FieldDataMap), intent(inout) :: fielddatamap
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc
 !
@@ -709,6 +795,9 @@
 ! TODO: code goes here
 !
         if (present(rc)) rc = ESMF_FAILURE
+        ! check variables
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
+                                ESMF_FieldDataMapInit,fielddatamap)
 
         end subroutine ESMF_FieldDataMapWriteRestart
 
@@ -770,7 +859,7 @@
       subroutine ESMF_FieldDataMapWrite(fielddatamap, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap), intent(in) :: fielddatamap
+      type(ESMF_FieldDataMap), intent(inout) :: fielddatamap
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc
 !
@@ -799,6 +888,10 @@
 ! TODO: code goes here
 !
         if (present(rc)) rc = ESMF_FAILURE
+
+        ! check variables
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
+                                ESMF_FieldDataMapInit,fielddatamap)
 
         end subroutine ESMF_FieldDataMapWrite
 
@@ -861,7 +954,7 @@
       subroutine ESMF_FieldDataMapSerialize(fielddatamap, buffer, length, offset, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap), intent(in) :: fielddatamap 
+      type(ESMF_FieldDataMap), intent(inout) :: fielddatamap 
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
@@ -894,6 +987,10 @@
 !EOPI
 
       integer :: localrc                     ! Error status
+
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
+                              ESMF_FieldDataMapInit,fielddatamap)
 
 
       call c_ESMC_FieldDataMapSerialize(fielddatamap%status, &
@@ -931,7 +1028,7 @@
       subroutine ESMF_FieldDataMapDeserialize(fielddatamap, buffer, offset, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap), intent(in) :: fielddatamap 
+      type(ESMF_FieldDataMap), intent(inout) :: fielddatamap 
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       integer, intent(out), optional :: rc 
@@ -960,6 +1057,10 @@
 !EOPI
 
       integer :: localrc                ! Error status
+
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
+                              ESMF_FieldDataMapInit,fielddatamap)
 
       call c_ESMC_FieldDataMapDeserialize(fielddatamap%status, &
                                  fielddatamap%isScalar, &

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_BundleGetMacros.h,v 1.7 2006/11/16 05:20:56 cdeluca Exp $
+! $Id: ESMF_BundleGetMacros.h,v 1.8 2006/12/05 23:02:25 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -87,7 +87,7 @@
       subroutine ESMF_BundleGetDataPointer##mrank##D##mtypekind(bundle, & @\
                       fieldName, dataPointer, copyflag, rc) @\
  @\
-      type(ESMF_Bundle), intent(in) :: bundle @\
+      type(ESMF_Bundle), intent(inout) :: bundle @\
       character(len=*), intent(in) :: fieldName @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: dataPointer @\
       type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
@@ -103,6 +103,10 @@
         status = ESMF_FAILURE @\
         rcpresent = .FALSE. @\
         array%this = ESMF_NULL_POINTER @\
+ @\
+ @\
+        ! check variables @\
+        ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc) @\
  @\
         if (present(rc)) then @\
           rcpresent = .TRUE. @\

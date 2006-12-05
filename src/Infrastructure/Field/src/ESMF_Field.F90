@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.223 2006/11/16 20:45:59 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.224 2006/12/05 23:05:35 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -62,6 +62,7 @@
       use ESMF_InternArrayCommMod
       use ESMF_TimeMod
       use ESMF_FieldDataMapMod
+      use ESMF_InitMacrosMod
 
       implicit none
 
@@ -112,6 +113,7 @@
 
         integer :: rwaccess                      ! reserved for future use
         integer :: accesscount                   ! reserved for future use
+        ESMF_INIT_DECLARE
 
       end type
 
@@ -142,6 +144,7 @@
         type (ESMF_FieldDataMap) :: mapping  ! mapping of array indices to grid
         type (ESMF_IOSpec) :: iospec         ! iospec values
         type (ESMF_Status) :: iostatus       ! if unset, inherit from gcomp
+        ESMF_INIT_DECLARE
 
       end type
 
@@ -159,6 +162,7 @@
 #else
         type (ESMF_FieldType), pointer :: ftypep
 #endif
+        ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -171,6 +175,16 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
+   public ESMF_LocalFieldInit          ! For Standardized Initialization
+   public ESMF_LocalFieldValidate      ! For Standardized Initialization
+   public ESMF_LocalFieldGetInit       ! For Standardized Initialization
+
+   public ESMF_FieldTypeInit           ! For Standardized Initialization
+   public ESMF_FieldTypeValidate       ! For Standardized Initialization
+   public ESMF_FieldTypeGetInit        ! For Standardized Initialization
+
+   public ESMF_FieldGetInit            ! For Standardized Initialization
+
 
    public ESMF_FieldCreateNoData       ! Create a new Field without data
    public ESMF_FieldDestroy            ! Destroy a Field
@@ -225,7 +239,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.223 2006/11/16 20:45:59 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.224 2006/12/05 23:05:35 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -371,7 +385,232 @@
 !
 !==============================================================================
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalFieldGetInit"
+!BOPI
+! !IROUTINE:  ESMF_LocalFieldGetInit - Get initialization status.
 
+! !INTERFACE:
+    function ESMF_LocalFieldGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_LocalField), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_LocalFieldGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt localfield}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_LocalField} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_LocalFieldGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_LocalFieldGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_LocalFieldGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalFieldInit"
+!BOPI
+! !IROUTINE:  ESMF_LocalFieldInit - Initialize LocalField
+
+! !INTERFACE:
+    subroutine ESMF_LocalFieldInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_LocalField) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt localfield}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_LocalField} of which being initialized.
+!     \end{description}
+!
+!EOPI
+
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_LocalFieldInit
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalFieldValidate"
+!BOPI
+! !IROUTINE:  ESMF_LocalFieldValidate - Check validity of a LocalField
+
+! !INTERFACE:
+    subroutine ESMF_LocalFieldValidate(s,rc)
+!
+! !ARGUMENTS:
+       type(ESMF_LocalField), intent(inout) :: s
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt LocalField} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_LocalField} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt localfield}
+!           is valid.
+!     \end{description}
+!
+!EOPI
+     ESMF_INIT_CHECK_SHALLOW(ESMF_LocalFieldGetInit,ESMF_LocalFieldInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_LocalFieldValidate
+
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldTypeGetInit"
+!BOPI
+! !IROUTINE:  ESMF_FieldTypeGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_FieldTypeGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_FieldType), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_FieldTypeGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt fieldtype}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_FieldType} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_FieldTypeGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_FieldTypeGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_FieldTypeGetInit
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldTypeInit"
+!BOPI
+! !IROUTINE:  ESMF_FieldTypeInit - Initialize FieldType
+
+! !INTERFACE:
+    subroutine ESMF_FieldTypeInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_FieldType) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt fieldtype}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_FieldType} of which being initialized.
+!     \end{description}
+!
+!EOPI
+
+        s%fieldstatus   = ESMF_STATUS_UNINIT
+        s%gridstatus    = ESMF_STATUS_UNINIT
+        s%datastatus    = ESMF_STATUS_UNINIT
+        s%datamapstatus = ESMF_STATUS_UNINIT
+        ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_FieldTypeInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldTypeValidate"
+!BOPI
+! !IROUTINE:  ESMF_FieldTypeValidate - Check validity of a FieldType
+
+! !INTERFACE:
+    subroutine ESMF_FieldTypeValidate(s,rc)
+!
+! !ARGUMENTS:
+       type(ESMF_FieldType), intent(inout) :: s
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt FieldType} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_FieldType} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt localfield}
+!           is valid.
+!     \end{description}
+!
+!EOPI
+
+     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldTypeGetInit,ESMF_FieldTypeInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_FieldTypeValidate
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetInit"
+!BOPI
+! !IROUTINE:  ESMF_FieldGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_FieldGetInit(d)
+!
+! !ARGUMENTS:
+       type(ESMF_Field), intent(inout), optional :: d
+       ESMF_INIT_TYPE :: ESMF_FieldGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the Deep class {\tt field}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_Field} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(d)) then
+         ESMF_FieldGetInit = ESMF_INIT_GET(d)
+       else
+         ESMF_FieldGetInit = ESMF_INIT_CREATED
+       endif
+
+    end function ESMF_FieldGetInit
+
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateNoDataPtr"
 
@@ -393,7 +632,7 @@
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth    
-      type(ESMF_FieldDataMap), intent(in), optional :: datamap    
+      type(ESMF_FieldDataMap), intent(inout), optional :: datamap    
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
       integer, intent(out), optional :: rc               
@@ -445,6 +684,10 @@
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      if (present(datamap))   &
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
+
       allocate(ftype, stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
                                        ESMF_CONTEXT, rc)) return
@@ -459,6 +702,8 @@
 
       ! Set return values.
       ESMF_FieldCreateNoDataPtr%ftypep => ftype
+
+      ESMF_INIT_SET_CREATED(ESMF_FieldCreateNoDataPtr)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoDataPtr
@@ -483,7 +728,7 @@
       type(ESMF_Grid) :: grid                 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      type(ESMF_FieldDataMap), intent(in), optional :: datamap              
+      type(ESMF_FieldDataMap), intent(inout), optional :: datamap              
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
       integer, intent(out), optional :: rc               
@@ -531,6 +776,10 @@
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      if (present(datamap)) &
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
+
       allocate(ftype, stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
                                        ESMF_CONTEXT, rc)) return
@@ -545,6 +794,8 @@
 
       ! Set return values.
       ESMF_FieldCreateNoArray%ftypep => ftype
+
+      ESMF_INIT_SET_CREATED(ESMF_FieldCreateNoArray)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoArray
@@ -610,6 +861,8 @@
 
       ! Set return values.
       ESMF_FieldCreateNoGridArray%ftypep => ftype
+
+      ESMF_INIT_SET_CREATED(ESMF_FieldCreateNoGridArray)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoGridArray
@@ -667,7 +920,8 @@
          if (ESMF_LogMsgFoundAllocError(status, "Deallocating Field", &
                                        ESMF_CONTEXT, rc)) return
       endif 
-           
+      ESMF_INIT_SET_DELETED(field)
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldDestroy
@@ -685,7 +939,7 @@
                                rank, lbounds, ubounds, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field    
+      type(ESMF_Field), intent(inout) :: field    
       type(ESMF_Grid), intent(out), optional :: grid     
       type(ESMF_InternArray), intent(out), optional :: array     
       type(ESMF_FieldDataMap), intent(out), optional :: datamap     
@@ -747,6 +1001,9 @@
 
         ! assume failure
         if (present(rc)) rc = ESMF_FAILURE
+
+        ! check variables
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
         ! Validate object first
         call ESMF_FieldValidate(field, rc=status)
@@ -910,7 +1167,7 @@
 
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field
+      type(ESMF_Field), intent(inout) :: field
       type(ESMF_LocalArray), intent(out) :: array
       integer, intent(out), optional :: rc
 
@@ -939,6 +1196,9 @@
 
       ! Initialize return code
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       ! Validate first
       call ESMF_FieldValidate(field, rc=status)
@@ -971,7 +1231,7 @@
 
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field      
+      type(ESMF_Field), intent(inout) :: field      
       type(ESMF_InternArray), intent(out) :: array
       integer, intent(out), optional :: rc           
 
@@ -999,6 +1259,9 @@
 
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       !cheung turn off for now
       !! Validate first
@@ -1032,7 +1295,7 @@
 !     subroutine ESMF_FieldGetAttribute(field, name, <value argument>, rc)
 !
 ! !ARGUMENTS:
-!     type(ESMF_Field), intent(in) :: field  
+!     type(ESMF_Field), intent(inout) :: field  
 !     character (len = *), intent(in) :: name
 !     <value argument>, see below for supported values
 !     integer, intent(out), optional :: rc   
@@ -1081,7 +1344,7 @@
       subroutine ESMF_FieldGetInt4Attr(field, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I4), intent(out) :: value
       integer, intent(out), optional :: rc   
@@ -1109,6 +1372,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
                                     ESMF_DATA_INTEGER, ESMF_I4, 1, &
                                     value, status)
@@ -1132,7 +1398,7 @@
       subroutine ESMF_FieldGetInt4ListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
@@ -1166,6 +1432,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -1196,7 +1465,7 @@
       subroutine ESMF_FieldGetInt8Attr(field, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I8), intent(out) :: value
       integer, intent(out), optional :: rc   
@@ -1222,6 +1491,12 @@
 
       integer :: status                           ! Error status
 
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
                                     ESMF_DATA_INTEGER, ESMF_I8, 1, &
                                     value, status)
@@ -1245,7 +1520,7 @@
       subroutine ESMF_FieldGetInt8ListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
@@ -1275,6 +1550,12 @@
 
       integer :: status                           ! Error status
       integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -1306,7 +1587,7 @@
       subroutine ESMF_FieldGetReal4Attr(field, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R4), intent(out) :: value
       integer, intent(out), optional :: rc   
@@ -1332,6 +1613,12 @@
 
       integer :: status                           ! Error status
 
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
                                     ESMF_DATA_REAL, ESMF_R4, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1354,7 +1641,7 @@
       subroutine ESMF_FieldGetReal4ListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
@@ -1384,6 +1671,12 @@
 
       integer :: status                           ! Error status
       integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -1415,7 +1708,7 @@
       subroutine ESMF_FieldGetReal8Attr(field, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R8), intent(out) :: value
       integer, intent(out), optional :: rc   
@@ -1441,6 +1734,12 @@
 
       integer :: status                           ! Error status
 
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
                                     ESMF_DATA_REAL, ESMF_R8, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1463,7 +1762,7 @@
       subroutine ESMF_FieldGetReal8ListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
@@ -1493,6 +1792,12 @@
 
       integer :: status                           ! Error status
       integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -1524,7 +1829,7 @@
       subroutine ESMF_FieldGetLogicalAttr(field, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       type(ESMF_Logical), intent(out) :: value
       integer, intent(out), optional :: rc   
@@ -1550,6 +1855,12 @@
 
       integer :: status                           ! Error status
 
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
                                     ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
                                     value, status)
@@ -1573,7 +1884,7 @@
       subroutine ESMF_FieldGetLogicalListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       type(ESMF_Logical), dimension(:), intent(out) :: valueList
@@ -1603,6 +1914,12 @@
 
       integer :: status                           ! Error status
       integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -1634,7 +1951,7 @@
       subroutine ESMF_FieldGetCharAttr(field, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       character (len = *), intent(out) :: value
       integer, intent(out), optional :: rc   
@@ -1660,6 +1977,12 @@
 
       integer :: status                           ! Error status
 
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       call c_ESMC_AttributeGetChar(field%ftypep%base, name, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1681,7 +2004,7 @@
       subroutine ESMF_FieldGetAttributeCount(field, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       integer, intent(out) :: count   
       integer, intent(out), optional :: rc   
 
@@ -1705,6 +2028,12 @@
 
       integer :: status                           ! Error status
 
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       call c_ESMC_AttributeGetCount(field%ftypep%base, count, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1727,7 +2056,7 @@
                                              datakind, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character(len=*), intent(in) :: name
       type(ESMF_DataType), intent(out), optional :: datatype
       type(ESMF_DataKind), intent(out), optional :: datakind
@@ -1770,6 +2099,12 @@
       type(ESMF_DataKind) :: localDk
       integer :: localCount
 
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       call c_ESMC_AttributeGetAttrInfoName(field%ftypep%base, name, &
                                            localDt, localDk, localCount, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1797,7 +2132,7 @@
                                             datatype, datakind, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out), optional :: name
       type(ESMF_DataType), intent(out), optional :: datatype
@@ -1845,6 +2180,12 @@
       type(ESMF_DataKind) :: localDk
       integer :: localCount
 
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       call c_ESMC_AttributeGetAttrInfoNum(field%ftypep%base, attributeIndex, &
                                          localName, localDt, localDk, &
                                          localCount, status)
@@ -1873,7 +2214,7 @@
         size, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field      
+      type(ESMF_Field), intent(inout) :: field      
       integer, intent(out), optional :: ndim            
       integer, intent(out), optional :: ncell            
       integer, intent(out), optional :: nvertex           
@@ -1903,6 +2244,11 @@
 !
 !EOPI
 
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
 !
 ! TODO: code goes here.  This marked BOPI because it isn't implemented yet,
@@ -1925,7 +2271,7 @@
         size, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field   
+      type(ESMF_Field), intent(inout) :: field   
       integer, intent(out), optional :: ndim            
       integer, intent(out), optional :: ncell            
       integer, intent(out), optional :: nvertex           
@@ -1954,6 +2300,11 @@
 !
 !EOPI
 
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
 !
 ! TODO: code goes here
@@ -1972,7 +2323,7 @@
         indexorder, datatype, interleave, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field            
+      type(ESMF_Field), intent(inout) :: field            
       integer, intent(out), optional :: size(:)        
       integer, dimension(ESMF_MAXDIM), intent(out) :: indexorder 
       type(ESMF_DataType), intent(out) :: datatype
@@ -2002,6 +2353,11 @@
 !EOPI
 
 
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 !
 ! TODO: code goes here.  BOPI because not implemented yet.
 !
@@ -2019,7 +2375,7 @@
         indexorder, datatype, interleave, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field            
+      type(ESMF_Field), intent(inout) :: field            
       integer, intent(out), optional :: size(:)        
       integer, dimension(ESMF_MAXDIM), intent(out) :: indexorder 
       type(ESMF_DataType), intent(out) :: datatype
@@ -2050,6 +2406,11 @@
 !EOPI
 
 
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 !
 ! TODO: code goes here
 !
@@ -2067,7 +2428,7 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field 
+      type(ESMF_Field), intent(inout) :: field 
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
@@ -2092,6 +2453,9 @@
 
 
         if (present(rc)) rc = ESMF_FAILURE
+
+        ! check variables
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
         !nsc call ESMF_LogWrite("Field Print:", ESMF_LOG_INFO)
         write(*,*) "Field Print:"
@@ -2309,6 +2673,9 @@
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       ! validate before using
       call ESMF_FieldValidate(field, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -2379,6 +2746,9 @@
 
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       ! validate before using
       call ESMF_FieldValidate(field, rc=status)
@@ -2496,6 +2866,12 @@
 
       integer :: status                           ! Error status
 
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_INTEGER, ESMF_I4, 1, &
                                     value, status)
@@ -2519,7 +2895,7 @@
       subroutine ESMF_FieldSetInt4ListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
@@ -2551,6 +2927,12 @@
 
       integer :: status                           ! Error status
       integer :: limit
+
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -2609,6 +2991,12 @@
 
       integer :: status                           ! Error status
 
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_INTEGER, ESMF_I8, 1, &
                                     value, status)
@@ -2632,7 +3020,7 @@
       subroutine ESMF_FieldSetInt8ListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
@@ -2665,6 +3053,12 @@
       integer :: status                           ! Error status
       integer :: limit
 
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -2695,7 +3089,7 @@
       subroutine ESMF_FieldSetReal4Attr(field, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R4), intent(in) :: value
       integer, intent(out), optional :: rc   
@@ -2722,6 +3116,12 @@
 
       integer :: status                           ! Error status
 
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_REAL, ESMF_R4, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -2744,7 +3144,7 @@
       subroutine ESMF_FieldSetReal4ListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
@@ -2777,6 +3177,12 @@
       integer :: status                           ! Error status
       integer :: limit
 
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -2807,7 +3213,7 @@
       subroutine ESMF_FieldSetReal8Attr(field, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R8), intent(in) :: value
       integer, intent(out), optional :: rc   
@@ -2834,6 +3240,12 @@
 
       integer :: status                           ! Error status
 
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_REAL, ESMF_R8, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -2856,7 +3268,7 @@
       subroutine ESMF_FieldSetReal8ListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
@@ -2889,6 +3301,12 @@
       integer :: status                           ! Error status
       integer :: limit
 
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -2919,7 +3337,7 @@
       subroutine ESMF_FieldSetLogicalAttr(field, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       type(ESMF_Logical), intent(in) :: value
       integer, intent(out), optional :: rc   
@@ -2946,6 +3364,12 @@
 
       integer :: status                           ! Error status
 
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
                                     value, status)
@@ -2969,7 +3393,7 @@
       subroutine ESMF_FieldSetLogicalListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       type(ESMF_Logical), dimension(:), intent(in) :: valueList
@@ -3002,6 +3426,12 @@
       integer :: status                           ! Error status
       integer :: limit
 
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -3032,7 +3462,7 @@
       subroutine ESMF_FieldSetCharAttr(field, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       character (len = *), intent(in) :: value
       integer, intent(out), optional :: rc   
@@ -3058,6 +3488,12 @@
 !EOPI
 
       integer :: status                           ! Error status
+
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       call c_ESMC_AttributeSetChar(field%ftypep%base, name, value, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -3106,6 +3542,9 @@
 
         ! assume failure
         if (present(rc)) rc = ESMF_FAILURE
+
+        ! check variables
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
         ! Validate first
         call ESMF_FieldValidate(field, rc=localrc)
@@ -3157,7 +3596,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field
-      type(ESMF_FieldDataMap), intent(in) :: datamap
+      type(ESMF_FieldDataMap), intent(inout) :: datamap
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3182,6 +3621,11 @@
 
         ! assume failure
         if (present(rc)) rc = ESMF_FAILURE
+
+        ! check variables
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,  &
+                                ESMF_FieldDataMapInit,datamap)
 
         ! Validate first
         call ESMF_FieldValidate(field, rc=status)
@@ -3256,6 +3700,12 @@
 !
 !EOPI
 
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
 !       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
 !
@@ -3316,6 +3766,9 @@
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       if (.not.associated(field%ftypep)) then 
          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -3482,7 +3935,7 @@
       subroutine ESMF_FieldWrite(field, iospec, timestamp, rc)
 !
 ! !ARGUMENTS:
-        type(ESMF_Field), intent(in) :: field
+        type(ESMF_Field), intent(inout) :: field
         type(ESMF_IOSpec), intent(in), optional :: iospec
         type(ESMF_Time), intent(in), optional :: timestamp 
         integer, intent(out), optional :: rc               ! return code
@@ -3534,6 +3987,9 @@
 
         ! Initialize return code
         if (present(rc)) rc = ESMF_FAILURE      
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
            
         ! Get filename out of IOSpec, if specified.  Otherwise use the
         ! name of the Field.
@@ -3629,7 +4085,7 @@
                                  iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field 
+      type(ESMF_Field), intent(inout) :: field 
 !     type(ESMF_Subset), intent(in), optional :: subset
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc  
@@ -3673,6 +4129,9 @@
 
         ! Initialize return code
         if (present(rc)) rc = ESMF_FAILURE      
+
+        ! check variables
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
            
         ! Get filename out of IOSpec, if specified.  Otherwise use the
         ! name of the Field.
@@ -3738,7 +4197,7 @@
       subroutine ESMF_FieldWriteRestart(field, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field 
+      type(ESMF_Field), intent(inout) :: field 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc 
 !
@@ -3761,6 +4220,11 @@
 !
 !EOPI
 
+        ! Initialize return code
+        if (present(rc)) rc = ESMF_FAILURE
+
+        ! check variables
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
 !       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
 !
@@ -3795,7 +4259,7 @@
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
-      type(ESMF_FieldDataMap), intent(in), optional :: datamap           
+      type(ESMF_FieldDataMap), intent(inout), optional :: datamap           
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -3856,6 +4320,10 @@
       ! Initialize return code   
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      if (present(datamap))  &
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
 
       ! make sure hwidth has a value here.
       if (present(haloWidth)) then
@@ -3978,7 +4446,7 @@
       type(ESMF_InternArray), intent(in) :: array     
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      type(ESMF_FieldDataMap), intent(in), optional :: datamap           
+      type(ESMF_FieldDataMap), intent(inout), optional :: datamap           
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -4023,6 +4491,10 @@
 
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      if (present(datamap))  &
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
 
       ! this validates the grid already, no need to validate it first.
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
@@ -4080,7 +4552,7 @@
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth 
-      type(ESMF_FieldDataMap), intent(in), optional :: datamap 
+      type(ESMF_FieldDataMap), intent(inout), optional :: datamap 
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -4127,7 +4599,11 @@
 
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
- 
+
+      ! check variables
+      if (present(datamap))  &
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
+
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -4201,7 +4677,7 @@
       type(ESMF_Grid), intent(in) :: grid                 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      type(ESMF_FieldDataMap), intent(in), optional :: datamap              
+      type(ESMF_FieldDataMap), intent(inout), optional :: datamap              
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
       integer, intent(out), optional :: rc               
@@ -4243,6 +4719,10 @@
 
       ! Initialize return code
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      if (present(datamap))  &
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
 
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, status)
@@ -4423,7 +4903,7 @@
                                         sendDomainList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: srcField 
+      type(ESMF_Field), intent(inout) :: srcField 
       type(ESMF_Field), intent(in) :: dstField
       type(ESMF_DomainList), intent(inout) :: recvDomainlist
       type(ESMF_DomainList), intent(inout) :: sendDomainlist
@@ -4463,6 +4943,10 @@
 
       ! Initialize return code
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,dstField,rc)
 
       ! TODO: replace this with a better way to get the current VM
       call ESMF_GridGet(srcField%ftypep%grid, delayout=gridDELayout, rc=status)
@@ -4531,7 +5015,7 @@
       subroutine ESMF_FieldSerialize(field, buffer, length, offset, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field 
+      type(ESMF_Field), intent(inout) :: field 
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
@@ -4565,6 +5049,12 @@
 
       integer :: localrc                     ! Error status
       type(ESMF_FieldType), pointer :: fp    ! field type
+
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       ! shortcut to internals
       fp => field%ftypep

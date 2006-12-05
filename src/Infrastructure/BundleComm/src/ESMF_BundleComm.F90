@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.59 2006/11/16 05:20:56 cdeluca Exp $
+! $Id: ESMF_BundleComm.F90,v 1.60 2006/12/05 23:06:54 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.59 2006/11/16 05:20:56 cdeluca Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.60 2006/12/05 23:06:54 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -231,6 +231,9 @@
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       btypep => bundle%btypep
 
       ! Call Array method to perform actual work
@@ -312,6 +315,9 @@
       ! Initialize return code   
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       btypep => bundle%btypep
 
@@ -402,6 +408,9 @@
       ! Initialize return code   
       status = ESMF_FAILURE
       if(present(rc)) rc = ESMF_FAILURE
+
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
@@ -603,6 +612,9 @@
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -741,6 +753,10 @@
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,dstBundle,rc)
+
       stypep = srcBundle%btypep
       dtypep = dstBundle%btypep
       routehandle = ESMF_RouteHandleCreate(status)
@@ -854,6 +870,10 @@
       ! Initialize return code   
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,dstBundle,rc)
 
       stypep = srcBundle%btypep
       dtypep = dstBundle%btypep
@@ -1084,6 +1104,10 @@
       ! Initialize return code   
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,dstBundle,rc)
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(srcBundle, rc=status)
@@ -1317,6 +1341,10 @@
       localrc = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,dstBundle,rc)
+
       stypep = srcBundle%btypep
       dtypep = dstBundle%btypep
       routehandle = ESMF_RouteHandleCreate(localrc)
@@ -1437,6 +1465,10 @@
       ! Initialize return code   
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,dstBundle,rc)
 
       ! Does validate of both bundles and checks for consistent types.
       condition = ESMF_BundleCommPrepCheck(srcBundle, dstBundle, rc=status)
@@ -1696,6 +1728,10 @@
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,dstBundle,rc)
+
       ! Does validate of both bundles and checks for consistent types.
       condition = ESMF_BundleCommPrepCheck(srcBundle, dstBundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1840,6 +1876,9 @@
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       btypep = bundle%btypep
 
       ! Query the datamap and set info for grid so it knows how to
@@ -1945,6 +1984,10 @@
       ESMF_BundleCommPrepCheck = ESMF_BUNDLECOMM_NOMATCH
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,dstBundle,rc)
 
       ! Validate bundles before going further
       call ESMF_BundleValidate(srcBundle, rc=status)

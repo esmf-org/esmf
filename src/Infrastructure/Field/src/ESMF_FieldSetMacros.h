@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.10 2006/11/16 05:20:59 cdeluca Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.11 2006/12/05 23:05:35 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -115,6 +115,9 @@
           rcpresent = .TRUE. @\
           rc = ESMF_FAILURE @\
         endif @\
+ @\
+        ! check variables @\
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
  @\
         ! Test to see if pointer already associated, and fail if not so. @\
         if (.not.associated(dataPointer)) then @\

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.8 2006/11/16 05:20:59 cdeluca Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.9 2006/12/05 23:05:35 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -101,6 +101,9 @@
           rcpresent = .TRUE. @\
           rc = ESMF_FAILURE @\
         endif @\
+ @\
+        ! check variables @\
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
  @\
         ! Test to see if pointer already associated, and fail if so. @\
         ! TODO: check this - this test seems to always be true, even if @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.16 2006/11/16 05:20:59 cdeluca Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.17 2006/12/05 23:05:35 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.16 2006/11/16 05:20:59 cdeluca Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.17 2006/12/05 23:05:35 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -203,6 +203,8 @@ InterfaceMacro(FieldCreateEPtr)
    
       ! Set return values.
       ESMF_FieldCreateNew%ftypep => ftype
+
+      ESMF_INIT_SET_CREATED(ESMF_FieldCreateNew)
       if(rcpresent) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNew
@@ -305,6 +307,7 @@ InterfaceMacro(FieldCreateEPtr)
 
       ! Set return values.
       ESMF_FieldCreateFromArray%ftypep => ftype
+      ESMF_INIT_SET_CREATED(ESMF_FieldCreateFromArray)
       if(rcpresent) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateFromArray
@@ -394,6 +397,7 @@ InterfaceMacro(FieldCreateEPtr)
 
       ! Set return values.
       ESMF_FieldCreateRemap%ftypep => ftype
+      ESMF_INIT_SET_CREATED(ESMF_FieldCreateRemap)
       if(rcpresent) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateRemap

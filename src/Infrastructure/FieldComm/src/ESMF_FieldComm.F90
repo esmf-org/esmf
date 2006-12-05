@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.85 2006/11/16 05:21:00 cdeluca Exp $
+! $Id: ESMF_FieldComm.F90,v 1.86 2006/12/05 23:07:22 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.85 2006/11/16 05:21:00 cdeluca Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.86 2006/12/05 23:07:22 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -195,7 +195,7 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field                 
+      type(ESMF_Field), intent(inout) :: field                 
       type(ESMF_InternArray), intent(out) :: array
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
@@ -246,6 +246,9 @@
         rc = ESMF_FAILURE
       endif     
 
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       ftypep => field%ftypep
 
       ! Call Array method to perform actual work
@@ -274,7 +277,7 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field                 
+      type(ESMF_Field), intent(inout) :: field                 
       integer, intent(in) :: dstPET
       type(ESMF_InternArray), intent(out) :: array
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
@@ -341,6 +344,9 @@
         rc = ESMF_FAILURE
       endif     
  
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       ftypep => field%ftypep
 
       call ESMF_IArrayGather(ftypep%localfield%localdata, &
@@ -436,6 +442,9 @@
         rcpresent = .TRUE. 
         rc = ESMF_FAILURE
       endif     
+
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       ! Initialize other variables
       ftypep => field%ftypep
@@ -583,6 +592,9 @@
         rc = ESMF_FAILURE
       endif     
 
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       ! Sanity checks for good field, and that it has an associated grid
       ! and data before going down to the next level.
       if (.not.associated(field%ftypep)) then
@@ -675,6 +687,9 @@
         rc = ESMF_FAILURE
       endif     
 
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       ! Initialize other variables
       ftypep => field%ftypep
 
@@ -748,7 +763,7 @@
                                   blockingflag, commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: srcField
+      type(ESMF_Field), intent(inout) :: srcField
       type(ESMF_Field), intent(inout) :: dstField
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
@@ -815,6 +830,10 @@
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,dstField,rc)
+
       ! Initialize other variables
       dstFtypep => dstField%ftypep
       srcFtypep => srcField%ftypep
@@ -860,7 +879,7 @@
                                   blockingflag, commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: srcField
+      type(ESMF_Field), intent(inout) :: srcField
       type(ESMF_Field), intent(inout) :: dstField
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
@@ -922,6 +941,10 @@
    
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,dstField,rc)
 
       ! Initialize other variables
       dstFtypep => dstField%ftypep
@@ -1002,8 +1025,8 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: srcField
-      type(ESMF_Field), intent(in) :: dstField
+      type(ESMF_Field), intent(inout) :: srcField
+      type(ESMF_Field), intent(inout) :: dstField
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteHandle), intent(out) :: routehandle
       type(ESMF_RouteOptions), intent(in), optional :: routeOptions
@@ -1054,6 +1077,10 @@
       ! Initialize return code   
       localrc = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,dstField,rc)
 
       ! Validate the fields before proceeding.
       call ESMF_FieldValidate(srcField, rc=localrc)
@@ -1121,7 +1148,7 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: srcField
+      type(ESMF_Field), intent(inout) :: srcField
       integer, dimension(:), intent(in) :: decompIds
       type(ESMF_Field), intent(out) :: dstField
       type(ESMF_VM), intent(in) :: parentVM
@@ -1179,6 +1206,10 @@
         rc = ESMF_FAILURE
       endif     
 
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,dstField,rc)
+
       ! Sanity checks for good source field, and that it has an associated grid
       ! and data before going down to the next level.
       if (.not.associated(srcField%ftypep)) then
@@ -1231,7 +1262,7 @@
       subroutine ESMF_FieldRedistValidate(srcField, dstField, routehandle, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: srcField
+      type(ESMF_Field), intent(inout) :: srcField
       type(ESMF_Field), intent(inout) :: dstField
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       integer, intent(out), optional :: rc               
@@ -1272,6 +1303,10 @@
    
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,dstField,rc)
 
       ! Initialize other variables
       dstFtypep => dstField%ftypep
@@ -1422,7 +1457,7 @@
                                   commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: srcField                 
+      type(ESMF_Field), intent(inout) :: srcField                 
       type(ESMF_Field), intent(inout) :: dstField                 
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RegridMethod), intent(in) :: regridmethod
@@ -1499,6 +1534,10 @@
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,dstField,rc)
+
       routehandle = ESMF_RouteHandleCreate(localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1542,7 +1581,7 @@
                                   commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: srcField                 
+      type(ESMF_Field), intent(inout) :: srcField                 
       type(ESMF_Field), intent(inout) :: dstField                 
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_Mask), intent(in), optional :: srcMask                 
@@ -1614,6 +1653,10 @@
    
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,dstField,rc)
 
       ! if the routehandle has not been precomputed, do so now
       ! first check if the RouteHandle is valid (constructed)
@@ -1759,7 +1802,7 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: srcField                 
+      type(ESMF_Field), intent(inout) :: srcField                 
       type(ESMF_Field), intent(inout) :: dstField                 
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteHandle), intent(inout) :: routehandle
@@ -1821,6 +1864,10 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,dstField,rc)
+
       ! Make sure the fields and vm are all valid before going any further.
       call ESMF_FieldValidate(srcField, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1877,7 +1924,7 @@
                                           srcMask, dstMask, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: srcField                 
+      type(ESMF_Field), intent(inout) :: srcField                 
       type(ESMF_Field), intent(inout) :: dstField                 
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_Mask), intent(in), optional :: srcMask                 
@@ -1930,6 +1977,10 @@
    
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,dstField,rc)
 
       ! if the routehandle has not been precomputed, do so now
       ! first check if the RouteHandle is valid (constructed)
@@ -2091,6 +2142,9 @@
         rc = ESMF_FAILURE
       endif     
 
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       ftypep => field%ftypep
 
       ! Query the datamap and set info for grid so it knows how to
@@ -2219,6 +2273,9 @@
         rcpresent = .TRUE. 
         rc = ESMF_FAILURE
       endif     
+
+      ! check variable
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       ! Get the Layout from the Field's Grid
       ftypep => field%ftypep

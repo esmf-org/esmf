@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.85 2006/11/16 05:20:56 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.86 2006/12/05 23:02:24 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -50,6 +50,7 @@
       use ESMF_FieldDataMapMod
       use ESMF_FieldMod
       use ESMF_BundleDataMapMod
+      use ESMF_InitMacrosMod
       implicit none
 !
 ! !PRIVATE TYPES:
@@ -81,6 +82,7 @@
          integer :: bfa_start
          integer :: bfa_end
          integer :: bfa_strides
+         ESMF_INIT_DECLARE
       end type
 
 
@@ -98,6 +100,7 @@
           integer :: field_order                      ! index of this field
           type(ESMF_FieldDataMap) :: field_dm         ! copy of this field's dm
           type(ESMF_BundleFieldAccess) :: field_bfa   ! access info if packed
+          ESMF_INIT_DECLARE
         end type
 
 !------------------------------------------------------------------------------
@@ -115,6 +118,7 @@
         integer :: nonindexcounts(ESMF_MAXDIM) 
         type(ESMF_Relloc) :: datahorzrelloc, datavertrelloc
         integer :: haloWidth
+        ESMF_INIT_DECLARE
       end type
 
 
@@ -128,6 +132,7 @@
         type(ESMF_Status) :: gridstatus
         type(ESMF_Status) :: arraystatus
         integer :: accesscount
+        ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -165,6 +170,7 @@
         logical :: hasPattern                    ! first data field sets this
         !type(ESMF_BundleCongruentData) :: pattern ! what they must match
         integer :: field_count      
+        ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -181,6 +187,7 @@
 #else
         type (ESMF_BundleType), pointer :: btypep 
 #endif
+      ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -196,6 +203,26 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
+       public ESMF_BundleFieldAccessValidate   ! For Standardized Initialization
+       ! ESMF_BundleFieldAccess(Init) and (GetInit) are privite
+
+       public ESMF_BundleFieldInterleaveInit     ! For Standardized Initialization
+       public ESMF_BundleFieldInterleaveValidate ! For Standardized Initialization
+       public ESMF_BundleFieldInterleaveGetInit  ! For Standardized Initialization
+
+       public ESMF_BundleCongruentDataValidate  ! For Standardized Initialization
+       ! ESMF_BundleCongruentData(Init) and (GetInit) are privite
+
+       public ESMF_LocalBundleInit     ! For Standardized Initialization
+       public ESMF_LocalBundleValidate ! For Standardized Initialization
+       public ESMF_LocalBundleGetInit  ! For Standardized Initialization
+
+       public ESMF_BundleTypeInit      ! For Standardized Initialization
+       public ESMF_BundleTypeValidate  ! For Standardized Initialization
+       public ESMF_BundleTypeGetInit   ! For Standardized Initialization
+
+       public ESMF_BundleGetInit       ! For Standardized Initialization
+
        public ESMF_BundleCreate       ! Create a new Bundle
        public ESMF_BundleDestroy      ! Destroy a Bundle
 
@@ -419,6 +446,186 @@ end interface
 
       contains
 
+!------------------------------------------------------------------------------
+! function get Shallow class initialization
+    function ESMF_BundleFieldAccessGetInit(s)
+       type(ESMF_BundleFieldAccess), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_BundleFieldAccessGetInit
+
+       ESMF_BundleFieldAccessGetInit=ESMF_INIT_GET(s)
+
+    end function ESMF_BundleFieldAccessGetInit
+
+!------------------------------------------------------------------------------
+! subroutine for Shallow class initialization
+    subroutine ESMF_BundleFieldAccessInit(s)
+       type(ESMF_BundleFieldAccess) :: s
+
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_BundleFieldAccessInit
+
+!------------------------------------------------------------------------------
+! subroutine for Shallow class initialization Validation
+    subroutine ESMF_BundleFieldAccessValidate(s,rc)
+       type(ESMF_BundleFieldAccess), intent(inout) :: s
+       integer, intent(out), optional :: rc
+
+     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleFieldAccessGetInit,  &
+                             ESMF_BundleFieldAccessInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_BundleFieldAccessValidate
+
+!------------------------------------------------------------------------------
+! function get Shallow class initialization
+    function ESMF_BundleFieldInterleaveGetInit(s)
+       type(ESMF_BundleFieldInterleave), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_BundleFieldInterleaveGetInit
+
+       ESMF_BundleFieldInterleaveGetInit=ESMF_INIT_GET(s)
+
+    end function ESMF_BundleFieldInterleaveGetInit
+
+!------------------------------------------------------------------------------
+! subroutine for Shallow class initialization
+    subroutine ESMF_BundleFieldInterleaveInit(s)
+       type(ESMF_BundleFieldInterleave) :: s
+
+        ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_BundleFieldInterleaveInit
+
+!------------------------------------------------------------------------------
+! subroutine for Shallow class initialization Validation
+    subroutine ESMF_BundleFieldInterleaveValidate(s,rc)
+       type(ESMF_BundleFieldInterleave), intent(inout) :: s
+       integer, intent(out), optional :: rc
+
+     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleFieldInterleaveGetInit,  &
+                             ESMF_BundleFieldInterleaveInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_BundleFieldInterleaveValidate
+
+
+!------------------------------------------------------------------------------
+! function get Shallow class initialization
+    function ESMF_BundleCongruentDataGetInit(s)
+       type(ESMF_BundleCongruentData), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_BundleCongruentDataGetInit
+
+       ESMF_BundleCongruentDataGetInit=ESMF_INIT_GET(s)
+
+    end function ESMF_BundleCongruentDataGetInit
+
+!------------------------------------------------------------------------------
+! subroutine for Shallow class initialization
+    subroutine ESMF_BundleCongruentDataInit(s)
+       type(ESMF_BundleCongruentData) :: s
+
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_BundleCongruentDataInit
+
+!------------------------------------------------------------------------------
+! subroutine for Shallow class initialization Validation
+    subroutine ESMF_BundleCongruentDataValidate(s,rc)
+       type(ESMF_BundleCongruentData), intent(inout) :: s
+       integer, intent(out), optional :: rc
+
+     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleCongruentDataGetInit,  &
+                             ESMF_BundleCongruentDataInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_BundleCongruentDataValidate
+
+
+!------------------------------------------------------------------------------
+! function get Shallow class initialization
+    function ESMF_LocalBundleGetInit(s)
+       type(ESMF_LocalBundle), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_LocalBundleGetInit
+
+       ESMF_LocalBundleGetInit=ESMF_INIT_GET(s)
+
+    end function ESMF_LocalBundleGetInit
+
+!------------------------------------------------------------------------------
+! subroutine for Shallow class initialization
+    subroutine ESMF_LocalBundleInit(s)
+       type(ESMF_LocalBundle) :: s
+
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_LocalBundleInit
+
+!------------------------------------------------------------------------------
+! subroutine for Shallow class initialization Validation
+    subroutine ESMF_LocalBundleValidate(s,rc)
+       type(ESMF_LocalBundle), intent(inout) :: s
+       integer, intent(out), optional :: rc
+
+     ESMF_INIT_CHECK_SHALLOW(ESMF_LocalBundleGetInit,ESMF_LocalBundleInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_LocalBundleValidate
+
+
+!------------------------------------------------------------------------------
+! function get Shallow class initialization
+    function ESMF_BundleTypeGetInit(s)
+       type(ESMF_BundleType), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_BundleTypeGetInit
+
+       ESMF_BundleTypeGetInit=ESMF_INIT_GET(s)
+
+    end function ESMF_BundleTypeGetInit
+
+!------------------------------------------------------------------------------
+! subroutine for Shallow class initialization
+    subroutine ESMF_BundleTypeInit(s)
+       type(ESMF_BundleType) :: s
+        s%flist => NULL()
+        ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_BundleTypeInit
+
+!------------------------------------------------------------------------------
+! subroutine for Shallow class initialization Validation
+    subroutine ESMF_BundleTypeValidate(s,rc)
+       type(ESMF_BundleType), intent(inout) :: s
+       integer, intent(out), optional :: rc
+ 
+     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleTypeGetInit,ESMF_BundleTypeInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_BundleTypeValidate
+
+!------------------------------------------------------------------------------
+! subroutine gets Deep class initialization
+    function ESMF_BundleGetInit(d)
+       type(ESMF_Bundle), intent(inout), optional :: d
+       ESMF_INIT_TYPE :: ESMF_BundleGetInit
+
+       if (present(d)) then
+         ESMF_BundleGetInit = ESMF_INIT_GET(d)
+       else
+         ESMF_BundleGetInit = ESMF_INIT_CREATED
+       endif
+
+    end function ESMF_BundleGetInit
+
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_PackFlags to see if they're the same or not
@@ -450,7 +657,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle
-      type(ESMF_Field), intent(in) :: field
+      type(ESMF_Field), intent(inout) :: field
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -479,6 +686,10 @@ end function
       ! Initialize return code in case we return early.
       ! Otherwise, count on AddFieldList call to set rc
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       temp_list(1) = field
 
@@ -511,7 +722,7 @@ end function
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle        
       integer, intent(in) :: fieldCount
-      type(ESMF_Field), dimension(:), intent(in) :: fieldList
+      type(ESMF_Field), dimension(:), intent(inout) :: fieldList
       integer, intent(out), optional :: rc          
 !
 ! !DESCRIPTION:
@@ -545,6 +756,10 @@ end function
       ! Initialize return code in case we return early.
       ! Otherwise, count on AddFieldList call to set rc
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList,rc)
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
@@ -636,6 +851,12 @@ end function
       logical :: dummy
       integer :: status                                ! Error status
 
+      ! Initialize return code in case we return early.
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList,rc)
+
       ! Initialize pointers
       nullify(btypep)
       nullify(ESMF_BundleCreateNew%btypep)
@@ -664,6 +885,8 @@ end function
 
       ! this resets the congruent flag as a side effect
       dummy = ESMF_BundleIsCongruent(ESMF_BundleCreateNew, rc)
+
+      ESMF_INIT_SET_CREATED(ESMF_BundleCreateNew)
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
@@ -751,6 +974,8 @@ end function
 
       ! Set return values.
       ESMF_BundleCreateNoFields%btypep => btypep
+      ESMF_INIT_SET_CREATED(ESMF_BundleCreateNoFields)
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_BundleCreateNoFields
@@ -811,6 +1036,7 @@ end function
       if (ESMF_LogMsgFoundAllocError(status, "Bundle deallocate", &
                                        ESMF_CONTEXT, rc)) return
       nullify(bundle%btypep)
+      ESMF_INIT_SET_DELETED(bundle)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -828,7 +1054,7 @@ end function
       subroutine ESMF_BundleGet(bundle, grid, fieldCount, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       type(ESMF_Grid), intent(out), optional :: grid
       integer, intent(out), optional :: fieldCount
       character (len = *), intent(out), optional :: name
@@ -863,6 +1089,9 @@ end function
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
@@ -912,7 +1141,7 @@ end function
       subroutine ESMF_BundleGetAllFields(bundle, fieldList, fieldCount, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       type(ESMF_Field), dimension (:), optional :: fieldList
       integer, intent(out), optional :: fieldCount
       integer, intent(out), optional :: rc
@@ -942,6 +1171,10 @@ end function
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+      if(present(fieldList)) ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList,rc)
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
@@ -982,7 +1215,7 @@ end function
 !     subroutine ESMF_BundleGetAttribute(bundle, name, <value argument>, rc)
 !
 ! !ARGUMENTS:
-!     type(ESMF_Bundle), intent(in) :: bundle  
+!     type(ESMF_Bundle), intent(inout) :: bundle  
 !     character (len = *), intent(in) :: name
 !     <value argument>, see below for supported values
 !     integer, intent(out), optional :: rc   
@@ -1030,7 +1263,7 @@ end function
       subroutine ESMF_BundleGetInt4Attr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I4), intent(out) :: value
       integer, intent(out), optional :: rc   
@@ -1058,6 +1291,9 @@ end function
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
@@ -1087,7 +1323,7 @@ end function
       subroutine ESMF_BundleGetInt4ListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
@@ -1120,6 +1356,9 @@ end function
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -1156,7 +1395,7 @@ end function
       subroutine ESMF_BundleGetInt8Attr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I8), intent(out) :: value
       integer, intent(out), optional :: rc   
@@ -1184,6 +1423,9 @@ end function
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
@@ -1213,7 +1455,7 @@ end function
       subroutine ESMF_BundleGetInt8ListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
@@ -1246,6 +1488,9 @@ end function
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -1282,7 +1527,7 @@ end function
       subroutine ESMF_BundleGetReal4Attr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R4), intent(out) :: value
       integer, intent(out), optional :: rc   
@@ -1309,6 +1554,9 @@ end function
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
@@ -1337,7 +1585,7 @@ end function
       subroutine ESMF_BundleGetReal4ListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
@@ -1370,6 +1618,9 @@ end function
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -1406,7 +1657,7 @@ end function
       subroutine ESMF_BundleGetReal8Attr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R8), intent(out) :: value
       integer, intent(out), optional :: rc   
@@ -1433,6 +1684,9 @@ end function
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
@@ -1461,7 +1715,7 @@ end function
       subroutine ESMF_BundleGetReal8ListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
@@ -1494,6 +1748,9 @@ end function
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -1530,7 +1787,7 @@ end function
       subroutine ESMF_BundleGetLogicalAttr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       type(ESMF_Logical), intent(out) :: value
       integer, intent(out), optional :: rc   
@@ -1560,6 +1817,9 @@ end function
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1588,7 +1848,7 @@ end function
       subroutine ESMF_BundleGetLogicalListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       type(ESMF_Logical), dimension(:), intent(out) :: valueList
@@ -1622,6 +1882,9 @@ end function
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -1658,7 +1921,7 @@ end function
       subroutine ESMF_BundleGetCharAttr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       character (len = *), intent(out) :: value
       integer, intent(out), optional :: rc   
@@ -1688,6 +1951,9 @@ end function
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1714,7 +1980,7 @@ end function
       subroutine ESMF_BundleGetAttributeCount(bundle, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       integer, intent(out) :: count   
       integer, intent(out), optional :: rc   
 
@@ -1740,6 +2006,9 @@ end function
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
@@ -1768,7 +2037,7 @@ end function
                                               datakind, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character(len=*), intent(in) :: name
       type(ESMF_DataType), intent(out), optional :: datatype
       type(ESMF_DataKind), intent(out), optional :: datakind
@@ -1814,6 +2083,9 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1846,7 +2118,7 @@ end function
                                              datatype, datakind, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out), optional :: name
       type(ESMF_DataType), intent(out), optional :: datatype
@@ -1896,6 +2168,9 @@ end function
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
@@ -1969,6 +2244,10 @@ end function
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       ESMF_BundleIsCongruent = .FALSE.
       bundle%btypep%isCongruent = .FALSE.
 
@@ -2080,8 +2359,8 @@ end function
       subroutine ESMF_BundleGetDataMap(bundle, bundledatamap, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
-      type(ESMF_BundleDataMap), intent(out) :: bundledatamap
+      type(ESMF_Bundle), intent(inout) :: bundle
+      type(ESMF_BundleDataMap) :: bundledatamap
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2114,6 +2393,11 @@ end function
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
 
+    ! check variables
+    ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,  &
+                            ESMF_BundleDataMapInit,bundledatamap)
+
     ! Validate bundle before going further
     call ESMF_BundleValidate(bundle, rc=status)
     if (ESMF_LogMsgFoundError(status, &
@@ -2140,7 +2424,7 @@ end function
       subroutine ESMF_BundleGetFieldByName(bundle, name, field, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       character (len = *), intent(in) :: name
       type(ESMF_Field), intent(out) :: field
       integer, intent(out), optional :: rc
@@ -2176,6 +2460,9 @@ end function
       ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       found = .FALSE.
 
@@ -2233,7 +2520,7 @@ end function
       subroutine ESMF_BundleGetFieldByNum(bundle, fieldIndex, field, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       integer, intent(in) :: fieldIndex
       type(ESMF_Field), intent(out) :: field
       integer, intent(out), optional :: rc
@@ -2263,6 +2550,9 @@ end function
       ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       found = .FALSE.
 
@@ -2309,7 +2599,7 @@ end function
       subroutine ESMF_BundleGetFieldNames(bundle, nameList, nameCount, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle 
+      type(ESMF_Bundle), intent(inout) :: bundle 
       character (len = *), intent(out) :: nameList(:)
       integer, intent(out), optional :: nameCount     
       integer, intent(out), optional :: rc     
@@ -2369,7 +2659,7 @@ end function
       subroutine ESMF_BundleGetGridCellCount(bundle, localcount, globalcount, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       integer, intent(out), optional :: localcount(:)
       integer, intent(out), optional :: globalcount(:)
       integer, intent(out), optional :: rc
@@ -2407,7 +2697,7 @@ end function
       subroutine ESMF_BundleGetGridDimCount(bundle, dimcount, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       integer, intent(out) :: dimcount
       integer, intent(out), optional :: rc
 !
@@ -2445,7 +2735,7 @@ end function
       subroutine ESMF_BundleGetGridDimSize(bundle, locallist, globallist, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       integer, intent(out), optional :: locallist(:)
       integer, intent(out), optional :: globallist(:)
       integer, intent(out), optional :: rc
@@ -2486,7 +2776,7 @@ end function
       subroutine ESMF_BundleGetGridIndexOrder(bundle, indexorder, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       integer, dimension(:), intent(out) :: indexorder
       integer, intent(out), optional :: rc
 !
@@ -2522,7 +2812,7 @@ end function
       subroutine ESMF_BundleGetGridPointCount(bundle, localcount, globalcount, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       integer, intent(out), optional :: localcount(:)
       integer, intent(out), optional :: globalcount(:)
       integer, intent(out), optional :: rc
@@ -2562,7 +2852,7 @@ end function
       subroutine ESMF_BundlePackData(bundle, bundledatamap, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       type(ESMF_BundleDataMap), intent(in), optional :: bundledatamap 
       integer, intent(out), optional :: rc 
 !
@@ -2593,6 +2883,11 @@ end function
       ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+      if (present(bundledatamap)) &
+       ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,ESMF_BundleDataMapInit,bundledatamap)
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
@@ -2629,7 +2924,7 @@ end function
       subroutine ESMF_BundlePrint(bundle, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       character (len=*), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
@@ -2796,7 +3091,7 @@ end function
       subroutine ESMF_BundleRemoveField(bundle, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       character (len = *), intent(in) :: name
       integer, intent(out), optional :: rc
 
@@ -2839,7 +3134,7 @@ end function
       subroutine ESMF_BundleReorder(bundle, bundledatamap, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       type(ESMF_BundleDataMap), intent(in) :: bundledatamap
       integer, intent(out), optional :: rc
 
@@ -2881,7 +3176,7 @@ end function
 !     subroutine ESMF_BundleSetAttribute(bundle, name, <value argument>, rc)
 !
 ! !ARGUMENTS:
-!     type(ESMF_Bundle), intent(in) :: bundle  
+!     type(ESMF_Bundle), intent(inout) :: bundle  
 !     character (len = *), intent(in) :: name
 !     <value argument>, see below for supported values
 !     integer, intent(out), optional :: rc   
@@ -2931,7 +3226,7 @@ end function
       subroutine ESMF_BundleSetInt4Attr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I4), intent(in) :: value
       integer, intent(out), optional :: rc   
@@ -2961,6 +3256,9 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -2989,7 +3287,7 @@ end function
       subroutine ESMF_BundleSetInt4ListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
@@ -3023,6 +3321,9 @@ end function
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -3059,7 +3360,7 @@ end function
       subroutine ESMF_BundleSetInt8Attr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I8), intent(in) :: value
       integer, intent(out), optional :: rc   
@@ -3089,6 +3390,9 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -3117,7 +3421,7 @@ end function
       subroutine ESMF_BundleSetInt8ListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
@@ -3151,6 +3455,9 @@ end function
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -3187,7 +3494,7 @@ end function
       subroutine ESMF_BundleSetReal4Attr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R4), intent(in) :: value
       integer, intent(out), optional :: rc   
@@ -3217,6 +3524,9 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -3245,7 +3555,7 @@ end function
       subroutine ESMF_BundleSetReal8Attr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R8), intent(in) :: value
       integer, intent(out), optional :: rc   
@@ -3275,6 +3585,9 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -3303,7 +3616,7 @@ end function
       subroutine ESMF_BundleSetReal4ListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
@@ -3337,6 +3650,9 @@ end function
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -3373,7 +3689,7 @@ end function
       subroutine ESMF_BundleSetReal8ListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
@@ -3407,6 +3723,9 @@ end function
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -3443,7 +3762,7 @@ end function
       subroutine ESMF_BundleSetLogicalAttr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       type(ESMF_Logical), intent(in) :: value
       integer, intent(out), optional :: rc   
@@ -3473,6 +3792,9 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -3501,7 +3823,7 @@ end function
       subroutine ESMF_BundleSetLogicalListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       type(ESMF_Logical), dimension(:), intent(in) :: valueList
@@ -3535,6 +3857,9 @@ end function
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -3571,7 +3896,7 @@ end function
       subroutine ESMF_BundleSetCharAttr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
+      type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in) :: name
       character (len = *), intent(in) :: value
       integer, intent(out), optional :: rc   
@@ -3601,6 +3926,9 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -3626,7 +3954,7 @@ end function
       subroutine ESMF_BundleSetDataValues(bundle, index, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       integer, dimension (:), intent(in) :: index
       real, dimension (:), intent(in) :: value
       integer, intent(out), optional :: rc
@@ -3675,7 +4003,7 @@ end function
       subroutine ESMF_BundleSetGrid(bundle, grid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       type(ESMF_Grid), intent(in) :: grid
       integer, intent(out), optional :: rc
 !
@@ -3706,6 +4034,9 @@ end function
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
@@ -3747,7 +4078,7 @@ end function
       subroutine ESMF_BundleValidate(bundle, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       character (len=*), intent(in), optional :: options 
       integer, intent(out), optional :: rc
 !
@@ -3778,6 +4109,9 @@ end function
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       if (.not.associated(bundle%btypep)) then 
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Bundle", &
@@ -3807,7 +4141,7 @@ end function
       subroutine ESMF_BundleWrite(bundle, subarray, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       type(ESMF_InternArray), pointer, optional :: subarray
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc
@@ -3851,7 +4185,7 @@ end function
       subroutine ESMF_BundleWriteRestart(bundle, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle 
+      type(ESMF_Bundle), intent(inout) :: bundle 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc     
 !
@@ -3895,7 +4229,7 @@ end function
 ! !ARGUMENTS:
       type(ESMF_BundleType), pointer :: btype        
       integer, intent(in) :: fieldCount
-      type(ESMF_Field), dimension(:), intent(in) :: fields
+      type(ESMF_Field), dimension(:), intent(inout) :: fields
       integer, intent(out), optional :: rc          
 !
 ! !DESCRIPTION:
@@ -3934,6 +4268,10 @@ end function
       ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
       if(present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleTypeGetInit,btype,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields,rc)
 
       ! Initial values
       nullify(temp_flist)
@@ -4145,6 +4483,11 @@ end function
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleTypeGetInit,btype,rc)
+      if (present(bundledatamap))   &
+       ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,ESMF_BundleDataMapInit,bundledatamap)
+
       ! TODO: take this out when implemented
       if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                 "Packed Data not supported yet in Bundles", &
@@ -4230,6 +4573,10 @@ end function
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleTypeGetInit,btype,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields,rc)
+
       ! Initialize the derived type contents.
       call ESMF_BundleConstructNoFields(btype, name, iospec, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -4291,6 +4638,9 @@ end function
       ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleTypeGetInit,btype,rc)
 
 
       ! Initialize the base object
@@ -4384,7 +4734,7 @@ end function
       subroutine ESMF_BundleSerialize(bundle, buffer, length, offset, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle 
+      type(ESMF_Bundle), intent(inout) :: bundle 
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset

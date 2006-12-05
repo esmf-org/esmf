@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.28 2006/11/16 05:20:56 cdeluca Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.29 2006/12/05 23:03:40 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -49,6 +49,7 @@
       
 ! !USES:
       use ESMF_UtilTypesMod    ! ESMF base class
+      use ESMF_InitMacrosMod
       use ESMF_LogErrMod
       use ESMF_BaseMod
       use ESMF_IOSpecMod
@@ -78,6 +79,7 @@
         type(ESMF_Status) :: status 
         type(ESMF_InterleaveFlag) :: bil
 #endif
+        ESMF_INIT_DECLARE
       end type
 
 
@@ -89,6 +91,9 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
+      public ESMF_BundleDataMapInit     ! For Standardized Initialization
+      public ESMF_BundleDataMapGetInit  ! For Standardized Initialization
+
       ! TODO: this may need to become Create/Destroy (because it may need
       ! to be a deep object instead of a shallow one.)
       public ESMF_BundleDataMapSetDefault
@@ -110,7 +115,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.28 2006/11/16 05:20:56 cdeluca Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.29 2006/12/05 23:03:40 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -128,6 +133,32 @@
 
 
       contains
+
+!------------------------------------------------------------------------------
+! function get Shallow class initialization
+    function ESMF_BundleDataMapGetInit(s)
+       type(ESMF_BundleDataMap), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_BundleDataMapGetInit
+
+       if (present(s)) then
+         ESMF_BundleDataMapGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_BundleDataMapGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_BundleDataMapGetInit
+
+!------------------------------------------------------------------------------
+! subroutine for Shallow class initialization
+    subroutine ESMF_BundleDataMapInit(s)
+       type(ESMF_BundleDataMap) :: s
+
+        s%status = ESMF_STATUS_UNINIT
+        s%bil = ESMF_INTERLEAVE_BY_ITEM
+
+        ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_BundleDataMapInit
+
 
 
 !------------------------------------------------------------------------------
@@ -174,6 +205,10 @@
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
+        ! check variables
+        ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,    &
+                                ESMF_BundleDataMapInit,bundledatamap)
 
         ! if specified, return value
         if (present(bundleinterleave)) bundleinterleave = bundledatamap%bil
@@ -283,6 +318,9 @@
           rc = ESMF_FAILURE
         endif
 
+        ! check variables
+        ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,    &
+                                ESMF_BundleDataMapInit,bundledatamap)
 
         ! if specified, set value
         if (present(bundleinterleave)) bundledatamap%bil = bundleinterleave
@@ -339,6 +377,10 @@
         else
           rcpresent = .FALSE.
         endif
+
+        ! check variables
+        ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,    &
+                                ESMF_BundleDataMapInit,bundledatamap)
 
         ! set the default
         bundledatamap%bil = ESMF_INTERLEAVE_BY_BLOCK
@@ -436,6 +478,9 @@
           rc = ESMF_FAILURE
         endif
 
+        ! check variables
+        ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,    &
+                                ESMF_BundleDataMapInit,bundledatamap)
 
         if (bundledatamap%status .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
