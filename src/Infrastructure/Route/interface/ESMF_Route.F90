@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.82 2006/12/04 18:41:54 peggyli Exp $
+! $Id: ESMF_Route.F90,v 1.83 2006/12/06 01:53:30 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.82 2006/12/04 18:41:54 peggyli Exp $'
+      '$Id: ESMF_Route.F90,v 1.83 2006/12/06 01:53:30 peggyli Exp $'
 
 !==============================================================================
 !
@@ -157,14 +157,37 @@ end interface
 ! Route Initialiation and Validation functions
 !
 !------------------------------------------------------------------------------
-function ESMF_RouteGetInit(d)
-  type(ESMF_Route), intent(in):: d
-  ESMF_INIT_TYPE::ESMF_RouteGetInit
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteGetInit"
+!BOPI
+! !IROUTINE: ESMF_RouteGetInit - Get the Init status 
 
-  ESMF_RouteGetInit=ESMF_INIT_GET(d)
-
+! !INTERFACE:
+      function ESMF_RouteGetInit(d)
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_RouteGetInit
+!
+! !ARGUMENTS:
+      type(ESMF_Route), intent(in),optional :: d
+!
+! !DESCRIPTION:
+!     Get the init status
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[d] 
+!          The class to be queried 
+!     \end{description}
+!
+!EOPI
+ 
+  if (present(d)) then
+     ESMF_RouteGetInit=ESMF_INIT_GET(d)
+  else
+     ESMF_RouteGetInit=ESMF_INIT_CREATED
+  endif 
 end function ESMF_RouteGetInit
-
 
 !==============================================================================
 !

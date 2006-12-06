@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.29 2006/12/04 18:41:54 peggyli Exp $
+! $Id: ESMF_RHandle.F90,v 1.30 2006/12/06 01:53:30 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -106,11 +106,7 @@
       type ESMF_RouteHandle
       sequence
       private
-#ifndef ESMF_NO_INITIALIZERS
-        type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
-#else
         type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
-#endif
 	ESMF_INIT_DECLARE
       end type
 
@@ -158,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.29 2006/12/04 18:41:54 peggyli Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.30 2006/12/06 01:53:30 peggyli Exp $'
 
 !==============================================================================
 
@@ -169,12 +165,36 @@
 ! TransformValues GetInit function
 !
 !------------------------------------------------------------------------------
-function ESMF_TransformValuesGetInit(d)
-  type(ESMF_TransformValues), intent(in):: d
-  ESMF_INIT_TYPE::ESMF_TransformValuesGetInit
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TransformValuesGetInit"
+!BOPI
+! !IROUTINE: ESMF_TransformValuesGetInit - Get the Init status 
 
-  ESMF_TransformValuesGetInit=ESMF_INIT_GET(d)
-
+! !INTERFACE:
+      function ESMF_TransformValuesGetInit(d)
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_TransformValuesGetInit
+!
+! !ARGUMENTS:
+      type(ESMF_TransformValues), intent(in),optional :: d
+!
+! !DESCRIPTION:
+!     Get the init status
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[d] 
+!          The class to be queried 
+!     \end{description}
+!
+!EOPI
+  if (present(d)) then
+     ESMF_TransformValuesGetInit=ESMF_INIT_GET(d)
+  else
+     ESMF_TransformValuesGetInit=ESMF_INIT_CREATED
+  endif 
 end function ESMF_TransformValuesGetInit
 
 !==============================================================================
@@ -515,6 +535,9 @@ end function ESMF_TransformValuesGetInit
         if (present(rc)) rc = ESMF_FAILURE
 
         ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,srcIndex,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,dstIndex,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,weight,rc)
 
         ! Get old values and only replace the ones specified.
         call c_ESMC_TransformValuesGet(tv, curnumlist, cursrc, &
@@ -672,12 +695,37 @@ end function ESMF_TransformValuesGetInit
 ! RouteHandle GetInit function
 !
 !------------------------------------------------------------------------------
-function ESMF_RouteHandleGetInit(d)
-  type(ESMF_RouteHandle), intent(in):: d
-  ESMF_INIT_TYPE::ESMF_RouteHandleGetInit
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleGetInit"
+!BOPI
+! !IROUTINE: ESMF_RouteHandleGetInit - Get the Init status 
 
-  ESMF_RouteHandleGetInit=ESMF_INIT_GET(d)
-
+! !INTERFACE:
+      function ESMF_RouteHandleGetInit(d)
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_RouteHandleGetInit
+!
+! !ARGUMENTS:
+      type(ESMF_RouteHandle), intent(in),optional :: d
+!
+! !DESCRIPTION:
+!     Get the init status
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[d] 
+!          The class to be queried 
+!     \end{description}
+!
+!EOPI
+ 
+  if (present(d)) then
+     ESMF_RouteHandleGetInit=ESMF_INIT_GET(d)
+  else
+     ESMF_RouteHandleGetInit=ESMF_INIT_CREATED
+  endif 
 end function ESMF_RouteHandleGetInit
 
 !==============================================================================
@@ -1112,7 +1160,12 @@ end function ESMF_RouteHandleGetInit
         if (present(rc)) rc = ESMF_FAILURE
 
         ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
-
+	if (present(route)) then
+           ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+	endif
+	if (present(tdata)) then
+           ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tdata,rc)
+        endif
         if (present(htype)) then
             call c_ESMC_RouteHandleSetType(rhandle, htype, status)
             if (ESMF_LogMsgFoundError(status, &

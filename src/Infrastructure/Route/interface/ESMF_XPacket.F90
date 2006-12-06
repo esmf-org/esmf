@@ -1,4 +1,4 @@
-! $Id: ESMF_XPacket.F90,v 1.16 2006/12/04 18:41:54 peggyli Exp $
+! $Id: ESMF_XPacket.F90,v 1.17 2006/12/06 01:53:30 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_XPacket.F90,v 1.16 2006/12/04 18:41:54 peggyli Exp $'
+      '$Id: ESMF_XPacket.F90,v 1.17 2006/12/06 01:53:30 peggyli Exp $'
 
 !==============================================================================
 
@@ -96,31 +96,89 @@
 ! XPacket Initialiation and Validation functions
 !
 !------------------------------------------------------------------------------
-function ESMF_XPacketGetInit(s)
-  type(ESMF_XPacket), intent(in):: s
-  ESMF_INIT_TYPE::ESMF_XPacketGetInit
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XPacketGetInit"
+!BOPI
+! !IROUTINE: ESMF_XPacketGetInit - Get the Init status 
 
-  ESMF_XPacketGetInit=ESMF_INIT_GET(s)
-
+! !INTERFACE:
+      function ESMF_XPacketGetInit(s)
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_XPacketGetInit
+!
+! !ARGUMENTS:
+      type(ESMF_XPacket), intent(in),optional :: s
+!
+! !DESCRIPTION:
+!     Get the init status
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[s] 
+!          The class to be queried 
+!     \end{description}
+!
+!EOPI
+  if (present(s)) then
+     ESMF_XPacketGetInit=ESMF_INIT_GET(s)
+  else
+     ESMF_XPacketGetInit=ESMF_INIT_DEFINED
+  endif 
 end function ESMF_XPacketGetInit
 
+!---------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XPacketInit"
+!BOPI
+! !IROUTINE: ESMF_XPacketInit - Initialize XPacket variables
 
-subroutine ESMF_XPacketInit(s)
-  type(ESMF_XPacket) :: s
-
-!  s%rank=0
-!  s%offset=0
-!  s%contig_length=0
-!  s%stride=0
-!  s%rep_count=0
+! !INTERFACE:
+      subroutine ESMF_XPacketInit(s)
+!
+! !ARGUMENTS:
+      type(ESMF_XPacket), intent(inout) :: s
+!
+! !DESCRIPTION:
+!     Initialize XPacket
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[s] 
+!          The class to be queried 
+!     \end{description}
+!
+!EOPI
 
   ESMF_INIT_SET_DEFINED(s)
 
 end subroutine ESMF_XPacketInit
 
-subroutine ESMF_XPacketValidate(s,rc)
-  type(ESMF_XPacket), intent(in):: s
-  integer, intent(out), optional::rc
+!-------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XPacketValidate"
+!BOP
+! !IROUTINE: ESMF_XPacketValidate - Validateialize XPacket variables
+
+! !INTERFACE:
+      subroutine ESMF_XPacketValidate(s,rc)
+!
+! !ARGUMENTS:
+      type(ESMF_XPacket), intent(inout) :: s
+      integer, intent(out), optional::rc
+!
+! !DESCRIPTION:
+!     Check if s is initialized.  If not, initialize it.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[s] 
+!          The class to be validated
+!     \item[rc] 
+!          return value, always return ESMF_SUCCESS.
+!     \end{description}
+!
+!EOP
 
   ESMF_INIT_CHECK_SHALLOW(ESMF_XPacketGetInit,ESMF_XPacketInit,s)
 

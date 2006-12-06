@@ -1,4 +1,4 @@
-! $Id: ESMF_RTable.F90,v 1.11 2006/12/04 18:41:54 peggyli Exp $
+! $Id: ESMF_RTable.F90,v 1.12 2006/12/06 01:53:30 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RTable.F90,v 1.11 2006/12/04 18:41:54 peggyli Exp $'
+      '$Id: ESMF_RTable.F90,v 1.12 2006/12/06 01:53:30 peggyli Exp $'
 
 !==============================================================================
 !
@@ -113,12 +113,37 @@
 ! RTable Initialiation and Validation functions
 !
 !------------------------------------------------------------------------------
-function ESMF_RTableGetInit(d)
-  type(ESMF_RTable), intent(in):: d
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RTableGetInit"
+!BOPI
+! !IROUTINE: ESMF_RTableGetInit - Get the Init status 
+
+! !INTERFACE:
+      function ESMF_RTableGetInit(d)
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_RTableGetInit
+!
+! !ARGUMENTS:
+      type(ESMF_RTable), intent(in),optional :: d
+!
+! !DESCRIPTION:
+!     Get the init status
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[d] 
+!          The class to be queried 
+!     \end{description}
+!
+!EOPI
   ESMF_INIT_TYPE::ESMF_RTableGetInit
-
-  ESMF_RTableGetInit=ESMF_INIT_GET(d)
-
+ 
+  if (present(d)) then
+     ESMF_RTableGetInit=ESMF_INIT_GET(d)
+  else
+     ESMF_RTableGetInit=ESMF_INIT_CREATED
+  endif 
 end function ESMF_RTableGetInit
 
 !==============================================================================
@@ -293,6 +318,8 @@ end function ESMF_RTableGetInit
           rc = ESMF_FAILURE
         endif
 
+        ESMF_INIT_CHECK_DEEP(ESMF_RTableGetInit,rtable,rc)
+
         if (present(value1)) then
           ! code to be added here
         endif
@@ -420,6 +447,8 @@ end function ESMF_RTableGetInit
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
+        ESMF_INIT_CHECK_DEEP(ESMF_RTableGetInit,rtable,rc)
 
         if (present(value1)) then
           ! code to be added here
