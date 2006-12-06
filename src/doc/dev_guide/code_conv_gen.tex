@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_gen.tex,v 1.5 2006/12/06 19:08:51 cdeluca Exp $
+% CVS $Id: code_conv_gen.tex,v 1.6 2006/12/06 19:12:28 cdeluca Exp $
 
 \subsection{Code and Documentation Templates and Associated Scripts}
 \label{sec:code_templates}
@@ -89,7 +89,7 @@ Measurements and analyses of ESMF performance are documented in
 performance reports.  These reports are used to communicate 
 information about framework performance, and are used to
 define and assess the success of optimization efforts.
-They are posted on the ESMF website under the {bf Performance}
+They are posted on the ESMF website under the {\bf Performance}
 link.  Reports typically contain the following sections:  Objective,
 Description of the Benchmark,  Results, Optimizations 
 and Conclusions.
@@ -97,7 +97,7 @@ and Conclusions.
 Performance reports should contain the following specific 
 information:
 \begin{enumerate}
-\item The tag or version of the framework used ({\i not} a moving tag,
+\item The tag or version of the framework used ({\it not} a moving tag,
 like HEAD or LAST\_STABLE)
 \item Where to get the source code
 \item Machine location and type
@@ -348,14 +348,14 @@ The first line of every file in ESMF
   must be its CVS version identification. For example, each \LaTeX
   file must begin:
 \begin{verbatim}
-% $Id: code_conv_gen.tex,v 1.5 2006/12/06 19:08:51 cdeluca Exp $ 
+% $Id: code_conv_gen.tex,v 1.6 2006/12/06 19:12:28 cdeluca Exp $ 
 \end{verbatim}
 
 In addition, for source code, the CVS identifier must have the 
 ability to be written to a variable for output to a configuration log.  
 Therefore each F90 module must contain a declaration:
 \begin{verbatim}
-character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.5 2006/12/06 19:08:51 cdeluca Exp $'
+character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.6 2006/12/06 19:12:28 cdeluca Exp $'
 \end{verbatim}
 
 \subsubsection{License and Copyright Information}
