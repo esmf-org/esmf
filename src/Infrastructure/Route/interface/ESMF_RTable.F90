@@ -1,4 +1,4 @@
-! $Id: ESMF_RTable.F90,v 1.12 2006/12/06 01:53:30 peggyli Exp $
+! $Id: ESMF_RTable.F90,v 1.13 2006/12/06 17:58:48 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RTable.F90,v 1.12 2006/12/06 01:53:30 peggyli Exp $'
+      '$Id: ESMF_RTable.F90,v 1.13 2006/12/06 17:58:48 peggyli Exp $'
 
 !==============================================================================
 !
@@ -137,8 +137,6 @@
 !     \end{description}
 !
 !EOPI
-  ESMF_INIT_TYPE::ESMF_RTableGetInit
- 
   if (present(d)) then
      ESMF_RTableGetInit=ESMF_INIT_GET(d)
   else
