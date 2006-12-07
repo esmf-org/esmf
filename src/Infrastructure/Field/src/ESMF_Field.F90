@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.224 2006/12/05 23:05:35 samsoncheung Exp $
+! $Id: ESMF_Field.F90,v 1.225 2006/12/07 05:31:18 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -239,7 +239,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.224 2006/12/05 23:05:35 samsoncheung Exp $'
+      '$Id: ESMF_Field.F90,v 1.225 2006/12/07 05:31:18 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -685,7 +685,6 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
-      if (present(datamap))   &
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
 
       allocate(ftype, stat=status)
@@ -3701,7 +3700,6 @@
 !EOPI
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
@@ -4322,8 +4320,8 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
-      if (present(datamap))  &
-      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
+                              ESMF_FieldDataMapInit,datamap)
 
       ! make sure hwidth has a value here.
       if (present(haloWidth)) then
@@ -4904,7 +4902,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: srcField 
-      type(ESMF_Field), intent(in) :: dstField
+      type(ESMF_Field), intent(inout) :: dstField
       type(ESMF_DomainList), intent(inout) :: recvDomainlist
       type(ESMF_DomainList), intent(inout) :: sendDomainlist
       integer, intent(out), optional :: rc 

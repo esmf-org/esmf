@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.96 2006/11/16 07:06:36 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.97 2006/12/07 05:35:36 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.96 2006/11/16 07:06:36 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.97 2006/12/07 05:35:36 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -615,7 +615,7 @@ end interface
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state 
       integer, intent(in) :: bundleCount
-      type(ESMF_Bundle), dimension(:), intent(in) :: bundleList
+      type(ESMF_Bundle), dimension(:), intent(inout) :: bundleList
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -719,7 +719,7 @@ end interface
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state 
       integer, intent(in) :: fieldCount
-      type(ESMF_Field), dimension(:), intent(in) :: fieldList
+      type(ESMF_Field), dimension(:), intent(inout) :: fieldList
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -987,8 +987,8 @@ end interface
 ! !ARGUMENTS:
       character(len=*), intent(in), optional :: stateName 
       type(ESMF_StateType), intent(in), optional :: statetype
-      type(ESMF_Bundle), dimension(:), intent(in), optional :: bundleList
-      type(ESMF_Field), dimension(:), intent(in), optional :: fieldList
+      type(ESMF_Bundle), dimension(:), intent(inout), optional :: bundleList
+      type(ESMF_Field), dimension(:), intent(inout), optional :: fieldList
       type(ESMF_InternArray), dimension(:), intent(in), optional :: arrayList
       type(ESMF_State), dimension(:), intent(in), optional :: nestedStateList
       character(len=*), dimension(:), intent(in), optional :: nameList
@@ -4036,8 +4036,8 @@ end interface
       type (ESMF_StateClass), pointer :: stypep
       character(len=*), intent(in), optional :: statename 
       type(ESMF_StateType), intent(in), optional :: statetype
-      type(ESMF_Bundle), dimension(:), intent(in), optional :: bundles
-      type(ESMF_Field), dimension(:), intent(in), optional :: fields
+      type(ESMF_Bundle), dimension(:), intent(inout), optional :: bundles
+      type(ESMF_Field), dimension(:), intent(inout), optional :: fields
       type(ESMF_InternArray), dimension(:), intent(in), optional :: arrays
       type(ESMF_State), dimension(:), intent(in), optional :: states
       character(len=*), dimension(:), intent(in), optional :: names
@@ -4111,6 +4111,10 @@ end interface
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
         localrc = ESMF_FAILURE 
+
+        ! check variables
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,bundles,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields,rc)
 
         ! Quick sanity check on the values
 
@@ -4730,7 +4734,7 @@ end interface
 ! !ARGUMENTS:
       type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: fcount
-      type(ESMF_Field), dimension(:), intent(in) :: fields
+      type(ESMF_Field), dimension(:), intent(inout) :: fields
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -4761,6 +4765,9 @@ end interface
       ! Initialize return code.  Assume failure until success assured.
       if (present(rc)) rc = ESMF_FAILURE 
       fname = ""
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields,rc)
 
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
@@ -4923,7 +4930,7 @@ end interface
 ! !ARGUMENTS:
       type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: bcount
-      type(ESMF_Bundle), dimension(:), intent(in) :: bundles
+      type(ESMF_Bundle), dimension(:), intent(inout) :: bundles
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -4957,6 +4964,9 @@ end interface
       if (present(rc)) rc = ESMF_FAILURE
       fneedsdealloc = .FALSE.
       fname = ""
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields,rc)
   
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.

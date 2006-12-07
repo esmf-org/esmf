@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.86 2006/12/05 23:02:24 samsoncheung Exp $
+! $Id: ESMF_Bundle.F90,v 1.87 2006/12/07 05:27:35 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -203,14 +203,14 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-       public ESMF_BundleFieldAccessValidate   ! For Standardized Initialization
+       ! public ESMF_BundleFieldAccessValidate   ! For Standardized Initialization
        ! ESMF_BundleFieldAccess(Init) and (GetInit) are privite
 
        public ESMF_BundleFieldInterleaveInit     ! For Standardized Initialization
        public ESMF_BundleFieldInterleaveValidate ! For Standardized Initialization
        public ESMF_BundleFieldInterleaveGetInit  ! For Standardized Initialization
 
-       public ESMF_BundleCongruentDataValidate  ! For Standardized Initialization
+       ! public ESMF_BundleCongruentDataValidate  ! For Standardized Initialization
        ! ESMF_BundleCongruentData(Init) and (GetInit) are privite
 
        public ESMF_LocalBundleInit     ! For Standardized Initialization
@@ -447,29 +447,88 @@ end interface
       contains
 
 !------------------------------------------------------------------------------
-! function get Shallow class initialization
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleFieldAccessGetInit"!BOPI
+! !IROUTINE:  ESMF_BundleFieldAccessGetInit - Get initialization status.
+
+! !INTERFACE:
     function ESMF_BundleFieldAccessGetInit(s)
+!
+! !ARGUMENTS:
        type(ESMF_BundleFieldAccess), intent(in), optional :: s
        ESMF_INIT_TYPE :: ESMF_BundleFieldAccessGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt bundlefieldaccess}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_BundleFieldAccess} from which to retreive status.
+!     \end{description}
+!
+!EOPI
 
-       ESMF_BundleFieldAccessGetInit=ESMF_INIT_GET(s)
+       if (present(s)) then
+         ESMF_BundleFieldAccessGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_BundleFieldAccessGetInit = ESMF_INIT_DEFINED
+       endif
 
     end function ESMF_BundleFieldAccessGetInit
 
 !------------------------------------------------------------------------------
-! subroutine for Shallow class initialization
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleFieldAccessInit"
+!BOPI
+! !IROUTINE:  ESMF_BundleFieldAccessInit - Initialize BundleFieldAccess
+
+! !INTERFACE:
     subroutine ESMF_BundleFieldAccessInit(s)
+!
+! !ARGUMENTS:
        type(ESMF_BundleFieldAccess) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt bundlefieldaccess}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_BundleFieldAccess} of which being initialized.
+!     \end{description}
+!
+!EOPI
 
        ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_BundleFieldAccessInit
 
 !------------------------------------------------------------------------------
-! subroutine for Shallow class initialization Validation
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleFieldAccessValidate"
+!BOPI
+! !IROUTINE:  ESMF_BundleFieldAccessValidate - Check validity of a BundleFieldAccess
+
+! !INTERFACE:
     subroutine ESMF_BundleFieldAccessValidate(s,rc)
+!
+! !ARGUMENTS:
        type(ESMF_BundleFieldAccess), intent(inout) :: s
        integer, intent(out), optional :: rc
-
+!
+! !DESCRIPTION:
+!      Validates that the {\tt BundleFieldAccess} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_BundleFieldAccess} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt bundlefieldaccess}
+!           is valid.
+!     \end{description}
+!
+!EOPI
      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleFieldAccessGetInit,  &
                              ESMF_BundleFieldAccessInit,s)
 
@@ -480,28 +539,87 @@ end interface
     end subroutine ESMF_BundleFieldAccessValidate
 
 !------------------------------------------------------------------------------
-! function get Shallow class initialization
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleFieldInterleaveGetInit"
+
+! !INTERFACE:
     function ESMF_BundleFieldInterleaveGetInit(s)
+!
+! !ARGUMENTS:
        type(ESMF_BundleFieldInterleave), intent(in), optional :: s
        ESMF_INIT_TYPE :: ESMF_BundleFieldInterleaveGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt bundlefieldinterleave}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_BundleFieldInterleave} from which to retreive status.
+!     \end{description}
+!
+!EOPI
 
-       ESMF_BundleFieldInterleaveGetInit=ESMF_INIT_GET(s)
+       if (present(s)) then
+         ESMF_BundleFieldInterleaveGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_BundleFieldInterleaveGetInit = ESMF_INIT_DEFINED
+       endif
 
     end function ESMF_BundleFieldInterleaveGetInit
 
 !------------------------------------------------------------------------------
-! subroutine for Shallow class initialization
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleFieldInterleaveInit"
+!BOPI
+! !IROUTINE:  ESMF_BundleFieldInterleaveInit - Initialize BundleFieldInterleave
+
+! !INTERFACE:
     subroutine ESMF_BundleFieldInterleaveInit(s)
+!
+! !ARGUMENTS:
        type(ESMF_BundleFieldInterleave) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt bundlefieldinterleave}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_BundleFieldInterleave} of which being initialized.
+!     \end{description}
+!
+!EOPI
 
         ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_BundleFieldInterleaveInit
 
 !------------------------------------------------------------------------------
-! subroutine for Shallow class initialization Validation
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleFieldInterleaveValidate"
+!BOPI
+! !IROUTINE:  ESMF_BundleFieldInterleaveValidate - Check validity of a BundleFieldInterleave
+
+! !INTERFACE:
     subroutine ESMF_BundleFieldInterleaveValidate(s,rc)
+!
+! !ARGUMENTS:
        type(ESMF_BundleFieldInterleave), intent(inout) :: s
        integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt BundleFieldInterleave} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_BundleFieldInterleave} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt localfield}
+!           is valid.
+!     \end{description}
+!
+!EOPI
 
      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleFieldInterleaveGetInit,  &
                              ESMF_BundleFieldInterleaveInit,s)
@@ -514,29 +632,89 @@ end interface
 
 
 !------------------------------------------------------------------------------
-! function get Shallow class initialization
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleCongruentDataGetInit"
+!BOPI
+! !IROUTINE:  ESMF_BundleCongruentDataGetInit - Get initialization status.
+
+! !INTERFACE:
     function ESMF_BundleCongruentDataGetInit(s)
+!
+! !ARGUMENTS:
        type(ESMF_BundleCongruentData), intent(in), optional :: s
        ESMF_INIT_TYPE :: ESMF_BundleCongruentDataGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt bundlecongruentdata}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_ESMF_BundleCongruentData} from which to retreive status.
+!     \end{description}
+!
+!EOPI
 
-       ESMF_BundleCongruentDataGetInit=ESMF_INIT_GET(s)
+       if (present(s)) then
+         ESMF_BundleCongruentDataGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_BundleCongruentDataGetInit = ESMF_INIT_DEFINED
+       endif
 
     end function ESMF_BundleCongruentDataGetInit
 
 !------------------------------------------------------------------------------
-! subroutine for Shallow class initialization
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleCongruentDataInit"
+!BOPI
+! !IROUTINE:  ESMF_BundleCongruentDataInit - Initialize BundleCongruentData
+
+! !INTERFACE:
     subroutine ESMF_BundleCongruentDataInit(s)
+!
+! !ARGUMENTS:
        type(ESMF_BundleCongruentData) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt bundlecongruentdata}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_BundleCongruentData} of which being initialized.
+!     \end{description}
+!
+!EOPI
 
        ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_BundleCongruentDataInit
 
 !------------------------------------------------------------------------------
-! subroutine for Shallow class initialization Validation
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleCongruentDataValidate"
+!BOPI
+! !IROUTINE:  ESMF_BundleCongruentDataValidate - Check validity of a BundleCongruentData
+
+! !INTERFACE:
     subroutine ESMF_BundleCongruentDataValidate(s,rc)
+!
+! !ARGUMENTS:
        type(ESMF_BundleCongruentData), intent(inout) :: s
        integer, intent(out), optional :: rc
-
+!
+! !DESCRIPTION:
+!      Validates that the {\tt BundleCongruentData} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_BundleCongruentData} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt localfield}
+!           is valid.
+!     \end{description}
+!
+!EOPI
      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleCongruentDataGetInit,  &
                              ESMF_BundleCongruentDataInit,s)
 
@@ -548,29 +726,89 @@ end interface
 
 
 !------------------------------------------------------------------------------
-! function get Shallow class initialization
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalBundleGetInit"
+!BOPI
+! !IROUTINE:  ESMF_LocalBundleGetInit - Get initialization status.
+
+! !INTERFACE:
     function ESMF_LocalBundleGetInit(s)
+!
+! !ARGUMENTS:
        type(ESMF_LocalBundle), intent(in), optional :: s
        ESMF_INIT_TYPE :: ESMF_LocalBundleGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt localbundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_LocalBundle} from which to retreive status.
+!     \end{description}
+!
+!EOPI
 
-       ESMF_LocalBundleGetInit=ESMF_INIT_GET(s)
+       if (present(s)) then
+         ESMF_LocalBundleGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_LocalBundleGetInit = ESMF_INIT_DEFINED
+       endif
 
     end function ESMF_LocalBundleGetInit
 
 !------------------------------------------------------------------------------
-! subroutine for Shallow class initialization
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalBundleInit"
+!BOPI
+! !IROUTINE:  ESMF_LocalBundleInit - Initialize LocalBundle
+
+! !INTERFACE:
     subroutine ESMF_LocalBundleInit(s)
+!
+! !ARGUMENTS:
        type(ESMF_LocalBundle) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt localbundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_LocalBundle} of which being initialized.
+!     \end{description}
+!
+!EOPI
 
        ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_LocalBundleInit
 
 !------------------------------------------------------------------------------
-! subroutine for Shallow class initialization Validation
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalBundleValidate"
+!BOPI
+! !IROUTINE:  ESMF_LocalBundleValidate - Check validity of a LocalBundle
+
+! !INTERFACE:
     subroutine ESMF_LocalBundleValidate(s,rc)
+!
+! !ARGUMENTS:
        type(ESMF_LocalBundle), intent(inout) :: s
        integer, intent(out), optional :: rc
-
+!
+! !DESCRIPTION:
+!      Validates that the {\tt LocalBundle} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_LocalBundle} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt localfield}
+!           is valid.
+!     \end{description}
+!
+!EOPI
      ESMF_INIT_CHECK_SHALLOW(ESMF_LocalBundleGetInit,ESMF_LocalBundleInit,s)
 
      ! return success
@@ -581,29 +819,90 @@ end interface
 
 
 !------------------------------------------------------------------------------
-! function get Shallow class initialization
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleTypeGetInit"
+!BOPI
+! !IROUTINE:  ESMF_BundleTypeGetInit - Get initialization status.
+
+! !INTERFACE:
     function ESMF_BundleTypeGetInit(s)
+!
+! !ARGUMENTS:
        type(ESMF_BundleType), intent(in), optional :: s
        ESMF_INIT_TYPE :: ESMF_BundleTypeGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt bundletype}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_BundleType} from which to retreive status.
+!     \end{description}
+!
+!EOPI
 
-       ESMF_BundleTypeGetInit=ESMF_INIT_GET(s)
+       if (present(s)) then
+         ESMF_BundleTypeGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_BundleTypeGetInit = ESMF_INIT_DEFINED
+       endif
 
     end function ESMF_BundleTypeGetInit
 
 !------------------------------------------------------------------------------
-! subroutine for Shallow class initialization
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleTypeInit"
+!BOPI
+! !IROUTINE:  ESMF_BundleTypeInit - Initialize BundleType
+
+! !INTERFACE:
     subroutine ESMF_BundleTypeInit(s)
+!
+! !ARGUMENTS:
        type(ESMF_BundleType) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt bundletype}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_BundleType} of which being initialized.
+!     \end{description}
+!
+!EOPI
+
         s%flist => NULL()
         ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_BundleTypeInit
 
 !------------------------------------------------------------------------------
-! subroutine for Shallow class initialization Validation
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleTypeValidate"
+!BOPI
+! !IROUTINE:  ESMF_BundleTypeValidate - Check validity of a BundleType
+
+! !INTERFACE:
     subroutine ESMF_BundleTypeValidate(s,rc)
+!
+! !ARGUMENTS:
        type(ESMF_BundleType), intent(inout) :: s
        integer, intent(out), optional :: rc
- 
+!
+! !DESCRIPTION:
+!      Validates that the {\tt BundleType} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_BundleType} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt localfield}
+!           is valid.
+!     \end{description}
+!
+!EOPI
      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleTypeGetInit,ESMF_BundleTypeInit,s)
 
      ! return success
@@ -613,10 +912,28 @@ end interface
     end subroutine ESMF_BundleTypeValidate
 
 !------------------------------------------------------------------------------
-! subroutine gets Deep class initialization
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetInit"
+!BOPI
+! !IROUTINE:  ESMF_BundleGetInit - Get initialization status.
+
+! !INTERFACE:
     function ESMF_BundleGetInit(d)
+!
+! !ARGUMENTS:
        type(ESMF_Bundle), intent(inout), optional :: d
        ESMF_INIT_TYPE :: ESMF_BundleGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the Deep class {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_Bundle} from which to retreive status.
+!     \end{description}
+!
+!EOPI
 
        if (present(d)) then
          ESMF_BundleGetInit = ESMF_INIT_GET(d)
@@ -1174,7 +1491,7 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-      if(present(fieldList)) ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList,rc)
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
@@ -4485,8 +4802,7 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_BundleTypeGetInit,btype,rc)
-      if (present(bundledatamap))   &
-       ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,ESMF_BundleDataMapInit,bundledatamap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,ESMF_BundleDataMapInit,bundledatamap)
 
       ! TODO: take this out when implemented
       if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &

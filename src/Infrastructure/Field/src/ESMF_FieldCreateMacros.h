@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.12 2006/12/05 23:05:35 samsoncheung Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.13 2006/12/07 05:31:19 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@
 !     type(ESMF_RelLoc), intent(in), optional :: horzRelloc @\
 !     type(ESMF_RelLoc), intent(in), optional :: vertRelloc  @\
 !     integer, intent(in), optional :: haloWidth @\
-!     type(ESMF_FieldDataMap), intent(in), optional :: datamap @\
+!     type(ESMF_FieldDataMap), intent(inout), optional :: datamap @\
 !     character (len=*), intent(in), optional :: name  @\
 !     type(ESMF_IOSpec), intent(in), optional :: iospec @\
 !     integer, intent(out), optional :: rc @\
@@ -131,7 +131,6 @@
         endif @\
  @\
         ! check variables @\
-        if (present(datamap))  & @\
         ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap) @\
  @\
         ! Test to see if pointer not associated, and fail if so. @\
@@ -162,7 +161,7 @@
         ESMF_FieldCreateDPtr##mrank##D##mtypekind%ftypep => ftype  @\
  @\
         ESMF_INIT_SET_CREATED(ESMF_FieldCreateDPtr##mrank##D##mtypekind) @\
-
+ @\
         if (rcpresent) rc = status @\
  @\
         end function ESMF_FieldCreateDPtr##mrank##D##mtypekind  @\
@@ -296,7 +295,6 @@
         endif @\
  @\
         ! check variables @\
-        if (present(datamap))  & @\
         ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap) @\
  @\
         ! Test to see if pointer not already associated, and fail if so. @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_RedistHelpers.F90,v 1.3 2006/11/16 05:21:18 cdeluca Exp $
+! $Id: ESMF_RedistHelpers.F90,v 1.4 2006/12/07 05:34:43 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -208,7 +208,7 @@ end subroutine FillIndexField
 ! Assumes data is real*8.
 !
 subroutine ValidateConstantField(field, val, rc)
-    type(ESMF_Field), intent(in) :: field
+    type(ESMF_Field), intent(inout) :: field
     real (ESMF_KIND_R8), intent(in) :: val
     integer, intent(out) :: rc
     
@@ -256,7 +256,7 @@ end subroutine ValidateConstantField
 ! Assumes data is real*8.
 !
 subroutine ValidateConstantHalo(field, val, rc)
-    type(ESMF_Field), intent(in) :: field
+    type(ESMF_Field), intent(inout) :: field
     real (ESMF_KIND_R8), intent(in) :: val
     integer, intent(out) :: rc
     
@@ -345,7 +345,7 @@ end subroutine ValidateConstantHalo
 ! Assumes data is real*8.
 !
 subroutine ValidateIndexField(field, rc)
-    type(ESMF_Field), intent(in) :: field
+    type(ESMF_Field), intent(inout) :: field
     integer, intent(out) :: rc
     
     ! Local variables

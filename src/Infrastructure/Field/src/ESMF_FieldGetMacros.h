@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.9 2006/12/05 23:05:35 samsoncheung Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.10 2006/12/07 05:31:19 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !      subroutine ESMF_FieldGetDataPointer<rank><type><kind>(field, ptr, copyflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!      type(ESMF_Field), intent(in) :: field @\
+!      type(ESMF_Field), intent(inout) :: field @\
 !      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: ptr @\
 !      type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
 !      integer, intent(out), optional :: rc   @\
@@ -81,7 +81,7 @@
 ^define ESMF_METHOD "ESMF_FieldGetDataPointer" @\
       subroutine ESMF_FieldGetDataPointer##mrank##D##mtypekind(field, ptr, copyflag, counts, rc) @\
  @\
-      type(ESMF_Field), intent(in) :: field @\
+      type(ESMF_Field), intent(inout) :: field @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: ptr @\
       type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
       integer, intent(out), optional :: counts(:) @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.37 2006/11/16 05:21:15 cdeluca Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.38 2006/12/07 05:32:42 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.37 2006/11/16 05:21:15 cdeluca Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.38 2006/12/07 05:32:42 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -90,11 +90,11 @@
       type(ESMF_RouteHandle),  intent(inout) :: rh
       type(ESMF_InternArray),        intent(in ) :: srcArray
       type(ESMF_Grid),         intent(in ) :: srcGrid
-      type(ESMF_FieldDataMap), intent(in ) :: srcDataMap
+      type(ESMF_FieldDataMap), intent(inout) :: srcDataMap
       logical,                 intent(in ) :: hasSrcData
       type(ESMF_InternArray),        intent(in ) :: dstArray
       type(ESMF_Grid),         intent(in ) :: dstGrid
-      type(ESMF_FieldDataMap), intent(in ) :: dstDataMap
+      type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       logical,                 intent(in ) :: hasDstData
       type(ESMF_VM),           intent(in ) :: parentVM
       integer,                 intent(in ) :: routeIndex
@@ -159,6 +159,10 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDataMap)
 
 ! TODO: passed in now, not constructed here.
       !! Construct an empty regrid structure

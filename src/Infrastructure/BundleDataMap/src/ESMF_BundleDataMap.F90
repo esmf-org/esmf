@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.29 2006/12/05 23:03:40 samsoncheung Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.30 2006/12/07 05:29:51 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.29 2006/12/05 23:03:40 samsoncheung Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.30 2006/12/07 05:29:51 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -135,10 +135,28 @@
       contains
 
 !------------------------------------------------------------------------------
-! function get Shallow class initialization
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDataMapGetInit"
+!BOPI
+! !IROUTINE:  ESMF_BundleDataMapGetInit - Get initialization status.
+
+! !INTERFACE:
     function ESMF_BundleDataMapGetInit(s)
+!
+! !ARGUMENTS:
        type(ESMF_BundleDataMap), intent(in), optional :: s
        ESMF_INIT_TYPE :: ESMF_BundleDataMapGetInit
+!
+! !DESCRIPTION:
+!     Get the initialization status of the shallow class {\tt bundledatamap}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_BundleDataMap} from which to retreive status.
+!     \end{description}
+!
+!EOPI
 
        if (present(s)) then
          ESMF_BundleDataMapGetInit = ESMF_INIT_GET(s)
@@ -149,9 +167,27 @@
     end function ESMF_BundleDataMapGetInit
 
 !------------------------------------------------------------------------------
-! subroutine for Shallow class initialization
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDataMapInit"
+!BOPI
+! !IROUTINE:  ESMF_BundleDataMapInit - Initialize BundleDataMap
+
+! !INTERFACE:
     subroutine ESMF_BundleDataMapInit(s)
+!
+! !ARGUMENTS:
        type(ESMF_BundleDataMap) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt bundledatamap}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_BundleDataMap} of which being initialized.
+!     \end{description}
+!
+!EOPI
 
         s%status = ESMF_STATUS_UNINIT
         s%bil = ESMF_INTERLEAVE_BY_ITEM

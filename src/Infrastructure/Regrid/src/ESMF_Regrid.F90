@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.104 2006/11/16 05:21:14 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.105 2006/12/07 05:32:42 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.104 2006/11/16 05:21:14 cdeluca Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.105 2006/12/07 05:32:42 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -206,11 +206,11 @@
 ! !ARGUMENTS:
       type(ESMF_InternArray),         intent(in   ) :: srcArray
       type(ESMF_Grid),          intent(in   ) :: srcGrid
-      type(ESMF_FieldDataMap),  intent(in   ) :: srcDatamap
+      type(ESMF_FieldDataMap),  intent(inout) :: srcDatamap
       logical,                  intent(in   ) :: hasSrcData
       type(ESMF_InternArray),         intent(in   ) :: dstArray
       type(ESMF_Grid),          intent(in   ) :: dstGrid
-      type(ESMF_FieldDataMap),  intent(in   ) :: dstDatamap
+      type(ESMF_FieldDataMap),  intent(inout) :: dstDatamap
       logical,                  intent(in   ) :: hasDstData
       type(ESMF_VM),            intent(in   ) :: parentVM
       type(ESMF_RouteHandle),   intent(inout) :: routehandle
@@ -302,6 +302,10 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
 
       ! TODO: error check for regridnormOpt only for conservative methods
       
@@ -494,10 +498,10 @@
 ! !ARGUMENTS:
 
       type(ESMF_InternArray),        intent(in   ) :: srcArrayList(:)
-      type(ESMF_FieldDataMap), intent(in   ) :: srcDatamap
+      type(ESMF_FieldDataMap), intent(inout) :: srcDatamap
       logical,                 intent(in   ) :: hasSrcData
       type(ESMF_InternArray),        intent(inout) :: dstArrayList(:)
-      type(ESMF_FieldDataMap), intent(in   ) :: dstDatamap
+      type(ESMF_FieldDataMap), intent(inout) :: dstDatamap
       logical,                 intent(in   ) :: hasDstData
       type(ESMF_RouteHandle),  intent(in   ) :: routehandle 
                                                   ! precomputed regrid structure
@@ -539,6 +543,10 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
 
       ! Before going further down into this code, make sure
       ! that this DE has at least src or dst data.   If neither, return now.
@@ -836,10 +844,10 @@
 ! !ARGUMENTS:
 
       type(ESMF_InternArray),        intent(in   ) :: srcArrayList(:)
-      type(ESMF_FieldDataMap), intent(in   ) :: srcDatamap
+      type(ESMF_FieldDataMap), intent(inout) :: srcDatamap
       logical,                 intent(in   ) :: hasSrcData
       type(ESMF_InternArray),        intent(inout) :: dstArrayList(:)
-      type(ESMF_FieldDataMap), intent(in   ) :: dstDatamap
+      type(ESMF_FieldDataMap), intent(inout) :: dstDatamap
       logical,                 intent(in   ) :: hasDstData
       type(ESMF_RouteHandle),  intent(in   ) :: routehandle 
                                                   ! precomputed regrid structure
@@ -881,6 +889,10 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
 
       ! Before going further down into this code, make sure
       ! that this DE has at least src or dst data.   If neither, return now.
@@ -1341,10 +1353,10 @@
 ! !ARGUMENTS:
       type(ESMF_InternArray),         intent(in   ) :: srcArray
       type(ESMF_Grid),          intent(in   ) :: srcGrid
-      type(ESMF_FieldDataMap),  intent(in   ) :: srcDatamap
+      type(ESMF_FieldDataMap),  intent(inout) :: srcDatamap
       type(ESMF_InternArray),         intent(in   ) :: dstArray
       type(ESMF_Grid),          intent(in   ) :: dstGrid
-      type(ESMF_FieldDataMap),  intent(in   ) :: dstDatamap
+      type(ESMF_FieldDataMap),  intent(inout) :: dstDatamap
       type(ESMF_VM),            intent(in   ) :: parentVM
       type(ESMF_RouteHandle),   intent(out  ) :: routehandle
       type(ESMF_RegridMethod),  intent(in   ) :: regridmethod
@@ -1430,10 +1442,10 @@
 ! !ARGUMENTS:
       type(ESMF_InternArray),         intent(in   ) :: srcArray
       type(ESMF_Grid),          intent(in   ) :: srcGrid
-      type(ESMF_FieldDataMap),  intent(in   ) :: srcDatamap
+      type(ESMF_FieldDataMap),  intent(inout) :: srcDatamap
       type(ESMF_InternArray),         intent(in   ) :: dstArray
       type(ESMF_Grid),          intent(in   ) :: dstGrid
-      type(ESMF_FieldDataMap),  intent(in   ) :: dstDatamap
+      type(ESMF_FieldDataMap),  intent(inout) :: dstDatamap
       type(ESMF_VM),            intent(in   ) :: parentVM
       type(ESMF_RouteHandle),   intent(inout) :: routehandle
       integer,                  intent(in   ) :: routeIndex
@@ -1673,6 +1685,10 @@
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDataMap)
  
       ! Before going further down into this code, make sure
       ! that this DE has at least src or dst data.   If neither, return now.
@@ -1834,6 +1850,10 @@
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDataMap)
  
       ! Before going further down into this code, make sure
       ! that this DE has at least src or dst data.   If neither, return now.
@@ -1954,7 +1974,7 @@
 
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_FieldDatamap), intent(in) :: datamap
+      type(ESMF_FieldDatamap), intent(inout) :: datamap
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:

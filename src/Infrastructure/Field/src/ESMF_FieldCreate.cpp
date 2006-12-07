@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.17 2006/12/05 23:05:35 samsoncheung Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.18 2006/12/07 05:31:19 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.17 2006/12/05 23:05:35 samsoncheung Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.18 2006/12/07 05:31:19 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -124,7 +124,7 @@ InterfaceMacro(FieldCreateEPtr)
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
-      type(ESMF_FieldDataMap), intent(in), optional :: datamap          
+      type(ESMF_FieldDataMap), intent(inout), optional :: datamap          
       character (len=*), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -186,6 +186,9 @@ InterfaceMacro(FieldCreateEPtr)
         rc = ESMF_FAILURE
       endif
 
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
+
       allocate(ftype, stat=status)
       ! If error write message and return.
       ! Formal error handling will be added asap.
@@ -231,7 +234,7 @@ InterfaceMacro(FieldCreateEPtr)
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
-      type(ESMF_FieldDataMap), intent(in), optional :: datamap           
+      type(ESMF_FieldDataMap), intent(inout), optional :: datamap           
       character (len = *), intent(in), optional :: name   
       type(ESMF_IOSpec), intent(in), optional :: iospec   
       integer, intent(out), optional :: rc                
@@ -292,6 +295,9 @@ InterfaceMacro(FieldCreateEPtr)
         rc = ESMF_FAILURE
       endif     
 
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
+
       allocate(ftype, stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
                                        ESMF_CONTEXT, rc)) return
@@ -332,7 +338,7 @@ InterfaceMacro(FieldCreateEPtr)
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
-      type(ESMF_FieldDataMap), intent(in), optional :: datamap              
+      type(ESMF_FieldDataMap), intent(inout), optional :: datamap              
       character (len = *), intent(in), optional :: name   
       type(ESMF_IOSpec), intent(in), optional :: iospec   
       integer, intent(out), optional :: rc                
@@ -388,6 +394,9 @@ InterfaceMacro(FieldCreateEPtr)
         rcpresent = .TRUE. 
         rc = ESMF_FAILURE
       endif     
+
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
 
       allocate(ftype, stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &

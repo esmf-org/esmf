@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.15 2006/11/16 05:20:56 cdeluca Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.16 2006/12/07 05:28:53 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -331,7 +331,7 @@ end subroutine CreateFields
 #define ESMF_METHOD "CreateBundle"
 subroutine CreateBundle(bundle, field1, field2, field3, field4, field5, rc)
     type(ESMF_Bundle), intent(out) :: bundle
-    type(ESMF_Field), intent(in), optional :: field1,field2,field3,field4,field5
+    type(ESMF_Field), intent(inout), optional :: field1,field2,field3,field4,field5
     integer, intent(out), optional :: rc
     
     integer :: localrc
@@ -383,7 +383,7 @@ end subroutine CreateBundle
 #define ESMF_METHOD "AddBundle"
 subroutine AddBundle(bundle, field1, field2, field3, field4, field5, rc)
     type(ESMF_Bundle), intent(inout) :: bundle
-    type(ESMF_Field), intent(in), optional :: field1,field2,field3,field4,field5
+    type(ESMF_Field), intent(inout), optional :: field1,field2,field3,field4,field5
     integer, intent(out), optional :: rc
     
     integer :: localrc
@@ -927,7 +927,7 @@ end subroutine FillIndexField
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ValidateConstantR8Field"
 subroutine ValidateConstantR8Field(field, val, slop, rc)
-    type(ESMF_Field), intent(in) :: field
+    type(ESMF_Field), intent(inout) :: field
     real (ESMF_KIND_R8), intent(in) :: val
     logical, intent(in), optional :: slop
     integer, intent(out), optional  :: rc
@@ -944,7 +944,7 @@ end subroutine ValidateConstantR8Field
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ValidateConstantR4Field"
 subroutine ValidateConstantR4Field(field, val, slop, rc)
-    type(ESMF_Field), intent(in) :: field
+    type(ESMF_Field), intent(inout) :: field
     real (ESMF_KIND_R4), intent(in) :: val
     logical, intent(in), optional :: slop
     integer, intent(out), optional  :: rc
@@ -962,7 +962,7 @@ end subroutine ValidateConstantR4Field
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ValidateConstantI8Field"
 subroutine ValidateConstantI8Field(field, val, slop, rc)
-    type(ESMF_Field), intent(in) :: field
+    type(ESMF_Field), intent(inout) :: field
     real (ESMF_KIND_I8), intent(in) :: val
     logical, intent(in), optional :: slop
     integer, intent(out), optional  :: rc
@@ -979,7 +979,7 @@ end subroutine ValidateConstantI8Field
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ValidateConstantI4Field"
 subroutine ValidateConstantI4Field(field, val, slop, rc)
-    type(ESMF_Field), intent(in) :: field
+    type(ESMF_Field), intent(inout) :: field
     real (ESMF_KIND_I4), intent(in) :: val
     logical, intent(in), optional :: slop
     integer, intent(out), optional  :: rc
@@ -999,7 +999,7 @@ end subroutine ValidateConstantI4Field
 #define ESMF_METHOD "InternalValidateConstantField"
 subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
                                           slop, rc)
-    type(ESMF_Field), intent(in) :: field
+    type(ESMF_Field), intent(inout) :: field
     real (ESMF_KIND_R8), intent(in), optional :: r8val
     real (ESMF_KIND_R4), intent(in), optional :: r4val
     real (ESMF_KIND_I8), intent(in), optional :: i8val
@@ -1556,7 +1556,7 @@ end subroutine InternalValidateConstantField
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ValidateConstantHalo"
 subroutine ValidateConstantHalo(field, val, rc)
-    type(ESMF_Field), intent(in) :: field
+    type(ESMF_Field), intent(inout) :: field
     real (ESMF_KIND_R8), intent(in) :: val
     integer, intent(out) :: rc
     
@@ -1648,7 +1648,7 @@ end subroutine ValidateConstantHalo
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ValidateConstantR4Halo"
 subroutine ValidateConstantR4Halo(field, val, rc)
-    type(ESMF_Field), intent(in) :: field
+    type(ESMF_Field), intent(inout) :: field
     real (ESMF_KIND_R4), intent(in) :: val
     integer, intent(out) :: rc
     
@@ -1740,7 +1740,7 @@ end subroutine ValidateConstantR4Halo
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ValidateIndexField"
 subroutine ValidateIndexField(field, rc)
-    type(ESMF_Field), intent(in) :: field
+    type(ESMF_Field), intent(inout) :: field
     integer, intent(out) :: rc
     
     ! Local variables

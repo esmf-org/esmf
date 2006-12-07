@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.83 2006/11/16 05:21:15 cdeluca Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.84 2006/12/07 05:32:42 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -263,7 +263,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.83 2006/11/16 05:21:15 cdeluca Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.84 2006/12/07 05:32:42 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -579,8 +579,8 @@
       type(ESMF_Grid),         intent(in   ) :: dstGrid
       type(ESMF_DomainList),   intent(inout) :: recvDomainList
       type(ESMF_VM),           intent(in   ) :: parentVM
-      type(ESMF_FieldDataMap), intent(in   ) :: srcDatamap
-      type(ESMF_FieldDataMap), intent(in   ) :: dstDatamap
+      type(ESMF_FieldDataMap), intent(inout) :: srcDatamap
+      type(ESMF_FieldDataMap), intent(inout) :: dstDatamap
       logical,                 intent(in   ), optional :: hasSrcData
       logical,                 intent(in   ), optional :: hasDstData
       type(ESMF_InternArray),        intent(in   ), optional :: srcArray
@@ -612,6 +612,10 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
 
       ! use optional arguments if present
       totalUse = .false.
@@ -824,8 +828,8 @@
       type(ESMF_InternArray),        intent(in   ), optional :: dstArray
       type (ESMF_Grid),         intent(in   ), optional :: srcGrid
       type (ESMF_Grid),         intent(in   ), optional :: dstGrid
-      type (ESMF_FieldDataMap), intent(in   ), optional :: srcDatamap
-      type (ESMF_FieldDataMap), intent(in   ), optional :: dstDatamap
+      type (ESMF_FieldDataMap), intent(inout), optional :: srcDatamap
+      type (ESMF_FieldDataMap), intent(inout), optional :: dstDatamap
       type (ESMF_RegridMethod), intent(in   ), optional :: method
       character (*),            intent(in   ), optional :: name
       integer,                  intent(  out), optional :: rc
@@ -1069,7 +1073,7 @@
       type(ESMF_DomainList),   intent(inout) :: domainList
       type(ESMF_InternArray),        intent(in   ) :: array
       type(ESMF_Grid),         intent(in   ) :: grid
-      type(ESMF_FieldDataMap), intent(in   ) :: dataMap
+      type(ESMF_FieldDataMap), intent(inout) :: dataMap
       logical,                 intent(in   ) :: total
       integer,                 intent(  out), optional :: rc
 !
@@ -1110,6 +1114,12 @@
       type(ESMF_AxisIndex), dimension(:), pointer :: thisAI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: allAI
       type(ESMF_DELayout) :: layout
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dataMap)
 
       call ESMF_GridGet(grid, delayout=layout, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
