@@ -70,7 +70,7 @@ module config_subrs
       integer, allocatable, dimension(:) :: ncol
       logical :: end
       real temp
-      type(ESMF_VM):: vm
+      type(ESMF_VM),save:: vm
       
       integer :: counter_total, counter_success
       integer :: rc_opening
@@ -1249,7 +1249,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.21 2006/11/16 05:20:57 cdeluca Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.22 2006/12/07 23:45:24 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
