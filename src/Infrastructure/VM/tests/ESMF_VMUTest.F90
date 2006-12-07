@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.17 2006/11/16 05:21:22 cdeluca Exp $
+! $Id: ESMF_VMUTest.F90,v 1.18 2006/12/07 23:46:30 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
       character(ESMF_MAXSTR) :: name
 
 !     !Module global variables
-      type(ESMF_VM):: vm
+      type(ESMF_VM),save :: vm
       integer:: localPet, npets
       integer, allocatable:: array1(:), array3(:),array3_soln(:)
       integer, dimension (:, :), allocatable:: array2
@@ -522,7 +522,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.17 2006/11/16 05:21:22 cdeluca Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.18 2006/12/07 23:46:30 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
