@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.87 2006/12/07 05:27:35 samsoncheung Exp $
+! $Id: ESMF_Bundle.F90,v 1.88 2006/12/07 19:33:29 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -207,10 +207,10 @@
        ! ESMF_BundleFieldAccess(Init) and (GetInit) are privite
 
        public ESMF_BundleFieldInterleaveInit     ! For Standardized Initialization
-       public ESMF_BundleFieldInterleaveValidate ! For Standardized Initialization
-       public ESMF_BundleFieldInterleaveGetInit  ! For Standardized Initialization
+       public ESMF_BundleFieldInterleaveVdt   ! For Standardized Initialization
+       public ESMF_BundleFieldInterleaveGtIn  ! For Standardized Initialization
 
-       ! public ESMF_BundleCongruentDataValidate  ! For Standardized Initialization
+       ! public ESMF_BundleCongruentDataVdt  ! For Standardized Initialization
        ! ESMF_BundleCongruentData(Init) and (GetInit) are privite
 
        public ESMF_LocalBundleInit     ! For Standardized Initialization
@@ -540,14 +540,14 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleFieldInterleaveGetInit"
+#define ESMF_METHOD "ESMF_BundleFieldInterleaveGtIn"
 
 ! !INTERFACE:
-    function ESMF_BundleFieldInterleaveGetInit(s)
+    function ESMF_BundleFieldInterleaveGtIn(s)
 !
 ! !ARGUMENTS:
        type(ESMF_BundleFieldInterleave), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_BundleFieldInterleaveGetInit
+       ESMF_INIT_TYPE :: ESMF_BundleFieldInterleaveGtIn
 !
 ! !DESCRIPTION:
 !      Get the initialization status of the shallow class {\tt bundlefieldinterleave}.
@@ -561,12 +561,12 @@ end interface
 !EOPI
 
        if (present(s)) then
-         ESMF_BundleFieldInterleaveGetInit = ESMF_INIT_GET(s)
+         ESMF_BundleFieldInterleaveGtIn = ESMF_INIT_GET(s)
        else
-         ESMF_BundleFieldInterleaveGetInit = ESMF_INIT_DEFINED
+         ESMF_BundleFieldInterleaveGtIn = ESMF_INIT_DEFINED
        endif
 
-    end function ESMF_BundleFieldInterleaveGetInit
+    end function ESMF_BundleFieldInterleaveGtIn
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -596,12 +596,12 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleFieldInterleaveValidate"
+#define ESMF_METHOD "ESMF_BundleFieldInterleaveVdt"
 !BOPI
-! !IROUTINE:  ESMF_BundleFieldInterleaveValidate - Check validity of a BundleFieldInterleave
+! !IROUTINE:  ESMF_BundleFieldInterleaveVdt - Check validity of a BundleFieldInterleave
 
 ! !INTERFACE:
-    subroutine ESMF_BundleFieldInterleaveValidate(s,rc)
+    subroutine ESMF_BundleFieldInterleaveVdt(s,rc)
 !
 ! !ARGUMENTS:
        type(ESMF_BundleFieldInterleave), intent(inout) :: s
@@ -621,14 +621,14 @@ end interface
 !
 !EOPI
 
-     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleFieldInterleaveGetInit,  &
+     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleFieldInterleaveGtIn,  &
                              ESMF_BundleFieldInterleaveInit,s)
 
      ! return success
      if(present(rc)) then
        rc = ESMF_SUCCESS
      endif
-    end subroutine ESMF_BundleFieldInterleaveValidate
+    end subroutine ESMF_BundleFieldInterleaveVdt
 
 
 !------------------------------------------------------------------------------
@@ -691,12 +691,12 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleCongruentDataValidate"
+#define ESMF_METHOD "ESMF_BundleCongruentDataVdt"
 !BOPI
-! !IROUTINE:  ESMF_BundleCongruentDataValidate - Check validity of a BundleCongruentData
+! !IROUTINE:  ESMF_BundleCongruentDataVdt - Check validity of a BundleCongruentData
 
 ! !INTERFACE:
-    subroutine ESMF_BundleCongruentDataValidate(s,rc)
+    subroutine ESMF_BundleCongruentDataVdt(s,rc)
 !
 ! !ARGUMENTS:
        type(ESMF_BundleCongruentData), intent(inout) :: s
@@ -722,7 +722,7 @@ end interface
      if(present(rc)) then
        rc = ESMF_SUCCESS
      endif
-    end subroutine ESMF_BundleCongruentDataValidate
+    end subroutine ESMF_BundleCongruentDataVdt
 
 
 !------------------------------------------------------------------------------
