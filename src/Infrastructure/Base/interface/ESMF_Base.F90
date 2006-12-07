@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.122 2006/11/16 05:20:55 cdeluca Exp $
+! $Id: ESMF_Base.F90,v 1.123 2006/12/07 23:23:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -8,8 +8,9 @@
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
+!==============================================================================
 #define ESMF_FILENAME "ESMF_Base.F90"
-
+!==============================================================================
 !
 ! ESMF Base Module
 !
@@ -25,14 +26,13 @@
 !------------------------------------------------------------------------------
 ! module definition
 
-      module ESMF_BaseMod
- 
-      ! parameters, types
-      use ESMF_UtilTypesMod
-      use ESMF_LogErrMod
-
+module ESMF_BaseMod
+!
+!------------------------------------------------------------------------------
+! INCLUDES
 #include "ESMF.h"
 
+!==============================================================================
 !BOPI
 ! !MODULE: ESMF_BaseMod - Base class for all ESMF classes
 !
@@ -46,26 +46,27 @@
 ! See the ESMF Developers Guide document for more details.
 !
 !------------------------------------------------------------------------------
-
 ! !USES:
-      implicit none
-!
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_LogErrMod        ! ESMF error handling
+
+  implicit none
+
+!------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
+  private
 
 !------------------------------------------------------------------------------
 !
-      ! Contains pointer to real Base object which is defined in C++
 
-      type ESMF_Base
-      sequence
-      !private
-#ifndef ESMF_NO_INITIALIZERS
-         type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
-#else
-         type(ESMF_Pointer) :: this
-#endif
-     end type
+  ! Contains pointer to real Base object which is defined in C++
+  type ESMF_Base
+  sequence
+  !private
+    type(ESMF_Pointer) :: this
+    ESMF_INIT_DECLARE
+  end type
 
 
 !------------------------------------------------------------------------------
@@ -73,12 +74,12 @@
 !    ! Dummy structure which must just be big enough to hold the values.
 !    ! actual data values will always be accessed on the C++ side.
 
-      type ESMF_Attribute
-      sequence
-      private
-          character (len=ESMF_MAXSTR) :: attr_name
-          type (ESMF_DataValue) :: attr_value
-      end type
+  type ESMF_Attribute
+  sequence
+  private
+    character(len=ESMF_MAXSTR)  :: attr_name
+    type(ESMF_DataValue)        :: attr_value
+  end type
 
 
 !------------------------------------------------------------------------------
@@ -110,6 +111,8 @@
 
        public ESMF_BasePrint
        public ESMF_BaseValidate
+       
+       public ESMF_BaseGetInit
 
 !   Virtual methods to be defined by derived classes
 !      public ESMF_Read
@@ -145,7 +148,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.122 2006/11/16 05:20:55 cdeluca Exp $'
+               '$Id: ESMF_Base.F90,v 1.123 2006/12/07 23:23:17 theurich Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -163,7 +166,7 @@
 ! !IROUTINE:  ESMF_BaseCreate - Create and initialize a Base object
 !
 ! !INTERFACE:
-      subroutine ESMF_BaseCreate(base, superclass, name, nattr, rc)
+  subroutine ESMF_BaseCreate(base, superclass, name, nattr, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base) :: base                 
@@ -198,24 +201,31 @@
 !
 !EOPI
 
-      integer :: status, allocNAttrs
+    integer :: status, allocNAttrs
 
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+    ! Initialize return code
+    if (present(rc)) rc = ESMF_FAILURE
 
-      allocNAttrs = 0   ! default value, overwrite if argument specified
-      if (present(nattr)) allocNAttrs = nattr
+    allocNAttrs = 0   ! default value, overwrite if argument specified
+    if (present(nattr)) allocNAttrs = nattr
 
-      if (present(name)) then
-          call c_ESMC_BaseCreate(base, superclass, name, allocNattrs, status)
-      else
-          !!call c_ESMC_BaseCreate(base, superclass, ESMF_NULL_POINTER, &
-          call c_ESMC_BaseCreate(base, superclass, "", allocNattrs, status)
-      endif
+    if (present(name)) then
+        call c_ESMC_BaseCreate(base, superclass, name, allocNattrs, status)
+    else
+        !!call c_ESMC_BaseCreate(base, superclass, ESMF_NULL_POINTER, &
+        call c_ESMC_BaseCreate(base, superclass, "", allocNattrs, status)
+    endif
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(base)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_BaseCreate
 
-      if (present(rc)) rc = status
-
-      end subroutine ESMF_BaseCreate
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -224,11 +234,11 @@
 ! !IROUTINE:  ESMF_BaseDestroy - Release resources from a Base object
 !
 ! !INTERFACE:
-      subroutine ESMF_BaseDestroy(base, rc)
+  subroutine ESMF_BaseDestroy(base, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base) :: base                 
-      integer, intent(out), optional :: rc     
+    type(ESMF_Base)                         :: base                 
+    integer,        intent(out),  optional  :: rc     
 
 !
 ! !DESCRIPTION:
@@ -243,21 +253,28 @@
 !
 !EOPI
 
-      logical :: rcpresent                          ! Return code present   
-      integer :: status
+    logical :: rcpresent                          ! Return code present   
+    integer :: status
 
-!     ! Initialize return code
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+    ! Initialize return code
+    rcpresent = .FALSE.
+    if(present(rc)) then
+      rcpresent = .TRUE.
+      rc = ESMF_FAILURE
+    endif
 
-      call c_ESMC_BaseDestroy(base, status)
+    call c_ESMC_BaseDestroy(base, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-      if (rcpresent) rc = status
+    ! Set init code
+    ESMF_INIT_SET_DELETED(base)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_BaseDestroy
 
-      end subroutine ESMF_BaseDestroy
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -266,7 +283,7 @@
 ! !IROUTINE:  ESMF_AttributeSet - set attribute on an ESMF type
 !
 ! !INTERFACE:
-      subroutine ESMF_AttributeSet(base, name, value, rc)
+  subroutine ESMF_AttributeSet(base, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: base
@@ -293,13 +310,17 @@
 !
 !EOPI
 
-      integer :: status 
+    integer :: status 
 
-      status = ESMF_FAILURE
-      !call c_ESMC_AttributeSet(base, name, value, status) 
-      if (present(rc)) rc = status
+    status = ESMF_FAILURE
+      
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)
+      
+    !call c_ESMC_AttributeSet(base, name, value, status) 
+    if (present(rc)) rc = status
 
-      end subroutine ESMF_AttributeSet
+  end subroutine ESMF_AttributeSet
 
 
 !-------------------------------------------------------------------------
@@ -309,7 +330,7 @@
 ! !IROUTINE:  ESMF_AttributeGet - get attribute from an ESMF type
 !
 ! !INTERFACE:
-      subroutine ESMF_AttributeGet(base, name, value, rc)
+  subroutine ESMF_AttributeGet(base, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: base 
@@ -336,13 +357,17 @@
 !
 !EOPI
 
-      integer :: status 
+    integer :: status 
 
-      status = ESMF_FAILURE
-      !call c_ESMC_AttributeGet(base, name, value, status) 
-      if (present(rc)) rc = status
+    status = ESMF_FAILURE
+      
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)
+      
+    !call c_ESMC_AttributeGet(base, name, value, status) 
+    if (present(rc)) rc = status
 
-      end subroutine ESMF_AttributeGet
+  end subroutine ESMF_AttributeGet
 
 
 !-------------------------------------------------------------------------
@@ -352,7 +377,7 @@
 ! !IROUTINE:  ESMF_AttributeGetCount - get an ESMF object's number of attributes
 !
 ! !INTERFACE:
-      subroutine ESMF_AttributeGetCount(anytype, count, rc)
+  subroutine ESMF_AttributeGetCount(anytype, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
@@ -375,13 +400,17 @@
 !
 !EOPI
 
-      integer :: status 
+    integer :: status 
 
-      status = ESMF_FAILURE
-      !call c_ESMC_AttributeGetCount(base, count, status) 
-      if (present(rc)) rc = status
+    status = ESMF_FAILURE
 
-      end subroutine ESMF_AttributeGetCount
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, anytype, rc)
+
+    !call c_ESMC_AttributeGetCount(base, count, status) 
+    if (present(rc)) rc = status
+
+  end subroutine ESMF_AttributeGetCount
 
 
 !-------------------------------------------------------------------------
@@ -391,7 +420,7 @@
 ! !IROUTINE:  ESMF_AttributeGetbyNumber - get an object attribute by number
 !
 ! !INTERFACE:
-      subroutine ESMF_AttributeGetbyNumber(anytype, number, name, type, value, rc)
+  subroutine ESMF_AttributeGetbyNumber(anytype, number, name, type, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype
@@ -425,13 +454,17 @@
 !     
 !
 !EOPI
-      integer :: status 
+    integer :: status 
 
-      status = ESMF_FAILURE
-      !call c_ESMC_AttributeGetbyNumber(base, number, name, value, status) 
-      if (present(rc)) rc = status
+    status = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, anytype, rc)
+    
+    !call c_ESMC_AttributeGetbyNumber(base, number, name, value, status) 
+    if (present(rc)) rc = status
 
-      end subroutine ESMF_AttributeGetbyNumber
+  end subroutine ESMF_AttributeGetbyNumber
 
 
 !-------------------------------------------------------------------------
@@ -441,7 +474,7 @@
 ! !IROUTINE:  ESMF_AttributeGetNameList - get an object attribute name list
 !
 ! !INTERFACE:
-      subroutine ESMF_AttributeGetNameList(anytype, count, namelist, rc)
+  subroutine ESMF_AttributeGetNameList(anytype, count, namelist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype
@@ -470,7 +503,7 @@
       !TODO: when code added here, change (inout) for namelist to just out.
       ! absoft compiler was unhappy.
 
-      end subroutine ESMF_AttributeGetNameList
+  end subroutine ESMF_AttributeGetNameList
 
 
 !-------------------------------------------------------------------------
@@ -480,7 +513,7 @@
 ! !IROUTINE:  ESMF_AttributeSetList - set an ESMF object's attributes 
 !
 ! !INTERFACE:
-      subroutine ESMF_AttributeSetList(anytype, namelist, valuelist, rc)
+  subroutine ESMF_AttributeSetList(anytype, namelist, valuelist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype
@@ -508,7 +541,7 @@
 !
 !EOPI
 
-      end subroutine ESMF_AttributeSetList
+  end subroutine ESMF_AttributeSetList
 
 
 !-------------------------------------------------------------------------
@@ -518,7 +551,7 @@
 ! !IROUTINE:  ESMF_AttributeGetList - get an objects attributes
 !
 ! !INTERFACE:
-      subroutine ESMF_AttributeGetList(anytype, namelist, typelist, valuelist, rc)
+  subroutine ESMF_AttributeGetList(anytype, namelist, typelist, valuelist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype
@@ -548,7 +581,7 @@
 !
 !EOPI
 
-      end subroutine ESMF_AttributeGetList
+  end subroutine ESMF_AttributeGetList
 
 
 !-------------------------------------------------------------------------
@@ -558,7 +591,7 @@
 ! !IROUTINE:  ESMF_AttributeSetObjectList - set an attribute on multiple ESMF objects 
 !
 ! !INTERFACE:
-      subroutine ESMF_AttributeSetObjectList(anytypelist, name, value, rc)
+  subroutine ESMF_AttributeSetObjectList(anytypelist, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), dimension (:), intent(in) :: anytypelist
@@ -584,7 +617,7 @@
 !
 !EOPI
 
-      end subroutine ESMF_AttributeSetObjectList
+  end subroutine ESMF_AttributeSetObjectList
 
 
 !-------------------------------------------------------------------------
@@ -594,7 +627,7 @@
 ! !IROUTINE:  ESMF_AttributeGetObjectList - get an attribute from multiple ESMF objects 
 !
 ! !INTERFACE:
-      subroutine ESMF_AttributeGetObjectList(anytypelist, name, typelist, valuelist, rc)
+  subroutine ESMF_AttributeGetObjectList(anytypelist, name, typelist, valuelist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), dimension (:), intent(in) :: anytypelist
@@ -623,7 +656,7 @@
 !
 !EOPI
 
-      end subroutine ESMF_AttributeGetObjectList
+  end subroutine ESMF_AttributeGetObjectList
 
 
 !-------------------------------------------------------------------------
@@ -633,7 +666,7 @@
 ! !IROUTINE:  ESMF_AttributeCopy - copy an attribute between two objects
 !
 ! !INTERFACE:
-      subroutine ESMF_AttributeCopy(name, source, destination, rc)
+  subroutine ESMF_AttributeCopy(name, source, destination, rc)
 !
 ! !ARGUMENTS:
       character (len = *), intent(in) :: name
@@ -662,7 +695,7 @@
 !
 !EOPI
 
-      end subroutine ESMF_AttributeCopy
+  end subroutine ESMF_AttributeCopy
 
 
 !-------------------------------------------------------------------------
@@ -672,7 +705,7 @@
 ! !IROUTINE:  ESMF_AttributeCopyAll - copy attributes between two objects
 !
 ! !INTERFACE:
-      subroutine ESMF_AttributeCopyAll(source, destination, rc)
+  subroutine ESMF_AttributeCopyAll(source, destination, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: source
@@ -699,7 +732,7 @@
 !
 !EOPI
 
-      end subroutine ESMF_AttributeCopyAll
+  end subroutine ESMF_AttributeCopyAll
 
 !-------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -709,7 +742,7 @@
 ! !IROUTINE:  ESMF_SetName - set the name of this object
 !
 ! !INTERFACE:
-      subroutine ESMF_SetName(base, name, namespace, rc)
+  subroutine ESMF_SetName(base, name, namespace, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base) :: base                 
@@ -767,7 +800,7 @@
 
       if (rcpresent) rc = status
 
-      end subroutine ESMF_SetName
+  end subroutine ESMF_SetName
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -776,7 +809,7 @@
 ! !IROUTINE:  ESMF_GetName - get the name of this object
 !
 ! !INTERFACE:
-      subroutine ESMF_GetName(base, name, rc)
+  subroutine ESMF_GetName(base, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: base
@@ -803,7 +836,7 @@
       call c_ESMC_GetName(base, name, status)
       if (present(rc)) rc = status
 
-      end subroutine ESMF_GetName
+  end subroutine ESMF_GetName
 
 
 !-------------------------------------------------------------------------
@@ -816,12 +849,12 @@
 ! !IROUTINE:  ESMF_BasePrint - Call into C++ code to print base object
 !
 ! !INTERFACE:
-      subroutine ESMF_BasePrint(base, options, rc)
+  subroutine ESMF_BasePrint(base, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: base
-      character(len=*), intent(in), optional :: options
-      integer, intent(out), optional :: rc
+    type(ESMF_Base),  intent(in)              :: base
+    character(len=*), intent(in),   optional  :: options
+    integer,          intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !  Interface to call through to C++ and print base object values.
@@ -838,25 +871,25 @@
 !
 !
 !EOPI
-      integer :: status
-      character(len=ESMF_MAXSTR) :: opts
+    integer                     :: localrc
+    character(len=ESMF_MAXSTR)  :: opts
 
-      if (present(options)) then
-          opts = options
-      else
-          opts = ''
-      endif
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)
 
-      if (base%this .eq. ESMF_NULL_POINTER) then
-        call ESMF_LogWrite("Uninitialized Base object", &
-                             ESMF_LOG_INFO) 
-        return
-      endif
+    if (present(options)) then
+        opts = options
+    else
+        opts = ''
+    endif
 
-      call c_ESMC_BasePrint(base, opts, status)
-      if (present(rc)) rc = status
+    call c_ESMC_BasePrint(base, opts, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-      end subroutine ESMF_BasePrint
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_BasePrint
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -865,12 +898,12 @@
 ! !IROUTINE:  ESMF_BaseValidate - Call into C++ code to print base object
 !
 ! !INTERFACE:
-      subroutine ESMF_BaseValidate(base, options, rc)
+  subroutine ESMF_BaseValidate(base, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: base
-      character(len=*), intent(in), optional :: options
-      integer, intent(out), optional :: rc
+    type(ESMF_Base),  intent(in)              :: base
+    character(len=*), intent(in),   optional  :: options
+    integer,          intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !  Interface to call through to C++ and validate base object values.
@@ -887,28 +920,62 @@
 !
 !
 !EOPI
-      integer :: status
-      character(len=ESMF_MAXSTR) :: opts
+    integer                     :: localrc
+    character(len=ESMF_MAXSTR)  :: opts
 
-      if (present(options)) then
-          opts = options
-      else
-          opts = ''
-      endif
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)
 
-      if (base%this .eq. ESMF_NULL_POINTER) then
-        call ESMF_LogWrite("Uninitialized Base object", &
-                             ESMF_LOG_INFO) 
-        rc = ESMF_FAILURE
-        return
-      endif
+    if (present(options)) then
+        opts = options
+    else
+        opts = ''
+    endif
 
-      call c_ESMC_BaseValidate(base, opts, status)
-      if (present(rc)) rc = status
+    call c_ESMC_BaseValidate(base, opts, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-      end subroutine ESMF_BaseValidate
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
+  end subroutine ESMF_BaseValidate
 !------------------------------------------------------------------------------
 
 
-      end module ESMF_BaseMod
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseGetInit"
+!BOPI
+! !IROUTINE: ESMF_BaseGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+  function ESMF_BaseGetInit(base) 
+!
+! !RETURN VALUE:
+    ESMF_INIT_TYPE :: ESMF_BaseGetInit   
+!
+! !ARGUMENTS:
+    type(ESMF_Base), intent(in), optional :: base
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [base]
+!           Base object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(base)) then
+      ESMF_BaseGetInit = ESMF_INIT_GET(base)
+    else
+      ESMF_BaseGetInit = ESMF_INIT_CREATED
+    endif
+
+  end function ESMF_BaseGetInit
+!------------------------------------------------------------------------------
+
+end module ESMF_BaseMod

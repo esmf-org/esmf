@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.9 2006/12/04 23:41:53 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.10 2006/12/07 23:23:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -101,6 +101,7 @@ module ESMF_DistGridMod
 
 ! - ESMF-private methods:
   public ESMF_DistGridGetInit
+  public ESMF_DistGridSetInitCreated
   
   
 !EOPI
@@ -109,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.9 2006/12/04 23:41:53 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.10 2006/12/07 23:23:18 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2257,6 +2258,13 @@ contains
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
+    ! Set init code for deep C++ objects
+    if (present(delayout)) then
+      call ESMF_DELayoutSetInitCreated(delayout, rc=status)
+      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
     ! garbage collection
     call ESMF_InterfaceIntDestroy(patchListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -2613,6 +2621,49 @@ contains
     endif
 
     end function ESMF_DistGridGetInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridSetInitCreated()"
+!BOPI
+! !IROUTINE: ESMF_DistGridSetInitCreated - Set DistGrid init code to "CREATED"
+
+! !INTERFACE:
+  subroutine ESMF_DistGridSetInitCreated(distgrid, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid),  intent(inout)           :: distgrid
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in DistGrid object to "CREATED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Specified {\tt ESMF\_DistGrid} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(distgrid)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_DistGridSetInitCreated
 !------------------------------------------------------------------------------
 
 

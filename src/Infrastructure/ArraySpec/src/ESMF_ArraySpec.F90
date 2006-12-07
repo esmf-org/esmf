@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.14 2006/11/16 05:20:55 cdeluca Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.15 2006/12/07 23:23:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -9,21 +9,22 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-!
 #define ESMF_FILENAME "ESMF_ArraySpec.F90"
+!==============================================================================
 !
-! ESMF ArraySpec module
-      module ESMF_ArraySpecMod
+! ESMF ArraySpec Module
+module ESMF_ArraySpecMod
 !
 !==============================================================================
 !
 ! This file contains the ArraySpec class definition and all ArraySpec
 ! class methods.
 !
-
+!------------------------------------------------------------------------------
+! INCLUDES
 #include "ESMF.h"
 
-!------------------------------------------------------------------------------
+!==============================================================================
 !BOPI
 ! !MODULE: ESMF_ArraySpecMod - Manage data arrays uniformly between F90 and C++
 !
@@ -41,48 +42,55 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_UtilTypesMod    ! ESMF base class
-      use ESMF_BaseMod
-      use ESMF_LogErrMod
-      implicit none
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error handling
+
+  implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
+  private
 
 !------------------------------------------------------------------------------
 ! ! ESMF_ArraySpec
 !
 ! ! Data array specification, with no associated data buffer.
 
-      type ESMF_ArraySpec
-      sequence
-      private
-
-        integer :: rank             ! number of dimensions
-        type(ESMF_DataType) :: type ! real/float, integer, etc enum
-        type(ESMF_DataKind) :: kind ! fortran "kind" enum/integer
-
-      end type
+  type ESMF_ArraySpec
+  sequence
+  private
+    integer             :: rank   ! number of dimensions
+    type(ESMF_DataType) :: type   ! real/float, integer, etc enum
+    type(ESMF_DataKind) :: kind   ! fortran "kind" enum/integer
+    ESMF_INIT_DECLARE
+  end type
 
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_ArraySpec
+  public ESMF_ArraySpec
 
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_ArraySpecSet
-      public ESMF_ArraySpecGet
+! - ESMF-public methods:
+  public ESMF_ArraySpecSet
+  public ESMF_ArraySpecGet
+  public ESMF_ArraySpecValidate
+
+! - ESMF-private methods:
+  public ESMF_ArraySpecInit
+  public ESMF_ArraySpecGetInit
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter, private :: version = &
-      '$Id: ESMF_ArraySpec.F90,v 1.14 2006/11/16 05:20:55 cdeluca Exp $'
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_ArraySpec.F90,v 1.15 2006/12/07 23:23:17 theurich Exp $'
 
 !==============================================================================
 !
@@ -95,23 +103,23 @@
 ! !IROUTINE: ESMF_ArraySpecSet - Set the contents of an ArraySpec 
 !
 ! !INTERFACE:
-      interface ESMF_ArraySpecSet
+  interface ESMF_ArraySpecSet
   
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_ArraySpecSetThree
-        module procedure ESMF_ArraySpecSetTwo
+    module procedure ESMF_ArraySpecSetThree
+    module procedure ESMF_ArraySpecSetTwo
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that sets
 !     an {\tt ESMF\_ArraySpec}.
 
-      end interface
+  end interface
 !EOPI
 !
 
 !==============================================================================
 
-      contains
+  contains
 
 !==============================================================================
 
@@ -121,14 +129,14 @@
 ! !IROUTINE: ESMF_ArraySpecGet - Get values from an ArraySpec
 !
 ! !INTERFACE:
-      subroutine ESMF_ArraySpecGet(arrayspec, rank, type, kind, rc)
+  subroutine ESMF_ArraySpecGet(arrayspec, rank, type, kind, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArraySpec), intent(in) :: arrayspec
-      integer, intent(out), optional :: rank
-      type(ESMF_DataType), intent(out), optional :: type
-      type(ESMF_DataKind), intent(out), optional :: kind
-      integer, intent(out), optional :: rc
+    type(ESMF_ArraySpec), intent(in)            :: arrayspec
+    integer,              intent(out), optional :: rank
+    type(ESMF_DataType),  intent(out), optional :: type
+    type(ESMF_DataKind),  intent(out), optional :: kind
+    integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Returns information about the contents of an {\tt ESMF\_ArraySpec}.
@@ -154,27 +162,30 @@
 !
 !EOP
 
-        ! Local vars
-        integer :: status ! local error status
-        logical :: rcpresent ! did user specify rc?
+    ! Local vars
+    integer :: status ! local error status
+    logical :: rcpresent ! did user specify rc?
 
-        ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+    ! Initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
 
-        ! Get arrayspec contents
+    ! Get arrayspec contents
+    if(present(rank)) rank = arrayspec%rank
+    if(present(type)) type = arrayspec%type
+    if(present(kind)) kind = arrayspec%kind
 
-        if(present(rank)) rank = arrayspec%rank
-        if(present(type)) type = arrayspec%type
-        if(present(kind)) kind = arrayspec%kind
+    ! Return successfully
+    if (rcpresent) rc = ESMF_SUCCESS
 
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArraySpecGet
+  end subroutine ESMF_ArraySpecGet
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -184,15 +195,15 @@
 !
 ! !INTERFACE:
      ! Private name; call using ESMF_ArraySpecSet()
-     subroutine ESMF_ArraySpecSetThree(arrayspec, rank, type, kind, rc)
+  subroutine ESMF_ArraySpecSetThree(arrayspec, rank, type, kind, rc)
 !
 !
 ! !ARGUMENTS:
-     type(ESMF_ArraySpec), intent(inout) :: arrayspec
-     integer, intent(in) :: rank
-     type(ESMF_DataType), intent(in) :: type
-     type(ESMF_DataKind), intent(in) :: kind
-     integer, intent(out), optional :: rc
+    type(ESMF_ArraySpec), intent(inout)         :: arrayspec
+    integer,              intent(in)            :: rank
+    type(ESMF_DataType),  intent(in)            :: type
+    type(ESMF_DataKind),  intent(in)            :: kind
+    integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Creates a description of the data -- the type, the dimensionality, etc.
@@ -219,39 +230,42 @@
 !
 !EOP
 
-        ! Local vars
-        integer :: status ! local error status
-        logical :: rcpresent ! did user specify rc?
+    ! Local vars
+    integer :: status ! local error status
+    logical :: rcpresent ! did user specify rc?
 
-        ! Initialize pointer
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
+    ! Initialize pointer
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
 
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) then
+      rcpresent = .TRUE.
+      rc = ESMF_FAILURE
+    endif
 
-        ! Set arrayspec contents with some checking to keep Silverio at bay
-        if (rank.ge.1 .and. rank.le.ESMF_MAXDIM) then
-          arrayspec%rank = rank
-        else
-          ! something to trigger on next time that this is bad
-          arrayspec%rank = 0
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "bad value for rank", &
-                                 ESMF_CONTEXT, rc)) return
-        endif
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
 
-        ! Since type and kind are derived types, you cannot set them to
-        ! illegal values, so no additional tests are needed.
-        arrayspec%type = type
-        arrayspec%kind = kind
+    ! Set arrayspec contents with some checking to keep Silverio at bay
+    if (rank.ge.1 .and. rank.le.ESMF_MAXDIM) then
+      arrayspec%rank = rank
+    else
+      ! something to trigger on next time that this is bad
+      arrayspec%rank = 0
+      if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                            "bad value for rank", &
+                             ESMF_CONTEXT, rc)) return
+    endif
 
-        if (rcpresent) rc = ESMF_SUCCESS
+    ! Since type and kind are derived types, you cannot set them to
+    ! illegal values, so no additional tests are needed.
+    arrayspec%type = type
+    arrayspec%kind = kind
 
-        end subroutine ESMF_ArraySpecSetThree
+    if (rcpresent) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArraySpecSetThree
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -261,13 +275,13 @@
 !
 ! !INTERFACE:
      ! Private name; call using ESMF_ArraySpecSet()
-     subroutine ESMF_ArraySpecSetTwo(arrayspec, rank, typekind, rc)
+  subroutine ESMF_ArraySpecSetTwo(arrayspec, rank, typekind, rc)
 !
 ! !ARGUMENTS:
-     type(ESMF_ArraySpec), intent(inout) :: arrayspec
-     integer, intent(in) :: rank
-     type(ESMF_DataKind), intent(in) :: typekind
-     integer, intent(out), optional :: rc
+    type(ESMF_ArraySpec), intent(inout)         :: arrayspec
+    integer,              intent(in)            :: rank
+    type(ESMF_DataKind),  intent(in)            :: typekind
+    integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Creates a description of the data -- the type, the dimensionality, etc.
@@ -291,60 +305,181 @@
 !
 !EOPI
 
-        ! Local vars
-        integer :: status ! local error status
-        logical :: rcpresent ! did user specify rc?
+    ! Local vars
+    integer :: status ! local error status
+    logical :: rcpresent ! did user specify rc?
 
-        ! Initialize pointer
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
+    ! Initialize pointer
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
 
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) then
+      rcpresent = .TRUE.
+      rc = ESMF_FAILURE
+    endif
 
-        ! Set arrayspec contents with some checking to keep Silverio at bay
-        if (rank.ge.1 .and. rank.le.ESMF_MAXDIM) then
-          arrayspec%rank = rank
-        else
-          ! something to trigger on next time that this is bad
-          arrayspec%rank = 0
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "bad value for rank", &
-                                 ESMF_CONTEXT, rc)) return
-        endif
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
 
-        ! Since type and kind are derived types, you cannot set them to
-        ! illegal values, so no additional validity tests are needed.
-        arrayspec%kind = typekind
-        select case (typekind%dkind)
+    ! Set arrayspec contents with some checking to keep Silverio at bay
+    if (rank.ge.1 .and. rank.le.ESMF_MAXDIM) then
+      arrayspec%rank = rank
+    else
+      ! something to trigger on next time that this is bad
+      arrayspec%rank = 0
+      if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                            "bad value for rank", &
+                             ESMF_CONTEXT, rc)) return
+    endif
+
+    ! Since type and kind are derived types, you cannot set them to
+    ! illegal values, so no additional validity tests are needed.
+    arrayspec%kind = typekind
+    select case (typekind%dkind)
 #ifndef ESMF_NO_INTEGER_1_BYTE 
-          case (ESMF_I1%dkind)
-            arrayspec%type = ESMF_DATA_INTEGER
+    case (ESMF_I1%dkind)
+      arrayspec%type = ESMF_DATA_INTEGER
 #endif
 #ifndef ESMF_NO_INTEGER_2_BYTE 
-          case (ESMF_I2%dkind)
-            arrayspec%type = ESMF_DATA_INTEGER
+    case (ESMF_I2%dkind)
+      arrayspec%type = ESMF_DATA_INTEGER
 #endif
-          case (ESMF_I4%dkind)
-            arrayspec%type = ESMF_DATA_INTEGER
-          case (ESMF_I8%dkind)
-            arrayspec%type = ESMF_DATA_INTEGER
-          case (ESMF_R4%dkind)
-            arrayspec%type = ESMF_DATA_REAL
-          case (ESMF_R8%dkind)
-            arrayspec%type = ESMF_DATA_REAL
-          case (ESMF_C8%dkind)
-            arrayspec%type = ESMF_DATA_COMPLEX
-          case (ESMF_C16%dkind)
-            arrayspec%type = ESMF_DATA_COMPLEX
-         end select
+    case (ESMF_I4%dkind)
+      arrayspec%type = ESMF_DATA_INTEGER
+    case (ESMF_I8%dkind)
+      arrayspec%type = ESMF_DATA_INTEGER
+    case (ESMF_R4%dkind)
+      arrayspec%type = ESMF_DATA_REAL
+    case (ESMF_R8%dkind)
+      arrayspec%type = ESMF_DATA_REAL
+    case (ESMF_C8%dkind)
+      arrayspec%type = ESMF_DATA_COMPLEX
+    case (ESMF_C16%dkind)
+      arrayspec%type = ESMF_DATA_COMPLEX
+    end select
 
-        if (rcpresent) rc = ESMF_SUCCESS
+    if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArraySpecSetTwo
+  end subroutine ESMF_ArraySpecSetTwo
 
 
-        end module ESMF_ArraySpecMod
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySpecValidate()"
+!BOP
+! !IROUTINE: ESMF_ArraySpecValidate - Validate ArraySpec internals
+
+! !INTERFACE:
+  subroutine ESMF_ArraySpecValidate(arrayspec, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArraySpec), intent(in)              :: arrayspec
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Validates that the {\tt arrayspec} is internally consistent.
+!      The method returns an error code if problems are found.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[arrayspec] 
+!          Specified {\tt ESMF\_ArraySpec} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
+    
+    ! Call into the C++ interface, which will sort out optional arguments.
+    !todo: call c_ESMC_ArraySpecValidate(arrayspec, localrc)
+    localrc = ESMF_SUCCESS  ! remove when todo is done.
+    
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_ArraySpecValidate
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySpecInit()"
+!BOPI
+! !IROUTINE: ESMF_ArraySpecInit - Init ArraySpec internals
+
+! !INTERFACE:
+  subroutine ESMF_ArraySpecInit(arrayspec)
+!
+! !ARGUMENTS:
+    type(ESMF_ArraySpec), intent(inout)              :: arrayspec
+!         
+!
+! !DESCRIPTION:
+!      Initialize ArraySpec internals.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[arrayspec] 
+!          Specified {\tt ESMF\_ArraySpec} object.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    ESMF_INIT_SET_DEFINED(arrayspec)
+  end subroutine ESMF_ArraySpecInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySpecGetInit"
+!BOPI
+! !IROUTINE: ESMF_ArraySpecGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+  function ESMF_ArraySpecGetInit(arrayspec) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_ArraySpecGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_ArraySpec), intent(in), optional :: arrayspec
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [arrayspec]
+!           ArraySpec object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(arrayspec)) then
+      ESMF_ArraySpecGetInit = ESMF_INIT_GET(arrayspec)
+    else
+      ESMF_ArraySpecGetInit = ESMF_INIT_DEFINED
+    endif
+
+  end function ESMF_ArraySpecGetInit
+!------------------------------------------------------------------------------
+
+
+end module ESMF_ArraySpecMod

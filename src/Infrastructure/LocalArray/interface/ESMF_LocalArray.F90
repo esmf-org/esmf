@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.23 2006/11/16 05:21:06 cdeluca Exp $
+! $Id: ESMF_LocalArray.F90,v 1.24 2006/12/07 23:23:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -10,17 +10,16 @@
 !
 !==============================================================================
 #define ESMF_FILENAME "ESMF_LocalArray.F90"
+!==============================================================================
 !
 ! ESMF LocalArray module
-      module ESMF_LocalArrayMod
+module ESMF_LocalArrayMod
 !
 !==============================================================================
 !
 ! This file contains the sub modules for LocalArray class definition and methods
 !
 !------------------------------------------------------------------------------
-      use ESMF_LocalArrayCreateMod
-      use ESMF_LocalArrayGetMod
-
-
-      end module ESMF_LocalArrayMod
+  use ESMF_LocalArrayCreateMod
+  use ESMF_LocalArrayGetMod
+end module ESMF_LocalArrayMod

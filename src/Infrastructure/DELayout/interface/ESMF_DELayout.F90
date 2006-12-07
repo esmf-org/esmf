@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.60 2006/12/04 23:21:34 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.61 2006/12/07 23:23:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -112,7 +112,9 @@ module ESMF_DELayoutMod
   public ESMF_DELayoutSerialize
   public ESMF_DELayoutDeserialize
 
+! - ESMF-private methods:
   public ESMF_DELayoutGetInit
+  public ESMF_DELayoutSetInitCreated
 
 ! - depricated methods
   public ESMF_DELayoutGetVM
@@ -130,7 +132,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.60 2006/12/04 23:21:34 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.61 2006/12/07 23:23:17 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -890,6 +892,13 @@ end function
       opt_vasLocalDeList(1), len_vasLocalDeList, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Set init code for deep C++ objects
+    if (present(vm)) then
+      call ESMF_VMSetInitCreated(vm, rc=status)
+      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
     
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1313,10 +1322,16 @@ end function
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutGetVM(delayout, vm, localrc)
-
-    ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set init code for deep C++ objects
+    call ESMF_VMSetInitCreated(vm, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_DELayoutGetVM
 !------------------------------------------------------------------------------
@@ -1725,13 +1740,17 @@ end function
 
     integer :: localrc
 
-    call c_ESMC_DELayoutDeserialize(ESMF_DELayoutDeserialize%this, &
-                                    buffer(1), offset, localrc)
-
-    ! Use LogErr to handle return code
+    call c_ESMC_DELayoutDeserialize(ESMF_DELayoutDeserialize%this, buffer(1), &
+      offset, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DELayoutDeserialize)
 
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
     end function ESMF_DELayoutDeserialize
 !------------------------------------------------------------------------------
 
@@ -1769,6 +1788,49 @@ end function
     endif
 
     end function ESMF_DELayoutGetInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutSetInitCreated()"
+!BOPI
+! !IROUTINE: ESMF_DELayoutSetInitCreated - Set DELayout init code to "CREATED"
+
+! !INTERFACE:
+  subroutine ESMF_DELayoutSetInitCreated(delayout, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),  intent(inout)           :: delayout
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in DELayout object to "CREATED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          Specified {\tt ESMF\_DELayout} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(delayout)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_DELayoutSetInitCreated
 !------------------------------------------------------------------------------
 
 

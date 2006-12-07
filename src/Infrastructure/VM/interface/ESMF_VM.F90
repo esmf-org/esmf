@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.81 2006/12/05 20:47:36 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.82 2006/12/07 23:23:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -181,7 +181,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.81 2006/12/05 20:47:36 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.82 2006/12/07 23:23:19 theurich Exp $"
 
 !==============================================================================
 
@@ -3146,10 +3146,14 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGetCurrent(vm, localrc)
-
-    ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Set init code
+    ESMF_INIT_SET_CREATED(vm)
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGetCurrent
 !------------------------------------------------------------------------------
@@ -6015,7 +6019,7 @@ module ESMF_VMMod
     ! Set init code
     ESMF_INIT_SET_CREATED(GlobalVM)
 
-    ! Return success
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMInitialize
@@ -6213,7 +6217,7 @@ module ESMF_VMMod
   subroutine ESMF_VMSetInitCreated(vm, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),  intent(in)              :: vm
+    type(ESMF_VM),  intent(inout)           :: vm
     integer,        intent(out),  optional  :: rc  
 !         
 !

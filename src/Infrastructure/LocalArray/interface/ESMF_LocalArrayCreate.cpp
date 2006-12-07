@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cpp,v 1.3 2006/11/16 05:21:07 cdeluca Exp $
+! $Id: ESMF_LocalArrayCreate.cpp,v 1.4 2006/12/07 23:23:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -10,9 +10,10 @@
 !
 !==============================================================================
 ^define ESMF_FILENAME "ESMF_LocalArrayCreate.F90"
+!==============================================================================
 !
-!     ESMF LocalArrayCreate module
-      module ESMF_LocalArrayCreateMod
+! ESMF LocalArrayCreate module
+module ESMF_LocalArrayCreateMod
 !
 !==============================================================================
 !
@@ -46,121 +47,121 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_UtilTypesMod
-      use ESMF_BaseMod
-      use ESMF_LogErrMod
-      use ESMF_IOSpecMod
-      use ESMF_ArraySpecMod
-      implicit none
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_IOSpecMod
+  use ESMF_ArraySpecMod
+
+  implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
+  private
 !------------------------------------------------------------------------------
-!     ! ESMF_CopyFlag
-!
-!     ! Indicates whether a data array should be copied or referenced. 
-!     !  This matches an enum on the C++ side and the values must match.
-!     !  Update ../include/ESMC_LocalArray.h if you change these values.
+  ! ESMF_CopyFlag
 
-      type ESMF_CopyFlag
-      sequence
-      private
-        integer :: docopy
-      end type
+  ! Indicates whether a data array should be copied or referenced. 
+  !  This matches an enum on the C++ side and the values must match.
+  !  Update ../include/ESMC_LocalArray.h if you change these values.
 
-      type(ESMF_CopyFlag), parameter :: & 
-                            ESMF_DATA_COPY  = ESMF_CopyFlag(1), &
-                            ESMF_DATA_REF   = ESMF_CopyFlag(2), &
-                            ESMF_DATA_DEFER = ESMF_CopyFlag(3), &
-                            ESMF_DATA_SPACE = ESMF_CopyFlag(4), &
-                            ESMF_DATA_NONE  = ESMF_CopyFlag(5)  ! private
+  type ESMF_CopyFlag
+  sequence
+  private
+    integer :: docopy
+  end type
 
-!------------------------------------------------------------------------------
-!     ! ESMF_LocalArrayOrigin
-!
-!     ! Private flag which indicates the create was initiated on the F90 side.
-!     !  This matches an enum on the C++ side and the values must match.
-!     !  Update ../include/ESMC_LocalArray.h if you change these values.
-
-      type ESMF_LocalArrayOrigin
-      sequence
-      private
-        integer :: origin
-      end type
-
-      type(ESMF_LocalArrayOrigin), parameter :: & 
-                            ESMF_FROM_FORTRAN   = ESMF_LocalArrayOrigin(1), &
-                            ESMF_FROM_CPLUSPLUS = ESMF_LocalArrayOrigin(2)
+  type(ESMF_CopyFlag), parameter :: & 
+    ESMF_DATA_COPY  = ESMF_CopyFlag(1), &
+    ESMF_DATA_REF   = ESMF_CopyFlag(2), &
+    ESMF_DATA_DEFER = ESMF_CopyFlag(3), &
+    ESMF_DATA_SPACE = ESMF_CopyFlag(4), &
+    ESMF_DATA_NONE  = ESMF_CopyFlag(5)    ! this value is _not_ public
 
 !------------------------------------------------------------------------------
-!     ! ESMF_LocalArray
-!
-!     ! LocalArray data type.  All information is kept on the C++ side inside
-!     ! the class structure.
+  ! ESMF_LocalArrayOrigin
 
-      type ESMF_LocalArray
-      sequence
-      !!private
-        ! opaque pointer to the C++ class data
-        ! disable this for now - it causes too many compiler problems
-#if !defined(ESMF_NO_INITIALIZERS) && (0)
-        type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
-#else
-        type(ESMF_Pointer) :: this
-#endif
-      end type
+  ! Private flag which indicates the create was initiated on the F90 side.
+  !  This matches an enum on the C++ side and the values must match.
+  !  Update ../include/ESMC_LocalArray.h if you change these values.
+
+  type ESMF_LocalArrayOrigin
+  sequence
+  private
+    integer :: origin
+  end type
+
+  type(ESMF_LocalArrayOrigin), parameter :: & 
+    ESMF_FROM_FORTRAN   = ESMF_LocalArrayOrigin(1), &
+    ESMF_FROM_CPLUSPLUS = ESMF_LocalArrayOrigin(2)
 
 !------------------------------------------------------------------------------
-!     ! Internal wrapper structures for passing f90 pointers to C++ and
-!     ! guaranteeing they are passed by reference on all compilers and all
-!     ! platforms.  These are never seen outside this module.
-!
-      ! < these expand into defined type declarations >
+  ! ESMF_LocalArray
+ 
+  ! LocalArray data type.  All information is kept on the C++ side inside
+  ! the class structure.
+
+  type ESMF_LocalArray
+  sequence
+  !private
+    type(ESMF_Pointer) :: this
+    ESMF_INIT_DECLARE
+  end type
+
+!------------------------------------------------------------------------------
+  ! Internal wrapper structures for passing f90 pointers to C++ and
+  ! guaranteeing they are passed by reference on all compilers and all
+  ! platforms.  These are never seen outside this module.
+
+  ! < these expand into defined type declarations >
 AllTypesMacro(LocalArrayType)
 
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_CopyFlag, ESMF_DATA_COPY, ESMF_DATA_REF, ESMF_DATA_SPACE
-      public ESMF_LocalArray
+  public ESMF_CopyFlag, ESMF_DATA_COPY, ESMF_DATA_REF, ESMF_DATA_SPACE
+  public ESMF_LocalArray
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_LocalArrayCreate
-      public ESMF_LocalArrayDestroy
- 
+  public ESMF_LocalArrayCreate
+  public ESMF_LocalArrayDestroy
 
-      public ESMF_LocalArraySetData
-      public ESMF_LocalArraySetInfo, ESMF_LocalArrayGetInfo
-      public ESMF_LocalArrayGet, ESMF_LocalArrayGetName
+  public ESMF_LocalArraySetData
+  public ESMF_LocalArraySetInfo, ESMF_LocalArrayGetInfo
+  public ESMF_LocalArrayGet, ESMF_LocalArrayGetName
  
-      public ESMF_LocalArrayF90Allocate
-      public ESMF_LocalArrayF90Deallocate
-      public ESMF_LocalArrConstrF90Ptr    ! needed for C++ callback only
+  public ESMF_LocalArrayF90Allocate
+  public ESMF_LocalArrayF90Deallocate
+  public ESMF_LocalArrConstrF90Ptr    ! needed for C++ callback only
 
-      public ESMF_LocalArraySlice
-      !public ESMF_LocalArrayReshape
+  public ESMF_LocalArraySlice
+  !public ESMF_LocalArrayReshape
 
-      public ESMF_LocalArrayWriteRestart
-      public ESMF_LocalArrayReadRestart
-      public ESMF_LocalArrayWrite
-      public ESMF_LocalArrayRead
-      !public ESMF_LocalArraySerialize, ESMF_LocalArraySerializeNoData
-      !public ESMF_LocalArrayDeserialize, ESMF_LocalArrayDeserializeNoData
+  public ESMF_LocalArrayWriteRestart
+  public ESMF_LocalArrayReadRestart
+  public ESMF_LocalArrayWrite
+  public ESMF_LocalArrayRead
+  !public ESMF_LocalArraySerialize, ESMF_LocalArraySerializeNoData
+  !public ESMF_LocalArrayDeserialize, ESMF_LocalArrayDeserializeNoData
  
-      public ESMF_LocalArrayValidate
-      public ESMF_LocalArrayPrint
-      
-      public ESMF_LocalArrayAdjust
+  public ESMF_LocalArrayValidate
+  public ESMF_LocalArrayPrint
+  
+  public ESMF_LocalArrayAdjust
 !EOPI
-      public operator(.eq.), operator(.ne.)
+  public ESMF_LocalArrayGetInit
+  public ESMF_LocalArraySetInitCreated
+  public ESMF_LocalArrayGetThis
+  public ESMF_LocalArraySetThis
+  public operator(.eq.), operator(.ne.)
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArrayCreate.cpp,v 1.3 2006/11/16 05:21:07 cdeluca Exp $'
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_LocalArrayCreate.cpp,v 1.4 2006/12/07 23:23:19 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -282,20 +283,20 @@ end function
 
 ! !INTERFACE:
       ! Private name; call using ESMF_LocalArrayCreate()
-      function ESMF_LocalArrayCreateByLst1D(rank, type, kind, counts, &
-                                            lbounds, ubounds, rc)
+  function ESMF_LocalArrayCreateByLst1D(rank, type, kind, counts, lbounds, &
+    ubounds, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByLst1D
+    type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByLst1D
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: rank
-      type(ESMF_DataType), intent(in) :: type
-      type(ESMF_DataKind), intent(in) :: kind
-      integer, intent(in) :: counts   !! this is what differs from ...ByList
-      integer, intent(in), optional :: lbounds
-      integer, intent(in), optional :: ubounds
-      integer, intent(out), optional :: rc
+    integer, intent(in) :: rank
+    type(ESMF_DataType), intent(in) :: type
+    type(ESMF_DataKind), intent(in) :: kind
+    integer, intent(in) :: counts   !! this is what differs from ...ByList
+    integer, intent(in), optional :: lbounds
+    integer, intent(in), optional :: ubounds
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Create a new {\tt ESMF\_LocalArray} and allocate data space, which remains
@@ -330,19 +331,28 @@ end function
 !
 !EOPI
 
-        integer, dimension(1) :: countlist
-        integer, dimension(1) :: lb, ub
+    integer               :: localrc      ! local return code
+    integer, dimension(1) :: countlist
+    integer, dimension(1) :: lb, ub
 
-        countlist(1) = counts
-        lb(1) = 1
-        if (present(lbounds)) lb(1) = lbounds
-        ub(1) = counts
-        if (present(ubounds)) ub(1) = ubounds
-        
-        ESMF_LocalArrayCreateByLst1D = ESMF_LocalArrayCreateByList(rank, &
-                                             type, kind, countlist, lb, ub, rc)
+    countlist(1) = counts
+    lb(1) = 1
+    if (present(lbounds)) lb(1) = lbounds
+    ub(1) = counts
+    if (present(ubounds)) ub(1) = ubounds
+    
+    ESMF_LocalArrayCreateByLst1D = ESMF_LocalArrayCreateByList(rank, &
+      type, kind, countlist, lb, ub, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_LocalArrayCreateByLst1D)
 
-        end function ESMF_LocalArrayCreateByLst1D
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_LocalArrayCreateByLst1D
 
 
 !------------------------------------------------------------------------------
@@ -353,20 +363,20 @@ end function
 
 ! !INTERFACE:
       ! Private name; call using ESMF_LocalArrayCreate()
-      function ESMF_LocalArrayCreateByList(rank, type, kind, counts, &
-                                           lbounds, ubounds, rc)
+  function ESMF_LocalArrayCreateByList(rank, type, kind, counts, lbounds, &
+    ubounds, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByList
+    type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByList
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: rank
-      type(ESMF_DataType), intent(in) :: type
-      type(ESMF_DataKind), intent(in) :: kind
-      integer, dimension(:), intent(in) :: counts
-      integer, dimension(:), intent(in), optional :: lbounds
-      integer, dimension(:), intent(in), optional :: ubounds
-      integer, intent(out), optional :: rc 
+    integer, intent(in) :: rank
+    type(ESMF_DataType), intent(in) :: type
+    type(ESMF_DataKind), intent(in) :: kind
+    integer, dimension(:), intent(in) :: counts
+    integer, dimension(:), intent(in), optional :: lbounds
+    integer, dimension(:), intent(in), optional :: ubounds
+    integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_LocalArray} and allocate data space, which remains
@@ -397,48 +407,50 @@ end function
 !
 !EOP
 
-        ! Local vars
-        type (ESMF_LocalArray) :: array     ! new C++ LocalArray
-        integer, dimension(ESMF_MAXDIM) :: lb, ub  ! local bounds
-        integer :: status                   ! local error status
-        logical :: rcpresent                ! did user specify rc?
+    ! Local vars
+    integer                 :: localrc          ! local return code
+    type (ESMF_LocalArray)  :: array            ! new C++ LocalArray
+    integer, dimension(ESMF_MAXDIM) :: lb, ub   ! local bounds
 
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        array%this = ESMF_NULL_POINTER
+    array%this = ESMF_NULL_POINTER
 
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_FAILURE
 
-        ! Assume defaults first, then alter if lb or ub specified. 
-        lb = 1
-        ub(1:size(counts)) = counts
-        if (present(lbounds)) then 
-            lb(1:size(lbounds)) = lbounds
-        endif 
-        if (present(ubounds)) then 
-            ub(1:size(ubounds)) = ubounds
-        endif 
+    ! Assume defaults first, then alter if lb or ub specified. 
+    lb = 1
+    ub(1:size(counts)) = counts
+    if (present(lbounds)) then 
+        lb(1:size(lbounds)) = lbounds
+    endif 
+    if (present(ubounds)) then 
+        ub(1:size(ubounds)) = ubounds
+    endif 
 
-        ! TODO: should this take the counts, or not?  for now i am going to
-        !  set the counts after i have created the f90 array and not here.
-        call c_ESMC_LocalArrayCreateNoData(array, rank, type, kind, &
-                                           ESMF_FROM_FORTRAN, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+    ! TODO: should this take the counts, or not?  for now i am going to
+    !  set the counts after i have created the f90 array and not here.
+    call c_ESMC_LocalArrayCreateNoData(array, rank, type, kind, &
+      ESMF_FROM_FORTRAN, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
 
-        call ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, &
-                                       lb, ub, status)
+    call ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, lb, ub, &
+      localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
 
-        ! Set return values
-        ESMF_LocalArrayCreateByList = array 
-        if (rcpresent) rc = status
+    ! Set return value
+    ESMF_LocalArrayCreateByList = array
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_LocalArrayCreateByList)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
-        end function ESMF_LocalArrayCreateByList
+  end function ESMF_LocalArrayCreateByList
 
 
 !------------------------------------------------------------------------------
@@ -449,17 +461,17 @@ end function
 
 ! !INTERFACE:
       ! Private name; call using ESMF_LocalArrayCreate()
-      function ESMF_LocalArrayCreateBySpec(arrayspec, counts, lbounds, ubounds, rc)
+  function ESMF_LocalArrayCreateBySpec(arrayspec, counts, lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_LocalArray) :: ESMF_LocalArrayCreateBySpec
+    type(ESMF_LocalArray) :: ESMF_LocalArrayCreateBySpec
 !
 ! !ARGUMENTS:
-      type(ESMF_ArraySpec), intent(in) :: arrayspec
-      integer, intent(in), dimension(:) :: counts
-      integer, dimension(:), intent(in), optional :: lbounds
-      integer, dimension(:), intent(in), optional :: ubounds 
-      integer, intent(out), optional :: rc 
+    type(ESMF_ArraySpec), intent(in) :: arrayspec
+    integer, intent(in), dimension(:) :: counts
+    integer, dimension(:), intent(in), optional :: lbounds
+    integer, dimension(:), intent(in), optional :: ubounds 
+    integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_LocalArray} and allocate data space, which remains
@@ -482,33 +494,37 @@ end function
 !
 !EOP
 
-        ! Local vars
-        type (ESMF_LocalArray) :: array     ! new C++ LocalArray
-        integer :: status                   ! local error status
-        logical :: rcpresent                ! did user specify rc?
-        integer :: rank
-        type(ESMF_DataType) :: type
-        type(ESMF_DataKind) :: kind
+    ! Local vars
+    type (ESMF_LocalArray) :: array     ! new C++ LocalArray
+    integer                :: localrc   ! local return code
+    integer :: rank
+    type(ESMF_DataType) :: type
+    type(ESMF_DataKind) :: kind
 
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        array%this = ESMF_NULL_POINTER
+    array%this = ESMF_NULL_POINTER
 
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_FAILURE
 
-        call ESMF_ArraySpecGet(arrayspec, rank, type, kind, status)
-        if (status .ne. ESMF_SUCCESS) return
-        
-        ! Call the list function to make the array
-        ESMF_LocalArrayCreateBySpec = ESMF_LocalArrayCreateByList(rank, type, &
-                                         kind, counts, lbounds, ubounds, status)
-        if (rcpresent) rc = status
+    call ESMF_ArraySpecGet(arrayspec, rank, type, kind, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
+    
+    ! Call the list function to make the array
+    ESMF_LocalArrayCreateBySpec = ESMF_LocalArrayCreateByList(rank, type, &
+      kind, counts, lbounds, ubounds, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
 
-        end function ESMF_LocalArrayCreateBySpec
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_LocalArrayCreateBySpec)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_LocalArrayCreateBySpec
 
 
 !------------------------------------------------------------------------------
@@ -581,6 +597,9 @@ end function
           rc = ESMF_FAILURE
         endif
 
+        ! Cannot check init status of array argument here because
+        ! the array object is only partially created at this point
+            
         localtype = type%dtype
         localkind = kind%dkind
 
@@ -935,11 +954,11 @@ DeclarationMacro(LocalArrayDeallocate)
 ! !IROUTINE: ESMF_LocalArrayDestroy - Remove a LocalArray
 !
 ! !INTERFACE:
-      subroutine ESMF_LocalArrayDestroy(array, rc)
+  subroutine ESMF_LocalArrayDestroy(array, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocalArray), intent(inout) :: array
-      integer, intent(out), optional :: rc
+    type(ESMF_LocalArray),  intent(inout)           :: array
+    integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !     Releases all resources associated with this {\tt ESMF\_LocalArray}.
@@ -961,63 +980,68 @@ DeclarationMacro(LocalArrayDeallocate)
 !
 !EOP
 
-        ! Local vars
-        integer :: status                   ! local error status
-        logical :: rcpresent                ! did user specify rc?
-        logical :: needsdealloc             ! do we need to free space?
-        integer :: rank
-        type(ESMF_DataType) :: type
-        type(ESMF_DataKind) :: kind
+    ! Local vars
+    integer :: localrc                  ! local return code
+    logical :: needsdealloc             ! do we need to free space?
+    integer :: rank
+    type(ESMF_DataType) :: type
+    type(ESMF_DataKind) :: kind
 
-        ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
 
-        ! Simple validity check
-        if (array%this .eq. ESMF_NULL_POINTER) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "LocalArray not initialized or Destroyed", &
-                                 ESMF_CONTEXT, rc)) return
-        endif
+    needsdealloc = .FALSE.
 
-        needsdealloc = .FALSE.
+    ! TODO: document the current rule - if we do the allocate in
+    !   the case of ESMF_DATA_COPY at create time then we delete the
+    !   space.  otherwise, the user needs to destroy the array 
+    !   (we will ignore the data) and call deallocate themselves.
 
-        ! TODO: document the current rule - if we do the allocate in
-        !   the case of ESMF_DATA_COPY at create time then we delete the
-        !   space.  otherwise, the user needs to destroy the array 
-        !   (we will ignore the data) and call deallocate themselves.
+    ! Call Destruct first, then free this memory
+    call c_ESMC_LocalArrayNeedsDealloc(array, needsdealloc, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
+    if (needsdealloc) then
+      call c_ESMC_LocalArrayGetRank(array, rank, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+      call c_ESMC_LocalArrayGetType(array, type, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+      call c_ESMC_LocalArrayGetKind(array, kind, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+      call ESMF_LocalArrayF90Deallocate(array, rank, type, kind, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+      call c_ESMC_LocalArraySetNoDealloc(array, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+    endif
 
-        ! Call Destruct first, then free this memory
-        call c_ESMC_LocalArrayNeedsDealloc(array, needsdealloc, status)
-        if (needsdealloc) then
-          call c_ESMC_LocalArrayGetRank(array, rank, status)
-          call c_ESMC_LocalArrayGetType(array, type, status)
-          call c_ESMC_LocalArrayGetKind(array, kind, status)
-          call ESMF_LocalArrayF90Deallocate(array, rank, type, kind, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-          call c_ESMC_LocalArraySetNoDealloc(array, status)
-        endif
+    ! Calling deallocate first means this will not return back to F90
+    !  before returning for good.
+    call c_ESMC_LocalArrayDestroy(array, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
 
-        ! Calling deallocate first means this will not return back to F90
-        !  before returning for good.
-        call c_ESMC_LocalArrayDestroy(array, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+    ! Set init code
+    ESMF_INIT_SET_DELETED(array)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
-        ! mark this as destroyed
-        array%this = ESMF_NULL_POINTER
-
-        ! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_LocalArrayDestroy
+  end subroutine ESMF_LocalArrayDestroy
 
 
 !------------------------------------------------------------------------------
@@ -1027,16 +1051,16 @@ DeclarationMacro(LocalArrayDeallocate)
 ! !IROUTINE: ESMF_LocalArraySetInfo
 !
 ! !INTERFACE:
-      subroutine ESMF_LocalArraySetInfo(array, counts, lbounds, ubounds, &
+  subroutine ESMF_LocalArraySetInfo(array, counts, lbounds, ubounds, &
                                         offsets, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocalArray), intent(inout) :: array 
-      integer, dimension(:), intent(in), optional :: counts
-      integer, dimension(:), intent(in), optional :: lbounds
-      integer, dimension(:), intent(in), optional :: ubounds
-      integer, dimension(:), intent(in), optional :: offsets
-      integer, intent(out), optional :: rc     
+    type(ESMF_LocalArray), intent(inout) :: array 
+    integer, dimension(:), intent(in), optional :: counts
+    integer, dimension(:), intent(in), optional :: lbounds
+    integer, dimension(:), intent(in), optional :: ubounds
+    integer, dimension(:), intent(in), optional :: offsets
+    integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !      Must be used with care - if you set the values on an already created
@@ -1045,14 +1069,21 @@ DeclarationMacro(LocalArrayDeallocate)
 !
 !EOPI
 
-        integer :: status
+    integer :: localrc
 
-        call c_ESMC_LocalArraySetInfo(array, counts, lbounds, ubounds, &
-                                      offsets, status)
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
 
-        if (present(rc)) rc = status
+    call c_ESMC_LocalArraySetInfo(array, counts, lbounds, ubounds, offsets, &
+      localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-        end subroutine ESMF_LocalArraySetInfo
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_LocalArraySetInfo
 
 
 !------------------------------------------------------------------------------
@@ -1062,16 +1093,16 @@ DeclarationMacro(LocalArrayDeallocate)
 ! !IROUTINE: ESMF_LocalArrayGetInfo
 !
 ! !INTERFACE:
-      subroutine ESMF_LocalArrayGetInfo(array, counts, lbounds, ubounds, &
-                                        offsets, rc)
+  subroutine ESMF_LocalArrayGetInfo(array, counts, lbounds, ubounds, offsets, &
+    rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocalArray), intent(in) :: array 
-      integer, dimension(:), intent(out), optional :: counts
-      integer, dimension(:), intent(out), optional :: lbounds
-      integer, dimension(:), intent(out), optional :: ubounds
-      integer, dimension(:), intent(out), optional :: offsets
-      integer, intent(out), optional :: rc     
+    type(ESMF_LocalArray), intent(in) :: array 
+    integer, dimension(:), intent(out), optional :: counts
+    integer, dimension(:), intent(out), optional :: lbounds
+    integer, dimension(:), intent(out), optional :: ubounds
+    integer, dimension(:), intent(out), optional :: offsets
+    integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !      Get back information about counts and upper and lower bounds
@@ -1079,14 +1110,21 @@ DeclarationMacro(LocalArrayDeallocate)
 !
 !EOPI
 
-        integer :: status
+    integer :: localrc
 
-        call c_ESMC_LocalArrayGetInfo(array, counts, lbounds, ubounds, &
-                                      offsets, status)
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
 
-        if (present(rc)) rc = status
+    call c_ESMC_LocalArrayGetInfo(array, counts, lbounds, ubounds, offsets, &
+      localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-        end subroutine ESMF_LocalArrayGetInfo
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_LocalArrayGetInfo
 
 
 !------------------------------------------------------------------------------
@@ -1097,13 +1135,13 @@ DeclarationMacro(LocalArrayDeallocate)
 ! !IROUTINE: ESMF_LocalArraySetData
 !
 ! !INTERFACE:
-      subroutine ESMF_LocalArraySetData(array, databuf, docopy, rc)
+  subroutine ESMF_LocalArraySetData(array, databuf, docopy, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocalArray), intent(inout) :: array 
-      real, dimension (:), pointer :: databuf    
-      type(ESMF_CopyFlag), intent(in) :: docopy 
-      integer, intent(out), optional :: rc     
+    type(ESMF_LocalArray), intent(inout) :: array 
+    real, dimension (:), pointer :: databuf    
+    type(ESMF_CopyFlag), intent(in) :: docopy 
+    integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !      Used only with the version of {\tt ESMF\_LocalArrayCreate} which
@@ -1117,9 +1155,12 @@ DeclarationMacro(LocalArrayDeallocate)
 !  added BOPI/EOPI until code is written
 ! TODO: code goes here
 !
-        if (present(rc)) rc = ESMF_FAILURE
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
 
-        end subroutine ESMF_LocalArraySetData
+    if (present(rc)) rc = ESMF_FAILURE
+
+  end subroutine ESMF_LocalArraySetData
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -1133,20 +1174,20 @@ DeclarationMacro(LocalArrayDeallocate)
 ! !IROUTINE: ESMF_LocalArrayGet - return information about a LocalArray
 !
 ! !INTERFACE:
-      subroutine ESMF_LocalArrayGet(array, rank, type, kind, counts, &
-                                    lbounds, ubounds, base, name, rc)
+  subroutine ESMF_LocalArrayGet(array, rank, type, kind, counts, lbounds, &
+    ubounds, base, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocalArray), intent(in) :: array
-      integer, intent(out), optional :: rank
-      type(ESMF_DataType), intent(out), optional :: type
-      type(ESMF_DataKind), intent(out), optional :: kind
-      integer, dimension(:), intent(out), optional :: counts
-      integer, dimension(:), intent(out), optional :: lbounds
-      integer, dimension(:), intent(out), optional :: ubounds
-      type(ESMF_Pointer), intent(out), optional :: base
-      character(len=ESMF_MAXSTR), intent(out), optional :: name
-      integer, intent(out), optional :: rc             
+    type(ESMF_LocalArray), intent(in) :: array
+    integer, intent(out), optional :: rank
+    type(ESMF_DataType), intent(out), optional :: type
+    type(ESMF_DataKind), intent(out), optional :: kind
+    integer, dimension(:), intent(out), optional :: counts
+    integer, dimension(:), intent(out), optional :: lbounds
+    integer, dimension(:), intent(out), optional :: ubounds
+    type(ESMF_Pointer), intent(out), optional :: base
+    character(len=ESMF_MAXSTR), intent(out), optional :: name
+    integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -1156,68 +1197,87 @@ DeclarationMacro(LocalArrayDeallocate)
 !
 !EOPI
 
-      integer :: status     ! Error status
-      logical :: rcpresent  ! Return code present
-      integer :: lrank      ! Local use to get rank
+    integer :: localrc    ! local return code
+    integer :: lrank      ! Local use to get rank
 
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
 
-      if (present(rank)) then
-         call c_ESMC_LocalArrayGetRank(array, rank, status)
-         if (status .ne. ESMF_SUCCESS) return
-      endif
+    if (present(rank)) then
+      call c_ESMC_LocalArrayGetRank(array, rank, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
-      if (present(type)) then
-         call c_ESMC_LocalArrayGetType(array, type, status)
-         if (status .ne. ESMF_SUCCESS) return
-      endif
+    if (present(type)) then
+      call c_ESMC_LocalArrayGetType(array, type, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
-      if (present(kind)) then
-         call c_ESMC_LocalArrayGetKind(array, kind, status)
-         if (status .ne. ESMF_SUCCESS) return
-      endif
+    if (present(kind)) then
+      call c_ESMC_LocalArrayGetKind(array, kind, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
-      if (present(counts)) then
-         call c_ESMC_LocalArrayGetRank(array, lrank, status)
-         if (status .ne. ESMF_SUCCESS) return
-         call c_ESMC_LocalArrayGetLengths(array, lrank, counts, status)
-         if (status .ne. ESMF_SUCCESS) return
-      endif
+    if (present(counts)) then
+      call c_ESMC_LocalArrayGetRank(array, lrank, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call c_ESMC_LocalArrayGetLengths(array, lrank, counts, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
-      if (present(lbounds)) then
-         call c_ESMC_LocalArrayGetRank(array, lrank, status)
-         if (status .ne. ESMF_SUCCESS) return
-         call c_ESMC_LocalArrayGetLbounds(array, lrank, lbounds, status)
-         if (status .ne. ESMF_SUCCESS) return
-      endif
+    if (present(lbounds)) then
+      call c_ESMC_LocalArrayGetRank(array, lrank, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call c_ESMC_LocalArrayGetLbounds(array, lrank, lbounds, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
-      if (present(ubounds)) then
-         call c_ESMC_LocalArrayGetRank(array, lrank, status)
-         if (status .ne. ESMF_SUCCESS) return
-         call c_ESMC_LocalArrayGetUbounds(array, lrank, ubounds, status)
-         if (status .ne. ESMF_SUCCESS) return
-      endif
+    if (present(ubounds)) then
+      call c_ESMC_LocalArrayGetRank(array, lrank, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call c_ESMC_LocalArrayGetUbounds(array, lrank, ubounds, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
-      if (present(base)) then
-         call c_ESMC_LocalArrayGetBaseAddr(array, base, status)
-         if (status .ne. ESMF_SUCCESS) return
-      endif
+    if (present(base)) then
+      call c_ESMC_LocalArrayGetBaseAddr(array, base, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
-      if (present(name)) then
-         call c_ESMC_GetName(array, name, status)
-         if (status .ne. ESMF_SUCCESS) return
-      endif
+    if (present(name)) then
+      call c_ESMC_GetName(array, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
-      if (rcpresent) rc = ESMF_SUCCESS
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LocalArrayGet
+  end subroutine ESMF_LocalArrayGet
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
@@ -1226,13 +1286,13 @@ DeclarationMacro(LocalArrayDeallocate)
 ! !IROUTINE: ESMF_LocalArrayGetName - Retrieve the name of a LocalArray
 !
 ! !INTERFACE:
-      subroutine ESMF_LocalArrayGetName(array, name, rc)
+  subroutine ESMF_LocalArrayGetName(array, name, rc)
 
 !
 ! !ARGUMENTS:
-      type(ESMF_LocalArray), intent(in) :: array
-      character (len = *), intent(out) :: name
-      integer, intent(out), optional :: rc
+    type(ESMF_LocalArray), intent(in) :: array
+    character (len = *), intent(out) :: name
+    integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -1242,25 +1302,23 @@ DeclarationMacro(LocalArrayDeallocate)
 !
 !EOPI
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+    integer :: localrc    ! local return code
 
-!     Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_FAILURE
 
-      call c_ESMC_GetName(array, name, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
 
-      if (rcpresent) rc = ESMF_SUCCESS
+    call c_ESMC_GetName(array, name, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
 
-      end subroutine ESMF_LocalArrayGetName
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_LocalArrayGetName
 
 
 !------------------------------------------------------------------------------
@@ -1951,6 +2009,9 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
           rc = ESMF_FAILURE
         endif
 
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
+    
         ! Get info from the existing array
         call c_ESMC_LocalArrayGetRank(array, rank, status)
         call c_ESMC_LocalArrayGetType(array, type, status)  
@@ -2041,6 +2102,10 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 !
 ! TODO: code goes here
 !
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
+        !todo: init check iospec
+
         if (present(rc)) rc = ESMF_FAILURE
 
         end subroutine ESMF_LocalArrayWriteRestart
@@ -2122,6 +2187,10 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
          rc = ESMF_FAILURE
        endif
 
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
+        !todo: init check iospec
+
        defaultopts = "singlefile"
        defaultfile = "datafile"
 
@@ -2187,56 +2256,46 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 ! !IROUTINE: ESMF_LocalArrayValidate - Check validity of LocalArray object
 !
 ! !INTERFACE:
-      subroutine ESMF_LocalArrayValidate(array, options, rc)
+  subroutine ESMF_LocalArrayValidate(array, options, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_LocalArray), intent(in) :: array
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
+    type(ESMF_LocalArray),  intent(in)              :: array
+    character(len = *),     intent(in),   optional  :: options
+    integer,                intent(out),  optional  :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to print information about a {\tt ESMF\_LocalArray}.
+!      Validate a {\tt ESMF\_LocalArray} object.
 !
 !EOPI
 
-       character (len=6) :: defaultopts      ! default print options 
-       integer :: status                     ! local error status
-       logical :: rcpresent        
+    character (len=6) :: defaultopts      ! default print options 
+    integer :: status                     ! local error status
+    logical :: rcpresent        
 
-       ! Initialize return code; assume failure until success is certain
-       status = ESMF_FAILURE
-       rcpresent = .FALSE.
-       if (present(rc)) then
-         rcpresent = .TRUE.
-         rc = ESMF_FAILURE
-       endif
+    ! Initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.
+      rc = ESMF_FAILURE
+    endif
+     
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
+      
+    defaultopts = "brief"
 
-       defaultopts = "brief"
+    if(present(options)) then
+      !call c_ESMC_LocalArrayValidate(array, options, status) 
+    else
+      !call c_ESMC_LocalArrayValidate(array, defaultopts, status) 
+    endif
 
-       ! Simple validity checks
-       if (array%this .eq. ESMF_NULL_POINTER) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "LocalArray not initialized, or Destroyed", &
-                                 ESMF_CONTEXT, rc)) return
-           return 
-       endif
+    ! Return successfully
+    if (rcpresent) rc = ESMF_SUCCESS
 
-       if(present(options)) then
-           !call c_ESMC_LocalArrayValidate(array, options, status) 
-       else
-           !call c_ESMC_LocalArrayValidate(array, defaultopts, status) 
-       endif
-
-      !cheung I comment it otherwise it always returns as Error
-      !if (ESMF_LogMsgFoundError(status, &
-      !                            ESMF_ERR_PASSTHRU, &
-      !                            ESMF_CONTEXT, rc)) return
-
-       ! Set return values
-       if (rcpresent) rc = ESMF_SUCCESS
-
-       end subroutine ESMF_LocalArrayValidate
+  end subroutine ESMF_LocalArrayValidate
 
 
 !------------------------------------------------------------------------------
@@ -2246,59 +2305,62 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 ! !IROUTINE: ESMF_LocalArrayPrint - Print contents of an LocalArray object
 !
 ! !INTERFACE:
-      subroutine ESMF_LocalArrayPrint(array, options, rc)
+  subroutine ESMF_LocalArrayPrint(array, options, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_LocalArray), intent(in) :: array
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
+    type(ESMF_LocalArray),  intent(in)              :: array
+    character(len = *),     intent(in),   optional  :: options
+    integer,                intent(out),  optional  :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to print information about a {\tt ESMF\_LocalArray}.
+!      Print information about a {\tt ESMF\_LocalArray}.
 !
 !EOPI
 
-       character (len=6) :: defaultopts      ! default print options 
-       integer :: status                     ! local error status
-       logical :: rcpresent        
-       !character(len=ESMF_MAXSTR) :: msgbuf
+    character (len=6) :: defaultopts      ! default print options 
+    integer :: status                     ! local error status
+    logical :: rcpresent        
+    !character(len=ESMF_MAXSTR) :: msgbuf
 
-       ! Initialize return code; assume failure until success is certain
-       status = ESMF_FAILURE
-       rcpresent = .FALSE.
-       if (present(rc)) then
-         rcpresent = .TRUE.
-         rc = ESMF_FAILURE
-       endif
+    ! Initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.
+      rc = ESMF_FAILURE
+    endif
 
-       if (array%this .eq. ESMF_NULL_POINTER) then
-         !write(msgbuf,*)  "LocalArray Print:"
-         !call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-         write(*,*)  "LocalArray Print:"
-         !write(msgbuf,*)  " Empty or Uninitialized Array"
-         !call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-         write(*,*)  " Empty or Uninitialized Array"
-         if (present(rc)) rc = ESMF_SUCCESS
-         return
-       endif
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
+      
+    if (array%this .eq. ESMF_NULL_POINTER) then
+      !write(msgbuf,*)  "LocalArray Print:"
+      !call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+      write(*,*)  "LocalArray Print:"
+      !write(msgbuf,*)  " Empty or Uninitialized Array"
+      !call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+      write(*,*)  " Empty or Uninitialized Array"
+      if (present(rc)) rc = ESMF_SUCCESS
+      return
+    endif
 
-       defaultopts = "brief"
+    defaultopts = "brief"
 
-       if(present(options)) then
-           call c_ESMC_LocalArrayPrint(array, options, status) 
-       else
-           call c_ESMC_LocalArrayPrint(array, defaultopts, status) 
-       endif
+    if(present(options)) then
+        call c_ESMC_LocalArrayPrint(array, options, status) 
+    else
+        call c_ESMC_LocalArrayPrint(array, defaultopts, status) 
+    endif
 
-       if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+    if (ESMF_LogMsgFoundError(status, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
 
-!      set return values
-       if (rcpresent) rc = ESMF_SUCCESS
+    ! Return successfully
+    if (rcpresent) rc = ESMF_SUCCESS
 
-       end subroutine ESMF_LocalArrayPrint
+  end subroutine ESMF_LocalArrayPrint
 
 
 !------------------------------------------------------------------------------
@@ -2333,6 +2395,9 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
         status = ESMF_FAILURE
 
+        ! Cannot check init status of array argument here because
+        ! the array object is only partially created at this point
+            
         localtype = type%dtype
         localkind = kind%dkind
 
@@ -2641,7 +2706,179 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
        if (present(rc)) rc = ESMF_SUCCESS
 
        end subroutine ESMF_LocalArrayAdjust
+       
+       
+! -------------------------- ESMF-private method ------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_LocalArrayGetInit"
+!BOPI
+! !IROUTINE: ESMF_LocalArrayGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+  function ESMF_LocalArrayGetInit(array) 
+!
+! !RETURN VALUE:
+    ESMF_INIT_TYPE :: ESMF_LocalArrayGetInit   
+!
+! !ARGUMENTS:
+    type(ESMF_LocalArray), intent(in), optional :: array
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           LocalArray object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(array)) then
+      ESMF_LocalArrayGetInit = ESMF_INIT_GET(array)
+    else
+      ESMF_LocalArrayGetInit = ESMF_INIT_CREATED
+    endif
+
+  end function ESMF_LocalArrayGetInit
+!------------------------------------------------------------------------------
+       
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalArraySetInitCreated()"
+!BOPI
+! !IROUTINE: ESMF_LocalArraySetInitCreated - Set LocalArray init code to "CREATED"
+
+! !INTERFACE:
+  subroutine ESMF_LocalArraySetInitCreated(array, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_LocalArray),  intent(inout)           :: array
+    integer,                intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in LocalArray object to "CREATED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!          Specified {\tt ESMF\_LocalArray} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(array)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_LocalArraySetInitCreated
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalArrayGetThis()"
+!BOPI
+! !IROUTINE: ESMF_LocalArrayGetThis - Internal access routine for C++ pointer
+
+! !INTERFACE:
+  subroutine ESMF_LocalArrayGetThis(array, this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_LocalArray),  intent(in), optional  :: array
+    type(ESMF_Pointer),     intent(out)           :: this
+    integer,                intent(out),optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Internal access routine for C++ pointer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!          Specified {\tt ESMF\_LocalArray} object.
+!     \item[this] 
+!          C++ pointer.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Copy C++ pointer
+    this = array%this
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_LocalArrayGetThis
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalArraySetThis()"
+!BOPI
+! !IROUTINE: ESMF_LocalArraySetThis - Set C++ pointer in LocalArray
+
+! !INTERFACE:
+  subroutine ESMF_LocalArraySetThis(localarray, this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_LocalArray),  intent(inout)           :: localarray
+    type(ESMF_Pointer),     intent(in)              :: this
+    integer,                intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Set C++ pointer in LocalArray.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[localarray] 
+!          Specified {\tt ESMF\_LocalArray} object.
+!     \item[this] 
+!          C++ pointer.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Copy C++ pointer
+    localarray%this = this
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_LocalArraySetThis
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
-        end module ESMF_LocalArrayCreateMod
+end module ESMF_LocalArrayCreateMod
 
