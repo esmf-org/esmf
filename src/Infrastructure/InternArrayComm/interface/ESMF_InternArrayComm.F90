@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.6 2006/12/06 18:38:30 theurich Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.7 2006/12/08 23:36:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -10,9 +10,10 @@
 !
 !==============================================================================
 #define ESMF_FILENAME "ESMF_IArrayComm.F90"
+!==============================================================================
 !
-!     ESMF Array Comm module
-      module ESMF_InternArrayCommMod
+! ESMF Array Comm module
+module ESMF_InternArrayCommMod
 !
 !==============================================================================
 !
@@ -21,6 +22,7 @@
 ! of the Array class.
 !
 !------------------------------------------------------------------------------
+! INCLUDES
 #include "ESMF.h"
 
 !------------------------------------------------------------------------------
@@ -37,49 +39,48 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_UtilTypesMod    ! ESMF base class
-      use ESMF_BaseMod
-      use ESMF_IOSpecMod
-      use ESMF_LogErrMod
-      use ESMF_LocalArrayMod
-      use ESMF_InternArrayDataMapMod
-      use ESMF_VMMod
-      use ESMF_DELayoutMod  
-      use ESMF_InternArrayMod
-      use ESMF_InternArrayGetMod
-      use ESMF_GridTypesMod
-      use ESMF_GridMod
-      use ESMF_RHandleMod
-      use ESMF_RouteMod
-      use ESMF_FieldDataMapMod
-      implicit none
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_IOSpecMod
+  use ESMF_LocalArrayMod
+  use ESMF_InternArrayDataMapMod
+  use ESMF_VMMod
+  use ESMF_DELayoutMod  
+  use ESMF_InternArrayMod
+  use ESMF_InternArrayGetMod
+  use ESMF_GridTypesMod
+  use ESMF_GridMod
+  use ESMF_RHandleMod
+  use ESMF_RouteMod
+  use ESMF_FieldDataMapMod
+  
+  implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
+  private
 
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_IArrayGetAllAxisIndices
+  public ESMF_IArrayGetAllAxisIndices
 
-      public ESMF_IArrayHaloStore, ESMF_IArrayHalo, ESMF_IArrayHaloRelease
-      public ESMF_IArrayRedistStore, ESMF_IArrayRedist, ESMF_IArrayRedistRelease
-      public ESMF_IArrayHaloValidate, ESMF_IArrayRedistValidate
-      ! Regrid methods are in ESMF_Regrid.F90
+  public ESMF_IArrayHaloStore, ESMF_IArrayHalo, ESMF_IArrayHaloRelease
+  public ESMF_IArrayRedistStore, ESMF_IArrayRedist, ESMF_IArrayRedistRelease
+  public ESMF_IArrayHaloValidate, ESMF_IArrayRedistValidate
+  ! Regrid methods are in ESMF_Regrid.F90
 
-      public ESMF_IArrayGather, ESMF_IArrayScatter
-      !!public ESMF_IArrayAllGather
-      !!public ESMF_IArrayReduce, ESMF_IArrayAllReduce
-      !!public ESMF_IArrayBroadcast, ESMF_IArrayAlltoAll
+  public ESMF_IArrayGather, ESMF_IArrayScatter
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter, private :: version = &
-      '$Id: ESMF_InternArrayComm.F90,v 1.6 2006/12/06 18:38:30 theurich Exp $'
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_InternArrayComm.F90,v 1.7 2006/12/08 23:36:07 theurich Exp $'
 !
 !==============================================================================
 !
@@ -90,65 +91,65 @@
 ! !IROUTINE: ESMF_IArrayHaloStore - Compute info to Halo a distributed array
 !
 ! !INTERFACE:
-      interface ESMF_IArrayHaloStore
+  interface ESMF_IArrayHaloStore
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_IArrayHaloStoreOne
-          module procedure ESMF_IArrayHaloStoreIndex
+    module procedure ESMF_IArrayHaloStoreOne
+    module procedure ESMF_IArrayHaloStoreIndex
 
 ! !DESCRIPTION:
 !     This interface provides for calling halo on 
 !     an {\tt ESMF\_Array} object, or a list of compatible array objects.
 
 !EOPI
-      end interface
+  end interface
 
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_IArrayHalo - Halo a distributed array
 !
 ! !INTERFACE:
-      interface ESMF_IArrayHalo
+  interface ESMF_IArrayHalo
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_IArrayHaloOne
-          module procedure ESMF_IArrayHaloList
+    module procedure ESMF_IArrayHaloOne
+    module procedure ESMF_IArrayHaloList
 
 ! !DESCRIPTION:
 !     This interface provides for calling Halo on a 
 !     single {\tt ESMF\_Array} or a list of compatible array objects.
 
 !EOPI
-      end interface
+  end interface
 
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_IArrayHaloValidate - Validate a Halo
 !
 ! !INTERFACE:
-      interface ESMF_IArrayHaloValidate
+  interface ESMF_IArrayHaloValidate
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_IArrayHaloValidateOne
-          module procedure ESMF_IArrayHaloValidateList
+    module procedure ESMF_IArrayHaloValidateOne
+    module procedure ESMF_IArrayHaloValidateList
 
 ! !DESCRIPTION:
 !     This interface provides for calling halo validate on a 
 !     single {\tt ESMF\_Array} or a list of compatible array objects.
 
 !EOPI
-      end interface
+  end interface
 
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_IArrayRedistStore - Compute info to Redistribute an Array
 !
 ! !INTERFACE:
-      interface ESMF_IArrayRedistStore
+  interface ESMF_IArrayRedistStore
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_IArrayRedistStoreOne
-          module procedure ESMF_IArrayRedistStoreIndex
+    module procedure ESMF_IArrayRedistStoreOne
+    module procedure ESMF_IArrayRedistStoreIndex
 
 ! !DESCRIPTION:
 !     This interface provides for
@@ -156,18 +157,18 @@
 !      list of compatible array objects.
 
 !EOPI
-      end interface
+  end interface
 
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_IArrayRedist - Redistribute an Array
 !
 ! !INTERFACE:
-      interface ESMF_IArrayRedist
+  interface ESMF_IArrayRedist
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_IArrayRedistOne
-          module procedure ESMF_IArrayRedistList
+    module procedure ESMF_IArrayRedistOne
+    module procedure ESMF_IArrayRedistList
 
 ! !DESCRIPTION:
 !     This interface provides for
@@ -175,18 +176,18 @@
 !      list of compatible array objects.
 
 !EOPI
-      end interface
+  end interface
 
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_IArrayRedistValidate - Validate a Redistribution
 !
 ! !INTERFACE:
-      interface ESMF_IArrayRedistValidate
+  interface ESMF_IArrayRedistValidate
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_IArrayRedistValidateOne
-          module procedure ESMF_IArrayRedistValidateList
+    module procedure ESMF_IArrayRedistValidateOne
+    module procedure ESMF_IArrayRedistValidateList
 
 ! !DESCRIPTION:
 !     This interface provides for
@@ -194,133 +195,15 @@
 !      list of compatible array objects.
 
 !EOPI
-      end interface
+  end interface
 
-#if 0
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_IArrayAllGather - Gather a distributed array to all DEs
-!
-! !INTERFACE:
-      interface ESMF_IArrayAllGather
-
-! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_IArrayAllGatherGrid
-          module procedure ESMF_IArrayAllGatherList
-
-! !DESCRIPTION:
-!     This interface provides both the revised entry point for
-!      calling Redistribute on an {\tt ESMF\_Array} object, and temporarily
-!      for backwards compatibility an older interface into the same code.
-
-!EOPI
-      end interface
-#endif
 
 !==============================================================================
 
-      contains
+  contains
 
 !==============================================================================
 
-
-
-#if 0
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_IArrayAllGather - Gather an Array and put results on all DEs
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_IArrayAllGather
-      subroutine ESMF_IArrayAllGatherList(array, delayout, decompids, &
-                                         localAxisLengths, globalDimLengths, &
-                                         local_maxlengths, gatheredArray, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_InternArray), intent(in) :: array
-      type(ESMF_DELayout), intent(in) :: delayout
-      integer, dimension(:), intent(in) :: decompids
-      integer, dimension(:,:), intent(in) :: localAxisLengths
-      integer, dimension(:), intent(in) :: globalDimLengths
-      integer, dimension(:), intent(in) :: local_maxlengths
-      type(ESMF_InternArray), intent(out) :: gatheredArray
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to gather a distributed Array into a global Array on all DEs.
-!
-!EOPI
-
-        integer :: localrc         ! local error status
-        integer :: size_decomp, size_axislengths, i
-
-        ! initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
- 
-        ! call c routine to allgather
-        size_decomp = size(decompids)
-        size_axislengths = size(localAxisLengths,1) * size(localAxisLengths,2)
-        call c_ESMC_IArrayAllGather(array, delayout, decompids, size_decomp, &
-                                   localAxisLengths, &
-                                   globalDimLengths, local_maxlengths, &
-                                   gatheredArray, localrc)
-
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        ! set return code if user specified it
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_IArrayAllGatherList
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_IArrayGather - Gather a distributed Array
-!
-! !INTERFACE:
-      subroutine ESMF_IArrayGather(array, delayout, decompids, &
-                                  global_dimlengths, local_maxlengths, deid, &
-                                  gatheredArray, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_InternArray), intent(in) :: array
-      type(ESMF_DELayout), intent(in) :: delayout
-      integer, dimension(:), intent(in) :: decompids
-      integer, dimension(:), intent(in) :: global_dimlengths
-      integer, dimension(:), intent(in) :: local_maxlengths
-      integer, intent(in) :: deid
-      type(ESMF_InternArray), intent(out) :: gatheredArray
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to gather a distributed Array into a global Array on all DEs.
-!
-!
-!EOPI
-
-        integer :: localrc         ! local error status
-        integer :: size_decomp, size_AI
-        integer :: i
-
-        ! initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
- 
-        ! call c routine to allgather
-        size_decomp = size(decompids)
-        call c_ESMC_IArrayGather(array, delayout, decompids, size_decomp, &
-                                global_dimlengths, local_maxlengths, deid, &
-                                gatheredArray, localrc)
-
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        ! set return code if user specified it
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_IArrayGather
-#endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -329,7 +212,7 @@
 ! !IROUTINE: ESMF_IArrayGather - Gather an Array onto one DE
 !
 ! !INTERFACE:
-    subroutine ESMF_IArrayGather(array, grid, datamap, rootDE, gatheredArray, rc)
+  subroutine ESMF_IArrayGather(array, grid, datamap, rootDE, gatheredArray, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(in) :: array
@@ -380,14 +263,18 @@
     ! initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_FAILURE
  
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
+
     ! extract necessary information from the grid
     call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, rc=status)
     
     call ESMF_DELayoutGetDeprecated(delayout, deCount=nDEs, &
       dimCount=size_decomp, rc=status)
     
-    ! gjt size_decomp can be hardcoded to 2 here because that what it had to be
-    
+    ! gjt size_decomp can be hardcoded to 2 here because that's what it had to be
       
     allocate(localAxisLengths(nDEs,ESMF_MAXDIM), stat=status)
     allocate( tempMLCCPD(     gridrank), stat=status)
@@ -464,7 +351,7 @@
     ! set return code if user specified it
     if (present(rc)) rc = ESMF_SUCCESS
 
-    end subroutine ESMF_IArrayGather
+  end subroutine ESMF_IArrayGather
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -473,7 +360,7 @@
 ! !IROUTINE: ESMF_IArrayGetAIsAllDEs - Get AxisIndex list for all DEs in a distributed Array
 !
 ! !INTERFACE:
-    subroutine ESMF_IArrayGetAIsAllDEs(array, grid, datamap, &
+  subroutine ESMF_IArrayGetAIsAllDEs(array, grid, datamap, &
                                       localGlobalFlag, domainTypeFlag, &
                                       AIListPerDEPerRank, rc)
 !
@@ -537,90 +424,95 @@
 !
 !EOPI
 
-      integer :: localrc, nDEs, i
-      integer :: gridrank, datarank
-      integer, dimension(:), allocatable :: dimOrder
-      type(ESMF_AxisIndex), dimension(:), pointer :: myArrayAIsPerRank
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: gridAIsPerDEPerRank
-      type(ESMF_DELayout) :: delayout
-      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
+    integer :: localrc, nDEs, i
+    integer :: gridrank, datarank
+    integer, dimension(:), allocatable :: dimOrder
+    type(ESMF_AxisIndex), dimension(:), pointer :: myArrayAIsPerRank
+    type(ESMF_AxisIndex), dimension(:,:), pointer :: gridAIsPerDEPerRank
+    type(ESMF_DELayout) :: delayout
+    type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
-      ! make sure the compilers can tell these are unassociated.
-      nullify(myArrayAIsPerRank)
-      nullify(gridAIsPerDEPerRank)
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
 
-      ! get layout from the grid in order to get the number of DEs
-      call ESMF_InternArrayGet(array, rank=datarank, rc=localrc)
-      call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, &
-                        rc=localrc)
-      call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=localrc)
+    ! make sure the compilers can tell these are unassociated.
+    nullify(myArrayAIsPerRank)
+    nullify(gridAIsPerDEPerRank)
 
-      ! check if the AI array pointer is associated
-      !  -  If it is, check that it is right size to hold the requested data.
-      !  -  If it is not, allocate it here
-      if (associated(AIListPerDEPerRank)) then
-        if (size(AIListPerDEPerRank,1).ne.nDEs .OR. &
-            size(AIListPerDEPerRank,2).ne.datarank) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-                             "AIList array not correct size for requested data", &
-                             ESMF_CONTEXT, rc)
-          return
-        endif
-      else
-        allocate(AIListPerDEPerRank(nDEs,datarank), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "allocating AIList array", &
-                                       ESMF_CONTEXT, rc)) return
+    ! get layout from the grid in order to get the number of DEs
+    call ESMF_InternArrayGet(array, rank=datarank, rc=localrc)
+    call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, &
+                      rc=localrc)
+    call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=localrc)
+
+    ! check if the AI array pointer is associated
+    !  -  If it is, check that it is right size to hold the requested data.
+    !  -  If it is not, allocate it here
+    if (associated(AIListPerDEPerRank)) then
+      if (size(AIListPerDEPerRank,1).ne.nDEs .OR. &
+          size(AIListPerDEPerRank,2).ne.datarank) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                           "AIList array not correct size for requested data", &
+                           ESMF_CONTEXT, rc)
+        return
       endif
+    else
+      allocate(AIListPerDEPerRank(nDEs,datarank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "allocating AIList array", &
+                                     ESMF_CONTEXT, rc)) return
+    endif
 
-      ! get information from the datamap
-      allocate(dimOrder(datarank), stat=localrc)
-      call ESMF_FieldDataMapGet(datamap, dataIndexList=dimOrder, &
-                                horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
-                                rc=localrc)
+    ! get information from the datamap
+    allocate(dimOrder(datarank), stat=localrc)
+    call ESMF_FieldDataMapGet(datamap, dataIndexList=dimOrder, &
+                              horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                              rc=localrc)
 
-      ! call grid to access AIs for all DEs
-      call ESMF_GridGetAIsAllDEs(grid, localGlobalFlag, &
-                                 gridAIsPerDEPerRank, &
-                                 horzRelLoc, vertRelLoc, rc=localrc)
+    ! call grid to access AIs for all DEs
+    call ESMF_GridGetAIsAllDEs(grid, localGlobalFlag, &
+                               gridAIsPerDEPerRank, &
+                               horzRelLoc, vertRelLoc, rc=localrc)
 
-      ! allocate arrayindex array; get all types (excl, comp, total?) from the array
-      allocate(myArrayAIsPerRank(datarank), stat=localrc)
-      call ESMF_IArrayGetAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
-                                  myArrayAIsPerRank, rc=localrc)
+    ! allocate arrayindex array; get all types (excl, comp, total?) from the array
+    allocate(myArrayAIsPerRank(datarank), stat=localrc)
+    call ESMF_IArrayGetAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
+                                myArrayAIsPerRank, rc=localrc)
 
-      ! load AIListPerDEPerRank with array AIs and grid AIs
-      do i = 1,datarank
-        if (dimOrder(i).eq.0) then
-          AIListPerDEPerRank(:,i) = myArrayAIsPerRank(i)
-        else
-          AIListPerDEPerRank(:,i) = gridAIsPerDEPerRank(:,dimOrder(i))
-        endif
-      enddo
+    ! load AIListPerDEPerRank with array AIs and grid AIs
+    do i = 1,datarank
+      if (dimOrder(i).eq.0) then
+        AIListPerDEPerRank(:,i) = myArrayAIsPerRank(i)
+      else
+        AIListPerDEPerRank(:,i) = gridAIsPerDEPerRank(:,dimOrder(i))
+      endif
+    enddo
 
-      ! if the request was for computational domain, we're done now
-      ! TODO: case statement on domainTypeFlag -- nothing to do for comp
+    ! if the request was for computational domain, we're done now
+    ! TODO: case statement on domainTypeFlag -- nothing to do for comp
 
-      ! TODO: modify if not computational
-      ! if the request was for anything else, we have to query for the halo
-      ! widths.  they should come back (datarank, 2). 
-      ! then we make a new AI modify routine which takes this halo array,
-      ! plus a domain type, and either adds or subtracts to get the right
-      ! values.  (you cannot ask for allocate here because you can't.)  (see
-      ! note 1.)   the input here will be (nDEs, datarank) long, and this
-      ! new routine just computes over all of them.
+    ! TODO: modify if not computational
+    ! if the request was for anything else, we have to query for the halo
+    ! widths.  they should come back (datarank, 2). 
+    ! then we make a new AI modify routine which takes this halo array,
+    ! plus a domain type, and either adds or subtracts to get the right
+    ! values.  (you cannot ask for allocate here because you can't.)  (see
+    ! note 1.)   the input here will be (nDEs, datarank) long, and this
+    ! new routine just computes over all of them.
 
-      ! note 1:
-      ! there is no way to know the allocate size for all nDEs in a
-      ! distributed array without a broadcast.
+    ! note 1:
+    ! there is no way to know the allocate size for all nDEs in a
+    ! distributed array without a broadcast.
 
-      ! Clean up
-      deallocate(dimOrder,            stat=localrc)
-      deallocate(myArrayAIsPerRank,   stat=localrc)
-      deallocate(gridAIsPerDEPerRank, stat=localrc)
+    ! Clean up
+    deallocate(dimOrder,            stat=localrc)
+    deallocate(myArrayAIsPerRank,   stat=localrc)
+    deallocate(gridAIsPerDEPerRank, stat=localrc)
 
-      if (present(rc)) rc = localrc
+    if (present(rc)) rc = localrc
 
-      end subroutine ESMF_IArrayGetAIsAllDEs
+  end subroutine ESMF_IArrayGetAIsAllDEs
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -629,7 +521,7 @@
 ! !IROUTINE: ESMF_IArrayGetGlobalAIs - Get AIs for local chunk in global index space
 !
 ! !INTERFACE:
-    subroutine ESMF_IArrayGetGlobalAIs(array, grid, datamap, &
+  subroutine ESMF_IArrayGetGlobalAIs(array, grid, datamap, &
                                       domainTypeFlag, globalAIPerRank, rc)
 !
 ! !ARGUMENTS:
@@ -677,46 +569,51 @@
 !
 !EOPI
 
-      integer :: localrc, i
-      integer :: datarank
-      integer :: dimOrder(ESMF_MAXDIM)
-      integer :: gridOffsets(ESMF_MAXGRIDDIM)
-      type(ESMF_AxisIndex) :: localAIsPerRank(ESMF_MAXDIM)
-      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
+    integer :: localrc, i
+    integer :: datarank
+    integer :: dimOrder(ESMF_MAXDIM)
+    integer :: gridOffsets(ESMF_MAXGRIDDIM)
+    type(ESMF_AxisIndex) :: localAIsPerRank(ESMF_MAXDIM)
+    type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
-      ! get layout from the grid in order to get the number of DEs
-      call ESMF_InternArrayGet(array, rank=datarank, rc=localrc)
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
 
-      ! get information from the datamap
-      call ESMF_FieldDataMapGet(datamap, dataIndexList=dimOrder, &
-                                horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
-                                rc=localrc)
+    ! get layout from the grid in order to get the number of DEs
+    call ESMF_InternArrayGet(array, rank=datarank, rc=localrc)
 
-      ! call grid to access AIs for all DEs
-      call ESMF_GridGetDELocalInfo(grid, horzRelLoc, vertRelLoc, &
-                                   globalStartPerDim=gridOffsets, rc=localrc)
+    ! get information from the datamap
+    call ESMF_FieldDataMapGet(datamap, dataIndexList=dimOrder, &
+                              horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                              rc=localrc)
 
-      ! allocate arrayindex array; get requested type from array
-      call ESMF_IArrayGetAxisIndex(array, domainTypeFlag, &
-                                  localAIsPerRank, rc=localrc)
+    ! call grid to access AIs for all DEs
+    call ESMF_GridGetDELocalInfo(grid, horzRelLoc, vertRelLoc, &
+                                 globalStartPerDim=gridOffsets, rc=localrc)
 
-      ! load AIListPerDEPerRank with array AIs and grid AIs
-      ! adding grid offsets for grid-aligned axes
-      do i = 1,datarank
-        if (dimOrder(i).eq.0) then
-          globalAIPerRank(i) = localAIsPerRank(i)
-        else
-          globalAIPerRank(i) = localAIsPerRank(i)
-          globalAIPerRank(i)%min = globalAIPerRank(i)%min + &
-                                                      gridOffsets(dimOrder(i))
-          globalAIPerRank(i)%max = globalAIPerRank(i)%max + &
-                                                      gridOffsets(dimOrder(i))
-        endif
-      enddo
+    ! allocate arrayindex array; get requested type from array
+    call ESMF_IArrayGetAxisIndex(array, domainTypeFlag, &
+                                localAIsPerRank, rc=localrc)
 
-      if (present(rc)) rc = localrc
+    ! load AIListPerDEPerRank with array AIs and grid AIs
+    ! adding grid offsets for grid-aligned axes
+    do i = 1,datarank
+      if (dimOrder(i).eq.0) then
+        globalAIPerRank(i) = localAIsPerRank(i)
+      else
+        globalAIPerRank(i) = localAIsPerRank(i)
+        globalAIPerRank(i)%min = globalAIPerRank(i)%min + &
+                                                    gridOffsets(dimOrder(i))
+        globalAIPerRank(i)%max = globalAIPerRank(i)%max + &
+                                                    gridOffsets(dimOrder(i))
+      endif
+    enddo
 
-      end subroutine ESMF_IArrayGetGlobalAIs
+    if (present(rc)) rc = localrc
+
+  end subroutine ESMF_IArrayGetGlobalAIs
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -725,19 +622,19 @@
 ! !IROUTINE: ESMF_IArrayGetAllAxisIndices - Get all AIs associated with a Grid
 !
 ! !INTERFACE:
-      subroutine ESMF_IArrayGetAllAxisIndices(array, grid, datamap, &
+  subroutine ESMF_IArrayGetAllAxisIndices(array, grid, datamap, &
                                              totalindex, compindex, exclindex, &
                                              AICountPerDE, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternArray), intent(in) :: array
-      type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_FieldDataMap), intent(inout) :: datamap
-      type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: totalindex
-      type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: compindex
-      type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: exclindex
-      integer, dimension(:), pointer, optional :: AIcountPerDE
-      integer, intent(out), optional :: rc
+    type(ESMF_InternArray), intent(in) :: array
+    type(ESMF_Grid), intent(in) :: grid
+    type(ESMF_FieldDataMap), intent(inout) :: datamap
+    type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: totalindex
+    type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: compindex
+    type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: exclindex
+    integer, dimension(:), pointer, optional :: AIcountPerDE
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Used to retrieve the index annotations from all {\tt ESMF\_Array}s
@@ -745,14 +642,19 @@
 !    instead of broadcasting them.
 !EOPI
 
-      integer :: status, nDEs, nAIs, i, j
-      integer :: gridrank, datarank, maxrank
-      integer, dimension(:), allocatable :: dimOrder, countPerDim
-      type(ESMF_AxisIndex), dimension(:), pointer :: arrayindex
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: gridindex, globalindex
-      type(ESMF_DELayout) :: delayout
-      type(ESMF_GridStorage) :: gridStorage
-      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
+    integer :: status, nDEs, nAIs, i, j
+    integer :: gridrank, datarank, maxrank
+    integer, dimension(:), allocatable :: dimOrder, countPerDim
+    type(ESMF_AxisIndex), dimension(:), pointer :: arrayindex
+    type(ESMF_AxisIndex), dimension(:,:), pointer :: gridindex, globalindex
+    type(ESMF_DELayout) :: delayout
+    type(ESMF_GridStorage) :: gridStorage
+    type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
 
       ! get layout from the grid in order to get the number of DEs
       call ESMF_InternArrayGet(array, rank=datarank, rc=status)
@@ -878,7 +780,7 @@
 
       if (present(rc)) rc = status 
 
-      end subroutine ESMF_IArrayGetAllAxisIndices
+  end subroutine ESMF_IArrayGetAllAxisIndices
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -888,15 +790,14 @@
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_IArrayHalo()
-    subroutine ESMF_IArrayHaloList(arrayList, routehandle, routeIndex, &
-                                  blocking, commhandle, routeOptions, rc)
+  subroutine ESMF_IArrayHaloList(arrayList, routehandle, routeIndex, &
+                                  blocking, routeOptions, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(inout) :: arrayList(:)
     type(ESMF_RouteHandle), intent(in) :: routehandle
     integer, intent(in), optional :: routeIndex
     type(ESMF_BlockingFlag), intent(in), optional :: blocking
-    type(ESMF_CommHandle), intent(inout), optional :: commhandle
     type(ESMF_RouteOptions), intent(in), optional :: routeOptions
     integer, intent(out), optional :: rc
 !
@@ -924,11 +825,6 @@
 !         Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !         {\tt ESMF\_NONBLOCKING}.
 !      (This feature is not yet supported.  All operations are synchronous.)
-!   \item [{[commhandle]}]
-!         If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
-!         argument is required.  Information about the pending operation
-!         will be stored in the {\tt ESMF\_CommHandle} and can be queried
-!         or waited for later.
 !    \item [{[routeOptions]}]
 !          Not normally specified.  Specify which internal strategy to select
 !          when executing the communication needed to execute the halo.
@@ -939,57 +835,63 @@
 !
 !EOP
 
-      integer :: status         ! local error status
-      integer :: i, nitems
-      type(ESMF_LocalArray), allocatable :: local_arrayList(:)
-      type(ESMF_Route) :: route
+    integer :: status         ! local error status
+    integer :: i, nitems
+    type(ESMF_LocalArray), allocatable :: local_arrayList(:)
+    type(ESMF_Route) :: route
 
-      ! initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
  
-      if (present(routeIndex)) then
-          call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
-                                        route=route, rc=status)
-      else
-          call ESMF_RouteHandleGet(routehandle, which_route=1, &
-                                        route=route, rc=status)
-      endif
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+    ! Check init status of arguments
+    do i=1, size(arrayList)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, arrayList(i), rc)
+    enddo
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
-      nitems = size(arrayList)
-      allocate(local_arrayList(nitems), stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, &
-                                     "Allocating localarraylist information", &
-                                      ESMF_CONTEXT, rc)) return
+    if (present(routeIndex)) then
+        call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
+                                      route=route, rc=status)
+    else
+        call ESMF_RouteHandleGet(routehandle, which_route=1, &
+                                      route=route, rc=status)
+    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      ! fortran equivalent of a cast - routerun wants a local array 
-      do i=1, nitems
-        local_arrayList(i)%this%ptr = arrayList(i)%this%ptr
-      enddo
-
-      ! Set the route options if given, then execute.
-      if (present(routeOptions)) then
-          call c_ESMC_RouteSet(route, routeOptions, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                    ESMF_ERR_PASSTHRU, &
+    nitems = size(arrayList)
+    allocate(local_arrayList(nitems), stat=status)
+    if (ESMF_LogMsgFoundAllocError(status, &
+                                   "Allocating localarraylist information", &
                                     ESMF_CONTEXT, rc)) return
-      endif
 
+    ! fortran equivalent of a cast - routerun wants a local array 
+    do i=1, nitems
+      local_arrayList(i)%this%ptr = arrayList(i)%this%ptr
+    enddo
 
-      call ESMF_RouteRunList(route, local_arrayList, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+    ! Set the route options if given, then execute.
+    if (present(routeOptions)) then
+        call c_ESMC_RouteSet(route, routeOptions, status)
+        if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+    endif
 
-      deallocate(local_arrayList, stat=status)
-      ! do not error check this; preserve rc from routerun
 
-      ! last call to routerun set rc
+    call ESMF_RouteRunList(route, local_arrayList, rc=status)
+    if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      end subroutine ESMF_IArrayHaloList
+    deallocate(local_arrayList, stat=status)
+    ! do not error check this; preserve rc from routerun
+
+    ! last call to routerun set rc
+
+  end subroutine ESMF_IArrayHaloList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -999,15 +901,14 @@
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_IArrayHalo()
-    subroutine ESMF_IArrayHaloOne(array, routehandle, routeIndex, &
-                                 blocking, commhandle, routeOptions, rc)
+  subroutine ESMF_IArrayHaloOne(array, routehandle, routeIndex, &
+                                 blocking, routeOptions, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(inout) :: array
     type(ESMF_RouteHandle), intent(in) :: routehandle
     integer, intent(in), optional :: routeIndex
     type(ESMF_BlockingFlag), intent(in), optional :: blocking
-    type(ESMF_CommHandle), intent(inout), optional :: commhandle
     type(ESMF_RouteOptions), intent(in), optional :: routeOptions
     integer, intent(out), optional :: rc
 !
@@ -1035,11 +936,6 @@
 !         Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !         {\tt ESMF\_NONBLOCKING}.
 !      (This feature is not yet supported.  All operations are synchronous.)
-!   \item [{[commhandle]}]
-!         If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
-!         argument is required.  Information about the pending operation
-!         will be stored in the {\tt ESMF\_CommHandle} and can be queried
-!         or waited for later.
 !     \item [{[routeOptions]}]
 !           Not normally specified.  Specify which internal strategy to select
 !           when executing the communication needed to execute the halo.
@@ -1050,45 +946,49 @@
 !
 !EOP
 
-      integer :: status         ! local error status
-      type(ESMF_LocalArray) :: local_array
-      type(ESMF_Route) :: route
+    integer :: status         ! local error status
+    type(ESMF_LocalArray) :: local_array
+    type(ESMF_Route) :: route
 
-      ! initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
  
-      if (present(routeIndex)) then
-          call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
-                                   route=route, rc=status)
-      else
-          call ESMF_RouteHandleGet(routehandle, which_route=1, &
-                                   route=route, rc=status)
-      endif
-      if (ESMF_LogMsgFoundError(status, &
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+
+    if (present(routeIndex)) then
+        call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
+                                 route=route, rc=status)
+    else
+        call ESMF_RouteHandleGet(routehandle, which_route=1, &
+                                 route=route, rc=status)
+    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+    ! fortran equivalent of a cast - routerun wants a local array 
+    local_array%this%ptr = array%this%ptr
+
+    ! Set the route options if given, then execute the route.
+    if (present(routeOptions)) then
+        call c_ESMC_RouteSet(route, routeOptions, status)
+        if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-
-      ! fortran equivalent of a cast - routerun wants a local array 
-      local_array%this%ptr = array%this%ptr
-
-      ! Set the route options if given, then execute the route.
-      if (present(routeOptions)) then
-          call c_ESMC_RouteSet(route, routeOptions, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
-      endif
+    endif
 
 
-      call ESMF_RouteRun(route, local_array, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+    call ESMF_RouteRun(route, local_array, rc=status)
+    if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      ! last call to logerr already set rc
+    ! last call to logerr already set rc
 
-      end subroutine ESMF_IArrayHaloOne
+  end subroutine ESMF_IArrayHaloOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1097,11 +997,11 @@
 ! !IROUTINE: ESMF_IArrayHaloRelease - Release resources stored for halo operation
 !
 ! !INTERFACE:
-      subroutine ESMF_IArrayHaloRelease(routehandle, rc)
+  subroutine ESMF_IArrayHaloRelease(routehandle, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_RouteHandle), intent(inout) :: routehandle
-      integer, intent(out), optional :: rc
+    type(ESMF_RouteHandle), intent(inout) :: routehandle
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     When the precomputed information about a halo operation is no longer
@@ -1117,9 +1017,12 @@
 !
 !EOP
 
-      call ESMF_RouteHandleDestroy(routehandle, rc=rc)
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
-      end subroutine ESMF_IArrayHaloRelease
+    call ESMF_RouteHandleDestroy(routehandle, rc=rc)
+
+  end subroutine ESMF_IArrayHaloRelease
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1129,17 +1032,17 @@
 !
 ! !INTERFACE:
       ! Private interface; call using ESMF_IArrayHaloStore()
-      subroutine ESMF_IArrayHaloStoreOne(array, grid, datamap, routehandle, &
+  subroutine ESMF_IArrayHaloStoreOne(array, grid, datamap, routehandle, &
                                      halodirection, routeOptions, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternArray), intent(inout) :: array
-      type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_FieldDataMap), intent(inout) :: datamap
-      type(ESMF_RouteHandle), intent(out) :: routehandle
-      type(ESMF_HaloDirection), intent(in), optional :: halodirection
-      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
-      integer, intent(out), optional :: rc
+    type(ESMF_InternArray), intent(inout) :: array
+    type(ESMF_Grid), intent(in) :: grid
+    type(ESMF_FieldDataMap), intent(inout) :: datamap
+    type(ESMF_RouteHandle), intent(out) :: routehandle
+    type(ESMF_HaloDirection), intent(in), optional :: halodirection
+    type(ESMF_RouteOptions), intent(in), optional :: routeOptions
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Precompute the data movements needed to 
@@ -1184,12 +1087,18 @@
       ! this level (inout) as well, even though that is confusing to users,
       ! or make a temporary here and do an assignment before returning.
 
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
+
       ! passthru call, setting index to 1 and type 1-to-1
       call ESMF_IArrayHaloStoreIndex(array, 1, ESMF_1TO1HANDLEMAP, 1, &
                                 grid, datamap, &
                                 routehandle, halodirection, routeOptions, rc)
 
-      end subroutine ESMF_IArrayHaloStoreOne
+  end subroutine ESMF_IArrayHaloStoreOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1199,7 +1108,7 @@
 !
 ! !INTERFACE:
       ! Internal routine, intended to be called directly by Bundle code only
-      subroutine ESMF_IArrayHaloStoreIndex(array, index, rmaptype, maxindex, &
+  subroutine ESMF_IArrayHaloStoreIndex(array, index, rmaptype, maxindex, &
                                       grid, datamap, routehandle, &
                                       halodirection, routeOptions, rc)
 !
@@ -1281,6 +1190,12 @@
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
  
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+
       ! TODO: all this code could be moved to the C++ side once Grid has
       !       an interface
 
@@ -1450,7 +1365,7 @@
       ! set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_IArrayHaloStoreIndex
+  end subroutine ESMF_IArrayHaloStoreIndex
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1460,7 +1375,7 @@
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_IArrayHaloValidate()
-    subroutine ESMF_IArrayHaloValidateList(arrayList, routehandle, routeIndex, &
+  subroutine ESMF_IArrayHaloValidateList(arrayList, routehandle, routeIndex, &
                                           rc)
 !
 ! !ARGUMENTS:
@@ -1504,6 +1419,12 @@
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
  
+    ! Check init status of arguments
+    do i=1, size(arrayList)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, arrayList(i), rc)
+    enddo
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+
       if (present(routeIndex)) then
           call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
                                         route=route, rc=status)
@@ -1548,7 +1469,7 @@
       ! do NOT error check this; preserve the rc returned from validate.
 
 
-      end subroutine ESMF_IArrayHaloValidateList
+  end subroutine ESMF_IArrayHaloValidateList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1558,7 +1479,7 @@
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_IArrayHaloValidate()
-    subroutine ESMF_IArrayHaloValidateOne(array, routehandle, routeIndex, rc)
+  subroutine ESMF_IArrayHaloValidateOne(array, routehandle, routeIndex, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(inout) :: array
@@ -1599,6 +1520,10 @@
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
  
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+
       if (present(routeIndex)) then
           call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
                                    route=route, rc=status)
@@ -1633,7 +1558,7 @@
 
       ! last call to logerr already set rc
 
-      end subroutine ESMF_IArrayHaloValidateOne
+  end subroutine ESMF_IArrayHaloValidateOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1643,9 +1568,9 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_IArrayRedist()
-      subroutine ESMF_IArrayRedistList(srcArrayList, dstArrayList, routehandle, &
+  subroutine ESMF_IArrayRedistList(srcArrayList, dstArrayList, routehandle, &
                                       routeIndex, blocking, &
-                                      commhandle, routeOptions, rc) 
+                                      routeOptions, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(inout) :: srcArrayList(:)
@@ -1653,7 +1578,6 @@
       type(ESMF_RouteHandle), intent(in) :: routehandle
       integer, intent(in), optional :: routeIndex
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
-      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc
 !
@@ -1690,11 +1614,6 @@
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
 !      (This feature is not yet supported.  All operations are synchronous.)
-!     \item [{[commhandle]}]
-!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
-!           argument is required.  Information about the pending operation
-!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
-!           or waited for later.
 !     \item [{[routeOptions]}]
 !           Not normally specified.  Specify which internal strategy to select
 !           when executing the communication needed to execute the
@@ -1714,6 +1633,15 @@
 
       ! initialize return code; assume failure until success certain
       if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    do i=1, size(srcArrayList)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArrayList(i), rc)
+    enddo
+    do i=1, size(dstArrayList)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArrayList(i), rc)
+    enddo
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
       if (present(routeIndex)) then
           call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
@@ -1773,7 +1701,7 @@
 
       ! rc has been set from previous call
 
-      end subroutine ESMF_IArrayRedistList
+  end subroutine ESMF_IArrayRedistList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1783,9 +1711,9 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_IArrayRedist()
-      subroutine ESMF_IArrayRedistOne(srcArray, dstArray, routehandle, &
+  subroutine ESMF_IArrayRedistOne(srcArray, dstArray, routehandle, &
                                      routeIndex, blocking, &
-                                     commhandle, routeOptions, rc) 
+                                     routeOptions, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(in) :: srcArray
@@ -1793,7 +1721,6 @@
       type(ESMF_RouteHandle), intent(in) :: routehandle
       integer, intent(in), optional :: routeIndex
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
-      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc
 !
@@ -1830,11 +1757,6 @@
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
 !      (This feature is not yet supported.  All operations are synchronous.)
-!     \item [{[commhandle]}]
-!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
-!           argument is required.  Information about the pending operation
-!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
-!           or waited for later.
 !     \item [{[routeOptions]}]
 !           Not normally specified.  Specify which internal strategy to select
 !           when executing the communication needed to execute the
@@ -1852,6 +1774,11 @@
 
       ! initialize return code; assume failure until success certain
       if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
       if (present(routeIndex)) then
           call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
@@ -1883,7 +1810,7 @@
 
       ! rc has already been set by logerr call above
 
-      end subroutine ESMF_IArrayRedistOne
+  end subroutine ESMF_IArrayRedistOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1892,7 +1819,7 @@
 ! !IROUTINE: ESMF_IArrayRedistRelease - Release resources stored for redist operation
 !
 ! !INTERFACE:
-      subroutine ESMF_IArrayRedistRelease(routehandle, rc)
+  subroutine ESMF_IArrayRedistRelease(routehandle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_RouteHandle), intent(inout) :: routehandle
@@ -1913,9 +1840,12 @@
 !
 !EOP
 
-      call ESMF_RouteHandleDestroy(routehandle, rc=rc)
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
-      end subroutine ESMF_IArrayRedistRelease
+    call ESMF_RouteHandleDestroy(routehandle, rc=rc)
+
+  end subroutine ESMF_IArrayRedistRelease
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1925,7 +1855,7 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_IArrayRedistStore()
-      subroutine ESMF_IArrayRedistStoreOne(srcArray, srcGrid, srcDataMap, &
+  subroutine ESMF_IArrayRedistStoreOne(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
                                        parentVM, routeOptions, routehandle, rc)
 !
@@ -1988,13 +1918,22 @@
     ! if problems compiling, see the comment in HaloStore() for
     ! suggestions regarding intent(out) vs intent(inout).
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, srcGrid, rc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, srcDatamap)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, dstGrid, rc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, dstDatamap)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, parentVM, rc)
+
     call ESMF_IArrayRedistStoreIndex(srcArray, srcGrid, srcDataMap, &
                                dstArray, dstGrid, dstDataMap, &
                                1, ESMF_1TO1HANDLEMAP, 1, &
                                parentVM, routehandle, routeOptions, rc)
 
 
-    end subroutine ESMF_IArrayRedistStoreOne
+  end subroutine ESMF_IArrayRedistStoreOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2004,7 +1943,7 @@
 !
 ! !INTERFACE:
       ! internal use only; called by Bundle code for multi-fields
-      subroutine ESMF_IArrayRedistStoreIndex(srcArray, srcGrid, srcDataMap, &
+  subroutine ESMF_IArrayRedistStoreIndex(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
                                        index, rmaptype, maxindex, &
                                        parentVM, routehandle, routeOptions, rc)
@@ -2103,6 +2042,16 @@
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, srcGrid, rc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, srcDatamap)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, dstGrid, rc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, dstDatamap)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, parentVM, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
       ! start with a very clean slate...
       nullify(dstAICountPerDE)
@@ -2310,7 +2259,7 @@
 
       ! rc has been set by the calls above, just return here.
 
-      end subroutine ESMF_IArrayRedistStoreIndex
+  end subroutine ESMF_IArrayRedistStoreIndex
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2320,7 +2269,7 @@
 !
 ! !INTERFACE:
       ! internal use only; called by Bundle code for multi-fields
-      subroutine ESMF_IArrayRedistStoreIndexArb(srcArray, srcGrid, srcDataMap, &
+  subroutine ESMF_IArrayRedistStoreIndexArb(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
                                        index, rmaptype, maxindex, &
                                        parentVM, routehandle, routeOptions, rc)
@@ -2426,6 +2375,16 @@
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, srcGrid, rc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, srcDatamap)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, dstGrid, rc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, dstDatamap)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, parentVM, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
       ! TODO: query to get storage type and if vector, branch out.
 
@@ -2759,7 +2718,7 @@
       ! set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_IArrayRedistStoreIndexArb
+  end subroutine ESMF_IArrayRedistStoreIndexArb
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2769,7 +2728,7 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_IArrayRedistValidate()
-      subroutine ESMF_IArrayRedistValidateList(srcArrayList, dstArrayList, &
+  subroutine ESMF_IArrayRedistValidateList(srcArrayList, dstArrayList, &
                                               routehandle, routeIndex, rc)
 !
 ! !ARGUMENTS:
@@ -2816,6 +2775,15 @@
 
       ! initialize return code; assume failure until success certain
       if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    do i=1, size(srcArrayList)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArrayList(i), rc)
+    enddo
+    do i=1, size(dstArrayList)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArrayList(i), rc)
+    enddo
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
       if (present(routeIndex)) then
           call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
@@ -2877,7 +2845,7 @@
 
       ! rc has already been set, just return
 
-      end subroutine ESMF_IArrayRedistValidateList
+  end subroutine ESMF_IArrayRedistValidateList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2887,15 +2855,15 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_IArrayRedistValidate()
-      subroutine ESMF_IArrayRedistValidateOne(srcArray, dstArray, routehandle, &
+  subroutine ESMF_IArrayRedistValidateOne(srcArray, dstArray, routehandle, &
                                              routeIndex, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternArray), intent(in) :: srcArray
-      type(ESMF_InternArray), intent(in) :: dstArray
-      type(ESMF_RouteHandle), intent(in) :: routehandle
-      integer, intent(in), optional :: routeIndex
-      integer, intent(out), optional :: rc
+    type(ESMF_InternArray), intent(in) :: srcArray
+    type(ESMF_InternArray), intent(in) :: dstArray
+    type(ESMF_RouteHandle), intent(in) :: routehandle
+    integer, intent(in), optional :: routeIndex
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Do extensive error checking on the incoming 
@@ -2931,6 +2899,11 @@
 
       ! initialize return code; assume failure until success certain
       if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
       if (present(routeIndex)) then
           call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
@@ -2972,7 +2945,7 @@
 
       ! preserve the rc and return it
 
-      end subroutine ESMF_IArrayRedistValidateOne
+  end subroutine ESMF_IArrayRedistValidateOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2981,7 +2954,7 @@
 ! !IROUTINE: ESMF_IArrayScatter - Scatter a single Array across multiple DEs
 !
 ! !INTERFACE:
-      subroutine ESMF_IArrayScatter(array, delayout, decompids, rootDE, &
+  subroutine ESMF_IArrayScatter(array, delayout, decompids, rootDE, &
                                    scatteredArray, rc)
 !
 ! !ARGUMENTS:
@@ -3021,6 +2994,10 @@
         ! initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
  
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+
         ! call c routine to allgather
         size_decomp = size(decompids)
         call c_ESMC_IArrayScatter(array, delayout, decompids, size_decomp, &
@@ -3033,9 +3010,10 @@
         ! set return code if user specified it
         if (present(rc)) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_IArrayScatter
+  end subroutine ESMF_IArrayScatter
 
-       end module ESMF_InternArrayCommMod
+!------------------------------------------------------------------------------
+end module ESMF_InternArrayCommMod
 
 
 

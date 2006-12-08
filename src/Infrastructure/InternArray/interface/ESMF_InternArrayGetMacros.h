@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_InternArrayGetMacros.h,v 1.3 2006/11/16 05:21:04 cdeluca Exp $
+! $Id: ESMF_InternArrayGetMacros.h,v 1.4 2006/12/08 23:36:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -81,65 +81,68 @@
 ^undef  ESMF_METHOD @\
 !define ESMF_METHOD "ESMF_InternArrayGetData##mrank##D##mtypekind" @\
 ^define ESMF_METHOD "ESMF_InternArrayGetData" @\
-      subroutine ESMF_ArrayGetData##mrank##D##mtypekind(array, fptr, docopy, rc) @\
+  subroutine ESMF_ArrayGetData##mrank##D##mtypekind(array, fptr, docopy, rc) @\
  @\
-      type(ESMF_InternArray) :: array @\
-      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
-      type(ESMF_CopyFlag), intent(in), optional :: docopy @\
-      integer, intent(out), optional :: rc @\
+    type(ESMF_InternArray) :: array @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
+    type(ESMF_CopyFlag), intent(in), optional :: docopy @\
+    integer, intent(out), optional :: rc @\
  @\
-        integer :: status                   ! local error status @\
-        logical :: rcpresent                ! did user specify rc? @\
-        logical :: copyreq                  ! did user specify copy? @\
+    integer :: status                   ! local error status @\
+    logical :: rcpresent                ! did user specify rc? @\
+    logical :: copyreq                  ! did user specify copy? @\
  @\
-        type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap     ! for passing f90 ptr to C++ @\
-        integer :: lb(mrank), ub(mrank)  ! size info for the array @\
-        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
+    type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap     ! for passing f90 ptr to C++ @\
+    integer :: lb(mrank), ub(mrank)  ! size info for the array @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
  @\
-        ! initialize return code; assume failure until success is certain @\
-        status = ESMF_FAILURE @\
-        rcpresent = .FALSE. @\
-        if (present(rc)) then @\
-          rcpresent = .TRUE. @\
-          rc = ESMF_FAILURE @\
-        endif @\
+    ! initialize return code; assume failure until success is certain @\
+    status = ESMF_FAILURE @\
+    rcpresent = .FALSE. @\
+    if (present(rc)) then @\
+      rcpresent = .TRUE. @\
+      rc = ESMF_FAILURE @\
+    endif @\
  @\
-        copyreq = .FALSE. @\
+    ! Check init status of arguments @\
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc) @\
  @\
-        ! check copyflag to see if we are making a reference @\
-        ! or making a new array and a copy @\
-        if (present(docopy)) then @\
-          if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. @\
-        endif @\
+    copyreq = .FALSE. @\
  @\
-        call c_ESMC_IArrayGetF90Ptr(array, wrap, status) @\
-        if (ESMF_LogMsgFoundError(status, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
+    ! check copyflag to see if we are making a reference @\
+    ! or making a new array and a copy @\
+    if (present(docopy)) then @\
+      if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. @\
+    endif @\
  @\
-        ! Allocate a new buffer if requested and return a copy @\
-        if (copyreq) then @\
-          call c_ESMC_IArrayGetLbounds(array, mrank, lb, status) @\
-          if (ESMF_LogMsgFoundError(status, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
-          call c_ESMC_IArrayGetUbounds(array, mrank, ub, status) @\
-          if (ESMF_LogMsgFoundError(status, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
-          allocate(localp( mrng ), stat=status) @\
-          if (ESMF_LogMsgFoundAllocError(status, "Array local copy", & @\
-                                       ESMF_CONTEXT, rc)) return @\
-          ! this must do a contents assignment @\
-          localp = wrap % ptr##mrank##D##mtypekind @\
-          fptr => localp  @\
-        else @\
-          fptr => wrap % ptr##mrank##D##mtypekind @\
-        endif @\
+    call c_ESMC_IArrayGetF90Ptr(array, wrap, status) @\
+    if (ESMF_LogMsgFoundError(status, & @\
+                              ESMF_ERR_PASSTHRU, & @\
+                              ESMF_CONTEXT, rc)) return @\
  @\
-        if (rcpresent) rc = ESMF_SUCCESS @\
+    ! Allocate a new buffer if requested and return a copy @\
+    if (copyreq) then @\
+      call c_ESMC_IArrayGetLbounds(array, mrank, lb, status) @\
+      if (ESMF_LogMsgFoundError(status, & @\
+                              ESMF_ERR_PASSTHRU, & @\
+                              ESMF_CONTEXT, rc)) return @\
+      call c_ESMC_IArrayGetUbounds(array, mrank, ub, status) @\
+      if (ESMF_LogMsgFoundError(status, & @\
+                              ESMF_ERR_PASSTHRU, & @\
+                              ESMF_CONTEXT, rc)) return @\
+      allocate(localp( mrng ), stat=status) @\
+      if (ESMF_LogMsgFoundAllocError(status, "Array local copy", & @\
+                                   ESMF_CONTEXT, rc)) return @\
+      ! this must do a contents assignment @\
+      localp = wrap % ptr##mrank##D##mtypekind @\
+      fptr => localp  @\
+    else @\
+      fptr => wrap % ptr##mrank##D##mtypekind @\
+    endif @\
  @\
-        end subroutine ESMF_ArrayGetData##mrank##D##mtypekind @\
+    if (rcpresent) rc = ESMF_SUCCESS @\
+ @\
+  end subroutine ESMF_ArrayGetData##mrank##D##mtypekind @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\

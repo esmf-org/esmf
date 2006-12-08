@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.86 2006/12/05 23:07:22 samsoncheung Exp $
+! $Id: ESMF_FieldComm.F90,v 1.87 2006/12/08 23:36:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.86 2006/12/05 23:07:22 samsoncheung Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.87 2006/12/08 23:36:06 theurich Exp $'
 
 !==============================================================================
 !
@@ -482,7 +482,7 @@
 
       ! real call.
       call ESMF_IArrayHalo(ftypep%localfield%localdata, routehandle, 1, &
-                          blockingflag, commhandle, routeOptions, rc=status)
+                          blockingflag, routeOptions, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -851,7 +851,7 @@
 
       call ESMF_IArrayRedist(srcFtypep%localfield%localdata, &
                             dstFtypep%localfield%localdata, &
-                            routehandle, 1, blockingflag, commhandle, &
+                            routehandle, 1, blockingflag, &
                             routeOptions, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -969,7 +969,7 @@
 
       call ESMF_IArrayRedist(srcFtypep%localfield%localdata, &
                             dstFtypep%localfield%localdata, &
-                            routehandle, 1, blockingflag, commhandle, &
+                            routehandle, 1, blockingflag, &
                             routeOptions, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1552,8 +1552,8 @@
                                 ESMF_CONTEXT, rc)) return
 
       call ESMF_FieldRegrid(srcField, dstField, routehandle, &
-                            srcMask, dstMask, blockingflag, &
-                            commhandle, routeOptions, localrc)
+                            srcMask, dstMask, blockingflag, commhandle, &
+                            routeOptions, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return

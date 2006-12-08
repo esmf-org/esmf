@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArray.F90,v 1.3 2006/11/16 05:21:03 cdeluca Exp $
+! $Id: ESMF_InternArray.F90,v 1.4 2006/12/08 23:36:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -10,9 +10,10 @@
 !
 !==============================================================================
 #define ESMF_FILENAME "ESMF_InternArray.F90"
+!==============================================================================
 !
-!     ESMF Array module
-      module ESMF_InternArrayMod
+! ESMF InternArray module
+module ESMF_InternArrayMod
 !
 !==============================================================================
 !
@@ -22,9 +23,10 @@
 ! macro-generated interfaces.
 !
 !------------------------------------------------------------------------------
+! INCLUDES
 #include "ESMF.h"
 
-!------------------------------------------------------------------------------
+!==============================================================================
 !BOPI
 ! !MODULE: ESMF_InternArrayMod - Manage data arrays uniformly between F90 and C++     
 !
@@ -42,94 +44,104 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_UtilTypesMod    ! ESMF base class
-      use ESMF_BaseMod
-      use ESMF_LogErrMod
-      use ESMF_IOSpecMod
-      use ESMF_ArraySpecMod
-      use ESMF_LocalArrayMod
-      use ESMF_DELayoutMod
-      implicit none
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_IOSpecMod
+  use ESMF_ArraySpecMod
+  use ESMF_LocalArrayMod
+  use ESMF_DELayoutMod
+  
+  implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
+  private
 !------------------------------------------------------------------------------
-!     ! ESMF_HaloDirection
-! 
-!     ! Object for specifiying halo directions (mostly a placeholder for now)
+  ! ESMF_HaloDirection
+ 
+  ! Object for specifiying halo directions (mostly a placeholder for now)
 
-      type ESMF_HaloDirection
-      sequence
-      private
-        integer :: edges
-      end type
+  type ESMF_HaloDirection
+  sequence
+  private
+    integer :: edges
+    ESMF_INIT_DECLARE
+  end type
 
 
 !------------------------------------------------------------------------------
-!     ! ESMF_Mask
-! 
-!     ! Class for storing information about masked regions.
+  ! ESMF_Mask
+ 
+  ! Class for storing information about masked regions.
 
-      type ESMF_Mask
-      sequence
-      private
-        ! same size as data array
-#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
-        type (ESMF_LocalArray), pointer :: maskvals => NULL()
+  type ESMF_Mask
+  sequence
+  private
+#ifndef ESMF_NO_INITIALIZERS
+    type (ESMF_LocalArray), pointer :: maskvals => NULL()
 #else
-        type (ESMF_LocalArray), pointer :: maskvals 
+    type (ESMF_LocalArray), pointer :: maskvals 
 #endif
-      end type
+    ESMF_INIT_DECLARE
+  end type
 
 
 !------------------------------------------------------------------------------
-!     ! ESMF_InternArray
-!
-!     ! Array data type.  All information is kept on the C++ side inside
-!     ! the class structure.
+  ! ESMF_InternArray
 
-      type ESMF_InternArray
-      sequence
-        ! opaque pointer to the C++ class data
-#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
-        type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
-#else
-        type(ESMF_Pointer) :: this
-#endif
-      end type
+  ! Array data type.  All information is kept on the C++ side inside
+  ! the class structure.
+
+  type ESMF_InternArray
+  sequence
+    type(ESMF_Pointer) :: this
+    ESMF_INIT_DECLARE
+  end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_HaloDirection, ESMF_Mask
-      public ESMF_InternArray
+  public ESMF_HaloDirection
+  public ESMF_Mask
+  public ESMF_InternArray
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
  
-      public ESMF_InternArrayGet, ESMF_InternArraySet
-      public ESMF_IArrayGetAttribute, ESMF_IArraySetAttribute
-      public ESMF_IArrayGetAttributeCount
-      public ESMF_IArrayGetAttributeInfo
+! - ESMF-public methods:
+  public ESMF_InternArrayGet, ESMF_InternArraySet
+  public ESMF_IArrayGetAttribute, ESMF_IArraySetAttribute
+  public ESMF_IArrayGetAttributeCount
+  public ESMF_IArrayGetAttributeInfo
 
-      public ESMF_IArraySetAxisIndex, ESMF_IArrayGetAxisIndex  
-      !public ESMF_IArrayComputeAxisIndex
+  public ESMF_IArraySetAxisIndex, ESMF_IArrayGetAxisIndex  
+  !public ESMF_IArrayComputeAxisIndex
 
-      public ESMF_InternArrayWriteRestart
-      public ESMF_InternArrayReadRestart
-      public ESMF_InternArrayWrite
-      public ESMF_InternArrayRead
+  public ESMF_InternArrayWriteRestart
+  public ESMF_InternArrayReadRestart
+  public ESMF_InternArrayWrite
+  public ESMF_InternArrayRead
  
-      public ESMF_InternArrayValidate
-      public ESMF_InternArrayPrint
+  public ESMF_InternArrayValidate
+  public ESMF_InternArrayPrint
 !EOPI
 
-      public assignment(=)
+! - ESMF-private methods:
+  public ESMF_InternArrayGetInit
+
+  public ESMF_HaloDirectionInit
+  public ESMF_HaloDirectionGetInit
+  
+  public ESMF_MaskInit
+  public ESMF_MaskGetInit
+
+  public assignment(=)
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter, private :: version = &
-      '$Id: ESMF_InternArray.F90,v 1.3 2006/11/16 05:21:03 cdeluca Exp $'
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_InternArray.F90,v 1.4 2006/12/08 23:36:06 theurich Exp $'
 !
 !==============================================================================
 !
@@ -259,7 +271,7 @@ end subroutine
                                base, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternArray) :: array
+      type(ESMF_InternArray), intent(in) :: array
       integer, intent(out), optional :: rank
       type(ESMF_DataType), intent(out), optional :: type
       type(ESMF_DataKind), intent(out), optional :: kind
@@ -330,6 +342,8 @@ end subroutine
           rc = ESMF_FAILURE
       endif
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       if (present(rank)) then
          call c_ESMC_IArrayGetRank(array, rank, status)
@@ -434,6 +448,9 @@ end subroutine
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
       call c_ESMC_AttributeGetValue(array%this, name, &
                                     ESMF_DATA_INTEGER, ESMF_I4, 1, &
                                     value, status)
@@ -491,6 +508,9 @@ end subroutine
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -547,6 +567,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
       call c_ESMC_AttributeGetValue(array%this, name, &
                                     ESMF_DATA_INTEGER, ESMF_I8, 1, &
                                     value, status)
@@ -600,6 +623,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -657,6 +683,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
       call c_ESMC_AttributeGetValue(array%this, name, &
                                     ESMF_DATA_REAL, ESMF_R4, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -709,6 +738,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -766,6 +798,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
       call c_ESMC_AttributeGetValue(array%this, name, &
                                     ESMF_DATA_REAL, ESMF_R8, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -818,6 +853,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -875,6 +913,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
       call c_ESMC_AttributeGetValue(array%this, name, &
                                     ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
                                     value, status)
@@ -928,6 +969,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -985,6 +1029,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
       call c_ESMC_AttributeGetChar(array%this, name, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1029,6 +1076,9 @@ end subroutine
 !EOP
 
       integer :: status                           ! Error status
+
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       call c_ESMC_AttributeGetCount(array%this, count, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1094,6 +1144,9 @@ end subroutine
       type(ESMF_DataType) :: localDt
       type(ESMF_DataKind) :: localDk
       integer :: localCount
+
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       call c_ESMC_AttributeGetAttrInfoName(array%this, name, &
                                            localDt, localDk, localCount, status)
@@ -1170,6 +1223,9 @@ end subroutine
       type(ESMF_DataKind) :: localDk
       integer :: localCount
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
       call c_ESMC_AttributeGetAttrInfoNum(array%this, attributeIndex, &
                                          localName, localDt, localDk, &
                                          localCount, status)
@@ -1219,6 +1275,9 @@ end subroutine
 !EOPI
 
         integer :: status, i
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
         ! call c routine to get index
         call c_ESMC_IArrayGetAxisIndex(array, domainTypeFlag, AIPerRank,&
@@ -1278,6 +1337,9 @@ end subroutine
 
         integer :: status, i
 
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
         ! call c routine to get index
         if (present(totalindex)) then
           call c_ESMC_IArrayGetAxisIndex(array, ESMF_DOMAIN_TOTAL, totalindex,&
@@ -1326,7 +1388,7 @@ end subroutine
       subroutine ESMF_InternArrayPrint(array, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternArray) :: array
+      type(ESMF_InternArray), intent(in) :: array
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !
@@ -1357,12 +1419,8 @@ end subroutine
          rc = ESMF_FAILURE
        endif
 
-       if (array%this .eq. ESMF_NULL_POINTER) then
-         print *, "Array Print:"
-         print *, " Empty or Uninitialized Array"
-         if (present(rc)) rc = ESMF_SUCCESS
-         return
-       endif
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
        defaultopts = "brief"
 
@@ -1562,6 +1620,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
       call c_ESMC_AttributeSetValue(array%this, name, &
                                     ESMF_DATA_INTEGER, ESMF_I4, 1, &
                                     value, status)
@@ -1617,6 +1678,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -1675,7 +1739,10 @@ end subroutine
 
       integer :: status                           ! Error status
 
-      call c_ESMC_AttributeSetValue(array%this, name, &
+       ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
+     call c_ESMC_AttributeSetValue(array%this, name, &
                                     ESMF_DATA_INTEGER, ESMF_I8, 1, &
                                     value, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1730,6 +1797,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -1788,6 +1858,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
       call c_ESMC_AttributeSetValue(array%this, name, &
                                     ESMF_DATA_REAL, ESMF_R4, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1842,6 +1915,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -1900,6 +1976,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
       call c_ESMC_AttributeSetValue(array%this, name, &
                                     ESMF_DATA_REAL, ESMF_R8, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1954,6 +2033,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -2012,6 +2094,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
       call c_ESMC_AttributeSetValue(array%this, name, &
                                     ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
                                     value, status)
@@ -2067,6 +2152,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -2125,6 +2213,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
       call c_ESMC_AttributeSetChar(array%this, name, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2174,6 +2265,9 @@ end subroutine
 
         integer :: status
         integer :: i
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
         ! call c routine to add index
         if (present(totalindex)) then
@@ -2319,6 +2413,9 @@ end subroutine
           rc = ESMF_FAILURE
       endif
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+
       if (present(name)) then
           call c_ESMC_SetName(array, "Array", name, status)
           if (ESMF_LogMsgFoundError(status, &
@@ -2338,13 +2435,13 @@ end subroutine
 ! !IROUTINE: ESMF_InternArrayValidate - Check validity of an Array 
 !
 ! !INTERFACE:
-      subroutine ESMF_InternArrayValidate(array, options, rc)
+  subroutine ESMF_InternArrayValidate(array, options, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_InternArray) :: array
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
+    type(ESMF_InternArray)                        :: array
+    character(len = *),   intent(in),   optional  :: options
+    integer,              intent(out),  optional  :: rc 
 !
 ! !DESCRIPTION:
 !      Validates that the {\tt array} is internally consistent.
@@ -2365,42 +2462,28 @@ end subroutine
 !
 !EOP
 
-       character (len=6) :: defaultopts      ! default print options 
-       integer :: status                     ! local error status
-       logical :: rcpresent        
+    character(len=6)  :: defaultopts      ! default print options 
+    integer           :: status           ! local error status
 
-       ! Initialize return code; assume failure until success is certain
-       status = ESMF_FAILURE
-       rcpresent = .FALSE.
-       if (present(rc)) then
-         rcpresent = .TRUE.
-         rc = ESMF_FAILURE
-       endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+    
+    defaultopts = "brief"
 
-       defaultopts = "brief"
+    if(present(options)) then
+        !call c_ESMC_IArrayValidate(array, options, status) 
+    else
+        !call c_ESMC_IArrayValidate(array, defaultopts, status) 
+    endif
+    !todo: error handling
+    
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
-       ! Simple validity checks
-       if (array%this .eq. ESMF_NULL_POINTER) then
-          ! TODO: this will always return.  
-          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                ESMF_CONTEXT, rc)) return
-       endif
-
-       if(present(options)) then
-           !call c_ESMC_IArrayValidate(array, options, status) 
-       else
-           !call c_ESMC_IArrayValidate(array, defaultopts, status) 
-       endif
-
-       !if (status .ne. ESMF_SUCCESS) then
-       !  print *, "Array validate error"
-       !  return
-       !endif
-
-       ! Set return values
-       if (rcpresent) rc = ESMF_SUCCESS
-
-       end subroutine ESMF_InternArrayValidate
+  end subroutine ESMF_InternArrayValidate
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2448,6 +2531,9 @@ end subroutine
          rcpresent = .TRUE.
          rc = ESMF_FAILURE
        endif
+
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
        defaultopts = "singlefile"
        defaultfile = "datafile"
@@ -2512,5 +2598,173 @@ end subroutine
 !------------------------------------------------------------------------------
 
 
-       end module ESMF_InternArrayMod
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InternArrayGetInit"
+!BOPI
+! !IROUTINE: ESMF_InternArrayGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+      function ESMF_InternArrayGetInit(array) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_InternArrayGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_InternArray), intent(in), optional :: array
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           InternArray object.
+!     \end{description}
+!
+!EOPI
 
+    if (present(array)) then
+      ESMF_InternArrayGetInit = ESMF_INIT_GET(array)
+    else
+      ESMF_InternArrayGetInit = ESMF_INIT_CREATED
+    endif
+
+    end function ESMF_InternArrayGetInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HaloDirectionInit()"
+!BOPI
+! !IROUTINE: ESMF_HaloDirectionInit - Init HaloDirection internals
+
+! !INTERFACE:
+  subroutine ESMF_HaloDirectionInit(halodirection)
+!
+! !ARGUMENTS:
+    type(ESMF_HaloDirection), intent(inout) :: halodirection
+!         
+!
+! !DESCRIPTION:
+!      Initialize HaloDirection internals.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[halodirection] 
+!          Specified {\tt ESMF\_HaloDirection} object.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    ESMF_INIT_SET_DEFINED(halodirection)
+  end subroutine ESMF_HaloDirectionInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HaloDirectionGetInit"
+!BOPI
+! !IROUTINE: ESMF_HaloDirectionGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+  function ESMF_HaloDirectionGetInit(halodirection) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_HaloDirectionGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_HaloDirection), intent(in), optional :: halodirection
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [halodirection]
+!           HaloDirection object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(halodirection)) then
+      ESMF_HaloDirectionGetInit = ESMF_INIT_GET(halodirection)
+    else
+      ESMF_HaloDirectionGetInit = ESMF_INIT_DEFINED
+    endif
+
+  end function ESMF_HaloDirectionGetInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MaskInit()"
+!BOPI
+! !IROUTINE: ESMF_MaskInit - Init Mask internals
+
+! !INTERFACE:
+  subroutine ESMF_MaskInit(mask)
+!
+! !ARGUMENTS:
+    type(ESMF_Mask), intent(inout) :: mask
+!         
+!
+! !DESCRIPTION:
+!      Initialize Mask internals.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[mask] 
+!          Specified {\tt ESMF\_Mask} object.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    mask%maskvals => NULL()
+    ESMF_INIT_SET_DEFINED(mask)
+  end subroutine ESMF_MaskInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MaskGetInit"
+!BOPI
+! !IROUTINE: ESMF_MaskGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+  function ESMF_MaskGetInit(mask) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_MaskGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_Mask), intent(in), optional :: mask
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [mask]
+!           Mask object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(mask)) then
+      ESMF_MaskGetInit = ESMF_INIT_GET(mask)
+    else
+      ESMF_MaskGetInit = ESMF_INIT_DEFINED
+    endif
+
+  end function ESMF_MaskGetInit
+!------------------------------------------------------------------------------
+
+
+end module ESMF_InternArrayMod

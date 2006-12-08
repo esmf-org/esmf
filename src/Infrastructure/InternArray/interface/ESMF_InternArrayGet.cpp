@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayGet.cpp,v 1.3 2006/11/16 05:21:04 cdeluca Exp $
+! $Id: ESMF_InternArrayGet.cpp,v 1.4 2006/12/08 23:36:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -10,9 +10,10 @@
 !
 !==============================================================================
 ^define ESMF_FILENAME "ESMF_InternArrayGet.F90"
+!==============================================================================
 !
-!     ESMF Array module
-      module ESMF_InternArrayGetMod
+! ESMF InternArrayGet module
+module ESMF_InternArrayGetMod
 !
 !==============================================================================
 !
@@ -25,44 +26,46 @@
 ! INCLUDES
 ! < ignore blank lines below.  they are created by the files which
 !   define various macros. >
+^include "ESMF.h"
 #include "ESMF_StdCppMacros.h"
 #include "ESMF_InternArrayGetMacros.h"
-^include "ESMF.h"
+
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_UtilTypesMod
-      use ESMF_BaseMod
-      use ESMF_LogErrMod
-      use ESMF_LocalArrayMod
-      use ESMF_InternArrayMod
-      use ESMF_InternArrayCreateMod
-      implicit none
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_LocalArrayMod
+  use ESMF_InternArrayMod
+  use ESMF_InternArrayCreateMod
+  
+  implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
-
+  private
 
 !------------------------------------------------------------------------------
-!     ! Internal wrapper structures for passing f90 pointers to C++ and
-!     ! guaranteeing they are passed by reference on all compilers and all
-!     ! platforms.  These are never seen outside this module.
-!
-      ! < these expand into defined type declarations >
+  ! Internal wrapper structures for passing f90 pointers to C++ and
+  ! guaranteeing they are passed by reference on all compilers and all
+  ! platforms.  These are never seen outside this module.
+
+  ! < these expand into defined type declarations >
 AllTypesMacro(ArrayType)
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_InternArraySetData
-      public ESMF_InternArrayGetData
+  public ESMF_InternArraySetData
+  public ESMF_InternArrayGetData
 
-      public operator(.eq.), operator(.ne.)
+  public operator(.eq.), operator(.ne.)
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter, private :: version = &
-      '$Id: ESMF_InternArrayGet.cpp,v 1.3 2006/11/16 05:21:04 cdeluca Exp $'
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_InternArrayGet.cpp,v 1.4 2006/12/08 23:36:07 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -76,7 +79,7 @@ AllTypesMacro(ArrayType)
 ! !IROUTINE: ESMF_InternArrayGetData -- Get a Fortran pointer to the data contents
 !
 ! !INTERFACE:
-     interface ESMF_InternArrayGetData
+  interface ESMF_InternArrayGetData
 !
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -88,11 +91,11 @@ InterfaceMacro(ArrayGetData)
 !  types of {\tt ESMF\_InternArrayGetData} functions.   
 !  
 !EOPI 
-end interface
+  end interface
 
 !==============================================================================
 
-      contains
+  contains
 
 !==============================================================================
 
@@ -102,13 +105,13 @@ end interface
 ! !IROUTINE: ESMF_InternArraySetData
 !
 ! !INTERFACE:
-      subroutine ESMF_InternArraySetData(array, databuf, docopy, rc)
+  subroutine ESMF_InternArraySetData(array, databuf, docopy, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternArray) :: array 
-      real, dimension (:), pointer :: databuf    
-      type(ESMF_CopyFlag), intent(in) :: docopy 
-      integer, intent(out), optional :: rc     
+    type(ESMF_InternArray), intent(inout) :: array 
+    real, dimension (:), pointer :: databuf    
+    type(ESMF_CopyFlag), intent(in) :: docopy 
+    integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !      Used only with the version of ArrayCreate which creates an empty 
@@ -124,9 +127,9 @@ end interface
 !       Changed BOP/EOP to BOPI/EOPI until code is added.
 ! TODO: code goes here
 !
-        rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
 
-        end subroutine ESMF_InternArraySetData
+  end subroutine ESMF_InternArraySetData
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -137,6 +140,4 @@ DeclarationMacro(ArrayGetData)
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-
-        end module ESMF_InternArrayGetMod
-
+end module ESMF_InternArrayGetMod

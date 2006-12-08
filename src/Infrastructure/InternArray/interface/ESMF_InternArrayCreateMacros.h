@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_InternArrayCreateMacros.h,v 1.4 2006/11/16 05:21:04 cdeluca Exp $
+! $Id: ESMF_InternArrayCreateMacros.h,v 1.5 2006/12/08 23:36:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -152,6 +152,8 @@
         ! return value set by c_ESMC func above @\
         ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind = array @\
         if (present(rc)) rc = status @\
+        ! Set init code  @\
+        ESMF_INIT_SET_CREATED(ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind) @\
  @\
         end function ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind   @\
  @\
@@ -289,6 +291,8 @@
         ! return value set by c_ESMC func above @\
         ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind = array @\
         if (present(rc)) rc = status @\
+        ! Set init code  @\
+        ESMF_INIT_SET_CREATED(ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind) @\
  @\
         end function ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind   @\
  @\

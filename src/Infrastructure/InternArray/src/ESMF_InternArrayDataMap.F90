@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayDataMap.F90,v 1.3 2006/11/16 05:21:04 cdeluca Exp $
+! $Id: ESMF_InternArrayDataMap.F90,v 1.4 2006/12/08 23:36:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -8,12 +8,14 @@
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
-!------------------------------------------------------------------------------
+!==============================================================================
 #define ESMF_FILENAME "ESMF_ArrayDataMap.F90"
+!==============================================================================
 !
-! ESMF ArrayDataMap module
+! ESMF InternArrayDataMap module
+module ESMF_InternArrayDataMapMod
 !
-!------------------------------------------------------------------------------
+!==============================================================================
 !
 ! !PURPOSE:
 !
@@ -27,12 +29,8 @@
 !   index ordering, and to store complex data type interleave information.
 !
 !------------------------------------------------------------------------------
-!
+! INCLUDES
 #include "ESMF.h"
-
-! module definition
-
-      module ESMF_InternArrayDataMapMod
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -48,42 +46,45 @@
 ! !MODULE: ESMF_ArrayDataMapMod
       
 ! !USES:
-      use ESMF_UtilTypesMod    ! ESMF base class
-      use ESMF_BaseMod
-      use ESMF_IOSpecMod
-      use ESMF_LogErrMod
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_IOSpecMod
 
+  implicit none
+
+!------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      implicit none
-      private
+  private
 
 !------------------------------------------------------------------------------
 !  ! Interleaved types are used when there are multiple variables or
 !  ! if individual data items are > scalar.  This is the public flag.
 
-      type ESMF_InterleaveFlag
-      sequence
-      private
-          integer :: il
-      end type
+  type ESMF_InterleaveFlag
+  sequence
+  private
+    integer :: il
+  end type
 
-      type(ESMF_InterleaveFlag), parameter ::  &
-                    ESMF_INTERLEAVE_BY_BLOCK = ESMF_InterleaveFlag(1), &
-                    ESMF_INTERLEAVE_BY_ITEM = ESMF_InterleaveFlag(2)
+  type(ESMF_InterleaveFlag), parameter ::  &
+    ESMF_INTERLEAVE_BY_BLOCK = ESMF_InterleaveFlag(1), &
+    ESMF_INTERLEAVE_BY_ITEM  = ESMF_InterleaveFlag(2)
 
 !------------------------------------------------------------------------------
 !  ! Expected to be used most often for packed bundles, to allow access to
 !  ! data for an individual field.  Can also be used to describe vector data
 !  ! that is packed into a single array.  This is the private object.
 
-      type ESMF_InterleaveType
-      sequence
-      private
-         type(ESMF_InterleaveFlag) :: il_type
-         integer :: il_start
-         integer :: il_end
-         integer :: il_strides 
-      end type
+  type ESMF_InterleaveType
+  sequence
+  private
+    type(ESMF_InterleaveFlag) :: il_type
+    integer :: il_start
+    integer :: il_end
+    integer :: il_strides
+  end type
 
 !------------------------------------------------------------------------------
 !  ! This describes how the data items are located relative to an individual
@@ -92,49 +93,49 @@
 !  ! See the Grid object for a description of 'staggering' which is a 
 !  ! per-Grid concept. 
 
-      type ESMF_RelLoc
-      sequence
-      !private
-        integer :: relloc
-      end type
+  type ESMF_RelLoc
+  sequence
+  !private
+    integer :: relloc
+  end type
 
-      type(ESMF_RelLoc), parameter :: &
-                           ESMF_CELL_UNDEFINED = ESMF_RelLoc( 0), &
-                           ESMF_CELL_CENTER    = ESMF_RelLoc( 1), &
-                           ESMF_CELL_NFACE     = ESMF_RelLoc( 2), &
-                           ESMF_CELL_SFACE     = ESMF_RelLoc( 3), &
-                           ESMF_CELL_EFACE     = ESMF_RelLoc( 4), &
-                           ESMF_CELL_WFACE     = ESMF_RelLoc( 5), &
-                           ESMF_CELL_NECORNER  = ESMF_RelLoc( 6), &
-                           ESMF_CELL_NWCORNER  = ESMF_RelLoc( 7), &
-                           ESMF_CELL_SECORNER  = ESMF_RelLoc( 8), &
-                           ESMF_CELL_SWCORNER  = ESMF_RelLoc( 9), &
-                           ESMF_CELL_TOPFACE   = ESMF_RelLoc(10), &
-                           ESMF_CELL_BOTFACE   = ESMF_RelLoc(11), &
-                           ESMF_CELL_CELL      = ESMF_RelLoc(12), &
-                           ESMF_CELL_VERTEX    = ESMF_RelLoc(13)
+  type(ESMF_RelLoc), parameter :: &
+    ESMF_CELL_UNDEFINED = ESMF_RelLoc( 0), &
+    ESMF_CELL_CENTER    = ESMF_RelLoc( 1), &
+    ESMF_CELL_NFACE     = ESMF_RelLoc( 2), &
+    ESMF_CELL_SFACE     = ESMF_RelLoc( 3), &
+    ESMF_CELL_EFACE     = ESMF_RelLoc( 4), &
+    ESMF_CELL_WFACE     = ESMF_RelLoc( 5), &
+    ESMF_CELL_NECORNER  = ESMF_RelLoc( 6), &
+    ESMF_CELL_NWCORNER  = ESMF_RelLoc( 7), &
+    ESMF_CELL_SECORNER  = ESMF_RelLoc( 8), &
+    ESMF_CELL_SWCORNER  = ESMF_RelLoc( 9), &
+    ESMF_CELL_TOPFACE   = ESMF_RelLoc(10), &
+    ESMF_CELL_BOTFACE   = ESMF_RelLoc(11), &
+    ESMF_CELL_CELL      = ESMF_RelLoc(12), &
+    ESMF_CELL_VERTEX    = ESMF_RelLoc(13)
  
 !------------------------------------------------------------------------------
 !  ! A set of predefined index orders, which shortcut setting
 !  ! the dimension order array explicitly.   Note that this is merely
 !  ! an alternative to specifying a 1D integer array of index numbers.
 
-      type ESMF_IndexOrder
-      sequence
-      private
-          integer :: iorder
-      end type
+  type ESMF_IndexOrder
+  sequence
+  private
+    integer :: iorder
+  end type
  
-      type(ESMF_IndexOrder), parameter :: &
-                ESMF_INDEX_I   = ESMF_IndexOrder(0), &
-                ESMF_INDEX_IJ  = ESMF_IndexOrder(1), &
-                ESMF_INDEX_JI  = ESMF_IndexOrder(2), &
-                ESMF_INDEX_IJK = ESMF_IndexOrder(3), &
-                ESMF_INDEX_JIK = ESMF_IndexOrder(4), &
-                ESMF_INDEX_KJI = ESMF_IndexOrder(5), &
-                ESMF_INDEX_IKJ = ESMF_IndexOrder(6), &
-                ESMF_INDEX_JKI = ESMF_IndexOrder(7), &
-                ESMF_INDEX_KIJ = ESMF_IndexOrder(8)
+  type(ESMF_IndexOrder), parameter :: &
+    ESMF_INDEX_I   = ESMF_IndexOrder(0), &
+    ESMF_INDEX_IJ  = ESMF_IndexOrder(1), &
+    ESMF_INDEX_JI  = ESMF_IndexOrder(2), &
+    ESMF_INDEX_IJK = ESMF_IndexOrder(3), &
+    ESMF_INDEX_JIK = ESMF_IndexOrder(4), &
+    ESMF_INDEX_KJI = ESMF_IndexOrder(5), &
+    ESMF_INDEX_IKJ = ESMF_IndexOrder(6), &
+    ESMF_INDEX_JKI = ESMF_IndexOrder(7), &
+    ESMF_INDEX_KIJ = ESMF_IndexOrder(8)
 
 !------------------------------------------------------------------------------
 !  ! ESMF_ArrayDataMap
@@ -143,77 +144,81 @@
 !  ! the data array, plus other metadata info such as where the
 !  ! data is relative to the grid, and any interleaving info needed.
 
-      type ESMF_InternArrayDataMap
-      sequence
-      !private
+  type ESMF_InternArrayDataMap
+  sequence
+  !private
 #ifndef ESMF_NO_INITIALIZERS
-        type(ESMF_Status) :: status = ESMF_STATUS_UNINIT
+    type(ESMF_Status) :: status = ESMF_STATUS_UNINIT
 #else
-        type(ESMF_Status) :: status 
+    type(ESMF_Status) :: status 
 #endif
-        ! index orders - how the grid dims (X,Y,Z) or (u,v) or (i,j,k)
-        !  map onto the array memory layout as declared.  
-        !  set dim numbers to 1-N, use 0 for dims which are part of data
-        !  items and do not map to the grid dims.
-        integer :: dataRank                             ! scalar, vector, etc.
-        integer, dimension(ESMF_MAXDIM) :: dataDimOrder ! 0 = not a data dim
-        integer, dimension(ESMF_MAXDIM) :: dataNonGridCounts ! for non-grid dims
-        ! TODO: plus C++ vs F90 native index flag
-        ! TODO: plus complex number interleave flag? (r,i) vs (rrr...) (iii...)
-      end type
+    ! index orders - how the grid dims (X,Y,Z) or (u,v) or (i,j,k)
+    !  map onto the array memory layout as declared.  
+    !  set dim numbers to 1-N, use 0 for dims which are part of data
+    !  items and do not map to the grid dims.
+    integer :: dataRank                             ! scalar, vector, etc.
+    integer, dimension(ESMF_MAXDIM) :: dataDimOrder ! 0 = not a data dim
+    integer, dimension(ESMF_MAXDIM) :: dataNonGridCounts ! for non-grid dims
+    ! TODO: plus C++ vs F90 native index flag
+    ! TODO: plus complex number interleave flag? (r,i) vs (rrr...) (iii...)
+    ESMF_INIT_DECLARE
+  end type
 
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER TYPES:
 !
-      public ESMF_InternArrayDataMap
+  public ESMF_InternArrayDataMap
 
-      public ESMF_InterleaveFlag
-      public ESMF_INTERLEAVE_BY_BLOCK, ESMF_INTERLEAVE_BY_ITEM
+  public ESMF_InterleaveFlag
+  public ESMF_INTERLEAVE_BY_BLOCK, ESMF_INTERLEAVE_BY_ITEM
 
-      public ESMF_InterleaveType ! public only for field datamap use
+  public ESMF_InterleaveType ! public only for field datamap use
 
-      public ESMF_IndexOrder
-      public ESMF_INDEX_I,   ESMF_INDEX_IJ,  ESMF_INDEX_JI
-      public ESMF_INDEX_IJK, ESMF_INDEX_JIK, ESMF_INDEX_KJI
-      public ESMF_INDEX_IKJ, ESMF_INDEX_JKI, ESMF_INDEX_KIJ 
+  public ESMF_IndexOrder
+  public ESMF_INDEX_I,   ESMF_INDEX_IJ,  ESMF_INDEX_JI
+  public ESMF_INDEX_IJK, ESMF_INDEX_JIK, ESMF_INDEX_KJI
+  public ESMF_INDEX_IKJ, ESMF_INDEX_JKI, ESMF_INDEX_KIJ 
 
-      public ESMF_RelLoc
-      public ESMF_CELL_UNDEFINED, ESMF_CELL_CENTER
-      public ESMF_CELL_NFACE,     ESMF_CELL_SFACE
-      public ESMF_CELL_EFACE,     ESMF_CELL_WFACE
-      public ESMF_CELL_NECORNER,  ESMF_CELL_NWCORNER
-      public ESMF_CELL_SECORNER,  ESMF_CELL_SWCORNER
-      public ESMF_CELL_TOPFACE,   ESMF_CELL_BOTFACE
-      public ESMF_CELL_CELL,      ESMF_CELL_VERTEX
-
+  public ESMF_RelLoc
+  public ESMF_CELL_UNDEFINED, ESMF_CELL_CENTER
+  public ESMF_CELL_NFACE,     ESMF_CELL_SFACE
+  public ESMF_CELL_EFACE,     ESMF_CELL_WFACE
+  public ESMF_CELL_NECORNER,  ESMF_CELL_NWCORNER
+  public ESMF_CELL_SECORNER,  ESMF_CELL_SWCORNER
+  public ESMF_CELL_TOPFACE,   ESMF_CELL_BOTFACE
+  public ESMF_CELL_CELL,      ESMF_CELL_VERTEX
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-      public ESMF_ArrayDataMapSetDefault
-      public ESMF_ArrayDataMapSetInvalid
+  public ESMF_ArrayDataMapSetDefault
+  public ESMF_ArrayDataMapSetInvalid
 
-      public ESMF_ArrayDataMapGet, ESMF_ArrayDataMapSet
+  public ESMF_ArrayDataMapGet, ESMF_ArrayDataMapSet
 
-      public ESMF_ArrayDataMapWriteRestart, ESMF_ArrayDataMapReadRestart
-      public ESMF_ArrayDataMapWrite, ESMF_ArrayDataMapRead 
-      public ESMF_ArrayDataMapValidate, ESMF_ArrayDataMapPrint
+  public ESMF_ArrayDataMapWriteRestart, ESMF_ArrayDataMapReadRestart
+  public ESMF_ArrayDataMapWrite, ESMF_ArrayDataMapRead 
 
-      public ESMF_RelLocString, ESMF_InterleaveFlagString, ESMF_IndexOrderString
-      public ESMF_InterleaveTypeString
+  public ESMF_ArrayDataMapValidate
+  public ESMF_ArrayDataMapPrint
 
-      public operator(.eq.), operator(.ne.)
+  public ESMF_RelLocString, ESMF_InterleaveFlagString, ESMF_IndexOrderString
+  public ESMF_InterleaveTypeString
+
+  public operator(.eq.), operator(.ne.)
 
 !EOPI
+
+  public ESMF_ArrayDataMapInit
+  public ESMF_ArrayDataMapGetInit
  
 !
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version =  &
-             '$Id: ESMF_InternArrayDataMap.F90,v 1.3 2006/11/16 05:21:04 cdeluca Exp $'
+  character(*), parameter, private :: version =  &
+    '$Id: ESMF_InternArrayDataMap.F90,v 1.4 2006/12/08 23:36:07 theurich Exp $'
 !------------------------------------------------------------------------------
-
 
 
 !------------------------------------------------------------------------------
@@ -227,40 +232,39 @@
 ! !IROUTINE: ESMF_ArrayDataMapSetDefault - Set all defaults in a ArrayDataMap
 
 ! !INTERFACE:
-      interface ESMF_ArrayDataMapSetDefault
+  interface ESMF_ArrayDataMapSetDefault
 
 ! !PRIVATE MEMBER FUNCTIONS:
-       module procedure ESMF_ArrayDataMapSetDefIndex
-       module procedure ESMF_ArrayDataMapSetDefExplicit
+    module procedure ESMF_ArrayDataMapSetDefIndex
+    module procedure ESMF_ArrayDataMapSetDefExplicit
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for {\tt ESMF\_ArrayDataMap}
 !  initialization methods.
 !EOPI
 
-      end interface 
+  end interface 
                                       
 
 !------------------------------------------------------------------------------
 ! overload .eq. & .ne. with additional derived types so you can compare
 !  them as if they were simple integers.
 
-interface operator (.eq.)
- module procedure ESMF_rleq
- module procedure ESMF_ileq
- module procedure ESMF_ioeq
-end interface
+  interface operator (.eq.)
+    module procedure ESMF_rleq
+    module procedure ESMF_ileq
+    module procedure ESMF_ioeq
+  end interface
 
-interface operator (.ne.)
- module procedure ESMF_rlne
- module procedure ESMF_ilne
- module procedure ESMF_ione
-end interface
+  interface operator (.ne.)
+    module procedure ESMF_rlne
+    module procedure ESMF_ilne
+    module procedure ESMF_ione
+  end interface
 
 !------------------------------------------------------------------------------
 ! end of declarations & definitions
 !------------------------------------------------------------------------------
-
 
       contains
 
@@ -374,6 +378,8 @@ end function
           rc = ESMF_FAILURE
         endif
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, arraydatamap)
 
         if (present(dataRank)) dataRank = arraydatamap%dataRank
 
@@ -433,6 +439,9 @@ end function
 
         integer :: i, j
         !character(len=ESMF_MAXSTR) :: msgbuf
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, arraydatamap)
 
       !jw  write(msgbuf,*)  "ArrayDataMap print:"
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
@@ -537,6 +546,9 @@ end function
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, arraydatamap)
 
 
         if (present(dataRank)) arraydatamap%dataRank = dataRank
@@ -644,6 +656,9 @@ end function
           rcpresent = .FALSE.
         endif
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, arraydatamap)
+
         ! initialize the contents of the arraydatamap
         arraydatamap%dataRank = dataRank
 
@@ -741,6 +756,9 @@ end function
         else
           rcpresent = .FALSE.
         endif
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, arraydatamap)
 
         ! initialize the contents of the arraydatamap
 
@@ -846,6 +864,9 @@ end function
 !
 !EOP
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, arraydatamap)
+
         arraydatamap%status = ESMF_STATUS_INVALID
 
         ! If user asked for it, return error code
@@ -890,6 +911,9 @@ end function
         ! initialize return code
         if (present(rc)) rc = ESMF_FAILURE
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, arraydatamap)
+
         if (arraydatamap%status .ne. ESMF_STATUS_READY) return
             
         ! TODO: add more validation here - for index numbers, etc
@@ -933,6 +957,9 @@ end function
 !
 ! TODO: code goes here
 !
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
+
         if (present(rc)) rc = ESMF_FAILURE
 
         end subroutine ESMF_ArrayDataMapWriteRestart
@@ -1021,6 +1048,9 @@ end function
 !	Changed BOP/EOP to BOPI/EOPI until code is added.
 ! TODO: code goes here
 !
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
+
         if (present(rc)) rc = ESMF_FAILURE
 
         end subroutine ESMF_ArrayDataMapWrite
@@ -1067,6 +1097,73 @@ end function
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_ArrayDataMapRead
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayDataMapInit()"
+!BOPI
+! !IROUTINE: ESMF_ArrayDataMapInit - Init ArrayDataMap internals
+
+! !INTERFACE:
+  subroutine ESMF_ArrayDataMapInit(datamap)
+!
+! !ARGUMENTS:
+    type(ESMF_InternArrayDataMap), intent(inout)  :: datamap
+!         
+!
+! !DESCRIPTION:
+!      Initialize ArrayDataMap internals.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[datamap] 
+!          Specified {\tt ESMF\_InternArrayDataMap} object.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    datamap%status = ESMF_STATUS_UNINIT
+    ESMF_INIT_SET_DEFINED(datamap)
+  end subroutine ESMF_ArrayDataMapInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayDataMapGetInit"
+!BOPI
+! !IROUTINE: ESMF_ArrayDataMapGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+  function ESMF_ArrayDataMapGetInit(datamap) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_ArrayDataMapGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_InternArrayDataMap), intent(in), optional :: datamap
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [arrayspec]
+!           InternArrayDataMap object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(datamap)) then
+      ESMF_ArrayDataMapGetInit = ESMF_INIT_GET(datamap)
+    else
+      ESMF_ArrayDataMapGetInit = ESMF_INIT_DEFINED
+    endif
+
+  end function ESMF_ArrayDataMapGetInit
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -1239,5 +1336,5 @@ end function
 !------------------------------------------------------------------------------
 
 
-        end module ESMF_InternArrayDataMapMod
+end module ESMF_InternArrayDataMapMod
 

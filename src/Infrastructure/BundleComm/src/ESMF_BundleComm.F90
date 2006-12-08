@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.60 2006/12/05 23:06:54 samsoncheung Exp $
+! $Id: ESMF_BundleComm.F90,v 1.61 2006/12/08 23:36:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.60 2006/12/05 23:06:54 samsoncheung Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.61 2006/12/08 23:36:06 theurich Exp $'
 
 !==============================================================================
 !
@@ -455,7 +455,7 @@
           do i=1, btypep%field_count
 
             call ESMF_IArrayHalo(btypep%flist(i)%ftypep%localfield%localdata, &
-                                routehandle, i, blocking, commhandle, rc=status)
+                                routehandle, i, blocking, rc=status)
             if (ESMF_LogMsgFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
@@ -489,7 +489,7 @@
     
     
             call ESMF_IArrayHalo(arrayList, routehandle, 1,  &
-                                  blocking, commhandle, rc=status)
+                                  blocking, rc=status)
     
           else
             ! multiple congruent fields but single route.   
@@ -497,7 +497,7 @@
             do i=1, btypep%field_count
   
               call ESMF_IArrayHalo(btypep%flist(i)%ftypep%localfield%localdata, &
-                                routehandle, 1, blocking, commhandle, rc=status)
+                                routehandle, 1, blocking, rc=status)
               if (ESMF_LogMsgFoundError(status, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) return
@@ -938,7 +938,7 @@
          ! routehandle now internally stores multiple routes
          call ESMF_IArrayRedist(stypep%flist(i)%ftypep%localfield%localdata, &
                                dtypep%flist(i)%ftypep%localfield%localdata, &
-                               routehandle, i, blocking, commhandle, &
+                               routehandle, i, blocking, &
                                routeOptions, status)
          if (ESMF_LogMsgFoundError(status, &
                                    ESMF_ERR_PASSTHRU, &
@@ -971,7 +971,7 @@
             enddo
       
             call ESMF_IArrayRedist(srcArrayList, dstArrayList, &
-                                  routehandle, 1, blocking, commhandle, &
+                                  routehandle, 1, blocking, &
                                   routeOptions, status)
             if (ESMF_LogMsgFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
@@ -989,7 +989,7 @@
               call ESMF_IArrayRedist( &
                                  stypep%flist(i)%ftypep%localfield%localdata, &
                                  dtypep%flist(i)%ftypep%localfield%localdata, &
-                                 routehandle, 1, blocking, commhandle, &
+                                 routehandle, 1, blocking, &
                                  routeOptions, status)
               if (ESMF_LogMsgFoundError(status, &
                                         ESMF_ERR_PASSTHRU, &

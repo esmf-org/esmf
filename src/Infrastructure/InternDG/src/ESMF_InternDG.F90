@@ -1,4 +1,4 @@
-! $Id: ESMF_InternDG.F90,v 1.5 2006/11/16 05:21:06 cdeluca Exp $
+! $Id: ESMF_InternDG.F90,v 1.6 2006/12/08 23:36:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -9,11 +9,11 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-!
 #define ESMF_FILENAME "ESMF_InternDG.F90"
+!==============================================================================
 !
-!     ESMF InternDG Module
-      module ESMF_InternDGMod
+! ESMF InternDG Module
+module ESMF_InternDGMod
 !
 !==============================================================================
 !
@@ -40,16 +40,18 @@
 !
 !------------------------------------------------------------------------------
 ! !USES: 
-      use ESMF_UtilTypesMod    ! ESMF base class
-      use ESMF_BaseMod
-      use ESMF_LogErrMod
-      use ESMF_DELayoutMod
-      use ESMF_VMMod
-      implicit none
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_DELayoutMod
+  use ESMF_VMMod
+  
+  implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
+  private
 
 !------------------------------------------------------------------------------
 !     ! ESMF_InternDGLocal
@@ -59,27 +61,26 @@
 !     ! per PE then we will have a list of these instead of a single one
 !     ! in the InternDGType type.
 
-      type ESMF_InternDGLocal
-      sequence
-      !private
+  type ESMF_InternDGLocal
+  sequence
+  !private
 
-        ! single values for this DE:
+    ! single values for this DE:
+    integer :: MyDE                     ! identifier for this DE
+    integer :: localCellCount           ! total number of cells for this DE
 
-        integer :: MyDE                     ! identifier for this DE
-        integer :: localCellCount           ! total number of cells for this DE
+    ! one value per axis/dimension of the Grid:
 
-        ! one value per axis/dimension of the Grid:
-
-        integer, dimension(:), pointer :: localCellCountPerDim
+    integer, dimension(:), pointer :: localCellCountPerDim
                                             ! number of cells per dim
-        integer, dimension(:), pointer :: globalStartPerDim
+    integer, dimension(:), pointer :: globalStartPerDim
                                             ! offset, per dim, for this DE from
                                             ! the global grid origin
-        type (ESMF_AxisIndex), dimension(:), pointer :: globalAIPerDim
+    type (ESMF_AxisIndex), dimension(:), pointer :: globalAIPerDim
                                             ! (min/max/stride) per axis relative
                                             ! to the global grid origin
-        integer, dimension(:,:), pointer :: localIndices
-      end type
+    integer, dimension(:,:), pointer :: localIndices
+  end type
 
 !------------------------------------------------------------------------------
 !     ! ESMF_InternDGGlobal
@@ -91,40 +92,37 @@
 !     ! allows InternDG to compute information about other decompositions on
 !     ! other PEs without having to do communication first.
 
-      type ESMF_InternDGGlobal
-      sequence
-      !private
+  type ESMF_InternDGGlobal
+  sequence
+  !private
  
-      ! values where there are only a single one per Grid:
+    ! values where there are only a single one per Grid:
+    integer :: globalCellCount      ! total number of cells in the entire grid
+    integer :: maxLocalCellCount    ! maximum number of cells in the largest
+                                    ! single DE for this grid
 
-        integer :: globalCellCount      ! total number of cells in the entire grid
-        integer :: maxLocalCellCount    ! maximum number of cells in the largest
-                                        ! single DE for this grid
+    ! values where there are 1 per dimension of the Grid:
+    integer, dimension(:), pointer :: globalCellCountPerDim
+                                      ! number of cells in the entire grid,
+                                      ! per axis/dimension
+    integer, dimension(:), pointer :: maxLocalCellCountPerDim
+                                      ! the largest number of cells per axis
+                                      ! in any single DE for this grid 
 
-      ! values where there are 1 per dimension of the Grid:
-  
-        integer, dimension(:), pointer :: globalCellCountPerDim
-                                        ! number of cells in the entire grid,
-                                        ! per axis/dimension
-        integer, dimension(:), pointer :: maxLocalCellCountPerDim
-                                        ! the largest number of cells per axis
-                                        ! in any single DE for this grid 
+    ! values where there are 1 per DE in this Grid:  (For the 2d values
+    ! below, one dim is per DE, the other dim is per Grid dimension.)
 
-      ! values where there are 1 per DE in this Grid:  (For the 2d values
-      ! below, one dim is per DE, the other dim is per Grid dimension.)
-
-        integer, dimension(:), pointer :: cellCountPerDE
+    integer, dimension(:), pointer :: cellCountPerDE
                                         ! total number of cells per each DE
-        integer, dimension(:,:), pointer :: cellCountPerDEPerDim
+    integer, dimension(:,:), pointer :: cellCountPerDEPerDim
                                         ! number of cells per axis, one for each DE
-        integer, dimension(:,:), pointer :: globalStartPerDEPerDim
+    integer, dimension(:,:), pointer :: globalStartPerDEPerDim
                                         ! offset from the origin of the entire
                                         ! grid, per axis, per DE
-        type (ESMF_AxisIndex), dimension(:,:), pointer :: AIPerDEPerDim
+    type (ESMF_AxisIndex), dimension(:,:), pointer :: AIPerDEPerDim
                                         ! (min/max/stride) per axis, per DE 
                                         ! relative to the entire grid
-
-      end type
+  end type
 
 !------------------------------------------------------------------------------
 !     !  ESMF_InternDGType
@@ -144,83 +142,81 @@
 !     !  contributions on the interior edges of decompositions without 
 !     !  requiring additional interprocessor communication.
 
-      type ESMF_InternDGType
-      sequence
-      !private
+  type ESMF_InternDGType
+  sequence
+  !private
 
-        type (ESMF_Base) :: base          ! standard ESMF base object
-        type(ESMF_DELayout) :: delayout    ! the delayout for this grid
+    type(ESMF_Base)     :: base         ! standard ESMF base object
+    type(ESMF_DELayout) :: delayout     ! the delayout for this grid
 
-      ! 1 per dimension of the Grid
-        integer, dimension(:), pointer :: decompIDs
+    ! 1 per dimension of the Grid
+    integer, dimension(:), pointer :: decompIDs
                                       ! decomposition identifiers
-        logical, dimension(:), pointer :: coversDomain
+    logical, dimension(:), pointer :: coversDomain
                                       ! InternDG covers entire physical domain?
 
-      ! local and global information, for both the total number of cells 
-      ! including the boundary regions, and the computational cells 
-      ! (where each cell belongs to one and only one DE).
-        type (ESMF_InternDGLocal) :: myDETotal 
-        type (ESMF_InternDGLocal) :: myDEComp 
-        type (ESMF_InternDGGlobal) :: globalTotal
-        type (ESMF_InternDGGlobal) :: globalComp
+    ! local and global information, for both the total number of cells 
+    ! including the boundary regions, and the computational cells 
+    ! (where each cell belongs to one and only one DE).
+    type (ESMF_InternDGLocal) :: myDETotal 
+    type (ESMF_InternDGLocal) :: myDEComp 
+    type (ESMF_InternDGGlobal) :: globalTotal
+    type (ESMF_InternDGGlobal) :: globalComp
 
-        integer :: dimCount               ! Number of dimensions
-        integer :: arbitrary              ! identifier for arbitrary storage
-        integer :: gridBoundaryWidth      ! # of exterior cells/edge
+    integer :: dimCount               ! Number of dimensions
+    integer :: arbitrary              ! identifier for arbitrary storage
+    integer :: gridBoundaryWidth      ! # of exterior cells/edge
 
-      end type
+  end type
 
 !------------------------------------------------------------------------------
 !     !  ESMF_InternDG
 !
 !     !  The InternDG data structure that is passed between languages.
 
-      type ESMF_InternDG
-      sequence
-      !private
-#ifndef ESMF_NO_INITIALIZERS
-        type (ESMF_InternDGType), pointer :: ptr => NULL()
-#else
-        type (ESMF_InternDGType), pointer :: ptr 
-#endif
-
-      end type
+  type ESMF_InternDG
+  sequence
+  !private
+    type (ESMF_InternDGType), pointer :: ptr 
+    ESMF_INIT_DECLARE
+  end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_InternDG
-      public ESMF_InternDGType   ! TODO: this is really internal to Grid
-      public ESMF_InternDGLocal, ESMF_InternDGGlobal  ! ditto
+  public ESMF_InternDG
+  public ESMF_InternDGType   ! TODO: this is really internal to Grid
+  public ESMF_InternDGLocal, ESMF_InternDGGlobal  ! ditto
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-    public ESMF_InternDGCreate
-    public ESMF_InternDGDestroy
-    public ESMF_InternDGGet
-    public ESMF_InternDGSet
-    public ESMF_InternDGSetCounts
-    public ESMF_InternDGGetDE
-    public ESMF_InternDGSetDE
-    public ESMF_InternDGGetAllAxisIndex
-    public ESMF_InternDGGetAIsAllDEs
-    public ESMF_InternDGGetAllCounts
-    public ESMF_InternDGGetDELayout
-    ! TODO:  combine all the get subroutines into one
-    public ESMF_InternDGLocalToGlobalIndex
-    public ESMF_InternDGGlobalToLocalIndex
-    public ESMF_InternDGValidate
-    public ESMF_InternDGPrint
-    public ESMF_InternDGSerialize
-    public ESMF_InternDGDeserialize
+  public ESMF_InternDGCreate
+  public ESMF_InternDGDestroy
+  public ESMF_InternDGGet
+  public ESMF_InternDGSet
+  public ESMF_InternDGSetCounts
+  public ESMF_InternDGGetDE
+  public ESMF_InternDGSetDE
+  public ESMF_InternDGGetAllAxisIndex
+  public ESMF_InternDGGetAIsAllDEs
+  public ESMF_InternDGGetAllCounts
+  public ESMF_InternDGGetDELayout
+  ! TODO:  combine all the get subroutines into one
+  public ESMF_InternDGLocalToGlobalIndex
+  public ESMF_InternDGGlobalToLocalIndex
+  public ESMF_InternDGValidate
+  public ESMF_InternDGPrint
+  public ESMF_InternDGSerialize
+  public ESMF_InternDGDeserialize
  
 !EOPI
 
+  public ESMF_InternDGGetInit
+
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter, private :: version = &
-      '$Id: ESMF_InternDG.F90,v 1.5 2006/11/16 05:21:06 cdeluca Exp $'
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_InternDG.F90,v 1.6 2006/12/08 23:36:07 theurich Exp $'
 
 !==============================================================================
 !
@@ -371,6 +367,10 @@
 
 !     Set return values.
       ESMF_InternDGCreateEmpty%ptr => dgtype
+
+      ! Set init code
+      ESMF_INIT_SET_CREATED(ESMF_InternDGCreateEmpty)
+ 
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_InternDGCreateEmpty
@@ -464,6 +464,10 @@
 
 !     Set return values.
       ESMF_InternDGCreateBlock%ptr => dgtype
+
+      ! Set init code
+      ESMF_INIT_SET_CREATED(ESMF_InternDGCreateBlock)
+ 
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_InternDGCreateBlock
@@ -546,6 +550,10 @@
 
 !     Set return values.
       ESMF_InternDGCreateArb%ptr => dgtype
+
+      ! Set init code
+      ESMF_INIT_SET_CREATED(ESMF_InternDGCreateArb)
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_InternDGCreateArb
@@ -591,6 +599,9 @@
 !        return
 !      endif
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternDGGetInit, InternDG, rc)
+    
       ! Destruct all InternDG internals and then free field memory.
       if (associated(InternDG%ptr)) then
         call ESMF_InternDGDestruct(InternDG, localrc)
@@ -601,6 +612,9 @@
 
       nullify(InternDG%ptr)
 
+      ! Set init code
+      ESMF_INIT_SET_DELETED(InternDG)
+ 
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_InternDGDestroy
@@ -1398,6 +1412,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternDGGetInit, InternDG, rc)
+    
       ! If total is true, get info for the total cells including
       ! boundary areas; otherwise get only computational areas.
       dgtype => InternDG%ptr
@@ -3232,6 +3249,9 @@
 !
 !  code goes here
 !
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternDGGetInit, InternDG, rc)
+    
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_InternDGValidate
@@ -3270,6 +3290,9 @@
       integer :: i, j
       type(ESMF_InternDGType) , pointer :: dg
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternDGGetInit, InternDG, rc)
+    
       print *, 'InternDG Print:'
 
       dg => InternDG%ptr
@@ -3338,6 +3361,9 @@
       integer :: nDEs
       type(ESMF_InternDGGlobal), pointer :: glob
 
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP(ESMF_InternDGGetInit, InternDG, rc)
+    
       ! shortcut to internals
       glob => InternDG%ptr%globalComp
 
@@ -3449,4 +3475,43 @@
 
 !------------------------------------------------------------------------------
 
-      end module ESMF_InternDGMod
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InternDGGetInit"
+!BOPI
+! !IROUTINE: ESMF_InternDGGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+      function ESMF_InternDGGetInit(interndg) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_InternDGGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_InternDG), intent(in), optional :: interndg
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [interndg]
+!           InternDG object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(interndg)) then
+      ESMF_InternDGGetInit = ESMF_INIT_GET(interndg)
+    else
+      ESMF_InternDGGetInit = ESMF_INIT_CREATED
+    endif
+
+    end function ESMF_InternDGGetInit
+!------------------------------------------------------------------------------
+
+
+
+
+end module ESMF_InternDGMod

@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayCreate.cpp,v 1.3 2006/11/16 05:21:04 cdeluca Exp $
+! $Id: ESMF_InternArrayCreate.cpp,v 1.4 2006/12/08 23:36:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -10,9 +10,10 @@
 !
 !==============================================================================
 ^define ESMF_FILENAME "ESMF_InternArrayCreate.F90"
+!==============================================================================
 !
-!     ESMF Array module
-      module ESMF_InternArrayCreateMod
+! ESMF InternArrayCreate module
+module ESMF_InternArrayCreateMod
 !
 !==============================================================================
 !
@@ -25,65 +26,69 @@
 ! INCLUDES
 ! < ignore blank lines below.  they are created by the files which
 !   define various macros. >
+^include "ESMF.h"
 #include "ESMF_StdCppMacros.h"
 #include "ESMF_InternArrayCreateMacros.h"
 #include "ESMF_AllocMacros.h"
-^include "ESMF.h"
+
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_UtilTypesMod
-      use ESMF_BaseMod
-      use ESMF_LogErrMod
-      use ESMF_ArraySpecMod
-      use ESMF_LocalArrayMod
-      use ESMF_InternArrayMod
-      implicit none
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_ArraySpecMod
+  use ESMF_LocalArrayMod
+  use ESMF_InternArrayMod
+  
+  implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
+  private
 
 !------------------------------------------------------------------------------
-!     ! ESMF_ArrayOrigin
-!
-!     ! Private flag which indicates the create was initiated on the F90 side.
-!     !  This matches an enum on the C++ side and the values must match.
-!     !  Update ../include/ESMC_Array.h if you change these values.
+  ! ESMF_ArrayOrigin
 
-      type ESMF_ArrayOrigin
-      sequence
-      private
-        integer :: origin
-      end type
+  ! Private flag which indicates the create was initiated on the F90 side.
+  !  This matches an enum on the C++ side and the values must match.
+  !  Update ../include/ESMC_Array.h if you change these values.
 
-      type(ESMF_ArrayOrigin), parameter :: &
-                            ESMF_FROM_FORTRAN   = ESMF_ArrayOrigin(1), &
-                            ESMF_FROM_CPLUSPLUS = ESMF_ArrayOrigin(2)
+  type ESMF_ArrayOrigin
+  sequence
+  private
+    integer :: origin
+  end type
+
+  type(ESMF_ArrayOrigin), parameter :: &
+    ESMF_FROM_FORTRAN   = ESMF_ArrayOrigin(1), &
+    ESMF_FROM_CPLUSPLUS = ESMF_ArrayOrigin(2)
 
 !------------------------------------------------------------------------------
-!     ! Internal wrapper structures for passing f90 pointers to C++ and
-!     ! guaranteeing they are passed by reference on all compilers and all
-!     ! platforms.  These are never seen outside this module.
-!
-      ! < these expand into defined type declarations >
+  ! Internal wrapper structures for passing f90 pointers to C++ and
+  ! guaranteeing they are passed by reference on all compilers and all
+  ! platforms.  These are never seen outside this module.
+
+  ! < these expand into defined type declarations >
 AllTypesMacro(ArrayType)
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_InternArrayCreate, ESMF_InternArrayDestroy
+  public ESMF_InternArrayCreate
+  public ESMF_InternArrayDestroy
 
-      public ESMF_InternArrayF90Allocate
-      public ESMF_InternArrayF90Deallocate
-      public ESMF_InternArrayConstructF90Ptr    ! needed for C++ callback only
+  public ESMF_InternArrayF90Allocate
+  public ESMF_InternArrayF90Deallocate
+  public ESMF_InternArrayConstructF90Ptr    ! needed for C++ callback only
 
 !EOP
-      public operator(.eq.), operator(.ne.)
+  public operator(.eq.), operator(.ne.)
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter, private :: version = &
-      '$Id: ESMF_InternArrayCreate.cpp,v 1.3 2006/11/16 05:21:04 cdeluca Exp $'
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_InternArrayCreate.cpp,v 1.4 2006/12/08 23:36:07 theurich Exp $'
       
 !==============================================================================
 ! 
@@ -95,12 +100,12 @@ AllTypesMacro(ArrayType)
 ! !IROUTINE: ESMF_InternArrayCreate -- Generic interface to create an Array
 !
 ! !INTERFACE:
-     interface ESMF_InternArrayCreate
+  interface ESMF_InternArrayCreate
 !
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_ArrayCreateByList      ! specify TKR
-        module procedure ESMF_ArrayCreateBySpec      ! specify ArraySpec
+    module procedure ESMF_ArrayCreateByList      ! specify TKR
+    module procedure ESMF_ArrayCreateBySpec      ! specify ArraySpec
 !   
         ! Plus interfaces for each T/K/R 
 
@@ -157,12 +162,12 @@ InterfaceMacro(ArrayCreateByFullPtr)
 !  {\tt ESMF\_ArraySpec} object which can then be used repeatedly in
 !  subsequent {\tt Array} Create calls.
 !  
-end interface
+  end interface
 !EOP 
 
 !==============================================================================
 
-      contains
+  contains
 
 !==============================================================================
 !------------------------------------------------------------------------------
@@ -278,6 +283,9 @@ DeclarationMacro(ArrayCreateByFullPtr)
         ! Set return values
         ESMF_ArrayCreateByList = array 
         if (rcpresent) rc = status
+        
+        ! Set init code
+        ESMF_INIT_SET_CREATED(ESMF_ArrayCreateByList)
 
         end function ESMF_ArrayCreateByList
 
@@ -357,6 +365,9 @@ DeclarationMacro(ArrayCreateByMTPtr)
           rc = ESMF_FAILURE
         endif
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
+
         call ESMF_ArraySpecGet(arrayspec, rank, type, kind, status)
         if (status .ne. ESMF_SUCCESS) return
         
@@ -365,6 +376,9 @@ DeclarationMacro(ArrayCreateByMTPtr)
                                                        counts, haloWidth, &
                                                        lbounds, ubounds, status)
         if (rcpresent) rc = status
+
+        ! Set init code
+        ESMF_INIT_SET_CREATED(ESMF_ArrayCreateBySpec)
 
         end function ESMF_ArrayCreateBySpec
 
@@ -426,11 +440,8 @@ DeclarationMacro(ArrayDeallocate)
           rc = ESMF_FAILURE
         endif
 
-        ! Simple validity check 
-        if (array%this .eq. ESMF_NULL_POINTER) then
-          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                 ESMF_CONTEXT, rc)) return
-        endif
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
         needsdealloc = .FALSE.
 
@@ -462,6 +473,9 @@ DeclarationMacro(ArrayDeallocate)
         ! mark this as destroyed 
         array%this = ESMF_NULL_POINTER
 
+        ! Set init code
+        ESMF_INIT_SET_DELETED(array)
+ 
         ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 

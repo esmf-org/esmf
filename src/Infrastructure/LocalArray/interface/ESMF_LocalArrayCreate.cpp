@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cpp,v 1.4 2006/12/07 23:23:19 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cpp,v 1.5 2006/12/08 23:36:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -161,7 +161,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cpp,v 1.4 2006/12/07 23:23:19 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cpp,v 1.5 2006/12/08 23:36:07 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -505,6 +505,9 @@ end function
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
 
     call ESMF_ArraySpecGet(arrayspec, rank, type, kind, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
