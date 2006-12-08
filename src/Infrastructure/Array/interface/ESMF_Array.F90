@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.38 2006/12/07 23:23:17 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.39 2006/12/08 23:47:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -149,7 +149,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.38 2006/12/07 23:23:17 theurich Exp $'
+      '$Id: ESMF_Array.F90,v 1.39 2006/12/08 23:47:43 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2280,7 +2280,7 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
-!todo:    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySparseMatMul(srcArray, dstArray, routehandle, status)
