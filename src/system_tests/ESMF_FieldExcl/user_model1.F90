@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.18 2006/03/28 21:52:35 theurich Exp $
+! $Id: user_model1.F90,v 1.19 2006/12/08 18:39:06 oehmke Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -303,8 +303,8 @@
 !   !
       
     subroutine verifyRedistResults(field1, field2, rc)
-      type(ESMF_Field), intent(in) :: field1
-      type(ESMF_Field), intent(in) :: field2
+      type(ESMF_Field), intent(inout) :: field1
+      type(ESMF_Field), intent(inout) :: field2
       integer, intent(out) :: rc
 
       ! Local variables
@@ -350,7 +350,7 @@
 
 
     subroutine verifyHaloResults(field1, rc)
-      type(ESMF_Field), intent(in) :: field1
+      type(ESMF_Field), intent(inout) :: field1
       integer, intent(out) :: rc
 
       ! Local variables

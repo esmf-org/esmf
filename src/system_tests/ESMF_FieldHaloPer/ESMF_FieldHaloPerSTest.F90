@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.38 2006/03/28 21:52:35 theurich Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.39 2006/12/08 18:39:06 oehmke Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -632,7 +632,7 @@
       use ESMF_Mod
       use global_data
 
-      type(ESMF_Field), intent(in) :: thisfield
+      type(ESMF_Field), intent(inout) :: thisfield
       integer, intent(out) :: rc
 
 

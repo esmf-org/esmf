@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.29 2006/03/28 21:52:35 theurich Exp $
+! $Id: user_model2.F90,v 1.30 2006/12/08 18:39:06 oehmke Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -276,7 +276,7 @@
 !   !
  
     subroutine verifyResults(humidity, rc)
-      type(ESMF_Field), intent(in) :: humidity
+      type(ESMF_Field), intent(inout) :: humidity
       integer, intent(out) :: rc
 
       ! Local variables
