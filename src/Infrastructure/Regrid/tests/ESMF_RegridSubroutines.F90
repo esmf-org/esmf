@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.18 2006/10/02 22:12:00 theurich Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.19 2006/12/08 01:11:33 oehmke Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -22,7 +22,7 @@ module ESMF_RegridSubroutines
         character(ESMF_MAXSTR) :: srcgridStaggerString, dstgridStaggerString
         character(ESMF_MAXSTR) :: srcHaloString, dstHaloString
     end type testArguments
-    type(ESMF_VM) :: vm
+    type(ESMF_VM),save :: vm
     integer ::  npets, localPet
     integer :: regrid_rc    !single test error indicator
     integer :: lrc,iFunction,iRegrid,ig
