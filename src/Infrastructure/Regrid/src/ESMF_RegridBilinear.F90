@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.95 2006/12/08 23:36:07 theurich Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.96 2006/12/09 04:09:05 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.95 2006/12/08 23:36:07 theurich Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.96 2006/12/09 04:09:05 oehmke Exp $'
 
 !==============================================================================
 
@@ -163,10 +163,8 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,  &
-                              ESMF_FieldDataMapInit,srcDataMap)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,  &
-                              ESMF_FieldDataMapInit,dstDataMap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDataMap)
 
       ! nullify pointers
       nullify(srcUserMask, dstUserMask, found)
