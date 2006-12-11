@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.88 2006/12/07 19:33:29 samsoncheung Exp $
+! $Id: ESMF_Bundle.F90,v 1.89 2006/12/11 23:47:42 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -2712,8 +2712,7 @@ end function
 
     ! check variables
     ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-    ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,  &
-                            ESMF_BundleDataMapInit,bundledatamap)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,ESMF_BundleDataMapInit,bundledatamap)
 
     ! Validate bundle before going further
     call ESMF_BundleValidate(bundle, rc=status)
@@ -3203,8 +3202,7 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-      if (present(bundledatamap)) &
-       ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,ESMF_BundleDataMapInit,bundledatamap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,ESMF_BundleDataMapInit,bundledatamap)
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
