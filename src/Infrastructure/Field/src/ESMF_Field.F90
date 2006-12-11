@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.225 2006/12/07 05:31:18 samsoncheung Exp $
+! $Id: ESMF_Field.F90,v 1.226 2006/12/11 23:41:24 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -239,7 +239,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.225 2006/12/07 05:31:18 samsoncheung Exp $'
+      '$Id: ESMF_Field.F90,v 1.226 2006/12/11 23:41:24 oehmke Exp $'
 
 !==============================================================================
 !
@@ -776,7 +776,6 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
-      if (present(datamap)) &
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
 
       allocate(ftype, stat=status)
@@ -4491,7 +4490,6 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
-      if (present(datamap))  &
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
 
       ! this validates the grid already, no need to validate it first.
@@ -4599,7 +4597,6 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
-      if (present(datamap))  &
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
 
       ! Construct a default name if one is not given
@@ -4719,7 +4716,6 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
-      if (present(datamap))  &
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
 
       ! Construct a default name if one is not given
