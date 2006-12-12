@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.76 2006/11/16 05:21:20 cdeluca Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.77 2006/12/12 22:36:31 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.76 2006/11/16 05:21:20 cdeluca Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.77 2006/12/12 22:36:31 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -938,6 +938,7 @@
       contains
 
 !==============================================================================
+
 !BOP
 ! !IROUTINE:  ESMF_TimeIntervalAbsValue - Get the absolute value of a TimeInterval
 

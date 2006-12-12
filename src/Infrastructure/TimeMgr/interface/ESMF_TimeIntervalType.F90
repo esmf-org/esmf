@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalType.F90,v 1.6 2006/11/16 05:21:20 cdeluca Exp $
+! $Id: ESMF_TimeIntervalType.F90,v 1.7 2006/12/12 22:36:31 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -81,6 +81,7 @@
         integer(ESMF_KIND_I8) :: mm        ! calendar interval number of months
         integer(ESMF_KIND_I8) :: d         ! calendar interval number of days
 #endif
+        ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -93,7 +94,73 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeIntervalType.F90,v 1.6 2006/11/16 05:21:20 cdeluca Exp $'
+      '$Id: ESMF_TimeIntervalType.F90,v 1.7 2006/12/12 22:36:31 samsoncheung Exp $'
+!------------------------------------------------------------------------------
+
+      contains
+
+!==============================================================================
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalGetInit"
+!BOPI
+! !IROUTINE:  ESMF_TimeIntervalGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_TimeIntervalGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_TimeInterval), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_TimeIntervalGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt timeinterval}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_TimeInterval} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_TimeIntervalGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_TimeIntervalGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_TimeIntervalGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalInit"
+!BOPI
+! !IROUTINE:  ESMF_TimeIntervalInit - Initialize TimeInterval
+
+! !INTERFACE:
+    subroutine ESMF_TimeIntervalInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_TimeInterval) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt timeinterval}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_TimeInterval} of which being initialized.
+!     \end{description}
+!
+!EOPI
+        s%calendar => NULL()
+        s%yy = 0
+        s%mm = 0
+        s%d  = 0
+        ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_TimeIntervalInit
+
 !------------------------------------------------------------------------------
 
       end module ESMF_TimeIntervalTypeMod

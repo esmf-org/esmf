@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockType.F90,v 1.6 2006/11/16 05:21:19 cdeluca Exp $
+! $Id: ESMF_ClockType.F90,v 1.7 2006/12/12 22:36:32 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -58,6 +58,7 @@
 #else
         type(ESMF_Pointer) :: this
 #endif
+        ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -70,7 +71,42 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ClockType.F90,v 1.6 2006/11/16 05:21:19 cdeluca Exp $'
+      '$Id: ESMF_ClockType.F90,v 1.7 2006/12/12 22:36:32 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
+      contains
+
+!==============================================================================
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockGetInit"
+!BOPI
+! !IROUTINE:  ESMF_ClockGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_ClockGetInit(d)
+!
+! !ARGUMENTS:
+       type(ESMF_Clock), intent(inout), optional :: d
+       ESMF_INIT_TYPE :: ESMF_ClockGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the Deep class {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_Clock} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(d)) then
+         ESMF_ClockGetInit = ESMF_INIT_GET(d)
+       else
+         ESMF_ClockGetInit = ESMF_INIT_CREATED
+       endif
+
+    end function ESMF_ClockGetInit
+
+!------------------------------------------------------------------------------
       end module ESMF_ClockTypeMod

@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.69 2006/11/16 05:21:19 cdeluca Exp $
+! $Id: ESMF_Clock.F90,v 1.70 2006/12/12 22:36:32 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,6 +38,7 @@
       ! inherit from ESMF base class
       use ESMF_UtilTypesMod
       use ESMF_BaseMod
+      use ESMF_InitMacrosMod
 
       ! for ReadRestart()/WriteRestart()
       use ESMF_IOSpecMod
@@ -99,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.69 2006/11/16 05:21:19 cdeluca Exp $'
+      '$Id: ESMF_Clock.F90,v 1.70 2006/12/12 22:36:32 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -256,6 +257,9 @@
 ! !REQUIREMENTS:
 !     TMG3.4.1
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
       ! initialize list size to zero for not-present list
       integer :: sizeofRingingAlarmList
       sizeofRingingAlarmList = 0
@@ -370,6 +374,7 @@
                                  timeStep, startTime, stopTime, runDuration, &
                                  runTimeStepCount, refTime, rc)
 
+      ESMF_INIT_SET_CREATED(ESMF_ClockCreateNew)
       end function ESMF_ClockCreateNew
 
 !------------------------------------------------------------------------------
@@ -407,6 +412,7 @@
 !     invoke C to C++ entry point to copy clock
       call c_ESMC_ClockCreateCopy(ESMF_ClockCreateCopy, clock, rc)
 
+      ESMF_INIT_SET_CREATED(ESMF_ClockCreateCopy)
       end function ESMF_ClockCreateCopy
 
 !------------------------------------------------------------------------------
@@ -437,6 +443,7 @@
 !     invoke C to C++ entry point
       call c_ESMC_ClockDestroy(clock, rc)
 
+      ESMF_INIT_SET_DELETED(clock)
       end subroutine ESMF_ClockDestroy
 
 !------------------------------------------------------------------------------
@@ -540,6 +547,9 @@
       nameLen = 0
       tempNameLen = 0
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
       ! get length of given name for C++ validation
       if (present(name)) then
         nameLen = len(name)
@@ -569,7 +579,7 @@
       subroutine ESMF_ClockGetAlarm(clock, name, alarm, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),  intent(in)            :: clock
+      type(ESMF_Clock),  intent(inout)         :: clock
       character (len=*), intent(in)            :: name
       type(ESMF_Alarm),  intent(out)           :: alarm
       integer,           intent(out), optional :: rc
@@ -612,7 +622,7 @@
                                         alarmList, alarmCount, timeStep, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),               intent(in)            :: clock
+      type(ESMF_Clock),               intent(inout)         :: clock
       type(ESMF_AlarmListType),       intent(in)            :: alarmListType
       type(ESMF_Alarm), dimension(:), intent(out)           :: alarmList
       integer,                        intent(out)           :: alarmCount
@@ -665,6 +675,9 @@
 ! !REQUIREMENTS:
 !     TMG4.3, 4.8
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
       ! get size of given alarm list for C++ validation
       integer :: sizeofAlarmList
       sizeofAlarmList = size(alarmList)
@@ -693,7 +706,7 @@
       subroutine ESMF_ClockGetNextTime(clock, nextTime, timeStep, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),        intent(in)            :: clock
+      type(ESMF_Clock),        intent(inout)         :: clock
       type(ESMF_Time),         intent(out)           :: nextTime
       type(ESMF_TimeInterval), intent(in),  optional :: timeStep
       integer,                 intent(out), optional :: rc
@@ -719,6 +732,9 @@
 ! !REQUIREMENTS:
 !     TMGx.x, CCSM
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_ClockGetNextTime(clock, nextTime, timeStep, rc)
 
@@ -735,7 +751,7 @@
       logical :: ESMF_ClockIsDone
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(in)            :: clock
+      type(ESMF_Clock), intent(inout)         :: clock
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -754,6 +770,9 @@
 ! !REQUIREMENTS:
 !     TMG3.5.7
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_ClockIsDone(clock, ESMF_ClockIsDone, rc)
     
@@ -770,7 +789,7 @@
       logical :: ESMF_ClockIsReverse
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(in)            :: clock
+      type(ESMF_Clock), intent(inout)         :: clock
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -789,6 +808,9 @@
 ! !REQUIREMENTS:
 !     TMG3.4.6
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_ClockIsReverse(clock, ESMF_ClockIsReverse, rc)
     
@@ -805,7 +827,7 @@
       logical :: ESMF_ClockIsStopTime
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(in)            :: clock
+      type(ESMF_Clock), intent(inout)         :: clock
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -823,6 +845,9 @@
 ! !REQUIREMENTS:
 !     TMG3.5.6
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_ClockIsStopTime(clock, ESMF_ClockIsStopTime, rc)
     
@@ -839,7 +864,7 @@
       logical :: ESMF_ClockIsStopTimeEnabled
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(in)            :: clock
+      type(ESMF_Clock), intent(inout)         :: clock
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -857,6 +882,9 @@
 ! !REQUIREMENTS:
 !     TMGx.x, WRF
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_ClockIsStopTimeEnabled(clock, ESMF_ClockIsStopTimeEnabled, rc)
     
@@ -870,7 +898,7 @@
       subroutine ESMF_ClockPrint(clock, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),  intent(in)            :: clock
+      type(ESMF_Clock),  intent(inout)         :: clock
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
@@ -906,6 +934,9 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
       
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_ClockPrint(clock, options, rc)   
 
@@ -1055,6 +1086,9 @@
       integer :: nameLen
       nameLen = 0
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
       ! get length of given name for C++ validation
       if (present(name)) then
         nameLen = len_trim(name)
@@ -1093,6 +1127,9 @@
 ! !REQUIREMENTS:
 !     TMGx.x, WRF
     
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_ClockStopTimeDisable(clock, rc)
 
@@ -1127,6 +1164,9 @@
 ! !REQUIREMENTS:
 !     TMGx.x, WRF
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_ClockStopTimeEnable(clock, stopTime, rc)
 
@@ -1159,6 +1199,9 @@
 ! !REQUIREMENTS:
 !     TMG3.4.5
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_ClockSyncToRealTime(clock, rc)
     
@@ -1172,7 +1215,7 @@
       subroutine ESMF_ClockValidate(clock, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),  intent(in)            :: clock
+      type(ESMF_Clock),  intent(inout)         :: clock
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
@@ -1196,6 +1239,9 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
     
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_ClockValidate(clock, options, rc)
     
@@ -1209,7 +1255,7 @@
       subroutine ESMF_ClockWriteRestart(clock, iospec, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),  intent(in)            :: clock
+      type(ESMF_Clock),  intent(inout)         :: clock
       type(ESMF_IOSpec), intent(in),  optional :: iospec
       integer,           intent(out), optional :: rc
 
@@ -1229,6 +1275,9 @@
 !
 !EOPI
 ! !REQUIREMENTS:
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockWriteRestart(clock, iospec, rc)

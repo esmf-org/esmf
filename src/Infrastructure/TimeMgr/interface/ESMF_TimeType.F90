@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeType.F90,v 1.3 2006/11/16 05:21:20 cdeluca Exp $
+! $Id: ESMF_TimeType.F90,v 1.4 2006/12/12 22:36:32 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -22,7 +22,7 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include <ESMF_TimeMgr.inc>
-
+#include "ESMF.h"
 !===============================================================================
 !BOPI
 !
@@ -39,6 +39,7 @@
 ! !USES:
       ! inherit from base time class
       use ESMF_BaseTimeMod
+      use ESMF_INITMacrosMod
 
       ! associated derived types
       use ESMF_CalendarMod
@@ -71,6 +72,7 @@
       integer                      :: timeZone  ! local timezone
       integer                      :: pad       ! to satisfy halem compiler
 #endif
+      ESMF_INIT_DECLARE
      end type
 
 !------------------------------------------------------------------------------
@@ -83,7 +85,72 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeType.F90,v 1.3 2006/11/16 05:21:20 cdeluca Exp $'
+      '$Id: ESMF_TimeType.F90,v 1.4 2006/12/12 22:36:32 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
+      contains
+
+!==============================================================================
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeGetInit"
+!BOPI
+! !IROUTINE:  ESMF_TimeGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_TimeGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_Time), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_TimeGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt time}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_Time} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_TimeGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_TimeGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_TimeGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeInit"
+!BOPI
+! !IROUTINE:  ESMF_TimeInit - Initialize Time
+
+! !INTERFACE:
+    subroutine ESMF_TimeInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_Time) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt time}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_Time} of which being initialized.
+!     \end{description}
+!
+!EOPI
+    ! Note: ESMF_TimeType is private
+        s%calendar => NULL()
+        s%timeZone = 0
+        s%pad = 0
+        ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_TimeInit
+
+!------------------------------------------------------------------------------
+  
       end module ESMF_TimeTypeMod

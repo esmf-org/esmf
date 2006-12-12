@@ -1,4 +1,4 @@
-! $Id: ESMF_Fraction.F90,v 1.13 2006/11/16 05:21:19 cdeluca Exp $
+! $Id: ESMF_Fraction.F90,v 1.14 2006/12/12 22:36:31 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -22,6 +22,7 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
+#include "ESMF.h"
 !
 !===============================================================================
 !BOPI
@@ -40,6 +41,7 @@
 ! !USES:
       use ESMF_UtilTypesMod
       use ESMF_BaseMod
+      use ESMF_InitMacrosMod
       implicit none
 !
 !------------------------------------------------------------------------------
@@ -57,6 +59,7 @@
         integer :: whole        ! Integer (whole) seconds (signed)
         integer :: numerator    ! Integer fraction (exact) n/d; numerator (signed)
         integer :: denominator  ! Integer fraction (exact) n/d; denominator
+        ESMF_INIT_DECLARE
       end type
 !
 !------------------------------------------------------------------------------
@@ -65,6 +68,9 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
+      public ESMF_FractionInit
+      public ESMF_FractionGetInit
+      public ESMF_FractionValidate
 
 ! !PRIVATE MEMBER FUNCTIONS:
 
@@ -73,11 +79,104 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Fraction.F90,v 1.13 2006/11/16 05:21:19 cdeluca Exp $'
+      '$Id: ESMF_Fraction.F90,v 1.14 2006/12/12 22:36:31 samsoncheung Exp $'
 
 !==============================================================================
 
       contains
+
+!==============================================================================
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FractionGetInit"
+!BOPI
+! !IROUTINE:  ESMF_FractionGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_FractionGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_Fraction), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_FractionGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt fraction}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_Fraction} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_FractionGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_FractionGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_FractionGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FractionInit"
+!BOPI
+! !IROUTINE:  ESMF_FractionInit - Initialize Fraction
+
+! !INTERFACE:
+    subroutine ESMF_FractionInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_Fraction) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt fraction}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_Fraction} of which being initialized.
+!     \end{description}
+!
+!EOPI
+        ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_FractionInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FractionValidate"
+!BOPI
+! !IROUTINE:  ESMF_FractionValidate - Check validity of a Fraction
+
+! !INTERFACE:
+    subroutine ESMF_FractionValidate(s,rc)
+!
+! !ARGUMENTS:
+       type(ESMF_Fraction), intent(inout) :: s
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt Fraction} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_Fraction} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt fraction}
+!           is valid.
+!     \end{description}
+!
+!EOPI
+     ESMF_INIT_CHECK_SHALLOW(ESMF_FractionGetInit,ESMF_FractionInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_FractionValidate
+
+
 
 !==============================================================================
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.65 2006/11/16 05:21:19 cdeluca Exp $
+! $Id: ESMF_Alarm.F90,v 1.66 2006/12/12 22:36:32 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -52,6 +52,8 @@
       ! type definition for this module
       use ESMF_AlarmTypeMod
 
+      use ESMF_InitMacrosMod
+
       implicit none
 
 !------------------------------------------------------------------------------
@@ -104,7 +106,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.65 2006/11/16 05:21:19 cdeluca Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.66 2006/12/12 22:36:32 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -323,6 +325,7 @@
                                  ringTime, ringInterval, stopTime, &
                                  ringDuration, ringTimeStepCount, refTime, &
                                  enabled, sticky, rc)
+      ESMF_INIT_SET_CREATED(ESMF_AlarmCreateNew)
 
       end function ESMF_AlarmCreateNew
 
@@ -338,7 +341,7 @@
       type(ESMF_Alarm) :: ESMF_AlarmCreateCopy
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(in)            :: alarm
+      type(ESMF_Alarm), intent(inout)         :: alarm
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -360,6 +363,7 @@
 
 !     invoke C to C++ entry point to copy alarm
       call c_ESMC_AlarmCreateCopy(ESMF_AlarmCreateCopy, alarm, rc)
+      ESMF_INIT_SET_CREATED(ESMF_AlarmCreateCopy)
 
       end function ESMF_AlarmCreateCopy
 
@@ -390,6 +394,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmDestroy(alarm, rc)
+      ESMF_INIT_SET_DELETED(alarm)
 
       end subroutine ESMF_AlarmDestroy
 
@@ -418,6 +423,9 @@
 ! !REQUIREMENTS:
 !     TMG4.5.3
     
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_AlarmDisable(alarm, rc)
 
@@ -448,6 +456,9 @@
 ! !REQUIREMENTS:
 !     TMG4.5.3
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_AlarmEnable(alarm, rc)
 
@@ -465,7 +476,7 @@
                                ringingOnPrevTimeStep, enabled, sticky, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm),        intent(in)            :: alarm
+      type(ESMF_Alarm),        intent(inout)         :: alarm
       character (len=*),       intent(out), optional :: name
       type(ESMF_Clock),        intent(out), optional :: clock
       type(ESMF_Time),         intent(out), optional :: ringTime
@@ -550,6 +561,9 @@
       nameLen = 0
       tempNameLen = 0
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
+
       ! get length of given name for C++ validation
       if (present(name)) then
         nameLen = len(name)
@@ -581,7 +595,7 @@
       logical :: ESMF_AlarmIsEnabled
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(in)            :: alarm
+      type(ESMF_Alarm), intent(inout)         :: alarm
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -598,6 +612,9 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
     
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_AlarmIsEnabled(alarm, ESMF_AlarmIsEnabled, rc)
 
@@ -614,7 +631,7 @@
       logical :: ESMF_AlarmIsRinging
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(in)            :: alarm
+      type(ESMF_Alarm), intent(inout)            :: alarm
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -634,6 +651,9 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG4.4
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
     
 !     invoke C to C++ entry point
       call c_ESMC_AlarmIsRinging(alarm, ESMF_AlarmIsRinging, rc)
@@ -651,7 +671,7 @@
       logical :: ESMF_AlarmIsSticky
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(in)            :: alarm
+      type(ESMF_Alarm), intent(inout)         :: alarm
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -667,6 +687,9 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
     
 !     invoke C to C++ entry point
       call c_ESMC_AlarmIsSticky(alarm, ESMF_AlarmIsSticky, rc)
@@ -709,6 +732,9 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_AlarmNotSticky(alarm, ringDuration, &
                                  ringTimeStepCount, rc)
@@ -723,7 +749,7 @@
       subroutine ESMF_AlarmPrint(alarm, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm),  intent(in)            :: alarm
+      type(ESMF_Alarm),  intent(inout)         :: alarm
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
@@ -768,6 +794,9 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
       
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_AlarmPrint(alarm, options, rc)   
 
@@ -843,6 +872,9 @@
 ! !REQUIREMENTS:
 !     TMG4.6
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_AlarmRingerOff(alarm, rc)
 
@@ -874,6 +906,9 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG4.6
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmRingerOn(alarm, rc)
@@ -968,6 +1003,9 @@
       integer :: nameLen
       nameLen = 0
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
+
       ! get length of given name for C++ validation
       if (present(name)) then
         nameLen = len_trim(name)
@@ -1015,6 +1053,9 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_AlarmSticky(alarm, rc)
 
@@ -1028,7 +1069,7 @@
       subroutine ESMF_AlarmValidate(alarm, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm),  intent(in)            :: alarm
+      type(ESMF_Alarm),  intent(inout)         :: alarm
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
@@ -1051,6 +1092,9 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
       
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_AlarmValidate(alarm, options, rc)
     
@@ -1067,7 +1111,7 @@
       logical :: ESMF_AlarmWasPrevRinging
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(in)            :: alarm
+      type(ESMF_Alarm), intent(inout)         :: alarm
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1088,6 +1132,9 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG4.4
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
     
 !     invoke C to C++ entry point
       call c_ESMC_AlarmWasPrevRinging(alarm, ESMF_AlarmWasPrevRinging, rc)
@@ -1105,7 +1152,7 @@
       logical :: ESMF_AlarmWillRingNext
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm),        intent(in)            :: alarm
+      type(ESMF_Alarm),        intent(inout)         :: alarm
       type(ESMF_TimeInterval), intent(in),  optional :: timeStep
       integer,                 intent(out), optional :: rc
 
@@ -1131,6 +1178,9 @@
 ! !REQUIREMENTS:
 !     TMG4.4
     
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_AlarmWillRingNext(alarm, timeStep, ESMF_AlarmWillRingNext, rc)
 
@@ -1144,7 +1194,7 @@
       subroutine ESMF_AlarmWriteRestart(alarm, iospec, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm),  intent(in)            :: alarm
+      type(ESMF_Alarm),  intent(inout)         :: alarm
       type(ESMF_IOSpec), intent(in),  optional :: iospec
       integer,           intent(out), optional :: rc
 
@@ -1164,6 +1214,9 @@
 !
 !EOPI
 ! !REQUIREMENTS:
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmWriteRestart(alarm, iospec, rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.81 2006/11/16 05:21:19 cdeluca Exp $
+! $Id: ESMF_Calendar.F90,v 1.82 2006/12/12 22:36:31 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -91,6 +91,7 @@
 #else
         type(ESMF_Pointer) :: this
 #endif
+        ESMF_INIT_DECLARE
       end type
 !
 !------------------------------------------------------------------------------
@@ -118,6 +119,7 @@
       public ESMF_CalendarSetDefault
       public ESMF_CalendarValidate
       public ESMF_CalendarWriteRestart
+      public ESMF_CalendarGetInit       ! For Standardized Initialization
 !EOPI
 
 ! !PRIVATE MEMBER FUNCTIONS:
@@ -142,7 +144,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.81 2006/11/16 05:21:19 cdeluca Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.82 2006/12/12 22:36:31 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -527,6 +529,38 @@
       contains
 
 !==============================================================================
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarGetInit"
+!BOPI
+! !IROUTINE:  ESMF_CalendarGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_CalendarGetInit(d)
+!
+! !ARGUMENTS:
+       type(ESMF_Calendar), intent(inout), optional :: d
+       ESMF_INIT_TYPE :: ESMF_CalendarGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the Deep class {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_Calendar} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(d)) then
+         ESMF_CalendarGetInit = ESMF_INIT_GET(d)
+       else
+         ESMF_CalendarGetInit = ESMF_INIT_CREATED
+       endif
+
+    end function ESMF_CalendarGetInit
+
+!==============================================================================
 !BOP
 ! !IROUTINE: ESMF_CalendarCreate - Create a new ESMF Calendar of built-in type
 
@@ -583,6 +617,7 @@
       call c_ESMC_CalendarCreateBuiltIn(ESMF_CalendarCreateBuiltIn, nameLen, &
                                         name, calendartype, rc)
     
+      ESMF_INIT_SET_CREATED(ESMF_CalendarCreateBuiltIn)
       end function ESMF_CalendarCreateBuiltIn
     
 !------------------------------------------------------------------------------
@@ -620,6 +655,7 @@
 !     invoke C to C++ entry point to copy calendar
       call c_ESMC_CalendarCreateCopy(ESMF_CalendarCreateCopy, calendar, rc)
 
+      ESMF_INIT_SET_CREATED(ESMF_CalendarCreateCopy)
       end function ESMF_CalendarCreateCopy
 
 !------------------------------------------------------------------------------
@@ -723,6 +759,7 @@
                                          daysPerYearDd, rc)
       end if
     
+      ESMF_INIT_SET_CREATED(ESMF_CalendarCreateCustom)
       end function ESMF_CalendarCreateCustom
     
 !------------------------------------------------------------------------------
@@ -753,6 +790,7 @@
 !     invoke C to C++ entry point
       call c_ESMC_CalendarDestroy(calendar, rc)
 
+      ESMF_INIT_SET_DELETED(calendar)
       end subroutine ESMF_CalendarDestroy
 
 !------------------------------------------------------------------------------
@@ -793,7 +831,7 @@
                                   daysPerYear, &
                                   daysPerYearDn, daysPerYearDd, rc)
 ! !ARGUMENTS:
-      type(ESMF_Calendar),     intent(in)            :: calendar
+      type(ESMF_Calendar),     intent(inout)         :: calendar
       character (len=*),       intent(out), optional :: name
       type(ESMF_CalendarType), intent(out), optional :: calendartype
       integer, dimension(:),   intent(out), optional :: daysPerMonth
@@ -859,6 +897,9 @@
       nameLen = 0
       tempNameLen = 0
       sizeofDaysPerMonth = 0
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInt,calendar,rc)
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -940,7 +981,7 @@
       logical :: ESMF_CalendarIsLeapYearI4
 
 ! !ARGUMENTS:
-      type(ESMF_Calendar),   intent(in)            :: calendar
+      type(ESMF_Calendar),   intent(inout)         :: calendar
       integer(ESMF_KIND_I4), intent(in)            :: yy
       integer,               intent(out), optional :: rc
 
@@ -965,6 +1006,9 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInt,calendar,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_CalendarIsLeapYearI4(calendar, yy, &
                                        ESMF_CalendarIsLeapYearI4, rc)
@@ -983,7 +1027,7 @@
       logical :: ESMF_CalendarIsLeapYearI8
 
 ! !ARGUMENTS:
-      type(ESMF_Calendar),   intent(in)            :: calendar
+      type(ESMF_Calendar),   intent(inout)         :: calendar
       integer(ESMF_KIND_I8), intent(in)            :: yy_i8
       integer,               intent(out), optional :: rc
 
@@ -1008,6 +1052,9 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
     
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInt,calendar,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_CalendarIsLeapYearI8(calendar, yy_i8, &
                                        ESMF_CalendarIsLeapYearI8, rc)
@@ -1022,7 +1069,7 @@
       subroutine ESMF_CalendarPrint(calendar, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Calendar), intent(in)            :: calendar
+      type(ESMF_Calendar), intent(inout)         :: calendar
       character (len=*),   intent(in),  optional :: options
       integer,             intent(out), optional :: rc
 
@@ -1057,6 +1104,9 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
   
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInt,calendar,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_CalendarPrint(calendar, options, rc)
 
@@ -1308,7 +1358,7 @@
       subroutine ESMF_CalendarSetDefaultCal(calendar, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Calendar),     intent(in)            :: calendar
+      type(ESMF_Calendar),     intent(inout)            :: calendar
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1331,6 +1381,9 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
     
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInt,calendar,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_CalendarSetDefaultCal(calendar, rc)
     
@@ -1344,7 +1397,7 @@
       subroutine ESMF_CalendarValidate(calendar, options, rc)
  
 ! !ARGUMENTS:
-      type(ESMF_Calendar), intent(in)            :: calendar
+      type(ESMF_Calendar), intent(inout)         :: calendar
       character (len=*),   intent(in),  optional :: options
       integer,             intent(out), optional :: rc
 
@@ -1367,6 +1420,9 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
       
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_CalendarValidate(calendar, options, rc)
 
@@ -1380,7 +1436,7 @@
       subroutine ESMF_CalendarWriteRestart(calendar, iospec, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Calendar), intent(in)            :: calendar
+      type(ESMF_Calendar), intent(inout)         :: calendar
       type(ESMF_IOSpec),   intent(in),  optional :: iospec
       integer,             intent(out), optional :: rc
 
@@ -1401,6 +1457,9 @@
 !EOPI
 ! !REQUIREMENTS:
 !     TMGn.n.n
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInt,calendar,rc)
 
 !     invoke C to C++ entry point 
       call c_ESMC_CalendarWriteRestart(calendar, iospec, rc)
