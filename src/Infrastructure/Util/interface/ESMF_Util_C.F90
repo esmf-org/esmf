@@ -1,4 +1,4 @@
-!  $Id: ESMF_Util_C.F90,v 1.5 2006/11/16 05:21:21 cdeluca Exp $
+!  $Id: ESMF_Util_C.F90,v 1.6 2006/12/12 20:32:37 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -23,9 +23,8 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Util_C.F90,v 1.5 2006/11/16 05:21:21 cdeluca Exp $'
+!      '$Id: ESMF_Util_C.F90,v 1.6 2006/12/12 20:32:37 donstark Exp $'
 !==============================================================================
-
 !------------------------------------------------------------------------------
 !BOP
 !  !DESCRIPTION:
@@ -42,6 +41,7 @@
    subroutine f_esmf_domainlistgetde(domlist, dnum, DE, rc)
        use ESMF_UtilTypesMod    ! ESMF base class
        use ESMF_UtilMod    ! ESMF base class
+       use ESMF_InitMacrosMod
 
        type(ESMF_DomainList) :: domlist
        !type(ESMF_DomainList) :: domlist_t
@@ -52,6 +52,8 @@
        !integer :: DE_t
        integer :: rc     
        !integer :: rc_t
+
+       ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,domainlist)
 
        !domlist_t = domlist
        !dnum_t = dnum
@@ -69,12 +71,16 @@
    subroutine f_esmf_domainlistgetai(domlist, dnum, ainum, AI, rc)
        use ESMF_UtilTypesMod    ! ESMF base class
        use ESMF_UtilMod    ! ESMF base class
+       use ESMF_InitMacrosMod
 
        type(ESMF_DomainList) :: domlist
        integer :: dnum     
        integer :: ainum
        type(ESMF_AxisIndex) :: AI
        integer :: rc
+
+       ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,domlist)
+       ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit,ESMF_AxisIndexInit,AI)
 
        AI = domlist%domains(dnum+1)%ai(ainum+1)
        rc = ESMF_SUCCESS
