@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.30 2006/12/06 01:53:30 peggyli Exp $
+! $Id: ESMF_RHandle.F90,v 1.31 2006/12/12 21:54:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.30 2006/12/06 01:53:30 peggyli Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.31 2006/12/12 21:54:21 oehmke Exp $'
 
 !==============================================================================
 
@@ -359,9 +359,9 @@ end function ESMF_TransformValuesGetInit
         ! local variables
         integer :: status                  ! local error status
         integer :: curnumlist
-        type(ESMF_LocalArray) :: cursrc
-        type(ESMF_LocalArray) :: curdst
-        type(ESMF_LocalArray) :: curweights
+        type(ESMF_Pointer) :: cursrcPtr
+        type(ESMF_Pointer) :: curdstPtr
+        type(ESMF_Pointer) :: curweightsPtr
 
         ! Set initial values
         status = ESMF_FAILURE
@@ -372,8 +372,8 @@ end function ESMF_TransformValuesGetInit
         ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
 
         ! Call C++  code to get all current values
-        call c_ESMC_TransformValuesGet(tv, curnumlist, cursrc, &
-                                       curdst, curweights, status)
+        call c_ESMC_TransformValuesGet(tv, curnumlist, cursrcPtr, &
+                                       curdstPtr, curweightsPtr, status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -383,15 +383,18 @@ end function ESMF_TransformValuesGetInit
         endif
 
         if (present(srcIndex)) then
-            srcIndex = cursrc    
+            call ESMF_LocalArraySetThis(srcIndex,cursrcPtr)
+            call ESMF_LocalArraySetInitCreated(srcIndex)
         endif
 
         if (present(dstIndex)) then
-            dstIndex = curdst    
+            call ESMF_LocalArraySetThis(dstIndex,curdstPtr)
+            call ESMF_LocalArraySetInitCreated(dstIndex)
         endif
 
         if (present(weights)) then
-            weights = curweights    
+            call ESMF_LocalArraySetThis(weights,curweightsPtr)
+            call ESMF_LocalArraySetInitCreated(weights)
         endif
 
         if (present(rc)) rc = ESMF_SUCCESS
@@ -524,9 +527,9 @@ end function ESMF_TransformValuesGetInit
         integer :: status                  ! local error status
         logical :: changed
         integer :: curnumlist
-        type(ESMF_LocalArray) :: cursrc
-        type(ESMF_LocalArray) :: curdst
-        type(ESMF_LocalArray) :: curweights
+        type(ESMF_Pointer) :: cursrcPtr
+        type(ESMF_Pointer) :: curdstPtr
+        type(ESMF_Pointer) :: curweightsPtr
 
         ! Set initial values
         status = ESMF_FAILURE
@@ -539,9 +542,11 @@ end function ESMF_TransformValuesGetInit
         ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,dstIndex,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,weight,rc)
 
+
+
         ! Get old values and only replace the ones specified.
-        call c_ESMC_TransformValuesGet(tv, curnumlist, cursrc, &
-                                       curdst, curweights, status)
+        call c_ESMC_TransformValuesGet(tv, curnumlist, cursrcPtr, &
+                                       curdstPtr, curweightsPtr, status)
         changed = .false.
 
         if (present(numList)) then
@@ -551,24 +556,24 @@ end function ESMF_TransformValuesGetInit
 
         if (present(srcIndex)) then
           changed = .true.
-          cursrc = srcIndex    
+          call ESMF_LocalArrayGetThis(srcIndex,cursrcPtr)
         endif
 
         if (present(dstIndex)) then
           changed = .true.
-          curdst = dstIndex    
+          call ESMF_LocalArrayGetThis(dstIndex,curdstPtr)
         endif
 
         if (present(weights)) then
           changed = .true.
-          curweights = weights    
+          call ESMF_LocalArrayGetThis(weights,curweightsPtr)
         endif
 
         ! Overwrite the changed values
         if (changed) then
             ! Call C++  code
-            call c_ESMC_TransformValuesSet(tv, curnumlist, cursrc, &
-                                           curdst, curweights, status)
+            call c_ESMC_TransformValuesSet(tv, curnumlist, cursrcPtr, &
+                                           curdstPtr, curweightsPtr, status)
             if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1160,12 +1165,8 @@ end function ESMF_RouteHandleGetInit
         if (present(rc)) rc = ESMF_FAILURE
 
         ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
-	if (present(route)) then
-           ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
-	endif
-	if (present(tdata)) then
-           ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tdata,rc)
-        endif
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tdata,rc)
         if (present(htype)) then
             call c_ESMC_RouteHandleSetType(rhandle, htype, status)
             if (ESMF_LogMsgFoundError(status, &

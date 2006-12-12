@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.83 2006/12/06 01:53:30 peggyli Exp $
+! $Id: ESMF_Route.F90,v 1.84 2006/12/12 21:54:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.83 2006/12/06 01:53:30 peggyli Exp $'
+      '$Id: ESMF_Route.F90,v 1.84 2006/12/12 21:54:21 oehmke Exp $'
 
 !==============================================================================
 !
@@ -1724,12 +1724,14 @@ end subroutine rias
         ! local variables
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
-        type(ESMF_LocalArray) :: empty
-
+        type(ESMF_Pointer) :: empty
+        type(ESMF_Pointer) :: srcLocArrayPtr, &
+                              dstLocArrayPtr
+  
         ! Set initial values
         status = ESMF_FAILURE
         rcpresent = .FALSE.   
-        empty%this = ESMF_NULL_POINTER
+        empty= ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -1739,21 +1741,34 @@ end subroutine rias
 
 	! Check initialization
         ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
-	if (present(srcarray)) then
-	   ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,srcarray,rc)
-        endif
-	if (present(dstarray)) then
-	  ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,dstarray,rc)
-        endif
-        if ((.not.present(srcarray)) .and. (.not.present(dstarray))) then
+        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,srcarray,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,dstarray,rc)
+ 
+       ! translate F90 LocalArrays to C++ version of LocalArray
+       if (present(srcarray)) then
+          call ESMF_LocalArrayGetThis(srcArray,srcLocArrayPtr,status)
+
+          if (ESMF_LogMsgFoundError(status,ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
+       if (present(dstarray)) then
+          call ESMF_LocalArrayGetThis(dstArray,dstLocArrayPtr,status)
+
+          if (ESMF_LogMsgFoundError(status,ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
+
+
+       ! Run Route depending on inputs
+       if ((.not.present(srcarray)) .and. (.not.present(dstarray))) then
             ! nothing to do here
             status = ESMF_SUCCESS
         else if (.not.present(srcarray)) then
-            call c_ESMC_RouteRunLA(route, empty, dstarray, status)
+            call c_ESMC_RouteRunLA(route, empty, dstLocArrayPtr, status)
         else if (.not.present(dstarray)) then
-            call c_ESMC_RouteRunLA(route, srcarray, empty, status)
+            call c_ESMC_RouteRunLA(route, srcLocArrayPtr, empty, status)
         else  ! both srcarray and dstarray are specified
-            call c_ESMC_RouteRunLA(route, srcarray, dstarray, status)
+            call c_ESMC_RouteRunLA(route, srcLocArrayPtr, dstLocArrayPtr, status)
         endif
 
         if (ESMF_LogMsgFoundError(status, &
@@ -1804,12 +1819,16 @@ end subroutine rias
         logical :: rcpresent               ! did user specify rc?
         integer :: srcCount, dstCount
 	integer :: i
-        type(ESMF_LocalArray) :: empty(1)
+        type(ESMF_Pointer) :: empty(1)
+        type(ESMF_Pointer),allocatable :: srcArrayPtrList(:), &
+                                          dstArrayPtrList(:)
+
+
 
         ! Set initial values
         status = ESMF_FAILURE
         rcpresent = .FALSE.   
-        empty(1)%this = ESMF_NULL_POINTER
+        empty(1)= ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -1842,23 +1861,56 @@ end subroutine rias
 	  end do
 	end if
 
+        ! Translate F90 LocalArray into C++ Version
+       if (present(srcarrayList)) then
+          allocate(srcArrayPtrList(srcCount))
+          do i=1,srcCount
+             call ESMF_LocalArrayGetThis(srcArrayList(i), &
+                                         srcArrayPtrList(i),status)
+
+             if (ESMF_LogMsgFoundError(status,ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+       endif
+       if (present(dstarrayList)) then
+          allocate(dstArrayPtrList(dstCount))
+          do i=1,dstCount
+             call ESMF_LocalArrayGetThis(dstArrayList(i), &
+                                         dstArrayPtrList(i),status)
+
+             if (ESMF_LogMsgFoundError(status,ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+       endif
+
+
+        ! Run Route depending on inputs
         if ((srcCount .eq. 0) .and. (dstCount .eq. 0)) then
             ! nothing to do here
             status = ESMF_SUCCESS
         else if (srcCount .eq. 0) then
-            call c_ESMC_RouteRunLAL(route, empty, dstArrayList, &
+            call c_ESMC_RouteRunLAL(route, empty, dstArrayPtrList, &
                                     srcCount, dstCount, status)
         else if (dstCount .eq. 0) then
-            call c_ESMC_RouteRunLAL(route, srcArrayList, empty, &
+            call c_ESMC_RouteRunLAL(route, srcArrayPtrList, empty, &
                                     srcCount, dstCount, status)
         else  ! both srcCount and dstCount is > 0
-            call c_ESMC_RouteRunLAL(route, srcArrayList, dstArrayList, &
+            call c_ESMC_RouteRunLAL(route, srcArrayPtrList, dstArrayPtrList, &
                                     srcCount, dstCount, status)
         endif
 
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
+        ! deallocate temporary arrays
+        if (present(srcarrayList)) then
+           deallocate(srcArrayPtrList)
+        endif
+        if (present(dstarrayList)) then
+          deallocate(dstArrayPtrList)
+        endif
+
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1900,12 +1952,12 @@ end subroutine rias
         ! local variables
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
-        type(ESMF_LocalArray) :: empty
+        type(ESMF_Pointer) :: empty
 
         ! Set initial values
         status = ESMF_FAILURE
         rcpresent = .FALSE.   
-        empty%this = ESMF_NULL_POINTER
+        empty = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -1974,12 +2026,12 @@ end subroutine rias
         ! local variables
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
-        type(ESMF_LocalArray) :: empty
+        type(ESMF_Pointer) :: empty
 
         ! Set initial values
         status = ESMF_FAILURE
         rcpresent = .FALSE.   
-        empty%this = ESMF_NULL_POINTER
+        empty = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -2048,12 +2100,12 @@ end subroutine rias
         ! local variables
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
-        type(ESMF_LocalArray) :: empty
+        type(ESMF_Pointer) :: empty
 
         ! Set initial values
         status = ESMF_FAILURE
         rcpresent = .FALSE.   
-        empty%this = ESMF_NULL_POINTER
+        empty = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -2122,12 +2174,12 @@ end subroutine rias
         ! local variables
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
-        type(ESMF_LocalArray) :: empty
+        type(ESMF_Pointer) :: empty
 
         ! Set initial values
         status = ESMF_FAILURE
         rcpresent = .FALSE.   
-        empty%this = ESMF_NULL_POINTER
+        empty= ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -2197,12 +2249,12 @@ end subroutine rias
         ! local variables
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
-        type(ESMF_LocalArray) :: empty
+        type(ESMF_Pointer) :: empty
 
         ! Set initial values
         status = ESMF_FAILURE
         rcpresent = .FALSE.   
-        empty%this = ESMF_NULL_POINTER
+        empty = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
