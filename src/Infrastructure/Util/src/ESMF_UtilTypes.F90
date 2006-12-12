@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.32 2006/11/16 20:22:27 cdeluca Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.33 2006/12/12 20:31:19 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -43,6 +43,9 @@
 !------------------------------------------------------------------------------
 
 ! !USES:
+      ! inherit from ESMF base class
+!     use ESMF_UtilTypesMod
+      use ESMF_InitMacrosMod
       implicit none
 !
 ! !PRIVATE TYPES:
@@ -214,6 +217,9 @@
       !private
           integer :: objectID
           character (len=32) :: objectName
+#if 0 
+          ESMF_INIT_DECLARE
+#endif
       end type
 
       ! these work well for internal ESMF use, arguments, etc
@@ -263,6 +269,7 @@
           integer :: min
           integer :: max
           integer :: stride
+          ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -274,6 +281,7 @@
           integer :: rank
           ! TODO:  add an element for size in points (memory)
           type (ESMF_AxisIndex) :: ai(ESMF_MAXDIM)
+          ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -288,6 +296,7 @@
           integer :: total_points    ! total size of domain (number of points)
           integer :: pad_for_64bit   ! unused
           type(ESMF_Domain), dimension(:), pointer :: domains
+          ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -521,7 +530,12 @@
       public ESMF_REVISION, ESMF_PATCHLEVEL
       public ESMF_VERSION_STRING 
 
-      public ESMF_ObjectID, ESMF_ID_NONE
+      public ESMF_ObjectID
+
+#if 0 
+      public ESMF_ObjectIDGetInit, ESMF_ObjectIDInit, ESMF_ObjectIDValidate
+#endif
+      public ESMF_ID_NONE
       public ESMF_ID_BASE, ESMF_ID_IOSPEC, ESMF_ID_LOGERR, ESMF_ID_TIME
       public ESMF_ID_CALENDAR, ESMF_ID_TIMEINTERVAL, ESMF_ID_ALARM
       public ESMF_ID_CLOCK, ESMF_ID_ARRAYSPEC, ESMF_ID_LOCALARRAY
@@ -544,8 +558,12 @@
 
       public ESMF_Status, ESMF_Pointer, ESMF_DataType, ESMF_DataKind
       public ESMF_DataValue
-      public ESMF_Domain, ESMF_DomainList
-      public ESMF_AxisIndex
+      public ESMF_Domain, ESMF_DomainGetInit, ESMF_DomainInit, &
+             ESMF_DomainValidate
+      public ESMF_DomainList, ESMF_DomainListGetInit, ESMF_DomainListInit, & 
+             ESMF_DomainListValidate
+      public ESMF_AxisIndex, ESMF_AxisIndexGetInit, ESMF_AxisIndexInit, &
+             ESMF_AxisIndexValidate
       public ESMF_LocalGlobalFlag, ESMF_DomainTypeFlag
 
       public ESMF_PointerPrint
@@ -600,9 +618,379 @@ interface assignment (=)
   module procedure ESMF_ptas2
 end interface  
 
+
 !------------------------------------------------------------------------------
 
       contains
+
+#if 0 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ObjectIDGetInit"
+!BOPI
+! !IROUTINE:  ESMF_ObjectIDGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_ObjectIDGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_ObjectID), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_ObjectIDGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt domain}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_ObjectID} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_ObjectIDGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_ObjectIDGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_ObjectIDGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ObjectIDInit"
+!BOPI
+! !IROUTINE:  ESMF_ObjectIDInit - Initialize ObjectID
+
+! !INTERFACE:
+    subroutine ESMF_ObjectIDInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_ObjectID) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt ObjectID}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_ObjectID} of which being initialized.
+!     \end{description}
+!
+!EOPI
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_ObjectIDInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ObjectIDValidate"
+!BOPI
+! !IROUTINE:  ESMF_ObjectIDValidate - Check validity of a ObjectID 
+
+! !INTERFACE:
+    subroutine ESMF_ObjectIDValidate(s,rc)
+!
+! !ARGUMENTS:
+       type(ESMF_ObjectID), intent(inout) :: s
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt ObjectID} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_ObjectID} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt ObjectID}
+!           is valid.
+!     \end{description}
+!
+!EOPI
+     ESMF_INIT_CHECK_SHALLOW(ESMF_ObjectIDGetInit,ESMF_ObjectIDInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_ObjectIDValidate
+
+#endif
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AxisIndexGetInit"
+!BOPI
+! !IROUTINE:  ESMF_AxisIndexGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_AxisIndexGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_AxisIndex), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_AxisIndexGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt AxisIndex}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_AxisIndex} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_AxisIndexGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_AxisIndexGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_AxisIndexGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AxisIndexInit"
+!BOPI
+! !IROUTINE:  ESMF_AxisIndexInit - Initialize AxisIndex 
+
+! !INTERFACE:
+    subroutine ESMF_AxisIndexInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_AxisIndex) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt AxisIndex}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_AxisIndex} of which being initialized.
+!     \end{description}
+!
+!EOPI
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_AxisIndexInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AxisIndexValidate"
+!BOPI
+! !IROUTINE:  ESMF_AxisIndexValidate - Check validity of a AxisIndex 
+
+! !INTERFACE:
+    subroutine ESMF_AxisIndexValidate(s,rc)
+!
+! !ARGUMENTS:
+       type(ESMF_AxisIndex), intent(inout) :: s
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt AxisIndex} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_AxisIndex} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt AxisIndex}
+!           is valid.
+!     \end{description}
+!
+!EOPI
+     ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit,ESMF_AxisIndexInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_AxisIndexValidate
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DomainGetInit"
+!BOPI
+! !IROUTINE:  ESMF_DomainGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_DomainGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_Domain), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_DomainGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt domain}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_Domain} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_DomainGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_DomainGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_DomainGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DomainInit"
+!BOPI
+! !IROUTINE:  ESMF_DomainInit - Initialize Domain
+
+! !INTERFACE:
+    subroutine ESMF_DomainInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_Domain) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt domain}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_Domain} of which being initialized.
+!     \end{description}
+!
+!EOPI
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_DomainInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DomainValidate"
+!BOPI
+! !IROUTINE:  ESMF_DomainValidate - Check validity of a Domain
+
+! !INTERFACE:
+    subroutine ESMF_DomainValidate(s,rc)
+!
+! !ARGUMENTS:
+       type(ESMF_Domain), intent(inout) :: s
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt Domain} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_Domain} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt domain}
+!           is valid.
+!     \end{description}
+!
+!EOPI
+     ESMF_INIT_CHECK_SHALLOW(ESMF_DomainGetInit,ESMF_DomainInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_DomainValidate
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DomainListGetInit"
+!BOPI
+! !IROUTINE:  ESMF_DomainListGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_DomainListGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_DomainList), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_DomainListGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt domainlist}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_DomainList} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_DomainListGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_DomainListGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_DomainListGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DomainListInit"
+!BOPI
+! !IROUTINE:  ESMF_DomainListInit - Initialize DomainList
+
+! !INTERFACE:
+    subroutine ESMF_DomainListInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_Domain) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt DomainList}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_DomainList} of which being initialized.
+!     \end{description}
+!
+!EOPI
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_DomainListInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DomainListValidate"
+!BOPI
+! !IROUTINE:  ESMF_DomainListValidate - Check validity of a DomainList
+
+! !INTERFACE:
+    subroutine ESMF_DomainListValidate(s,rc)
+!
+! !ARGUMENTS:
+       type(ESMF_DomainList), intent(inout) :: s
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt DomainList} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_DomainList} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt DomainList}
+!           is valid.
+!     \end{description}
+!
+!EOPI
+     ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_DomainListValidate
+
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Status flags to see if they're the same or not
@@ -791,6 +1179,9 @@ function ESMF_aieq(ai1, ai2)
  logical ESMF_aieq
  type(ESMF_AxisIndex), intent(in) :: ai1, ai2
 
+ ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit,ESMF_AxisIndexInit,ai1)
+ ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit,ESMF_AxisIndexInit,ai2)
+
  ESMF_aieq = ((ai1%min .eq. ai2%min) .and. &
               (ai1%max .eq. ai2%max) .and. &
               (ai1%stride .eq. ai2%stride))
@@ -800,6 +1191,9 @@ end function
 function ESMF_aine(ai1, ai2)
  logical ESMF_aine
  type(ESMF_AxisIndex), intent(in) :: ai1, ai2
+
+ ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit,ESMF_AxisIndexInit,ai1)
+ ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit,ESMF_AxisIndexInit,ai2)
 
  ESMF_aine = ((ai1%min .ne. ai2%min) .or. &
               (ai1%max .ne. ai2%max) .or. &
