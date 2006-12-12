@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.26 2006/11/16 05:21:20 cdeluca Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.27 2006/12/12 22:33:17 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.26 2006/11/16 05:21:20 cdeluca Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.27 2006/12/12 22:33:17 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       integer, parameter :: CONVERT_TO_TIME = 1, CONVERT_TO_DATE = 2, &
@@ -344,7 +344,7 @@
       integer, intent(inout) :: MM
       integer, intent(inout) :: DD
       integer(ESMF_KIND_I8), intent(inout) :: Dl
-      type(ESMF_Calendar), intent(in) :: cal
+      type(ESMF_Calendar), intent(inout) :: cal
         
 ! !DESCRIPTION:
 !     Goes backwards one day at a time until the calendar conversion 
@@ -394,7 +394,7 @@
       integer, intent(inout) :: MM
       integer, intent(inout) :: DD
       integer(ESMF_KIND_I8), intent(inout) :: Dl
-      type(ESMF_Calendar), intent(in) :: cal
+      type(ESMF_Calendar), intent(inout) :: cal
         
 ! !DESCRIPTION:
 !     Goes forwards one day at a time until the calendar conversion 
@@ -450,7 +450,7 @@
       integer, intent(in) :: MM
       integer, intent(in) :: DD
       integer(ESMF_KIND_I8), intent(in) :: Dl
-      type(ESMF_Calendar), intent(in) :: cal
+      type(ESMF_Calendar), intent(inout) :: cal
       integer, intent(out), optional :: rc
       character(ESMF_MAXSTR) :: calName
         
@@ -567,7 +567,7 @@
 
 ! !ARGUMENTS:
       integer(ESMF_KIND_I8), intent(in) :: YYl
-      type(ESMF_Calendar), intent(in) :: cal
+      type(ESMF_Calendar), intent(inout) :: cal
         
 ! !DESCRIPTION:
 !     Checks given year to see if it is a leap year in the given calendar
