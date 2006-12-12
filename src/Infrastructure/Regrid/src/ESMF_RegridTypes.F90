@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.84 2006/12/07 05:32:42 samsoncheung Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.85 2006/12/12 20:50:00 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -59,6 +59,7 @@
       use ESMF_RouteMod      ! ESMF route  class
       use ESMF_FieldDataMapMod
       use ESMF_InternArrayCommMod
+      use ESMF_InitMacrosMod
 
       implicit none
 
@@ -75,6 +76,7 @@
 
         integer, dimension(:,:), pointer :: dstMinIndex, dstMaxIndex
 
+        ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -86,6 +88,7 @@
       sequence
       private
         type(ESMF_RegridIndexType), pointer :: ptr     ! pointer to a regrid index
+        ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -263,7 +266,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.84 2006/12/07 05:32:42 samsoncheung Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.85 2006/12/12 20:50:00 donstark Exp $'
 
 !==============================================================================
 !
@@ -332,6 +335,105 @@
 ! main Regrid type.  All other create methods are implemented in another
 ! module to facilitate branching based on type of regridding required.
 !
+!------------------------------------------------------------------------------
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridIndexTypeGetInit"
+ !BOPI
+! !IROUTINE: ESMF_RegridIndexTypeGetInit - Get initialization status.
+
+! !INTERFACE:
+   function ESMF_RegridIndexTypeGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_RegridIndexType), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_RegridIndexTypeGetInit
+!
+! !DESCRIPTION:
+! Get the initialization status of the
+! shallow class {\tt RegridIndexType}.
+!
+! The arguments are:
+! \begin{description}
+! \item [s]
+! {\tt ESMF\_RegridIndexType} from which to retreive status.
+! \end{description}
+!
+!EOPI
+       if (present(s)) then
+         ESMF_RegridIndexTypeGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_RegridIndexTypeGetInit = ESMF_INIT_DEFINED
+       endif
+
+     end function ESMF_RegridIndexTypeGetInit
+
+
+!------------------------------------------------------------------------------
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridIndexTypeInit"
+ !BOPI
+! !IROUTINE: ESMF_RegridIndexTypeGetInit - Initialize RegridIndexType variable.
+
+! !INTERFACE:
+   subroutine ESMF_RegridIndexTypeInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_RegridIndexType) :: s
+!
+! !DESCRIPTION:
+! Initialize the class {\tt RegridIndexType}.
+!
+! The arguments are:
+! \begin{description}
+! \item [s]
+! {\tt ESMF\_RegridIndexType} to initialize.
+! \end{description}
+!
+!EOPI
+
+       ESMF_INIT_SET_DEFINED(s)
+     end subroutine ESMF_RegridIndexTypeInit
+ 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridIndexTypeValidate"
+!BOP
+! !IROUTINE: ESMF_RegridIndexTypeValidate - Check validity of a RegridIndexType
+!
+! !INTERFACE:
+      subroutine ESMF_RegridIndexTypeValidate(s, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_RegridIndexType) :: s
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Validates that the {\tt RegridIndexType} is internally consistent.
+!     Currently this method determines if the {\tt RegridIndexType} is uninitialized
+!     or already destroyed.  The method returns an error code if problems
+!     are found.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[s]
+!       The {\tt ESMF\_RegridIndexType} to validate.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if the  {\tt RegridIndexType}
+!       is valid.
+!     \end{description}
+!
+!
+!EOPI
+     ESMF_INIT_CHECK_SHALLOW(ESMF_RegridIndexTypeGetInit,ESMF_RegridIndexTypeInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+
+
+end subroutine ESMF_RegridIndexTypeValidate
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RegridAddLink1D"
@@ -474,6 +576,8 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ESMF_INIT_CHECK_DEEP(ESMF_RegridIndexGetInit,index,rc)
 
       newLink      = .true.
       aggregateUse = .false.
@@ -1251,6 +1355,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ESMF_INIT_CHECK_SHALLOW(ESMF_RegridIndexTypeGetInit, ESMF_RegridIndexTypeInit, &
+                              ritype)
+
 !     Initialize pointers
       nullify(ritype)
       nullify(ESMF_RegridIndexCreate%ptr)
@@ -1272,6 +1379,7 @@
 !     Set return values.
       ESMF_RegridIndexCreate%ptr => ritype
 
+      ESMF_INIT_SET_CREATED(ESMF_RegridIndexCreate)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_RegridIndexCreate
@@ -1321,9 +1429,81 @@
 !     Destroy all components of the regrid index structure
       nullify(index%ptr)
 
+      ESMF_INIT_SET_DELETED(index)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridIndexDestroy
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridIndexGetInit"
+!BOPI
+! !IROUTINE:  ESMF_RegridIndexGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_RegridIndexGetInit(d)
+!
+! !ARGUMENTS:
+       type(ESMF_RegridIndex), intent(in), optional :: d
+       ESMF_INIT_TYPE :: ESMF_RegridIndexGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the Deep class {\tt RegridIndex}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_RegridIndex} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(d)) then
+         ESMF_RegridIndexGetInit = ESMF_INIT_GET(d)
+       else
+         ESMF_RegridIndexGetInit = ESMF_INIT_CREATED
+       endif
+
+    end function ESMF_RegridIndexGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridIndexValidate"
+
+!BOP
+! !IROUTINE:  ESMF_RegridIndexValidate - Check validity of a RegridIndex
+
+! !INTERFACE:
+      subroutine ESMF_RegridIndexValidate(s, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_RegridIndex), intent(in) :: s
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt RegridIndex} is internally consistent.
+!      Currently this method determines if the {\tt field} is uninitialized
+!      or already destroyed.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_RegridIndex} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt RegridIndex}
+!           is valid.
+!     \end{description}
+!
+!EOP
+
+      ! Check Init Status  
+      ESMF_INIT_CHECK_DEEP(ESMF_RegridIndexGetInit,s,rc)
+
+      ! If all checks pass return success
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_RegridIndexValidate
+
 
 !----------------------------------------------------------------------
 #undef  ESMF_METHOD
