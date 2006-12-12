@@ -1,4 +1,4 @@
-! $Id: ESMF_InitMacros.F90,v 1.7 2006/12/12 23:20:44 donstark Exp $
+! $Id: ESMF_InitMacros.F90,v 1.8 2006/12/12 23:53:34 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@ end function ESMF_InitCheckDeep
 !EOP
 	
 
-    ESMF_IMErr=0
+    ESMF_IMErr=.false.
 
 !    ESMF_IMErr=ESMF_LogMsgFoundError(ESMF_InitCheckDeep(isInit), &
 !                                   "Bad Object", &
