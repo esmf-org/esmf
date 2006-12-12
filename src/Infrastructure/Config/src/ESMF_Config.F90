@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.30 2006/11/16 18:20:36 tjcnrl Exp $
+! $Id: ESMF_Config.F90,v 1.31 2006/12/12 22:29:56 samsoncheung Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -38,6 +38,7 @@
       use ESMF_BaseMod
       use ESMF_DELayoutMod
       use ESMF_LogErrMod 
+      use ESMF_InitMacrosMod
 
       implicit none
       private
@@ -61,6 +62,16 @@
 !------------------------------------------------------------------------------
        public :: ESMF_Config
        public :: ESMF_ConfigClass, ESMF_ConfigAttrUsed  !For internal lib use only
+
+       public ESMF_ConfigAttrUsedInit       ! For Standardized Initialization
+       public ESMF_ConfigAttrUsedValidate   ! For Standardized Initialization
+       public ESMF_ConfigAttrUsedGetInit    ! For Standardized Initialization
+
+       public ESMF_ConfigClassInit          ! For Standardized Initialization
+       public ESMF_ConfigClassValidate      ! For Standardized Initialization
+       public ESMF_ConfigClassGetInit       ! For Standardized Initialization
+
+       public ESMF_ConfigGetInit            ! For Standardized Initialization
 !EOPI
 
 !==============================================================================
@@ -142,6 +153,7 @@
           private              
           character(len=LSZ)      :: label  ! attribute label
           logical                 :: used   ! attribute used (retrieved) or not
+          ESMF_INIT_DECLARE
        end type ESMF_ConfigAttrUsed
 
        type ESMF_ConfigClass
@@ -173,6 +185,7 @@
                                                        !   in the "used" table
           character(len=LSZ)          :: current_attr  ! the current attr label
           integer :: pad                             ! to satisfy halem compiler
+          ESMF_INIT_DECLARE
        end type ESMF_ConfigClass
 
 !      ! Config wrapper
@@ -186,9 +199,241 @@
 #else
           type (ESMF_ConfigClass), pointer :: cptr
 #endif
+          ESMF_INIT_DECLARE
        end type ESMF_Config
 
      contains
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigAttrUsedGetInit"
+!BOPI
+! !IROUTINE:  ESMF_ConfigAttrUsedGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_ConfigAttrUsedGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_ConfigAttrUsed), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_ConfigAttrUsedGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt ConfigAttrUsed}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_ConfigAttrUsed} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_ConfigAttrUsedGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_ConfigAttrUsedGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_ConfigAttrUsedGetInit
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigAttrUsedInit"
+!BOPI
+! !IROUTINE:  ESMF_ConfigAttrUsedInit - Initialize ESMF_ConfigAttrUsed
+
+! !INTERFACE:
+    subroutine ESMF_ConfigAttrUsedInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_ConfigAttrUsed) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt configAttrUsed}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_ConfigAttrUsed} of which being initialized.
+!     \end{description}
+!
+!EOPI
+
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_ConfigAttrUsedInit
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigAttrUsedValidate"
+!BOPI
+! !IROUTINE:  ESMF_ConfigAttrUsedValidate - Check validity of a ConfigAttrUsed
+
+! !INTERFACE:
+    subroutine ESMF_ConfigAttrUsedValidate(s,rc)
+!
+! !ARGUMENTS:
+       type(ESMF_ConfigAttrUsed), intent(inout) :: s
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt ConfigAttrUsed} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_ConfigAttrUsed} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt localfield}
+!           is valid.
+!     \end{description}
+!
+!EOPI
+     ESMF_INIT_CHECK_SHALLOW(ESMF_ConfigAttrUsedGetInit,  &
+                             ESMF_ConfigAttrUsedInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_ConfigAttrUsedValidate
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigClassGetInit"
+!BOPI
+! !IROUTINE:  ESMF_ConfigClassGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_ConfigClassGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_ConfigClass), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_ConfigClassGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt configclass}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_ConfigClass} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_ConfigClassGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_ConfigClassGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_ConfigClassGetInit
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigClassInit"
+!BOPI
+! !IROUTINE:  ESMF_ConfigClassInit - Initialize ESMF_ConfigClass
+
+! !INTERFACE:
+    subroutine ESMF_ConfigClassInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_ConfigClass) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt configclass}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_ConfigClass} of which being initialized.
+!     \end{description}
+!
+!EOPI
+       s%buffer => Null()
+       s%this_line => Null()
+       s%attr_used => Null()
+
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_ConfigClassInit
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigClassValidate"
+!BOPI
+! !IROUTINE:  ESMF_ConfigClassValidate - Check validity of a ConfigClass
+
+! !INTERFACE:
+    subroutine ESMF_ConfigClassValidate(s,rc)
+!
+! !ARGUMENTS:
+       type(ESMF_ConfigClass), intent(inout) :: s
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt Configclass} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_ConfigClass} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt localfield}
+!           is valid.
+!     \end{description}
+!
+!EOPI
+     ESMF_INIT_CHECK_SHALLOW(ESMF_ConfigClassGetInit,  &
+                             ESMF_ConfigClassInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_ConfigClassValidate
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetInit"
+!BOPI
+! !IROUTINE:  ESMF_ConfigGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_ConfigGetInit(d)
+!
+! !ARGUMENTS:
+       type(ESMF_Config), intent(inout), optional :: d
+       ESMF_INIT_TYPE :: ESMF_ConfigGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the Deep class {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_Config} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(d)) then
+         ESMF_ConfigGetInit = ESMF_INIT_GET(d)
+       else
+         ESMF_ConfigGetInit = ESMF_INIT_CREATED
+       endif
+
+    end function ESMF_ConfigGetInit
+
+
+
 !
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigCreate"
@@ -241,6 +486,7 @@
         rc = iret
       endif
 
+      ESMF_INIT_SET_CREATED(ESMF_ConfigCreate)
       return
     end function ESMF_ConfigCreate
 
@@ -293,6 +539,7 @@
         rc = iret
       endif
 
+      ESMF_INIT_SET_DELETED(config)
       return
 
      end subroutine ESMF_ConfigDestroy
@@ -339,6 +586,9 @@
       integer :: i, j, iret
 
       iret = 0
+
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
 !     Determine whether label exists
 !     ------------------------------    
@@ -419,6 +669,9 @@
       integer :: ib, ie, iret
       
       iret = 0
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+
 
 ! Default setting
       if( present( default ) ) then 
@@ -528,6 +781,8 @@
       real(ESMF_KIND_R4) :: x
       
       iret = 0
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
 ! Default setting
       if( present( default ) ) then 
@@ -618,6 +873,8 @@
       real(ESMF_KIND_R8) :: x
       
       iret = 0
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
 ! Default setting
       if( present( default ) ) then 
@@ -709,6 +966,8 @@
       integer :: iret, i 
 
       iret = 0
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       if (count.le.0) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -787,6 +1046,8 @@
       integer :: iret, i 
       
       iret = 0
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       if (count.le.0) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -867,6 +1128,8 @@
       integer :: iret
 
       iret = 0
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
 ! Default setting
       if( present( default ) ) then 
@@ -959,6 +1222,8 @@
       integer :: iret
 
       iret = 0
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
 ! Default setting
       if( present( default ) ) then 
@@ -1052,6 +1317,8 @@
       integer :: iret, i 
       
       iret = 0
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       if (count.le.0) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -1134,6 +1401,8 @@
       integer :: iret, i 
       
       iret = 0
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       if (count.le.0) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -1219,6 +1488,8 @@
       integer :: iret
 
       iret = 0
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       ! Default setting
       if( present( default ) ) then 
@@ -1323,6 +1594,8 @@
       integer :: iret, i 
       
       iret = 0
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       if (count.le.0) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -1402,6 +1675,8 @@
       integer :: iret
 
       iret = 0
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
 ! Default setting
       if( present( default ) ) then 
@@ -1482,6 +1757,9 @@
       lineCount = 0
       columnCount = 0
       
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+
       if ( present(label) ) then
         call ESMF_ConfigFindLabel(config, label = label, rc = iret )
         if ( iret /= 0 ) then
@@ -1561,6 +1839,9 @@
       count = 0
       ESMF_ConfigGetLen = -1    ! assume error
       
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+
       if( present( label )) then
          call ESMF_ConfigFindLabel(config, label = label, rc = iret )
          if( iret /= 0) then
@@ -1632,6 +1913,8 @@
       integer :: iret
 
       iret = 0
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       call ESMF_ConfigLoadFile_1proc_( config, filename, iret )
       if(iret /= 0) then
@@ -1695,6 +1978,8 @@
       character(len=LSZ) :: line
 
       iret = 0
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
 !     Open file
 !     ---------     
@@ -1813,6 +2098,8 @@
 
       iret = 0
       local_tend = .false.
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       if ( config%cptr%next_line .ge. config%cptr%nbuf ) then
          iret = -1
@@ -1885,6 +2172,9 @@
       if ( present (rc) ) then
         rc = ESMF_SUCCESS
       endif
+
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       ! initialize this config's attributes table "used" flags to "not used"
       do a = 1, MSZ
@@ -1973,6 +2263,9 @@
         rc = ESMF_SUCCESS
       endif
 
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+
       ! find attr label and set its used flag to given value
       !  TODO:  pre-sort and use binary search, or use hash function
       do i = 1, MSZ
@@ -1998,7 +2291,7 @@
     subroutine ESMF_ConfigValidate(config, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(in)            :: config 
+      type(ESMF_Config), intent(inout)         :: config 
       character (len=*), intent(in),  optional :: options
       integer, intent(out), optional           :: rc 
 !
@@ -2032,6 +2325,9 @@
       if (present(rc)) then
         rc = ESMF_SUCCESS
       endif
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       ! validate internal buffer indices
 
