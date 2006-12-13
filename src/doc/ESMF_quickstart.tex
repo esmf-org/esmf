@@ -1,0 +1,225 @@
+\section{Quick Start}
+\label{sec:QuickStart}
+
+This section gives a brief
+description of to how to get the ESMF software, build it, 
+and run the self-tests to verify the installation was successful.
+More detailed information on each of these steps, as well as
+information on running a demonstration application and linking
+the ESMF with your own code is found in Sections \ref{sec:TechOver} 
+and \ref{sec:TechOver2}.  
+
+\subsection{Downloading ESMF}
+
+ESMF is distributed as a source-code tar file.  The tar file, release notes, 
+known bugs, supported platforms, documentation, and other related information 
+can be found on the ESMF web site, under the "Downloads \& Documentation" link:
+\begin{verbatim}
+    http://www.esmf.ucar.edu -> Downloads & Documentation
+\end{verbatim}
+ESMF can also be downloaded from the Sourceforge web site
+from the "Files" link:
+\begin{verbatim}
+    http://sourceforge.net/projects/esmf -> Files
+\end{verbatim}
+Follow the directions on that web page to download a tar file.  
+The Sourceforge web site also contains 
+the bugs list, support requests, and core development group task
+lists for the ESMF project.
+See the {\tt Bugs}, {\tt Support}, and {\tt Tasks} links, respectively,
+for more information.  Archives of the ESMF mailing lists can be
+found under the {\tt Lists} link.
+
+Contributions from ESMF users are available at a second Sourceforge web site:
+\begin{verbatim}
+    http://sourceforge.net/projects/esmfcontrib -> CVS
+\end{verbatim}
+In case of problems or questions, contact the ESMF support mailing
+list at {\tt esmf\_support@ucar.edu}.
+
+
+\subsection{Building ESMF}
+
+After downloading and unpacking the ESMF tar file, the build procedure is:
+\begin{enumerate}
+\item Set the required environment variables. 
+\item Type {\tt gmake } to build the library.
+\item Type {\tt gmake check } to run self-tests to verify
+the build was successful.
+\end{enumerate}
+See the following sections for more information on each of these steps.
+
+\subsubsection{GNU make}
+The ESMF build system uses the GNU make program; it is normally named 
+{\tt gmake} but may also be simply {\tt make} or {\tt gnumake} on some 
+platforms.  ESMF does not use configure or autoconf;  the selection of 
+various options is done by
+setting environment variables before building the framework. 
+
+
+\subsubsection{Environment Variables}
+
+The syntax for setting environment variables depends on which shell
+you are running.  Examples of the two most common ways to set 
+an environment variable are:
+\begin{description}
+\item[ksh] {\tt  export ESMF\_DIR=/home/joeuser/esmf}
+\item[csh] {\tt  setenv ESMF\_DIR /home/joeuser/esmf}
+\end{description}
+
+The shell environment variables listed below are the ones most
+frequently used.  There are others which address needs on specific
+platforms or are needed under more unusual circumstances; 
+see Section \ref{sec:TechOver} for the full list.  
+\begin{description}
+
+\item[ESMF\_DIR]
+The environment variable {\tt ESMF\_DIR} must be set to the full pathname 
+of the top level ESMF directory before building the framework.  This is the 
+only environment variable which is required to be set on all platforms under 
+all conditions.
+
+\item[ESMF\_BOPT]
+This environment variable controls the build option. To make a debuggable
+version of the library set {\tt ESMF\_BOPT} to {\tt g} before building. The
+default is {\tt O} (capital oh) which builds an optimized version of the 
+library. If {\tt ESMF\_BOPT} is {\tt O}, {\tt ESMF\_OPTLEVEL} can also be set
+to a numeric value between 0 and 4 to select a specific optimization level.
+
+\item[ESMF\_COMM]
+On systems with a vendor-supplied MPI communications library the vendor library 
+is chosen by default for communications and {\tt ESMF\_COMM} need not be set.
+For other systems (e.g. Linux or Darwin) a multitude of MPI implementations is
+available and {\tt ESMF\_COMM} must be set to indicate which implementation is
+used to build the ESMF library. Set {\tt ESMF\_COMM} according to your situation
+to: {\tt mpich, mpich2, lam, openmpi} or {\tt intelmpi}. {\tt ESMF\_COMM} may
+also be set to {\tt user} indicating that the user will set all the required
+flags using advanced ESMF environment variables.
+
+Alternatively, ESMF comes with a single-processor MPI-bypass library which is
+the default for Linux and Darwin systems. To force the use of this bypass
+library set {\tt ESMF\_COMM} equal to "mpiuni".
+
+\item[ESMF\_COMPILER]
+The ESMF library build requires a working Fortran90 and C++ compiler. On 
+platforms that don't come with a single vendor supplied compiler suite
+(e.g. Linux or Darwin) {\tt ESMF\_COMPILER} must be set to select which Fortran
+and C++ compilers are being used to build the ESMF library. Notice that setting
+the {\tt ESMF\_COMPILER} variable does {\em not} affect how the compiler
+executables are located on the system. {\tt ESMF\_COMPILER} (together with
+{\tt ESMF\_COMM}) affect the name that is expected for the compiler executables.
+Furthermore, the {\tt ESMF\_COMPILER} setting is used to select compiler and
+linker flags consistent with the compilers indicated.
+
+By default Fortran and C++ compiler executables are expected to be located in
+a location contained in the user's {\tt PATH} environment variable. This means
+that if you cannot locate the correct compiler executable via the {\tt which}
+command on the shell prompt the ESMF build system won't find it either!
+
+There are advanced ESMF environment variables that can be used to select 
+specific compiler executables by specifying the full path. This can be used to
+pick specific compiler executables without having to modify the {\tt PATH}
+environment variable.
+
+Use 'gmake info' to see which compiler executables the ESMF build system will
+be using according to your environment variable settings.
+
+To see possible values for {\tt ESMF\_COMPILER}, cd to 
+{\tt \$ESMF\_DIR/build\_config} and list the directories there. The first part 
+of each directory name corresponds to the output of 'uname -s' for this 
+platform. The second part contains possible values for {\tt ESMF\_COMPILER}. In
+some cases multiple combinations of Fortran and C++ compilers are possible, e.g.
+there is {\tt intel} and {\tt intelgcc} available for Linux. Setting 
+{\tt ESMF\_COMPILER} to {\tt intel} indicates that both Intel Fortran and 
+C++ compilers are used, whereas {\tt intelgcc} indicates that the Intel Fortran
+compiler is used in combination with GCC's C++ compiler.
+
+If you do not find a configuration that matches your situation you will need to
+port ESMF.
+
+\item[ESMF\_ABI]
+If a system supports 32-bit and 64-bit (pointer wordsize) application binary
+interfaces (ABIs), this variable can be set to select which ABI to use. Valid 
+values are {\tt 32} or {\tt 64}. By default the most common ABI is chosen.
+
+\item[ESMF\_SITE]
+The Sourceforge {\tt esmfcontrib} repository contains makefiles which have 
+already been customized for certain machines.  If one exists for your site 
+and you wish to use it, download the corresponding files into the 
+{\tt build\_contrib} directory and set {\tt ESMF\_SITE} to your location
+(which corresponds to the last part of the directory name).  See the 
+Sourceforge site {\tt http://sourceforge.net/projects/esmfcontrib} for more 
+information.
+
+\item[ESMF\_INSTALL\_PREFIX]
+This variable specifies the prefix of the installation path used during the
+installation process accessible thought the install target. Libraries, F90
+module files, header files and documentation all are installed relative to
+{\tt ESMF\_INSTALL\_PREFIX} by default. The {\tt ESMF\_INSTALL\_PREFIX} may be
+provided as absolute path or relative to {\tt ESMF\_DIR}.
+
+\end{description}
+
+
+\subsubsection{Build makefile Targets}
+
+The makefiles follow the GNU target standards where possible.
+The most frequently used targets for building are listed below:
+\begin{description}
+\item[lib] build the ESMF libraries only (default)
+\item[all] build the libraries, unit and system tests, examples, and demos
+\item[doc] build the documentation (requires specific latex macros packages
+and additional utilities; see Section \ref{sec:TechOver} for more details
+on the requirements).  The ESMF web site 
+contains pre-built pdf and html versions of all documentation
+under the "Downloads \& Documentation" link.
+\item[info] print out extensive system configuration information about what
+           compilers, libraries, paths, flags, etc are being used
+\item[clean] remove all files built for this platform/compiler/wordsize.
+\item[clobber] remove all files built for all architectures
+\item[install] install the ESMF library in a custom location
+\end{description}
+
+
+
+\subsubsection{Testing makefile Targets}
+
+To build and run the unit and system tests in non-exhaustive mode, type:
+\begin{verbatim}
+gmake check
+\end{verbatim}
+A summary report of success and failures will be printed out at the end.
+
+\noindent Other test-related targets are:
+\begin{description}
+\item[all\_tests] build and run all available tests and demos
+\item[build\_all\_tests] build tests only, do not execute
+\item[run\_all\_tests] run tests without rebuilding and print a
+summary of the results
+\item[check\_all\_tests] 
+print out the results summary without re-executing the tests again
+\item[clean\_all\_tests] remove all test and demo executables 
+\end{description}
+
+For all the targets listed above, the string {\tt all\_tests} can be
+replaced with one of the strings listed below to select a
+specific type of test:
+\begin{description}
+\item[unit\_tests] unit tests exercise a single part of the system
+\item[system\_tests] system tests combine functions across the system
+\item[examples] examples contain code illustrating a single type of function
+\item[demos] demos are example applications showing the use of the system
+\end{description}
+For example, {\tt gmake build\_examples} recompiles the example programs but 
+does not execute them.  {\tt gmake clean\_system\_tests} removes all
+executables and files associated with the system tests.
+
+For the unit tests only, there is an additional environment variable
+which affects how the tests are built:
+\begin{description}
+\item[ESMF\_EXHAUSTIVE]
+If this variable is set to {\tt ON} before compiling the unit tests,
+longer and more exhaustive unit tests will be run.  Note that this is a
+compile-time and not run-time option.
+\end{description}
+

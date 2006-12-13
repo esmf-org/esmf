@@ -1,0 +1,110 @@
+
+{\it 
+In this section, we describe: 
+\begin{itemize}
+\item the goals and unique role of ESMF in Earth science;
+\item the relevant features of the problem domain that ESMF encompasses; and
+\item the key design features that are derived from the requirements of the ESMF domain and 
+enable the ESMF to satisfy its goals. 
+\end{itemize}
+}
+
+The {\bf Earth System Modeling Framework (ESMF)} is a software toolkit that increases 
+software reuse, component interoperability, performance portability, and ease of use in 
+Earth science applications.  The focus on Earth systems - a diverse but bounded domain - is 
+critical to the ability of the ESMF to achieve its goals.  This is where the ESMF's value and 
+capability come from - enabling interoperability but able to retain some efficiency and structure 
+because the domain is bounded.  The scope is also unique - there are larger projects and smaller 
+projects, but only ESMF spans institutions that are all interested in collaboration. The fifteen 
+initial testbeds for the ESMF represent a wide range of research and operational applications in 
+climate, weather, and data assimilation \cite{ref:models}.  Thus the ESMF must efficiently 
+support a variety of grids, programming paradigms, and computing platforms.  However, the ESMF 
+domain is restricted enough to allow the creation of specific data and control constructs.  A 
+challenge of the project is to support high-performance operations in the face of the generality 
+that's required.  Commonality in applications can be found at both the {\bf infrastructure} 
+level, in model development tools for communication, I/O, time management, and other basic 
+functions; and at the {\b superstructure} level, in an architecture and standards for 
+combining geophysical components into applications.
+
+The ESMF design is rooted in the requirements and characteristics of the applications that 
+the framework must support.  In the sections below, these characteristics are described.  
+Then we describe the major architectural implications that spring from the nature of the 
+domain.
+
+The key characteristics of the Earth science code that the ESMF must address are as follows.
+\begin{enumerate}
+
+\item Applications contain sets of complex software components that represent different 
+physical domains, such as land, ocean, atmosphere and sea ice.  Other components may perform 
+data assimilation or analysis.  These components are "coupled" so that the output fields of 
+some of the components are used 
+as the input fields for other components.  Coupling may include data transfers, unit 
+conversions, flux 
+calculations, regridding, data transfers, and other transformations.  The software that 
+couples components is often viewed as a component itself.  
+
+\item The same models or components may be run in a variety of configurations.  Scientists 
+may swap in
+alternative implementations of a domain or function in order to create new applications 
+(e.g., different 
+ocean models, different dynamical cores); may use different subsets and combinations 
+of a particular set of 
+components (e.g., an atmospheric model may be run with an ocean model for a 
+hurricane application, and 
+with a full complement of land, ocean, and sea ice models for a climate simulation); may 
+run ensembles of the same component; and as a matter of course attempt endless variations 
+and combinations of these research strategies.
+
+\item Applications run on a variety of parallel computing systems and require high performances. 
+
+\item Applications have many diverse users, from graduate students to software engineers 
+to .  Applications are under continuous scientific development, and scientists and developers 
+frequently wish to modify and update the code.
+
+\end{enumerate}
+
+The characteristics above inform a software architecture.  The key architectural features 
+of ESMF are described below.
+
+\begin{description}
+\item[Component-based architecture]  Applications running under ESMF are organized as sets of 
+interacting {\bf Components}.  A Component is
+a software representation of some domain or function; for example, a land model or data 
+assimilation 
+system.  All Components share common behavior in ESMF.  This architectural model lends itself 
+naturally to systems whose functionality is segregable.
+
+\item[Types of Components]  ESMF Components fall into a number of categories.  The two primary 
+types are Gridded 
+Components ({\tt ESMF\_GridComp}) and ESMF Coupler Components ({\tt ESMF\_CplComp}).  A 
+Gridded Component represents 
+a physical domain that contains fields discretized on a grid.  A Coupler Component performs the operations required for two or more components to interact with each other.
+
+\item[Local communication]
+
+One of the important features of the ESMF architecture is that all communication between 
+Gridded Components is 
+local.  Another way of stating this is that all inter-component communication is mediated 
+by a Coupler Component.    
+\end{description}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

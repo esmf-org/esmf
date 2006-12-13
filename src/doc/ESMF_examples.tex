@@ -1,0 +1,109 @@
+% $Id: ESMF_examples.tex,v 1.12 2006/12/13 20:17:53 cdeluca Exp $
+
+\subsection{Running ESMF Examples}
+\label{examples}
+
+
+\subsubsection{Example Source Code}
+
+Example source code for each class is found in the class's example
+directory. For example, source code for the Time Manager class examples
+are found in this directory:
+
+\begin{verbatim}
+        ESMF_DIR/src/Infrastructure/TimeMgr/examples/
+\end{verbatim}
+
+While the example code is formatted to be included in the documentation,
+it also runs and compiles to ensure accuracy.  Examples generally 
+contain simple usage of the basic methods for the class.
+
+\subsubsection{Building and Running Examples}
+
+The GNU makefile targets {\tt examples} and {\tt examples\_uni} build
+and run programs found in a class's examples directory.  After the
+examples are built, the {\tt examples} target runs the examples using
+multiple processors, while {\tt examples\_uni} runs the examples on
+a single processor.
+
+These targets first build the ESMF library.
+
+Run from ESMF\_DIR, this command will build and run all examples on
+multiple processors:
+
+\begin{verbatim}
+       gmake examples
+\end{verbatim}
+
+If the command is run in an example source code directory, then only
+the example from that directory will be built and run.  The examples
+and output files are created in this directory:
+
+\begin{verbatim}
+       ESMF_DIR/examples/examples$ESMF_BOPT/$ESMF_OS.$ESMF_COMPILER.$ESMF_ABI.$ESMF_SITE/
+\end{verbatim}
+
+The name of an output file will begin with the name of the example
+that created it followed by .stdout.
+
+At the end of examples execution a script runs to analyze the results.
+
+The script output indicates whether there are any examples failures.
+The following is a sample from the script output:
+
+\begin{verbatim}
+
+
+There are 34 examples, 32 passed and 2 failed.
+
+
+The following examples passed:
+
+
+src/Infrastructure/Array/examples/ESMF_ArrayCreateEx.F90
+src/Infrastructure/Array/examples/ESMF_ArrayGetEx.F90
+src/Infrastructure/ArrayComm/examples/ESMF_ArrayCommEx.F90
+src/Infrastructure/ArrayDataMap/examples/ESMF_ArrayDataMapEx.F90
+src/Infrastructure/ArraySpec/examples/ESMF_ArraySpecEx.F90
+src/Infrastructure/Bundle/examples/ESMF_BundleCreateEx.F90
+src/Infrastructure/BundleDataMap/examples/ESMF_BundleDataMapEx.F90
+src/Infrastructure/DELayout/examples/ESMF_DELayoutEx.F90
+src/Infrastructure/Field/examples/ESMF_FieldCreateEx.F90
+src/Infrastructure/Field/examples/ESMF_FieldFromUserEx.F90
+src/Infrastructure/Field/examples/ESMF_FieldGlobalEx.F90
+src/Infrastructure/Field/examples/ESMF_FieldWriteEx.F90
+src/Infrastructure/FieldComm/examples/ESMF_FieldCommEx.F90
+src/Infrastructure/FieldDataMap/examples/ESMF_FieldDataMapEx.F90
+src/Infrastructure/LogErr/examples/ESMF_LogErrEx.F90
+src/Infrastructure/Regrid/examples/ESMF_RegridEx.F90
+src/Infrastructure/Route/examples/ESMF_RouteEx.F90
+src/Infrastructure/TimeMgr/examples/ESMF_AlarmEx.F90
+src/Infrastructure/TimeMgr/examples/ESMF_CalendarEx.F90
+src/Infrastructure/TimeMgr/examples/ESMF_ClockEx.F90
+src/Infrastructure/TimeMgr/examples/ESMF_TimeEx.F90
+src/Infrastructure/VM/examples/ESMF_VMAllFullReduceEx.F90
+src/Infrastructure/VM/examples/ESMF_VMComponentEx.F90
+src/Infrastructure/VM/examples/ESMF_VMDefaultBasicsEx.F90
+src/Infrastructure/VM/examples/ESMF_VMGetMPICommunicatorEx.F90
+src/Infrastructure/VM/examples/ESMF_VMScatterVMGatherEx.F90
+src/Infrastructure/VM/examples/ESMF_VMSendVMRecvEx.F90
+src/Superstructure/Component/examples/ESMF_AppMainEx.F90
+src/Superstructure/Component/examples/ESMF_CplEx.F90
+src/Superstructure/Component/examples/ESMF_GCompEx.F90
+src/Superstructure/State/examples/ESMF_StateEx.F90
+src/Superstructure/State/examples/ESMF_StateReconcileEx.F90
+
+
+The following examples failed, did not build, or did not execute:
+
+
+src/Infrastructure/Grid/examples/ESMF_GridCreateEx.F90
+src/Infrastructure/TimeMgr/examples/ESMF_TimeIntervalEx.F90
+
+
+
+
+The stdout files for the examples can be found at:
+/home/bluedawn/svasquez/script_dirs/daily_builds/esmf/examples/examplesO/AIX.default.64.default
+
+\end{verbatim}

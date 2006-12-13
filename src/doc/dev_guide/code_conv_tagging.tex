@@ -1,0 +1,20 @@
+
+\subsection{Source Code Naming and Tagging Conventions}
+\label{sec:tagging}
+
+We provide two types of releases, public and internal, with similiar tagging conventions.
+
+\subsubsection{Public Releases}
+Public releases are each given a branch created from the main CVS repository ESMF trunk. The tagging convention
+for public releases is
+{\tt ESMF\_*\_*\_*r[p\#]}, e.g., {\tt ESMF\_0\_2\_1r}, where the first digit represents a major release, the
+second digit an incremental release, the third digit a routine update, and an official release {\tt r}.
+Subsequent patches to the release are identified with the letter {\tt p} followed by the patch number,
+e.g., {\tt ESMF\_1\_0\_0rp2}. Patches are tagged on the release branch.
+
+\subsubsection{Internal Releases}
+ESMF software internal releases are identified as tags on the CVS main trunk.
+The tagging convention for internal releases is
+{\tt ESMF\_*\_*\_*}, e.g., {\tt ESMF\_1\_0\_1}, where the first digit represents a
+major release, the second digit an incremental release, and the third digit a routine update.
+

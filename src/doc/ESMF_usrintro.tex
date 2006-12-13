@@ -1,0 +1,70 @@
+
+\section{What is the Earth System Modeling Framework?}
+
+The Earth System Modeling Framework (ESMF) is a structured collection of 
+software building blocks that can be used or customized to develop 
+Earth system model components, and assemble them into applications.  
+The simplest view of the ESMF is that it consists of an {\it infrastructure} 
+of utilities and data structures for creating 
+model components, and a {\it superstructure} for coupling them.  
+User code sits between these two layers, making calls to the infrastructure
+libraries beneath it and being scheduled and synchronized by the 
+superstructure above it.  The configuration resembles a sandwich, as
+shown in Figure~\ref{fig:TheESMFwich}.
+
+The ESMF architecture is scalable, flexible paradigm for building highly 
+complex climate, weather, and related applications from components such
+as atmospheric models, land models, and data assimilation systems.  The 
+ESMF is not a single master application into which all components must fit; 
+rather it is a way of developing components so that they can be used 
+in many different user-written applications.  Model components that adopt 
+ESMF are usable in different contexts without code modification, and may be
+incorporated into other ESMF-based modeling systems within the Earth 
+science community.  In addition to high-level organization, ESMF provides 
+a set of robust, portable, performance optimized libraries for regridding, 
+data transfers, I/O, time management, and other common modeling functions.  
+ESMF users may choose to extensively rewrite their codes to take advantage 
+of the ESMF infrastructure, or they may decide to simply wrap user-written 
+components in ESMF interfaces in order to adopt the ESMF architecture and 
+utilize framework coupling services.
+
+\section{The ESMF User's Guide}
+
+This {\it ESMF User's Guide} will eventually serve as an installation
+and build guide for
+the new ESMF user and as a reference for the experienced user.  This
+edition of the {\it User's Guide} is designed to guide you through the
+introduction process to the software.  We strongly encourage you to
+download the ESMF software and try running a demonstration program, 
+{\tt ESMF\_COUPLED\_FLOW}, that illustrates both ESMF utilities and 
+coupling services.
+
+The next two sections, \ref{sec:Support} and \ref{sec:Submission}, 
+concern user support and how to submit comments on the ESMF system 
+to our development team.  
+Sections \ref{sec:QuickStart} through \ref{sec:TechOver2} contain a 
+{\it Quick Start} guide that explains how to install the ESMF software 
+and run the self-tests, 
+followed by more detail on ESMF structure and operation, 
+such as a description of the directory structure and how to build and
+run the ESMF examples and demonstration programs.
+Section \ref{sec:ArchOver} is an architectural overview that describes the
+framework's basic goals and features.  The next few Sections, beginning
+with \ref{sec:demo}, describe in detail the {\tt ESMF\_COUPLED\_FLOW} demo
+application.
+Section \ref{sec:Adoption} details the steps required to adapt a component
+for use with ESMF.  Finally, to help you become familiar with ESMF
+terminology, the last section in the {\it User's Guide} is a glossary.
+
+\begin{center}
+\begin{figure}
+\caption{Schematic of the ESMF ``sandwich'' architecture. In this 
+design the framework consists of two parts, an upper level
+{\bf superstructure} layer and a lower-level {\bf infrastructure} layer. 
+User code is sandwiched between these two layers.}
+\label{fig:TheESMFwich}
+\scalebox{1.0}{\includegraphics{ESMF_sandwich}}
+\end{figure}
+\end{center}
+
+

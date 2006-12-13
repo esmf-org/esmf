@@ -1,0 +1,191 @@
+%===============================================================================
+% CVS $Id: testing.tex,v 1.9 2006/12/13 20:19:08 cdeluca Exp $
+% CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/testing.tex,v $
+% CVS $Name:  $
+%===============================================================================
+
+\subsection{Testing and Validation}
+\label{sec:testing}
+
+ESMF software is subject to the following tests:
+\begin{enumerate}
+\item Unit tests, which are simple per-class tests.
+\item System tests, which generally involve inter-component interactions.
+\item Use test cases (UTCs), which are tests at realistic problem
+sizes (e.g., large data sets, processor counts, grids).
+\item Examples that range from simple to complex.
+\item Beta testing through preliminary releases.
+\end{enumerate}
+Unit tests, system tests, and examples are distributed with the
+ESMF software.  UTCs, because of their size, are 
+stored and distributed separately.  Tests are run nightly,
+following a weekly schedule, on a wide variety of platforms.  
+Beta testing of ESMF software is done by providing an Internal Release
+to customers three months before public release.  
+
+The ESMF team keeps track of test coverage on a per-method basis.
+This information is on the {\bf Metrics} page under the {\bf Development}
+link on the navigation bar.
+
+Testing information is stored on a {\bf Test and Validation} webpage,
+under the {\bf Development} link on the ESMF 
+website.  This webpage includes:
+\begin{itemize}
+\item separate webpages for each system test and UTC;
+\item links to the {\it Developer's Guide}, SourceForge Tracker, Requirements 
+Spreadsheet, and any other pertinent information; and
+\item separate webpage for automated regression test information and results.
+\end{itemize}
+
+The ESMF is designed to run on several target platforms, in different 
+configurations, and is required to interoperate with many combinations 
+of application software. Thus our test strategy includes the following.
+
+\begin{itemize}
+\item Tests are executed on as many target platforms as possible. 
+\item Tests are executed on a variety of programming paradigms
+(e.g pure shared memory, pure distributed memory and a mix of both).
+\item Tests are executed in multiple configurations (e.g. uni-processor,
+multi-processor).
+\item The result of each test is a {\tt PASS/FAIL}.  
+\item In some cases, for floating point comparisons, an epsilon value
+will be used.
+\item Tests are implemented for each language interface that is 
+supported.
+\end{itemize}
+
+\subsubsection{Unit Tests}
+
+Each class in the framework is associated with a suite of unit tests.
+Typically the unit tests are stored in one file per class, and are
+located near the corresponding source code in a test directory.  The 
+framework {\tt make} system will have an option to build and run unit tests.
+The user has the option of building either a "sanity check" type test
+or an exhaustive suite. The exhaustive tests include tests of many 
+functionalities and a variety of valid and invalid input values. The sanity 
+check tests are a minumum set of tests to indicate whether, for example, the 
+software has been installed correctly. It is the responsiblity of the 
+software developer to write and execute the unit tests. Unit tests 
+are distributed with the framework software.
+
+To achieve adequate unit testing, developers shall attempt to meet the following goals. 
+
+\begin{itemize}
+\item Individual procedures will be evaluated with at least one unit
+test function.  However, as many test functions as necessary will be
+implemented to assure that each procedure works properly.  
+\item Developers should unit test their code to the degree possible  
+before it is checked into the repository.  It is assumed that 
+developers will use stubs as necessary.
+\item Variables are tested for acceptable range and precision.
+\item Variables are tested for a range of valid values, including boundary
+values.
+\item Unit tests should verify that error handling works correctly.
+\end{itemize}
+
+\subsubsection{System Tests}
+
+System tests are written to test functionality that spans several 
+classes.  The following areas should be addressed in system testing.
+
+\begin{itemize}
+\item Design omissions (e.g. incomplete or incorrect behaviors).
+\item Associations between objects (e.g. fields, grids, bundles).
+\item Control and infrastructure. (e.g. couplers, time management, error handling).
+\item Feature interactions or side effects when multiple features are used
+simultaneously.
+\end{itemize}
+
+The system tester should issue a test log after each software release is tested,
+which is recorded on the {\bf Test and Validation} webpage. The test 
+log shall
+include: a test ID number, a software release ID number, testing environment 
+descriptions, a list of test cases executed, results, and any unexpected 
+events. Bugs should be documented in the \htmladdnormallink{{\it SourceForge Bug 
+Tracker}}{https://sourceforge.net/tracker/?group\_id=38089&atid=421185} and 
+any bug fixes shall be validated.
+
+\subsubsection{Use Test Cases (UTCs)}
+
+Use Test Cases are problems of realistic size created to test the ESMF
+software.  They were initiated when the ESMF team and its users saw that
+often ESMF capabilities could pass simple system tests but would fail
+out in the field, for real customer problems.  UTCs have realistic
+processor counts, data set sizes, and grid and data array sizes.  UTCs are
+listed on the {\bf Test \& Validation} page of the ESMF website.  They
+are not distributed with the ESMF software; instead they are stored in
+a separate module in the main repository called {\tt use\_test\_cases}.
+
+\subsubsection{Beta Testing}
+
+ESMF software is released in a beta form, as an Internal Release,
+three months before it is publicly released.  This gives users
+a chance to test the software and report back any problems to 
+support.
+
+\subsubsection{Automated Regression Tests}
+
+The purpose of regression testing is to reveal faults caused by new
+or modified software (e.g. side effects, incompatibility between 
+releases, and bad bug fixes).  
+Regression tests regularly exercise all interfaces of the code on 
+all target platforms.  The Integrator runs 
+automated nightly builds on a wide variety of machines, listed on the
+{\bf Test and Validation} website. This site stores log files of the
+build results.
+The log files are kept on a monthly basis in 
+separate directories. For example, the December 2002 directory is named {\tt 0212\_test}. The 
+directory contains an {\tt ESMFdailyLog} file which has a one line entry for each platform on 
+which the build was attempted indicating whether the build was successful or not. 
+
+The {\tt ESMFdailyLog} file for the current month is available on the {\bf Test and Validation} website.
+
+If the build is not successful, then a file containing the build output is stored in 
+the:\\
+{\tt /fs/projects/css/esmf/esmf\_test/daily\_builds}\\
+directory on the NCAR fileserver. The file naming convention for the build output file is:\\
+{\tt build\_BOPT\_(day)(platform)ESMF\_ARCH}.\\
+For example, if the build fails on longs on the 19th of the month with {\tt BOPT=g},
+the file would be called:\\
+{\tt build\_g\_19longslinux\_lf95}. 
+
+Email is sent daily to the ESMF core team listing all the platforms on which the build was attempted with a {\tt PASS/FAIL} indication. 
+
+\subsubsection{Testing for Releases}
+
+We provide two types of tar files, the ESMF source and the shared
+libraries of the supported platforms. Consequently, there are two test
+procedures followed before placing the tar files on the ESMF download website. 
+
+The {\bf Source Code Test Procedure} is followed on all the supported
+platforms for the particular release.
+
+\begin{enumerate}
+\item Verify that the source code builds in both {\tt BOPT=g} and {\tt BOPT=O}.
+\item Verify that  the {\tt ESMF\_COUPLED\_FLOW} demonstration executes successfully.
+\item Verify that the unit tests run successfully, and that there are no {\tt NON-EXHAUSTIVE} unit tests  failures.
+\item Verify that all system tests run successfully. 
+\end{enumerate}
+
+The {\bf Shared Libraries Test Procedure} is also followed on all supported
+platforms for a release.
+
+\begin{enumerate}
+\item Change to the {\tt CoupledFlowEx} directory and execute {\tt gmake}. Verify that the demo runs successfully.
+\item Change to the {\tt CoupledFlowSrc} directory and execute {\tt gmake} then {\tt gmake run}. Verify that the demo runs successfully.
+\item Change to the {\tt examples} directory and execute {\tt gmake} and {\tt gmake run}. Verify that the example runs successfully.
+\end{enumerate}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

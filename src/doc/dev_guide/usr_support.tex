@@ -1,0 +1,66 @@
+\subsection{User Support}
+\label{sec:usr_support}
+
+
+\subsubsection{Roles}
+The {\bf Advocate} is the staff person assigned to a particular code e.g. GEOS-5. See section ~\ref{core} for a full definition and list of responsibilities. 
+the {\bf Handler} is the staff person who actually solves the request. The advocate and the Handler may be the same person or they may be different. See section ~\ref{core} for complete definitiona and list of responsibilities.
+
+\subsubsection{Support Categories}
+{\bf New} is a request that has not been replied to.
+{\bf Closed} is a request that has been fixed to the user's satisfaction.
+{\bf Pending} is a request that has been fixed to the Handler's satisfaction but has not yet been approved by the user.
+
+\subsubsection{Work Flow}
+\begin{enumerate}
+\item Message received
+\item Silverio or in his absence Sylvia, generates a SourceForge Bug, Feature, or Support request ticket
+\item If the request contains more than one topic, then Silverio will open multiple tickets, one per topic. This can been done
+initially if obvious, or later if more research indicates it is necessary. 
+
+\begin{itemize}
+\item The top line of the entry should be WHO: <Requestor Name>.
+\item Indicate the institution and model if known
+\item Keep title of initial email and the title of the SF ticket the
+same or close enough to be able to determine they are one and the same
+\item Assign the ticket to the Advocate of that component. 
+\end{itemize}
+
+\item Initial contact is made by:
+
+\begin{itemize}
+\item The Advocate or
+\item A Handler assigned by the Advocate
+\item Sylvia if the Advocate is unavailable
+\end{itemize}
+
+\item The Handler, which may be the Advocate or another developer assigned by the Advocate, works on the issue keeping the requester informed. Once the work has been completed to the Handlers satisfaction, the ticket can be coded on SourceForge as pending by the Handler.  The mail folder on 
+on the IMAP server can also be moved to pending. This can be done by either the Advocate or the Handler, whichever the Advocate prefers.
+
+\item The Handler contacts the customer to gage their satisfaction in the solution. If the customer is satisfied, the ticket may be closed by the Advocate, and the mail folder on the IMAP server moved from open to 
+closed by the Advocate.  If the customer does not respond, an attempt at contact will be made every two-weeks for one month.  After one month with no contact, a pending ticket may be closed. The Advocate can choose to hand off this part of the process to Sylvia if desired. 
+\end{enumerate}
+
+\subsubsection{General Guidelines for Handling Tickets}
+\begin{itemize}
+\item Include title and ticket number on all correspondence.
+\item Make initial contact within 48 hours even if just to say message received
+\item Copy esmf\_support on all replies.
+\item Bugs that are fixed should be marked Closed, and Fixed. They should never be deleted. 
+\item Bugs that are duplicates should be marked Deleted, and Duplicate. 
+\item If the main issue in a bug, feature request, or support request has not been implemented it should stay Open.
+\item The Handler is the person responsible for marking a ticket Pending and moving the mail folder from Open to Pending.
+\item The Advocate is the person responsible for marking a ticket Closed and moving the mail folder to Closed
+\end{itemize}
+
+\subsubsection{IMAP mail archives}
+\begin{enumerate}
+\item Folders are labeled by component and consolidated as necessary.
+\item Silverio will create a folder labeled with the request number. 
+\item Silverio will then copy each related email message to the appropriate 
+numbered folder. 
+\item The number folders will be filed under Open, Closed, or Pending folders 
+corresponding to status of the request on the SourceForge system.
+\item When a ticket has been closed or marked Pending, the Advocate will move the numbered folder from the Open folder to the Closed or Pending folder.
+\item There will be only one New folder to which all unresponded requests will be placed. Once a request has been responded to, Silverio will move the folder to the appropriate institution. Advocates may also move mailfolders around.
+\end{enumerate}

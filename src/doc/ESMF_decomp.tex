@@ -1,0 +1,86 @@
+\section{Decomposition and Data Arrangement}
+
+The high-performance computers Earth system models run on often include cache hierarchies, 
+combinations of shared and distributed memory, and multiple processors.  These architectural features
+offer opportunities for performance enhancement through decomposition of work and data.  We 
+describe data and memory decomposition in more detail in this section.
+
+\subsection{Machine Model}
+
+We propose a general machine model that consists of the abstractions {\bf heaps, 
+links, tasks} and {\bf processors}.  This model can represent cache hierarchies,
+clustered architectures, distinctions between vector and scalar architectures,
+massively parallel processors, pure shared memory systems, and heterogeneous
+distributed systems in a systematic manner.  The machine model is primarily
+for use by the framework developer in designing performance portable 
+low level communications and computations.  It is not intended to be visible 
+to the application developer.
+
+\subsubsection{Data decomposition}
+{\bf Data} is decomposed into different portions of computer memory, which we will 
+call {\bf heaps}.  Heaps may represent distributed memory, multiple memory
+pools within the same physical memory (e.g., a default stack and a user-created
+stack), or a cache hierarchy.  Data may be partitioned into multiple heaps 
+for a variety of reasons; a common one is that it allows multiple processors to perform calculations simultaneously on different segments of the data.  Heaps may permit their their data to be viewed and/or accessed for computation
+by no processing elements (data may need to be transferred to another heap first), by one processing element (the MPP model), or by multiple processing 
+elements (the shared memory model).  Data may be replicated on multiple heaps.  Data is transferred between heaps by one or more {\bf links}, each of which
+may be assigned -- or may determine through self-testing -- an associated 
+bandwidth and latency.  Links between heaps may be one-to-one, one-to-many, or 
+many-to-many.   
+
+\subsubsection{Work decomposition}
+Computational work is performed by {\bf processors}, which may be assigned
+or may determine through self-testing attributes such as processor speed and a scalar or vector type.
+A computational workload is split into multiple {\bf tasks} either by simply being divided 
+among processors or via threading.  In MPP architectures, such as the Cray T3E, 
+each task running on a processor had its own associated memory, and work and data decomposition 
+coincided.  On clusters of shared memory machines each processor on a node may have access
+to a shared memory pool and tasks may be threaded, with one or more tasks
+permitted per processor.  The number of 
+tasks allowed per processor is a processor attribute.  
+
+In order to obtain optimal performance, it is useful to retain control over both work and data decomposition, either directly, which can
+become complicated, or through a layer of abstraction that simplifies the constructs yet provides
+enough access to offer good performance.  The advantage of the proposed architectural view is that it is quite simple and yet comprehensive.  It may be implemented incrementally, leaving more advanced features, such as self-testing to determine characteristics of the computing environment, for future development.
+
+\subsubsection{Expressing Decompositions}
+
+We have seen that decomposition occurs over both heaps and tasks.  Since
+a task is always associated with one heap but the reverse may not be true,
+we perform decompositions hierarchically, with the heap decomposition
+specified first.  Task decomposition may be specified at a high level
+and treated much like a data decomposition, with each task assigned its 
+own virtual heap.  It is also possible to leave task decomposition 
+unspecified and obtain a default configuration, or to specify it at a 
+low level, with tasks sharing memory to increase performance or migrating 
+across processors for load balancing.  If the ESMF is used to specify 
+all task decomposition
+that occurs in the same heap, the framework should be able to reconcile 
+or flag potential problems that arise from task decomposition at multiple
+levels.
+
+\subsection{Local data arrangement}
+How data is arranged in local memory can be critical in obtaining optimal 
+performance.  Dense, regular field data is represented through the use 
+of a basic data type that has tuples in each dimension (first, last, 
+length, stride).  Such a detailed specification is useful when data fields are 
+interleaved or when switching 
+between row and column major languages.  A data representation that can 
+capture a wide variety of arrangements has a better chance of being 
+able to reference rather than copy data before a communication.  (In
+some cases, such as highly segmented data, a copy may be desirable,
+but in others it may be efficient to avoid it.)  The application developer
+should be able to rely largely on default data arrangement.
+
+It will be useful to create a separate basic data type for sparse 
+matrices, using a standard format such as compressed storage row.
+
+
+
+
+
+
+
+
+
+

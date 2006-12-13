@@ -1,0 +1,21 @@
+\subsection{Implementation Language and Language Interoperability Strategy}
+
+The ESMF will have C++ and F90 language bindings.
+
+It is possible to represent the fundamental features of object-oriented 
+software -- polymorphism, inheritance and encapsulation -- in a variety of languages, 
+including the usual choices for high-performance systems: C, C++ and F90. \footnote{Albeit 
+with differing levels of difficulty and effectiveness.}  Perhaps the best evidence for 
+this claim is that widely used object-oriented libraries and frameworks have been 
+written in each of these languages.  Given the above, we can assume that the architecture 
+and design of the ESMF is largely independent of its implementation language.  
+In practice we have decided to implement the lower layers 
+of the ESMF and some of the higher-level control machanisms in C++.  The
+implementation of fields and grids will be in F90.  We anticipate developing a 
+prototype implementation of the fields and grids layer in C++ as well.
+The rationale for our decision is presented in the {\it ESMF Implementation Report.}
+
+
+
+
+

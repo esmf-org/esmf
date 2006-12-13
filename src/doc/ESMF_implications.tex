@@ -1,0 +1,123 @@
+\section{ESMF Compliance and Framework Adoption}
+\label{sec:implications}
+
+\subsection{ESMF Compliance}
+
+The definition of compliance below applies to JMC codes during the
+ESMF project's initial three-year period of NASA funding.
+
+\subsubsection{Partial Compliance}
+In order to achieve partial compliance, a JMC code component must 
+implement, or adopt default implementations, of the complete set of 
+standard ESMF component interface methods including the following
+capabilities:
+
+\begin{itemize}
+\item It must be able to be instantiated in parallel configurations.
+
+\item It must provide implementations of methods for creation, deletion, 
+configuration, initialization, finalization, run, read and write 
+restart, and others as necessary for control by an ESMF application 
+framework.
+
+\item It must provide method implementations to allow it to be queried 
+for its distribution, state (i.e. fields available for export, fields 
+required for import, etc.), run status and other pertinent 
+information.
+
+\item Communication with other JMC code components must be mediated by an 
+ESMF coupler component using framework communication services, such 
+that neither JMC component needs to maintain information about the 
+specific component that it is being coupled to. 
+
+\item Data and information to be exchanged with other JMC code components
+must be provided through ESMF constructs and utilities (i.e. ESMF state,
+bundles, fields, time, grid, decomposition, etc.) These must include
+pertinent metadata information and provide a standard format for
+exchanging information. JMC code components must use the public
+interface methods provided by the ESMF utilities and constructs and not
+directly manipulate their internal data.
+
+\item The JMC components must be able to accept ESMF time management 
+information.
+
+\item Data and information to be exchanged with other JMC code components
+must be provided through ESMF constructs and utilities (i.e. ESMF state,
+bundles, fields, grid, etc.) These must include
+pertinent metadata information and provide a standard format for
+exchanging information.  JMC code components must use the public 
+interface methods provided by the ESMF utilities and not directly 
+manipulate the internal data of those utilities.  
+
+\end{itemize}
+
+\subsubsection{Full Compliance}
+
+A fully compliant JMC code component must satisfy all requirements 
+described for partial compliance.  In addition, a fully compliant 
+component must:
+
+\begin{itemize}
+\item Extensively use internally three or more utilities from the following
+set:
+   I/O, parameter specification, log/error, performance profiling, time
+   management, grid communication services.
+
+\item Adopt the standard ESMF grid communication services and constructs
+   internally to the extent necessary to allow interoperability with
+   other compliant weather, climate, and data assimilation
+   components.
+
+\item Adopt the standard ESMF time management utilities for calendars,
+time instants, time spans, alarms, etc. internally to the extent
+necessary to allow interoperability with other compliant weather,
+climate, and data assimilation components.
+
+\item Adopt design features that eliminate or minimize as much as possible
+the potential for name space conflicts of variables, methods, etc.
+between components.
+
+\item Adopt design features that eliminate or minimize as much as possible
+the potential for I/O conflicts between components during reads/writes
+of configuration, state, errors, logs, performance analysis, etc.
+\end{itemize}
+
+JMC codes are required to be compliant by April 2004.
+
+\subsection{Implications of Architecture for Framework Adoption}
+
+In this section we outline the types of changes that will be necessary for
+application groups to adapt their software components for ESMF.  {\it Since the
+functional interface to the ESMF is not yet fully defined, nor have we 
+explored all the implications of the architectural definition, this list is 
+necessarily tentative, incomplete, and non-specific.}
+
+\begin{itemize}
+\item Since {\tt Gridded Component}s and {\tt Coupler Component}s
+must be composable with other Components to build an application,
+it is necessary to subroutinize
+them and provide standard methods such as {\tt ESMF\_CompInitialize}, 
+{\tt ESMF\_CompRun}, and {\tt ESMF\_CompFinalize}.  For {\tt Gridded 
+Component}s
+with a time iteration loop, we expect the {\tt ESMF\_CompRun} command to 
+take a time interval or number of timesteps as one of its arguments.
+\item {\tt Gridded Component}s must define ESMF import and export {\tt State} 
+structures.
+\item {\tt Coupler Component}s must define and return in a specified 
+format any transforms that {\tt Gridded Component}s involved 
+in a coupling interaction will execute.
+\item Components must implement standard query methods to return
+their {\tt DELayout}, {\tt Grid(s)}, {\tt States}, run status, and other 
+information in a standard format.
+\end{itemize}
+
+Components {\it will not} need to recast their internal data structures.
+They {\it will not} be required to insert return points at each timestep.
+Thus the amount of internal reorganization of codes required should be 
+kept to a minimum.  We hope, however, to provide high-performance 
+infrastructure, both data structures and utilities, that can be 
+leveraged by groups who see
+the ESMF effort as an opportunity to restructure their codes.
+
+
+

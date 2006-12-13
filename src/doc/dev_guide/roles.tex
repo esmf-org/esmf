@@ -1,0 +1,138 @@
+%===============================================================================
+% CVS $Id: roles.tex,v 1.12 2006/12/13 20:19:08 cdeluca Exp $
+% CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/roles.tex,v $
+% CVS $Name:  $
+%===============================================================================
+
+\section{Groups and Roles in ESMF Development}
+
+For more detail on the groups below, including their Terms of
+Reference, see the {\it ESMF Project Plan}\cite{bib:ESMFprojectplan}.
+This document is available via the {\bf Management} link on 
+the ESMF website navigation bar.
+
+\subsection{Core Team}
+ESMF software implementation is led by a distributed {\bf Core Team} which is based in the 
+Technology Development Division (TDD) of the National Center for
+Atmospheric Research (NCAR).  The Core Team relies on close interaction
+with customers, and the work of many contributors.  Core Team
+activities are open to all active ESMF developers.
+
+All Core Team members are responsible for helping to 
+develop effective project processes and for following
+processes that are in place.
+
+\subsubsection{Core Team Roles}
+\label{core}
+{\bf Developers} are the Core Team members that design, implement, document, and test
+ESMF software.  They are expected to interact with customers throughout the entire
+development process in order to understand customer requirements.  Developer priorities are set by the Change Review Board (CRB) but developers are expected to understand customer requirements and
+needs and to manage their own time.
+
+The {\bf Integrator} is the lead tester. He or she is responsible for running regression
+tests, managing project computing accounts, preparing for releases,
+generating project metrics, and overseeing request and bug tracking.
+
+The {\bf Core Team Manager} is responsible for overseeing the overall development, and 
+for coordinating the activities of multiple developers
+so that project schedules and priorities are achieved.
+Responsibilities include:
+
+\begin{itemize}
+\item Project administration and the assignment of  tasks
+\item Acquisition of funding
+\item Deciding on short-term priorities based on longer-term objectives
+\item Monitoring conformance to processes and conventions
+\item Representation of the Core Team to NCAR executive management, the Change Review 
+Board, and sponsors.
+\end{itemize}
+
+Code {\bf Advocates} are Core Team members who have been assigned to interface with owners of
+a particular code e.g. CCSM, GEOS-5. Advocates are expected to contact the code owners and keep track of what and how they are doing. They should know the following things about their assigned code:
+
+\begin{itemize}
+\item contact info
+\item models or components being ESMF-ized
+\item what the customer is trying to do
+\item what platforms they are working on
+\item what pieces of ESMF they are using
+\item their current status of ESMF-ization
+\item what is holding them up if anything
+\item open tickets (see section ~\ref{tracking_tools} for types) and their status
+\end{itemize}
+
+Code {\bf Advocates} should do the following for their code:
+\begin{itemize}
+\item Touch base periodically and find out how things are going
+\item Coordinate the resolution of all tickets (see section ~\ref{tracking_tools} for types)
+\item Be prepared to brief the status of all requests and issues
+\item Update or ensure the update of related tickets (see Section ~\ref{sec:usr_support} for details on
+the proper handling of tickets).
+\end{itemize}
+
+{\bf Advocates} are NOT responsible for:
+\begin{itemize}
+\item Representing the code to the CRB
+\item Fielding support related phone calls.
+
+All customers should send support requests to \htmladdnormallink{esmf\_support@ucar.edu}{mailto:esmf\_support@ucar.edu}.
+They should not call their Advocate or other developers.  Dire emergencies are exempt from the no-phone rule. 
+There are many good reason for doing this, including developer absences, group visibility and communication,
+and enabling developers to set priorities.  If a customer really feels the need to talk with an
+Advocate or developer, they need to arrange for a date and time through the support list.
+\end {itemize}
+
+{\bf Handlers} are developers assigned to fix a particular problem reported on one of the trackers (see 
+~\ref{tracking_tools} for list). They are expected to be sufficiently familiar with the issue and the
+code involved so as to not unnecessarily pester the customer with requests for information (e.g. the
+information is contained in previous tickets from the same customer). See section ~\ref{sec:usr_support} for
+a complete list of {\bf Handlers} activities in the support process.  
+
+\subsection{Joint Specification Team (JST)}
+The Core Team, along with contributors, customers, technical
+managers, and other stakeholders in development, are collectively
+referred to as the {\bf ESMF Joint Specification Team}, or {\bf JST}.  
+JST membership is open to members of the science, computing, and
+related communities.
+
+
+\subsection{Change Review Board (CRB)}
+\label{crb}
+ESMF development priorities and schedules are set by a 
+{\bf Change Review Board} (CRB) that consists of individuals
+associated with major ESMF initiatives and applications.  
+Members of the CRB are chosen by the ESMF Executive Management.
+
+\subsection{Quality Assurance Responsibilities}
+
+Collective public reviews and the intelligence and attentiveness of
+project staff are the two primary mechanisms for software quality assurance.  
+
+Requirements, design, code, and project documents such as plans
+are subject to public review.  The purpose of the reviews is
+to look for models of good documentation, as well as inconsistencies,
+errors, inefficiencies, and areas for improvement.  Reviews also
+increase coordination and awareness within the ESMF project.
+
+The Integrator ensures that support requests
+and bugs are reported, tracked, and resolved, and that automated
+test and backup scripts are operating correctly.
+
+The Core Team Manager works with team to ensure that documentation
+is sufficient, tracks consistency between documentation and source
+code before releases, and monitors conformance to coding and
+documentation standards.  The Core Team Manager is also responsible
+for ensuring the quality and accuracy of the ESMF source code
+distribution overall, by leading the development,
+implementation and documentation of development, test, and release
+procedures.
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,268 @@
+% $Id: ESMF_testing.tex,v 1.23 2006/12/13 20:18:01 cdeluca Exp $
+
+\subsection{Running ESMF Self-Tests}
+\label{testing}
+
+Robustness and portability are primary goals of the ESMF development
+effort.  To ensure that these goals are met, the ESMF includes a
+comprehesive suite of tests.  They allow testing and validation of
+everything from individual functions to complete system tests.  These
+test suites are used by the ESMF development team as part of their
+regular development process.  ESMF users can run the testing suites to
+verify that the framework software was built and installed properly,
+and is running correctly on a particular platform.
+
+Test targets will compile the ESMF library if it has not already been built.
+
+\subsubsection{Running ESMF Unit Tests}
+
+\label{UnitTestDescription}
+The unit tests provided with the ESMF library evaluate the following:
+\begin{itemize}
+\item correctness of individual functions
+\item behavior of individual modules or classes
+\item appropriate error handling
+\end{itemize}
+
+Unit tests can be run in either an exhaustive or a non-exhaustive (sanity check)
+mode.  The exhaustive mode includes the sanity check tests.  Typically, sanity
+checks for each ESMF capability include creating and destroying an object and 
+testing its basic function using a valid argument set.  In the exhaustive mode,
+a wide range of valid and non-valid arguments are evaluated for correct behavior.
+
+\label{RunUnitTests}
+
+The following commands are used to build and run the unit tests provided with 
+the ESMF:
+\begin{verbatim}
+        gmake [ESMF_EXHAUSTIVE=<ON,OFF>] tests
+        gmake [ESMF_EXHAUSTIVE=<ON,OFF>] tests_uni
+\end{verbatim}
+
+The {\tt tests\_uni} target runs the tests on a single processor. 
+The {\tt tests} target runs the test on multiple processors.
+
+The non-exhaustive set of unit tests should all pass.  At this point in 
+development, the exhaustive tests do not all pass.  Current problems with 
+unit tests are being tracked and corrected by the ESMF development team.
+
+The results of running the unit tests can be found in the following location:
+\begin{verbatim}
+${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_OS}.${ESMF_COMPILER}.${ESMF_ABI}.${ESMF_SITE}
+\end{verbatim}
+
+For example, if your esmf source files have been placed in: 
+\begin{verbatim}
+       /usr/local/esmf
+\end{verbatim}
+
+If your platform is a Linux uni-processor that has an installed Lahey
+Fortran compiler and ESMF\_COMPILER has been set to lahey, then the build
+system configuration file will be:
+
+\begin{verbatim}
+      build_config/Linux.lahey.default/build_rules.mk
+\end{verbatim}
+
+If you want to run a debug version of non-exhaustive unit tests,
+then you use these commands from /usr/local/esmf:
+
+\begin{verbatim}
+       setenv ESMF_DIR /usr/local/esmf
+       gmake ESMF_BOPT=g ESMF_SITE=lahey ESMF_EXHAUSTIVE=OFF tests_uni
+\end{verbatim}
+
+
+If you are using ksh, then replace the setenv command with:
+\begin{verbatim}
+       export ESMF_DIR=/usr/local/esmf
+\end{verbatim}
+
+The results of the unit tests will be in:
+\begin{verbatim}
+       /usr/local/esmf/test/testg/Linux.lahey.32.default/
+\end{verbatim}
+
+At the end of unit test execution a script runs to analyze the results.
+
+The script output indicates whether there are any unit test failures.
+The following is a sample from the script output:
+
+\begin{verbatim}
+
+There are a total of 1224 exhaustive multi processor unit tests, 1220 pass and 4 fail.
+
+The unit tests in the following files all pass:
+
+src/Infrastructure/Array/tests/ESMF_ArrayUTest.F90
+src/Infrastructure/ArrayDataMap/tests/ESMF_ArrayDataMapUTest.F90
+src/Infrastructure/Base/tests/ESMF_BaseUTest.F90
+src/Infrastructure/Bundle/tests/ESMF_BundleUTest.F90
+src/Infrastructure/BundleDataMap/tests/ESMF_BundleDataMapUTest.F90
+src/Infrastructure/Config/tests/ESMF_ConfigUTest.F90
+src/Infrastructure/DELayout/tests/ESMF_DELayoutUTest.F90
+src/Infrastructure/Field/tests/ESMF_FRoute4UTest.F90
+src/Infrastructure/Field/tests/ESMF_FieldUTest.F90
+src/Infrastructure/FieldComm/tests/ESMF_FieldGatherUTest.F90
+src/Infrastructure/FieldDataMap/tests/ESMF_FieldDataMapUTest.F90
+src/Infrastructure/Grid/tests/ESMF_GridUTest.F90
+src/Infrastructure/IOSpec/tests/ESMF_IOSpecUTest.F90
+src/Infrastructure/LocalArray/tests/ESMF_ArrayDataUTest.F90
+src/Infrastructure/LocalArray/tests/ESMF_ArrayF90PtrUTest.F90
+src/Infrastructure/LocalArray/tests/ESMF_LocalArrayUTest.F90
+src/Infrastructure/LogErr/tests/ESMF_LogErrUTest.F90
+src/Infrastructure/Regrid/tests/ESMF_Regrid1UTest.F90
+src/Infrastructure/Regrid/tests/ESMF_RegridUTest.F90
+src/Infrastructure/TimeMgr/tests/ESMF_AlarmUTest.F90
+src/Infrastructure/TimeMgr/tests/ESMF_CalRangeUTest.F90
+src/Infrastructure/TimeMgr/tests/ESMF_ClockUTest.F90
+src/Infrastructure/TimeMgr/tests/ESMF_TimeIntervalUTest.F90
+src/Infrastructure/TimeMgr/tests/ESMF_TimeUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMBarrierUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMBroadcastUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMGatherUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMScatterUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMSendVMRecvUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMUTest.F90
+src/Superstructure/Component/tests/ESMF_CplCompCreateUTest.F90
+src/Superstructure/Component/tests/ESMF_GridCompCreateUTest.F90
+src/Superstructure/State/tests/ESMF_StateUTest.F90
+
+
+The following unit test files failed to build, failed to execute or crashed during execution:
+
+src/Infrastructure/TimeMgr/tests/ESMF_CalendarUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMSendRecvUTest.F90
+
+
+The following unit test files had failed unit tests:
+
+src/Infrastructure/Field/tests/ESMF_FRoute8UTest.F90
+src/Infrastructure/Grid/tests/ESMF_GridCreateUTest.F90
+
+
+The following individual unit tests fail:
+
+  FAIL  DELayout Get Test, ESMF_FRoute8UTest.F90, line 139                                                                                                                                                                                                       
+  FAIL  Grid Distribute Test, ESMF_GridCreateUTest.F90, line 198                                                                                                                                                                                                 
+
+
+The stdout files for the unit tests can be found at:
+/home/bluedawn/svasquez/script_dirs/daily_builds/esmf/test/testO/AIX.default.64.default
+
+\end{verbatim}
+
+The following is an example of the output generated when a unit test fails:
+\begin{verbatim}
+ESMF_FieldUTest.stdout: FAIL  Unique default Field names Test, FLD1.5.1 & 1.7.1,
+                        ESMF_FieldUTest.F90, line 204  Field names not unique
+\end{verbatim}
+
+\subsubsection{Running ESMF System Tests}
+\label{SystemTestDescription}
+
+The system tests provided with the ESMF library evaluate:
+\begin{itemize}
+\item interface agreement between parts of the system
+\item behavior of the system as a whole
+\end{itemize}
+
+The current system test suite includes tests that perform layout
+reduction operations, redistribution-transpose, halo operations,
+component creation and intra-grid communication.  Some of the system
+tests are no longer compatible with the current API, but are included
+in the release for completeness.  A complete description of each
+available system test and its current compatibility status can be
+found at the ESMF website,
+\htmladdnormallink{http://www.esmf.ucar.edu}{http://www.esmf.ucar.edu}.  
+The testing
+and validation page is accessible from the {\bf Development} 
+link on the navigation bar.
+
+The following commands are used to build and run the system tests:
+
+\begin{verbatim}
+        gmake [SYSTEM_TEST=xxx] system_tests
+        gmake [SYSTEM_TEST=xxx] system_tests_uni
+\end{verbatim}
+
+The {\tt system\_tests\_uni} target runs the tests on a single processor. 
+The {\tt system\_tests} target runs the test on multiple processors.
+
+If a particular SYSTEM\_TEST is not specified, then all available system tests 
+are built and run.
+
+The results of the test can be found in the following location:
+\begin{verbatim}
+${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_OS}.${ESMF_COMPILER}.${ESMF_ABI}.${ESMF_SITE}
+\end{verbatim}
+
+For example, if your ESMF source files have been placed in your home directory:
+\begin{verbatim}
+       ~/esmf
+\end{verbatim}
+
+and your platform and compiler configuration is:
+\begin{verbatim}
+       Alpha multi-processor using the native compiler
+\end{verbatim}
+
+and you want to run an optimized version of system test SimpleCoupling,
+then you use these commands from the directory {\tt \~/esmf}. 
+\begin{verbatim}
+       setenv ESMF_PROJECT <project_name>
+       gmake ESMF_DIR=`pwd` SYSTEM_TEST=ESMF_SimpleCoupling system_tests
+\end{verbatim}
+
+If you are using ksh then replace the setenv command with
+this:
+
+\begin{verbatim}
+       export ESMF_PROJECT=<project_name>
+\end{verbatim}
+
+The results will be in:
+\begin{verbatim}
+~/esmf/test/testO/OSF1.default.64.default/ESMF_SimpleCouplingSTest.stdout
+\end{verbatim}
+
+At the end of system test execution a script runs to analyze the results.
+
+The script output indicates whether there are any system test failures.
+The following is a sample from the script output:
+
+\begin{verbatim}
+There are 14 system tests, 12 passed and 2 failed.
+
+
+The following system tests passed:
+
+
+src/system_tests/ESMF_CompCreate/ESMF_CompCreateSTest.F90
+src/system_tests/ESMF_FieldExcl/ESMF_FieldExclSTest.F90
+src/system_tests/ESMF_FieldHalo/ESMF_FieldHaloSTest.F90
+src/system_tests/ESMF_FieldHaloPer/ESMF_FieldHaloPerSTest.F90
+src/system_tests/ESMF_FieldRedist/ESMF_FieldRedistSTest.F90
+src/system_tests/ESMF_FieldRegrid/ESMF_FieldRegridSTest.F90
+src/system_tests/ESMF_FieldRegridMulti/ESMF_FieldRegridMultiSTest.F90
+src/system_tests/ESMF_FieldRegridOrder/ESMF_FieldRegridOrderSTest.F90
+src/system_tests/ESMF_FlowComp/ESMF_FlowCompSTest.F90
+src/system_tests/ESMF_FlowWithCoupling/ESMF_FlowWithCouplingSTest.F90
+src/system_tests/ESMF_SimpleCoupling/ESMF_SimpleCouplingSTest.F90
+src/system_tests/ESMF_VectorStorage/ESMF_VectorStorageSTest.F90
+
+
+The following system tests failed, did not build, or did not execute:
+
+
+src/system_tests/ESMF_FieldRegridConserv/ESMF_FieldRegridConsrvSTest.F90
+src/system_tests/ESMF_RowReduce/ESMF_RowReduceSTest.F90
+
+
+
+
+The stdout files for the system_tests can be found at:
+/home/bluedawn/svasquez/script_dirs/daily_builds/esmf/test/testO/AIX.default.64.default
+
+\end{verbatim}
+

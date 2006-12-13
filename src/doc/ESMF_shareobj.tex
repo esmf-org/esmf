@@ -1,0 +1,61 @@
+% $Id: ESMF_shareobj.tex,v 1.5 2006/12/13 20:18:01 cdeluca Exp $
+
+\subsection{Shared Objects}
+ Using shared libraries you can: 
+\begin{itemize}
+\item update libraries and still support programs that want to use older, non-backward-compatible versions of those libraries;
+\item override specific libraries or even specific functions in a library when executing a particular program.
+\item do all this while programs are running using existing libraries.
+\end{itemize}
+
+Shared objects libraries have two different names: the \emph{soname} and the \emph{real name}. The \emph{soname} consists of the prefix \emph{"lib"}, followed by the name of the library, a \emph{".so"} followed by another dot, and a number indicating the major version number. The \emph{soname} may be fully qualified by prefixing path information. The \emph{real name} is the actual file name containing the compiled code for the library. The real name adds a dot, a minor number, another dot, and the release number, to the \emph{soname}. (The release number and the associated dot are optional.)
+
+The use of shared object libraries:
+\begin{itemize}
+\item simplifies the process of compiling and linking mixed C/C++ and F90 source code on multiple compiler/platform combinations. 
+\item allows library upgrades to be distributed and installed separately from the applications that use them. 
+\item increases program modularity and can make it easier to manage the evolution of large applications.
+\item shortens the time required to recompile applications.
+\end{itemize}
+
+\subsubsection{Can I mix shared object libraries with other types of libraries?}
+
+In short yes. But, there are a few things to keep in mind when including them in your application:
+
+Static vs Dynamic - If there are two copies of a library, one static and one shared, the default behavior is to prefer the shared library. Before looking for static library like \emph{'libutil.a'}, the linker will look for a file named \emph{'libutil.so'} - as a shared library. Only if it cannot find a shared library, will it look for \emph{'libutil.a'} as a static library. This behavior can be overridden using some linker flags (\emph{'-Wl,static'} with some linkers, \emph{'-Bstatic'} with other types of linkers. refer to the compiler's or the linker's manual for info about these flags). 
+
+%[TODO:] Answer if this is a potential problem for users component code to end up loading duplicate copies of .so libraries.…(Suppose you are building two dynamic-load modules, B and C, which should share another block of code A. On Unix, you would not pass A.a to the linker for B.so and C.so; that would cause it to be included twice, so that B and C would each have their own copy.)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

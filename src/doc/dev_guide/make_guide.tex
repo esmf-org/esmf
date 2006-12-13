@@ -1,0 +1,122 @@
+% CVS $Id: make_guide.tex,v 1.5 2006/12/13 20:19:07 cdeluca Exp $
+
+\subsection{Makefile Conventions} 	 
+
+The makefiles use GNU standard target names when possible.
+The default rule is to remake the ESMF library.  Targets exist
+to build the unit and system tests, the examples, the demos,
+and to run them together or individually.  Targets also exist
+to build the documentation and create pdf and html versions.
+For more details on targets, refer to the README file in the top
+level ESMF directory, and also the {\it ESMF User's Guide}.
+
+
+\subsubsection{Code Building Rules} 
+During software development it is advantageous to recompile a portion of
+ESMF and not build the entire framework when testing localized software
+modifications.  The makefiles are configured to compile only files in the
+current directory and rebuild the shared libraries only when necessary.
+Therefore when "gmake" is entered in any directory, only files in that
+directory are compiled.  However, the entire ESMF framework may be built
+from any directory by entering "gmake lib".
+
+The unit tests, the system tests, the examples, and the demos all share
+a common set of targets.  The following target list illustrates the
+options for the examples.  The names {\tt unit\_tests}, {\tt system\_tests},
+{\tt demos}, and {\tt all\_tests} can be substituted whereever {\tt examples}
+occurs.
+\begin{description} 
+\item [examples] build and run all examples
+\item [examples\_uni] build and run all examples single process
+\item [build\_examples] build the examples
+\item [run\_examples] run the examples and report the success/fail status
+\item [run\_examples\_uni] run the examples single process
+\item [check\_examples] report the success/fail status without reexecution
+\item [clean\_examples] remove the example executables
+\end{description} 
+
+\subsubsection{Document Building Rules} 
+The makefile rules for building documents are now located in:
+\begin{verbatim} build/common.mk \end{verbatim} 
+The rules exist
+as pattern rules and are controlled by the variables set in a doc
+directory's makefile.  The pattern rules will build .tex  from source code
+and .pdf, .dvi and html files from .ctex files.
+
+Variables that can be set in the individual doc/makefiles are called
+"makefile variables".  These are: 
+\begin{description} 
+\item [DVIFILES]
+\item [PDFFILES] 
+\item [HTMLFILES] 
+\item [TEXTFILES\_TO\_MAKE]
+\end{description}
+
+Document file dependencies are set with: 
+\begin{description} 
+\item [REFDOC\_DEP\_FILES]
+\end{description}
+
+The makefiles targets work from both local directory and from ESMF\_DIR:
+\begin{description} 
+\item [gmake alldoc] 
+\item [gmake pdf] 
+\item [gmake dvi] 
+\item [gmake html] 
+\end{description}
+
+
+\subsubsection{Include Files} 
+At the highest directory level, the "include"
+directory will contain public include files intended to be used in
+user-written code.  They will be broken up into separate files, with a
+single "ESMF.h" include file which includes all the others.
+
+At the 'src' level, parallel to Infrastructure, Superstructure, and doc,
+is another include directory.  This is for private include files which are
+ESMF-wide.  These might include system-wide architecture dependent
+\#defines constants, etc.
+
+Below the Superstructure \& Infrastructure level are the individual
+component levels (TimeMgr, Field, Component, etc).  Under each of these
+directories is an include directory for the component specific include
+files.
+
+\subsection{System Dependent Strategy Using Preprocessor} Since the code
+must compile across different platforms, a stategy must be adopted to
+handle the system differences. Examples of system differences are: the
+subroutines (bcopy vs memcopy) or include filenames (strings.h vs str.h,
+etc).
+
+Rather than putting architecture names in all the source files, there will
+be an ESMF-wide file which contains sections like this: 
+\begin{verbatim}
+
+ #ifdef sgi 
+ #define HAS_VFORK 0 
+ #define BCOPY_FASTER 1 
+ #define FOPEN_3RD_ARG 1 
+ #endif
+
+ #ifdef sun 
+ #define HAS_VFORK 1 
+ #define BCOPY_FASTER 0 
+ #define FOPEN_3RD_ARG 1 
+ #endif
+
+\end{verbatim} This allows system-dependent code to be bracketed with
+meaningful names: 
+
+\begin{verbatim} 
+
+ #if HAS_VFORK
+    vfork();
+ #else
+    fork(); 
+    exec();
+ #endif
+
+\end{verbatim} 
+and not an endless string of architecture names.
+
+

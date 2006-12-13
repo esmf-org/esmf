@@ -1,0 +1,175 @@
+% $Id: ESMF_adoption.tex,v 1.9 2006/12/13 20:17:51 cdeluca Exp $
+
+\section{How to Adapt Applications for ESMF}
+\label{sec:Adoption}
+
+In this section we describe how to bring existing applications 
+into the framework.
+
+\subsection{Individual Components}
+
+\begin{itemize}
+
+\item Decide what parts will become Gridded Components 
+
+A Gridded Component is a self-contained
+piece of code which will be initialized, will be called once or many times
+to run, and then will be finalized.  It will be expected to either take in
+data from other components/models, produce data, or both.
+
+Generally a computational model like an ocean or atmosphere model will
+map either to a single component or to a set of multiple nested
+components.
+
+\item Decide what data is produced 
+
+A component provides data to other components using an ESMF State
+object.  A component should fill the State object with a description of
+all possible values that it can export.  Generally, a piece of code
+external to the component (the AppDriver, or a parent component) will 
+be responsible for marking which of these items are actually going to
+be needed.  Then the component can choose to either produce all possible
+data items (simpler but less efficient) or only produce the data items
+marked as being needed.  The component should consult the CF data naming
+conventions when it is listing what data it can produce.
+
+\item Decide what data is needed 
+
+A component gets data from other components using an ESMF State object.
+The application developer must figure out how to get any required 
+fields from other components in the application.
+
+\item Make the data blocks private 
+
+A component should communicate to other components only through the
+framework.  All global data items should be private to Fortran modules,
+and ideally would be isolated to a single derived type which is allocated
+at run time.   
+
+\item Divide the code up into start/middle/end phases 
+
+A component needs to provide 3 routines which handle
+initialization, running, and finalization.  (For codes which have
+multiple phases of initialize, run, and finalize it is possible to have
+multiple initialize, run, and finalize routines.)
+
+The initialize routine needs to allocate space, initialize
+data items, boundary conditions, and do whatever else is necessary in
+order to prepare the component to run.
+
+For a sequential application in which all components are on the same
+set of processors, the run phase will
+be called multiple times.  Each time the model is expected to take in
+any new data from other models, do its computation, and produce data
+needed by other components.   A concurrent model, in which different
+components are run on different processors, may execute the same 
+way.  Alternatively, it may have its run routine called
+only once and may use different parts of the framework to arrange
+data exchange with other models.  This feature is not yet implemented
+in ESMF.
+
+The finalize routine needs to release space, write out results,
+close open files, and generally close down the computation gracefully.
+
+\item Make a "Set Services" subroutine 
+
+Components need to provide only a single externally visible entry point.
+It will be called at start time, and its job is to register with the
+framework which routines satisfy the initialize, run, and finalize
+requirements.  It can also register the address of its private data block.
+
+\item Create ESMF Fields and Bundles for holding data
+
+An ESMF State object is fundamentally an annotated list of other
+ESMF items, most often expected to be ESMF Bundles (groups of
+Fields on the same grid).  Other things which can be placed in a 
+State object are Fields, Arrays (raw data with no gridding/coordinate 
+information)
+and other States (generally used by coupling code).  Any data which is
+going to be received from other components or sent to other components
+needs to be represented as an ESMF object.
+
+To create an ESMF Field the code must create an ESMF Array object to
+contain the data values, and usually an ESMF Grid object to describe the
+computational grid where the values are located.  If this is an
+observational data stream the locations of the data values will be held in
+an ESMF Location Stream object instead of a Grid.  (Location Streams
+are not yet fully implemented.)
+
+\item Be able to read an ESMF clock
+
+During the execution of the run routine, information about time 
+is transferred between components through ESMF Clocks.  The 
+component needs to be able to at least query a Clock for the 
+current time using framework methods.
+
+\item Decide how much of the lower level infrastructure to use
+
+The ESMF framework provides a rich set of time management functions,
+data management and query functions, IO functions, and other utility
+routines which help to insulate the user's code from the vast differences
+in hardware architectures, system software, and runtime environments.
+It is up to the user to select which parts of these functions they
+choose to use.
+
+\end{itemize}
+
+\subsection{Full Application}
+
+\begin{itemize}
+
+\item Decide on which components to use 
+
+Select from the set of ESMF components available.
+
+\item Understand the data flow in order to customize a Coupler Component
+
+Examine what data is produced by each component and what data is
+needed by each component.  The role of Coupler Components in the
+ESMF is to set up any necessary regridding and data conversions
+to match output data from one component to input data in another.
+
+\item Write or adapt a Coupler Component
+
+Decide on a strategy for how to do the coupling.  There can be a single
+coupler for the application or multiple couplers.
+Single couplers follow a "hub and
+spoke" model.
+Multiple couplers can couple between subsets of the components, and
+can be written to couple either only one-way
+(e.g. output of component A into input of component B), or two-way
+(both A to B and B to A).  
+
+The coupler must understand States, Fields, Bundles, 
+Grids, and Arrays and ESMF execution/environment objects
+such as DELayouts.    
+
+\item Use or adapt a main program 
+
+The main program can be an unchanged copy of the file found in
+the {\tt AppDriver} directory.  The only customization needed is to
+set the name of the top level Gridded Component, and to set the
+name of the {\tt SetServices} routine.  The template file includes
+a call to {\tt ESMF\_Initialize()} which ensures the framework
+initialization code is run, and will
+provide the environment for components to be created and run.
+
+Although ESMF provides source code for the main program, it is
+{\bf not} considered part of the framework and can be changed by
+the user as needed.
+
+The final thing the main program must do is call {\tt ESMF\_Finalize()}.
+This will close down the framework and release any associated resources.
+
+The main program is responsible for creating a top-level
+Gridded Component, which in turn creates other Gridded and Coupler 
+Components.  We encourage this hierarchical design because it
+aids in extensibility.
+The top-level component contains the main time loop and is 
+responsible for calling the
+{\tt SetServices} entry point for each child component it creates.
+
+\end{itemize}
+
+
+

@@ -1,0 +1,26 @@
+% $Id: ESMF_buildinstall.tex,v 1.5 2006/12/13 20:17:52 cdeluca Exp $
+
+
+\subsection{Install Options}
+\label{BuildOptions}
+
+There is an install target which will copy the library and *.mod files to
+specified directories.  To invoke this target use:
+\begin{verbatim}
+  gmake ESMF_BOPT=[O,g] ESMF_LIB_INSTALL=<path for library>
+                   ESMF_MOD_INSTALL=<path for *.mod files> install 
+\end{verbatim}
+
+Some users may wish for the library to be built in a directory different from 
+where the source code resides.  To do this, build using:
+\begin{verbatim}
+   gmake ESMF_BUILD=<path> 
+\end{verbatim}
+
+The {\tt ESMF\_BUILD} variable gives an alternate path in which to
+place the libraries, *.mod files and object files.  This variable
+defaults to {\tt ESMF\_DIR}.  If it is assigned another value, the
+{\tt ESMF\_BUILD} variable will need to be passed as an additional
+argument to the the above make commands.  (Alternatively the variable
+{\tt ESMF\_BUILD} can be set in the environment (using setenv or
+export) and then it need not be passed to any make calls).

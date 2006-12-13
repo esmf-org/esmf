@@ -1,0 +1,98 @@
+%===============================================================================
+% CVS $Id: dev_guide.tex,v 1.11 2006/12/13 20:19:07 cdeluca Exp $
+% CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/dev_guide.tex,v $
+% CVS $Name:  $
+%===============================================================================
+\documentclass[english,dvips]{article}
+\usepackage{epsf}
+\usepackage{babel}
+\usepackage{supertabular}
+\usepackage{html}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+
+\setlength{\textwidth}{6.5truein}
+\setlength{\textheight}{8.5truein}
+\setlength{\oddsidemargin}{0in}
+\setlength{\unitlength}{1truecm}
+
+
+\begin{document}
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+\begin{titlepage}
+
+\begin{center}
+{\Large    Earth System Modeling Framework } \\
+{\Large {\bf  Software Developer's Guide}} \\
+\medskip
+{\it Silverio Vasquez and Cecelia DeLuca} \\
+\vspace{.5in}
+{\large \today}
+\end{center}
+
+\begin{latexonly}
+\vspace{6in}
+\begin{tabular}{p{5in}p{.9in}}
+\hrulefill \\
+\noindent http://www.esmf.ucar.edu \\
+\end{tabular}
+\end{latexonly}
+
+\end{titlepage}
+
+\tableofcontents
+
+\newpage
+
+\input{intro}
+
+%\section{Groups and Roles}
+\input{roles}
+
+%\section{Communications}
+\input{communication}
+
+%\section{Processes}
+\input{processes}
+
+%\section{Testing and Validation}
+\input{testing}
+
+%\section{User Suppport}
+\input{usr_support}
+
+%\section{Conventions}
+\input{code_conv}
+
+%\section{Tracking}
+\input{tracking}
+
+%\section{Policies}
+\input{policies}
+
+\newpage
+%\section*{Appendix A:  Testing Terminology}
+\input{append_testing}
+\addcontentsline{toc}{section}{Appendix A: Testing Terminology}
+
+\newpage
+%\section{Bibliography}
+\bibliography{dev_guide} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+

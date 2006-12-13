@@ -1,0 +1,419 @@
+
+\section{The ESMF Application Programming Interface}
+
+The ESMF Application Programming Interface (API) is based on the
+object-oriented programming notion of a {\bf class}.  A class is a 
+software construct that's used for grouping a set of related variables 
+together with the subroutines and functions that operate on them.  We 
+use classes in ESMF because they help to organize the code, and often 
+make it easier to maintain and understand.  A particular instance
+of a class is called an {\bf object}.  For example, Field is an 
+ESMF class.  An actual Field called {\tt temperature} is an object. 
+That is about as far as we will go into formal software engineering
+terminology.  
+
+The Fortran interface is implemented so that the variables associated
+with a class are stored in a derived type.  For example, an 
+{\tt ESMF\_Field} derived type stores the data array, grid 
+information, and metadata associated with a physical field.
+The derived type for each class is stored in a Fortran module, and 
+the operations associated with each class are defined as module
+procedures.  We use the Fortran features of generic functions and
+optional arguments extensively to simplify our interfaces.
+
+The modules for ESMF are bundled together and can be accessed with a 
+single {\tt USE} statement, {\tt USE ESMF\_Mod}.
+
+\subsection{Standard Methods and Interface Rules}
+
+ESMF defines a set of standard methods and interface rules that
+hold across the entire API.  These are: 
+
+\begin{itemize}
+
+\item {\tt ESMF\_<Class>Create()} and {\tt ESMF\_<Class>Destroy()}, for creating and 
+destroying classes.  The {\tt ESMF\_<Class>Create()} method allocates 
+memory for the class structure itself and for internal variables, and
+initializes variables as appropriate.  It is always written as a 
+Fortran function that returns a derived type instance of the class.
+
+\item {\tt ESMF\_<Class>Set()} and {\tt ESMF\_<Class>Get()}, for setting 
+and retrieving a particular item or flag.  In general, these methods are
+overloaded for all cases where the item can be manipulated as a
+name/value pair.  If identifying the item requires more than a 
+name, or if the class is of sufficient complexity that overloading
+in this way would result in an overwhelming number of options, we 
+define specific {\tt ESMF\_<Class>Set<Something>()} and 
+{\tt ESMF\_<Class>Get<Something>()} interfaces.
+
+\item {\tt ESMF\_<Class>Add()}, {\tt ESMF\_<Class>Get()}, and 
+{\tt ESMF\_<Class>Remove()} for manipulating 
+items that can be appended or inserted into a list of like
+items within a class.  For example, the {\tt ESMF\_StateAddField()}
+method adds another Field to the list of Fields contained
+in the State class.
+
+\item {\tt ESMF\_<Class>Print()}, for printing the contents of a class to 
+standard out.  This method is mainly intended for debugging.
+
+\item {\tt ESMF\_<Class>ReadRestart()} and {\tt ESMF\_<Class>WriteRestart()}, 
+for saving the contents of a class and restoring it exactly.  Read
+and write restart methods have not yet been implemented for most
+ESMF classes, so where necessary the user needs to write restart 
+values themselves.
+
+\item {\tt ESMF\_<Class>Validate()}, for determining whether a class is 
+internally consistent.  For example, {\tt ESMF\_FieldValidate()} checks 
+whether the Array and Grid associated with a Field are consistent.
+
+\end{itemize}
+
+{\bf EXAMPLE}
+
+In this simple example, an ESMF Field is created with the 
+name {\tt 'temp'}.  
+
+\begin{verbatim}
+
+USE ESMF_Mod
+
+type ESMF_Field :: field
+
+field = ESMF_FieldCreate('temp')
+
+\end{verbatim}
+
+\subsection{Deep and Shallow Classes}
+\label{sec:deepshallow}
+
+The ESMF contains two types of classes.  {\bf Deep} classes require
+{\tt ESMF\_<Class>Create()} and {\tt ESMF\_<Class>Destroy()} calls.
+They take significant time to set up and should not be created
+in a time-critical portion of code.  Deep objects persist 
+even after the method in which they were created has returned.
+Most classes in the ESMF, including Fields, Bundles, Arrays,
+Grids and Clocks, fall into this category.
+
+{\tt Shallow} classes do not require {\tt ESMF\_<Class>Create()}
+ and {\tt ESMF\_<Class>Destroy()} calls.  They can simply be declared
+and their values set using an {\tt ESMF\_<Class>Set()} call.  Shallow
+classes do not take long to set up and can be declared and set within
+a time-critical code segment.  Shallow objects stop existing when
+the method in which they were declared has returned.  
+
+An exception to this is when a shallow object, such as an IOSpec, 
+is used to carry values into a deep object, for example during an 
+{\tt ESMF\_FieldCreate()} call during an application initialization 
+phase.  In this case an IOSpec is passed
+in through the {\tt ESMF\_FieldCreate()} argument list and the values 
+of the IOSpec are copied into the new Field object.  Although the 
+IOSpec is destroyed when the initialization phase ends, 
+the Field carries a copy of the IOSpec in persistent memory.  This 
+internal IOSpec is destroyed with the {\tt ESMF\_FieldDestroy()} call.
+
+Other examples of shallow classes are Times, TimeIntervals, and 
+ArraySpecs.
+
+See Section \ref{sec:overallimpl}, {\tt Overall Design and Implementation 
+Notes}, for a brief discussion of deep and shallow classes from 
+an implementation perspective.  For an in-depth look at the design 
+and inter-language issues related to deep and shallow classes, please 
+see the {\tt ESMF Implementation Report}.
+
+\subsection{Special Methods}
+
+The following are special methods which, in one case,
+are required by any application using ESMF, and in the 
+other case must be called by any application that is using 
+ESMF Components.
+
+\begin{itemize}
+
+\item {\tt ESMF\_Initialize()} and {\tt ESMF\_Finalize()} are required 
+methods that must bracket the use of ESMF within an application.  
+They manage the resources required to run ESMF and shut it down
+gracefully.
+\item {\tt ESMF\_<Type>CompInitialize()}, {\tt ESMF\_<Type>CompRun()}, and 
+{\tt ESMF\_<Type>CompFinalize()} are component methods that are used at the 
+highest level within ESMF.  {\tt <Type>} may be {\tt <Grid>}, for 
+Gridded Components such as oceans or atmospheres, or
+{\tt <Cpl>}, for Coupler Components that are used to connect 
+them.  The content of these methods is not part of the ESMF.  
+Instead the methods call into associated Fortran subroutines within 
+user code.
+
+\end{itemize}
+
+\subsection{The ESMF Data Hierarchy}
+
+The ESMF API is organized around an hierarchy of five classes that 
+contain model field data.  The operations that are performed
+on model field data, such as regridding, redistribution, and halo 
+updates, are accessed through these classes.  
+
+The main data classes in ESMF, in order of increasing complexity, are:
+\begin{itemize}
+\item {\bf Array} An ESMF Array is a distributed, multi-dimensional 
+array that can carry information such as its type, kind, rank, and 
+associated halo widths.  It contains a reference to a native Fortran array.
+\item {\bf Field}  A Field represents a physical scalar or vector field.
+It contains a reference to an Array along with grid information and metadata.
+\item {\bf Bundle}  A Bundle is a collection of Fields discretized 
+on the same grid.  The staggering of data points may be different for 
+different Fields within a Bundle.
+\item {\bf State}  A State represents the collection of data that a 
+Component either requires to run (an Import State) or can make 
+available to other Components (an Export State).
+States may contain references to Bundles, Fields, or Arrays. 
+\item {\bf Component}  A Component is a substantial piece of software 
+with a distinct function.  ESMF currently recognizes two types 
+of Components.  Components that represent a physical domain 
+or process, such 
+as an atmospheric model, are called Gridded Components since they are 
+usually discretized on an underlying grid.  The Components 
+responsible for regridding and transferring data between Gridded 
+Components are called Coupler Components.  Each Component
+is associated with an Import and an Export State.  Components
+can be nested so that simpler components and applications can 
+be used to compose more complex applications.
+
+\end{itemize}
+
+Underlying these data classes are native language arrays.  ESMF allows 
+you to reference an existing Fortran array to an ESMF Array, 
+Field, or Bundle, so that ESMF data classes can be readily 
+introduced into existing code.  You can perform communication operations 
+directly on Fortran arrays through the DELayout class, which serves 
+as a unifying wrapper for distributed and shared memory communication 
+libraries.
+
+\subsection{ESMF Spatial Classes}
+
+Like the hierarchy of model data classes, ranging from the 
+simple to the complex, the ESMF is organized around an hierarchy of 
+classes that represent different spaces associated with a computation.
+Each of these spaces can be indexed in some fashion, in order to give
+the user control over how a computation is executed.  For Earth system
+applications, this hierarchy spans the environment associated with the 
+computer to the physical region described by the application.  
+The main spatial classes in ESMF, in order of those closest to the
+machine to those closest to the application, are:
+
+\begin{itemize}
+
+\item The {\bf Virtual Machine}, or {\bf VM} The ESMF VM is an 
+abstraction of a parallel computing environment that encompasses 
+both shared and distributed memory.  Its primary purpose 
+is resource allocation.  Each Component defines its own VM based on 
+the resources it desires.  The elements of a VM are {\bf Persistent 
+Execution Threads}, or {\bf PETs}.  A simple case is one in which 
+every PET is associated with an MPI process running on a separate
+processor.  If Components are nested, the parent component allocates 
+a subset of its PETs to its children.  The children have some flexibility, 
+subject to the constraints of the computing environment, to decide 
+how they want to use the PETs they've received.
+
+\item {\bf DELayout}  A DELayout represents a decomposition.  Its
+basic elements are {\bf Decomposition Elements}, or {\bf DEs}.  
+A DELayout associates a set of DEs and a topology - how the DEs 
+are connected - with the PETs in a VM.  The user can also define 
+communication weights between DEs, for use in load balancing.
+DEs are not necessarily one-to-one with PETs.  For cache blocking,
+or user-managed multi-threading, more DEs than PETs may be defined.
+Fewer DEs than PETs may be defined if an application requires,
+for example, a decomposition that is an integer multiple.
+
+\item {\bf Grid}  A Grid is an abstraction of a physical space.  
+It associates a coordinate system, a set of coordinates, and 
+a topology to a collection of grid cells. 
+
+\item {\bf Field}  A Field may contain more dimensions than the 
+Grid that it is discretized on.  For example, for convenience 
+during integration, a user may want to define a single Field object 
+that holds snapshots of the data at multiple times.  The Field 
+must track what these additional dimensions mean.  Fields also 
+keep track of the location of a Field data point within its 
+associated Grid cell.
+
+\end{itemize}
+
+Although it is not an ESMF class, the linear {\bf address space} 
+of the computer is another fundamental index space that must be 
+mapped to data stored by the ESMF system.  
+
+\subsection{ESMF DataMap Classes}
+
+In order to map the index spaces of the spatial classes,
+we require either implicit rules (in which case the relationship 
+between index spaces is defined by default), or special classes that 
+allow the user to specify the desired association.  The following
+classes define how the data is laid out in memory.
+
+\begin{itemize}
+
+\item {\bf ArrayDataMap} The ArrayDataMap class specifies how the 
+address space of the computer relates to the array rank (e.g. row 
+or column major order), and, optionally, how a list of array ranks 
+corresponds to a list of Grid dimensions.   
+
+\item {\bf FieldDataMap} The FieldDataMap specifies the number of 
+directional components in a vector Field, and how they are interleaved.
+
+\item {\bf BundleDataMap} The BundleDataMap dictates how the Fields
+within a Bundle are interleaved.  
+
+\end{itemize}
+
+\subsection{ESMF Specification Classes}
+
+At various places in the ESMF, it is useful to make neat packets
+of descriptive parameters.  Some of these are:
+\begin{itemize}
+\item {\bf IOSpec}, for storing IO parameters.
+\item {\bf ArraySpec}, for storing the specifics, such as type/kind/rank,
+of an array.
+\end{itemize}
+
+\subsection{ESMF Utility Classes}
+
+There are a number of utilities in ESMF that can be used independently.
+These are:
+\begin{itemize}
+\item {\bf TimeMgr}, for calendar, date, clock and alarm functions.
+\item {\bf LogErr}, for logging and error handling.
+\item {\bf Config}, for creating resource files that can replace namelists
+as a consistent way of setting configuration parameters.
+\end{itemize}
+
+\section{Overall Rules and Behavior}
+
+\subsection{Allocation Rules}
+
+The basic rule of allocation and deallocation for the ESMF is:
+whoever allocates it is responsible for deallocating it.
+
+ESMF methods that allocate their own space for data will
+deallocate that space when the object is destroyed. 
+Methods which accept a user-allocated buffer, for example
+{\tt ESMF\_FieldCreate()} with the {\tt ESMF\_DATA\_REF} flag,
+will not deallocate that buffer at the time the object is
+destroyed.  The user must arrange for the buffer to be deallocated
+when all use of it is complete.
+
+Classes such as Fields, Bundles, and States may have Arrays, 
+Fields, Grids and Bundles created externally and associated with
+them.  These associated items are not destroyed along with the rest  
+of the data object since it is possible for the items to be added 
+to more than one data object at a time (e.g. the same Grid could 
+be part of many Fields).  It is the user's responsibility to delete 
+these items when the last use of them is done.
+
+\subsection{Equality and Copying Objects}
+
+The equal sign operator in ESMF does not generate any special 
+behavior on the part of the framework.  If the user decides to set
+one object equal to another, the internal contents will simply be
+copied.  That means that if there is a pointer within the object
+being copied, the pointer will be replicated and the data pointed to 
+will be referenced by the object copy.  As a matter of style and 
+safety, users should try to avoid exploiting such implicit behavior.
+A preferable approach is to use a class creation or duplication 
+method.  Unfortunately, not all classes have duplication methods yet.
+
+\subsection{Attributes}
+
+Attributes are (name, value) pairs, where
+the name is a character string and the value can be either a single
+value or list of {\tt int}/{\tt I*4}, {\tt double}/{\tt R*8},
+logical ({\tt ESMF\_Logical}), or {\tt char *}/{\tt character} values.
+Attributes can be associated with Fields, Bundles, and States. 
+Mixed types are not allowed in a single attribute, and all attribute
+names must be unique within a single object.    Attributes are set
+by name, and can be retrieved either directly by name or by querying
+for a count of attributes and retrieving names and values
+by index number.
+
+\section{Integrating ESMF into Applications}
+
+Depending on the requirements of the application, the user may 
+want to begin integrating ESMF in either a top-down or bottom-up 
+manner.  In the top-down approach, tools at the superstructure 
+level are used to help reorganize and structure the interactions
+among large-scale components in the application.  It is appropriate
+when interoperability is a primary concern; for example, when 
+several different versions or implementations of components are going 
+to be swapped in, or a particular component is going to be used 
+in multiple contexts.  Another reason for deciding on a top-down 
+approach is that the application contains legacy code that for 
+some reason (e.g., very large, difficult to work with, 
+highly performance-tuned, resource limitations) there is little 
+motivation to fully restructure.  The superstructure can be 
+incorporated into such applications in a way that is non-intrusive.
+
+In the bottom-up approach, the user selects desired utilities 
+(data communications, calendar management, performance profiling,
+logging and error handling, etc.) from the ESMF infrastructure 
+and either writes new code using them, introduces them into 
+existing code, or replaces the functionality in existing code 
+with them.  This makes sense when there is a specific need for 
+some functionality, like robust data acommunications, or 
+when the component writer is starting from scratch.
+
+\subsection{Using the ESMF Superstructure}
+
+The following is a typical set of steps involved in adopting
+the ESMF superstructure.  The first two tasks, which occur 
+before an ESMF call is ever made, have the potential to be 
+the most difficult and time-consuming.  They are the work 
+of splitting an application into components and ensuring that
+each component has well-defined stages of execution.\footnote{ESMF
+aside, this sort of code structure helps to promote application
+clarity and maintainability, and the effort put into it is likely
+to be a good investment in any case.}
+
+\begin{enumerate}
+
+\item Decide how to organize the application as discrete Gridded 
+and Coupler Components.  The developer might need to reorganize code
+so that individual components are cleanly separated and their 
+interactions consist of a minimal number of data exchanges.
+
+\item Divide the code for each component into initialize, run, and
+finalize methods.  These methods can be multi-phase, e.g., 
+{\tt init\_1, init\_2}.
+
+\item Pack any data that will be transferred between components
+into ESMF Import and Export State data structures.  The user must 
+describe the distribution of grids over resources on a parallel
+computer via the VM and DELayout.
+
+\item Pack time information into ESMF time management data 
+structures.
+
+\item Using code templates provided in the ESMF distribution, create
+ESMF Gridded and Coupler Components to represent each component
+in the user code.
+
+\item Write a set services routine that sets ESMF entry 
+points for each user component's initialize, run, and finalize 
+methods.
+
+\item Run the application using an ESMF Application Driver.
+
+\end{enumerate} 
+
+\subsection{Using the ESMF Infrastructure}
+
+Adoption of infrastructure utilities and data structures can
+follow many different paths.  The calendar management utility 
+is a popular place to start, since there is enough functionality
+in the ESMF time manager to merit the effort required to 
+integrate it into codes and bundle it with an application.
+
+
+
+
+
+
+
+

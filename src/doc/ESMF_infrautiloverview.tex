@@ -1,0 +1,22 @@
+% $Id: ESMF_infrautiloverview.tex,v 1.4 2006/12/13 20:17:55 cdeluca Exp $
+
+\section{Overview of Infrastructure Utility Classes}
+
+The ESMF utilities are
+a set of tools for quickly assembling modeling applications.
+The Time Management Library
+provides utilities for time and date representation and calculation,
+and higher-level utilities that control model time stepping and alarming.
+
+The Array class offers an efficient, language-neutral way 
+of storing and manipulating data arrays.
+
+The Communications/Memory/Kernel library provides utilities for isolating system-dependent functions to ease
+platform portability.  It provides services to represent a particular machine's
+characteristics and to organize these into processor lists and layouts to
+allow for optimal allocation of resources to an ESMF component. Also provided
+is a unified interface for system-dependent communication services such as
+MPI or pthreads. 
+
+ESMF Configuration Management is based on NASA DAO's Inpak package, a collection of routines for accessing files containing
+input parameters stored in an ASCII format.
