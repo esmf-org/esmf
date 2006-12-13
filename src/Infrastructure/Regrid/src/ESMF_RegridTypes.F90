@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.85 2006/12/12 20:50:00 donstark Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.86 2006/12/13 00:52:31 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -266,7 +266,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.85 2006/12/12 20:50:00 donstark Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.86 2006/12/13 00:52:31 donstark Exp $'
 
 !==============================================================================
 !
@@ -372,7 +372,7 @@
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_RegridIndexTypeInit"
  !BOPI
-! !IROUTINE: ESMF_RegridIndexTypeGetInit - Initialize RegridIndexType variable.
+! !IROUTINE: ESMF_RegridIndexTypeInit - Initialize RegridIndexType variable.
 
 ! !INTERFACE:
    subroutine ESMF_RegridIndexTypeInit(s)
@@ -1482,7 +1482,7 @@ end subroutine ESMF_RegridIndexTypeValidate
 !
 ! !DESCRIPTION:
 !      Validates that the {\tt RegridIndex} is internally consistent.
-!      Currently this method determines if the {\tt field} is uninitialized
+!      Currently this method determines if the {\tt RegridIndex} is uninitialized
 !      or already destroyed.  
 !
 !     The arguments are:
