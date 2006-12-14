@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArray.F90,v 1.4 2006/12/08 23:36:06 theurich Exp $
+! $Id: ESMF_InternArray.F90,v 1.5 2006/12/14 22:03:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -141,7 +141,7 @@ module ESMF_InternArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArray.F90,v 1.4 2006/12/08 23:36:06 theurich Exp $'
+    '$Id: ESMF_InternArray.F90,v 1.5 2006/12/14 22:03:14 oehmke Exp $'
 !
 !==============================================================================
 !
@@ -2725,7 +2725,7 @@ end subroutine
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    mask%maskvals => NULL()
+    nullify(mask%maskvals)
     ESMF_INIT_SET_DEFINED(mask)
   end subroutine ESMF_MaskInit
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.31 2006/12/12 22:29:56 samsoncheung Exp $
+! $Id: ESMF_Config.F90,v 1.32 2006/12/14 22:03:14 oehmke Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -356,9 +356,9 @@
 !     \end{description}
 !
 !EOPI
-       s%buffer => Null()
-       s%this_line => Null()
-       s%attr_used => Null()
+       nullify(s%buffer)
+       nullify(s%this_line)
+       nullify(s%attr_used)
 
        ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_ConfigClassInit

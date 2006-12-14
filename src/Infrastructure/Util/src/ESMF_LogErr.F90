@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.21 2006/12/12 20:29:42 donstark Exp $
+! $Id: ESMF_LogErr.F90,v 1.22 2006/12/14 22:03:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -254,10 +254,10 @@ contains
 !     \end{description}
 !
 !EOPI
-       s%LOG_ENTRY=>Null()
+       nullify(s%LOG_ENTRY)
        s%FileIsOpen=ESMF_False
 !       s%errorMask(:)=>Null()
-       s%errorMask=>Null()
+       nullify(s%errorMask)
        s%errorMaskCount=0
        ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_LogInit

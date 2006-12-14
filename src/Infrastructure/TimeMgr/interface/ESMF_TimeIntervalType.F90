@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalType.F90,v 1.7 2006/12/12 22:36:31 samsoncheung Exp $
+! $Id: ESMF_TimeIntervalType.F90,v 1.8 2006/12/14 22:03:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeIntervalType.F90,v 1.7 2006/12/12 22:36:31 samsoncheung Exp $'
+      '$Id: ESMF_TimeIntervalType.F90,v 1.8 2006/12/14 22:03:14 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -154,7 +154,7 @@
 !     \end{description}
 !
 !EOPI
-        s%calendar => NULL()
+        nullify(s%calendar)
         s%yy = 0
         s%mm = 0
         s%d  = 0

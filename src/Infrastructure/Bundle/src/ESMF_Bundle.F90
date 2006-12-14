@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.89 2006/12/11 23:47:42 oehmke Exp $
+! $Id: ESMF_Bundle.F90,v 1.90 2006/12/14 22:03:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -873,7 +873,8 @@ end interface
 !
 !EOPI
 
-        s%flist => NULL()
+        nullify(s%flist)
+
         ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_BundleTypeInit
 
