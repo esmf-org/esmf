@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockType.F90,v 1.7 2006/12/12 22:36:32 samsoncheung Exp $
+! $Id: ESMF_ClockType.F90,v 1.8 2006/12/14 21:45:02 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -71,7 +71,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ClockType.F90,v 1.7 2006/12/12 22:36:32 samsoncheung Exp $'
+      '$Id: ESMF_ClockType.F90,v 1.8 2006/12/14 21:45:02 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -86,7 +86,7 @@
     function ESMF_ClockGetInit(d)
 !
 ! !ARGUMENTS:
-       type(ESMF_Clock), intent(inout), optional :: d
+       type(ESMF_Clock), intent(in), optional :: d
        ESMF_INIT_TYPE :: ESMF_ClockGetInit
 !
 ! !DESCRIPTION:

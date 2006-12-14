@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.70 2006/12/12 22:36:32 samsoncheung Exp $
+! $Id: ESMF_Clock.F90,v 1.71 2006/12/14 21:45:02 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.70 2006/12/12 22:36:32 samsoncheung Exp $'
+      '$Id: ESMF_Clock.F90,v 1.71 2006/12/14 21:45:02 oehmke Exp $'
 
 !==============================================================================
 !
@@ -622,7 +622,7 @@
                                         alarmList, alarmCount, timeStep, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),               intent(inout)         :: clock
+      type(ESMF_Clock),               intent(in)         :: clock
       type(ESMF_AlarmListType),       intent(in)            :: alarmListType
       type(ESMF_Alarm), dimension(:), intent(out)           :: alarmList
       integer,                        intent(out)           :: alarmCount
@@ -706,7 +706,7 @@
       subroutine ESMF_ClockGetNextTime(clock, nextTime, timeStep, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),        intent(inout)         :: clock
+      type(ESMF_Clock),        intent(in)         :: clock
       type(ESMF_Time),         intent(out)           :: nextTime
       type(ESMF_TimeInterval), intent(in),  optional :: timeStep
       integer,                 intent(out), optional :: rc
@@ -751,7 +751,7 @@
       logical :: ESMF_ClockIsDone
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout)         :: clock
+      type(ESMF_Clock), intent(in)         :: clock
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -789,7 +789,7 @@
       logical :: ESMF_ClockIsReverse
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout)         :: clock
+      type(ESMF_Clock), intent(in)         :: clock
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -827,7 +827,7 @@
       logical :: ESMF_ClockIsStopTime
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout)         :: clock
+      type(ESMF_Clock), intent(in)         :: clock
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -864,7 +864,7 @@
       logical :: ESMF_ClockIsStopTimeEnabled
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout)         :: clock
+      type(ESMF_Clock), intent(in)         :: clock
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -898,7 +898,7 @@
       subroutine ESMF_ClockPrint(clock, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),  intent(inout)         :: clock
+      type(ESMF_Clock),  intent(in)         :: clock
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
