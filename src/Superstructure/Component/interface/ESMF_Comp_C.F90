@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.34 2006/12/05 20:47:36 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.35 2006/12/15 23:59:47 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.34 2006/12/05 20:47:36 theurich Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.35 2006/12/15 23:59:47 donstark Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -71,6 +71,9 @@ recursive subroutine f_esmf_compgetvmparent(comp, vm_parent, rc)
   type(ESMF_VM)      :: local_vm_parent
   type(ESMF_Pointer) :: this
 
+  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm_parent,rc)
+
   call ESMF_CompGet(compp=comp%compp, vm_parent=local_vm_parent, rc=rc)
 
   call ESMF_VMGetThis(local_vm_parent, this, rc=rc)  ! Get C++ address
@@ -91,6 +94,9 @@ recursive subroutine f_esmf_compgetvmplan(comp, vmplan, rc)
 
   type(ESMF_VMPlan)  :: local_vmplan
   type(ESMF_Pointer) :: this
+
+  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit,vmplan,rc)
 
   call ESMF_CompGet(compp=comp%compp, vmplan=local_vmplan, rc=rc)
 
@@ -114,6 +120,9 @@ recursive subroutine f_esmf_compinsertvm(comp, vm, rc)
   type(ESMF_VM)      :: local_vm
   type(ESMF_Pointer) :: this
   
+  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
+
   call ESMF_VMGetThis(vm, this, rc=rc)       ! Get address of C++ object
   call ESMF_VMSetThis(local_vm, this, rc=rc) ! Set address of C++ object
   call ESMF_VMSetInitCreated(local_vm)       ! Set init code
@@ -131,6 +140,8 @@ recursive subroutine f_esmf_compget(comp, ctype, rc)
   type(ESMF_CWrap) :: comp
   type(ESMF_CompType) :: ctype
   integer :: rc
+
+  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp,rc)
 
   call ESMF_CompGet(comp%compp, ctype=ctype, rc=rc)
 end subroutine f_esmf_compget
@@ -150,6 +161,10 @@ recursive subroutine f_esmf_compreplicate(comp, comp_src, vm, rc)
 
   type (ESMF_CompClass), pointer :: compclass  
   
+  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp_src,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
+
   nullify(comp%compp)
   nullify(compclass)
   allocate(compclass)
@@ -172,6 +187,9 @@ recursive subroutine f_esmf_compcopy(comp, comp_src, rc)
 
   type (ESMF_CompClass), pointer :: compclass_src, compclass
   
+  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp_src,rc)
+
   compclass_src => comp_src%compp
   compclass => comp%compp
   compclass = compclass_src
@@ -187,6 +205,8 @@ recursive subroutine f_esmf_compdelete(comp, rc)
   type(ESMF_CWrap) :: comp
   integer :: rc
   
+  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp,rc)
+
   deallocate(comp%compp)
   nullify(comp%compp)
 end subroutine f_esmf_compdelete
@@ -216,6 +236,11 @@ subroutine f_esmf_gridcompcreate(gcomp, name, mtype, grid, config, configFile, &
   type(ESMF_Clock), optional :: clock
   integer, optional :: rc
 
+  ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gcomp,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
   gcomp = ESMF_GridCompCreate(name=name, gridcomptype=mtype, grid=grid, &
     config=config, configFile=configFile, clock=clock, rc=rc)
 end subroutine f_esmf_gridcompcreate
@@ -230,6 +255,8 @@ subroutine f_esmf_gridcompdestroy(comp, rc)
 
   type(ESMF_GridComp) :: comp
   integer, optional :: rc              
+
+  ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
 
   call ESMF_GridCompDestroy(comp, rc)
 end subroutine f_esmf_gridcompdestroy
@@ -252,6 +279,11 @@ subroutine f_esmf_gridcompinitialize(comp, importState, exportState, clock, &
   integer, optional :: phase
   type(ESMF_BlockingFlag), optional :: blockingFlag
   integer, optional :: rc     
+
+  ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
 
   call ESMF_GridCompInitialize(comp, importState, exportState, clock, phase, &
     blockingFlag, rc)
@@ -276,6 +308,11 @@ subroutine f_esmf_gridcomprun(comp, importState, exportState, clock, phase, &
   type(ESMF_BlockingFlag), optional :: blockingFlag
   integer, optional :: rc     
 
+  ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+
   call ESMF_GridCompRun(comp, importState, exportState, clock, phase, &
     blockingFlag, rc)
 end subroutine f_esmf_gridcomprun
@@ -299,6 +336,11 @@ subroutine f_esmf_gridcompfinalize(comp, importState, exportState, clock, &
   type(ESMF_BlockingFlag), optional :: blockingFlag
   integer, optional :: rc     
 
+  ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+
   call ESMF_GridCompFinalize(comp, importState, exportState, clock, phase, &
     blockingFlag, rc)
 end subroutine f_esmf_gridcompfinalize
@@ -314,6 +356,8 @@ subroutine f_esmf_gridcompset(comp, rc)
   type(ESMF_GridComp) :: comp      
   integer, optional :: rc     
 
+  ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
+
   call ESMF_GridCompSet(comp)
 end subroutine f_esmf_gridcompset
 
@@ -327,6 +371,8 @@ subroutine f_esmf_gridcompget(comp, rc)
 
   type(ESMF_GridComp) :: comp      
   integer, optional :: rc     
+
+  ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
 
   call ESMF_GridCompGet(comp)
 end subroutine f_esmf_gridcompget
@@ -343,6 +389,8 @@ subroutine f_esmf_gridcompvalidate(comp, options, rc)
   character(len=*), optional :: options
   integer, optional :: rc     
 
+  ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
+
   call ESMF_GridCompValidate(comp, options, rc)
 end subroutine f_esmf_gridcompvalidate
 
@@ -357,6 +405,8 @@ subroutine f_esmf_gridcompprint(comp, options, rc)
   type(ESMF_GridComp) :: comp      
   character(len=*), optional :: options
   integer, optional :: rc     
+
+  ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
 
   call ESMF_GridCompPrint(comp, options, rc)
 end subroutine f_esmf_gridcompprint
@@ -381,6 +431,10 @@ subroutine f_esmf_cplcompcreate(ccomp, name, config, configFile, clock, rc)
   type(ESMF_Clock), optional :: clock
   integer, optional :: rc
 
+  ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,ccomp,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
   ccomp = ESMF_CplCompCreate(name=name, config=config, configFile=configFile, &
     clock=clock, rc=rc)
 end subroutine f_esmf_cplcompcreate
@@ -395,6 +449,8 @@ subroutine f_esmf_cplcompdestroy(comp, rc)
 
   type(ESMF_CplComp) :: comp
   integer, optional :: rc              
+
+  ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
 
   call ESMF_CplCompDestroy(comp, rc)
 end subroutine f_esmf_cplcompdestroy
@@ -441,6 +497,13 @@ subroutine f_esmf_cplcomprun(comp, importState, exportState, clock, phase, &
   type(ESMF_BlockingFlag), optional :: blockingFlag
   integer, optional :: rc     
 
+
+  ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+
+
   call ESMF_CplCompRun(comp, importState, exportState, clock, phase, &
     blockingFlag, rc)
 end subroutine f_esmf_cplcomprun
@@ -464,6 +527,11 @@ subroutine f_esmf_cplcompfinalize(comp, importState, exportState, clock, &
   type(ESMF_BlockingFlag), optional :: blockingFlag
   integer, optional :: rc     
 
+  ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+  ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+
   call ESMF_CplCompFinalize(comp, importState, exportState, clock, phase, &
     blockingFlag, rc)
 end subroutine f_esmf_cplcompfinalize
@@ -479,6 +547,8 @@ subroutine f_esmf_cplcompset(comp, rc)
   type(ESMF_CplComp) :: comp      
   integer, optional :: rc     
 
+  ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
+
   call ESMF_CplCompSet(comp)
 end subroutine f_esmf_cplcompset
 
@@ -492,6 +562,8 @@ subroutine f_esmf_cplcompget(comp, rc)
 
   type(ESMF_CplComp) :: comp      
   integer, optional :: rc     
+
+  ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
 
   call ESMF_CplCompGet(comp)
 end subroutine f_esmf_cplcompget
@@ -522,6 +594,8 @@ subroutine f_esmf_cplcompprint(comp, options, rc)
   type(ESMF_CplComp) :: comp      
   character(len=*), optional :: options
   integer, optional :: rc     
+
+  ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
 
   call ESMF_CplCompPrint(comp, options, rc)
 end subroutine f_esmf_cplcompprint
