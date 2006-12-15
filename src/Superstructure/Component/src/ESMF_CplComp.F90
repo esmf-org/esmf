@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.67 2006/11/16 05:21:24 cdeluca Exp $
+! $Id: ESMF_CplComp.F90,v 1.68 2006/12/15 23:59:00 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -47,6 +47,7 @@
       use ESMF_StateTypesMod
       use ESMF_StateMod
       use ESMF_CompMod
+      use ESMF_InitMacrosMod
 
       implicit none
 
@@ -64,6 +65,7 @@
       public ESMF_CplCompSet
  
       public ESMF_CplCompValidate
+      public ESMF_CplCompGetInit
       public ESMF_CplCompPrint
  
       ! These do argument processing and then call the user-provided routines.
@@ -94,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.67 2006/11/16 05:21:24 cdeluca Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.68 2006/12/15 23:59:00 donstark Exp $'
 
 !==============================================================================
 !
@@ -160,8 +162,8 @@
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: name
-      type(ESMF_Config), intent(in) :: config
-      type(ESMF_Clock), intent(in) :: clock
+      type(ESMF_Config), intent(inout) :: config
+      type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -195,6 +197,9 @@
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
         integer :: localrc                               ! local error status
 
+        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
         ! Initialize the pointer to null.
         nullify(ESMF_CplCompCreateNew%compp)
         nullify(compclass)
@@ -216,6 +221,8 @@
 
         ! Set return values
         ESMF_CplCompCreateNew%compp => compclass
+
+        ESMF_INIT_SET_CREATED(ESMF_CplCompCreateNew)
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_CplCompCreateNew
@@ -236,12 +243,12 @@
 !
 ! !ARGUMENTS:
       character(len=*),       intent(in),  optional :: name
-      type(ESMF_Config),      intent(in),  optional :: config
+      type(ESMF_Config),      intent(inout),  optional :: config
       character(len=*),       intent(in),  optional :: configFile
-      type(ESMF_Clock),       intent(in),  optional :: clock
+      type(ESMF_Clock),       intent(inout),  optional :: clock
       integer,                intent(in),  optional :: petList(:)
       type(ESMF_ContextFlag), intent(in),  optional :: contextflag
-      type(ESMF_VM),          intent(in),  optional :: parentVm
+      type(ESMF_VM),          intent(inout),  optional :: parentVm
       integer,                intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -297,6 +304,10 @@
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
         integer :: localrc                                ! local error localrc
 
+        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVm,rc)
+
         ! Initialize the pointer to null.
         nullify(ESMF_CplCompCreate%compp)
         nullify(compclass)
@@ -320,6 +331,8 @@
 
         ! Set return values
         ESMF_CplCompCreate%compp => compclass
+
+        ESMF_INIT_SET_CREATED(ESMF_CplCompCreate)
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_CplCompCreate
@@ -340,11 +353,11 @@
       type(ESMF_CplComp) :: ESMF_CplCompCreateVM
 !
 ! !ARGUMENTS:
-      type(ESMF_VM),          intent(in)            :: vm
+      type(ESMF_VM),          intent(inout)            :: vm
       character(len=*),       intent(in),  optional :: name
-      type(ESMF_Config),      intent(in),  optional :: config
+      type(ESMF_Config),      intent(inout),  optional :: config
       character(len=*),       intent(in),  optional :: configFile
-      type(ESMF_Clock),       intent(in),  optional :: clock
+      type(ESMF_Clock),       intent(inout),  optional :: clock
       integer,                intent(in),  optional :: petList(:)
       type(ESMF_ContextFlag), intent(in),  optional :: contextflag
       integer,                intent(out), optional :: rc 
@@ -401,6 +414,10 @@
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
         integer :: localrc                                ! local error localrc
 
+        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
+
         ! Initialize the pointer to null.
         nullify(ESMF_CplCompCreateVM%compp)
         nullify(compclass)
@@ -424,6 +441,8 @@
 
         ! Set return values
         ESMF_CplCompCreateVM%compp => compclass
+
+        ESMF_INIT_SET_CREATED(ESMF_CplCompCreateVM)
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_CplCompCreateVM
@@ -446,10 +465,10 @@
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(in) :: parent
       character(len=*), intent(in), optional :: name
-      type(ESMF_Config), intent(in), optional :: config
+      type(ESMF_Config), intent(inout), optional :: config
       character(len=*), intent(in), optional :: configFile
-      type(ESMF_Clock), intent(in), optional :: clock
-      type(ESMF_VM), intent(in), optional :: vm
+      type(ESMF_Clock), intent(inout), optional :: clock
+      type(ESMF_VM), intent(inout), optional :: vm
       integer, intent(in),  optional :: petList(:)
       integer, intent(out), optional :: rc 
 !
@@ -506,6 +525,10 @@
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
         integer :: localrc                               ! local error status
 
+        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
+
         ! Initialize the pointer to null.
         nullify(ESMF_CplCompCreateGPar%compp)
         nullify(compclass)
@@ -529,6 +552,8 @@
 
         ! Set return values
         ESMF_CplCompCreateGPar%compp => compclass
+
+        ESMF_INIT_SET_CREATED(ESMF_CplCompCreateGPar)
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_CplCompCreateGPar
@@ -551,10 +576,10 @@
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(in) :: parent
       character(len=*), intent(in), optional :: name
-      type(ESMF_Config), intent(in), optional :: config
+      type(ESMF_Config), intent(inout), optional :: config
       character(len=*), intent(in), optional :: configFile
-      type(ESMF_Clock), intent(in), optional :: clock
-      type(ESMF_VM), intent(in), optional :: vm
+      type(ESMF_Clock), intent(inout), optional :: clock
+      type(ESMF_VM), intent(inout), optional :: vm
       integer, intent(in),  optional :: petList(:)
       integer, intent(out), optional :: rc 
 !
@@ -611,6 +636,10 @@
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
         integer :: localrc                                ! local error status
 
+        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVm,rc)
+
         ! Initialize the pointer to null.
         nullify(ESMF_CplCompCreateCPar%compp)
         nullify(compclass)
@@ -634,6 +663,8 @@
 
         ! Set return values
         ESMF_CplCompCreateCPar%compp => compclass
+
+        ESMF_INIT_SET_CREATED(ESMF_CplCompCreateCPar)
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_CplCompCreateCPar
@@ -673,6 +704,8 @@
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
 
+        ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+
         ! Check to see if already destroyed
         if (.not.associated(cplcomp%compp)) then  
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -693,10 +726,44 @@
                                        ESMF_CONTEXT, rc)) return
         nullify(cplcomp%compp)
  
+        ESMF_INIT_SET_DELETED(cplcomp)
         ! Set return code if user specified it
         if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_CplCompDestroy
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompGetInit"
+!BOPI
+! !IROUTINE:  ESMF_CplCompGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_CplCompGetInit(d)
+!
+! !ARGUMENTS:
+       type(ESMF_CplComp), intent(in), optional :: d
+       ESMF_INIT_TYPE :: ESMF_CplCompGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the Deep class {\tt CplComp}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_CplComp} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(d)) then
+         ESMF_CplCompGetInit = ESMF_INIT_GET(d)
+       else
+         ESMF_CplCompGetInit = ESMF_INIT_CREATED
+       endif
+
+    end function ESMF_CplCompGetInit
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -713,7 +780,7 @@
       type (ESMF_CplComp) :: cplcomp
       type (ESMF_State), intent(inout), optional :: importState
       type (ESMF_State), intent(inout), optional :: exportState
-      type (ESMF_Clock), intent(in), optional :: clock
+      type (ESMF_Clock), intent(inout), optional :: clock
       integer, intent(in), optional :: phase
       type (ESMF_BlockingFlag), intent(in), optional :: blockingflag
       integer, intent(out), optional :: rc 
@@ -765,6 +832,11 @@
 !
 !EOP
 
+        ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+
         call ESMF_CompExecute(cplcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETFINAL, phase=phase, &
           blockingflag=blockingflag, rc=rc)
@@ -783,7 +855,7 @@
         vm, contextflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CplComp),     intent(in)            :: cplcomp
+      type(ESMF_CplComp),     intent(inout)            :: cplcomp
       character(len=*),       intent(out), optional :: name
       type(ESMF_Config),      intent(out), optional :: config
       character(len=*),       intent(out), optional :: configFile
@@ -823,6 +895,11 @@
 !
 !EOP
 
+        ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
+
         call ESMF_CompGet(cplcomp%compp, name, vm=vm, contextflag=contextflag, &
           clock=clock, configFile=configFile, config=config, rc=rc)
 
@@ -843,7 +920,7 @@
       type (ESMF_CplComp) :: cplcomp
       type (ESMF_State), intent(inout), optional :: importState
       type (ESMF_State), intent(inout), optional :: exportState
-      type (ESMF_Clock), intent(in), optional :: clock
+      type (ESMF_Clock), intent(inout), optional :: clock
       integer, intent(in), optional :: phase
       type (ESMF_BlockingFlag), intent(in), optional :: blockingflag
       integer, intent(out), optional :: rc 
@@ -894,6 +971,11 @@
 !
 !EOP
 
+        ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+
         call ESMF_CompExecute(cplcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETINIT, phase=phase, &
           blockingflag=blockingflag, rc=rc)
@@ -930,6 +1012,8 @@
 !
 !EOP
 
+     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+
      !jw  call ESMF_LogWrite("Coupler Component:", ESMF_LOG_INFO)
        print *, "Coupler Component:"
        call ESMF_CompPrint(cplcomp%compp, options, rc)
@@ -949,7 +1033,7 @@
 ! !ARGUMENTS:
       type (ESMF_CplComp), intent(inout) :: cplcomp
       type (ESMF_IOSpec), intent(inout), optional :: iospec
-      type (ESMF_Clock), intent(in), optional :: clock
+      type (ESMF_Clock), intent(inout), optional :: clock
       integer, intent(in), optional :: phase
       type (ESMF_BlockingFlag), intent(in), optional :: blockingflag
       integer, intent(out), optional :: rc 
@@ -994,6 +1078,11 @@
 !   \end{description}
 !
 !EOP
+        ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
+        ESMF_INIT_CHECK_SHALLOW(ESMF_IOSpecGetInit,ESMF_IOSpecInit,iospec)
+
 	! Changed BOP to BOPI until implemented.
         call ESMF_CompReadRestart(cplcomp%compp, iospec, clock, phase, &
                                   blockingflag, rc)
@@ -1014,7 +1103,7 @@
       type (ESMF_CplComp) :: cplcomp
       type (ESMF_State), intent(inout), optional :: importState
       type (ESMF_State), intent(inout), optional :: exportState
-      type (ESMF_Clock), intent(in), optional :: clock
+      type (ESMF_Clock), intent(inout), optional :: clock
       integer, intent(in), optional :: phase
       type (ESMF_BlockingFlag), intent(in), optional :: blockingflag
       integer, intent(out), optional :: rc 
@@ -1068,6 +1157,11 @@
 !
 !EOP
 
+        ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+
         call ESMF_CompExecute(cplcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETRUN, phase=phase, &
           blockingflag=blockingflag, rc=rc)
@@ -1087,9 +1181,9 @@
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: cplcomp
       character(len=*), intent(in), optional :: name
-      type(ESMF_Config), intent(in), optional :: config
+      type(ESMF_Config), intent(inout), optional :: config
       character(len=*), intent(in), optional :: configFile
-      type(ESMF_Clock), intent(in), optional :: clock
+      type(ESMF_Clock), intent(inout), optional :: clock
       integer, intent(out), optional :: rc             
 
 !
@@ -1123,6 +1217,10 @@
 !
 !EOP
 
+        ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
         call ESMF_CompSet(cplcomp%compp, name, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
 
@@ -1139,7 +1237,7 @@
                      pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),  intent(in)            :: cplcomp
+    type(ESMF_CplComp),  intent(inout)            :: cplcomp
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -1172,6 +1270,8 @@
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_FAILURE
 
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+
     ! call CompClass method
     call ESMF_CompSetVMMaxThreads(cplcomp%compp, max, &
                    pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
@@ -1195,7 +1295,7 @@
                         pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),  intent(in)            :: cplcomp
+    type(ESMF_CplComp),  intent(inout)         :: cplcomp
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -1227,6 +1327,8 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_FAILURE
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
     ! call CompClass method
     call ESMF_CompSetVMMinThreads(cplcomp%compp, max, &
@@ -1252,7 +1354,7 @@
                        pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),  intent(in)            :: cplcomp
+    type(ESMF_CplComp),  intent(inout)         :: cplcomp
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -1284,6 +1386,8 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_FAILURE
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
     ! call CompClass method
     call ESMF_CompSetVMMaxPEs(cplcomp%compp, max, &
@@ -1330,6 +1434,12 @@
 
        call ESMF_CompValidate(cplcomp%compp, options, rc)
  
+      ! Check Init Status
+      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+
+      ! If all checks pass return success
+      if (present(rc)) rc = ESMF_SUCCESS
+
        end subroutine ESMF_CplCompValidate
 
 !------------------------------------------------------------------------------
@@ -1345,7 +1455,7 @@
 ! !ARGUMENTS:
       type (ESMF_CplComp), intent(inout) :: cplcomp
       type (ESMF_IOSpec), intent(inout), optional :: iospec
-      type (ESMF_Clock), intent(in), optional :: clock
+      type (ESMF_Clock), intent(inout), optional :: clock
       integer, intent(in), optional :: phase
       type (ESMF_BlockingFlag), intent(in), optional :: blockingflag
       integer, intent(out), optional :: rc 
@@ -1387,6 +1497,11 @@
 !   \end{description}
 !
 !EOP
+
+        ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
+        ESMF_INIT_CHECK_SHALLOW(ESMF_IOSpecGetInit,ESMF_IOSpecInit,iospec)
 	! Changed BOP to BOPI until implemented.
         call ESMF_CompWriteRestart(cplcomp%compp, iospec, clock, phase, &
                                    blockingflag, rc)
@@ -1405,7 +1520,7 @@
   subroutine ESMF_CplCompWait(cplcomp, blockingFlag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp), intent(in)                  :: cplcomp
+    type(ESMF_CplComp), intent(inout)               :: cplcomp
     type (ESMF_BlockingFlag), intent(in), optional  :: blockingFlag
     integer,            intent(out), optional       :: rc           
 !
@@ -1432,6 +1547,8 @@
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_FAILURE
 
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+
     ! call CompClass method
     call ESMF_CompWait(cplcomp%compp, blockingFlag, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
@@ -1456,7 +1573,7 @@
       logical :: ESMF_CplCompIsPetLocal
 !
 ! !ARGUMENTS:
-      type(ESMF_CplComp), intent(in) :: cplcomp
+      type(ESMF_CplComp), intent(inout) :: cplcomp
       integer, intent(out), optional  :: rc 
 !
 ! !DESCRIPTION:
@@ -1480,6 +1597,8 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_FAILURE
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
     ! call CompClass method
     localresult = ESMF_CompIsPetLocal(cplcomp%compp, localrc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.79 2006/11/16 05:21:24 cdeluca Exp $
+! $Id: ESMF_GridComp.F90,v 1.80 2006/12/15 23:58:36 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -46,6 +46,7 @@
       use ESMF_StateTypesMod
       use ESMF_StateMod
       use ESMF_CompMod
+      use ESMF_InitMacrosMod
 
       implicit none
 
@@ -63,6 +64,7 @@
       public ESMF_GridCompGet
       public ESMF_GridCompSet
  
+      public ESMF_GridCompGetInit
       public ESMF_GridCompValidate
       public ESMF_GridCompPrint
  
@@ -92,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.79 2006/11/16 05:21:24 cdeluca Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.80 2006/12/15 23:58:36 donstark Exp $'
 
 !==============================================================================
 !
@@ -153,9 +155,9 @@
 ! !ARGUMENTS:
       character(len=*), intent(in) :: name
       type(ESMF_GridCompType), intent(in) :: gridcomptype 
-      type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Config), intent(in) :: config
-      type(ESMF_Clock), intent(in) :: clock
+      type(ESMF_Grid), intent(inout) :: grid
+      type(ESMF_Config), intent(inout) :: config
+      type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -196,6 +198,10 @@
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
         integer :: localrc                               ! local error status
 
+        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
         ! Initialize the pointer to null.
         nullify(ESMF_GridCompCreateNew%compp)
         nullify(compclass)
@@ -216,6 +222,8 @@
 
         ! Set return values
         ESMF_GridCompCreateNew%compp => compclass
+
+        ESMF_INIT_SET_CREATED(ESMF_GridCompCreateNew)
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_GridCompCreateNew
@@ -238,13 +246,13 @@
       !external :: services
       character(len=*),        intent(in),    optional :: name
       type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
-      type(ESMF_Grid),         intent(in),    optional :: grid
-      type(ESMF_Config),       intent(in),    optional :: config
+      type(ESMF_Grid),         intent(inout),    optional :: grid
+      type(ESMF_Config),       intent(inout),    optional :: config
       character(len=*),        intent(in),    optional :: configFile
       type(ESMF_Clock),        intent(inout), optional :: clock
       integer,                 intent(in),    optional :: petList(:)
       type(ESMF_ContextFlag),  intent(in),    optional :: contextflag
-      type(ESMF_VM),           intent(in),    optional :: parentVm
+      type(ESMF_VM),           intent(inout),    optional :: parentVm
       integer,                 intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
@@ -307,6 +315,11 @@
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
         integer :: localrc                               ! local error status
 
+        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVm,rc)
+
         ! Initialize the pointer to null.
         nullify(ESMF_GridCompCreate%compp)
         nullify(compclass)
@@ -333,6 +346,8 @@
 
         ! Set return values
         ESMF_GridCompCreate%compp => compclass
+
+        ESMF_INIT_SET_CREATED(ESMF_GridCompCreate)
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_GridCompCreate
@@ -354,11 +369,11 @@
 !
 ! !ARGUMENTS:
       !external :: services
-      type(ESMF_VM),           intent(in)              :: vm
+      type(ESMF_VM),           intent(inout)              :: vm
       character(len=*),        intent(in),    optional :: name
       type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
-      type(ESMF_Grid),         intent(in),    optional :: grid
-      type(ESMF_Config),       intent(in),    optional :: config
+      type(ESMF_Grid),         intent(inout),    optional :: grid
+      type(ESMF_Config),       intent(inout),    optional :: config
       character(len=*),        intent(in),    optional :: configFile
       type(ESMF_Clock),        intent(inout), optional :: clock
       integer,                 intent(in),    optional :: petList(:)
@@ -424,6 +439,11 @@
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
         integer :: localrc                               ! local error status
 
+        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
+
         ! Initialize the pointer to null.
         nullify(ESMF_GridCompCreateVM%compp)
         nullify(compclass)
@@ -450,6 +470,8 @@
 
         ! Set return values
         ESMF_GridCompCreateVM%compp => compclass
+
+        ESMF_INIT_SET_CREATED(ESMF_GridCompCreateVM)
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_GridCompCreateVM
@@ -475,11 +497,11 @@
       type(ESMF_GridComp),  intent(in)  :: parent
       character(len=*),     intent(in),    optional :: name
       type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
-      type(ESMF_Grid),      intent(in),    optional :: grid
-      type(ESMF_Config),    intent(in),    optional :: config
+      type(ESMF_Grid),      intent(inout),    optional :: grid
+      type(ESMF_Config),    intent(inout),    optional :: config
       character(len=*),     intent(in),    optional :: configFile
       type(ESMF_Clock),     intent(inout), optional :: clock
-      type(ESMF_VM),        intent(in),    optional :: vm
+      type(ESMF_VM),        intent(inout),    optional :: vm
       integer,              intent(in),    optional :: petList(:)
       integer,              intent(out),   optional :: rc 
 !
@@ -542,6 +564,11 @@
         ! local vars
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
         integer :: localrc                               ! local error status
+
+        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
 
         ! Initialize the pointer to null.
         nullify(ESMF_GridCompCreateGPar%compp)
@@ -568,6 +595,8 @@
 
         ! Set return values
         ESMF_GridCompCreateGPar%compp => compclass
+
+        ESMF_INIT_SET_CREATED(ESMF_GridCompCreateGPar)
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_GridCompCreateGPar
@@ -592,11 +621,11 @@
       type(ESMF_CplComp),   intent(in)              :: parent
       character(len=*),     intent(in),    optional :: name
       type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
-      type(ESMF_Grid),      intent(in),    optional :: grid
-      type(ESMF_Config),    intent(in),    optional :: config
+      type(ESMF_Grid),      intent(inout),    optional :: grid
+      type(ESMF_Config),    intent(inout),    optional :: config
       character(len=*),     intent(in),    optional :: configFile
       type(ESMF_Clock),     intent(inout), optional :: clock
-      type(ESMF_VM),        intent(in),    optional :: vm
+      type(ESMF_VM),        intent(inout),    optional :: vm
       integer,              intent(in),    optional :: petList(:)
       integer,              intent(out),   optional :: rc 
 !
@@ -660,6 +689,11 @@
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
         integer :: localrc                               ! local error status
 
+        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVm,rc)
+
         ! Initialize the pointer to null.
         nullify(ESMF_GridCompCreateCPar%compp)
         nullify(compclass)
@@ -685,6 +719,8 @@
 
         ! Set return values
         ESMF_GridCompCreateCPar%compp => compclass
+
+        ESMF_INIT_SET_CREATED(ESMF_GridCompCreateCPar)
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_GridCompCreateCPar
@@ -723,6 +759,8 @@
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
 
+        ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+
         ! Check to see if already destroyed
         if (.not.associated(gridcomp%compp)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -744,10 +782,43 @@
 
         nullify(gridcomp%compp)
  
+        ESMF_INIT_SET_DELETED(gridcomp)
         ! Set return code if user specified it
         if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_GridCompDestroy
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompGetInit"
+!BOPI
+! !IROUTINE:  ESMF_GridCompGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_GridCompGetInit(d)
+!
+! !ARGUMENTS:
+       type(ESMF_GridComp), intent(in), optional :: d
+       ESMF_INIT_TYPE :: ESMF_GridCompGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the Deep class {\tt GridComp}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_GridComp} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(d)) then
+         ESMF_GridCompGetInit = ESMF_INIT_GET(d)
+       else
+         ESMF_GridCompGetInit = ESMF_INIT_CREATED
+       endif
+
+    end function ESMF_GridCompGetInit
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -763,7 +834,7 @@
       type (ESMF_GridComp)                              :: gridcomp
       type (ESMF_State),        intent(inout), optional :: importState
       type (ESMF_State),        intent(inout), optional :: exportState
-      type (ESMF_Clock),        intent(in),    optional :: clock
+      type (ESMF_Clock),        intent(inout),    optional :: clock
       integer,                  intent(in),    optional :: phase
       type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
       integer,                  intent(out),   optional :: rc 
@@ -815,6 +886,11 @@
 !
 !EOP
 
+        ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+
         call ESMF_CompExecute(gridcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETFINAL, phase=phase, &
           blockingflag=blockingflag, rc=rc)
@@ -832,7 +908,7 @@
         grid, config, configFile, clock, vm, contextflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp),     intent(in)            :: gridcomp
+      type(ESMF_GridComp),     intent(inout)            :: gridcomp
       character(len=*),        intent(out), optional :: name
       type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
       type(ESMF_Grid),         intent(out), optional :: grid
@@ -878,6 +954,11 @@
 !
 !EOP
 
+        ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
+
         call ESMF_CompGet(gridcomp%compp, name, vm=vm, contextflag=contextflag,&
                           gridcomptype=gridcomptype, grid=grid, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
@@ -898,7 +979,7 @@
       type (ESMF_GridComp)                              :: gridcomp
       type (ESMF_State),        intent(inout), optional :: importState
       type (ESMF_State),        intent(inout), optional :: exportState
-      type (ESMF_Clock),        intent(in),    optional :: clock
+      type (ESMF_Clock),        intent(inout), optional :: clock
       integer,                  intent(in),    optional :: phase
       type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
       integer,                  intent(out),   optional :: rc 
@@ -949,6 +1030,11 @@
 !
 !EOP
 
+        ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+
         call ESMF_CompExecute(gridcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETINIT, phase=phase, &
           blockingflag=blockingflag, rc=rc)
@@ -984,6 +1070,9 @@
 !
 !EOP
 
+        ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+
+
      !jw  call ESMF_LogWrite("Gridded Component:", ESMF_LOG_INFO)
        print *, "Gridded Component:"
        call ESMF_CompPrint(gridcomp%compp, options, rc)
@@ -1003,7 +1092,7 @@
 ! !ARGUMENTS:
       type (ESMF_GridComp), intent(inout) :: gridcomp
       type (ESMF_IOSpec), intent(inout), optional :: iospec
-      type (ESMF_Clock), intent(in), optional :: clock
+      type (ESMF_Clock), intent(inout), optional :: clock
       integer, intent(in), optional :: phase
       type (ESMF_BlockingFlag), intent(in), optional :: blockingflag
       integer, intent(out), optional :: rc 
@@ -1048,6 +1137,10 @@
 !   \end{description}
 !
 !EOP
+        ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_IOSpecGetInit,ESMF_IOSpecInit,iospec)
+
 	! Change BOPI to BOP when implemented.
         call ESMF_CompReadRestart(gridcomp%compp, iospec, clock, phase, &
                                   blockingflag, rc)
@@ -1068,7 +1161,7 @@
       type (ESMF_GridComp)                              :: gridcomp
       type (ESMF_State),        intent(inout), optional :: importState
       type (ESMF_State),        intent(inout), optional :: exportState
-      type (ESMF_Clock),        intent(in),    optional :: clock
+      type (ESMF_Clock),        intent(inout),    optional :: clock
       integer,                  intent(in),    optional :: phase
       type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
       integer,                  intent(out),   optional :: rc 
@@ -1121,6 +1214,11 @@
 !
 !EOP
 
+        ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+
         call ESMF_CompExecute(gridcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETRUN, phase=phase, &
           blockingflag=blockingflag, rc=rc)
@@ -1141,10 +1239,10 @@
       type(ESMF_GridComp),     intent(inout)         :: gridcomp
       character(len=*),        intent(in),  optional :: name
       type(ESMF_GridCompType), intent(in),  optional :: gridcomptype 
-      type(ESMF_Grid),         intent(in),  optional :: grid
-      type(ESMF_Config),       intent(in),  optional :: config
+      type(ESMF_Grid),         intent(inout),  optional :: grid
+      type(ESMF_Config),       intent(inout),  optional :: config
       character(len=*),        intent(in),  optional :: configFile
-      type(ESMF_Clock),        intent(in),  optional :: clock
+      type(ESMF_Clock),        intent(inout),  optional :: clock
       integer,                 intent(out), optional :: rc             
 
 !
@@ -1182,6 +1280,11 @@
 !
 !EOP
 
+        ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
         call ESMF_CompSet(gridcomp%compp, name, &
                           gridcomptype=gridcomptype, grid=grid, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
@@ -1200,7 +1303,7 @@
                      pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in)            :: gridcomp
+    type(ESMF_GridComp), intent(inout)            :: gridcomp
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -1233,6 +1336,8 @@
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_FAILURE
 
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+
     ! call CompClass method
     call ESMF_CompSetVMMaxThreads(gridcomp%compp, max, &
                  pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
@@ -1257,7 +1362,7 @@
                     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in)            :: gridcomp
+    type(ESMF_GridComp), intent(inout)            :: gridcomp
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -1289,6 +1394,8 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_FAILURE
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
     ! call CompClass method
     call ESMF_CompSetVMMinThreads(gridcomp%compp, max, &
@@ -1315,7 +1422,7 @@
                        pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in)            :: gridcomp
+    type(ESMF_GridComp), intent(inout)            :: gridcomp
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -1347,6 +1454,8 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_FAILURE
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
     ! call CompClass method
     call ESMF_CompSetVMMaxPEs(gridcomp%compp, max, &
@@ -1395,6 +1504,12 @@
        call ESMF_CompValidate(gridcomp%compp, options, rc)
 
        ! TODO: also need to validate grid if it's associated here
+
+      ! Check Init Status
+      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+
+      ! If all checks pass return success
+      if (present(rc)) rc = ESMF_SUCCESS
  
        end subroutine ESMF_GridCompValidate
 
@@ -1412,7 +1527,7 @@
 ! !ARGUMENTS:
       type (ESMF_GridComp), intent(inout) :: gridcomp
       type (ESMF_IOSpec), intent(inout), optional :: iospec
-      type (ESMF_Clock), intent(in), optional :: clock
+      type (ESMF_Clock), intent(inout), optional :: clock
       integer, intent(in), optional :: phase
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       integer, intent(out), optional :: rc 
@@ -1454,6 +1569,12 @@
 !   \end{description}
 !
 !EOP
+        ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
+        ESMF_INIT_CHECK_SHALLOW(ESMF_IOSpecGetInit,ESMF_IOSpecInit,iospec)
+
+
 	!Change BOPI to BOP when implemented.
         call ESMF_CompWriteRestart(gridcomp%compp, iospec, clock, phase, &
                                    blockingflag, rc)
@@ -1498,6 +1619,8 @@
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_FAILURE
 
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+
     ! call CompClass method
     call ESMF_CompWait(gridcomp%compp, blockingFlag, localrc)
     ! if (ESMF_LogPassFoundError(localrc, rc)) return
@@ -1524,7 +1647,7 @@
       logical :: ESMF_GridCompIsPetLocal
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp), intent(in) :: gridcomp
+      type(ESMF_GridComp), intent(inout) :: gridcomp
       integer, intent(out), optional  :: rc 
 !
 ! !DESCRIPTION:
@@ -1548,6 +1671,8 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_FAILURE
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
     ! call CompClass method
     localresult = ESMF_CompIsPetLocal(gridcomp%compp, localrc)
