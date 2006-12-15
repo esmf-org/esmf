@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.54 2006/12/13 20:17:55 cdeluca Exp $
+% $Id: ESMF_install.tex,v 1.55 2006/12/15 22:10:19 cdeluca Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -460,42 +460,26 @@ uni-processor targets are available as {\tt gmake run\_examples\_uni} or
 \subsubsection{Building the ESMF Documentation}
 \label{BuildDocumentation}
 
-The documentation consists of an {\it ESMF User's Guide}, 
-{\it ESMF Requirements Document}, and 
-{\it ESMF Reference Manual for Fortran}.  
+The ESMF source documentation consists of an {\it ESMF User's Guide}
+and an {\it ESMF Reference Manual for Fortran}.
+
+The tarballs on the ESMF website for ESMF versions 3.0.1 and later do
+not contain the ESMF documentation files.  The documentation is 
+available on the ESMF website in html or pdf form and most users should
+not need to build it from the source.
+
+If a user does want to build the documentation, they will need to 
+download the {\tt esmf} module from the ESMF SourceForge repository
+(see section \ref{sec:download}.  Latex and latex2html must be
+installed.
+
 \noindent To build documentation:
 \begin{verbatim}
   gmake doc              ! Builds the manuals, including pdf and html.
 \end{verbatim}
 
 \noindent The resulting documentation files will be
-located in the top level directory \${ESMF\_DIR}/doc.
-
-%%
-%% nsc 22jun04 - this is no longer true, so i'm commenting it out for now.
-%% when we make it work again, comment this section back in and update it.
-%% 
-%% \noindent To build documentation for one module:
-%% 
-%% \noindent First change directory to the where the desired module's documentation 
-%% resides; for example, to build the {\tt TimeMgr} documentation start
-%% with:
-%% 
-%% \begin{verbatim}
-%% cd $ESMF_DIR/src/Infrastructure/TimeMgr/doc
-%% \end{verbatim}
-%% 
-%% \noindent Next issue one of the following commands:
-%% \begin{verbatim}
-%%   gmake pdf      ! Builds local pdf files.
-%%   gmake html     ! Builds local html files.
-%%   gmake alldoc   ! Builds all of the local documents.
-%% \end{verbatim}
-%% 
-%% \noindent The output from this local documentation build is in the top 
-%% level {\tt doc} directory, as with the previous commands.
-%% 
-%% 
+located in the top level directory \${ESMF\_DIR}/doc
 
 \subsubsection{Installing the ESMF}
 \label{InstallESMF}
