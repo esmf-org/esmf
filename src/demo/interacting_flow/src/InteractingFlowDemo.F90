@@ -1,4 +1,4 @@
-! $Id: InteractingFlowDemo.F90,v 1.3 2006/02/09 21:00:03 nscollins Exp $
+! $Id: InteractingFlowDemo.F90,v 1.4 2006/12/20 16:43:46 samsoncheung Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -106,7 +106,7 @@
 ! !ARGUMENTS:
      type(ESMF_GridComp), intent(inout) :: gcomp
      type(ESMF_State), intent(inout) :: importState, exportState
-     type(ESMF_Clock), intent(in) :: clock
+     type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -317,7 +317,7 @@
 ! !ARGUMENTS:
      type(ESMF_GridComp), intent(inout) :: comp
      type(ESMF_State), intent(inout) :: importState, exportState
-     type(ESMF_Clock), intent(in) :: clock
+     type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -392,7 +392,7 @@ end subroutine interactingflow_run
 ! !ARGUMENTS:
      type(ESMF_GridComp), intent(inout) :: comp
      type(ESMF_State), intent(inout) :: importState, exportState
-     type(ESMF_Clock), intent(in) :: clock
+     type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:

@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.28 2006/04/13 18:27:48 samsoncheung Exp $
+! $Id: FlowSolverMod.F90,v 1.29 2006/12/20 16:42:37 samsoncheung Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -137,7 +137,7 @@
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
-      type(ESMF_Clock), intent(in) :: clock
+      type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -327,7 +327,7 @@
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
-      type(ESMF_Clock), intent(in) :: clock
+      type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -396,7 +396,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: gcomp
-      type(ESMF_Clock), intent(in) :: clock
+      type(ESMF_Clock), intent(inout) :: clock
       integer, optional, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -1572,7 +1572,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp) :: gcomp
-      type(ESMF_Clock), intent(in) :: clock
+      type(ESMF_Clock), intent(inout) :: clock
       integer, intent(in) :: file_no
       integer, optional, intent(out) :: rc
 !
@@ -1688,7 +1688,7 @@
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
-      type(ESMF_Clock), intent(in) :: clock
+      type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:

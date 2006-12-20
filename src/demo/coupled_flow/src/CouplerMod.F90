@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.23 2005/10/12 19:06:22 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.24 2006/12/20 16:42:37 samsoncheung Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -89,7 +89,7 @@
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp
       type(ESMF_State), intent(inout) :: importState, exportState
-      type(ESMF_Clock), intent(in) :: clock
+      type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -169,7 +169,7 @@
 ! !ARGUMENTS:
      type(ESMF_CplComp), intent(inout) :: comp
      type(ESMF_State), intent(inout) :: importState, exportState
-     type(ESMF_Clock), intent(in) :: clock
+     type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -281,7 +281,7 @@
 ! !ARGUMENTS:
       type(ESMF_CplComp) :: comp
       type(ESMF_State), intent(inout) :: importState, exportState
-      type(ESMF_Clock), intent(in) :: clock
+      type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
