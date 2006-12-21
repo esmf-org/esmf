@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.50 2006/11/16 05:21:02 cdeluca Exp $
+! $Id: ESMF_GridTypes.F90,v 1.51 2006/12/21 22:01:11 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -546,7 +546,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.50 2006/11/16 05:21:02 cdeluca Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.51 2006/12/21 22:01:11 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -1074,7 +1074,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(out) :: physgrid
-      type(ESMF_GridClass), intent(in)  :: grid
+      type(ESMF_GridClass), intent(inout)  :: grid
       type(ESMF_RelLoc), intent(in), optional :: relloc
       character(*), intent(in), optional :: name
       integer, intent(out), optional :: rc
@@ -1177,7 +1177,7 @@
       subroutine ESMF_GridGetPhysGridID(grid, relloc, physGridId, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridClass), intent(in) :: grid
+      type(ESMF_GridClass), intent(inout) :: grid
       type(ESMF_RelLoc), intent(in) :: relloc
       integer, intent(out) :: physGridId
       integer, intent(out), optional :: rc

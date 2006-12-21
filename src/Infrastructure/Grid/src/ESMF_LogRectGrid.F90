@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.158 2006/11/16 05:21:02 cdeluca Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.159 2006/12/21 22:01:11 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.158 2006/11/16 05:21:02 cdeluca Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.159 2006/12/21 22:01:11 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -4609,7 +4609,7 @@
                                      cornerCoord, faceCoord, reorder, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Grid), intent(inout) :: grid
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       type(ESMF_InternArray), intent(out), dimension(:), optional :: centerCoord
@@ -7293,7 +7293,7 @@
                                 periodic, delayout, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Grid), intent(inout) :: grid
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       type(ESMF_GridType), intent(out), optional :: horzGridType

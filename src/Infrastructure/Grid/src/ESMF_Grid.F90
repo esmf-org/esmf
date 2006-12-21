@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.238 2006/11/17 18:35:52 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.239 2006/12/21 22:01:11 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.238 2006/11/17 18:35:52 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.239 2006/12/21 22:01:11 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -1440,7 +1440,7 @@
                                      periodic, delayout, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Grid), intent(inout) :: grid
       type(ESMF_GridType),     intent(out), optional :: horzgridtype
       type(ESMF_GridVertType), intent(out), optional :: vertgridtype
       type(ESMF_GridHorzStagger), intent(out), optional :: horzstagger
@@ -1646,7 +1646,7 @@
                                         delayout, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Grid), intent(inout) :: grid
       type(ESMF_RelLoc), intent(in) :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       type(ESMF_GridType),     intent(out), optional :: horzgridtype
@@ -2944,7 +2944,7 @@
                                    cornerCoord, faceCoord, reorder, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Grid), intent(inout) :: grid
       type(ESMF_RelLoc), intent(in), optional :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       type(ESMF_InternArray), intent(out), dimension(:), optional :: centerCoord
@@ -3083,7 +3083,7 @@
         docopy, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Grid), intent(inout) :: grid
       integer, intent(in) :: dim
       type(ESMF_RelLoc), intent(in), optional :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
@@ -3253,7 +3253,7 @@
         docopy, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Grid), intent(inout) :: grid
       integer, intent(in) :: dim
       type(ESMF_RelLoc), intent(in), optional :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
@@ -6439,7 +6439,7 @@
       subroutine ESMF_GridSerialize(grid, buffer, length, offset, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid 
+      type(ESMF_Grid), intent(inout) :: grid 
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
