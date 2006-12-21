@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.86 2006/12/13 00:52:31 donstark Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.87 2006/12/21 22:04:44 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -266,7 +266,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.86 2006/12/13 00:52:31 donstark Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.87 2006/12/21 22:04:44 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -679,8 +679,8 @@ end subroutine ESMF_RegridIndexTypeValidate
 ! !ARGUMENTS:
 
       integer,                 intent(in   ) :: dimCount
-      type(ESMF_Grid),         intent(in   ) :: srcGrid
-      type(ESMF_Grid),         intent(in   ) :: dstGrid
+      type(ESMF_Grid),         intent(inout) :: srcGrid
+      type(ESMF_Grid),         intent(inout) :: dstGrid
       type(ESMF_DomainList),   intent(inout) :: recvDomainList
       type(ESMF_VM),           intent(in   ) :: parentVM
       type(ESMF_FieldDataMap), intent(inout) :: srcDatamap
@@ -1176,7 +1176,7 @@ end subroutine ESMF_RegridIndexTypeValidate
       integer,                 intent(in   ) :: dimCount
       type(ESMF_DomainList),   intent(inout) :: domainList
       type(ESMF_InternArray),        intent(in   ) :: array
-      type(ESMF_Grid),         intent(in   ) :: grid
+      type(ESMF_Grid),         intent(inout) :: grid
       type(ESMF_FieldDataMap), intent(inout) :: dataMap
       logical,                 intent(in   ) :: total
       integer,                 intent(  out), optional :: rc

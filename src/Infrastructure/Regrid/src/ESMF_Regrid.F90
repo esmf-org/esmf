@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.106 2006/12/08 23:36:07 theurich Exp $
+! $Id: ESMF_Regrid.F90,v 1.107 2006/12/21 22:04:44 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.106 2006/12/08 23:36:07 theurich Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.107 2006/12/21 22:04:44 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -205,11 +205,11 @@
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray),         intent(in   ) :: srcArray
-      type(ESMF_Grid),          intent(in   ) :: srcGrid
+      type(ESMF_Grid),          intent(inout) :: srcGrid
       type(ESMF_FieldDataMap),  intent(inout) :: srcDatamap
       logical,                  intent(inout) :: hasSrcData
       type(ESMF_InternArray),         intent(in   ) :: dstArray
-      type(ESMF_Grid),          intent(in   ) :: dstGrid
+      type(ESMF_Grid),          intent(inout) :: dstGrid
       type(ESMF_FieldDataMap),  intent(inout) :: dstDatamap
       logical,                  intent(inout) :: hasDstData
       type(ESMF_VM),            intent(in   ) :: parentVM
@@ -1352,10 +1352,10 @@
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray),         intent(in   ) :: srcArray
-      type(ESMF_Grid),          intent(in   ) :: srcGrid
+      type(ESMF_Grid),          intent(inout) :: srcGrid
       type(ESMF_FieldDataMap),  intent(inout) :: srcDatamap
       type(ESMF_InternArray),         intent(in   ) :: dstArray
-      type(ESMF_Grid),          intent(in   ) :: dstGrid
+      type(ESMF_Grid),          intent(inout) :: dstGrid
       type(ESMF_FieldDataMap),  intent(inout) :: dstDatamap
       type(ESMF_VM),            intent(in   ) :: parentVM
       type(ESMF_RouteHandle),   intent(out  ) :: routehandle
@@ -1441,10 +1441,10 @@
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray),         intent(in   ) :: srcArray
-      type(ESMF_Grid),          intent(in   ) :: srcGrid
+      type(ESMF_Grid),          intent(inout) :: srcGrid
       type(ESMF_FieldDataMap),  intent(inout) :: srcDatamap
       type(ESMF_InternArray),         intent(in   ) :: dstArray
-      type(ESMF_Grid),          intent(in   ) :: dstGrid
+      type(ESMF_Grid),          intent(inout) :: dstGrid
       type(ESMF_FieldDataMap),  intent(inout) :: dstDatamap
       type(ESMF_VM),            intent(in   ) :: parentVM
       type(ESMF_RouteHandle),   intent(inout) :: routehandle
@@ -1973,7 +1973,7 @@
       logical :: ESMF_RegridHasData
 
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Grid), intent(inout) :: grid
       type(ESMF_FieldDatamap), intent(inout) :: datamap
       integer, intent(out), optional :: rc
 !
