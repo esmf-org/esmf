@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.100 2006/11/16 05:21:13 cdeluca Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.101 2006/12/21 21:59:37 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -45,6 +45,7 @@
       use ESMF_InternArrayCreateMod
       use ESMF_InternArrayGetMod
       use ESMF_PhysCoordMod
+      use ESMF_InitMacrosMod
 
       implicit none
 
@@ -77,7 +78,7 @@
                                         ! conditions and to avoid the need for
                                         ! inter-DE communication at the internal
                                         ! boundaries.
-
+        ESMF_INIT_DECLARE
 
       end type
 
@@ -120,6 +121,7 @@
                                   ! parameters of ellipse describing region
                                   ! around each point.  Note that the values can
                                   ! be equal, describing a circle or sphere
+        ESMF_INIT_DECLARE
       
       end type
 
@@ -147,6 +149,7 @@
         type(ESMF_GridMaskType) :: maskType
                                   ! type of mask
         type(ESMF_InternArray) :: data  ! mask data at each grid point
+        ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -214,6 +217,7 @@
                                   ! queried as a convenience to the user.  If
                                   ! there arises a need for internally computed
                                   ! metrics, they will also be set here.
+        ESMF_INIT_DECLARE
 
       end type
 
@@ -226,6 +230,7 @@
       sequence
 !     private
         type(ESMF_PhysGridType), pointer :: ptr   ! pointer to a physgrid type
+        ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -242,10 +247,24 @@
       public ESMF_PhysGrid
       public ESMF_PhysGridType
 
+      public ESMF_PhysLocationInit
+      public ESMF_PhysLocationValidate
+      public ESMF_PhysLocationGetInit
+
+      public ESMF_GridMaskInit
+      public ESMF_GridMaskValidate
+      public ESMF_GridMaskGetInit
+
+      public ESMF_PhysGridTypeInit
+      public ESMF_PhysGridTypeValidate
+      public ESMF_PhysGridTypeGetInit
+
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
+      public ESMF_PhysGridGetInit
+
       public ESMF_PhysGridCreate
       public ESMF_PhysGridDestroy
       public ESMF_PhysGridGet
@@ -324,7 +343,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.100 2006/11/16 05:21:13 cdeluca Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.101 2006/12/21 21:59:37 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -442,6 +461,412 @@
       contains
 
 !==============================================================================
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysLocationGetInit"
+!BOPI
+! !IROUTINE:  ESMF_PhysLocationGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_PhysLocationGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_PhysLocation), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_PhysLocationGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt physlocation}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_PhysLocation} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_PhysLocationGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_PhysLocationGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_PhysLocationGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysLocationInit"
+!BOPI
+! !IROUTINE:  ESMF_PhysLocationInit - Initialize PhysLocation
+
+! !INTERFACE:
+    subroutine ESMF_PhysLocationInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_PhysLocation) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt physlocation}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_PhysLocation} of which being initialized.
+!     \end{description}
+!
+!EOPI
+
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_PhysLocationInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysLocationValidate"
+!BOPI
+! !IROUTINE:  ESMF_PhysLocationValidate - Check validity of a PhysLocation
+
+! !INTERFACE:
+    subroutine ESMF_PhysLocationValidate(s,rc)
+!
+! !ARGUMENTS:
+       type(ESMF_PhysLocation), intent(inout) :: s
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt PhysLocation} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_PhysLocation} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt physlocation}
+!           is valid.
+!     \end{description}
+!
+!EOPI
+     ESMF_INIT_CHECK_SHALLOW(ESMF_PhysLocationGetInit,ESMF_PhysLocationInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_PhysLocationValidate
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysRegionGetInit"
+!BOPI
+! !IROUTINE:  ESMF_PhysRegionGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_PhysRegionGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_PhysRegion), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_PhysRegionGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt physregion}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_PhysRegion} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_PhysRegionGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_PhysRegionGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_PhysRegionGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysRegionInit"
+!BOPI
+! !IROUTINE:  ESMF_PhysRegionInit - Initialize PhysRegion
+
+! !INTERFACE:
+    subroutine ESMF_PhysRegionInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_PhysRegion) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt physregion}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_PhysRegion} of which being initialized.
+!     \end{description}
+!
+!EOPI
+
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_PhysRegionInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysRegionValidate"
+!BOPI
+! !IROUTINE:  ESMF_PhysRegionValidate - Check validity of a PhysRegion
+
+! !INTERFACE:
+    subroutine ESMF_PhysRegionValidate(s,rc)
+!
+! !ARGUMENTS:
+       type(ESMF_PhysRegion), intent(inout) :: s
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt PhysRegion} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_PhysRegion} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt physregion}
+!           is valid.
+!     \end{description}
+!
+!EOPI
+     ESMF_INIT_CHECK_SHALLOW(ESMF_PhysRegionGetInit,ESMF_PhysRegionInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_PhysRegionValidate
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMaskGetInit"
+!BOPI
+! !IROUTINE:  ESMF_GridMaskGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_GridMaskGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_GridMask), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_GridMaskGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt gridmask}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_GridMask} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_GridMaskGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_GridMaskGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_GridMaskGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMaskInit"
+!BOPI
+! !IROUTINE:  ESMF_GridMaskInit - Initialize GridMask
+
+! !INTERFACE:
+    subroutine ESMF_GridMaskInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_GridMask) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt gridmask}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_GridMask} of which being initialized.
+!     \end{description}
+!
+!EOPI
+
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_GridMaskInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMaskValidate"
+!BOPI
+! !IROUTINE:  ESMF_GridMaskValidate - Check validity of a GridMask
+
+! !INTERFACE:
+    subroutine ESMF_GridMaskValidate(s,rc)
+!
+! !ARGUMENTS:
+       type(ESMF_GridMask), intent(inout) :: s
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt GridMask} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_GridMask} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt gridmask}
+!           is valid.
+!     \end{description}
+!
+!EOPI
+     ESMF_INIT_CHECK_SHALLOW(ESMF_GridMaskGetInit,ESMF_GridMaskInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_GridMaskValidate
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridTypeGetInit"
+!BOPI
+! !IROUTINE:  ESMF_PhysGridTypeGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_PhysGridTypeGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_PhysGridType), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_PhysGridTypeGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt physgridtype}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_PhysGridType} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_PhysGridTypeGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_PhysGridTypeGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_PhysGridTypeGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridTypeInit"
+!BOPI
+! !IROUTINE:  ESMF_PhysGridTypeInit - Initialize PhysGridType
+
+! !INTERFACE:
+    subroutine ESMF_PhysGridTypeInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_PhysGridType) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt physgridtype}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_PhysGridType} of which being initialized.
+!     \end{description}
+!
+!EOPI
+
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_PhysGridTypeInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridTypeValidate"
+!BOPI
+! !IROUTINE:  ESMF_PhysGridTypeValidate - Check validity of a PhysGridType
+
+! !INTERFACE:
+    subroutine ESMF_PhysGridTypeValidate(s,rc)
+!
+! !ARGUMENTS:
+       type(ESMF_PhysGridType), intent(inout) :: s
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt PhysGridType} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_PhysGridType} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt physgridtype}
+!           is valid.
+!     \end{description}
+!
+!EOPI
+     ESMF_INIT_CHECK_SHALLOW(ESMF_PhysGridTypeGetInit,ESMF_PhysGridTypeInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_PhysGridTypeValidate
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridGetInit"
+!BOPI
+! !IROUTINE:  ESMF_PhysGridGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_PhysGridGetInit(d)
+!
+! !ARGUMENTS:
+       type(ESMF_PhysGrid), intent(inout), optional :: d
+       ESMF_INIT_TYPE :: ESMF_PhysGridGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the Deep class {\tt physgrid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_PhysGrid} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(d)) then
+         ESMF_PhysGridGetInit = ESMF_INIT_GET(d)
+       else
+         ESMF_PhysGridGetInit = ESMF_INIT_CREATED
+       endif
+
+    end function ESMF_PhysGridGetInit
+
+
+!------------------------------------------------------------------------------
 !
 ! This section includes the PhysGrid Create and Destroy methods.
 !
@@ -562,6 +987,7 @@
 
       ! Set return values.
       ESMF_PhysGridCreateNew%ptr => physgrid
+      ESMF_INIT_SET_CREATED(ESMF_PhysGridCreateNew)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_PhysGridCreateNew
@@ -744,6 +1170,7 @@
 
       nullify(physgrid%ptr)
 
+      ESMF_INIT_SET_DELETED(physgrid)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridDestroy
@@ -825,7 +1252,7 @@
                                   coordSystem, orientation, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
       type(ESMF_RelLoc), intent(out), optional :: relloc
       character (len = *), intent(out), optional :: name  
       integer, intent(out), optional :: numDims
@@ -868,6 +1295,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
+
       if (present(name)) then
         call ESMF_GetName(physgrid%ptr%base, name, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -896,7 +1326,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(inout) :: physgrid
-      type(ESMF_PhysCoord), intent(in) :: physCoord
+      type(ESMF_PhysCoord), intent(inout) :: physCoord
       integer, intent(in), optional ::  dimOrder
       integer, intent(out), optional :: rc            
 !
@@ -928,6 +1358,10 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
 
       ! if coordinate array not allocated yet, do so now
       if (.not. associated(physgrid%ptr%coords)) then
@@ -969,7 +1403,7 @@
       subroutine ESMF_PhysGridGetCoord(physgrid, physCoord, dimOrder, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
       type(ESMF_PhysCoord), intent(out) :: physCoord
       integer, intent(in), optional :: dimOrder
       character (*), intent(in), optional :: name
@@ -1007,6 +1441,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
 
       ! if dimension supplied, just grab the coordinate
       if (present(dimOrder)) then
@@ -1062,7 +1499,7 @@
                                            total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
       character(*), intent(out), optional :: name
       type(ESMF_InternArray), dimension(:), intent(inout), optional :: locationArray 
       logical, intent(in), optional :: total
@@ -1099,6 +1536,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
 
       ! if name requested, get name
       if (present(name)) then
@@ -1171,6 +1611,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
 
       ! if name specified, add name.  otherwise, make one up based on PhysGrid.
       if (present(name)) then
@@ -1263,6 +1706,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
+
       ! if name specified, add name.  otherwise, make one up based on PhysGrid.
       if (present(name)) then
         call ESMF_SetName(physgrid%ptr%regions%base, name, &
@@ -1328,7 +1774,7 @@
                                          ellipseArray, bboxArray, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
       type(ESMF_RegionType), intent(inout), optional :: regionType
       character(*), intent(inout), optional :: name
       integer, intent(inout), optional :: numVertices
@@ -1380,6 +1826,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
 
       ! if name requested, get name
       if (present(name)) then
@@ -1498,6 +1947,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
+
       ! increment mask counter
       numMaskOld = physgrid%ptr%numMasks
       numMaskNew = numMaskOld + 1
@@ -1567,7 +2019,7 @@
       subroutine ESMF_PhysGridGetMask(physgrid, maskArray, name, id, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
       type(ESMF_InternArray), intent(out) :: maskArray
       character(*), intent(in), optional :: name
       integer, intent(in), optional :: id
@@ -1606,6 +2058,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
 
       ! if id supplied, check for valid id and return appropriate mask
       if (present(id)) then
@@ -1706,6 +2161,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
+
       ! increment metric counter
       numMetricOld = physgrid%ptr%numMetrics
       numMetricNew = numMetricOld + 1
@@ -1773,7 +2231,7 @@
       subroutine ESMF_PhysGridGetMetric(physgrid, metricArray, name, id, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
       type(ESMF_InternArray), intent(out) :: metricArray
       character(*), intent(in), optional :: name
       integer, intent(in), optional :: id
@@ -1811,6 +2269,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
 
       ! if id supplied, check for valid id and return appropriate metric
       if (present(id)) then
@@ -1897,6 +2358,7 @@
 !
 !  code goes here
 !
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,d,rc)
       rc = ESMF_SUCCESS
       end subroutine ESMF_PhysGridValidate
 
@@ -1910,7 +2372,7 @@
       subroutine ESMF_PhysGridPrint(physgrid, opt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid      
+      type(ESMF_PhysGrid), intent(inout) :: physgrid      
       character (len=*), intent(in) :: opt      
       integer, intent(out), optional :: rc           
 !
@@ -1937,6 +2399,9 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
 
       ! This code will surely change, but for development purposes it
       ! is necessary to have some information available currently.
@@ -1979,7 +2444,7 @@
 !      real(kind=ESMF_KIND_R8), intent(in) :: x
 !      real(kind=ESMF_KIND_R8), intent(in) :: y
 !      integer, intent(in) :: DEid
-!      type(ESMF_PhysGrid), intent(in) :: physgrid
+!      type(ESMF_PhysGrid), intent(inout) :: physgrid
 !      type(ESMF_InternDG), intent(in) :: interndg
 !      integer, intent(out), optional :: rc
 !
@@ -2012,6 +2477,9 @@
 
 !      character(len=ESMF_MAXSTR) :: logMsg
 !!
+!      ! check variables
+!      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
+!
 !!     broadcast the point to all DEs
 !!
 !      if (my_DE == DEid) then
@@ -2132,7 +2600,7 @@
 
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
       integer, dimension(2) :: dstAdd
       real(kind=ESMF_KIND_R8), dimension(2), intent(in) :: point
       integer, intent(out), optional :: rc
@@ -2167,6 +2635,9 @@
 
       ! Initialize return code - assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
 
       ! initialize destination address to zero
       dstAdd = 0
@@ -2233,7 +2704,7 @@
 
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
       integer, dimension(2) :: dstAdd
       real(kind=ESMF_KIND_R8), dimension(2), intent(in) :: point
       character(3), intent(in) :: option
@@ -2273,6 +2744,9 @@
 
       ! Initialize return code - assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
 
       ! check validity of "option" argument
       if (option.ne.'min' .AND. option.ne.'max') then
@@ -2373,7 +2847,7 @@
 !      real(kind=ESMF_KIND_R8), intent(in) :: x
 !      real(kind=ESMF_KIND_R8), intent(in) :: y
 !      integer, intent(in) :: DEid
-!      type(ESMF_PhysGrid), intent(in) :: physgrid
+!      type(ESMF_PhysGrid), intent(inout) :: physgrid
 !      type(ESMF_InternDG), intent(in) :: interndg
 !      integer, intent(out), optional :: rc
 !
@@ -2405,6 +2879,9 @@
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
 !      character(len=ESMF_MAXSTR) :: logMsg
+!
+!      ! check variables
+!      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
 !!
 !!     broadcast the point to all DEs
 !!
@@ -2514,7 +2991,7 @@
 !      real(kind=ESMF_KIND_R8), intent(in) :: x
 !      real(kind=ESMF_KIND_R8), intent(in) :: y
 !      integer, intent(in) :: DEid
-!      type(ESMF_PhysGrid), intent(in) :: physgrid
+!      type(ESMF_PhysGrid), intent(inout) :: physgrid
 !      type(ESMF_InternDG), intent(in) :: interndg
 !      integer, intent(out), optional :: rc
 !
@@ -2545,6 +3022,9 @@
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
 !      character(len=ESMF_MAXSTR) :: logMsg
+!
+!      ! check variables
+!      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
 !!
 !!     broadcast the point to all DEs
 !!

@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.19 2006/11/16 05:21:13 cdeluca Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.20 2006/12/21 21:59:37 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -41,6 +41,7 @@
       use ESMF_UtilTypesMod
       use ESMF_LogErrMod
       use ESMF_BaseMod
+      use ESMF_InitMacrosMod
 
       implicit none
 
@@ -92,6 +93,7 @@
         logical :: equalSpaced     ! coord is equally spaced
         logical :: cyclic          ! coord is cyclic
         character (len=ESMF_MAXSTR) :: units  ! units of coord (eg 'degrees')
+        ESMF_INIT_DECLARE
 
       end type
 
@@ -103,6 +105,7 @@
       type ESMF_PhysCoord
       sequence
         type (ESMF_PhysCoordType), pointer :: ptr ! pointer to a physdomain
+        ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -126,6 +129,13 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
+      public ESMF_PhysCoordTypeInit         ! For Standardized Initialization
+      public ESMF_PhysCoordTypeValidate     ! For Standardized Initialization
+      public ESMF_PhysCoordTypeGetInit      ! For Standardized Initialization
+
+      public ESMF_PhysCoordValidate         ! For Standardized Initialization
+      public ESMF_PhysCoordGetInit          ! For Standardized Initialization
+
       public ESMF_PhysCoordCreate
       public ESMF_PhysCoordDestroy
 
@@ -230,7 +240,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.19 2006/11/16 05:21:13 cdeluca Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.20 2006/12/21 21:59:37 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -278,6 +288,167 @@
       contains
 
 !==============================================================================
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysCoordTypeGetInit"
+!BOPI
+! !IROUTINE:  ESMF_PhysCoordTypeGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_PhysCoordTypeGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_PhysCoordType), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_PhysCoordTypeGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt physcoordType}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_PhysCoordType} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_PhysCoordTypeGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_PhysCoordTypeGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_PhysCoordTypeGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysCoordTypeInit"
+!BOPI
+! !IROUTINE:  ESMF_PhysCoordTypeInit - Initialize PhysCoordType
+
+! !INTERFACE:
+    subroutine ESMF_PhysCoordTypeInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_PhysCoordType) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt physcoordtype}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_PhysCoordType} of which being initialized.
+!     \end{description}
+!
+!EOPI
+
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_PhysCoordTypeInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysCoordTypeValidate"
+!BOPI
+! !IROUTINE:  ESMF_PhysCoordTypeValidate - Check validity of a PhysCoordType
+
+! !INTERFACE:
+    subroutine ESMF_PhysCoordTypeValidate(s,rc)
+!
+! !ARGUMENTS:
+       type(ESMF_PhysCoordType), intent(inout) :: s
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt PhysCoordType} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_PhysCoordType} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt physcoordtype}
+!           is valid.
+!     \end{description}
+!
+!EOPI
+     ESMF_INIT_CHECK_SHALLOW(ESMF_PhysCoordTypeGetInit,ESMF_PhysCoordTypeInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_PhysCoordTypeValidate
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysCoordGetInit"
+!BOPI
+! !IROUTINE:  ESMF_PhysCoordGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_PhysCoordGetInit(d)
+!
+! !ARGUMENTS:
+       type(ESMF_PhysCoord), intent(inout), optional :: d
+       ESMF_INIT_TYPE :: ESMF_PhysCoordGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the Deep class {\tt physcoord}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_PhysCoord} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(d)) then
+         ESMF_PhysCoordGetInit = ESMF_INIT_GET(d)
+       else
+         ESMF_PhysCoordGetInit = ESMF_INIT_CREATED
+       endif
+
+    end function ESMF_PhysCoordGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysCoordValidate"
+!BOP
+! !IROUTINE: ESMF_PhysCoordValidate - Check validity of a PhysCoord
+!
+! !INTERFACE:
+      subroutine ESMF_PhysCoordValidate(d,rc)
+!
+! !ARGUMENTS:
+      type(ESMF_PhysCoord), intent(inout) :: d
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt physcoord} is internally consistent.
+!      Currently this method determines if the {\tt bundle} is uninitialized
+!      or already destroyed.  The method returns an error code if problems
+!      are found.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [d]
+!           {\tt ESMF\_PhysCoord} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt physcoord}
+!           is valid.
+!     \end{description}
+!EOP
+
+        ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,d,rc)
+
+        end subroutine ESMF_PhysCoordValidate
+
+
+!------------------------------------------------------------------------------
 !
 ! This section includes the PhysCoord Create and Destroy methods.
 !
@@ -416,6 +587,7 @@
 
       ! Set return values.
       ESMF_PhysCoordCreate%ptr => physCoord
+      ESMF_INIT_SET_CREATED(ESMF_PhysCoordCreate)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_PhysCoordCreate
@@ -468,6 +640,7 @@
       nullify(physCoord%ptr)
 
       ! Set return values.
+      ESMF_INIT_SET_DELETED(physCoord)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysCoordDestroy
@@ -548,6 +721,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
+
       ! Check to see if physcoord is valid
       if (.not. associated(physCoord%ptr)) then
         dummy=ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -611,7 +787,7 @@
 !
 ! !ARGUMENTS:
 
-      type(ESMF_PhysCoord), intent(in) :: physCoord
+      type(ESMF_PhysCoord), intent(inout) :: physCoord
       type(ESMF_CoordType), intent(out), optional :: coordType
       character (len=ESMF_MAXSTR), intent(out), optional :: name
       character (len=ESMF_MAXSTR), intent(out), optional :: units
@@ -645,6 +821,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
 
       ! Check for valid physcoord
       if (.not. associated(physCoord%ptr)) then
@@ -688,7 +867,7 @@
                                           originOffset, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_PhysCoord), intent(in) :: physCoord
+      type (ESMF_PhysCoord), intent(inout) :: physCoord
       real (ESMF_KIND_R8), intent(out), optional :: minVal
       real (ESMF_KIND_R8), intent(out), optional :: maxVal
       real (ESMF_KIND_R8), intent(out), optional :: originOffset
@@ -721,6 +900,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
+
       ! Check for valid physcoord
       if (.not. associated(physCoord%ptr)) then
         dummy=ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -752,7 +934,7 @@
       logical :: ESMF_PhysCoordIsAligned     ! true if physical,logical coord aligned
 !
 ! !ARGUMENTS:
-      type (ESMF_PhysCoord), intent(in) :: physCoord
+      type (ESMF_PhysCoord), intent(inout) :: physCoord
       integer, intent(out), optional :: rc               
 
 ! !DESCRIPTION:
@@ -776,6 +958,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
 
       ! Check for valid physcoord
       if (.not. associated(physCoord%ptr)) then
@@ -806,7 +991,7 @@
       logical :: ESMF_PhysCoordIsEqualSpaced     ! true if physical,logical coord aligned
 !
 ! !ARGUMENTS:
-      type (ESMF_PhysCoord), intent(in) :: physCoord
+      type (ESMF_PhysCoord), intent(inout) :: physCoord
       integer, intent(out), optional :: rc               
 
 ! !DESCRIPTION:
@@ -830,6 +1015,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
 
       ! Check for valid physcoord
       if (.not. associated(physCoord%ptr)) then
@@ -860,7 +1048,7 @@
       logical :: ESMF_PhysCoordIsCyclic     ! true if physical,logical coord aligned
 !
 ! !ARGUMENTS:
-      type (ESMF_PhysCoord), intent(in) :: physCoord
+      type (ESMF_PhysCoord), intent(inout) :: physCoord
       integer, intent(out), optional :: rc               
 
 ! !DESCRIPTION:
@@ -883,6 +1071,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
 
       ! Check for valid physcoord
       if (.not. associated(physCoord%ptr)) then
@@ -915,7 +1106,7 @@
 !
 ! !ARGUMENTS:
       real (ESMF_KIND_R8), intent(in) :: point
-      type (ESMF_PhysCoord), intent(in) :: physCoord
+      type (ESMF_PhysCoord), intent(inout) :: physCoord
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -945,6 +1136,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
 
       ESMF_PhysCoordPointInRange = .false.
 
@@ -1015,7 +1209,7 @@
       subroutine ESMF_PhysCoordPrint(physCoord, opt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysCoord), intent(in) :: physCoord      
+      type(ESMF_PhysCoord), intent(inout) :: physCoord      
       character (len=*), intent(in) :: opt      
       integer, intent(out), optional :: rc           
 !
@@ -1044,6 +1238,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
 
       print *, 'PhysCoord:'
 
