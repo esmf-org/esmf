@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.7 2006/12/08 23:36:07 theurich Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.8 2006/12/21 22:03:37 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.7 2006/12/08 23:36:07 theurich Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.8 2006/12/21 22:03:37 samsoncheung Exp $'
 !
 !==============================================================================
 !
@@ -216,7 +216,7 @@ module ESMF_InternArrayCommMod
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(in) :: array
-    type(ESMF_Grid), intent(in) :: grid
+    type(ESMF_Grid), intent(inout) :: grid
     type(ESMF_FieldDataMap), intent(inout) :: datamap
     integer, intent(in) :: rootDE
     type(ESMF_InternArray), intent(out) :: gatheredArray
@@ -366,7 +366,7 @@ module ESMF_InternArrayCommMod
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(in) :: array
-    type(ESMF_Grid), intent(in) :: grid
+    type(ESMF_Grid), intent(inout) :: grid
     type(ESMF_FieldDataMap), intent(inout) :: datamap
     type(ESMF_LocalGlobalFlag), intent(in) :: localGlobalFlag
     type(ESMF_DomainTypeFlag), intent(in) :: domainTypeFlag
@@ -526,7 +526,7 @@ module ESMF_InternArrayCommMod
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(in) :: array
-    type(ESMF_Grid), intent(in) :: grid
+    type(ESMF_Grid), intent(inout) :: grid
     type(ESMF_FieldDataMap), intent(inout) :: datamap
     type(ESMF_DomainTypeFlag), intent(in) :: domainTypeFlag
     type(ESMF_AxisIndex), dimension(:), pointer :: globalAIPerRank
@@ -628,7 +628,7 @@ module ESMF_InternArrayCommMod
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(in) :: array
-    type(ESMF_Grid), intent(in) :: grid
+    type(ESMF_Grid), intent(inout) :: grid
     type(ESMF_FieldDataMap), intent(inout) :: datamap
     type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: totalindex
     type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: compindex
@@ -1037,7 +1037,7 @@ module ESMF_InternArrayCommMod
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(inout) :: array
-    type(ESMF_Grid), intent(in) :: grid
+    type(ESMF_Grid), intent(inout) :: grid
     type(ESMF_FieldDataMap), intent(inout) :: datamap
     type(ESMF_RouteHandle), intent(out) :: routehandle
     type(ESMF_HaloDirection), intent(in), optional :: halodirection
@@ -1117,7 +1117,7 @@ module ESMF_InternArrayCommMod
       integer, intent(in) :: index
       integer, intent(in) :: rmaptype
       integer, intent(in) :: maxindex
-      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Grid), intent(inout) :: grid
       type(ESMF_FieldDataMap), intent(inout) :: datamap
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_HaloDirection), intent(in), optional :: halodirection
@@ -1861,10 +1861,10 @@ module ESMF_InternArrayCommMod
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(in) :: srcArray
-      type(ESMF_Grid), intent(in) :: srcGrid
+      type(ESMF_Grid), intent(inout) :: srcGrid
       type(ESMF_FieldDataMap), intent(inout) :: srcDataMap
       type(ESMF_InternArray), intent(in) :: dstArray
-      type(ESMF_Grid), intent(in) :: dstGrid
+      type(ESMF_Grid), intent(inout) :: dstGrid
       type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteOptions), intent(in), optional :: routeOptions
@@ -1950,10 +1950,10 @@ module ESMF_InternArrayCommMod
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(in) :: srcArray
-      type(ESMF_Grid), intent(in) :: srcGrid
+      type(ESMF_Grid), intent(inout) :: srcGrid
       type(ESMF_FieldDataMap), intent(inout) :: srcDataMap
       type(ESMF_InternArray), intent(in) :: dstArray
-      type(ESMF_Grid), intent(in) :: dstGrid
+      type(ESMF_Grid), intent(inout) :: dstGrid
       type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       integer, intent(in) :: index
       integer, intent(in) :: rmaptype
@@ -2276,10 +2276,10 @@ module ESMF_InternArrayCommMod
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(in) :: srcArray
-      type(ESMF_Grid), intent(in) :: srcGrid
+      type(ESMF_Grid), intent(inout) :: srcGrid
       type(ESMF_FieldDataMap), intent(inout) :: srcDataMap
       type(ESMF_InternArray), intent(in) :: dstArray
-      type(ESMF_Grid), intent(in) :: dstGrid
+      type(ESMF_Grid), intent(inout) :: dstGrid
       type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       integer, intent(in) :: index
       integer, intent(in) :: rmaptype
