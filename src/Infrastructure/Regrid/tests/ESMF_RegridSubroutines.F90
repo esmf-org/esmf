@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.19 2006/12/08 01:11:33 oehmke Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.20 2006/12/22 01:37:10 samsoncheung Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -984,7 +984,7 @@ contains
 
     subroutine createField(grid, LocChoice, halo, fieldName, field, &
                               f90ptr, xCoor,  yCoor, arrayspec, rc )
-    type(ESMF_Grid), intent(in)                 :: grid
+    type(ESMF_Grid), intent(inout)              :: grid
     type(ESMF_RelLoc), intent(in)               :: LocChoice
     integer, intent(in)                         :: halo
     character (len=*), intent(in)               :: fieldName
