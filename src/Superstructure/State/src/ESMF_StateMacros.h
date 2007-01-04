@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StateMacros.h,v 1.11 2006/11/16 05:21:25 cdeluca Exp $
+! $Id: ESMF_StateMacros.h,v 1.12 2007/01/04 23:19:17 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -112,6 +112,10 @@
           rcpresent = .TRUE. @\
           rc = ESMF_FAILURE @\
         endif @\
+ @\
+        ! check input variables @\
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc) @\
+ @\
  @\
         ! Test to see if array already associated, and fail if so. @\
         if (associated(dataPointer)) then @\

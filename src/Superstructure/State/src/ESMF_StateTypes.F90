@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.12 2006/11/16 07:06:36 cdeluca Exp $
+! $Id: ESMF_StateTypes.F90,v 1.13 2007/01/04 23:19:17 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,6 +44,7 @@
       use ESMF_InternArrayGetMod
       use ESMF_FieldMod
       use ESMF_BundleMod
+      use ESMF_InitMacrosMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -168,6 +169,7 @@
           type(ESMF_InternArray)  :: iap
           type(ESMF_Array)  :: ap
           type(ESMF_StateClass), pointer  :: spp
+          ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -189,6 +191,7 @@
         type(ESMF_ReqForRestartFlag) :: reqrestart
         integer :: indirect_index
         character(len=ESMF_MAXSTR) :: namep
+         ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -211,6 +214,7 @@
         integer :: alloccount
         integer :: datacount
         type(ESMF_StateItem), dimension(:), pointer :: datalist
+         ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -228,6 +232,7 @@
 #else
         type(ESMF_StateClass), pointer :: statep
 #endif
+         ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -253,6 +258,23 @@
       public ESMF_StateClass, ESMF_StateItem, ESMF_DataHolder
       public ESMF_STATEITEM_INDIRECT, ESMF_STATEITEM_UNKNOWN
       public ESMF_STATE_INVALID
+
+      ! Public Methods
+      public ESMF_DataHolderValidate
+      public ESMF_StateItemValidate
+      public ESMF_StateClassValidate
+
+      ! ESMF library private methods
+      public ESMF_DataHolderInit
+      public ESMF_DataHolderGetInit
+      public ESMF_StateItemInit
+      public ESMF_StateItemGetInit
+      public ESMF_StateClassGetInit
+      public ESMF_StateGetInit
+
+
+
+
 !------------------------------------------------------------------------------
       public operator(.eq.), operator(.ne.)
 !EOPI
@@ -260,7 +282,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.12 2006/11/16 07:06:36 cdeluca Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.13 2007/01/04 23:19:17 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -367,6 +389,344 @@ function ESMF_validne(s1, s2)
  ESMF_validne = (s1%valid .ne. s2%valid)
 end function
 
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DataHolderValidate()"
+!BOP
+! !IROUTINE: ESMF_DataHolderValidate - Validate DataHolder internals
+
+! !INTERFACE:
+  subroutine ESMF_DataHolderValidate(dh, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DataHolder), intent(in)              :: dh
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Validates that the {\tt dh} is internally consistent.
+!      The method returns an error code if problems are found.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[dh] 
+!          Specified {\tt ESMF\_DataHolder} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_DataHolderGetInit, ESMF_DataHolderInit,dh)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_DataHolderValidate
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DataHolderInit()"
+!BOPI
+! !IROUTINE: ESMF_DataHolderInit - Init DataHolder internals
+
+! !INTERFACE:
+  subroutine ESMF_DataHolderInit(dh)
+!
+! !ARGUMENTS:
+    type(ESMF_DataHolder), intent(inout)              :: dh
+!         
+!
+! !DESCRIPTION:
+!      Initialize DataHolder internals.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[dh] 
+!          Specified {\tt ESMF\_DataHolder} object.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    ESMF_INIT_SET_DEFINED(dh)
+  end subroutine ESMF_DataHolderInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DataHolderGetInit"
+!BOPI
+! !IROUTINE: ESMF_DataHolderGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+  function ESMF_DataHolderGetInit(dh) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_DataHolderGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_DataHolder), intent(in), optional :: dh
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [dh]
+!           DataHolder object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(dh)) then
+      ESMF_DataHolderGetInit = ESMF_INIT_GET(dh)
+    else
+      ESMF_DataHolderGetInit = ESMF_INIT_DEFINED
+    endif
+
+  end function ESMF_DataHolderGetInit
+!------------------------------------------------------------------------------
+
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateItemValidate()"
+!BOP
+! !IROUTINE: ESMF_StateItemValidate - Validate StateItem internals
+
+! !INTERFACE:
+  subroutine ESMF_StateItemValidate(si, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_StateItem), intent(in)              :: si
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Validates that the {\tt si} is internally consistent.
+!      The method returns an error code if problems are found.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[si] 
+!          Specified {\tt ESMF\_StateItem} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_StateItemGetInit, ESMF_StateItemInit,si)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_StateItemValidate
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateItemInit()"
+!BOPI
+! !IROUTINE: ESMF_StateItemInit - Init StateItem internals
+
+! !INTERFACE:
+  subroutine ESMF_StateItemInit(si)
+!
+! !ARGUMENTS:
+    type(ESMF_StateItem), intent(inout)              :: si
+!         
+!
+! !DESCRIPTION:
+!      Initialize StateItem internals.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[si] 
+!          Specified {\tt ESMF\_StateItem} object.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    ESMF_INIT_SET_DEFINED(si)
+  end subroutine ESMF_StateItemInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateItemGetInit"
+!BOPI
+! !IROUTINE: ESMF_StateItemGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+  function ESMF_StateItemGetInit(si) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_StateItemGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_StateItem), intent(in), optional :: si
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [si]
+!           StateItem object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(si)) then
+      ESMF_StateItemGetInit = ESMF_INIT_GET(si)
+    else
+      ESMF_StateItemGetInit = ESMF_INIT_DEFINED
+    endif
+
+  end function ESMF_StateItemGetInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateClassValidate()"
+!BOP
+! !IROUTINE: ESMF_StateClassValidate - Validate StateClass internals
+
+! !INTERFACE:
+  subroutine ESMF_StateClassValidate(sc, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_StateClass), intent(in)              :: sc
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Validates that the {\tt StateClass} is internally consistent.
+!      The method returns an error code if problems are found.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[sc] 
+!          Specified {\tt ESMF\_StateClass} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit, sc, rc)
+      
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_StateClassValidate
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateClassGetInit"
+!BOPI
+! !IROUTINE: ESMF_StateClassGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+      function ESMF_StateClassGetInit(sc) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_StateClassGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_StateClass), intent(in), optional :: sc
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [sc]
+!           StateClass object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(sc)) then
+      ESMF_StateClassGetInit = ESMF_INIT_GET(sc)
+    else
+      ESMF_StateClassGetInit = ESMF_INIT_CREATED
+    endif
+
+    end function ESMF_StateClassGetInit
+!------------------------------------------------------------------------------
+
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetInit"
+!BOPI
+! !IROUTINE: ESMF_StateGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+      function ESMF_StateGetInit(s) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_StateGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in), optional :: s
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           State object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(s)) then
+      ESMF_StateGetInit = ESMF_INIT_GET(s)
+    else
+      ESMF_StateGetInit = ESMF_INIT_CREATED
+    endif
+
+    end function ESMF_StateGetInit
+!------------------------------------------------------------------------------
 
 
 end module ESMF_StateTypesMod

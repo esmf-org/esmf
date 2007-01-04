@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.97 2006/12/07 05:35:36 samsoncheung Exp $
+! $Id: ESMF_State.F90,v 1.98 2007/01/04 23:19:17 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -45,6 +45,7 @@
       use ESMF_FieldMod
       use ESMF_BundleMod
       use ESMF_StateTypesMod
+      use ESMF_InitMacrosMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -87,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.97 2006/12/07 05:35:36 samsoncheung Exp $'
+      '$Id: ESMF_State.F90,v 1.98 2007/01/04 23:19:17 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -384,6 +385,10 @@ end interface
       type(ESMF_InternArray) :: temp_list(1)
       integer :: localrc
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,array,rc)
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -435,7 +440,13 @@ end interface
 !
 !EOP
 
-      integer :: localrc
+      integer :: localrc,i
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      do i=1,arrayCount
+         ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,arrayList(i),rc)
+      enddo
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -486,6 +497,11 @@ end interface
 
       type(ESMF_Array) :: temp_list(1)
       integer :: localrc
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -538,7 +554,14 @@ end interface
 !
 !EOP
 
-      integer :: localrc
+      integer :: localrc,i
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      do i=1,arrayCount
+         ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,arrayList(i),rc)
+      enddo
+
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -591,6 +614,10 @@ end interface
       integer :: localrc
       type(ESMF_Bundle) :: temp_list(1)
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -641,7 +668,14 @@ end interface
 !     \end{description}
 !
 !EOP
-      integer :: localrc
+      integer :: localrc,i
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      do i=1,bundleCount
+         ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundleList(i),rc)
+      enddo
+
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -695,6 +729,10 @@ end interface
       integer :: localrc
       type(ESMF_Field) :: temp_list(1)
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -745,7 +783,14 @@ end interface
 !     \end{description}
 !
 !EOP
-      integer :: localrc
+      integer :: localrc,i
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      do i=1,fieldCount
+         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList(i),rc)
+      enddo
+
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -796,6 +841,9 @@ end interface
       integer :: localrc
       character(len=ESMF_MAXSTR) :: temp_list(1)
       
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -852,6 +900,10 @@ end interface
 !EOP
       integer :: localrc
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -903,6 +955,11 @@ end interface
 
       integer :: localrc
       type(ESMF_State) :: temp_list(1)
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,nestedState,rc)
+
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -957,7 +1014,14 @@ end interface
 !     \end{description}
 !
 !EOP
-      integer :: localrc
+      integer :: localrc,i
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      do i=1,nestedStateCount
+         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,nestedStateList(i),rc)
+      enddo
+
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1058,9 +1122,33 @@ end interface
         ! local vars
         type (ESMF_StateClass), pointer :: stypep
         integer :: localrc                          ! local error status
+        integer :: i
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
+
+        ! check input variables
+        if (present(bundleList)) then
+           do i=1,size(bundleList)
+              ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundleList(i),rc)
+           enddo
+        endif
+        if (present(fieldList)) then
+           do i=1,size(fieldList)
+              ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList(i),rc)
+           enddo
+        endif
+        if (present(arrayList)) then
+           do i=1,size(arrayList)
+              ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,arrayList(i),rc)
+           enddo
+        endif
+        if (present(nestedStateList)) then
+           do i=1,size(nestedStateList)
+              ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,nestedStateList(i),rc)
+           enddo
+        endif
+
 
         ! Initialize the pointers to null.
         nullify(ESMF_StateCreate%statep)
@@ -1083,7 +1171,11 @@ end interface
         endif
 
         ! Set return values
-        ESMF_StateCreate%statep => stypep 
+        ESMF_StateCreate%statep => stypep
+
+        ! validate created state
+        ESMF_INIT_SET_CREATED(ESMF_StateCreate)
+ 
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_StateCreate
@@ -1128,6 +1220,9 @@ end interface
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
         ! Simple sanity checks
         call ESMF_StateValidate(state, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -1146,6 +1241,9 @@ end interface
         if (ESMF_LogMsgFoundAllocError(localrc, "deallocate State", &
                                        ESMF_CONTEXT, rc)) return
         nullify(state%statep)
+
+        ! Invalidate Destroyed State
+        ESMF_INIT_SET_DELETED(state)
 
         ! Set return code if user specified it
         if (present(rc)) rc = ESMF_SUCCESS
@@ -1205,6 +1303,9 @@ end interface
       integer :: i, localrc
       type(ESMF_StateClass), pointer :: stypep
       type(ESMF_StateItem), pointer :: nextitem
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1298,6 +1399,10 @@ end interface
       character(len=ESMF_MAXSTR) :: errmsg
 
       localrc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
        
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1405,7 +1510,10 @@ end interface
       character(len=ESMF_MAXSTR) :: errmsg
 
       localrc = ESMF_FAILURE
-       
+   
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+    
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1540,6 +1648,9 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1600,6 +1711,9 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1663,6 +1777,9 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1723,6 +1840,9 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1787,6 +1907,10 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1846,6 +1970,9 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1910,6 +2037,9 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1969,6 +2099,9 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -2033,6 +2166,9 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2093,6 +2229,9 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -2157,6 +2296,9 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2208,6 +2350,9 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -2281,6 +2426,9 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -2364,6 +2512,9 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2444,6 +2595,10 @@ end interface
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
       ! TODO: do we need an empty bundle to mark failure?
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -2551,6 +2706,9 @@ end interface
       if (present(rc)) rc = ESMF_FAILURE
       ! TODO: do we need an empty field to mark failure?
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2652,6 +2810,10 @@ end interface
       type(ESMF_StateClass), pointer :: stypep
       type(ESMF_StateItem), pointer :: nextitem
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2723,6 +2885,9 @@ end interface
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2786,6 +2951,9 @@ end interface
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
       ! TODO: do we need an empty state to mark failure?
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -2857,6 +3025,9 @@ end interface
       if (present(rc)) rc = ESMF_FAILURE
       ESMF_StateIsNeeded = .FALSE.
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2925,6 +3096,10 @@ end interface
        defaultopts = "brief"
        ! Initialize return code; assume failure until success is certain
        if (present(rc)) rc = ESMF_FAILURE
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
 
        ! TODO: Add code here
        ! print num of states, state type, etc
@@ -3067,6 +3242,7 @@ end interface
         a%statep => b
         nullify(a%statep)
 
+
         ESMF_StateReadRestart = a 
         if (present(rc)) rc = ESMF_FAILURE
  
@@ -3161,6 +3337,10 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3223,6 +3403,10 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
   
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -3288,6 +3472,10 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3351,6 +3539,10 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
   
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3416,6 +3608,10 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3477,6 +3673,10 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -3543,6 +3743,10 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3604,6 +3808,10 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -3669,6 +3877,10 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3731,6 +3943,10 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -3796,6 +4012,10 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3852,6 +4072,10 @@ end interface
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3907,6 +4131,9 @@ end interface
 ! TODO: code goes here
 !
       character (len=6) :: defaultopts
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
       defaultopts = "brief"
       ! Initialize return code; assume failure until success is certain
@@ -3965,6 +4192,9 @@ end interface
 
         localrc = ESMF_FAILURE
 
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
         if (present(itemname)) then
             call ESMF_StateGetField(state, fieldname=itemname, field=fred, rc=localrc)
             call ESMF_FieldWrite(fred, iospec=iospec, rc=localrc) 
@@ -4017,6 +4247,11 @@ end interface
 ! the subroutine has not been implemented. When the code is
 ! completed change back to BOP/EOP.
 !
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+
         if (present(rc)) rc = ESMF_FAILURE
         end subroutine ESMF_StateWriteRestart
 
@@ -4107,17 +4342,36 @@ end interface
         ! Local vars
         integer :: count
         integer :: localrc                   ! local error status
+        integer :: i
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
         localrc = ESMF_FAILURE 
 
-        ! check variables
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,bundles,rc)
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields,rc)
+        ! check input variables
+        if (present(bundles)) then
+           do i=1,size(bundles)
+              ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundles(i),rc)
+           enddo
+        endif
+        if (present(fields)) then
+           do i=1,size(fields)
+              ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields(i),rc)
+           enddo
+        endif
+        if (present(arrays)) then
+           do i=1,size(arrays)
+              ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,arrays(i),rc)
+           enddo
+        endif
+        if (present(states)) then
+           do i=1,size(states)
+              ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,states(i),rc)
+           enddo
+        endif
+
 
         ! Quick sanity check on the values
-
         count = 0
         if (present(bundles)) count = count + size(bundles)
         if (present(fields)) count = count + size(fields)
@@ -4286,6 +4540,9 @@ end interface
         stypep%datacount = 0
         nullify(stypep%datalist)
 
+        ! Set as created
+        ESMF_INIT_SET_CREATED(stypep)
+
         ! set return values
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4323,6 +4580,9 @@ end interface
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
 
+        ! check input variable
+        ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
+
         ! mark object invalid, and free each of the blocks associated
         ! with each entry.  note that we are not freeing the objects
         ! themselves; they could be added to multiple states.  it is
@@ -4345,6 +4605,9 @@ end interface
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
+        ! Set as deleted
+        ESMF_INIT_SET_DELETED(stypep)
 
         ! Set return code if user specified it
         if (present(rc)) rc = ESMF_SUCCESS
@@ -4394,6 +4657,13 @@ end interface
 
       ! Initialize return code.  Assume failure until success assured.
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
+      do i=1,acount
+         ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,arrays(i),rc)
+      enddo
+
       aname = ""
   
       ! Return with error if list is empty.  
@@ -4578,6 +4848,14 @@ end interface
 
       ! Initialize return code.  Assume failure until success assured.
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
+      do i=1,acount
+         ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,arrays(i),rc)
+      enddo
+
+
       aname = ""
   
       ! Return with error if list is empty.  
@@ -4763,7 +5041,15 @@ end interface
       logical :: exists
 
       ! Initialize return code.  Assume failure until success assured.
-      if (present(rc)) rc = ESMF_FAILURE 
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
+      do i=1,fcount
+         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields(i),rc)
+      enddo
+
+ 
       fname = ""
 
       ! check variables
@@ -4966,7 +5252,10 @@ end interface
       fname = ""
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
+      do i=1,bcount
+         ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundles(i),rc)
+      enddo
   
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
@@ -5308,6 +5597,14 @@ end interface
 
       ! Initialize return code.  Assume failure until success assured.
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
+      do i=1,scount
+         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,states(i),rc)
+      enddo
+
+
       sname = ""
   
       ! Return with error if list is empty.  
@@ -5519,6 +5816,10 @@ end interface
       localrc = ESMF_FAILURE 
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
+
+
       itemfound = .FALSE.
   
       ! This function is only called internally, so we do not need to check
@@ -5601,6 +5902,9 @@ end interface
       ! Initialize return code.  Assume failure until success assured.
       if (present(rc)) rc = ESMF_FAILURE
   
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
+
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
       if (ncount .le. 0) then
@@ -5754,6 +6058,9 @@ end interface
       localrc = ESMF_FAILURE
       rc = ESMF_FAILURE
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
+
       ! Not an error to be called with 0 items - just return w/o error.
       if (itemcount .le. 0) then
           rc = ESMF_SUCCESS
@@ -5847,6 +6154,10 @@ end interface
       type(ESMF_StateClass), pointer :: sp           ! state type
       type(ESMF_StateItem), pointer :: sip           ! state item
       type(ESMF_State) :: wrapper
+
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
       ! shortcut to internals
       sp => state%statep
@@ -5967,6 +6278,9 @@ end interface
       type(ESMF_State) :: subsubstate
 
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
+
       ! in case of error, make sure this is invalid.
       !nullify(ESMF_StateDeserialize%statep)
       nullify(substate%statep)
@@ -6032,6 +6346,8 @@ end interface
 
 
       enddo
+
+      ESMF_INIT_SET_CREATED(sp)
 
       !ESMF_StateDeserialize%statep => sp
       substate%statep => sp

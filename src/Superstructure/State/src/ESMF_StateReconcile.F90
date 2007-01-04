@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.32 2006/12/07 23:23:19 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.33 2007/01/04 23:19:17 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -51,6 +51,7 @@
       use ESMF_BundleMod
       use ESMF_StateTypesMod
       use ESMF_StateMod
+      use ESMF_InitMacrosMod
       implicit none
 
       integer :: bufsize = 81920
@@ -114,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.32 2006/12/07 23:23:19 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.33 2007/01/04 23:19:17 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -172,6 +173,12 @@
 !EOP
     integer :: localrc
     type(ESMF_StateItemInfo), dimension(:), pointer :: stateinfo
+
+
+    ! check input variables
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
+
 
     ! This turns off the fast option on Regrid; it is working now for
     !  exclusive components, but if there is any reason we should turn
@@ -256,6 +263,11 @@
     integer(ESMF_KIND_I4), pointer, dimension(:) :: bptr
     integer :: offset, mypet
     type(ESMF_VMId) :: VMdummyID
+
+    ! check input variables
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
+
 
     ! get total num pets.  this is not needed by the code, just the debug
     ! messages below.
@@ -536,6 +548,10 @@
     type(ESMF_VMId) :: temp_vmid
     type(ESMF_StateItemInfo), pointer :: si
     integer :: offset
+
+    ! check input variables
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
 
     ! shorthand for the code below
     si => stateInfoList(1)
