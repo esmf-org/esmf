@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmType.F90,v 1.7 2006/12/12 22:36:32 samsoncheung Exp $
+! $Id: ESMF_AlarmType.F90,v 1.8 2007/01/06 01:38:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -89,7 +89,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_AlarmType.F90,v 1.7 2006/12/12 22:36:32 samsoncheung Exp $'
+      '$Id: ESMF_AlarmType.F90,v 1.8 2007/01/06 01:38:21 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -125,5 +125,92 @@
     end function ESMF_AlarmGetInit
 
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmSetInitCreated()"
+!BOPI
+! !IROUTINE: ESMF_AlarmSetInitCreated - Set Alarm init code to "CREATED"
+
+! !INTERFACE:
+  subroutine ESMF_AlarmSetInitCreated(alarm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Alarm), intent(inout)           :: alarm
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in Alarm object to "CREATED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm] 
+!          Specified {\tt ESMF\_Alarm} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(alarm)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_AlarmSetInitCreated
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmSetInitDeleted()"
+!BOPI
+! !IROUTINE: ESMF_AlarmSetInitDeleted - Set Alarm init code to "DELETED"
+
+! !INTERFACE:
+  subroutine ESMF_AlarmSetInitDeleted(alarm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Alarm), intent(inout)           :: alarm
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in Alarm object to "DELETED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm] 
+!          Specified {\tt ESMF\_Alarm} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Set init code
+    ESMF_INIT_SET_DELETED(alarm)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_AlarmSetInitDeleted
+!------------------------------------------------------------------------------
+
 
       end module ESMF_AlarmTypeMod

@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.66 2006/12/12 22:36:32 samsoncheung Exp $
+! $Id: ESMF_Alarm.F90,v 1.67 2007/01/06 01:38:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -21,6 +21,7 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include <ESMF_TimeMgr.inc>
+#include <ESMF.h>
 
 !===============================================================================
 !BOPI
@@ -106,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.66 2006/12/12 22:36:32 samsoncheung Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.67 2007/01/06 01:38:21 oehmke Exp $'
 
 !==============================================================================
 !
@@ -215,6 +216,8 @@
       contains
 
 !==============================================================================
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmCreateNew()"
 !BOP
 ! !IROUTINE: ESMF_AlarmCreate - Create a new ESMF Alarm
 
@@ -325,11 +328,14 @@
                                  ringTime, ringInterval, stopTime, &
                                  ringDuration, ringTimeStepCount, refTime, &
                                  enabled, sticky, rc)
-      ESMF_INIT_SET_CREATED(ESMF_AlarmCreateNew)
+
+      call ESMF_AlarmSetInitCreated(ESMF_AlarmCreateNew)
 
       end function ESMF_AlarmCreateNew
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmCreateCopy()"
 !BOP
 ! !IROUTINE: ESMF_AlarmCreate - Create a copy of an existing ESMF Alarm
 
@@ -363,11 +369,14 @@
 
 !     invoke C to C++ entry point to copy alarm
       call c_ESMC_AlarmCreateCopy(ESMF_AlarmCreateCopy, alarm, rc)
-      ESMF_INIT_SET_CREATED(ESMF_AlarmCreateCopy)
+
+      call ESMF_AlarmSetInitCreated(ESMF_AlarmCreateCopy)
 
       end function ESMF_AlarmCreateCopy
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmDestroy()"
 !BOP
 ! !IROUTINE: ESMF_AlarmDestroy - Free all resources associated with an Alarm
 !
@@ -394,11 +403,14 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmDestroy(alarm, rc)
-      ESMF_INIT_SET_DELETED(alarm)
+
+      call ESMF_AlarmSetInitDeleted(alarm)
 
       end subroutine ESMF_AlarmDestroy
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmDisable()"
 !BOP
 ! !IROUTINE: ESMF_AlarmDisable - Disable an Alarm
 
@@ -432,6 +444,8 @@
       end subroutine ESMF_AlarmDisable
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmEnable()"
 !BOP
 ! !IROUTINE: ESMF_AlarmEnable - Enable an Alarm
 
@@ -465,6 +479,8 @@
       end subroutine ESMF_AlarmEnable
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmGet()"
 !BOP
 ! !IROUTINE: ESMF_AlarmGet - Get Alarm properties
 
@@ -585,6 +601,8 @@
       end subroutine ESMF_AlarmGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmIsEnabled()"
 !BOP
 ! !IROUTINE:  ESMF_AlarmIsEnabled - Check if Alarm is enabled
 
@@ -621,6 +639,8 @@
       end function ESMF_AlarmIsEnabled
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmIsRinging()"
 !BOP
 ! !IROUTINE:  ESMF_AlarmIsRinging - Check if Alarm is ringing
 
@@ -661,6 +681,8 @@
       end function ESMF_AlarmIsRinging
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmIsSticky()"
 !BOP
 ! !IROUTINE:  ESMF_AlarmIsSticky - Check if Alarm is sticky
 
@@ -697,6 +719,8 @@
       end function ESMF_AlarmIsSticky
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmNotSticky()"
 !BOP
 ! !IROUTINE:  ESMF_AlarmNotSticky - Unset an Alarm's sticky flag
 
@@ -742,6 +766,8 @@
       end subroutine ESMF_AlarmNotSticky
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmPrint()"
 !BOP
 ! !IROUTINE:  ESMF_AlarmPrint - Print out an Alarm's properties
 
@@ -803,6 +829,8 @@
       end subroutine ESMF_AlarmPrint
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmReadRestart()"
 !BOPI
 ! !IROUTINE: ESMF_AlarmReadRestart - Restore the contents of an Alarm (not implemented)
 
@@ -845,6 +873,8 @@
       end function ESMF_AlarmReadRestart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmRingerOff()"
 !BOP
 ! !IROUTINE:  ESMF_AlarmRingerOff - Turn off an Alarm
 
@@ -881,6 +911,8 @@
       end subroutine ESMF_AlarmRingerOff
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmRingerOn()"
 !BOP
 ! !IROUTINE:  ESMF_AlarmRingerOn - Turn on an Alarm
 
@@ -916,6 +948,8 @@
       end subroutine ESMF_AlarmRingerOn
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmSet()"
 !BOP
 ! !IROUTINE: ESMF_AlarmSet - Set Alarm properties
 
@@ -1020,6 +1054,8 @@
       end subroutine ESMF_AlarmSet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmSticky()"
 !BOP
 ! !IROUTINE:  ESMF_AlarmSticky - Set an Alarm's sticky flag
 
@@ -1062,6 +1098,8 @@
       end subroutine ESMF_AlarmSticky
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmValidate()"
 !BOP
 ! !IROUTINE:  ESMF_AlarmValidate - Validate an Alarm's properties
 
@@ -1101,6 +1139,8 @@
       end subroutine ESMF_AlarmValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmWasPrevRinging()"
 !BOP
 ! !IROUTINE:  ESMF_AlarmWasPrevRinging - Check if Alarm was ringing on the previous Clock timestep
 
@@ -1142,6 +1182,8 @@
       end function ESMF_AlarmWasPrevRinging
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmWillRingNext()"
 !BOP
 ! !IROUTINE:  ESMF_AlarmWillRingNext - Check if Alarm will ring upon the next Clock timestep
 
@@ -1187,6 +1229,8 @@
       end function ESMF_AlarmWillRingNext
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmWriteRestart()"
 !BOPI
 ! !IROUTINE: ESMF_AlarmWriteRestart - Save the contents of an Alarm (not implemented)
 
@@ -1224,6 +1268,8 @@
       end subroutine ESMF_AlarmWriteRestart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmEQ()"
 !BOPI
 ! !IROUTINE:  ESMF_AlarmEQ - Compare two Alarms for equality
 !
@@ -1248,6 +1294,8 @@
       end function ESMF_AlarmEQ
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmNE()"
 !BOPI
 ! !IROUTINE:  ESMF_AlarmNE - Compare two Alarms for inequality
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.31 2006/12/12 21:54:21 oehmke Exp $
+! $Id: ESMF_RHandle.F90,v 1.32 2007/01/06 01:37:17 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.31 2006/12/12 21:54:21 oehmke Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.32 2007/01/06 01:37:17 oehmke Exp $'
 
 !==============================================================================
 
@@ -540,7 +540,7 @@ end function ESMF_TransformValuesGetInit
         ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,srcIndex,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,dstIndex,rc)
-        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,weight,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,weights,rc)
 
 
 

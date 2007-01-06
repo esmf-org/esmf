@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockType.F90,v 1.8 2006/12/14 21:45:02 oehmke Exp $
+! $Id: ESMF_ClockType.F90,v 1.9 2007/01/06 01:38:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -71,7 +71,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ClockType.F90,v 1.8 2006/12/14 21:45:02 oehmke Exp $'
+      '$Id: ESMF_ClockType.F90,v 1.9 2007/01/06 01:38:21 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -109,4 +109,92 @@
     end function ESMF_ClockGetInit
 
 !------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockSetInitCreated()"
+!BOPI
+! !IROUTINE: ESMF_ClockSetInitCreated - Set Clock init code to "CREATED"
+
+! !INTERFACE:
+  subroutine ESMF_ClockSetInitCreated(clock, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Clock), intent(inout)           :: clock
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in Clock object to "CREATED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[clock] 
+!          Specified {\tt ESMF\_Clock} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(clock)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_ClockSetInitCreated
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockSetInitDeleted()"
+!BOPI
+! !IROUTINE: ESMF_ClockSetInitDeleted - Set Clock init code to "DELETED"
+
+! !INTERFACE:
+  subroutine ESMF_ClockSetInitDeleted(clock, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Clock), intent(inout)           :: clock
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in Clock object to "DELETED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[clock] 
+!          Specified {\tt ESMF\_Clock} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Set init code
+    ESMF_INIT_SET_DELETED(clock)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_ClockSetInitDeleted
+!------------------------------------------------------------------------------
+
+
+
       end module ESMF_ClockTypeMod

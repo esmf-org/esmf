@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.82 2006/12/12 22:36:31 samsoncheung Exp $
+! $Id: ESMF_Calendar.F90,v 1.83 2007/01/06 01:38:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -45,6 +45,7 @@
 
       ! for ReadRestart()/WriteRestart()
       use ESMF_IOSpecMod
+      use ESMF_InitMacrosMod
 
       implicit none
 !
@@ -144,7 +145,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.82 2006/12/12 22:36:31 samsoncheung Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.83 2007/01/06 01:38:21 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -899,7 +900,7 @@
       sizeofDaysPerMonth = 0
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInt,calendar,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -1007,7 +1008,7 @@
 !     TMGn.n.n
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInt,calendar,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
 !     invoke C to C++ entry point
       call c_ESMC_CalendarIsLeapYearI4(calendar, yy, &
@@ -1053,7 +1054,7 @@
 !     TMGn.n.n
     
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInt,calendar,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
 !     invoke C to C++ entry point
       call c_ESMC_CalendarIsLeapYearI8(calendar, yy_i8, &
@@ -1105,7 +1106,7 @@
 !     TMGn.n.n
   
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInt,calendar,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
 !     invoke C to C++ entry point
       call c_ESMC_CalendarPrint(calendar, options, rc)
@@ -1382,7 +1383,7 @@
 !     TMGn.n.n
     
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInt,calendar,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
 !     invoke C to C++ entry point
       call c_ESMC_CalendarSetDefaultCal(calendar, rc)
@@ -1459,7 +1460,7 @@
 !     TMGn.n.n
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInt,calendar,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
 !     invoke C to C++ entry point 
       call c_ESMC_CalendarWriteRestart(calendar, iospec, rc)

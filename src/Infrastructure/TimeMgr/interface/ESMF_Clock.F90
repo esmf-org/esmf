@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.71 2006/12/14 21:45:02 oehmke Exp $
+! $Id: ESMF_Clock.F90,v 1.72 2007/01/06 01:38:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.71 2006/12/14 21:45:02 oehmke Exp $'
+      '$Id: ESMF_Clock.F90,v 1.72 2007/01/06 01:38:21 oehmke Exp $'
 
 !==============================================================================
 !
@@ -209,6 +209,8 @@
       contains
 
 !==============================================================================
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockAdvance()"
 !BOP
 ! !IROUTINE: ESMF_ClockAdvance - Advance a Clock's current time by one time step
 
@@ -257,11 +259,14 @@
 ! !REQUIREMENTS:
 !     TMG3.4.1
 
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
 
       ! initialize list size to zero for not-present list
       integer :: sizeofRingingAlarmList
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
       sizeofRingingAlarmList = 0
 
       ! get size of given ringing alarm list for C++ validation
@@ -290,6 +295,8 @@
       end subroutine ESMF_ClockAdvance
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockCreateNew()"
 !BOP
 ! !IROUTINE: ESMF_ClockCreate - Create a new ESMF Clock
 
@@ -374,10 +381,13 @@
                                  timeStep, startTime, stopTime, runDuration, &
                                  runTimeStepCount, refTime, rc)
 
-      ESMF_INIT_SET_CREATED(ESMF_ClockCreateNew)
+      call ESMF_ClockSetInitCreated(ESMF_ClockCreateNew)
+
       end function ESMF_ClockCreateNew
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockCreateCopy()"
 !BOP
 ! !IROUTINE: ESMF_ClockCreate - Create a copy of an existing ESMF Clock
 
@@ -412,10 +422,13 @@
 !     invoke C to C++ entry point to copy clock
       call c_ESMC_ClockCreateCopy(ESMF_ClockCreateCopy, clock, rc)
 
-      ESMF_INIT_SET_CREATED(ESMF_ClockCreateCopy)
+      call ESMF_ClockSetInitCreated(ESMF_ClockCreateCopy)
+
       end function ESMF_ClockCreateCopy
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockDestroy()"
 !BOP
 ! !IROUTINE: ESMF_ClockDestroy - Free all resources associated with a Clock
 !
@@ -443,10 +456,13 @@
 !     invoke C to C++ entry point
       call c_ESMC_ClockDestroy(clock, rc)
 
-      ESMF_INIT_SET_DELETED(clock)
+      call ESMF_ClockSetInitDeleted(clock)
+
       end subroutine ESMF_ClockDestroy
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockGet()"
 !BOP
 ! !IROUTINE: ESMF_ClockGet - Get a Clock's properties
 
@@ -572,6 +588,8 @@
       end subroutine ESMF_ClockGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockGetAlarm()"
 !BOP
 ! !IROUTINE: ESMF_ClockGetAlarm - Get an Alarm in a Clock's Alarm list
 
@@ -614,6 +632,8 @@
       end subroutine ESMF_ClockGetAlarm
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockGetAlarmList()"
 !BOP
 ! !IROUTINE: ESMF_ClockGetAlarmList - Get a list of Alarms from a Clock
 
@@ -675,11 +695,14 @@
 ! !REQUIREMENTS:
 !     TMG4.3, 4.8
 
+      ! get size of given alarm list for C++ validation
+      integer :: sizeofAlarmList
+
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-      ! get size of given alarm list for C++ validation
-      integer :: sizeofAlarmList
+
+
       sizeofAlarmList = size(alarmList)
 
       ! invoke C to C++ entry point
@@ -699,6 +722,8 @@
       end subroutine ESMF_ClockGetAlarmList
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockGetNextTime()"
 !BOP
 ! !IROUTINE: ESMF_ClockGetNextTime - Calculate a Clock's next time
 
@@ -741,6 +766,8 @@
       end subroutine ESMF_ClockGetNextTime
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockIsDone()"
 !BOP
 ! !IROUTINE: ESMF_ClockIsDone - Based on its direction, test if the Clock has reached or exceeded its stop time or start time
 
@@ -779,6 +806,8 @@
       end function ESMF_ClockIsDone
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockIsReverse()"
 !BOP
 ! !IROUTINE: ESMF_ClockIsReverse - Test if the Clock is in reverse mode
 
@@ -817,6 +846,8 @@
       end function ESMF_ClockIsReverse
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockIsStopTime()"
 !BOP
 ! !IROUTINE: ESMF_ClockIsStopTime - Test if the Clock has reached or exceeded its stop time
 
@@ -854,6 +885,8 @@
       end function ESMF_ClockIsStopTime
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockIsStopTimeEnabled()"
 !BOP
 ! !IROUTINE: ESMF_ClockIsStopTimeEnabled - Test if the Clock's stop time is enabled
 
@@ -891,6 +924,8 @@
       end function ESMF_ClockIsStopTimeEnabled
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockPrint()"
 !BOP
 ! !IROUTINE:  ESMF_ClockPrint - Print the contents of a Clock
 
@@ -943,6 +978,8 @@
       end subroutine ESMF_ClockPrint
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockReadRestart()"
 !BOPI
 ! !IROUTINE: ESMF_ClockReadRestart - Restore the contents of a Clock (not implemented)
 
@@ -985,6 +1022,8 @@
       end function ESMF_ClockReadRestart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockSet()"
 !BOP
 ! !IROUTINE: ESMF_ClockSet - Set one or more properties of a Clock
 
@@ -1102,6 +1141,8 @@
       end subroutine ESMF_ClockSet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockStopTimeDisable()"
 !BOP
 ! !IROUTINE: ESMF_ClockStopTimeDisable - Disable a Clock's stop time
 
@@ -1136,6 +1177,8 @@
       end subroutine ESMF_ClockStopTimeDisable
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockStopTimeEnable()"
 !BOP
 ! !IROUTINE: ESMF_ClockStopTimeEnable - Enable an Clock's stop time
 
@@ -1173,6 +1216,8 @@
       end subroutine ESMF_ClockStopTimeEnable
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockSyncToRealTime()"
 !BOP
 ! !IROUTINE: ESMF_ClockSyncToRealTime - Set Clock's current time to wall clock time
 
@@ -1208,6 +1253,8 @@
       end subroutine ESMF_ClockSyncToRealTime
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockValidate()"
 !BOP
 ! !IROUTINE:  ESMF_ClockValidate - Validate a Clock's properties
 
@@ -1248,6 +1295,8 @@
       end subroutine ESMF_ClockValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockWriteRestart()"
 !BOPI
 ! !IROUTINE: ESMF_ClockWriteRestart - Save the contents of a Clock (not implemented)
 
@@ -1285,6 +1334,8 @@
       end subroutine ESMF_ClockWriteRestart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockEQ()"
 !BOPI
 ! !IROUTINE:  ESMF_ClockEQ - Compare two Clocks for equality
 !
@@ -1309,6 +1360,8 @@
       end function ESMF_ClockEQ
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockNE()"
 !BOPI
 ! !IROUTINE:  ESMF_ClockNE - Compare two Clocks for inequality
 !
