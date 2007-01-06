@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.101 2006/12/21 21:59:37 samsoncheung Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.102 2007/01/06 01:39:29 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -343,7 +343,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.101 2006/12/21 21:59:37 samsoncheung Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.102 2007/01/06 01:39:29 oehmke Exp $'
 
 !==============================================================================
 !
@@ -2335,7 +2335,7 @@
       subroutine ESMF_PhysGridValidate(physgrid, opt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid       
+      type(ESMF_PhysGrid), intent(inout) :: physgrid       
       character (len=*), intent(in), optional :: opt    
       integer, intent(out), optional :: rc            
 !
@@ -2358,8 +2358,8 @@
 !
 !  code goes here
 !
-      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,d,rc)
-      rc = ESMF_SUCCESS
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_PhysGridValidate
 
 !------------------------------------------------------------------------------
