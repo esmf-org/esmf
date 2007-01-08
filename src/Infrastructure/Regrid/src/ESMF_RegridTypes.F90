@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.87 2006/12/21 22:04:44 samsoncheung Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.88 2007/01/08 23:41:39 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -266,7 +266,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.87 2006/12/21 22:04:44 samsoncheung Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.88 2007/01/08 23:41:39 donstark Exp $'
 
 !==============================================================================
 !
@@ -484,6 +484,8 @@ end subroutine ESMF_RegridIndexTypeValidate
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
+
       call ESMF_TransformValuesGet(tv, numList=numList, srcIndex=srcIndex, &
                                    dstIndex=dstIndex, weights=weights, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -578,6 +580,7 @@ end subroutine ESMF_RegridIndexTypeValidate
       if (present(rc)) rc = ESMF_FAILURE
 
       ESMF_INIT_CHECK_DEEP(ESMF_RegridIndexGetInit,index,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
 
       newLink      = .true.
       aggregateUse = .false.
@@ -720,6 +723,10 @@ end subroutine ESMF_RegridIndexTypeValidate
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,recvDomainList)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
 
       ! use optional arguments if present
       totalUse = .false.
@@ -874,6 +881,11 @@ end subroutine ESMF_RegridIndexTypeValidate
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
  
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
+
       rtype => regrid%ptr
       ! Get name if requested
       if (present(name)) then
@@ -976,6 +988,11 @@ end subroutine ESMF_RegridIndexTypeValidate
       ! Initalize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
  
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
+
       rtype => regrid%ptr
       ! Set name if requested
       if (present(name)) then
@@ -1222,6 +1239,10 @@ end subroutine ESMF_RegridIndexTypeValidate
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dataMap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,domainList)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dataMap)
 
@@ -1417,6 +1438,8 @@ end subroutine ESMF_RegridIndexTypeValidate
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ESMF_INIT_CHECK_DEEP(ESMF_RegridIndexGetInit,index,rc)
 
 !     deallocate regrid index internals.
       deallocate(index%ptr%srcMinIndex, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.97 2006/12/21 22:04:44 samsoncheung Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.98 2007/01/08 23:42:17 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -47,6 +47,7 @@
       use ESMF_FieldMod       ! ESMF field  class
       use ESMF_BundleMod      ! ESMF bundle class
       use ESMF_RegridTypesMod ! ESMF regrid data structures
+      use ESMF_InitMacrosMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -62,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.97 2006/12/21 22:04:44 samsoncheung Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.98 2007/01/08 23:42:17 donstark Exp $'
 
 !==============================================================================
 
@@ -165,6 +166,11 @@
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDataMap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,recvDomainList)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rh,rc)
 
       ! nullify pointers
       nullify(srcUserMask, dstUserMask, found)
@@ -630,6 +636,8 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
 
       weights(:) = 0.0
       zero = 0.

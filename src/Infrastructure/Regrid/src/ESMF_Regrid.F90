@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.107 2006/12/21 22:04:44 samsoncheung Exp $
+! $Id: ESMF_Regrid.F90,v 1.108 2007/01/08 23:40:33 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -63,6 +63,7 @@
       use ESMF_RegridNearNbrMod  ! methods related to nearest-nbr regrid
       use ESMF_RegridConservMod  ! methods related to conservative regrid
       use ESMF_RegridLinearMod   ! methods related to linear regrid
+      use ESMF_InitMacrosMod
 
       implicit none
 
@@ -94,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.107 2006/12/21 22:04:44 samsoncheung Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.108 2007/01/08 23:40:33 donstark Exp $'
 
 !==============================================================================
 !
@@ -304,6 +305,10 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
 
@@ -545,6 +550,7 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
 
@@ -893,6 +899,7 @@
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
+      ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
       ! Before going further down into this code, make sure
       ! that this DE has at least src or dst data.   If neither, return now.
@@ -1212,6 +1219,8 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
+
       !TODO: IS THIS CODE EVEN CALLED ANYMORE?   now that we don't have
       ! a regrid object, the ESMF_RegridRelease() code calls routehandle
       ! destroy, which frees the internal objects.   this code should be
@@ -1265,6 +1274,8 @@
 !EOP
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 
+      ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
+
       ! 
       ! code goes here
       ! 
@@ -1305,6 +1316,8 @@
 
       ! TODO: does this even need to be here?  it seems the print and
       ! validate routines should be in the routehandle code only.
+
+      ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
       ! 
       ! code goes here
@@ -1417,6 +1430,13 @@
 ! !REQUIREMENTS:
 
 
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
+      ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
+
       call ESMF_IArrayRegridStoreIndex(srcArray, srcGrid, srcDatamap, &
                                       dstArray, dstGrid, dstDatamap, &
                                       parentVM, routehandle, &
@@ -1522,6 +1542,13 @@
 
     ! assume failure until success certain
     if (present(rc)) rc = ESMF_FAILURE
+
+    ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
 
     ! TODO: add code here
     !  The form of this code depends on how we organize the interfaces
@@ -1689,6 +1716,7 @@
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDataMap)
+      ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
  
       ! Before going further down into this code, make sure
       ! that this DE has at least src or dst data.   If neither, return now.
@@ -1854,6 +1882,7 @@
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDataMap)
+      ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
  
       ! Before going further down into this code, make sure
       ! that this DE has at least src or dst data.   If neither, return now.
@@ -1952,6 +1981,8 @@
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
+
       call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1999,6 +2030,9 @@
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       ESMF_RegridHasData = .false.
 

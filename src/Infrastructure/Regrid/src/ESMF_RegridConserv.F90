@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.64 2006/12/21 22:04:44 samsoncheung Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.65 2007/01/08 23:42:47 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.64 2006/12/21 22:04:44 samsoncheung Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.65 2007/01/08 23:42:47 donstark Exp $'
 
 !==============================================================================
 
@@ -255,6 +255,11 @@
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDataMap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,recvDomainList)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rh,rc)
 
       ! Set optional parameters if present - otherwise set defaults
       orderUse      = 1
@@ -864,6 +869,7 @@
 
       ! Check variables
       ESMF_INIT_CHECK_DEEP(ESMF_RegridIndexGetInit,index,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
 
       ! Create the RegridIndex structure for use in the AddLink calls
       index = ESMF_RegridIndexCreate(srcSize, (/dstSizeX+2*dstIndexMod(1), &
@@ -1604,6 +1610,8 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
 
       ! determine number of weights for each entry based
       ! on input order of interpolation
