@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.22 2006/12/14 22:03:14 oehmke Exp $
+! $Id: ESMF_LogErr.F90,v 1.23 2007/01/09 23:06:43 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -46,7 +46,9 @@
 ! !USES:
     ! inherit from ESMF base class
     use ESMF_UtilTypesMod
-    use ESMF_InitMacrosMod
+ !!  use ESMF_InitMacrosMod Commented out to prevent circular dependency
+ !!                         this is possible because since all the checks
+ !!                         in this module are shallow - Bob 1/9/2007.
 
 implicit none
 

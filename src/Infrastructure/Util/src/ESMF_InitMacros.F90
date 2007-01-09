@@ -1,4 +1,4 @@
-! $Id: ESMF_InitMacros.F90,v 1.8 2006/12/12 23:53:34 oehmke Exp $
+! $Id: ESMF_InitMacros.F90,v 1.9 2007/01/09 23:06:43 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -27,21 +27,11 @@
 !
 ! !USES:
     ! inherit from ESMF base class
-!    use ESMF_UtilTypesMod
-!    use ESMF_LogErrMod
-
+    use ESMF_LogErrMod
+    use ESMF_UtilTypesMod
 
 ! !PUBLIC MEMBER FUNCTIONS:
    public ESMF_IMErr
-
-
-      integer, parameter,private :: &
-#ifndef ESMF_NEC_KIND_I8
-                   ESMF_KIND_I8 = selected_int_kind(18)
-#else
-                   ESMF_KIND_I8 = selected_int_kind(15)
-#endif
-
 
 
 contains
@@ -137,12 +127,10 @@ end function ESMF_InitCheckDeep
 !EOP
 	
 
-    ESMF_IMErr=.false.
-
-!    ESMF_IMErr=ESMF_LogMsgFoundError(ESMF_InitCheckDeep(isInit), &
-!                                   "Bad Object", &
-!                                   line, file, method, &
-!                                   rc)
+    ESMF_IMErr=ESMF_LogMsgFoundError(ESMF_InitCheckDeep(isInit), &
+                                     "Bad Object", &
+                                     line, file, method, &
+                                     rc)
        
 end function ESMF_IMErr
 
