@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.240 2007/01/09 21:10:22 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.241 2007/01/09 21:29:52 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.240 2007/01/09 21:10:22 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.241 2007/01/09 21:29:52 oehmke Exp $'
 
 !==============================================================================
 !
@@ -6259,6 +6259,7 @@
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
+      integer :: i,j
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -6490,6 +6491,7 @@
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
+      integer :: i,j
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE

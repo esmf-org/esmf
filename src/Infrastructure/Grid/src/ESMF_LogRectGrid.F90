@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.160 2007/01/09 21:10:22 oehmke Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.161 2007/01/09 21:29:53 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.160 2007/01/09 21:10:22 oehmke Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.161 2007/01/09 21:29:53 oehmke Exp $'
 
 !==============================================================================
 !
@@ -6178,6 +6178,7 @@
       logical :: dummy
       type(ESMF_AxisIndex),  dimension(:,:), allocatable :: gTempAI2D, lTempAI2D
       type(ESMF_InternDGType), pointer :: hdgtype, vdgtype
+      integer :: j
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -6394,7 +6395,7 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: i
+      integer :: i,j
       integer :: order(3)
       integer :: gridRank, aSize, tempSize, tempSize2
       integer :: horzDistIdUse, vertDistIdUse
