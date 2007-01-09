@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.51 2006/12/21 22:01:11 samsoncheung Exp $
+! $Id: ESMF_GridTypes.F90,v 1.52 2007/01/09 21:10:22 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -45,6 +45,7 @@
       use ESMF_InternDGMod      ! ESMF distributed grid class
       use ESMF_PhysCoordMod     ! ESMF physical coord class
       use ESMF_PhysGridMod      ! ESMF physical grid class
+      use ESMF_InitMacrosMod  ! init macros stuff
       implicit none
 
 !------------------------------------------------------------------------------
@@ -65,6 +66,8 @@
         real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: deltaPerDim
         type(ESMF_LocalArray), dimension(:), pointer :: coords
         integer, dimension(ESMF_MAXGRIDDIM) :: countPerDim
+
+         ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -75,6 +78,8 @@
       type ESMF_GridSpecific
       sequence
         type (ESMF_LogRectGrid), pointer :: logRectGrid
+
+        ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -281,6 +286,8 @@
                                               ! grids, background grids
 !       type (???) :: searchStructure
 
+         ESMF_INIT_DECLARE
+
       end type
 
 !------------------------------------------------------------------------------
@@ -296,6 +303,9 @@
 #else
         type (ESMF_GridClass), pointer :: ptr
 #endif
+       
+        ESMF_INIT_DECLARE
+
       end type
 
 !------------------------------------------------------------------------------
@@ -315,7 +325,16 @@
     ! These functions are generally accessed only by the main Grid module
     ! and are not meant to be accessed by the user.  Well...except for
     ! the overloaded operators.
-    
+
+    public ESMF_GridGetInit 
+    public ESMF_GridClassValidate   
+    public ESMF_GridClassGetInit 
+    public ESMF_LogRectGridValidate   
+    public ESMF_LogRectGridInit
+    public ESMF_LogRectGridGetInit 
+    public ESMF_GridSpecificValidate   
+    public ESMF_GridSpecificInit
+    public ESMF_GridSpecificGetInit 
     public ESMF_GridConstructNew
     public ESMF_GridGetDELayout
     public ESMF_GridAddInternDG
@@ -546,7 +565,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.51 2006/12/21 22:01:11 samsoncheung Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.52 2007/01/09 21:10:22 oehmke Exp $'
 
 !==============================================================================
 !
@@ -678,6 +697,8 @@
       nullify(grid%internDGIndex)
       ! nullify(grid%gridSpecific)
 
+      ESMF_INIT_SET_CREATED(grid)
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridConstructNew
@@ -693,7 +714,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_DELayout) :: delayout
+      type(ESMF_DELayout),intent(out) :: delayout
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -717,6 +738,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       ! call InternDG method to retrieve information otherwise not available
       ! to the application level -- does not matter which one since they all share
@@ -767,6 +791,10 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternDGGetInit,interndg,rc)
+
       ! Update the InternDGAlloc counter and check to see if InternDG
       ! array needs to be resized to add the new interndg
       call ESMF_GridMakeInternDGSpace(grid, grid%numInternDGs+1, localrc)
@@ -816,8 +844,8 @@
 !
 ! !REQUIREMENTS:
 !EOPI
-
-      ! note: this is an internal routine.  rc isn't optional - so we
+ 
+       ! note: this is an internal routine.  rc isn't optional - so we
       ! don't have to fool with rcpresent and status here.
 
       ! the save attribute is to be sure that the temp space isn't
@@ -827,6 +855,9 @@
       type(ESMF_InternDG), dimension(:), pointer, save :: temp_dgrids
       integer :: localrc                          ! Error status
       integer :: i, oldcount, alloccount
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,gridp,rc)
 
       ! number of currently used and available entries
       oldcount = gridp%numInternDGs
@@ -924,6 +955,10 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
+
       ! Update the PhysGridAlloc counter and check to see if PhysGrid
       ! array needs to be resized to add the new physgrid
       call ESMF_GridMakePhysGridSpace(grid, grid%numPhysGrids+1, localrc)
@@ -985,6 +1020,9 @@
       integer, dimension(:), pointer, save :: temp_dgIndex
       integer :: localrc                          ! Error status
       integer :: i, oldcount, alloccount
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,gridp,rc)
 
       ! number of currently used and available entries
       oldcount = gridp%numPhysGrids
@@ -1112,6 +1150,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+
       ! If name supplied, search by name and return selected PhysGrid
       if (present(name)) then
         found = .false.
@@ -1209,6 +1250,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+
       physGridId = -1
 
       ! Loop through physGrids comparing rellocs  TODO: make part of the Grid obj?
@@ -1278,6 +1322,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+
       ! Search by name and return selected InternDG
       found = .false.
       name_search: do n=1,grid%numInternDGsAlloc
@@ -1313,7 +1360,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass), intent(in) :: grid
-      type(ESMF_LocalArray), intent(inout) :: array
+      type(ESMF_LocalArray), intent(out) :: array !BOB changed to just out
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1337,6 +1384,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
 
       array = grid%boundingBoxes
 
@@ -2068,5 +2118,339 @@
       end function ESMF_CoordIndexNotEqual
 
 !------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogRectGridValidate()"
+!BOP
+! !IROUTINE: ESMF_LogRectGridValidate - Validate DataHolder internals
+
+! !INTERFACE:
+  subroutine ESMF_LogRectGridValidate(lrg, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_LogRectGrid), intent(in)              :: lrg
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Validates that the {\tt lrg} is internally consistent.
+!      The method returns an error code if problems are found.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[lrg] 
+!          Specified {\tt ESMF\_DataHolder} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogRectGridGetInit, ESMF_LogRectGridInit,lrg)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_LogRectGridValidate
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogRectGridInit()"
+!BOPI
+! !IROUTINE: ESMF_LogRectGridInit - Init DataHolder internals
+
+! !INTERFACE:
+  subroutine ESMF_LogRectGridInit(lrg)
+!
+! !ARGUMENTS:
+    type(ESMF_LogRectGrid), intent(inout)              :: lrg
+!         
+!
+! !DESCRIPTION:
+!      Initialize DataHolder internals.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[lrg] 
+!          Specified {\tt ESMF\_DataHolder} object.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    ESMF_INIT_SET_DEFINED(lrg)
+  end subroutine ESMF_LogRectGridInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogRectGridGetInit"
+!BOPI
+! !IROUTINE: ESMF_LogRectGridGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+  function ESMF_LogRectGridGetInit(lrg) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_LogRectGridGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_LogRectGrid), intent(in), optional :: lrg
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [lrg]
+!           DataHolder object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(lrg)) then
+      ESMF_LogRectGridGetInit = ESMF_INIT_GET(lrg)
+    else
+      ESMF_LogRectGridGetInit = ESMF_INIT_DEFINED
+    endif
+
+  end function ESMF_LogRectGridGetInit
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSpecificValidate()"
+!BOP
+! !IROUTINE: ESMF_GridSpecificValidate - Validate DataHolder internals
+
+! !INTERFACE:
+  subroutine ESMF_GridSpecificValidate(gs, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridSpecific), intent(in)              :: gs
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Validates that the {\tt gs} is internally consistent.
+!      The method returns an error code if problems are found.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[gs] 
+!          Specified {\tt ESMF\_DataHolder} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_GridSpecificGetInit, ESMF_GridSpecificInit,gs)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_GridSpecificValidate
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSpecificInit()"
+!BOPI
+! !IROUTINE: ESMF_GridSpecificInit - Init DataHolder internals
+
+! !INTERFACE:
+  subroutine ESMF_GridSpecificInit(gs)
+!
+! !ARGUMENTS:
+    type(ESMF_GridSpecific), intent(inout)              :: gs
+!         
+!
+! !DESCRIPTION:
+!      Initialize DataHolder internals.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[gs] 
+!          Specified {\tt ESMF\_DataHolder} object.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    ESMF_INIT_SET_DEFINED(gs)
+  end subroutine ESMF_GridSpecificInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSpecificGetInit"
+!BOPI
+! !IROUTINE: ESMF_GridSpecificGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+  function ESMF_GridSpecificGetInit(gs) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_GridSpecificGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_GridSpecific), intent(in), optional :: gs
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [gs]
+!           DataHolder object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(gs)) then
+      ESMF_GridSpecificGetInit = ESMF_INIT_GET(gs)
+    else
+      ESMF_GridSpecificGetInit = ESMF_INIT_DEFINED
+    endif
+
+  end function ESMF_GridSpecificGetInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridClassValidate()"
+!BOP
+! !IROUTINE: ESMF_GridClassValidate - Validate DataHolder internals
+
+! !INTERFACE:
+  subroutine ESMF_GridClassValidate(gc, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridClass), intent(in)              :: gc
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Validates that the {\tt gc} is internally consistent.
+!      The method returns an error code if problems are found.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[gc] 
+!          Specified {\tt ESMF\_DataHolder} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_GridClassGetInit, ESMF_GridClassInit,gc)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_GridClassValidate
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridClassGetInit"
+!BOPI
+! !IROUTINE: ESMF_GridClassGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+  function ESMF_GridClassGetInit(gc) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_GridClassGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_GridClass), intent(in), optional :: gc
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [gc]
+!           DataHolder object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(gc)) then
+      ESMF_GridClassGetInit = ESMF_INIT_GET(gc)
+    else
+      ESMF_GridClassGetInit = ESMF_INIT_DEFINED
+    endif
+
+  end function ESMF_GridClassGetInit
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetInit"
+!BOPI
+! !IROUTINE: ESMF_GridGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+  function ESMF_GridGetInit(g) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_GridGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in), optional :: g
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [g]
+!           DataHolder object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(g)) then
+      ESMF_GridGetInit = ESMF_INIT_GET(g)
+    else
+      ESMF_GridGetInit = ESMF_INIT_DEFINED
+    endif
+
+  end function ESMF_GridGetInit
+!------------------------------------------------------------------------------
+
+
 
       end module ESMF_GridTypesMod

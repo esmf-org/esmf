@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.159 2006/12/21 22:01:11 samsoncheung Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.160 2007/01/09 21:10:22 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -52,6 +52,7 @@
       use ESMF_PhysCoordMod   ! ESMF physical coord class
       use ESMF_PhysGridMod    ! ESMF physical grid class
       use ESMF_GridTypesMod   ! ESMF basic grid types and primitives
+      use ESMF_InitMacrosMod
       use ESMF_VMMod
       implicit none
 
@@ -128,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.159 2006/12/21 22:01:11 samsoncheung Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.160 2007/01/09 21:10:22 oehmke Exp $'
 
 !==============================================================================
 !
@@ -394,6 +395,12 @@
       ESMF_GridCreateHorzLatLonCoord%ptr => grid
       if (present(rc)) rc = ESMF_SUCCESS
 
+      ! Set grid as created 
+      ! (this may be done twice if this sub. is called from a general
+      !  grid create subroutine, but that should be ok, since
+      !  it doesn't matter how often a var. is set to the same value.)
+      ESMF_INIT_SET_CREATED(ESMF_GridCreateHorzLatLonCoord)
+
       end function ESMF_GridCreateHorzLatLonCoord
 
 !------------------------------------------------------------------------------
@@ -516,6 +523,13 @@
 
       ! Set return values.
       ESMF_GridCreateHorzLatLonDelta%ptr => grid
+
+      ! Set grid as created 
+      ! (this may be done twice if this sub. is called from a general
+      !  grid create subroutine, but that should be ok, since
+      !  it doesn't matter how often a var. is set to the same value.)
+      ESMF_INIT_SET_CREATED(ESMF_GridCreateHorzLatLonDelta)
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateHorzLatLonDelta
@@ -646,6 +660,13 @@
 
       ! Set return values.
       ESMF_GridCreateHorzLatLonUni%ptr => grid
+
+      ! Set grid as created 
+      ! (this may be done twice if this sub. is called from a general
+      !  grid create subroutine, but that should be ok, since
+      !  it doesn't matter how often a var. is set to the same value.)
+      ESMF_INIT_SET_CREATED(ESMF_GridCreateHorzLatLonUni)
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateHorzLatLonUni
@@ -762,6 +783,13 @@
 
       ! Set return values.
       ESMF_GridCreateHorzXYCoord%ptr => grid
+
+      ! Set grid as created 
+      ! (this may be done twice if this sub. is called from a general
+      !  grid create subroutine, but that should be ok, since
+      !  it doesn't matter how often a var. is set to the same value.)
+      ESMF_INIT_SET_CREATED(ESMF_GridCreateHorzXYCoord)
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateHorzXYCoord
@@ -886,6 +914,13 @@
 
       ! Set return values.
       ESMF_GridCreateHorzXYDelta%ptr => grid
+
+      ! Set grid as created 
+      ! (this may be done twice if this sub. is called from a general
+      !  grid create subroutine, but that should be ok, since
+      !  it doesn't matter how often a var. is set to the same value.)
+      ESMF_INIT_SET_CREATED(ESMF_GridCreateHorzXYDelta)
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateHorzXYDelta
@@ -1016,6 +1051,13 @@
 
       ! Set return values.
       ESMF_GridCreateHorzXYUni%ptr => grid
+
+      ! Set grid as created 
+      ! (this may be done twice if this sub. is called from a general
+      !  grid create subroutine, but that should be ok, since
+      !  it doesn't matter how often a var. is set to the same value.)
+      ESMF_INIT_SET_CREATED(ESMF_GridCreateHorzXYUni)
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateHorzXYUni
@@ -1100,6 +1142,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
 
       ! sanity check for bad values  TODO: more checks
       if (present(delta)) count = size(delta)
@@ -1239,6 +1284,13 @@
 
       ! Set return values.
       ESMF_LRGridCreateRead%ptr => grid
+
+      ! Set grid as created 
+      ! (this may be done twice if this sub. is called from a general
+      !  grid create subroutine, but that should be ok, since
+      !  it doesn't matter how often a var. is set to the same value.)
+      ESMF_INIT_SET_CREATED(ESMF_LRGridCreateRead)
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_LRGridCreateRead
@@ -1284,6 +1336,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
+
       ! Initialize pointers
       nullify(grid)
       nullify(ESMF_LRGridCreateCopy%ptr)
@@ -1296,10 +1351,17 @@
       call ESMF_GridConstructNew(grid, name, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                               ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       ESMF_LRGridCreateCopy%ptr => grid
+
+      ! Set grid as created 
+      ! (this may be done twice if this sub. is called from a general
+      !  grid create subroutine, but that should be ok, since
+      !  it doesn't matter how often a var. is set to the same value.)
+      ESMF_INIT_SET_CREATED(ESMF_LRGridCreateCopy)
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_LRGridCreateCopy
@@ -1351,6 +1413,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
+
       ! Initialize pointers
       nullify(grid)
       nullify(ESMF_LRGridCreateCutout%ptr)
@@ -1367,6 +1432,13 @@
 
       ! Set return values.
       ESMF_LRGridCreateCutout%ptr => grid
+
+      ! Set grid as created 
+      ! (this may be done twice if this sub. is called from a general
+      !  grid create subroutine, but that should be ok, since
+      !  it doesn't matter how often a var. is set to the same value.)
+      ESMF_INIT_SET_CREATED(ESMF_LRGridCreateCutout)
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_LRGridCreateCutout
@@ -1422,6 +1494,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
+
       ! Initialize pointers
       nullify(grid)
       nullify(ESMF_LRGridCreateDiffRes%ptr)
@@ -1438,6 +1513,13 @@
 
       ! Set return values.
       ESMF_LRGridCreateDiffRes%ptr => grid
+
+      ! Set grid as created 
+      ! (this may be done twice if this sub. is called from a general
+      !  grid create subroutine, but that should be ok, since
+      !  it doesn't matter how often a var. is set to the same value.)
+      ESMF_INIT_SET_CREATED(ESMF_LRGridCreateDiffRes)
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_LRGridCreateDiffRes
@@ -1486,6 +1568,10 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid1,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid2,rc)
+
       ! Initialize pointers
       nullify(grid)
       nullify(ESMF_LRGridCreateExchange%ptr)
@@ -1502,6 +1588,14 @@
 
       ! Set return values.
       ESMF_LRGridCreateExchange%ptr => grid
+
+      ! Set grid as created 
+      ! (this may be done twice if this sub. is called from a general
+      !  grid create subroutine, but that should be ok, since
+      !  it doesn't matter how often a var. is set to the same value.)
+      ESMF_INIT_SET_CREATED(ESMF_LRGridCreateExchange)
+
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_LRGridCreateExchange
@@ -1541,6 +1635,9 @@
 
       ! Initialize return code; assume failure until success is certain
       rc     = ESMF_FAILURE
+
+      ! check and set input variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_LogRectGridGetInit, ESMF_LogRectGridInit,lrgrid)
 
       ! Initialize lrgrid contents to default values
       do i = 1,ESMF_MAXGRIDDIM
@@ -1770,6 +1867,12 @@
       endif
 
       grid%gridStatus = ESMF_GRID_STATUS_INIT
+
+      ! Set grid as created 
+      ! (this may be done twice if this sub. is called from a general
+      !  grid create subroutine, but that should be ok, since
+      !  it doesn't matter how often a var. is set to the same value.)
+      ESMF_INIT_SET_CREATED(grid)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2075,6 +2178,12 @@
 
       grid%gridStatus = ESMF_GRID_STATUS_INIT
 
+      ! Set grid as created 
+      ! (this may be done twice if this sub. is called from a general
+      !  grid create subroutine, but that should be ok, since
+      !  it doesn't matter how often a var. is set to the same value.)
+      ESMF_INIT_SET_CREATED(grid)
+
       ! Clean up
       deallocate(coordsUse1, &
                  coordsUse2, stat=localrc)
@@ -2085,6 +2194,7 @@
         if (ESMF_LogMsgFoundAllocError(localrc, "deallocating coordsUse3", &
                                        ESMF_CONTEXT, rc)) return
       endif
+
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2161,6 +2271,10 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,delayout,rc)
 
       ! validate the layout before going any further
       call ESMF_DELayoutValidate(delayout, rc=localrc)
@@ -2921,6 +3035,10 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,delayout,rc)
+
       ! validate the layout before going any further
       call ESMF_DELayoutValidate(delayout, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -3513,6 +3631,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+
       ! If Grid is unitialized, return with warning
       if (grid%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
         call ESMF_LogWrite("destroying uninitialized grid", ESMF_LOG_WARNING, &
@@ -3568,6 +3689,12 @@
       grid%numPhysGrids    = 0
       grid%numInternDGs    = 0
 
+      ! Set grid as deleted 
+      ! (this may be done twice if this sub. is called from a general
+      !  grid create subroutine, but that should be ok, since
+      !  it doesn't matter how often a var. is set to the same value.)
+      ESMF_INIT_SET_DELETED(grid)
+      
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridDestruct
@@ -3644,6 +3771,10 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,delayout,rc)
 
       ! Create the InternDG
       internDG = ESMF_InternDGCreate(dimCount=dimCount, counts=counts, &
@@ -3726,6 +3857,10 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,delayout,rc)
 
       ! Create the InternDG
       internDG = ESMF_InternDGCreate(dimCount, myCount, myIndices, &
@@ -3828,6 +3963,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
 
       ! initialize some values
       gridBoundWidth = 1   ! TODO: move into structure, make input?
@@ -4179,6 +4317,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+
       gridp%ptr => grid
 
       ! initialize some values
@@ -4444,6 +4585,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+
       ! initialize some values
       gridBoundWidth = 1   ! TODO: move into structure, make input?
 
@@ -4676,6 +4820,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -4845,6 +4992,9 @@
 ! !REQUIREMENTS:
 !EOPI
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,array,rc)
 !
 !  code goes here
 !
@@ -4875,7 +5025,7 @@
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
                             maxLocalCoordPerDim
       integer, dimension(:), intent(inout), optional :: globalStartPerDim
-      type(ESMF_AxisIndex), dimension(:), intent(inout), &
+      type(ESMF_AxisIndex), dimension(:), intent(out), &
                                             optional :: globalAIPerDim
       logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
@@ -4947,6 +5097,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
@@ -5235,6 +5388,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -5404,6 +5560,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       ! Initialize other variables
       horzDistIdUse = -1
@@ -5614,6 +5773,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
@@ -5826,6 +5988,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -6016,6 +6181,24 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+      if (present(globalAI1D)) then
+          do i=1,size(globalAI1D)
+              ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit, ESMF_AxisIndexInit,globalAI1D(i))
+          enddo
+      endif
+
+      if (present(globalAI2D)) then
+          do j=1,size(globalAI2D,2)
+          do i=1,size(globalAI2D,1)
+              ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit, ESMF_AxisIndexInit,globalAI2D(i,j))
+          enddo
+          enddo
+      endif
+
 
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
@@ -6223,6 +6406,23 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+      if (present(localAI1D)) then
+          do i=1,size(localAI1D)
+              ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit, ESMF_AxisIndexInit,localAI1D(i))
+          enddo
+      endif
+
+      if (present(localAI2D)) then
+          do j=1,size(localAI2D,2)
+          do i=1,size(localAI2D,1)
+              ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit, ESMF_AxisIndexInit,localAI2D(i,j))
+          enddo
+          enddo
+      endif
+
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -6388,6 +6588,9 @@
 ! !REQUIREMENTS:
 !EOPI
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
 !
 !  code goes here
 !
@@ -6465,6 +6668,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
 
       ! TODO: could be a 1-D array for each coord axis later, but that
       !       would have to be supported by Regrid first
@@ -6937,6 +7143,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+
       ! allocate arrays
       allocate(centerArray(dimCount), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "local arrays", &
@@ -7270,6 +7479,10 @@
 ! !REQUIREMENTS:
 !EOPI
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
+
 !
 !  code goes here
 !
@@ -7381,6 +7594,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
  
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -7695,6 +7911,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+
       ! if present, set information filling in grid derived type
       if (present(horzGridType)) grid%horzGridType = horzGridType
       if (present(vertGridType)) grid%vertGridType = vertGridType
@@ -7738,7 +7957,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_InternArray), intent(inout) :: maskArray
+      type(ESMF_InternArray), intent(out) :: maskArray !BOB changed to out from inout
       type(ESMF_RelLoc), intent(in) :: relloc
       integer, intent(out), optional :: rc
 !
@@ -7772,6 +7991,9 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
@@ -7877,6 +8099,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+
       ! TODO: different subroutines for different dimCount?  or case?
 
       ! create ESMF_Array
@@ -7981,6 +8206,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+
       ! create ESMF_Array
       kind = ESMF_I4
       type = ESMF_DATA_INTEGER
@@ -8081,6 +8309,9 @@
 ! !REQUIREMENTS:
 !EOPI
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
 !
 !  code goes here
 !
@@ -8119,6 +8350,9 @@
 !
 ! !REQUIREMENTS:
 !EOPI
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
 !
 !  code goes here
@@ -8161,6 +8395,10 @@
 ! !REQUIREMENTS:
 !EOPI
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
+
 !
 !  code goes here
 !
@@ -8199,6 +8437,11 @@
 !
 ! !REQUIREMENTS:
 !EOPI
+
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,array,rc)
 
 !
 !  code goes here
@@ -8239,6 +8482,9 @@
 ! !REQUIREMENTS:
 !EOPI
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
 !
 !  code goes here
 !
@@ -8277,6 +8523,9 @@
 !
 ! !REQUIREMENTS:
 !EOPI
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
 !
 !  code goes here
@@ -8319,6 +8568,9 @@
 ! !REQUIREMENTS:
 !EOPI
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
 !
 !  code goes here
 !
@@ -8377,6 +8629,10 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+
 
       huge     = 999999.     !TODO: could be an ESMF constant -- OK for now
       numDE1   = size(countsPerDEDim1)
@@ -8520,6 +8776,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+
       ! TODO: break out by rank?
       ! Assume the following starage for bounding boxes:
       !   number of DEs * npts * dimCount
@@ -8604,6 +8863,9 @@
 
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
       if (.not. associated(grid%ptr)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Invalid Grid object", &
@@ -8643,7 +8905,7 @@
       type(ESMF_Grid) :: srcGrid
       type(ESMF_Grid) :: dstGrid
       type(ESMF_VM), intent(in) :: parentVM
-      type(ESMF_DomainList), intent(inout) :: domainList
+      type(ESMF_DomainList), intent(out) :: domainList !BOB changed from inout to out
       logical, intent(in) :: hasSrcData
       logical, intent(in) :: hasDstData
       logical, intent(in) :: total
@@ -8722,6 +8984,11 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
 
       ! set defaults and overwrite with optional arguments
       srcRellocUse = ESMF_CELL_CENTER
@@ -9090,6 +9357,10 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
+
       ! set defaults and overwrite with optional arguments
       srcRellocUse = ESMF_CELL_CENTER
       dstRellocUse = ESMF_CELL_CENTER
@@ -9358,6 +9629,9 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,array1,rc)
+
       ! get data in source array
       call ESMF_InternArrayGetData(array1, temp1, rc=localrc)
       i1 = size(temp1,1)
@@ -9439,6 +9713,9 @@
 !!EOPI
 !! !REQUIREMENTS:  SSSn.n, GGGn.n
 !
+!!
+!!      ! check input variables
+!!      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 !!
 !!     extract appropriate PhysGrid and InternDG to search
 !!     extract various other grid properties
@@ -9563,6 +9840,10 @@
       integer :: i
       type(ESMF_LogRectGrid), pointer :: lrgrid  ! lrgrid class
 
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+
       ! shortcut to internals
       lrgrid => grid%gridSpecific%logRectGrid
 
@@ -9667,6 +9948,12 @@
       endif
 
       ! call the appropriate create function -- is this necessary or is it all there?
+
+      ! Set grid as created 
+      ! (this may be done twice if this sub. is called from a general
+      !  grid create subroutine, but that should be ok, since
+      !  it doesn't matter how often a var. is set to the same value.)
+      ESMF_INIT_SET_CREATED(grid)
 
       if  (present(rc)) rc = ESMF_SUCCESS
 
