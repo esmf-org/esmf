@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.241 2007/01/09 21:29:52 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.242 2007/01/10 00:16:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
       use ESMF_InternArrayDataMapMod     ! ESMF data map class
       
       use ESMF_VMMod
-      
+      use ESMF_InitMacrosMod
       use ESMF_DELayoutMod ! ESMF layout class
       use ESMF_InternArrayMod
       use ESMF_InternArrayGetMod
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.241 2007/01/09 21:29:52 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.242 2007/01/10 00:16:56 oehmke Exp $'
 
 !==============================================================================
 !
@@ -812,7 +812,7 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
 
       ! Call GridCreateCutout routines based on GridStructure
 
@@ -929,7 +929,7 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
 
       ! Call GridCreateDiffRes routines based on GridStructure
 
@@ -1038,8 +1038,8 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln1,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln2,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn1,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn2,rc)
 
       ! Call GridCreateExchange routines based on GridStructure
 
@@ -1091,7 +1091,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! initialize grid as created
-      ESMF_INIT_SET_CREATED(ESMF_GridCreateDiffRes)
+      ESMF_INIT_SET_CREATED(ESMF_GridCreateExchange)
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
@@ -4967,7 +4967,7 @@
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
 
 !
 !  code goes here
@@ -5197,7 +5197,6 @@
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,array,rc)
 
 
 !
@@ -5419,7 +5418,7 @@
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
 
 !
 !  code goes here

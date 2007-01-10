@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.161 2007/01/09 21:29:53 oehmke Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.162 2007/01/10 00:16:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.161 2007/01/09 21:29:53 oehmke Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.162 2007/01/10 00:16:56 oehmke Exp $'
 
 !==============================================================================
 !
@@ -1337,7 +1337,7 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
 
       ! Initialize pointers
       nullify(grid)
@@ -1414,7 +1414,7 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
 
       ! Initialize pointers
       nullify(grid)
@@ -1495,7 +1495,7 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
 
       ! Initialize pointers
       nullify(grid)
@@ -1569,8 +1569,8 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid1,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid2,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn1,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn2,rc)
 
       ! Initialize pointers
       nullify(grid)
@@ -4821,7 +4821,7 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
@@ -7482,7 +7482,7 @@
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
 
 !
 !  code goes here
@@ -7596,7 +7596,7 @@
       if (present(rc)) rc = ESMF_FAILURE
  
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
@@ -8398,7 +8398,7 @@
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
 
 !
 !  code goes here
@@ -8571,7 +8571,7 @@
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridln,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
 !
 !  code goes here
 !

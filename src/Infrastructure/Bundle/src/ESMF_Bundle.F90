@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.90 2006/12/14 22:03:14 oehmke Exp $
+! $Id: ESMF_Bundle.F90,v 1.91 2007/01/10 00:16:55 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -1070,6 +1070,7 @@ end function
       integer :: status                                ! Error status
       logical :: dummy
       type(ESMF_BundleType), pointer :: btype
+      integer :: i
 
       ! Initialize return code in case we return early.
       ! Otherwise, count on AddFieldList call to set rc
@@ -1077,7 +1078,9 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList,rc)
+      do i=1,fieldCount
+         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList(i),rc)
+      enddo
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
@@ -1168,12 +1171,15 @@ end function
       type(ESMF_BundleType), pointer :: btypep         ! Pointer to new bundle
       logical :: dummy
       integer :: status                                ! Error status
+      integer :: i      
 
       ! Initialize return code in case we return early.
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList,rc)
+      do i=1,fieldCount
+         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList(i),rc)
+      enddo
 
       ! Initialize pointers
       nullify(btypep)
@@ -1492,7 +1498,7 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList,rc)
+
 
       ! Validate bundle before going further
       call ESMF_BundleValidate(bundle, rc=status)
@@ -4587,7 +4593,9 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_BundleTypeGetInit,btype,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields,rc)
+      do i=1,fieldCount
+         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields(i),rc)
+      enddo
 
       ! Initial values
       nullify(temp_flist)
@@ -4883,6 +4891,7 @@ end function
 !EOPI
       
       integer :: status                           ! Error status
+      integer :: i
 
       ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
@@ -4890,7 +4899,9 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_BundleTypeGetInit,btype,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields,rc)
+      do i=1,fieldCount
+         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields(i),rc)
+      enddo
 
       ! Initialize the derived type contents.
       call ESMF_BundleConstructNoFields(btype, name, iospec, status)
