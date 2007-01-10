@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.35 2006/12/15 23:59:47 donstark Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.36 2007/01/10 19:22:35 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.35 2006/12/15 23:59:47 donstark Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.36 2007/01/10 19:22:35 oehmke Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -40,7 +40,8 @@
 !EOP
 !------------------------------------------------------------------------------
 
-
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_compsetvminfo"
 recursive subroutine f_esmf_compsetvminfo(comp, vm_info, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
@@ -56,12 +57,14 @@ recursive subroutine f_esmf_compsetvminfo(comp, vm_info, rc)
   call ESMF_CompSet(compp=comp%compp, vm_info=vm_info, rc=rc)
 end subroutine f_esmf_compsetvminfo
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_compgetvmparent"
 recursive subroutine f_esmf_compgetvmparent(comp, vm_parent, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_VMMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CWrap) :: comp
@@ -71,7 +74,6 @@ recursive subroutine f_esmf_compgetvmparent(comp, vm_parent, rc)
   type(ESMF_VM)      :: local_vm_parent
   type(ESMF_Pointer) :: this
 
-  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp,rc)
   ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm_parent,rc)
 
   call ESMF_CompGet(compp=comp%compp, vm_parent=local_vm_parent, rc=rc)
@@ -80,12 +82,14 @@ recursive subroutine f_esmf_compgetvmparent(comp, vm_parent, rc)
   call ESMF_VMSetThis(vm_parent, this, rc=rc)        ! Set C++ address
 end subroutine f_esmf_compgetvmparent
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_compgetvmplan"
 recursive subroutine f_esmf_compgetvmplan(comp, vmplan, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_VMMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CWrap)   :: comp
@@ -95,7 +99,6 @@ recursive subroutine f_esmf_compgetvmplan(comp, vmplan, rc)
   type(ESMF_VMPlan)  :: local_vmplan
   type(ESMF_Pointer) :: this
 
-  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp,rc)
   ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit,vmplan,rc)
 
   call ESMF_CompGet(compp=comp%compp, vmplan=local_vmplan, rc=rc)
@@ -104,13 +107,16 @@ recursive subroutine f_esmf_compgetvmplan(comp, vmplan, rc)
   call ESMF_VMPlanSetThis(vmplan, this, rc=rc)        ! Set C++ address
 end subroutine f_esmf_compgetvmplan
 
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_compinsertvm"
 recursive subroutine f_esmf_compinsertvm(comp, vm, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_InitMacrosMod     ! ESMF initializer macros
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_VMMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CWrap) :: comp
@@ -120,7 +126,6 @@ recursive subroutine f_esmf_compinsertvm(comp, vm, rc)
   type(ESMF_VM)      :: local_vm
   type(ESMF_Pointer) :: this
   
-  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp,rc)
   ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
 
   call ESMF_VMGetThis(vm, this, rc=rc)       ! Get address of C++ object
@@ -130,28 +135,30 @@ recursive subroutine f_esmf_compinsertvm(comp, vm, rc)
   call ESMF_CompSet(compp=comp%compp, vm=local_vm, rc=rc)
 end subroutine f_esmf_compinsertvm
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_compget"
 recursive subroutine f_esmf_compget(comp, ctype, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CWrap) :: comp
   type(ESMF_CompType) :: ctype
   integer :: rc
 
-  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp,rc)
-
   call ESMF_CompGet(comp%compp, ctype=ctype, rc=rc)
 end subroutine f_esmf_compget
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_compreplicate"
 recursive subroutine f_esmf_compreplicate(comp, comp_src, vm, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_VMMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CWrap) :: comp
@@ -161,8 +168,6 @@ recursive subroutine f_esmf_compreplicate(comp, comp_src, vm, rc)
 
   type (ESMF_CompClass), pointer :: compclass  
   
-  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp,rc)
-  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp_src,rc)
   ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
 
   nullify(comp%compp)
@@ -173,12 +178,14 @@ recursive subroutine f_esmf_compreplicate(comp, comp_src, vm, rc)
   comp%compp => compclass
 end subroutine f_esmf_compreplicate
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_compcopy"
 recursive subroutine f_esmf_compcopy(comp, comp_src, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_VMMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CWrap) :: comp_src
@@ -187,25 +194,23 @@ recursive subroutine f_esmf_compcopy(comp, comp_src, rc)
 
   type (ESMF_CompClass), pointer :: compclass_src, compclass
   
-  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp,rc)
-  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp_src,rc)
-
   compclass_src => comp_src%compp
   compclass => comp%compp
   compclass = compclass_src
 end subroutine f_esmf_compcopy
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_compdelete"
 recursive subroutine f_esmf_compdelete(comp, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
-  
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CWrap) :: comp
   integer :: rc
   
-  ESMF_INIT_CHECK_DEEP(ESMF_CWrapGetInit,comp,rc)
 
   deallocate(comp%compp)
   nullify(comp%compp)
@@ -214,17 +219,19 @@ end subroutine f_esmf_compdelete
 
 !------------------------------------------------------------------------------
 
-
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_gridcompcreate"
 subroutine f_esmf_gridcompcreate(gcomp, name, mtype, grid, config, configFile, &
   clock, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ConfigMod
   use ESMF_ClockMod
+  use ESMF_ClockTypeMod
   use ESMF_GridTypesMod
   use ESMF_CompMod
   use ESMF_GridCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_GridComp) :: gcomp
@@ -245,12 +252,14 @@ subroutine f_esmf_gridcompcreate(gcomp, name, mtype, grid, config, configFile, &
     config=config, configFile=configFile, clock=clock, rc=rc)
 end subroutine f_esmf_gridcompcreate
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_gridcompdestroy"
 subroutine f_esmf_gridcompdestroy(comp, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_GridCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_GridComp) :: comp
@@ -261,15 +270,18 @@ subroutine f_esmf_gridcompdestroy(comp, rc)
   call ESMF_GridCompDestroy(comp, rc)
 end subroutine f_esmf_gridcompdestroy
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_gridcompinitialize"
 subroutine f_esmf_gridcompinitialize(comp, importState, exportState, clock, &
   phase, blockingFlag, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
+  use ESMF_ClockTypeMod
   use ESMF_StateMod
   use ESMF_CompMod
   use ESMF_GridCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_GridComp) :: comp      
@@ -289,15 +301,18 @@ subroutine f_esmf_gridcompinitialize(comp, importState, exportState, clock, &
     blockingFlag, rc)
 end subroutine f_esmf_gridcompinitialize
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_gridcomprun"
 subroutine f_esmf_gridcomprun(comp, importState, exportState, clock, phase, &
   blockingFlag, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
+  use ESMF_ClockTypeMod
   use ESMF_StateMod
   use ESMF_CompMod
   use ESMF_GridCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_GridComp) :: comp      
@@ -317,15 +332,18 @@ subroutine f_esmf_gridcomprun(comp, importState, exportState, clock, phase, &
     blockingFlag, rc)
 end subroutine f_esmf_gridcomprun
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_gridcompfinalize"
 subroutine f_esmf_gridcompfinalize(comp, importState, exportState, clock, &
   phase, blockingFlag, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
+  use ESMF_ClockTypeMod
   use ESMF_StateMod
   use ESMF_CompMod
   use ESMF_GridCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_GridComp) :: comp      
@@ -345,12 +363,14 @@ subroutine f_esmf_gridcompfinalize(comp, importState, exportState, clock, &
     blockingFlag, rc)
 end subroutine f_esmf_gridcompfinalize
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_gridcompset"
 subroutine f_esmf_gridcompset(comp, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_GridCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_GridComp) :: comp      
@@ -361,12 +381,14 @@ subroutine f_esmf_gridcompset(comp, rc)
   call ESMF_GridCompSet(comp)
 end subroutine f_esmf_gridcompset
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_gridcompget"
 subroutine f_esmf_gridcompget(comp, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_GridCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_GridComp) :: comp      
@@ -377,12 +399,14 @@ subroutine f_esmf_gridcompget(comp, rc)
   call ESMF_GridCompGet(comp)
 end subroutine f_esmf_gridcompget
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_gridcompvalidate"
 subroutine f_esmf_gridcompvalidate(comp, options, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_GridCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_GridComp) :: comp      
@@ -394,12 +418,14 @@ subroutine f_esmf_gridcompvalidate(comp, options, rc)
   call ESMF_GridCompValidate(comp, options, rc)
 end subroutine f_esmf_gridcompvalidate
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_gridcompprint"
 subroutine f_esmf_gridcompprint(comp, options, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_GridCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_GridComp) :: comp      
@@ -413,15 +439,17 @@ end subroutine f_esmf_gridcompprint
 
 
 !------------------------------------------------------------------------------
-
-
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_cplcompcreate"
 subroutine f_esmf_cplcompcreate(ccomp, name, config, configFile, clock, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
+  use ESMF_ClockTypeMod
   use ESMF_CompMod
+  use ESMF_ConfigMod
   use ESMF_CplCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CplComp) :: ccomp
@@ -439,12 +467,14 @@ subroutine f_esmf_cplcompcreate(ccomp, name, config, configFile, clock, rc)
     clock=clock, rc=rc)
 end subroutine f_esmf_cplcompcreate
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_cplcompdestroy"
 subroutine f_esmf_cplcompdestroy(comp, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_CplCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CplComp) :: comp
@@ -455,6 +485,8 @@ subroutine f_esmf_cplcompdestroy(comp, rc)
   call ESMF_CplCompDestroy(comp, rc)
 end subroutine f_esmf_cplcompdestroy
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_cplcompinitialize"
 subroutine f_esmf_cplcompinitialize(comp, importState, exportState, clock, &
   phase, blockingFlag, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
@@ -463,7 +495,7 @@ subroutine f_esmf_cplcompinitialize(comp, importState, exportState, clock, &
   use ESMF_StateMod
   use ESMF_CompMod
   use ESMF_CplCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CplComp) :: comp      
@@ -478,15 +510,18 @@ subroutine f_esmf_cplcompinitialize(comp, importState, exportState, clock, &
     blockingFlag, rc)
 end subroutine f_esmf_cplcompinitialize
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_cplcomprun"
 subroutine f_esmf_cplcomprun(comp, importState, exportState, clock, phase, &
   blockingFlag, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
   use ESMF_StateMod
+  use ESMF_ClockTypeMod
   use ESMF_CompMod
   use ESMF_CplCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CplComp) :: comp      
@@ -508,15 +543,18 @@ subroutine f_esmf_cplcomprun(comp, importState, exportState, clock, phase, &
     blockingFlag, rc)
 end subroutine f_esmf_cplcomprun
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_cplcompfinalize"
 subroutine f_esmf_cplcompfinalize(comp, importState, exportState, clock, &
   phase, blockingFlag, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
+  use ESMF_ClockTypeMod
   use ESMF_StateMod
   use ESMF_CompMod
   use ESMF_CplCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CplComp) :: comp      
@@ -536,12 +574,14 @@ subroutine f_esmf_cplcompfinalize(comp, importState, exportState, clock, &
     blockingFlag, rc)
 end subroutine f_esmf_cplcompfinalize
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_cplcompset"
 subroutine f_esmf_cplcompset(comp, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_CplCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CplComp) :: comp      
@@ -552,12 +592,14 @@ subroutine f_esmf_cplcompset(comp, rc)
   call ESMF_CplCompSet(comp)
 end subroutine f_esmf_cplcompset
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_cplcompget"
 subroutine f_esmf_cplcompget(comp, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_CplCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CplComp) :: comp      
@@ -568,12 +610,14 @@ subroutine f_esmf_cplcompget(comp, rc)
   call ESMF_CplCompGet(comp)
 end subroutine f_esmf_cplcompget
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_cplcompvalidate"
 subroutine f_esmf_cplcompvalidate(comp, options, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_CplCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CplComp) :: comp      
@@ -583,12 +627,14 @@ subroutine f_esmf_cplcompvalidate(comp, options, rc)
   call ESMF_CplCompValidate(comp, options, rc)
 end subroutine f_esmf_cplcompvalidate
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_cplcompprint"
 subroutine f_esmf_cplcompprint(comp, options, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_CplCompMod
-
+  use ESMF_InitMacrosMod
   implicit none
 
   type(ESMF_CplComp) :: comp      

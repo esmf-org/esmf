@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.68 2006/12/15 23:59:00 donstark Exp $
+! $Id: ESMF_CplComp.F90,v 1.69 2007/01/10 19:22:35 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -43,6 +43,7 @@
       use ESMF_LogErrMod
       use ESMF_ConfigMod
       use ESMF_ClockMod
+      use ESMF_ClockTypeMod
       use ESMF_GridMod
       use ESMF_StateTypesMod
       use ESMF_StateMod
@@ -96,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.68 2006/12/15 23:59:00 donstark Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.69 2007/01/10 19:22:35 oehmke Exp $'
 
 !==============================================================================
 !
@@ -638,7 +639,7 @@
 
         ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
-        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVm,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
 
         ! Initialize the pointer to null.
         nullify(ESMF_CplCompCreateCPar%compp)

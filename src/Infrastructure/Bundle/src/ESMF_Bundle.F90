@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.91 2007/01/10 00:16:55 oehmke Exp $
+! $Id: ESMF_Bundle.F90,v 1.92 2007/01/10 19:24:26 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -922,7 +922,7 @@ end interface
     function ESMF_BundleGetInit(d)
 !
 ! !ARGUMENTS:
-       type(ESMF_Bundle), intent(inout), optional :: d
+       type(ESMF_Bundle), intent(in), optional :: d
        ESMF_INIT_TYPE :: ESMF_BundleGetInit
 !
 ! !DESCRIPTION:

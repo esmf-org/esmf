@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.98 2007/01/04 23:19:17 oehmke Exp $
+! $Id: ESMF_State.F90,v 1.99 2007/01/10 19:22:35 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.98 2007/01/04 23:19:17 oehmke Exp $'
+      '$Id: ESMF_State.F90,v 1.99 2007/01/10 19:22:35 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -5051,9 +5051,6 @@ end interface
 
  
       fname = ""
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields,rc)
 
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
