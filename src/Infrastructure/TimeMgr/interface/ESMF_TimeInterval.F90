@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.77 2006/12/12 22:36:31 samsoncheung Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.78 2007/01/11 17:06:01 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -8,6 +8,8 @@
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
+!==============================================================================
+#define ESMF_FILENAME "ESMF_TimeInterval.F90"
 !==============================================================================
 !
 !     ESMF TimeInterval Module
@@ -123,7 +125,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.77 2006/12/12 22:36:31 samsoncheung Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.78 2007/01/11 17:06:01 oehmke Exp $'
 
 !==============================================================================
 !

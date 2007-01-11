@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.19 2004/03/10 03:03:24 eschwab Exp $ 
+# $Id: makefile,v 1.20 2007/01/11 17:06:01 oehmke Exp $ 
 
 ALL: build_here 
 
 CFLAGS    = 
-FFLAGS    =
+FFLAGS    = -free
 SOURCEC	  = ESMC_Fraction_F.C ESMC_BaseTime_F.C \
             ESMC_Calendar_F.C ESMC_TimeInterval_F.C ESMC_Time_F.C \
             ESMC_Alarm_F.C ESMC_Clock_F.C

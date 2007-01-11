@@ -1,4 +1,5 @@
-! $Id: ESMF_Clock.F90,v 1.72 2007/01/06 01:38:21 oehmke Exp $
+
+! $Id: ESMF_Clock.F90,v 1.73 2007/01/11 17:06:01 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -8,6 +9,8 @@
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
+!==============================================================================
+#define ESMF_FILENAME "ESMF_Clock.F90"
 !==============================================================================
 !
 !     ESMF Clock Module
@@ -100,7 +103,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.72 2007/01/06 01:38:21 oehmke Exp $'
+      '$Id: ESMF_Clock.F90,v 1.73 2007/01/11 17:06:01 oehmke Exp $'
 
 !==============================================================================
 !
