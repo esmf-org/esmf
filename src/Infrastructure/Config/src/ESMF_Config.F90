@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.32 2006/12/14 22:03:14 oehmke Exp $
+! $Id: ESMF_Config.F90,v 1.33 2007/01/11 17:11:21 oehmke Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -291,8 +291,7 @@
 !     \end{description}
 !
 !EOPI
-     ESMF_INIT_CHECK_SHALLOW(ESMF_ConfigAttrUsedGetInit,  &
-                             ESMF_ConfigAttrUsedInit,s)
+     ESMF_INIT_CHECK_SHALLOW(ESMF_ConfigAttrUsedGetInit, ESMF_ConfigAttrUsedInit,s)
 
      ! return success
      if(present(rc)) then
@@ -390,8 +389,7 @@
 !     \end{description}
 !
 !EOPI
-     ESMF_INIT_CHECK_SHALLOW(ESMF_ConfigClassGetInit,  &
-                             ESMF_ConfigClassInit,s)
+     ESMF_INIT_CHECK_SHALLOW(ESMF_ConfigClassGetInit, ESMF_ConfigClassInit,s)
 
      ! return success
      if(present(rc)) then
