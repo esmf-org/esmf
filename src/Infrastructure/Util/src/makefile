@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2007/01/09 23:06:43 oehmke Exp $ 
+# $Id: makefile,v 1.7 2007/01/11 19:58:41 rosalind Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
@@ -6,17 +6,20 @@ ALL: build_here
 CFLAGS    += -I$(ESMF_DIR)/src/Infrastructure/LogErr/include ${MPI_INCLUDE}
 FFLAGS    =
 
+# files which are generated from .cpp files
+AUTOGEN   = ESMF_FortranWordsize.F90
+
 SOURCEC	  = ESMC_Util.C ESMC_Fraction.C ESMC_F90Interface.C
 SOURCEF	  = ESMF_UtilTypes.F90 \
-            ESMF_LogErr.F90    \
-	    ESMF_InitMacros.F90 
-
- 
+            ESMF_LogErr.F90  \
+            $(AUTOGEN) \
+            ESMF_InitMacros.F90
+            
 STOREH    = ESMF_Macros.inc ESMF_Version.inc ESMF.h ESMC_Macros.h \
             ESMC_Util.h ESMF_StdCppMacros.h ESMC_Start.h \
             ESMC_F90Interface.h ESMF_ErrReturnCodes.inc ESMF_LogMacros.inc \
 	    ESMF_LogConstants.inc ESMC_Fraction.h ESMF_TypeKindTemplate.h \
-            ESMF_InitMacros.inc 
+            ESMF_InitMacros.inc ESMF_FortranWordsizeMacros.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
@@ -37,4 +40,4 @@ CLOBBERDIRS =
 
 ESMF_InitMacros.o: ESMF_LogErr.o ESMF_UtilTypes.o 
 ESMF_LogErr.o: ESMF_UtilTypes.o 
-
+ESMF_FortranWordsize.o: ESMF_FortranWordsize.cpp ESMF_TypeKindTemplate.h ESMF_FortranWordsizeMacros.h
