@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cpp,v 1.5 2006/12/08 23:36:07 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cpp,v 1.6 2007/01/11 18:05:38 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -161,7 +161,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cpp,v 1.5 2006/12/08 23:36:07 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cpp,v 1.6 2007/01/11 18:05:38 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -467,7 +467,7 @@ end function
     type(ESMF_LocalArray) :: ESMF_LocalArrayCreateBySpec
 !
 ! !ARGUMENTS:
-    type(ESMF_ArraySpec), intent(in) :: arrayspec
+    type(ESMF_ArraySpec), intent(inout) :: arrayspec
     integer, intent(in), dimension(:) :: counts
     integer, dimension(:), intent(in), optional :: lbounds
     integer, dimension(:), intent(in), optional :: ubounds 
@@ -2106,7 +2106,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 ! TODO: code goes here
 !
         ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
+        ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocalArrayGetInit, array, rc)
         !todo: init check iospec
 
         if (present(rc)) rc = ESMF_FAILURE
