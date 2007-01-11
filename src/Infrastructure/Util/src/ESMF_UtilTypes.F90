@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.34 2007/01/09 23:06:43 oehmke Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.35 2007/01/11 16:38:25 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -945,7 +945,7 @@ end interface
     subroutine ESMF_DomainListInit(s)
 !
 ! !ARGUMENTS:
-       type(ESMF_Domain) :: s
+       type(ESMF_DomainList) :: s
 !
 ! !DESCRIPTION:
 !      Initialize the shallow class {\tt DomainList}.
