@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayCreate.cpp,v 1.4 2006/12/08 23:36:07 theurich Exp $
+! $Id: ESMF_InternArrayCreate.cpp,v 1.5 2007/01/11 20:11:18 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayCreate.cpp,v 1.4 2006/12/08 23:36:07 theurich Exp $'
+    '$Id: ESMF_InternArrayCreate.cpp,v 1.5 2007/01/11 20:11:18 oehmke Exp $'
       
 !==============================================================================
 ! 
@@ -314,7 +314,7 @@ DeclarationMacro(ArrayCreateByMTPtr)
       type(ESMF_InternArray) :: ESMF_ArrayCreateBySpec
 !
 ! !ARGUMENTS:
-      type(ESMF_ArraySpec), intent(in) :: arrayspec
+      type(ESMF_ArraySpec), intent(inout) :: arrayspec
       integer, intent(in), dimension(:) :: counts
       integer, intent(in), optional :: haloWidth 
       integer, dimension(:), intent(in), optional :: lbounds
