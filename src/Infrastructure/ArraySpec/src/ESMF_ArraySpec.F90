@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.15 2006/12/07 23:23:17 theurich Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.16 2007/01/11 17:19:09 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -90,7 +90,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.15 2006/12/07 23:23:17 theurich Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.16 2007/01/11 17:19:09 oehmke Exp $'
 
 !==============================================================================
 !
@@ -132,7 +132,7 @@ module ESMF_ArraySpecMod
   subroutine ESMF_ArraySpecGet(arrayspec, rank, type, kind, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArraySpec), intent(in)            :: arrayspec
+    type(ESMF_ArraySpec), intent(inout)            :: arrayspec
     integer,              intent(out), optional :: rank
     type(ESMF_DataType),  intent(out), optional :: type
     type(ESMF_DataKind),  intent(out), optional :: kind
@@ -374,7 +374,7 @@ module ESMF_ArraySpecMod
   subroutine ESMF_ArraySpecValidate(arrayspec, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArraySpec), intent(in)              :: arrayspec
+    type(ESMF_ArraySpec), intent(inout)              :: arrayspec
     integer,              intent(out),  optional  :: rc  
 !         
 !
