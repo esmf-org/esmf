@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.228 2007/01/10 00:16:55 oehmke Exp $
+! $Id: ESMF_Field.F90,v 1.229 2007/01/11 20:12:27 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -239,7 +239,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.228 2007/01/10 00:16:55 oehmke Exp $'
+      '$Id: ESMF_Field.F90,v 1.229 2007/01/11 20:12:27 oehmke Exp $'
 
 !==============================================================================
 !
@@ -628,7 +628,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid                 
-      type(ESMF_ArraySpec), intent(in) :: arrayspec    
+      type(ESMF_ArraySpec), intent(inout) :: arrayspec    
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth    
@@ -4251,7 +4251,7 @@
 ! !ARGUMENTS:
       type(ESMF_FieldType), pointer :: ftype 
       type(ESMF_Grid) :: grid               
-      type(ESMF_ArraySpec), intent(in) :: arrayspec     
+      type(ESMF_ArraySpec), intent(inout) :: arrayspec     
       type(ESMF_AllocFlag), intent(in), optional :: allocflag
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
@@ -4544,7 +4544,7 @@
 ! !ARGUMENTS:     
       type(ESMF_FieldType), pointer :: ftype                
       type(ESMF_Grid), intent(inout) :: grid               
-      type(ESMF_ArraySpec), intent(in) :: arrayspec     
+      type(ESMF_ArraySpec), intent(inout) :: arrayspec     
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth 
