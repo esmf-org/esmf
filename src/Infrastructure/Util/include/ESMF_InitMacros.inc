@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_InitMacros.inc,v 1.14 2007/01/11 16:26:52 oehmke Exp $
+$Id: ESMF_InitMacros.inc,v 1.15 2007/01/11 18:08:07 oehmke Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -53,6 +53,9 @@ automatic initialization of types.
 #define ESMF_INIT_CHECK_DEEP(fget,var, rc) \
 if (ESMF_IMErr(fget(var),ESMF_CONTEXT,rc=rc)) return
 
+#define ESMF_INIT_CHECK_DEEP_SHORT(fget,var, rc) \
+if (ESMF_IMErr(fget(var),__LINE__,ESMF_FILENAME,"?",rc=rc)) return
+
 #else
 
 #define ESMF_INIT_GET(var) 0
@@ -69,6 +72,7 @@ if (ESMF_IMErr(fget(var),ESMF_CONTEXT,rc=rc)) return
 #define ESMF_INIT_SET_CREATED(var) 
 #define ESMF_INIT_SET_DELETED(var) 
 #define ESMF_INIT_CHECK_DEEP(fget, var, rc)
+#define ESMF_INIT_CHECK_DEEP_SHORT(fget,var, rc) 
 
 #endif
 
