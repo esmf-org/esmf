@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.7 2006/12/12 20:32:56 donstark Exp $
+! $Id: ESMF_Util.F90,v 1.8 2007/01/11 16:39:06 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -131,7 +131,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.7 2006/12/12 20:32:56 donstark Exp $'
+               '$Id: ESMF_Util.F90,v 1.8 2007/01/11 16:39:06 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -168,10 +168,6 @@
       integer :: status
       type(ESMF_Domain), dimension(:), pointer :: domains
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainGetInit,ESMF_DomainInit,domains)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit, &
-                              ESMF_DomainListCreate)
-
 ! Allocate an array of domains of specified size
       allocate(domains(num_domains), stat=status)
 
@@ -207,8 +203,7 @@
 !EOPI
       integer :: status
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit, &
-                              domainList)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,domainList)
 
       deallocate(domainlist%domains, stat=status)
 
@@ -241,8 +236,7 @@
       integer :: min, max, stride
       !character(len=ESMF_MAXSTR) :: msgbuf
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit, &
-                              domainList)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,domainList)
 
     !jw  write (msgbuf, *)  "DomainListPrint"
     !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
@@ -316,8 +310,7 @@
 !EOPI
       type(ESMF_Domain) :: newdomain          ! temp variable to use
       
-      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit, &
-                              domainList)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,domainList)
       ESMF_INIT_CHECK_SHALLOW(ESMF_DomainGetInit,ESMF_DomainInit,newdomain)
 
       newdomain%rank = 2
@@ -383,8 +376,7 @@
 !EOPI
       type(ESMF_Domain) :: newdomain          ! temp variable to use
       
-      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit, &
-                              domainList)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,domainList)
       ESMF_INIT_CHECK_SHALLOW(ESMF_DomainGetInit,ESMF_DomainInit,newdomain)
 
       newdomain%rank = 3
@@ -427,8 +419,7 @@
       integer :: new_size         ! New number of domains to alloc
       integer :: status, i
       
-      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit, &
-                              domainList)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,domainList)
       ESMF_INIT_CHECK_SHALLOW(ESMF_DomainGetInit,ESMF_DomainInit,newdomain)
 
 ! One way or another we are going to add the domain, so increment counter
@@ -442,7 +433,6 @@
 ! The strategy is debatable, but simply double the number of domains
       new_size = domainlist%current_size * 2
       allocate(temp_domains(new_size), stat=status)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainGetInit,ESMF_DomainInit,temp_domains)
 
 ! Copy over the old domains
       do i=1, domainlist%current_size
@@ -615,14 +605,14 @@
 !
 !EOPI
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit,ESMF_AxisIndexInit,ai)
-
       integer :: items, i
 
       items = size(ai) 
       do i=1, items
-        print *, "AI num, min, max, stride = ", &
-                   i, ai(i)%min, ai(i)%max, ai(i)%stride
+         ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit,ESMF_AxisIndexInit,ai(i))
+ 
+         print *, "AI num, min, max, stride = ", &
+                    i, ai(i)%min, ai(i)%max, ai(i)%stride
       enddo
 
       if (present(rc)) rc = ESMF_SUCCESS

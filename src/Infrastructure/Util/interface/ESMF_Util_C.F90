@@ -1,4 +1,4 @@
-!  $Id: ESMF_Util_C.F90,v 1.6 2006/12/12 20:32:37 donstark Exp $
+!  $Id: ESMF_Util_C.F90,v 1.7 2007/01/11 16:39:06 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Util_C.F90,v 1.6 2006/12/12 20:32:37 donstark Exp $'
+!      '$Id: ESMF_Util_C.F90,v 1.7 2007/01/11 16:39:06 oehmke Exp $'
 !==============================================================================
 !------------------------------------------------------------------------------
 !BOP
@@ -53,7 +53,7 @@
        integer :: rc     
        !integer :: rc_t
 
-       ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,domainlist)
+       ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,domlist)
 
        !domlist_t = domlist
        !dnum_t = dnum
