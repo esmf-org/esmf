@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.39 2006/12/08 23:47:43 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.40 2007/01/12 00:12:22 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -149,7 +149,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.39 2006/12/08 23:47:43 theurich Exp $'
+      '$Id: ESMF_Array.F90,v 1.40 2007/01/12 00:12:22 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -836,7 +836,7 @@ contains
     indexflag, staggerLoc, vectorDim, lbounds, ubounds, rc)
 !
 ! !ARGUMENTS:
-       type(ESMF_ArraySpec),  intent(in)              :: arrayspec
+       type(ESMF_ArraySpec),  intent(inout)              :: arrayspec
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        integer,               intent(in),   optional  :: dimmap(:)
        integer,               intent(in),   optional  :: computationalLWidth(:)

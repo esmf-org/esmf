@@ -1,4 +1,4 @@
-! $Id: ESMF_XPacket.F90,v 1.17 2006/12/06 01:53:30 peggyli Exp $
+! $Id: ESMF_XPacket.F90,v 1.18 2007/01/12 00:12:26 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_XPacket.F90,v 1.17 2006/12/06 01:53:30 peggyli Exp $'
+      '$Id: ESMF_XPacket.F90,v 1.18 2007/01/12 00:12:26 oehmke Exp $'
 
 !==============================================================================
 
@@ -197,7 +197,7 @@ end subroutine ESMF_XPacketValidate
       subroutine ESMF_XPacketGet(xpacket, value1, value2, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_XPacket), intent(in) :: xpacket
+      type(ESMF_XPacket), intent(inout) :: xpacket
       integer, intent(out), optional :: value1
       integer, intent(out), optional :: value2
       integer, intent(out), optional :: rc             
@@ -309,7 +309,7 @@ end subroutine ESMF_XPacketValidate
       subroutine ESMF_XPacketSet(XPacket, value1, value2, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_XPacket), intent(in) :: xpacket
+      type(ESMF_XPacket), intent(inout) :: xpacket
       integer, intent(in), optional :: value1
       integer, intent(in), optional :: value2
       integer, intent(out), optional :: rc            

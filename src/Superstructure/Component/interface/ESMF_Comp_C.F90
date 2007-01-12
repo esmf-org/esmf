@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.36 2007/01/10 19:22:35 oehmke Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.37 2007/01/12 00:11:38 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -8,6 +8,8 @@
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
+!==============================================================================
+#define ESMF_FILENAME "ESMF_COMP_C.F90"
 !==============================================================================
 !
 ! F77 interface files for C++ layer calling into F90 implementation layer.
@@ -23,7 +25,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.36 2007/01/10 19:22:35 oehmke Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.37 2007/01/12 00:11:38 oehmke Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------

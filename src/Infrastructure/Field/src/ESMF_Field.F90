@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.229 2007/01/11 20:12:27 oehmke Exp $
+! $Id: ESMF_Field.F90,v 1.230 2007/01/12 00:12:24 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -239,7 +239,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.229 2007/01/11 20:12:27 oehmke Exp $'
+      '$Id: ESMF_Field.F90,v 1.230 2007/01/12 00:12:24 oehmke Exp $'
 
 !==============================================================================
 !
@@ -3622,8 +3622,7 @@
 
         ! check variables
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,  &
-                                ESMF_FieldDataMapInit,datamap)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,datamap)
 
         ! Validate first
         call ESMF_FieldValidate(field, rc=status)
@@ -4319,8 +4318,7 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
-                              ESMF_FieldDataMapInit,datamap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,datamap)
 
       ! make sure hwidth has a value here.
       if (present(haloWidth)) then

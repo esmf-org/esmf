@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayDataMap.F90,v 1.4 2006/12/08 23:36:07 theurich Exp $
+! $Id: ESMF_InternArrayDataMap.F90,v 1.5 2007/01/12 00:12:25 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@ module ESMF_InternArrayDataMapMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version =  &
-    '$Id: ESMF_InternArrayDataMap.F90,v 1.4 2006/12/08 23:36:07 theurich Exp $'
+    '$Id: ESMF_InternArrayDataMap.F90,v 1.5 2007/01/12 00:12:25 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -332,7 +332,7 @@ end function
                                       counts, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternArrayDataMap), intent(in) :: arraydatamap  
+      type(ESMF_InternArrayDataMap), intent(inout) :: arraydatamap  
       integer, intent(out), optional :: dataRank    
       integer, dimension(:), intent(out), optional :: dataIndexList
       integer, dimension(:), intent(out), optional :: counts 
@@ -418,7 +418,7 @@ end function
       subroutine ESMF_ArrayDataMapPrint(arraydatamap, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternArrayDataMap), intent(in) :: arraydatamap
+      type(ESMF_InternArrayDataMap), intent(inout) :: arraydatamap
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !
@@ -885,7 +885,7 @@ end function
       subroutine ESMF_ArrayDataMapValidate(arraydatamap, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternArrayDataMap), intent(in) :: arraydatamap
+      type(ESMF_InternArrayDataMap), intent(inout) :: arraydatamap
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
@@ -930,7 +930,7 @@ end function
       subroutine ESMF_ArrayDataMapWriteRestart(datamap, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternArrayDataMap), intent(in) :: datamap
+      type(ESMF_InternArrayDataMap), intent(inout) :: datamap
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc
 !
@@ -1021,7 +1021,7 @@ end function
       subroutine ESMF_ArrayDataMapWrite(datamap, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternArrayDataMap), intent(in) :: datamap
+      type(ESMF_InternArrayDataMap), intent(inout) :: datamap
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc
 !

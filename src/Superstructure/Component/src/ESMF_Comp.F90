@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.143 2006/12/15 23:58:07 donstark Exp $
+! $Id: ESMF_Comp.F90,v 1.144 2007/01/12 00:11:38 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.143 2006/12/15 23:58:07 donstark Exp $'
+      '$Id: ESMF_Comp.F90,v 1.144 2007/01/12 00:11:38 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1635,8 +1635,7 @@ end function
         type (ESMF_CompClass) :: a
 
         ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,a)
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit, &
-                                ESMF_CompRead)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit, ESMF_CompRead)
 
 !       this is just to stop compiler warnings
         a%gridcomptype = ESMF_OTHER

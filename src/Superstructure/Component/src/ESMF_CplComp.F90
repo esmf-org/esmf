@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.69 2007/01/10 19:22:35 oehmke Exp $
+! $Id: ESMF_CplComp.F90,v 1.70 2007/01/12 00:11:38 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.69 2007/01/10 19:22:35 oehmke Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.70 2007/01/12 00:11:38 oehmke Exp $'
 
 !==============================================================================
 !
@@ -1082,7 +1082,6 @@
         ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_IOSpecGetInit,ESMF_IOSpecInit,iospec)
 
 	! Changed BOP to BOPI until implemented.
         call ESMF_CompReadRestart(cplcomp%compp, iospec, clock, phase, &
@@ -1502,7 +1501,7 @@
         ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_IOSpecGetInit,ESMF_IOSpecInit,iospec)
+
 	! Changed BOP to BOPI until implemented.
         call ESMF_CompWriteRestart(cplcomp%compp, iospec, clock, phase, &
                                    blockingflag, rc)

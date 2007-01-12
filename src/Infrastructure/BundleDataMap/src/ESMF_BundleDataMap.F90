@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.30 2006/12/07 05:29:51 samsoncheung Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.31 2007/01/12 00:12:23 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.30 2006/12/07 05:29:51 samsoncheung Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.31 2007/01/12 00:12:23 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -243,8 +243,7 @@
         endif
 
         ! check variables
-        ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,    &
-                                ESMF_BundleDataMapInit,bundledatamap)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit, ESMF_BundleDataMapInit,bundledatamap)
 
         ! if specified, return value
         if (present(bundleinterleave)) bundleinterleave = bundledatamap%bil
@@ -355,8 +354,7 @@
         endif
 
         ! check variables
-        ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,    &
-                                ESMF_BundleDataMapInit,bundledatamap)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit, ESMF_BundleDataMapInit,bundledatamap)
 
         ! if specified, set value
         if (present(bundleinterleave)) bundledatamap%bil = bundleinterleave
@@ -415,8 +413,7 @@
         endif
 
         ! check variables
-        ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,    &
-                                ESMF_BundleDataMapInit,bundledatamap)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit, ESMF_BundleDataMapInit,bundledatamap)
 
         ! set the default
         bundledatamap%bil = ESMF_INTERLEAVE_BY_BLOCK
@@ -515,8 +512,7 @@
         endif
 
         ! check variables
-        ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,    &
-                                ESMF_BundleDataMapInit,bundledatamap)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit, ESMF_BundleDataMapInit,bundledatamap)
 
         if (bundledatamap%status .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &

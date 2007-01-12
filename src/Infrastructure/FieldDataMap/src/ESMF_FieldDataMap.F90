@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.30 2006/12/05 23:06:20 samsoncheung Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.31 2007/01/12 00:12:24 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.30 2006/12/05 23:06:20 samsoncheung Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.31 2007/01/12 00:12:24 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -286,8 +286,7 @@
         endif
 
         ! check variables
-        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
-                                ESMF_FieldDataMapInit,fielddatamap)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,fielddatamap)
 
         ! get any values from the internal array fielddatamap
         call ESMF_ArrayDataMapGet(fielddatamap%adm, dataRank, dataIndexList, &
@@ -315,7 +314,7 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldDataMap), intent(in) :: fielddatamap
+      type(ESMF_FieldDataMap), intent(inout) :: fielddatamap
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !
@@ -439,8 +438,7 @@
         endif
 
         ! check variables
-        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
-                                ESMF_FieldDataMapInit,fielddatamap)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,fielddatamap)
         
 
         ! set the internal array map
@@ -534,8 +532,7 @@
         endif
 
         ! check variables
-        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
-                                ESMF_FieldDataMapInit,fielddatamap)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,fielddatamap)
 
         ! initialize the contents of the internal array fielddatamap
         call ESMF_ArrayDataMapSetDefault(fielddatamap%adm, dataRank, dataIndexList, &
@@ -629,8 +626,7 @@
         endif
 
         ! check variables
-        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
-                                ESMF_FieldDataMapInit,fielddatamap)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,fielddatamap)
 
         ! initialize the contents of the internal array fielddatamap
         call ESMF_ArrayDataMapSetDefault(fielddatamap%adm, indexorder, &
@@ -743,8 +739,7 @@
         endif
 
         ! check variables
-        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
-                                ESMF_FieldDataMapInit,fielddatamap)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,fielddatamap)
 
 
         if (fielddatamap%status .ne. ESMF_STATUS_READY) then
@@ -796,8 +791,7 @@
 !
         if (present(rc)) rc = ESMF_FAILURE
         ! check variables
-        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
-                                ESMF_FieldDataMapInit,fielddatamap)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,fielddatamap)
 
         end subroutine ESMF_FieldDataMapWriteRestart
 
@@ -890,8 +884,7 @@
         if (present(rc)) rc = ESMF_FAILURE
 
         ! check variables
-        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
-                                ESMF_FieldDataMapInit,fielddatamap)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,fielddatamap)
 
         end subroutine ESMF_FieldDataMapWrite
 
@@ -989,8 +982,7 @@
       integer :: localrc                     ! Error status
 
       ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
-                              ESMF_FieldDataMapInit,fielddatamap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,fielddatamap)
 
 
       call c_ESMC_FieldDataMapSerialize(fielddatamap%status, &
@@ -1059,8 +1051,7 @@
       integer :: localrc                ! Error status
 
       ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,    &
-                              ESMF_FieldDataMapInit,fielddatamap)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,fielddatamap)
 
       call c_ESMC_FieldDataMapDeserialize(fielddatamap%status, &
                                  fielddatamap%isScalar, &

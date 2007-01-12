@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.92 2007/01/10 19:24:26 oehmke Exp $
+! $Id: ESMF_Bundle.F90,v 1.93 2007/01/12 00:12:23 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -529,8 +529,7 @@ end interface
 !     \end{description}
 !
 !EOPI
-     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleFieldAccessGetInit,  &
-                             ESMF_BundleFieldAccessInit,s)
+     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleFieldAccessGetInit, ESMF_BundleFieldAccessInit,s)
 
      ! return success
      if(present(rc)) then
@@ -621,8 +620,7 @@ end interface
 !
 !EOPI
 
-     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleFieldInterleaveGtIn,  &
-                             ESMF_BundleFieldInterleaveInit,s)
+     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleFieldInterleaveGtIn, ESMF_BundleFieldInterleaveInit,s)
 
      ! return success
      if(present(rc)) then
@@ -715,8 +713,7 @@ end interface
 !     \end{description}
 !
 !EOPI
-     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleCongruentDataGetInit,  &
-                             ESMF_BundleCongruentDataInit,s)
+     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleCongruentDataGetInit, ESMF_BundleCongruentDataInit,s)
 
      ! return success
      if(present(rc)) then
@@ -4592,7 +4589,7 @@ end function
       if(present(rc)) rc = ESMF_FAILURE
 
       ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleTypeGetInit,btype,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleTypeGetInit,btype,rc)
       do i=1,fieldCount
          ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields(i),rc)
       enddo
@@ -4808,7 +4805,7 @@ end function
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleTypeGetInit,btype,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleTypeGetInit,btype,rc)
       ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,ESMF_BundleDataMapInit,bundledatamap)
 
       ! TODO: take this out when implemented
@@ -4898,7 +4895,7 @@ end function
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleTypeGetInit,btype,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleTypeGetInit,btype,rc)
       do i=1,fieldCount
          ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields(i),rc)
       enddo
@@ -4966,7 +4963,7 @@ end function
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleTypeGetInit,btype,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleTypeGetInit,btype,rc)
 
 
       ! Initialize the base object

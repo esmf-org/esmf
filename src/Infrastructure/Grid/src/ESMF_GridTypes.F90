@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.52 2007/01/09 21:10:22 oehmke Exp $
+! $Id: ESMF_GridTypes.F90,v 1.53 2007/01/12 00:12:25 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -565,7 +565,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.52 2007/01/09 21:10:22 oehmke Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.53 2007/01/12 00:12:25 oehmke Exp $'
 
 !==============================================================================
 !
@@ -2129,7 +2129,7 @@
   subroutine ESMF_LogRectGridValidate(lrg, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_LogRectGrid), intent(in)              :: lrg
+    type(ESMF_LogRectGrid), intent(inout)              :: lrg
     integer,              intent(out),  optional  :: rc  
 !         
 !
@@ -2238,7 +2238,7 @@
   subroutine ESMF_GridSpecificValidate(gs, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridSpecific), intent(in)              :: gs
+    type(ESMF_GridSpecific), intent(inout)              :: gs
     integer,              intent(out),  optional  :: rc  
 !         
 !

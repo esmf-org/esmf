@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.81 2007/01/10 19:22:35 oehmke Exp $
+! $Id: ESMF_GridComp.F90,v 1.82 2007/01/12 00:11:38 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.81 2007/01/10 19:22:35 oehmke Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.82 2007/01/12 00:11:38 oehmke Exp $'
 
 !==============================================================================
 !
@@ -1140,7 +1140,6 @@
 !EOP
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
-        ESMF_INIT_CHECK_SHALLOW(ESMF_IOSpecGetInit,ESMF_IOSpecInit,iospec)
 
 	! Change BOPI to BOP when implemented.
         call ESMF_CompReadRestart(gridcomp%compp, iospec, clock, phase, &
@@ -1573,7 +1572,6 @@
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_IOSpecGetInit,ESMF_IOSpecInit,iospec)
 
 
 	!Change BOPI to BOP when implemented.

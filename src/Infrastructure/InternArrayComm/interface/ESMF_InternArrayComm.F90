@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.8 2006/12/21 22:03:37 samsoncheung Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.9 2007/01/12 00:12:25 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.8 2006/12/21 22:03:37 samsoncheung Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.9 2007/01/12 00:12:25 oehmke Exp $'
 !
 !==============================================================================
 !
@@ -266,7 +266,7 @@ module ESMF_InternArrayCommMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
     ! extract necessary information from the grid
     call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, rc=status)
@@ -435,7 +435,7 @@ module ESMF_InternArrayCommMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
     ! make sure the compilers can tell these are unassociated.
     nullify(myArrayAIsPerRank)
@@ -579,7 +579,7 @@ module ESMF_InternArrayCommMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
     ! get layout from the grid in order to get the number of DEs
     call ESMF_InternArrayGet(array, rank=datarank, rc=localrc)
@@ -654,7 +654,7 @@ module ESMF_InternArrayCommMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
       ! get layout from the grid in order to get the number of DEs
       call ESMF_InternArrayGet(array, rank=datarank, rc=status)
@@ -1091,7 +1091,7 @@ module ESMF_InternArrayCommMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
       ! passthru call, setting index to 1 and type 1-to-1
       call ESMF_IArrayHaloStoreIndex(array, 1, ESMF_1TO1HANDLEMAP, 1, &
@@ -1193,7 +1193,7 @@ module ESMF_InternArrayCommMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
       ! TODO: all this code could be moved to the C++ side once Grid has
@@ -1421,7 +1421,7 @@ module ESMF_InternArrayCommMod
  
     ! Check init status of arguments
     do i=1, size(arrayList)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, arrayList(i), rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_InternArrayGetInit, arrayList(i), rc)
     enddo
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
@@ -1921,10 +1921,10 @@ module ESMF_InternArrayCommMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArray, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, srcGrid, rc)
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, srcDatamap)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, srcDatamap)
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArray, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, dstGrid, rc)
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, dstDatamap)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, dstDatamap)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, parentVM, rc)
 
     call ESMF_IArrayRedistStoreIndex(srcArray, srcGrid, srcDataMap, &
@@ -2046,10 +2046,10 @@ module ESMF_InternArrayCommMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArray, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, srcGrid, rc)
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, srcDatamap)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, srcDatamap)
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArray, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, dstGrid, rc)
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, dstDatamap)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, dstDatamap)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, parentVM, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
@@ -2379,12 +2379,12 @@ module ESMF_InternArrayCommMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArray, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, srcGrid, rc)
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, srcDatamap)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, srcDatamap)
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArray, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, dstGrid, rc)
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, dstDatamap)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, dstDatamap)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, parentVM, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
 
       ! TODO: query to get storage type and if vector, branch out.
 
@@ -2778,10 +2778,10 @@ module ESMF_InternArrayCommMod
 
     ! Check init status of arguments
     do i=1, size(srcArrayList)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArrayList(i), rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_InternArrayGetInit, srcArrayList(i), rc)
     enddo
     do i=1, size(dstArrayList)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArrayList(i), rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_InternArrayGetInit, dstArrayList(i), rc)
     enddo
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
