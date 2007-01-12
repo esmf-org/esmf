@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.20 2006/12/22 01:37:10 samsoncheung Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.21 2007/01/12 18:46:22 oehmke Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -991,7 +991,7 @@ contains
     type(ESMF_Field), intent(out)               :: field
     real(ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
     real(ESMF_KIND_R8), dimension(:,:), pointer :: xCoor, yCoor
-    type(ESMF_ArraySpec), intent(in)            :: arrayspec
+    type(ESMF_ArraySpec), intent(inout)         :: arrayspec
     integer, intent(out)			:: rc   
 
  !-------------------------------------------------------------------------
