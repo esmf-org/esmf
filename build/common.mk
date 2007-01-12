@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.169 2006/11/27 19:22:31 theurich Exp $
+#  $Id: common.mk,v 1.170 2007/01/12 22:57:11 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -86,6 +86,10 @@ endif
 
 ifeq ($(origin ESMF_H_INSTALL), environment)
 $(error Deprecated environment variable ESMF_H_INSTALL detected. Please see README.)
+endif
+
+ifeq ($(origin ESMF_NO_IOCODE), environment)
+$(error Deprecated environment variable ESMF_NO_IOCODE detected. Please see README.)
 endif
 
 #-------------------------------------------------------------------------------
