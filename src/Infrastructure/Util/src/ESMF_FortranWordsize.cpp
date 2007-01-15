@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsize.cpp,v 1.1 2007/01/11 19:58:41 rosalind Exp $
+! $Id: ESMF_FortranWordsize.cpp,v 1.2 2007/01/15 20:09:27 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -30,6 +30,8 @@
 ! !USES:
      use ESMF_UtilTypesMod      
      use ESMF_LogErrMod
+
+     implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
