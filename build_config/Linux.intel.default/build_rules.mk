@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.48.2.12 2006/11/21 21:52:18 theurich Exp $
+# $Id: build_rules.mk,v 1.48.2.13 2007/01/16 23:19:25 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -88,16 +88,6 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
 
 ############################################################
-# On IA64 set long and pointer types to 64-bit
-#
-ifeq ($(ESMF_ABI),64)
-ESMF_CXXCOMPILEOPTS       += -size_lp64
-ESMF_CXXLINKOPTS          += -size_lp64
-ESMF_F90COMPILEOPTS       += -size_lp64
-ESMF_F90LINKOPTS          += -size_lp64
-endif
-
-############################################################
 # Construct the ABISTRING
 #
 ifeq ($(ESMF_MACHINE),ia64)
@@ -107,6 +97,34 @@ endif
 ifeq ($(ESMF_ABI),64)
 ESMF_ABISTRING := $(ESMF_MACHINE)_64
 endif
+endif
+ifeq ($(ESMF_MACHINE),x86_64)
+ifeq ($(ESMF_ABI),32)
+ESMF_ABISTRING := $(ESMF_MACHINE)_32
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_ABISTRING := x86_64_small
+endif
+endif
+
+############################################################
+# Set memory model compiler flags according to ABISTRING
+#
+ifeq ($(ESMF_ABISTRING),x86_64_medium)
+ESMF_F90COMPILEOPTS     += -mcmodel=medium
+ESMF_F90LINKOPTS        += -mcmodel=medium
+ESMF_CXXCOMPILEOPTS     += -mcmodel=medium
+ESMF_CXXLINKOPTS        += -mcmodel=medium
+endif
+
+############################################################
+# On IA64 set long and pointer types to 64-bit
+#
+ifeq ($(ESMF_ABISTRING),ia64_64)
+ESMF_CXXCOMPILEOPTS       += -size_lp64
+ESMF_CXXLINKOPTS          += -size_lp64
+ESMF_F90COMPILEOPTS       += -size_lp64
+ESMF_F90LINKOPTS          += -size_lp64
 endif
 
 ############################################################
