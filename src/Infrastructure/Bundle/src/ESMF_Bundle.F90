@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.93 2007/01/12 00:12:23 oehmke Exp $
+! $Id: ESMF_Bundle.F90,v 1.94 2007/01/16 22:19:43 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -87,14 +87,14 @@
 
 
 !------------------------------------------------------------------------------
-!! ESMF_BundleFieldInterleave
+!! ESMF_BundleFieldIntrlv
 !!
 !!  Data type to record the ordering information for multiple field
 !!  data which is packed in a bundle.  Each has an associated
 !!  {\tt ESMF\_FieldDataMap} object to track the ordering of that 
 !!  {\tt ESMF\_Field}'s data in the packed buffer.
 
-        type ESMF_BundleFieldInterleave
+        type ESMF_BundleFieldIntrlv
         sequence
         private
           integer :: field_order                      ! index of this field
@@ -107,7 +107,7 @@
 !! For bookkeeping information which must be identical in each constituent
 !! Field in order to optimize some of the communications calls.
 
-      type ESMF_BundleCongruentData
+      type ESMF_BundleCongrntData
       sequence
       private
         ! for starters:
@@ -162,13 +162,13 @@
         type(ESMF_Grid) :: grid                  ! associated global grid
         type(ESMF_LocalBundle) :: localbundle    ! this differs per DE
         type(ESMF_Packflag) :: pack_flag         ! is packed data present?
-        type(ESMF_BundleFieldInterleave) :: fil  ! ordering in buffer
+        type(ESMF_BundleFieldIntrlv) :: fil  ! ordering in buffer
         type(ESMF_BundleDataMap) :: mapping      ! map info
         type(ESMF_IOSpec) :: iospec              ! iospec values
         type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
         logical :: isCongruent                   ! are all fields identical?
         logical :: hasPattern                    ! first data field sets this
-        !type(ESMF_BundleCongruentData) :: pattern ! what they must match
+        !type(ESMF_BundleCongrntData) :: pattern ! what they must match
         integer :: field_count      
         ESMF_INIT_DECLARE
       end type
@@ -198,7 +198,7 @@
       ! intended for internal ESMF use only but public for BundleComms
       public ESMF_BundleType           ! internal ESMF use only, for BundleComm
       public ESMF_LocalBundle          ! internal ESMF use only, for BundleComm
-      public ESMF_BundleFieldInterleave ! internal ESMF use only, for BundleComm
+      public ESMF_BundleFieldIntrlv ! internal ESMF use only, for BundleComm
 
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -206,12 +206,13 @@
        ! public ESMF_BundleFieldAccessValidate   ! For Standardized Initialization
        ! ESMF_BundleFieldAccess(Init) and (GetInit) are privite
 
-       public ESMF_BundleFieldInterleaveInit     ! For Standardized Initialization
-       public ESMF_BundleFieldInterleaveVdt   ! For Standardized Initialization
-       public ESMF_BundleFieldInterleaveGtIn  ! For Standardized Initialization
+       public ESMF_BundleFieldIntrlvInit     ! For Standardized Initialization
+       public ESMF_BundleFieldIntrlvValidate ! For Standardized Initialization
 
-       ! public ESMF_BundleCongruentDataVdt  ! For Standardized Initialization
-       ! ESMF_BundleCongruentData(Init) and (GetInit) are privite
+       public ESMF_BundleFieldIntrlvGetInit  ! For Standardized Initialization
+
+       ! public ESMF_BundleCongrntDataValidate  ! For Standardized Initialization
+       ! ESMF_BundleCongrntData(Init) and (GetInit) are privite
 
        public ESMF_LocalBundleInit     ! For Standardized Initialization
        public ESMF_LocalBundleValidate ! For Standardized Initialization
@@ -539,14 +540,14 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleFieldInterleaveGtIn"
+#define ESMF_METHOD "ESMF_BundleFieldIntrlvGetInit"
 
 ! !INTERFACE:
-    function ESMF_BundleFieldInterleaveGtIn(s)
+    function ESMF_BundleFieldIntrlvGetInit(s)
 !
 ! !ARGUMENTS:
-       type(ESMF_BundleFieldInterleave), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_BundleFieldInterleaveGtIn
+       type(ESMF_BundleFieldIntrlv), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_BundleFieldIntrlvGetInit
 !
 ! !DESCRIPTION:
 !      Get the initialization status of the shallow class {\tt bundlefieldinterleave}.
@@ -560,24 +561,24 @@ end interface
 !EOPI
 
        if (present(s)) then
-         ESMF_BundleFieldInterleaveGtIn = ESMF_INIT_GET(s)
+         ESMF_BundleFieldIntrlvGetInit = ESMF_INIT_GET(s)
        else
-         ESMF_BundleFieldInterleaveGtIn = ESMF_INIT_DEFINED
+         ESMF_BundleFieldIntrlvGetInit = ESMF_INIT_DEFINED
        endif
 
-    end function ESMF_BundleFieldInterleaveGtIn
+    end function ESMF_BundleFieldIntrlvGetInit
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleFieldInterleaveInit"
+#define ESMF_METHOD "ESMF_BundleFieldIntrlvInit"
 !BOPI
-! !IROUTINE:  ESMF_BundleFieldInterleaveInit - Initialize BundleFieldInterleave
+! !IROUTINE:  ESMF_BundleFieldIntrlvInit - Initialize BundleFieldInterleave
 
 ! !INTERFACE:
-    subroutine ESMF_BundleFieldInterleaveInit(s)
+    subroutine ESMF_BundleFieldIntrlvInit(s)
 !
 ! !ARGUMENTS:
-       type(ESMF_BundleFieldInterleave) :: s
+       type(ESMF_BundleFieldIntrlv) :: s
 !
 ! !DESCRIPTION:
 !      Initialize the shallow class {\tt bundlefieldinterleave}.
@@ -591,19 +592,19 @@ end interface
 !EOPI
 
         ESMF_INIT_SET_DEFINED(s)
-    end subroutine ESMF_BundleFieldInterleaveInit
+    end subroutine ESMF_BundleFieldIntrlvInit
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleFieldInterleaveVdt"
+#define ESMF_METHOD "ESMF_BundleFieldIntrlvValidate"
 !BOPI
-! !IROUTINE:  ESMF_BundleFieldInterleaveVdt - Check validity of a BundleFieldInterleave
+! !IROUTINE:  ESMF_BundleFieldIntrlvValidate - Check validity of a BundleFieldInterleave
 
 ! !INTERFACE:
-    subroutine ESMF_BundleFieldInterleaveVdt(s,rc)
+    subroutine ESMF_BundleFieldIntrlvValidate(s,rc)
 !
 ! !ARGUMENTS:
-       type(ESMF_BundleFieldInterleave), intent(inout) :: s
+       type(ESMF_BundleFieldIntrlv), intent(inout) :: s
        integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -620,27 +621,27 @@ end interface
 !
 !EOPI
 
-     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleFieldInterleaveGtIn, ESMF_BundleFieldInterleaveInit,s)
+     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleFieldIntrlvGetInit, ESMF_BundleFieldIntrlvInit,s)
 
      ! return success
      if(present(rc)) then
        rc = ESMF_SUCCESS
      endif
-    end subroutine ESMF_BundleFieldInterleaveVdt
+    end subroutine ESMF_BundleFieldIntrlvValidate
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleCongruentDataGetInit"
+#define ESMF_METHOD "ESMF_BundleCongrntDataGetInit"
 !BOPI
-! !IROUTINE:  ESMF_BundleCongruentDataGetInit - Get initialization status.
+! !IROUTINE:  ESMF_BundleCongrntDataGetInit - Get initialization status.
 
 ! !INTERFACE:
-    function ESMF_BundleCongruentDataGetInit(s)
+    function ESMF_BundleCongrntDataGetInit(s)
 !
 ! !ARGUMENTS:
-       type(ESMF_BundleCongruentData), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_BundleCongruentDataGetInit
+       type(ESMF_BundleCongrntData), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_BundleCongrntDataGetInit
 !
 ! !DESCRIPTION:
 !      Get the initialization status of the shallow class {\tt bundlecongruentdata}.
@@ -648,30 +649,30 @@ end interface
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_ESMF_BundleCongruentData} from which to retreive status.
+!           {\tt ESMF\_ESMF_BundleCongrntData} from which to retreive status.
 !     \end{description}
 !
 !EOPI
 
        if (present(s)) then
-         ESMF_BundleCongruentDataGetInit = ESMF_INIT_GET(s)
+         ESMF_BundleCongrntDataGetInit = ESMF_INIT_GET(s)
        else
-         ESMF_BundleCongruentDataGetInit = ESMF_INIT_DEFINED
+         ESMF_BundleCongrntDataGetInit = ESMF_INIT_DEFINED
        endif
 
-    end function ESMF_BundleCongruentDataGetInit
+    end function ESMF_BundleCongrntDataGetInit
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleCongruentDataInit"
+#define ESMF_METHOD "ESMF_BundleCongrntDataInit"
 !BOPI
-! !IROUTINE:  ESMF_BundleCongruentDataInit - Initialize BundleCongruentData
+! !IROUTINE:  ESMF_BundleCongrntDataInit - Initialize BundleCongruentData
 
 ! !INTERFACE:
-    subroutine ESMF_BundleCongruentDataInit(s)
+    subroutine ESMF_BundleCongrntDataInit(s)
 !
 ! !ARGUMENTS:
-       type(ESMF_BundleCongruentData) :: s
+       type(ESMF_BundleCongrntData) :: s
 !
 ! !DESCRIPTION:
 !      Initialize the shallow class {\tt bundlecongruentdata}.
@@ -685,19 +686,19 @@ end interface
 !EOPI
 
        ESMF_INIT_SET_DEFINED(s)
-    end subroutine ESMF_BundleCongruentDataInit
+    end subroutine ESMF_BundleCongrntDataInit
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleCongruentDataVdt"
+#define ESMF_METHOD "ESMF_BundleCongrntDataValidate"
 !BOPI
-! !IROUTINE:  ESMF_BundleCongruentDataVdt - Check validity of a BundleCongruentData
+! !IROUTINE:  ESMF_BundleCongrntDataValidate - Check validity of a BundleCongruentData
 
 ! !INTERFACE:
-    subroutine ESMF_BundleCongruentDataVdt(s,rc)
+    subroutine ESMF_BundleCongrntDataValidate(s,rc)
 !
 ! !ARGUMENTS:
-       type(ESMF_BundleCongruentData), intent(inout) :: s
+       type(ESMF_BundleCongrntData), intent(inout) :: s
        integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -713,13 +714,13 @@ end interface
 !     \end{description}
 !
 !EOPI
-     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleCongruentDataGetInit, ESMF_BundleCongruentDataInit,s)
+     ESMF_INIT_CHECK_SHALLOW(ESMF_BundleCongrntDataGetInit, ESMF_BundleCongrntDataInit,s)
 
      ! return success
      if(present(rc)) then
        rc = ESMF_SUCCESS
-     endif
-    end subroutine ESMF_BundleCongruentDataVdt
+     endif 
+    end subroutine ESMF_BundleCongrntDataValidate
 
 
 !------------------------------------------------------------------------------
@@ -2557,8 +2558,8 @@ end function
       integer :: status                            ! Error status
       integer :: i, newstart
       type(ESMF_BundleType), pointer :: btype      ! internal data
-      type(ESMF_BundleCongruentData) :: pattern    ! values to compare against
-      type(ESMF_BundleCongruentData) :: candidate  ! values being compared
+      type(ESMF_BundleCongrntData) :: pattern    ! values to compare against
+      type(ESMF_BundleCongrntData) :: candidate  ! values being compared
       type(ESMF_Field), pointer :: fieldp
       type(ESMF_InternArray) :: array
       type(ESMF_FieldDataMap) :: datamap
@@ -5105,7 +5106,7 @@ end function
         type(ESMF_Grid) :: grid                  ! associated global grid
         type(ESMF_LocalBundle) :: localbundle    ! this differs per DE
         type(ESMF_Packflag) :: pack_flag         ! is packed data present?
-        type(ESMF_BundleFieldInterleave) :: fil  ! ordering in buffer
+        type(ESMF_BundleFieldIntrlv) :: fil  ! ordering in buffer
         type(ESMF_BundleDataMap) :: mapping      ! map info
         type(ESMF_IOSpec) :: iospec              ! iospec values
         type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
