@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.28 2006/11/27 19:00:38 theurich Exp $
+# $Id: build_rules.mk,v 1.29 2007/01/16 19:59:02 theurich Exp $
 # 
 # IRIX64.default.default
 #
@@ -115,12 +115,12 @@ ESMF_RANLIBDEFAULT         = true
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lftn -lfortran -lm
+ESMF_F90LINKLIBS += -lftn -lfortran -lffio -lm
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lftn -lfortran -lm
+ESMF_CXXLINKLIBS += -lftn -lfortran -lffio -lm
 
 ############################################################
 # Shared library options
