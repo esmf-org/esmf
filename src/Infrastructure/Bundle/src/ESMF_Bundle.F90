@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.94 2007/01/16 22:19:43 oehmke Exp $
+! $Id: ESMF_Bundle.F90,v 1.95 2007/01/17 04:47:48 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -1272,6 +1272,9 @@ end function
       ! Initialize return code
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check inputs 
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
       allocate(btypep, stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Bundle allocate", &
                                        ESMF_CONTEXT, rc)) return
@@ -1340,6 +1343,10 @@ end function
       ! Initialize return code
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check inputs 
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
 
       ! If already destroyed or never created, return ok
       btype => bundle%btypep
@@ -4896,7 +4903,6 @@ end function
       if (present(rc)) rc = ESMF_FAILURE
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleTypeGetInit,btype,rc)
       do i=1,fieldCount
          ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields(i),rc)
       enddo
@@ -4916,6 +4922,7 @@ end function
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4963,11 +4970,7 @@ end function
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleTypeGetInit,btype,rc)
-
-
-      ! Initialize the base object
+       ! Initialize the base object
       btype%base%this = ESMF_NULL_POINTER
       call ESMF_BaseCreate(btype%base, "Bundle", name, 0, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -4992,6 +4995,9 @@ end function
 !     nullify(btype%localbundle%packed_data)
       btype%bundlestatus = ESMF_STATUS_READY
   
+
+      ! Set as created 
+      ESMF_INIT_SET_CREATED(btype)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5030,6 +5036,9 @@ end function
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleTypeGetInit,btype,rc)
+
       btype%bundlestatus = ESMF_STATUS_INVALID
       call ESMF_BaseDestroy(btype%base, status)
 
@@ -5041,6 +5050,9 @@ end function
                                          ESMF_CONTEXT, rc)) return
 
       endif
+
+      ! Set as deleted 
+      ESMF_INIT_SET_DELETED(btype)
 
       if (present(rc)) rc = status
 
@@ -5094,9 +5106,6 @@ end function
       integer :: i
       type(ESMF_BundleType), pointer :: bp   ! bundle type
 
-      ! shortcut to internals
-      bp => bundle%btypep
-
 #if 0
         type(ESMF_Base) :: base                   ! base class object
         type(ESMF_Field), dimension(:), pointer :: flist
@@ -5111,6 +5120,12 @@ end function
         type(ESMF_IOSpec) :: iospec              ! iospec values
         type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
 #endif
+
+     ! check inputs
+     ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)      
+
+      ! shortcut to internals
+      bp => bundle%btypep
 
       call c_ESMC_BaseSerialize(bp%base, buffer(1), length, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -5281,7 +5296,13 @@ end function
       !                           ESMF_CONTEXT, rc)) return
 
       ESMF_BundleDeserialize%btypep => bp
+
+      ! Set as created
+      ESMF_INIT_SET_CREATED(ESMF_BundleDeserialize)
+
       if  (present(rc)) rc = ESMF_SUCCESS
+
+
 
       end function ESMF_BundleDeserialize
 !------------------------------------------------------------------------------

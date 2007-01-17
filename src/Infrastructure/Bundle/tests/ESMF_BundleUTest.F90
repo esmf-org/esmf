@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.40 2006/11/16 05:20:56 cdeluca Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.41 2007/01/17 04:47:48 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.40 2006/11/16 05:20:56 cdeluca Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.41 2007/01/17 04:47:48 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -82,7 +82,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-     
       !NEX_UTest
       ! Test Requirement FLD2.4 Deletion
       ! Bundles may be deleted. Data allocated by and included in packed bundles
