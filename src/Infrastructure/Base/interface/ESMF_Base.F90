@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.123 2006/12/07 23:23:17 theurich Exp $
+! $Id: ESMF_Base.F90,v 1.124 2007/01/17 04:46:57 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -148,7 +148,7 @@ module ESMF_BaseMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.123 2006/12/07 23:23:17 theurich Exp $'
+               '$Id: ESMF_Base.F90,v 1.124 2007/01/17 04:46:57 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -210,10 +210,10 @@ module ESMF_BaseMod
     if (present(nattr)) allocNAttrs = nattr
 
     if (present(name)) then
-        call c_ESMC_BaseCreate(base, superclass, name, allocNattrs, status)
+        call c_ESMC_BaseCreate(base%this, superclass, name, allocNattrs, status)
     else
-        !!call c_ESMC_BaseCreate(base, superclass, ESMF_NULL_POINTER, &
-        call c_ESMC_BaseCreate(base, superclass, "", allocNattrs, status)
+        !!call c_ESMC_BaseCreate(base%this, superclass, ESMF_NULL_POINTER, &
+        call c_ESMC_BaseCreate(base%this, superclass, "", allocNattrs, status)
     endif
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -263,7 +263,10 @@ module ESMF_BaseMod
       rc = ESMF_FAILURE
     endif
 
-    call c_ESMC_BaseDestroy(base, status)
+    ! check input parameters
+    ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit,base,rc)
+
+    call c_ESMC_BaseDestroy(base%this, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -317,7 +320,7 @@ module ESMF_BaseMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)
       
-    !call c_ESMC_AttributeSet(base, name, value, status) 
+    !call c_ESMC_AttributeSet(base%this, name, value, status) 
     if (present(rc)) rc = status
 
   end subroutine ESMF_AttributeSet
@@ -364,7 +367,7 @@ module ESMF_BaseMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)
       
-    !call c_ESMC_AttributeGet(base, name, value, status) 
+    !call c_ESMC_AttributeGet(base%this, name, value, status) 
     if (present(rc)) rc = status
 
   end subroutine ESMF_AttributeGet
@@ -407,7 +410,7 @@ module ESMF_BaseMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, anytype, rc)
 
-    !call c_ESMC_AttributeGetCount(base, count, status) 
+    !call c_ESMC_AttributeGetCount(base%this, count, status) 
     if (present(rc)) rc = status
 
   end subroutine ESMF_AttributeGetCount
@@ -461,7 +464,7 @@ module ESMF_BaseMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, anytype, rc)
     
-    !call c_ESMC_AttributeGetbyNumber(base, number, name, value, status) 
+    !call c_ESMC_AttributeGetbyNumber(base%this, number, name, value, status) 
     if (present(rc)) rc = status
 
   end subroutine ESMF_AttributeGetbyNumber
@@ -796,7 +799,7 @@ module ESMF_BaseMod
       endif
       ! end cheat
 
-      call c_ESMC_SetName(base, namespace, name, status)
+      call c_ESMC_SetName(base%this, namespace, name, status)
 
       if (rcpresent) rc = status
 
@@ -833,7 +836,7 @@ module ESMF_BaseMod
 !EOPI
       integer :: status
 
-      call c_ESMC_GetName(base, name, status)
+      call c_ESMC_GetName(base%this, name, status)
       if (present(rc)) rc = status
 
   end subroutine ESMF_GetName
@@ -883,7 +886,7 @@ module ESMF_BaseMod
         opts = ''
     endif
 
-    call c_ESMC_BasePrint(base, opts, localrc)
+    call c_ESMC_BasePrint(base%this, opts, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -932,7 +935,7 @@ module ESMF_BaseMod
         opts = ''
     endif
 
-    call c_ESMC_BaseValidate(base, opts, localrc)
+    call c_ESMC_BaseValidate(base%this, opts, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
