@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.26 2006/09/22 23:55:37 theurich Exp $
+# $Id: build_rules.mk,v 1.27 2007/01/17 22:53:34 svasquez Exp $
 #
 # AIX.default.default
 #
@@ -35,6 +35,10 @@ ESMF_CXXLINKLIBS       += -lmpi_r
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.rs6000_sp
 ifeq ($(ESMF_BATCH),lsf.ibmpjl)
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
+else
+ifeq ($(ESMF_BATCH),lsf.batch)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.batch
+endif
 endif
 else
 ifeq ($(ESMF_COMM),user)
