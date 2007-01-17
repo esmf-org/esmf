@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsizeUTest.F90,v 1.1 2007/01/12 21:32:49 rosalind Exp $
+! $Id: ESMF_FortranWordsizeUTest.F90,v 1.2 2007/01/17 00:25:02 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FortranWordsizeUTest.F90,v 1.1 2007/01/12 21:32:49 rosalind Exp $'
+      '$Id: ESMF_FortranWordsizeUTest.F90,v 1.2 2007/01/17 00:25:02 rosalind Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -58,7 +58,7 @@
 
       real (ESMF_KIND_R4) :: vreal4
       real (ESMF_KIND_R8) :: vreal8
-      integer :: ESMF_FortranWordsize, datasize
+      integer :: datasize
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
