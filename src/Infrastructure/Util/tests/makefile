@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2007/01/12 17:03:24 rosalind Exp $ 
+# $Id: makefile,v 1.7 2007/01/17 20:04:41 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -52,10 +52,10 @@ RUN_ESMF_UtilUTestUNI:
 #
 
 RUN_ESMF_FortranWordsizeUTest:
-        $(MAKE) TNAME=FortranWordsize NP=4 ftest
+	$(MAKE) TNAME=FortranWordsize NP=4 ftest
 
 RUN_ESMF_FortranWordsizeUTestUNI:
-        $(MAKE) TNAME=FortranWordsize NP=1 ftest
+	$(MAKE) TNAME=FortranWordsize NP=1 ftest
 
 #
 # InitMacrosTest
