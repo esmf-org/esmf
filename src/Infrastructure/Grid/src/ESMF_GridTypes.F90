@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.53 2007/01/12 00:12:25 oehmke Exp $
+! $Id: ESMF_GridTypes.F90,v 1.54 2007/01/17 04:48:36 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -565,7 +565,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.53 2007/01/12 00:12:25 oehmke Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.54 2007/01/17 04:48:36 oehmke Exp $'
 
 !==============================================================================
 !
@@ -2373,7 +2373,7 @@
     if (present(rc)) rc = ESMF_FAILURE
     
     ! Check init status of arguments
-    ESMF_INIT_CHECK_SHALLOW(ESMF_GridClassGetInit, ESMF_GridClassInit,gc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,gc,rc)
 
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2410,7 +2410,7 @@
     if (present(gc)) then
       ESMF_GridClassGetInit = ESMF_INIT_GET(gc)
     else
-      ESMF_GridClassGetInit = ESMF_INIT_DEFINED
+      ESMF_GridClassGetInit = ESMF_INIT_CREATED
     endif
 
   end function ESMF_GridClassGetInit
@@ -2445,7 +2445,7 @@
     if (present(g)) then
       ESMF_GridGetInit = ESMF_INIT_GET(g)
     else
-      ESMF_GridGetInit = ESMF_INIT_DEFINED
+      ESMF_GridGetInit = ESMF_INIT_CREATED
     endif
 
   end function ESMF_GridGetInit
