@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.27 2007/01/17 22:53:34 svasquez Exp $
+# $Id: build_rules.mk,v 1.28 2007/01/17 23:09:32 svasquez Exp $
 #
 # AIX.default.default
 #
@@ -36,8 +36,8 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.rs6000_sp
 ifeq ($(ESMF_BATCH),lsf.ibmpjl)
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
 else
-ifeq ($(ESMF_BATCH),lsf.batch)
-ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.batch
+ifeq ($(ESMF_BATCH),lsf.ibmpjl.batch)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl.batch
 endif
 endif
 else
