@@ -1,6 +1,6 @@
 #!/bin/ksh
 #
-# $Id: mpirun.lsf.ibmpjl.batch,v 1.1 2007/01/17 23:06:26 svasquez Exp $
+# $Id: mpirun.lsf.ibmpjl.batch,v 1.2 2007/01/17 23:31:37 svasquez Exp $
 #
 # This script provides an interface such that the simple command
 # mpirun -np # 
@@ -27,6 +27,9 @@ prog=$*
 echo executing: bsub $ESMF_BATCHOPTIONS -n $num_procs -oo outfile  \"mpirun.lsf ${prog}\"
 
 bsub $ESMF_BATCHOPTIONS  -n $num_procs -oo outfile "mpirun.lsf ${prog}" 
+
+# Wait for the outfile to be available.
+sleep 30
 
 mv -f outfile  ${prog}.stdout 
 
