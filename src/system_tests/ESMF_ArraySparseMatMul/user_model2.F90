@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.2 2006/05/19 21:35:53 theurich Exp $
+! $Id: user_model2.F90,v 1.3 2007/01/18 18:11:47 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -134,7 +134,7 @@ module user_model2
     ! Gain access to actual data via F90 array pointer
     call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=status)
       
-    ! Fill source Array with data
+    ! Test Array in import state against exact solution
     do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
       do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
         if (abs(farrayPtr(i,j) - (10.0d0 &
