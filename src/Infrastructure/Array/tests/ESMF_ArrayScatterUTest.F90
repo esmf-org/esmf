@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.6 2006/11/16 05:20:55 cdeluca Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.7 2007/01/19 21:54:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.6 2006/11/16 05:20:55 cdeluca Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.7 2007/01/19 21:54:57 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -130,9 +130,9 @@ program ESMF_ArrayScatterUTest
     do i=1, 15
       value = 123.d0*sin(real(i)) + 321.d0*cos(real(j))
       value = srcfarray(i,j) / value - 1.d0
-print *, value
+!print *, value
       if (abs(value) > double_min) then
-print *, "Found large value"
+!print *, "Found large value"
         rc = ESMF_FAILURE
       endif
    enddo
@@ -158,7 +158,79 @@ print *, "Found large value"
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   deallocate(srcfarray)
   
+  !------------------------------------------------------------------------
+  ! preparations for same test as above but with a DistGrid that has less
+  ! cells in the first dimension that DEs requested in rhe regDecomp argument.
+  ! -> there will be DEs not associated with DistGrid cells.
+  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, rank=2, &
+    rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/1,23/), &
+    regDecomp=(/2,2/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!call ESMF_ArrayPrint(array)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  farrayPtr = real(localPet)  ! initialize each DE-local data chunk of Array
+!print *, "farrayPtr:", farrayPtr
+  ! prepare srcfarray on all PETs -> serves as ref. in comparison after scatter
+  allocate(srcfarray(1:1, 1:23))
+  do j=1, 23
+    do i=1, 1
+      srcfarray(i,j) = 123.d0*sin(real(i)) + 321.d0*cos(real(j))
+    enddo
+  enddo
+!print *, "srcfarray:", srcfarray
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "2D ArrayScatter() Test"
+  call ESMF_ArrayScatter(array, srcfarray, rootPet=0, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Verify srcfarray data after scatter
+  write(failMsg, *) "Source data was modified."
+  write(name, *) "Verifying srcfarray data after 2D ArrayScatter() Test"
+  rc = ESMF_SUCCESS
+  do j=1, 23
+    do i=1, 1
+      value = 123.d0*sin(real(i)) + 321.d0*cos(real(j))
+      value = srcfarray(i,j) / value - 1.d0
+!print *, value
+      if (abs(value) > double_min) then
+!print *, "Found large value"
+        rc = ESMF_FAILURE
+      endif
+   enddo
+  enddo
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Verify Array data after scatter
+  write(failMsg, *) "Array data wrong."
+  write(name, *) "Verifying Array data after 2D ArrayScatter() Test"
+  rc = ESMF_SUCCESS
+  do j=lbound(farrayPtr,2), ubound(farrayPtr,2)
+    do i=lbound(farrayPtr,1), ubound(farrayPtr,1)
+      if (abs(farrayPtr(i,j) - srcfarray(i,j)) > double_min) rc = ESMF_FAILURE
+    enddo
+  enddo
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  ! cleanup  
+  call ESMF_ArrayDestroy(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  deallocate(srcfarray)
+
 #ifdef ESMF_EXHAUSTIVE
+
   !------------------------------------------------------------------------
   ! preparations for testing ArrayScatter() for a 
   ! 2D+1 Array, i.e. an Array with 3D data rank but 2D decomposition
