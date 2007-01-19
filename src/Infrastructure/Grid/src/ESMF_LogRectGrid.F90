@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.162 2007/01/10 00:16:56 oehmke Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.163 2007/01/19 23:19:36 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.162 2007/01/10 00:16:56 oehmke Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.163 2007/01/19 23:19:36 oehmke Exp $'
 
 !==============================================================================
 !
@@ -3970,8 +3970,11 @@
       ! initialize some values
       gridBoundWidth = 1   ! TODO: move into structure, make input?
 
-      ! figure out the position of myDE to get local counts
+      ! create temporary grid to pass into query subroutines
       gridp%ptr => grid
+      call ESMF_GridSetInitCreated(gridp, rc)
+
+      ! figure out the position of myDE to get local counts
       call ESMF_LRGridGet(gridp, delayout=delayout)
       call ESMF_DELayoutGetDeprecated(delayout, localDE=localDE, rc=localrc)
       call ESMF_DELayoutGetDELocalInfo(delayout, de=localDE, &
@@ -4320,7 +4323,9 @@
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
 
+      ! create temporary grid to pass into subroutines
       gridp%ptr => grid
+      call ESMF_GridSetInitCreated(gridp, rc)
 
       ! initialize some values
       gridBoundWidth = 1   ! TODO: move into structure, make input?
@@ -4594,7 +4599,10 @@
 #if 0
 ! gjt: I took this out because it seems that it is not used...
       ! figure out the position of myDE to get local counts
+      ! create temporary grid to pass into subroutines
       gridp%ptr => grid
+      call ESMF_GridSetInitCreated(gridp, rc)
+
       call ESMF_GridGetDELayout(gridp, delayout, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -8794,7 +8802,10 @@
       !                 6. (Xmax,Ymin,Zmax)
       !                 7. (Xmax,Ymax,Zmax)
       !                 8. (Xmin,Ymax,Zmax)
+      ! create temporary grid to pass into subroutines
       gridp%ptr => grid
+      call ESMF_GridSetInitCreated(gridp, rc)
+
       call ESMF_LRGridGet(gridp, delayout=delayout, rc=localrc)
       call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=localrc)
       npts = 2**dimCount

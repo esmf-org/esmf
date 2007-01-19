@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.230 2007/01/12 00:12:24 oehmke Exp $
+! $Id: ESMF_Field.F90,v 1.231 2007/01/19 23:19:35 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -239,7 +239,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.230 2007/01/12 00:12:24 oehmke Exp $'
+      '$Id: ESMF_Field.F90,v 1.231 2007/01/19 23:19:35 oehmke Exp $'
 
 !==============================================================================
 !
@@ -898,6 +898,10 @@
       ! Initialize return code   
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
 
       ! TODO: If already destroyed or never created, return ok?
       ! (should it be ok to destroy the same object twice without complaint?)

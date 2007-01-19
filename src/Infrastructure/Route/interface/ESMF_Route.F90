@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.85 2007/01/06 01:37:17 oehmke Exp $
+! $Id: ESMF_Route.F90,v 1.86 2007/01/19 23:19:38 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@
 ! !PUBLIC MEMBER FUNCTIONS:
 !
       public ESMF_RouteGetInit
-
+      public ESMF_RouteSetInitCreated
       public ESMF_RouteCreate                 ! interface only, deep class
       public ESMF_RouteDestroy                ! interface only, deep class
 
@@ -146,17 +146,62 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.85 2007/01/06 01:37:17 oehmke Exp $'
+      '$Id: ESMF_Route.F90,v 1.86 2007/01/19 23:19:38 oehmke Exp $'
 
 !==============================================================================
 !
       contains
+
+
 
 !==============================================================================
 !
 ! Route Initialiation and Validation functions
 !
 !------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteSetInitCreated()"
+!BOPI
+! !IROUTINE: ESMF_RouteSetInitCreated - Set Route init code to "CREATED"
+
+! !INTERFACE:
+  subroutine ESMF_RouteSetInitCreated(r, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Route), intent(inout)           :: r
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in Route object to "CREATED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[r] 
+!          Specified {\tt ESMF\_Route} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(r)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_RouteSetInitCreated
+!------------------------------------------------------------------------------
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RouteGetInit"
 !BOPI

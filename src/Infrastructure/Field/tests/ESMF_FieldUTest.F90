@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.89 2006/11/16 05:20:59 cdeluca Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.90 2007/01/19 23:19:36 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.89 2006/11/16 05:20:59 cdeluca Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.90 2007/01/19 23:19:36 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -94,6 +94,7 @@
       call ESMF_VMGetGlobal(vm, rc=rc)
       delayout = ESMF_DELayoutCreate(vm, rc=rc)
       minCoord(:) = (/ 0.0, 0.0 /)
+
 
       !------------------------------------------------------------------------
       !NEX_UTest

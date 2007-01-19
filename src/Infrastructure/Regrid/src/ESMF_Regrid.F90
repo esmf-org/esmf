@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.108 2007/01/08 23:40:33 donstark Exp $
+! $Id: ESMF_Regrid.F90,v 1.109 2007/01/19 23:19:37 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.108 2007/01/08 23:40:33 donstark Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.109 2007/01/19 23:19:37 oehmke Exp $'
 
 !==============================================================================
 !
@@ -1432,7 +1432,6 @@
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
-      ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
@@ -1545,7 +1544,6 @@
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
@@ -1573,6 +1571,9 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
     else
+       ! check handle
+       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
+
        ! make sure it is a valid handle before going on
        call ESMF_RouteHandleValidate(routehandle, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, &

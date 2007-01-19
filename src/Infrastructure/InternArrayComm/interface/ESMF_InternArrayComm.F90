@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.9 2007/01/12 00:12:25 oehmke Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.10 2007/01/19 23:19:37 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.9 2007/01/12 00:12:25 oehmke Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.10 2007/01/19 23:19:37 oehmke Exp $'
 !
 !==============================================================================
 !
@@ -870,6 +870,7 @@ module ESMF_InternArrayCommMod
     ! fortran equivalent of a cast - routerun wants a local array 
     do i=1, nitems
       local_arrayList(i)%this%ptr = arrayList(i)%this%ptr
+      call ESMF_LocalArraySetInitCreated(local_arrayList(i))
     enddo
 
     ! Set the route options if given, then execute.
@@ -971,6 +972,7 @@ module ESMF_InternArrayCommMod
 
     ! fortran equivalent of a cast - routerun wants a local array 
     local_array%this%ptr = array%this%ptr
+    call ESMF_LocalArraySetInitCreated(local_array)
 
     ! Set the route options if given, then execute the route.
     if (present(routeOptions)) then
@@ -1194,7 +1196,6 @@ module ESMF_InternArrayCommMod
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
       ! TODO: all this code could be moved to the C++ side once Grid has
       !       an interface
@@ -1209,6 +1210,9 @@ module ESMF_InternArrayCommMod
                                    route_count=maxindex, rmaptype=rmaptype, &
                                    tv_count=0, tvmaptype=ESMF_NOHANDLEMAP, &
                                    rc=status)
+      else
+          ! if adding to an existing handle make sure it exists
+          ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
       endif
     
       ! Extract layout information from the Grid
@@ -1671,10 +1675,12 @@ module ESMF_InternArrayCommMod
 
       do i=1, nitemsSrc
         srcLocalArrayList(i)%this%ptr = srcArrayList(i)%this%ptr
+        call ESMF_LocalArraySetInitCreated(srcLocalArrayList(i))
       enddo
 
       do i=1, nitemsDst
         dstLocalArrayList(i)%this%ptr = dstArrayList(i)%this%ptr
+        call ESMF_LocalArraySetInitCreated(dstLocalArrayList(i))
       enddo
 
       ! Set the route options if given.
@@ -1800,9 +1806,15 @@ module ESMF_InternArrayCommMod
       endif
 
 
-      ! Execute the communications call.
-      dstLocalArray = dstArray
-      srcLocalArray = srcArray
+
+      ! Convert from Intern to Local Arrays
+      dstLocalArray%this%ptr = dstArray%this%ptr
+      call ESMF_LocalArraySetInitCreated(dstLocalArray)
+      srcLocalArray%this%ptr = srcArray%this%ptr
+      call ESMF_LocalArraySetInitCreated(srcLocalArray)
+
+
+      ! Execute the communications call
       call ESMF_RouteRun(route, srcLocalArray, dstLocalArray, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1959,7 +1971,7 @@ module ESMF_InternArrayCommMod
       integer, intent(in) :: rmaptype
       integer, intent(in) :: maxindex
       type(ESMF_VM), intent(in) :: parentVM
-      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_RouteHandle), intent(inout) :: routehandle 
       type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc
 !
@@ -2051,7 +2063,6 @@ module ESMF_InternArrayCommMod
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, dstGrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, dstDatamap)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, parentVM, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
       ! start with a very clean slate...
       nullify(dstAICountPerDE)
@@ -2071,6 +2082,10 @@ module ESMF_InternArrayCommMod
                                    route_count=maxindex, rmaptype=rmaptype, &
                                    tv_count=0, tvmaptype=ESMF_NOHANDLEMAP, &
                                    rc=status)
+      else
+          ! if adding to an existing handle make sure it exists
+          ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+
       endif
     
 
@@ -2384,7 +2399,6 @@ module ESMF_InternArrayCommMod
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, dstGrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, dstDatamap)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, parentVM, rc)
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
 
       ! TODO: query to get storage type and if vector, branch out.
 
@@ -2410,6 +2424,9 @@ module ESMF_InternArrayCommMod
                                    route_count=maxindex, rmaptype=rmaptype, &
                                    tv_count=0, tvmaptype=ESMF_NOHANDLEMAP, &
                                    rc=status)
+      else
+        ! if adding to an existing handle make sure it exists
+        ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
       endif
     
 

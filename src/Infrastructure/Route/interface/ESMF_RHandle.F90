@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.32 2007/01/06 01:37:17 oehmke Exp $
+! $Id: ESMF_RHandle.F90,v 1.33 2007/01/19 23:19:38 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.32 2007/01/06 01:37:17 oehmke Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.33 2007/01/19 23:19:38 oehmke Exp $'
 
 !==============================================================================
 
@@ -196,6 +196,7 @@
      ESMF_TransformValuesGetInit=ESMF_INIT_CREATED
   endif 
 end function ESMF_TransformValuesGetInit
+
 
 !==============================================================================
 !
@@ -1026,6 +1027,8 @@ end function ESMF_RouteHandleGetInit
             if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+            ! Make datatype valid
+            call ESMF_RouteSetInitCreated(route)
         else  
             ! cannot specify one arg but not the other
             call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
@@ -1058,6 +1061,8 @@ end function ESMF_RouteHandleGetInit
             if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+            ! Make datatype valid
+            ESMF_INIT_SET_CREATED(tdata)
         else  
             ! cannot specify one arg but not the other
             call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.54 2007/01/17 04:48:36 oehmke Exp $
+! $Id: ESMF_GridTypes.F90,v 1.55 2007/01/19 23:19:36 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -327,6 +327,7 @@
     ! the overloaded operators.
 
     public ESMF_GridGetInit 
+    public ESMF_GridSetInitCreated
     public ESMF_GridClassValidate   
     public ESMF_GridClassGetInit 
     public ESMF_LogRectGridValidate   
@@ -565,7 +566,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.54 2007/01/17 04:48:36 oehmke Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.55 2007/01/19 23:19:36 oehmke Exp $'
 
 !==============================================================================
 !
@@ -2415,6 +2416,50 @@
 
   end function ESMF_GridClassGetInit
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetInitCreated()"
+!BOPI
+! !IROUTINE: ESMF_GridSetInitCreated - Set Grid init code to "CREATED"
+
+! !INTERFACE:
+  subroutine ESMF_GridSetInitCreated(grid, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Grid), intent(inout)           :: grid
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in Grid object to "CREATED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Specified {\tt ESMF\_Grid} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(grid)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_GridSetInitCreated
+
+
 
 ! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
