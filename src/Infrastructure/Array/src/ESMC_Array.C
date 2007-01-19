@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.56 2006/11/16 05:20:54 cdeluca Exp $
+// $Id: ESMC_Array.C,v 1.57 2007/01/19 22:06:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.56 2006/11/16 05:20:54 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.57 2007/01/19 22:06:24 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -1299,9 +1299,12 @@ int ESMC_Array::ESMC_ArrayConstruct(
   memcpy(inverseDimmap, inverseDimmapArray, rank * sizeof(int));
   // indexflag
   indexflag = indexflagArg;
-  // determine contiguous flag
+  // contiguous flag
   contiguousFlag = new int[localDeCount];
+  // deAssociatedFlag
+  deAssociatedFlag = new int[localDeCount];
   
+  int *laLength  = new int[rank];
   int *dimExtent = new int[dimCount*deCount];
   int dummyLen[2];
   dummyLen[0] = dimCount;
@@ -1317,8 +1320,13 @@ int ESMC_Array::ESMC_ArrayConstruct(
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
 
-    contiguousFlag[i] = 1;  // initialize as contiguous
+    deAssociatedFlag[i] = 1;  // initialize as associated
+    larrayList[i]->ESMC_LocalArrayGetLengths(rank, laLength);
+    for (int jj=0; jj<rank; jj++)
+      if (laLength[jj] == 0) deAssociatedFlag[i] = 0; // mark as unassociated
     
+    contiguousFlag[i] = 1;  // initialize as contiguous
+
     for (int jj=0; jj<rank; jj++){
       int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor dims
       if (j){
@@ -1351,6 +1359,7 @@ int ESMC_Array::ESMC_ArrayConstruct(
         
   }
   delete [] dimExtent; 
+  delete [] laLength;
   
   // invalidate the name for this Array object in the Base class
   ESMC_BaseSetName(NULL, "Array");
@@ -1407,6 +1416,7 @@ int ESMC_Array::ESMC_ArrayDestruct(void){
   delete [] dimmap;
   delete [] inverseDimmap;
   delete [] contiguousFlag;
+  delete [] deAssociatedFlag;
   
   // return successfully
   return ESMF_SUCCESS;
@@ -1925,22 +1935,28 @@ int ESMC_Array::ESMC_ArrayPrint(){
   for (int i=0; i<localDeCount; i++){
     printf("~ local data in LocalArray for DE %d ~\n", localDeList[i]);
     larrayList[i]->ESMC_LocalArrayPrint();
-    int jjj=0;  // reset
-    for (int jj=0; jj<rank; jj++){
-      if (inverseDimmap[jj]){
-        // distributed dimension
-        int j = inverseDimmap[jj] - 1;  // shift to basis 0
-        printf("dim %d: [%d]: [%d [%d [%d, %d] %d] %d]\n", 
-          jj+1, j, 
-          totalLBound[i*dimCount+j], computationalLBound[i*dimCount+j],
-          exclusiveLBound[i*dimCount+j], exclusiveUBound[i*dimCount+j],
-          computationalUBound[i*dimCount+j], totalUBound[i*dimCount+j]);
-      }else{
-        // non-distributed dimension
-        printf("dim %d: lbounds[%d]=%d            ubounds[%d]=%d\n",
-          jj+1, jjj, lbounds[jjj], jjj, ubounds[jjj]);
-        ++jjj;
+    if (deAssociatedFlag[i]){
+      // associated DE
+      int jjj=0;  // reset
+      for (int jj=0; jj<rank; jj++){
+        if (inverseDimmap[jj]){
+          // distributed dimension
+          int j = inverseDimmap[jj] - 1;  // shift to basis 0
+          printf("dim %d: [%d]: [%d [%d [%d, %d] %d] %d]\n", 
+            jj+1, j, 
+            totalLBound[i*dimCount+j], computationalLBound[i*dimCount+j],
+            exclusiveLBound[i*dimCount+j], exclusiveUBound[i*dimCount+j],
+            computationalUBound[i*dimCount+j], totalUBound[i*dimCount+j]);
+        }else{
+          // non-distributed dimension
+          printf("dim %d: lbounds[%d]=%d            ubounds[%d]=%d\n",
+            jj+1, jjj, lbounds[jjj], jjj, ubounds[jjj]);
+          ++jjj;
+        }
       }
+    }else{
+      // unassociated DE
+      printf("this DE is not associated with DistGrid points\n");
     }
   }
   printf("--- ESMC_ArrayPrint end ---\n");
@@ -2271,6 +2287,7 @@ int ESMC_Array::ESMC_ArrayScatter(
     int *ii = new int[rank];     // index tuple basis 0
     int *iiEnd = new int[rank];
     for (int i=0; i<deCount; i++){
+      
       int cellCount = 1;  // reset
       int de = i;
       int **indexList = new int*[rank];
@@ -2317,6 +2334,8 @@ int ESMC_Array::ESMC_ArrayScatter(
       sendBuffer[i] = new char[cellCount*dataSize]; // contiguous sendBuffer
       
 //printf("gjt in ArrayScatter: sender DE %d - cellCount: %d \n", de, cellCount);
+
+      if (cellCount){ // skip to next DE
 
       int sendBufferIndex = 0;  // reset
       // reset counters
@@ -2373,6 +2392,8 @@ int ESMC_Array::ESMC_ArrayScatter(
       *commh = NULL; // invalidate
       vm->vmk_send(sendBuffer[i], cellCount*dataSize, dstPet, commh);
       
+      } // skip to next DE
+      
       // clean-up
       for (int j=0; j<rank; j++)
         delete [] indexList[j];
@@ -2387,6 +2408,7 @@ int ESMC_Array::ESMC_ArrayScatter(
   // all PETs may be receivers
   char **recvBuffer = new char*[localDeCount];
   for (int i=0; i<localDeCount; i++){
+    if (deAssociatedFlag[i] == 0) continue; // skip to next DE
     int de = localDeList[i];
     int cellCount = 1;  // reset
     for (int j=0; j<dimCount; j++)
@@ -2412,6 +2434,7 @@ int ESMC_Array::ESMC_ArrayScatter(
     
   // distribute received data into non-contiguous exclusive regions
   for (int i=0; i<localDeCount; i++){
+    if (deAssociatedFlag[i] == 0) continue; // skip to next DE
     int de = localDeList[i];
     if (!contiguousFlag[i]){
       // copy contiguous receive buffer into DE-local array segment

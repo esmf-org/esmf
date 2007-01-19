@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.46 2006/11/16 05:20:54 cdeluca Exp $
+// $Id: ESMC_Array.h,v 1.47 2007/01/19 22:06:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -75,6 +75,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     int *dimmap;
     int *inverseDimmap;
     int *contiguousFlag;
+    int *deAssociatedFlag;  // indicate if this local DE is associated w/ data
     // lower level objects
     ESMC_DistGrid *distgrid;
     ESMC_DELayout *delayout;
