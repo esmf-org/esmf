@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.7 2007/01/19 21:54:57 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.8 2007/01/22 17:44:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.7 2007/01/19 21:54:57 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.8 2007/01/22 17:44:44 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -156,7 +156,10 @@ program ESMF_ArrayScatterUTest
   ! cleanup  
   call ESMF_ArrayDestroy(array, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   deallocate(srcfarray)
+  
   
   !------------------------------------------------------------------------
   ! preparations for same test as above but with a DistGrid that has less
@@ -187,7 +190,7 @@ program ESMF_ArrayScatterUTest
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "2D ArrayScatter() Test"
+  write(name, *) "2D ArrayScatter() with unassociated DEs Test"
   call ESMF_ArrayScatter(array, srcfarray, rootPet=0, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -214,7 +217,7 @@ program ESMF_ArrayScatterUTest
   !NEX_UTest_Multi_Proc_Only
   ! Verify Array data after scatter
   write(failMsg, *) "Array data wrong."
-  write(name, *) "Verifying Array data after 2D ArrayScatter() Test"
+  write(name, *) "Verifying Array data after 2D ArrayScatter() with unassociated DEs Test"
   rc = ESMF_SUCCESS
   do j=lbound(farrayPtr,2), ubound(farrayPtr,2)
     do i=lbound(farrayPtr,1), ubound(farrayPtr,1)
@@ -227,6 +230,8 @@ program ESMF_ArrayScatterUTest
   ! cleanup  
   call ESMF_ArrayDestroy(array, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   deallocate(srcfarray)
 
 #ifdef ESMF_EXHAUSTIVE
@@ -236,6 +241,9 @@ program ESMF_ArrayScatterUTest
   ! 2D+1 Array, i.e. an Array with 3D data rank but 2D decomposition
   call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, rank=3, &
     rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
+    regDecomp=(/2,2/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     indexflag=ESMF_INDEX_GLOBAL, lbounds=(/-5/), ubounds=(/4/), rc=rc)
