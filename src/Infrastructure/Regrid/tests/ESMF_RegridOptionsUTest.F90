@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridOptionsUTest.F90,v 1.9 2006/12/07 05:33:48 samsoncheung Exp $
+! $Id: ESMF_RegridOptionsUTest.F90,v 1.11 2007/01/22 21:44:27 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_RegridOptionsUTest.F90,v 1.9 2006/12/07 05:33:48 samsoncheung Exp $'
+      '$Id: ESMF_RegridOptionsUTest.F90,v 1.11 2007/01/22 21:44:27 oehmke Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"

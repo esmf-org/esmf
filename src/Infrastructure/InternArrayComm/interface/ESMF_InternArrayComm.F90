@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.10 2007/01/19 23:19:37 oehmke Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.11 2007/01/22 21:42:02 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.10 2007/01/19 23:19:37 oehmke Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.11 2007/01/22 21:42:02 oehmke Exp $'
 !
 !==============================================================================
 !
@@ -870,7 +870,7 @@ module ESMF_InternArrayCommMod
     ! fortran equivalent of a cast - routerun wants a local array 
     do i=1, nitems
       local_arrayList(i)%this%ptr = arrayList(i)%this%ptr
-      call ESMF_LocalArraySetInitCreated(local_arrayList(i))
+      ESMF_INIT_COPY(local_arrayList(i),arrayList(i))
     enddo
 
     ! Set the route options if given, then execute.
@@ -972,7 +972,7 @@ module ESMF_InternArrayCommMod
 
     ! fortran equivalent of a cast - routerun wants a local array 
     local_array%this%ptr = array%this%ptr
-    call ESMF_LocalArraySetInitCreated(local_array)
+    ESMF_INIT_COPY(local_array,array)
 
     ! Set the route options if given, then execute the route.
     if (present(routeOptions)) then
@@ -1675,12 +1675,12 @@ module ESMF_InternArrayCommMod
 
       do i=1, nitemsSrc
         srcLocalArrayList(i)%this%ptr = srcArrayList(i)%this%ptr
-        call ESMF_LocalArraySetInitCreated(srcLocalArrayList(i))
+        ESMF_INIT_COPY(srcLocalArrayList(i),srcArrayList(i))
       enddo
 
       do i=1, nitemsDst
         dstLocalArrayList(i)%this%ptr = dstArrayList(i)%this%ptr
-        call ESMF_LocalArraySetInitCreated(dstLocalArrayList(i))
+        ESMF_INIT_COPY(dstLocalArrayList(i),dstArrayList(i))
       enddo
 
       ! Set the route options if given.
@@ -1809,9 +1809,9 @@ module ESMF_InternArrayCommMod
 
       ! Convert from Intern to Local Arrays
       dstLocalArray%this%ptr = dstArray%this%ptr
-      call ESMF_LocalArraySetInitCreated(dstLocalArray)
+      ESMF_INIT_COPY(dstLocalArray,dstArray)
       srcLocalArray%this%ptr = srcArray%this%ptr
-      call ESMF_LocalArraySetInitCreated(srcLocalArray)
+      ESMF_INIT_COPY(srcLocalArray,srcArray)
 
 
       ! Execute the communications call

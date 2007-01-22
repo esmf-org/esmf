@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.86 2007/01/19 23:19:38 oehmke Exp $
+! $Id: ESMF_Route.F90,v 1.87 2007/01/22 21:42:02 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.86 2007/01/19 23:19:38 oehmke Exp $'
+      '$Id: ESMF_Route.F90,v 1.87 2007/01/22 21:42:02 oehmke Exp $'
 
 !==============================================================================
 !
@@ -356,6 +356,9 @@ end subroutine rias
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
 
         ! Call C++ destroy code
         call c_ESMC_RouteDestroy(route, status)
