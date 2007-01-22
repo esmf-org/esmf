@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridOptionsUTest.F90,v 1.11 2007/01/22 21:44:27 oehmke Exp $
+! $Id: ESMF_RegridOptionsUTest.F90,v 1.10 2007/01/22 21:42:02 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_RegridOptionsUTest.F90,v 1.11 2007/01/22 21:44:27 oehmke Exp $'
+      '$Id: ESMF_RegridOptionsUTest.F90,v 1.10 2007/01/22 21:42:02 oehmke Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -625,7 +625,7 @@ contains
       real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
       real(ESMF_KIND_R8), dimension(:,:), pointer :: calc, coordX, coordY
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: data
-
+      integer :: is,js,ks
 
       pi = 3.14159
 
@@ -673,7 +673,12 @@ contains
             minCValue   = min(minCValue, abs(calc(i,j)))
             maxCValue   = max(maxCValue, abs(calc(i,j)))
             minDValue   = min(minDValue, abs(data(k,i,j)))
-            maxDValue   = max(maxDValue, abs(data(k,i,j)))
+            if (abs(data(k,i,j)) .gt. maxDValue) then 
+                             maxDValue = abs(data(k,i,j))
+                             is=i
+                             js=j
+                             ks=k    
+            endif
             maxError    = max(maxError, abs(error))
             maxPerError = max(maxPerError, 100.*abs(error)/abs(calc(i,j)))
           enddo
@@ -683,7 +688,7 @@ contains
       write(*,*) " "
       write(*,*) "Detailed results for DE #", myDE, ":"
       write(*,*) "   minimum regridded value = ", minDValue
-      write(*,*) "   maximum regridded value = ", maxDValue
+      write(*,*) "   maximum regridded value = ", maxDValue," (",ks,is,js,")"
       write(*,*) "   minimum computed value  = ", minCValue
       write(*,*) "   maximum computed value  = ", maxCValue
       write(*,*) "   maximum error           = ", maxError
