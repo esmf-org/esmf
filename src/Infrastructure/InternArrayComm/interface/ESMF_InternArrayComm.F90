@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.11 2007/01/22 21:42:02 oehmke Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.12 2007/01/23 19:25:02 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.11 2007/01/22 21:42:02 oehmke Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.12 2007/01/23 19:25:02 svasquez Exp $'
 !
 !==============================================================================
 !
@@ -1212,7 +1212,7 @@ module ESMF_InternArrayCommMod
                                    rc=status)
       else
           ! if adding to an existing handle make sure it exists
-          ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+          ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
       endif
     
       ! Extract layout information from the Grid
@@ -2084,8 +2084,7 @@ module ESMF_InternArrayCommMod
                                    rc=status)
       else
           ! if adding to an existing handle make sure it exists
-          ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
-
+          ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
       endif
     
 
