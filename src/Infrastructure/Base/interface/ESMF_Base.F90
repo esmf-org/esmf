@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.125 2007/01/22 21:42:01 oehmke Exp $
+! $Id: ESMF_Base.F90,v 1.126 2007/01/23 22:19:39 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -148,7 +148,7 @@ module ESMF_BaseMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.125 2007/01/22 21:42:01 oehmke Exp $'
+               '$Id: ESMF_Base.F90,v 1.126 2007/01/23 22:19:39 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -792,7 +792,11 @@ module ESMF_BaseMod
 
       ! TODO: remove this once everyone is initializing their Base objects.
       ! cheat for old code for now.
+#ifdef ESMF_INITMACROS_ON
+      if (base%isInit .ne. ESMF_INIT_CREATED) then 
+#else
       if (base%this .eq. ESMF_NULL_POINTER) then
+#endif
           call ESMF_BaseCreate(base, namespace, name, 0, status)
           if (rcpresent) rc = status
           return
