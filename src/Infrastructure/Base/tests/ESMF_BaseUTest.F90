@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseUTest.F90,v 1.20 2006/11/16 05:20:56 cdeluca Exp $
+! $Id: ESMF_BaseUTest.F90,v 1.21 2007/01/23 23:54:53 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BaseUTest.F90,v 1.20 2006/11/16 05:20:56 cdeluca Exp $'
+      '$Id: ESMF_BaseUTest.F90,v 1.21 2007/01/23 23:54:53 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -53,10 +53,11 @@
       character(ESMF_MAXSTR) :: print_options
       !type(ESMF_BaseConfig) :: config_set
       !type(ESMF_BaseConfig) :: config_get
+      type(ESMF_DataValue) :: data_value
       character(ESMF_MAXSTR) :: name_set, name_get
 
       ! instantiate a Base 
-      type(ESMF_Base) :: base
+      type(ESMF_Base) :: base, base1
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -90,6 +91,77 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
+                      
+      !NEX_UTest
+      ! destroy base object
+      call ESMF_BaseDestroy(base, rc)
+      write(name, *) "Destroy a destroyed Base"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+                      
+      !NEX_UTest
+      ! destroy base object
+      call ESMF_BaseDestroy(base1, rc)
+      write(name, *) "Destroy a non-created Base"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! test setting of ESMF_Base members values of uncreated Base
+      name_set = "fred"
+      call ESMF_SetName(base1, name_set, "Base", rc)
+      write(name, *) "ESMF_SetName of non-created Base"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      !EX_UTest
+      ! test setting of ESMF_Base members values of deleted Base
+      name_set = "fred"
+      call ESMF_SetName(base, name_set, "Base", rc)
+      write(name, *) "ESMF_SetName of deleted Base"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! test print method of deleted base via option string
+      print_options = "brief"
+      call ESMF_BasePrint(base, print_options, rc)
+      write(name, *) "ESMF_BasePrint of deleted Base"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+	print *, "rc = ", rc
+
+
+      !EX_UTest
+      ! test print method of non-created base via option string
+      print_options = "brief"
+      call ESMF_BasePrint(base1, print_options, rc)
+      write(name, *) "ESMF_BasePrint of non-created Base"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+	print *, "rc = ", rc
+
+
+      !EX_UTest
+      ! test setting of ESMF Base attribute values of deleted Base
+      call ESMF_AttributeSet(base, name, data_value, rc)
+      write(name, *) "ESMF_AttributeSet of deleted Base"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+	print *, "rc = ", rc
+
+      
       !EX_UTest
       ! test creation of base objects
       call ESMF_BaseCreate(base, "Base", "test object", 0, rc)
