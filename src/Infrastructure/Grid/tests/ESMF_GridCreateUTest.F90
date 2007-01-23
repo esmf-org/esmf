@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.40 2006/11/16 05:21:02 cdeluca Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.41 2007/01/23 21:16:06 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.40 2006/11/16 05:21:02 cdeluca Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.41 2007/01/23 21:16:06 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -70,7 +70,7 @@
       real(ESMF_KIND_R8) :: delta(15), grid_min(3), grid_max(3)
       real(ESMF_KIND_R8) :: coord1(21), coord2(16)
       real(ESMF_KIND_R8) :: Rgrid_min(3), Rgrid_max(3)
-      type(ESMF_Grid) :: grid, grid1, grid2
+      type(ESMF_Grid) :: grid, grid1, grid2, grid3
       type(ESMF_DELayout) :: layout
       type(ESMF_VM) :: vm
 
@@ -237,6 +237,32 @@
                               
 #ifdef ESMF_EXHAUSTIVE
 
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Destroy a destroyed Grid
+      call ESMF_GridDestroy(grid2, rc=rc)
+      write(failMsg, *) "Did not returned ESMF_RC_OBJ_DELETED"
+      write(name, *) "Destroy a destroyed Grid Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+                              
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Destroy a Non-created Grid
+      call ESMF_GridDestroy(grid2, rc=rc)
+      write(failMsg, *) "Did not returned ESMF_RC_OBJ_DELETED"
+      write(name, *) "Destroy a non-created Grid Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Get the Grid horzStagger from a non-created Grid
+      call ESMF_GridGet(grid3, horzstagger=Rhorz_stagger, rc=rc)
+      write(name, *) "Get the Grid horzStagger from non-created Grid Test"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED "
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
       !------------------------------------------------------------------------
       ! Create a Grid Test.
       !EX_UTest
