@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.90 2007/01/19 23:19:36 oehmke Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.91 2007/01/23 20:38:13 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.90 2007/01/19 23:19:36 oehmke Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.91 2007/01/23 20:38:13 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -56,7 +56,7 @@
       type(ESMF_VM) :: vm
       type(ESMF_Grid) :: grid, grid2, grid3, grid4, grid5, nogrid
       type(ESMF_ArraySpec) :: arrayspec
-      real, dimension(:,:), pointer :: f90ptr1, f90ptr2, f90ptr3, f90ptr4, f90ptr5
+      real, dimension(:,:), pointer :: f90ptr2, f90ptr4, f90ptr5
       real(ESMF_KIND_R8) :: minCoord(2), deltas(10)
       type(ESMF_FieldDataMap) :: dm, dm1
       !type(ESMF_RelLoc) :: rl
@@ -123,6 +123,31 @@
       call ESMF_FieldDestroy(nofield, rc=rc)
       nogrid = ESMF_GridCreate(rc=rc)
       call ESMF_GridDestroy(nogrid, rc=rc)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Verifing that a Field that has not been created doesn't
+      ! crash when it is destroyed 
+      call ESMF_FieldDestroy(f2, rc=rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Destroying a Field not created"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Get a name from a deleted created Field
+      call ESMF_FieldGet(f1, name=fname, rc=rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED "
+      write(name, *) "Getting name of deleted Field"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Get a name from a non-created Field
+      call ESMF_FieldGet(f2, name=fname, rc=rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Getting name of uncreated Field"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -201,7 +226,7 @@
       call ESMF_FieldPrint(f6, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Printing an uninitialized Field Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -217,7 +242,7 @@
       call ESMF_FieldPrint(f1, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Printing destroyed Field Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
