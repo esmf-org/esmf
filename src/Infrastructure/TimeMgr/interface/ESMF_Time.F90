@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.91 2007/01/24 05:36:10 oehmke Exp $
+! $Id: ESMF_Time.F90,v 1.92 2007/01/24 23:55:49 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.91 2007/01/24 05:36:10 oehmke Exp $'
+      '$Id: ESMF_Time.F90,v 1.92 2007/01/24 23:55:49 oehmke Exp $'
 
 !==============================================================================
 !
@@ -889,10 +889,11 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
-
       ! get length of given name for C++ validation
       integer :: nameLen       
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+
       nameLen = len_trim(name)
    
 !     invoke C to C++ entry point to restore time
