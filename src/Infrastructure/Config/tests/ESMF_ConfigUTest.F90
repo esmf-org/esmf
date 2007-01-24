@@ -41,7 +41,7 @@ module config_subrs
 
         public
 
-      type (ESMF_Config), save :: cf 
+      type (ESMF_Config), save :: cf, cf1
       
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
@@ -144,6 +144,15 @@ module config_subrs
 
      !------------------------------------------------------------------------
      !EX_UTest
+     ! Non initialized Config Get Attribute Int Test
+     write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+     write(name, *) "Non initialized Config Get Attribute Int Test"
+     call ESMF_ConfigGetAttribute( cf1, nDE, label ='Number_of_DEs:', & 
+           default=7, rc = rc )
+     call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+     !------------------------------------------------------------------------
+     !EX_UTest
      ! Config Get Attribute Int Test
      write(failMsg, *) "Did not return ESMF_SUCCESS"
      write(name, *) "Config Get Attribute Int Test"
@@ -212,6 +221,15 @@ module config_subrs
 
       rc = 0
 !''''''''''''''''''''''''''''
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Non-created Config Get Attribute Char Test
+     write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+     write(name, *) "Config Get Attribute Char Test"
+     call ESMF_ConfigGetChar( cf1, answer, 'Do_you_want_quality_control:', &
+                                    rc = rc )
+     call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
      !------------------------------------------------------------------------
      !EX_UTest
      ! Config Get Attribute Char Test
@@ -589,6 +607,14 @@ subroutine MultPar_SingleLine_Vf
       rc = 0
 
 !''''''''''''''''''''''''''''
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Non-created Config Find Label Test
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Non-create Config Find Label Test"
+      call ESMF_ConfigFindLabel( cf1, 'v-wind_flag:', rc )
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       !EX_UTest
       ! Config Find Label Test
@@ -1249,7 +1275,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.22 2006/12/07 23:45:24 oehmke Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.23 2007/01/24 23:06:57 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
@@ -1284,6 +1310,42 @@ end module config_subrs
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Config Destroy of a destroyed Config
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Destroy a destroyed Config Test"
+      call ESMF_ConfigDestroy( cf, rc ) 
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Destroyed Config Get Attribute Int Test
+     write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+     write(name, *) "Destroyed Config Get Attribute Int Test"
+     call ESMF_ConfigGetAttribute( cf, nDE, label ='Number_of_DEs:', &
+           default=7, rc = rc )
+     call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Destroyed Config Get Attribute Char Test
+     write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+     write(name, *) "Destroyed Config Get Attribute Char Test"
+     call ESMF_ConfigGetChar( cf, answer, 'Do_you_want_quality_control:', &
+                                    rc = rc )
+     call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Destroyed Config Find Label Test
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Non-create Config Find Label Test"
+      call ESMF_ConfigFindLabel( cf, 'v-wind_flag:', rc )
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+
 
 
 ! Initialization:
