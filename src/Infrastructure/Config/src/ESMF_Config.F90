@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.33 2007/01/11 17:11:21 oehmke Exp $
+! $Id: ESMF_Config.F90,v 1.34 2007/01/24 22:30:07 oehmke Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -517,6 +517,9 @@
 !
 !EOP -------------------------------------------------------------------
       integer :: iret
+
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       iret = 0
 
