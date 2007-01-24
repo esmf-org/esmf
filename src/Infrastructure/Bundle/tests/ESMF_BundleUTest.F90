@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.41 2007/01/17 04:47:48 oehmke Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.42 2007/01/24 20:43:09 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.41 2007/01/17 04:47:48 oehmke Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.42 2007/01/24 20:43:09 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -94,6 +94,96 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Bundle destroy of destroyed Bundle
+      call ESMF_BundleDestroy(bundle2, rc=rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Destroy of destroyed Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Bundle destroy of non-created Bundle
+      call ESMF_BundleDestroy(bundle1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Destroy of non-created Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Verify getting the name of a non-created  Bundle
+      call ESMF_BundleGet(bundle2, name=bname1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Getting name of deleted Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Verify getting the name of a non-created Bundle
+      call ESMF_BundleGet(bundle1, name=bname1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Getting name of non-create Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Set Grid in deleted Bundle Test
+      call ESMF_BundleSetGrid(bundle2, grid, rc=rc)
+      write(failMsg, *) "Did not Return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Set Grid in deleted Bundle  Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Set Grid in enon-created Bundle Test
+      call ESMF_BundleSetGrid(bundle1, grid, rc=rc)
+      write(failMsg, *) "Did not Return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Set Grid in non-created Bundle  Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Getting Attribute Count from a deleted Bundle
+      call ESMF_BundleGetAttributeCount(bundle2, count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Getting Attribute Count from a deleted Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Getting Attribute Count from a non-created Bundle
+      call ESMF_BundleGetAttributeCount(bundle1, count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Getting Attribute Count from a deleted Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Getting a third Field names from a deleted Bundle
+      call ESMF_BundleGetField(bundle2, 3, returnedfield3, rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Getting a third Field by index from a deleted Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Getting a third Field names from a non-created Bundle
+      call ESMF_BundleGetField(bundle1, 3, returnedfield3, rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Getting a third Field by index from a non-create Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Validate a deleted Bundle Test
+      call ESMF_BundleValidate(bundle2, rc=rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Validating a deleted Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
       ! set these up for use later
       nobundle = ESMF_BundleCreate()
       call ESMF_BundleDestroy(nobundle)
@@ -139,7 +229,7 @@
       !write(name, *) "Getting Field names from an uninitialized Bundle Test"
       !call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      !print *, "Field count of uninitialized Bundle = ", nameCount
+      !print *, "Field count of uninitialized Bundle = ", fieldcount
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test Requirement FLD2.1.1 Creation using Field list
@@ -313,7 +403,7 @@
       !EX_UTest
       ! Getting Attribute Count from a Bundle
       call ESMF_BundleGetAttributeCount(bundle2, count, rc=rc)
-      write(failMsg, *) "Did not retrun ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute Count from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -488,7 +578,7 @@
       !EX_UTest
       ! Getting Attribute Count from a Bundle
       call ESMF_BundleGetAttributeCount(bundle1, count, rc=rc)
-      write(failMsg, *) "Did not retrun ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute Count from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
