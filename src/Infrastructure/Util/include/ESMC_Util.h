@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.17 2007/01/19 23:19:38 oehmke Exp $
+// $Id: ESMC_Util.h,v 1.18 2007/01/24 05:36:11 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -166,9 +166,9 @@ class ESMC_AxisIndex {
     int     min;
     int     max;
     int  stride;
-#ifdef ESMF_INITMACROS_ON
-    char isInit[8]; // Pad to take care of isInit on F90 side - BOB
-#endif
+
+    ESMF_INIT_C_PAD 
+
 };
 
 // collection of AxisIndices per axis, to describe an n-dim cube
@@ -176,9 +176,8 @@ struct ESMC_Domain {
     int DE;
     int rank;
     ESMC_AxisIndex ai_list[ESMF_MAXDIM];
-#ifdef ESMF_INITMACROS_ON
-    char isInit[8]; // Pad to take care of isInit on F90 side - BOB
-#endif
+
+    ESMF_INIT_C_PAD 
 };
 
 
@@ -193,9 +192,9 @@ class ESMC_DomainList {
 
     int  ESMC_DomainListGetDE(int domainnum);
     ESMC_AxisIndex ESMC_DomainListGetAI(int domainnum, int ainum);
-#ifdef ESMF_INITMACROS_ON
-    char isInit[8]; // Pad to take care of isInit on F90 side - BOB
-#endif
+
+    ESMF_INIT_C_PAD 
+
 };
 
 // these should all become class methods

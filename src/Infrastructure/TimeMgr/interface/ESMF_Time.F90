@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.90 2007/01/11 17:06:01 oehmke Exp $
+! $Id: ESMF_Time.F90,v 1.91 2007/01/24 05:36:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.90 2007/01/11 17:06:01 oehmke Exp $'
+      '$Id: ESMF_Time.F90,v 1.91 2007/01/24 05:36:10 oehmke Exp $'
 
 !==============================================================================
 !
@@ -455,6 +455,8 @@
 
       contains
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeGet()"
 !==============================================================================
 !BOP
 ! !IROUTINE: ESMF_TimeGet - Get a Time value 
@@ -474,9 +476,8 @@
                                     dayOfWeek, midMonth, &
                                     dayOfYear,  dayOfYear_r8, &
                                     dayOfYear_intvl, rc)
-
 ! !ARGUMENTS:
-      type(ESMF_Time),         intent(in)            :: time
+      type(ESMF_Time),         intent(inout)            :: time
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer,                 intent(out), optional :: mm
@@ -679,6 +680,11 @@
       tempTimeStringLen = 0
       tempTimeStringLenISOFrac = 0
 
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,midMonth)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,dayOfYear_intvl)
+
       ! if used, get length of given timeString for C++ validation
       if (present(timeString)) then
         timeStringLen = len(timeString)
@@ -698,6 +704,9 @@
                           dayOfWeek, MidMonth, dayOfYear, dayOfYear_r8, &
                           dayOfYear_intvl, rc)
 
+                                  
+      if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
+
       ! copy temp time string back to given time string to restore
       !   native Fortran storage style
       if (present(timeString)) then
@@ -710,6 +719,8 @@
       end subroutine ESMF_TimeGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIsLeapYear()"
 !BOP
 ! !IROUTINE: ESMF_TimeIsLeapYear - Determine if a Time is in a leap year
 
@@ -720,7 +731,7 @@
       logical :: ESMF_TimeIsLeapYear
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(in)            :: time
+      type(ESMF_Time), intent(inout)            :: time
       integer,         intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -739,11 +750,15 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+
       call c_ESMC_TimeIsLeapYear(time, ESMF_TimeIsLeapYear, rc)
     
       end function ESMF_TimeIsLeapYear
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIsSameCalendar()"
 !BOP
 ! !IROUTINE: ESMF_TimeIsSameCalendar - Compare Calendars of two Times
 
@@ -754,8 +769,8 @@
       logical :: ESMF_TimeIsSameCalendar
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(in)            :: time1
-      type(ESMF_Time), intent(in)            :: time2
+      type(ESMF_Time), intent(inout)            :: time1
+      type(ESMF_Time), intent(inout)            :: time2
       integer,         intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -776,11 +791,16 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time1)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time2)
+
       call c_ESMC_TimeIsSameCalendar(time1, time2, ESMF_TimeIsSameCalendar, rc)
     
       end function ESMF_TimeIsSameCalendar
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimePrint()"
 !BOP
 ! !IROUTINE:  ESMF_TimePrint - Print the contents of a Time 
 
@@ -788,7 +808,7 @@
       subroutine ESMF_TimePrint(time, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time),   intent(in)            :: time
+      type(ESMF_Time),   intent(inout)            :: time
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
@@ -828,11 +848,15 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
    
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+
       call c_ESMC_TimePrint(time, options, rc)
 
       end subroutine ESMF_TimePrint
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeReadRestart()"
 !BOPI
 ! !IROUTINE:  ESMF_TimeReadRestart - Restore the contents of a Time (not implemented)
 
@@ -840,7 +864,7 @@
       subroutine ESMF_TimeReadRestart(time, name, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Time),   intent(in)            :: time
+      type(ESMF_Time),   intent(inout)            :: time
       character (len=*), intent(in)            :: name
       type(ESMF_IOSpec), intent(in),  optional :: iospec
       integer,           intent(out), optional :: rc
@@ -865,6 +889,8 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+
       ! get length of given name for C++ validation
       integer :: nameLen       
       nameLen = len_trim(name)
@@ -875,6 +901,8 @@
       end subroutine ESMF_TimeReadRestart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeSet()"
 !BOP
 ! !IROUTINE: ESMF_TimeSet - Initialize or set a Time
 
@@ -974,7 +1002,7 @@
 !     \item[{[yy]}]
 !          Integer year (>= 32-bit).  Default = 0
 !     \item[{[yy\_i8]}]
-!          Integer year (large, >= 64-bit).  Default = 0
+!          Integer year (large, >= 64-bit).  Default = 07
 !     \item[{[mm]}]
 !          Integer month.  Default = 1
 !     \item[{[dd]}]
@@ -1037,6 +1065,12 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
+
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+!      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
+
+
       ! use optional args for any subset
       call c_ESMC_TimeSet(time, yy, yy_i8, mm, dd, d, d_i8, &
                           h, m, s, s_i8, ms, us, ns, &
@@ -1046,6 +1080,8 @@
       end subroutine ESMF_TimeSet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeSyncToRealTime()"
 !BOP
 ! !IROUTINE: ESMF_TimeSyncToRealTime - Get system real time (wall clock time)
 !
@@ -1072,11 +1108,15 @@
 ! !REQUIREMENTS:
 !     TMG2.5.7
 
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+
       call c_ESMC_TimeSyncToRealTime(time, rc)
 
       end subroutine ESMF_TimeSyncToRealTime
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeValidate()"
 !BOP
 ! !IROUTINE:  ESMF_TimeValidate - Validate a Time
 
@@ -1084,7 +1124,7 @@
       subroutine ESMF_TimeValidate(time, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time),   intent(in)            :: time
+      type(ESMF_Time),   intent(inout)            :: time
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
@@ -1109,12 +1149,16 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
    
       call c_ESMC_TimeValidate(time, options, rc)
 
       end subroutine ESMF_TimeValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeWriteRestart()"
 !BOPI
 ! !IROUTINE:  ESMF_TimeWriteRestart - Save the contents of a Time (not implemented)
 
@@ -1122,7 +1166,7 @@
       subroutine ESMF_TimeWriteRestart(time, iospec, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time),   intent(in)            :: time
+      type(ESMF_Time),   intent(inout)            :: time
       type(ESMF_IOSpec), intent(in),  optional :: iospec
       integer,           intent(out), optional :: rc
 
@@ -1143,6 +1187,8 @@
 !EOPI
 ! !REQUIREMENTS:
 !     TMGn.n.n
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
    
 !     invoke C to C++ entry point
       call c_ESMC_TimeWriteRestart(time, iospec, rc)

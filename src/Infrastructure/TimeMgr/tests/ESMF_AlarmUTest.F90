@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.29 2006/11/16 05:21:20 cdeluca Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.30 2007/01/24 05:36:11 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.29 2006/11/16 05:21:20 cdeluca Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.30 2007/01/24 05:36:11 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1487,10 +1487,12 @@
       write(name, *) "Alarm list reallocation Test 2"
       call ESMF_ClockGetAlarmList(clock2, ESMF_ALARMLIST_ALL, alarmList, &
                                   alarmCount, rc=rc)
+      write(*,*) "rc=",rc
       call ESMF_AlarmGet(alarmList(alarmCount), name=aName, rc=rc)
 
       print *, "alarmCount = ", alarmCount
       print *, "201st alarm name = ", aName
+      write(*,*) "rc=",rc
 
       ! see if we have 201 alarms and if the 201st alarm has the right name!
       call ESMF_Test((alarmCount.eq.201).and.(aName.eq."201st Alarm") &

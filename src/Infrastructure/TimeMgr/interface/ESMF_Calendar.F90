@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.84 2007/01/11 17:06:01 oehmke Exp $
+! $Id: ESMF_Calendar.F90,v 1.85 2007/01/24 05:36:09 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -123,6 +123,7 @@
       public ESMF_CalendarValidate
       public ESMF_CalendarWriteRestart
       public ESMF_CalendarGetInit       ! For Standardized Initialization
+      public ESMF_CalendarSetInitCreated
 !EOPI
 
 ! !PRIVATE MEMBER FUNCTIONS:
@@ -147,7 +148,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.84 2007/01/11 17:06:01 oehmke Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.85 2007/01/24 05:36:09 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -541,7 +542,7 @@
     function ESMF_CalendarGetInit(d)
 !
 ! !ARGUMENTS:
-       type(ESMF_Calendar), intent(inout), optional :: d
+       type(ESMF_Calendar), intent(in), optional :: d
        ESMF_INIT_TYPE :: ESMF_CalendarGetInit
 !
 ! !DESCRIPTION:
@@ -562,6 +563,50 @@
        endif
 
     end function ESMF_CalendarGetInit
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarSetInitCreated()"
+!BOPI
+! !IROUTINE: ESMF_CalendarSetInitCreated - Set Calendar init code to "CREATED"
+
+! !INTERFACE:
+  subroutine ESMF_CalendarSetInitCreated(c, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Calendar), intent(inout)           :: c
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in Calendar object to "CREATED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[c] 
+!          Specified {\tt ESMF\_Calendar} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(c)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_CalendarSetInitCreated
+!------------------------------------------------------------------------------
+
+
 
 !==============================================================================
 !BOP
@@ -789,6 +834,8 @@
 !
 !EOP
 ! !REQUIREMENTS:
+
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
 !     invoke C to C++ entry point
       call c_ESMC_CalendarDestroy(calendar, rc)
@@ -1156,6 +1203,8 @@
       call c_ESMC_CalendarReadRestart(ESMF_CalendarReadRestart, nameLen, name, &
                                       iospec, rc)
 
+      ESMF_INIT_SET_CREATED(ESMF_CalendarReadRestart)
+ 
       end function ESMF_CalendarReadRestart
 
 !------------------------------------------------------------------------------
@@ -1202,6 +1251,9 @@
       ! initialize name length to zero for non-existent name
       integer :: nameLen
       nameLen = 0
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -1282,6 +1334,11 @@
       !   daysPerMonth
       integer :: nameLen
       integer :: monthsPerYear
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
+
+
       nameLen = 0
       monthsPerYear = 0
 

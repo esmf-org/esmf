@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmType.F90,v 1.9 2007/01/11 17:06:01 oehmke Exp $
+! $Id: ESMF_AlarmType.F90,v 1.10 2007/01/24 05:36:09 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_AlarmType.F90,v 1.9 2007/01/11 17:06:01 oehmke Exp $'
+      '$Id: ESMF_AlarmType.F90,v 1.10 2007/01/24 05:36:09 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -213,6 +213,83 @@
     
   end subroutine ESMF_AlarmSetInitDeleted
 !------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_AlarmGetThis - Internal access routine for C++ pointer
+! !INTERFACE:
+  subroutine ESMF_AlarmGetThis(alarm, this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Alarm), intent(in), optional :: alarm
+    type(ESMF_Pointer), intent(out) :: this
+    integer, intent(out),optional :: rc
+!
+!
+! !DESCRIPTION:
+! Internal access routine for C++ pointer.
+!
+! The arguments are:
+! \begin{description}
+! \item[alarm]
+! Specified {\tt ESMF\_Alarm} object.
+! \item[this]
+! C++ pointer.
+! \item[{[rc]}]
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+! !REQUIREMENTS: SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc ! local return code
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    ! Copy C++ pointer
+    this = alarm%this
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_AlarmGetThis
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_AlarmSetThis - Set C++ pointer in Alarm
+! !INTERFACE:
+  subroutine ESMF_AlarmSetThis(alarm, this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Alarm), intent(inout) :: alarm
+    type(ESMF_Pointer), intent(in) :: this
+    integer, intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+! Set C++ pointer in Alarm.
+!
+! The arguments are:
+! \begin{description}
+! \item[alarm]
+! Specified {\tt ESMF\_Alarm} object.
+! \item[this]
+! C++ pointer.
+! \item[{[rc]}]
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+! !REQUIREMENTS: SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc ! local return code
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    ! Copy C++ pointer
+    alarm%this = this
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_AlarmSetThis
+!------------------------------------------------------------------------------
+
 
 
       end module ESMF_AlarmTypeMod

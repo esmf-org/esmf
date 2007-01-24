@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.68 2007/01/11 17:06:01 oehmke Exp $
+! $Id: ESMF_Alarm.F90,v 1.69 2007/01/24 05:36:09 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.68 2007/01/11 17:06:01 oehmke Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.69 2007/01/24 05:36:09 oehmke Exp $'
 
 !==============================================================================
 !
@@ -320,6 +320,13 @@
       integer :: nameLen
       nameLen = 0
 
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,ringTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,stopTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,refTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,ringInterval)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,ringDuration)
+
       ! get length of given name for C++ validation
       if (present(name)) then
         nameLen = len_trim(name)
@@ -369,6 +376,8 @@
 !EOP
 ! !REQUIREMENTS:
 
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
+
 !     invoke C to C++ entry point to copy alarm
       call c_ESMC_AlarmCreateCopy(ESMF_AlarmCreateCopy, alarm, rc)
 
@@ -402,6 +411,8 @@
 !
 !EOP
 ! !REQUIREMENTS:
+
+      ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmDestroy(alarm, rc)
@@ -581,6 +592,15 @@
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,ringTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,prevRingTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,ringInterval)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,stopTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,refTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,ringBegin)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,ringEnd)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,ringDuration)
+
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -593,6 +613,9 @@
                            ringDuration, ringTimeStepCount, &
                            timeStepRingingCount, ringBegin, ringEnd, refTime, &
                            ringing, ringingOnPrevTimeStep, enabled, sticky, rc)
+
+      ! make work with Init. Stand.
+      if (present(clock)) call ESMF_ClockSetInitCreated(clock)
 
       ! copy temp name back to given name to restore native Fortran
       !   storage style

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.78 2007/01/11 17:06:01 oehmke Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.79 2007/01/24 05:36:11 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -125,7 +125,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.78 2007/01/11 17:06:01 oehmke Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.79 2007/01/24 05:36:11 oehmke Exp $'
 
 !==============================================================================
 !
@@ -972,6 +972,8 @@
       end function ESMF_TimeIntervalAbsValue
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalGet()"
 !BOP
 ! !IROUTINE: ESMF_TimeIntervalGet - Get a TimeInterval value 
 
@@ -991,7 +993,7 @@
                                          timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: mm
@@ -1127,6 +1129,10 @@
       ! initialize time string lengths to zero for non-existent time string
       integer :: timeStringLen, timeStringLenISOFrac
       integer :: tempTimeStringLen, tempTimeStringLenISOFrac
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
+
       timeStringLen = 0     
       timeStringLenISOFrac = 0     
       tempTimeStringLen = 0
@@ -1140,6 +1146,7 @@
         timeStringLenISOFrac = len(timeStringISOFrac)
       end if
 
+
       ! use optional args for any subset
       call c_ESMC_TimeIntervalGetDur(timeinterval, yy, yy_i8, mm, mm_i8, &
                                      d, d_i8, h, m, s, s_i8, ms, &
@@ -1151,6 +1158,9 @@
                                      timeStringLenISOFrac, &
                                      tempTimeStringLenISOFrac, &
                                      tempTimeStringISOFrac, rc)
+
+      if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
+
 
       ! copy temp time string back to given time string to restore
       !   native Fortran storage style
@@ -1164,6 +1174,8 @@
       end subroutine ESMF_TimeIntervalGetDur
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalGetDurStart()"
 !BOP
 ! !IROUTINE: ESMF_TimeIntervalGet - Get a TimeInterval value 
 
@@ -1185,7 +1197,7 @@
                                               timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: mm
@@ -1211,7 +1223,7 @@
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
-      type(ESMF_Time),         intent(in)            :: startTimeIn    ! Input
+      type(ESMF_Time),         intent(inout)            :: startTimeIn    ! Input
       character (len=*),       intent(out), optional :: timeString
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
@@ -1327,6 +1339,12 @@
       ! initialize time string lengths to zero for non-existent time string
       integer :: timeStringLen, timeStringLenISOFrac
       integer :: tempTimeStringLen, tempTimeStringLenISOFrac
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTimeIn)
+
+
       timeStringLen = 0
       timeStringLenISOFrac = 0
       tempTimeStringLen = 0
@@ -1354,6 +1372,8 @@
                                        tempTimeStringLenISOFrac, &
                                        tempTimeStringISOFrac, rc)
 
+      if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
+
       ! copy temp time string back to given time string to restore
       !   native Fortran storage style
       if (present(timeString)) then
@@ -1366,6 +1386,8 @@
       end subroutine ESMF_TimeIntervalGetDurStart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalGetDurCal()"
 !BOP
 ! !IROUTINE: ESMF_TimeIntervalGet - Get a TimeInterval value 
 
@@ -1387,7 +1409,7 @@
                                             timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: mm
@@ -1410,7 +1432,7 @@
       real(ESMF_KIND_R8),      intent(out), optional :: ns_r8 ! not implemented
       integer(ESMF_KIND_I4),   intent(out), optional :: sN
       integer(ESMF_KIND_I4),   intent(out), optional :: sD
-      type(ESMF_Time),         intent(out), optional :: startTime
+      type(ESMF_Time),         intent(inout), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
       type(ESMF_Calendar),     intent(in)            :: calendarIn     ! Input
@@ -1531,6 +1553,11 @@
       ! initialize time string lengths to zero for non-existent time string
       integer :: timeStringLen, timeStringLenISOFrac
       integer :: tempTimeStringLen, tempTimeStringLenISOFrac
+
+!      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendarIn,rc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
+
       timeStringLen = 0     
       timeStringLenISOFrac = 0     
       tempTimeStringLen = 0
@@ -1557,6 +1584,8 @@
                                   tempTimeStringLenISOFrac, &
                                   tempTimeStringISOFrac, rc)
 
+      if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
+
       ! copy temp time string back to given time string to restore
       !   native Fortran storage style
       if (present(timeString)) then
@@ -1569,6 +1598,8 @@
       end subroutine ESMF_TimeIntervalGetDurCal
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalGetDurCalTyp()"
 !BOP
 ! !IROUTINE: ESMF_TimeIntervalGet - Get a TimeInterval value 
 
@@ -1591,7 +1622,7 @@
                                                timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: mm
@@ -1733,6 +1764,10 @@
       ! initialize time string lengths to zero for non-existent time string
       integer :: timeStringLen, timeStringLenISOFrac
       integer :: tempTimeStringLen, tempTimeStringLenISOFrac
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
+
       timeStringLen = 0
       timeStringLenISOFrac = 0
       tempTimeStringLen = 0
@@ -1759,6 +1794,8 @@
                                   tempTimeStringLenISOFrac, &
                                   tempTimeStringISOFrac, rc)
 
+      if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
+
       ! copy temp time string back to given time string to restore
       !   native Fortran storage style
       if (present(timeString)) then
@@ -1771,6 +1808,8 @@
       end subroutine ESMF_TimeIntervalGetDurCalTyp
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalGetNegAbsValue()"
 !BOP
 ! !IROUTINE:  ESMF_TimeIntervalNegAbsValue - Get the negative absolute value of a TimeInterval
 
@@ -1781,7 +1820,7 @@
       type(ESMF_TimeInterval) :: ESMF_TimeIntervalNegAbsValue
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeinterval
+      type(ESMF_TimeInterval), intent(inout) :: timeinterval
 
 ! !DESCRIPTION:
 !     Returns the negative absolute value of {\tt timeinterval}.
@@ -1796,6 +1835,8 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG1.5.8
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
     
       call c_ESMC_TimeIntervalNegAbsValue(timeinterval, &
                                           ESMF_TimeIntervalNegAbsValue)
@@ -1803,6 +1844,8 @@
       end function ESMF_TimeIntervalNegAbsValue
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalPrint()"
 !BOP
 ! !IROUTINE:  ESMF_TimeIntervalPrint - Print the contents of a TimeInterval
 
@@ -1810,7 +1853,7 @@
       subroutine ESMF_TimeIntervalPrint(timeinterval, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
       character (len=*),       intent(in),  optional :: options
       integer,                 intent(out), optional :: rc
 
@@ -1847,12 +1890,16 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
     
       call c_ESMC_TimeIntervalPrint(timeinterval, options, rc)
 
       end subroutine ESMF_TimeIntervalPrint
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalReadRestart()"
 !BOPI
 ! !IROUTINE:  ESMF_TimeIntervalReadRestart - Restore the contents of a TimeInterval (not implmented)
 
@@ -1860,7 +1907,7 @@
       subroutine ESMF_TimeIntervalReadRestart(timeinterval, name, iospec, rc)
 !
 ! !ARGUMENTS:      
-      type(ESMF_TimeInterval), intent(in)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
       character (len=*),       intent(in)            :: name
       type(ESMF_IOSpec),       intent(in),  optional :: iospec
       integer,                 intent(out), optional :: rc
@@ -1885,6 +1932,8 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+
       ! get length of given name for C++ validation
       integer :: nameLen
       nameLen = len_trim(name)
@@ -1896,6 +1945,8 @@
       end subroutine ESMF_TimeIntervalReadRestart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalSetDur()"
 !BOP
 ! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval
 
@@ -2008,6 +2059,8 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+
       ! use optional args for any subset
       call c_ESMC_TimeIntervalSetDur(timeinterval, yy, yy_i8, &
                                      mm, mm_i8, &
@@ -2018,6 +2071,8 @@
       end subroutine ESMF_TimeIntervalSetDur
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalSetDurStart()"
 !BOP
 ! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval
 
@@ -2136,6 +2191,8 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+
       ! use optional args for any subset
       call c_ESMC_TimeIntervalSetDurStart(timeinterval, yy, yy_i8, &
                                           mm, mm_i8, &
@@ -2147,6 +2204,8 @@
       end subroutine ESMF_TimeIntervalSetDurStart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalSetDurCal()"
 !BOP
 ! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval
 
@@ -2270,6 +2329,9 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
+      ! check variables
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+
       ! use optional args for any subset
       call c_ESMC_TimeIntervalSetDurCal(timeinterval, yy, yy_i8, &
                                         mm, mm_i8, &
@@ -2281,6 +2343,8 @@
       end subroutine ESMF_TimeIntervalSetDurCal
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalSetDurCalTyp()"
 !BOP
 ! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval
 
@@ -2397,6 +2461,9 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+
       ! use optional args for any subset
       call c_ESMC_TimeIntervalSetDurCalTyp(timeinterval, yy, yy_i8, &
                                            mm, mm_i8, &
@@ -2408,6 +2475,8 @@
       end subroutine ESMF_TimeIntervalSetDurCalTyp
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalValidate()"
 !BOP
 ! !IROUTINE:  ESMF_TimeIntervalValidate - Validate a TimeInterval
 
@@ -2415,7 +2484,7 @@
       subroutine ESMF_TimeIntervalValidate(timeinterval, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
       character (len=*),       intent(in),  optional :: options
       integer,                 intent(out), optional :: rc
 
@@ -2438,11 +2507,15 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
     
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+
       call c_ESMC_TimeIntervalValidate(timeinterval, options, rc)
 
       end subroutine ESMF_TimeIntervalValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalWriteRestart()"
 !BOPI
 ! !IROUTINE:  ESMF_TimeIntervalWriteRestart - Save the contents of a TimeInterval (not implemented)
 
@@ -2450,7 +2523,7 @@
       subroutine ESMF_TimeIntervalWriteRestart(timeinterval, iospec, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
       type(ESMF_IOSpec),       intent(in),  optional :: iospec
       integer,                 intent(out), optional :: rc
 
@@ -2471,6 +2544,8 @@
 !EOPI
 ! !REQUIREMENTS:
 !     TMGn.n.n
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
 
 !     invoke C to C++ entry point 
       call c_ESMC_TimeIntervalWriteRestart(timeinterval, iospec, rc)

@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Clock.F90,v 1.73 2007/01/11 17:06:01 oehmke Exp $
+! $Id: ESMF_Clock.F90,v 1.74 2007/01/24 05:36:09 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -103,7 +103,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.73 2007/01/11 17:06:01 oehmke Exp $'
+      '$Id: ESMF_Clock.F90,v 1.74 2007/01/24 05:36:09 oehmke Exp $'
 
 !==============================================================================
 !
@@ -223,7 +223,7 @@
 
 ! !ARGUMENTS:
       type(ESMF_Clock),               intent(inout)         :: clock
-      type(ESMF_TimeInterval),        intent(in),  optional :: timeStep
+      type(ESMF_TimeInterval),        intent(inout),  optional :: timeStep
       type(ESMF_Alarm), dimension(:), intent(out), optional :: ringingAlarmList
       integer,                        intent(out), optional :: ringingAlarmCount
       integer,                        intent(out), optional :: rc
@@ -263,18 +263,23 @@
 !     TMG3.4.1
 
 
-
       ! initialize list size to zero for not-present list
-      integer :: sizeofRingingAlarmList
+      integer :: sizeofRingingAlarmList,i
+      type(ESMF_Pointer), allocatable :: ringingAlarmPtrList(:)      
+
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timestep)
 
       sizeofRingingAlarmList = 0
 
       ! get size of given ringing alarm list for C++ validation
       if (present(ringingAlarmList)) then
         sizeofRingingAlarmList = size(ringingAlarmList)
+ 
+        ! for Init Macros
+        allocate(ringingAlarmPtrList(sizeofRingingAlarmList))
       end if
 
       ! invoke C to C++ entry point
@@ -282,18 +287,33 @@
       if (present(ringingAlarmList) .and. sizeofRingingAlarmList > 1) then
         ! pass address of 2nd element for C++ to calculate array step size
         call c_ESMC_ClockAdvance2(clock, timeStep, &
-                                  ringingAlarmList(1), ringingAlarmList(2), &
+                                  ringingAlarmPtrList(1), ringingAlarmPtrList(2), &
                                   sizeofRingingAlarmList, ringingAlarmCount, rc)
       else if (sizeofRingingAlarmList == 1) then
         ! array has only one element
         call c_ESMC_ClockAdvance1(clock, timeStep, &
-                                  ringingAlarmList(1), &
+                                  ringingAlarmPtrList(1), &
                                   sizeofRingingAlarmList, ringingAlarmCount, rc)
       else
         ! array is not present
         call c_ESMC_ClockAdvance0(clock, timeStep, &
                                   sizeofRingingAlarmList, ringingAlarmCount, rc)
       endif
+
+      ! postprocess ringing alarm list
+      if (present(ringingAlarmList)) then
+
+         ! postprocess ringing ringingAlarm list
+         do i=1,sizeofRingingAlarmList
+            call ESMF_AlarmSetThis(ringingAlarmList(i),ringingAlarmPtrList(i))
+            call ESMF_AlarmSetInitCreated(ringingAlarmList(i))
+         enddo
+
+        ! Get rid of list
+        deallocate(ringingAlarmPtrList)
+     end if
+
+
     
       end subroutine ESMF_ClockAdvance
 
@@ -456,6 +476,9 @@
 !EOP
 ! !REQUIREMENTS:
 
+      ! check inputs
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
 !     invoke C to C++ entry point
       call c_ESMC_ClockDestroy(clock, rc)
 
@@ -566,8 +589,20 @@
       nameLen = 0
       tempNameLen = 0
 
+
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,stopTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,refTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,currTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,prevTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,runDuration)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timestep)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,currSimTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,prevSimTime)
+
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -581,6 +616,8 @@
                            currTime, prevTime, currSimTime, prevSimTime, &
                            calendar, calendarType, timeZone, advanceCount, &
                            alarmCount, direction, rc)
+
+      if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
 
       ! copy temp name back to given name to restore native Fortran
       !   storage style
@@ -631,7 +668,9 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockGetAlarm(clock, nameLen, name, alarm, rc)
-    
+   
+      call ESMF_AlarmSetInitCreated(alarm)
+ 
       end subroutine ESMF_ClockGetAlarm
 
 !------------------------------------------------------------------------------
@@ -699,29 +738,42 @@
 !     TMG4.3, 4.8
 
       ! get size of given alarm list for C++ validation
-      integer :: sizeofAlarmList
+      integer :: sizeofAlarmList,i
+      type(ESMF_Pointer), allocatable :: alarmPtrList(:)      
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-
-
       sizeofAlarmList = size(alarmList)
+      
+      ! for Init Macros
+      allocate(alarmPtrList(sizeofAlarmList))
 
       ! invoke C to C++ entry point
-
       if (sizeofAlarmList > 1) then
         ! pass address of 2nd element for C++ to calculate array step size
         call c_ESMC_ClockGetAlarmList2(clock, alarmListType, &
-                                      alarmList(1), alarmList(2), &
+                                      alarmPtrList(1), alarmPtrList(2), &
                                       sizeofAlarmList, alarmCount, timeStep, rc)
       else
         ! array has only one element
         call c_ESMC_ClockGetAlarmList1(clock, alarmListType, &
-                                      alarmList(1), &
+                                      alarmPtrList(1), &
                                       sizeofAlarmList, alarmCount, timeStep, rc)
       endif
+
     
+      ! postprocess ringing alarm list
+      do i=1,sizeofAlarmList
+         call ESMF_AlarmSetThis(alarmList(i),alarmPtrList(i))
+         call ESMF_AlarmSetInitCreated(alarmList(i))
+      enddo
+
+      ! Get rid of list
+      deallocate(alarmPtrList)
+
+
+
       end subroutine ESMF_ClockGetAlarmList
 
 !------------------------------------------------------------------------------
@@ -736,7 +788,7 @@
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(in)         :: clock
       type(ESMF_Time),         intent(out)           :: nextTime
-      type(ESMF_TimeInterval), intent(in),  optional :: timeStep
+      type(ESMF_TimeInterval), intent(inout),  optional :: timeStep
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -762,6 +814,8 @@
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,nextTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeStep)
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockGetNextTime(clock, nextTime, timeStep, rc)
@@ -1022,6 +1076,8 @@
       call c_ESMC_ClockReadRestart(ESMF_ClockReadRestart, nameLen, name, &
                                    iospec, rc)
 
+      call ESMF_ClockSetInitCreated(ESMF_ClockReadRestart)
+
       end function ESMF_ClockReadRestart
 
 !------------------------------------------------------------------------------
@@ -1038,13 +1094,13 @@
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(inout)         :: clock
       character (len=*),       intent(in),  optional :: name
-      type(ESMF_TimeInterval), intent(in),  optional :: timeStep
-      type(ESMF_Time),         intent(in),  optional :: startTime
-      type(ESMF_Time),         intent(in),  optional :: stopTime
-      type(ESMF_TimeInterval), intent(in),  optional :: runDuration
+      type(ESMF_TimeInterval), intent(inout),  optional :: timeStep
+      type(ESMF_Time),         intent(inout),  optional :: startTime
+      type(ESMF_Time),         intent(inout),  optional :: stopTime
+      type(ESMF_TimeInterval), intent(inout),  optional :: runDuration
       integer,                 intent(in),  optional :: runTimeStepCount
-      type(ESMF_Time),         intent(in),  optional :: refTime
-      type(ESMF_Time),         intent(in),  optional :: currTime
+      type(ESMF_Time),         intent(inout),  optional :: refTime
+      type(ESMF_Time),         intent(inout),  optional :: currTime
       integer(ESMF_KIND_I8),   intent(in),  optional :: advanceCount
       type(ESMF_Direction),    intent(in),  optional :: direction
       integer,                 intent(out), optional :: rc
@@ -1130,6 +1186,12 @@
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeStep)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,refTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,currTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,stopTime)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,runDuration)
 
       ! get length of given name for C++ validation
       if (present(name)) then
