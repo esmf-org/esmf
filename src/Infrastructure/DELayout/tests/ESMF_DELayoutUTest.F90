@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.13 2006/11/16 05:20:57 cdeluca Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.14 2007/01/25 18:25:05 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -14,6 +14,7 @@
 
 !------------------------------------------------------------------------------
  
+#include <ESMF.h>
 #include <ESMF_Macros.inc>
 
 !==============================================================================
@@ -36,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.13 2006/11/16 05:20:57 cdeluca Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.14 2007/01/25 18:25:05 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -51,7 +52,7 @@
 
 !     !LOCAL VARIABLES:
       type(ESMF_VM):: vm, vm1
-      type(ESMF_DELayout):: delayout
+      type(ESMF_DELayout):: delayout, delayout1
       integer:: petCount, ndes, i, n, nsum, isum
       integer, allocatable:: list(:)
       integer, allocatable:: petMap(:), deGrouping(:)
@@ -258,6 +259,55 @@
       call ESMF_DELayoutDestroy(delayout, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc.ne.ESMF_SUCCESS) goto 10
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Destroy a destroyed DELayout
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Destroy a destroyed DELayout Test"
+      call ESMF_DELayoutDestroy(delayout, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Destroy a non-created  DELayout
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Destroy a non-created DELayout Test"
+      call ESMF_DELayoutDestroy(delayout1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Get from a destroyed DELayout
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "DELayoutGet from destroyed DELayout Test"
+      call ESMF_DELayoutGet(delayout, vm=vm1, petMap=petMap, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Get from a non-created DELayout
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "DELayoutGet from non-created DELayout Test"
+      call ESMF_DELayoutGet(delayout1, vm=vm1, petMap=petMap, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Print a destroyed DELayout
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Print a destroyed DELayout Test"
+      call ESMF_DELayoutPrint(delayout, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Print a non-created DELayout
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Print a non-created DELayout Test"
+      call ESMF_DELayoutPrint(delayout1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
 #endif
       
 
