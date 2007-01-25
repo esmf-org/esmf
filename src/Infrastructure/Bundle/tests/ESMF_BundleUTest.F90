@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.43 2007/01/25 16:40:50 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.44 2007/01/25 17:39:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.43 2007/01/25 16:40:50 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.44 2007/01/25 17:39:43 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -182,6 +182,15 @@
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       write(name, *) "Validating a deleted Bundle Test"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Validate a non-created Bundle Test
+      call ESMF_BundleValidate(bundle1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Validating a non-created Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       ! set these up for use later
