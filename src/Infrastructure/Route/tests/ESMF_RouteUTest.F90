@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteUTest.F90,v 1.9 2006/11/16 05:21:18 cdeluca Exp $
+! $Id: ESMF_RouteUTest.F90,v 1.10 2007/01/25 23:14:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -13,6 +13,7 @@
       program ESMF_RouteTest
 
 #include "ESMF_Macros.inc"
+#include <ESMF.h>
 
 !------------------------------------------------------------------------------
 !
@@ -35,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RouteUTest.F90,v 1.9 2006/11/16 05:21:18 cdeluca Exp $'
+      '$Id: ESMF_RouteUTest.F90,v 1.10 2007/01/25 23:14:50 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -53,7 +54,7 @@
       character(ESMF_MAXSTR) :: print_options = "all"
 
       ! instantiate a Route 
-      type(ESMF_Route) :: route
+      type(ESMF_Route) :: route, route1
  
       ! local args needed to create/construct objects
       type(ESMF_VM) :: vm
@@ -166,7 +167,76 @@
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#ifdef ESMF_EXHAUSTIVE
       !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! destroy a destroyed Route
+      call ESMF_RouteDestroy(route, rc)
+      write(name, *) "Destroy a destroyed Route"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! destroy a non-created Route
+      call ESMF_RouteDestroy(route1, rc)
+      write(name, *) "Destroy a non-created Route"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! Print a deleted Route
+      call ESMF_RoutePrint(route, print_options, rc)
+      write(name, *) "Print a destroyed Route"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! Print a non-created Route
+      call ESMF_RoutePrint(route1, print_options, rc)
+      write(name, *) "Print a non-created Route"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! Validate a destroyed Route
+      call ESMF_RouteValidate(route, options=validate_options, rc=rc)
+      write(name, *) "Validate a destroyed Route Test"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! Validate a non-created Route
+      call ESMF_RouteValidate(route1, options=validate_options, rc=rc)
+      write(name, *) "Validate a non-created Route Test"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! add a recv route to a deleted Route
+      call ESMF_XPacketSetDefault(recvxp, 2, 0, 10, (/ 1, 10 /), (/ 3, 4 /) )
+      othervmid = MODULO(myvmid-1, vmidcount)
+      call ESMF_RouteSetRecv(route, othervmid, recvxp, rc);
+      write(name, *) "RouteSetRecv to a destroyed Route"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! add a recv route to a non-created Route
+      call ESMF_XPacketSetDefault(recvxp, 2, 0, 10, (/ 1, 10 /), (/ 3, 4 /) )
+      othervmid = MODULO(myvmid-1, vmidcount)
+      call ESMF_RouteSetRecv(route1, othervmid, recvxp, rc);
+      write(name, *) "RouteSetRecv to a non-created Route"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+#endif
 
 10    continue
 
