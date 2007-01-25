@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.42 2007/01/24 20:43:09 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.43 2007/01/25 16:40:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.42 2007/01/24 20:43:09 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.43 2007/01/25 16:40:50 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -156,7 +156,7 @@
       ! Getting Attribute Count from a non-created Bundle
       call ESMF_BundleGetAttributeCount(bundle1, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
-      write(name, *) "Getting Attribute Count from a deleted Bundle Test"
+      write(name, *) "Getting Attribute Count from a non-created Bundle Test"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
