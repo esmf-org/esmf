@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_TypeKindTemplate.h,v 1.3 2007/01/11 20:00:11 rosalind Exp $
+! $Id: ESMF_TypeKindTemplate.h,v 1.4 2007/01/25 20:03:07 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -53,8 +53,12 @@
 #define TypeKindTemplateInterfaceMacro(funcname) \
 !------------------------------------------------------------------------------ @\
 ! <This section created by macro - do not edit directly> @\
+^ifndef ESMF_NO_INTEGER_1_BYTE @\
     module procedure funcname##I1 @\
+^endif @\
+^ifndef ESMF_NO_INTEGER_2_BYTE @\
     module procedure funcname##I2 @\
+^endif @\
     module procedure funcname##I4 @\
     module procedure funcname##I8 @\
     module procedure funcname##R4 @\
@@ -84,8 +88,12 @@
  @\
 !! < start of macros which become actual subroutine bodies after expansion > @\
  @\
+^ifndef ESMF_NO_INTEGER_1_BYTE @\
 funcname##Macro(integer, I1) @\
+^endif @\
+^ifndef ESMF_NO_INTEGER_2_BYTE @\
 funcname##Macro(integer, I2) @\
+^endif @\
 funcname##Macro(integer, I4) @\
 funcname##Macro(integer, I8) @\
 funcname##Macro(real, R4) @\
