@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayUTest.F90,v 1.4 2006/11/16 05:21:04 cdeluca Exp $
+! $Id: ESMF_InternArrayUTest.F90,v 1.5 2007/01/25 20:34:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -16,6 +16,7 @@
 !
 
 #include <ESMF_Macros.inc>
+#include <ESMF.h>
 
 !==============================================================================
 !BOP
@@ -35,11 +36,11 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayUTest.F90,v 1.4 2006/11/16 05:21:04 cdeluca Exp $'
+      '$Id: ESMF_InternArrayUTest.F90,v 1.5 2007/01/25 20:34:41 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
-    type(ESMF_InternArray) :: array1
+    type(ESMF_InternArray) :: array1, array2
     real(ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1
     integer :: width, attribute
     integer :: counts(2), lbounds(2), ubounds(2)
@@ -110,6 +111,121 @@
     call ESMF_Test((.not. tf_result), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
+
+!-------------------------------------------------------------------------------
+!   !  Destroy destroyed  Array Test
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+    write(name, *) "Destroy a destroyed Array Test"
+    call ESMF_InternArrayDestroy(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!   !  Destroy a non-created Array Test
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+    write(name, *) "Destroy a non-created Array Test"
+    call ESMF_InternArrayDestroy(array2, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!   !  Get Array Name  of deleted Array Test
+ 
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+    write(name, *) "Get Array Name of destroyed Array Test"
+    call ESMF_InternArrayGet(array1, name=array_name, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!   !  Get Array Name  of non-created Array Test
+ 
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+    write(name, *) "Get Array Name of non-created Array Test"
+    call ESMF_InternArrayGet(array2, name=array_name, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!  !  Print a destroyed Array
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED" 
+    write(name, *) "Print a destroyed Array Test"
+    call ESMF_InternArrayPrint(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!  !  Print a non-created Array
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED" 
+    write(name, *) "Print a non-created Array Test"
+    call ESMF_InternArrayPrint(array2, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!  !  Get Attribute count from a destroyed Array
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED" 
+    write(name, *) "Set an Attribute from a destroyed Array Test"
+    call ESMF_IArrayGetAttributeCount(array1, attribute, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!  !  Get Attribute count from a non-created Array
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED" 
+    write(name, *) "Set an Attribute from a non-created Array Test"
+    call ESMF_IArrayGetAttributeCount(array2, attribute, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!  !  Set an Attribute in a destroyed Array
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+    write(name, *) "Set an Attribute in a destroyed Array Test"
+    call ESMF_IArraySetAttribute(array1, "test_attribute", 123456789, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!  !  Set an Attribute in a non-created Array
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+    write(name, *) "Set an Attribute in a non-created Array Test"
+    call ESMF_IArraySetAttribute(array2, "test_attribute", 123456789, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!  !  Get Attribute Info from a deleted Array
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED" 
+    write(name, *) "Get Attribute Info from a deleted Array Test"
+    call ESMF_IArrayGetAttributeInfo(array1, "test_attribute", &
+                                    datatype=att_datatype, &
+                                    datakind=att_datakind, &
+                                    count=att_count, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!  !  Get Attribute Info from a non-created Array
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED" 
+    write(name, *) "Get Attribute Info from a non-created Array Test"
+    call ESMF_IArrayGetAttributeInfo(array2, "test_attribute", &
+                                    datatype=att_datatype, &
+                                    datakind=att_datakind, &
+                                    count=att_count, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
 !-------------------------------------------------------------------------------
 !   !  Create an Array Test with data copy
 
@@ -147,7 +263,6 @@
     call ESMF_InternArrayDestroy(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 !   !  Deallocate the user-allocated memory (framework should *not* have
 !   !   deallocated it at array destroy time).
@@ -191,7 +306,6 @@
     call ESMF_InternArrayPrint(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 !  !  Get Attribute count from an Array
 
