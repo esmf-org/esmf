@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.41 2007/01/23 21:16:06 svasquez Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.42 2007/01/25 19:47:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.41 2007/01/23 21:16:06 svasquez Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.42 2007/01/25 19:47:55 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -249,10 +249,10 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Destroy a Non-created Grid
-      call ESMF_GridDestroy(grid2, rc=rc)
-      write(failMsg, *) "Did not returned ESMF_RC_OBJ_DELETED"
+      call ESMF_GridDestroy(grid3, rc=rc)
+      write(failMsg, *) "Did not returned ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Destroy a non-created Grid Test"
-      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -263,6 +263,65 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
       
+      !------------------------------------------------------------------------
+      ! Grid Add Vert Height to a deleted Grid Test.
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Add Grid Vert Height to a destroyed Grid Test"
+      call ESMF_GridAddVertHeight(grid, delta, vertstagger=vert_stagger, &
+                                  rc=status)
+      call ESMF_Test((status.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Grid Add Vert Height to a non-created Grid Test.
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Add Grid Vert Height to a non-created Grid Test"
+      call ESMF_GridAddVertHeight(grid3, delta, vertstagger=vert_stagger, &
+                                  rc=status)
+      call ESMF_Test((status.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Grid Distribute of destroyed Grid Test.
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Grid Distribute of destroyed Grid Test"
+      call ESMF_GridDistribute(grid, delayout=layout, countsPerDEDim1=DEDim1, &
+                               countsPerDEDim2=DEDim2, rc=status)
+      call ESMF_Test((status.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Grid Distribute of non-created Grid Test.
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Grid Distribute of non-created Grid Test"
+      call ESMF_GridDistribute(grid3, delayout=layout, countsPerDEDim1=DEDim1, &
+                               countsPerDEDim2=DEDim2, rc=status)
+      call ESMF_Test((status.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      !------------------------------------------------------------------------
+      ! Printing a destroyed Grid
+      !EX_UTest
+      call ESMF_GridPrint(grid, "", rc=rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Printing a destroyed Grid Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Printing a non-created Grid
+      !EX_UTest
+      call ESMF_GridPrint(grid3, "", rc=rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Printing a non-created Grid Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+
+
       !------------------------------------------------------------------------
       ! Create a Grid Test.
       !EX_UTest
