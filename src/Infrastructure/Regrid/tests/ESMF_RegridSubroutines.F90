@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.21 2007/01/12 18:46:22 oehmke Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.22 2007/01/26 00:43:08 oehmke Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -126,6 +126,7 @@ contains
                            domainType   = testArgs%domain, &
                            error_threshold=err_threshold, &
 			   ier=regrid_rc)
+
 		call ESMF_Test((regrid_rc.eq.ESMF_SUCCESS),name, failMsg, result, &
                     ESMF_SRCLINE)
 		testMsg = trim(" Function                  : " // testArgs%FunctionString)

@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.144 2007/01/12 00:11:38 oehmke Exp $
+! $Id: ESMF_Comp.F90,v 1.145 2007/01/26 00:44:27 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 #else
          type(ESMF_CompClass), pointer :: compp
 #endif
-      ESMF_INIT_DECLARE
+
       end type
 
 !------------------------------------------------------------------------------
@@ -246,7 +246,7 @@
       ! These have to be public so other component types can call them,
       !  but they are not intended to be used outside the Framework code.
 
-      public ESMF_CompClassGetInit, ESMF_CompClassInit
+      public ESMF_CompClassGetInit 
       public ESMF_CompClassValidate
 
       public ESMF_CompConstruct, ESMF_CompDestruct
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.144 2007/01/12 00:11:38 oehmke Exp $'
+      '$Id: ESMF_Comp.F90,v 1.145 2007/01/26 00:44:27 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -292,106 +292,94 @@ end interface
 
 !==============================================================================
 
-!------------------------------------------------------------------------------
-#undef ESMF_METHOD
-#define ESMF_METHOD "ESMF_CompClassGetInit"
- !BOPI
-! !IROUTINE: ESMF_CompClassGetInit - Get initialization status.
 
-! !INTERFACE:
-   function ESMF_CompClassGetInit(s)
-!
-! !ARGUMENTS:
-       type(ESMF_CompClass), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_CompClassGetInit
-!
-! !DESCRIPTION:
-! Get the initialization status of the
-! shallow class {\tt CompClass}.
-!
-! The arguments are:
-! \begin{description}
-! \item [s]
-! {\tt ESMF\_CompClass} from which to retreive status.
-! \end{description}
-!
-!EOPI
-       if (present(s)) then
-         ESMF_CompClassGetInit = ESMF_INIT_GET(s)
-       else
-         ESMF_CompClassGetInit = ESMF_INIT_DEFINED
-       endif
-
-     end function ESMF_CompClassGetInit
-
-
-!------------------------------------------------------------------------------
-#undef ESMF_METHOD
-#define ESMF_METHOD "ESMF_CompClassInit"
- !BOPI
-! !IROUTINE: ESMF_CompClassInit - Initialize CompClass variable.
-
-! !INTERFACE:
-   subroutine ESMF_CompClassInit(s)
-!
-! !ARGUMENTS:
-       type(ESMF_CompClass) :: s
-!
-! !DESCRIPTION:
-! Initialize the class {\tt CompClass}.
-!
-! The arguments are:
-! \begin{description}
-! \item [s]
-! {\tt ESMF\_CompClass} to initialize.
-! \end{description}
-!
-!EOPI
-
-       s%compstatus = ESMF_STATUS_INVALID
-
-       ESMF_INIT_SET_DEFINED(s)
-     end subroutine ESMF_CompClassInit
-
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CompClassValidate"
+#define ESMF_METHOD "ESMF_CompClassValidate()"
 !BOP
-! !IROUTINE: ESMF_CompClassValidate - Check validity of a CompClass
-!
+! !IROUTINE: ESMF_CompClassValidate - Validate CompClass internals
+
 ! !INTERFACE:
-      subroutine ESMF_CompClassValidate(s, rc)
+  subroutine ESMF_CompClassValidate(cc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CompClass) :: s
-      integer, intent(out), optional :: rc
+    type(ESMF_CompClass), intent(in)              :: cc
+    integer,          intent(out),  optional  :: rc  
+!         
 !
 ! !DESCRIPTION:
-!     Validates that the {\tt CompClass} is internally consistent.
-!     Currently this method determines if the {\tt CompClass} is uninitialized
-!     or already destroyed.  The method returns an error code if problems
-!     are found.
+!      Validates that the {\tt CompClass} is internally consistent.
+!      The method returns an error code if problems are found.  
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[s]
-!       The {\tt ESMF\_CompClass} to validate.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if the  {\tt CompClass}
-!       is valid.
+!     \item[cc] 
+!          Specified {\tt ESMF\_CompClass} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, cc, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments.
+    !todo: call c_ESMC_CompClassValidate(cc, localrc)
+    localrc = ESMF_SUCCESS  ! remove when todo is done.
+    
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_CompClassValidate
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompClassGetInit"
+!BOPI
+! !IROUTINE: ESMF_CompClassGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+      function ESMF_CompClassGetInit(cc) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_CompClassGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_CompClass), intent(in), optional :: cc
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [cc]
+!           CompClass object.
+!     \end{description}
 !
 !EOPI
-     ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,s)
 
-     ! return success
-     if(present(rc)) then
-       rc = ESMF_SUCCESS
-     endif
+    if (present(cc)) then
+      ESMF_CompClassGetInit = ESMF_INIT_GET(cc)
+    else
+      ESMF_CompClassGetInit = ESMF_INIT_CREATED
+    endif
 
+    end function ESMF_CompClassGetInit
+!------------------------------------------------------------------------------
 
-end subroutine ESMF_CompClassValidate
 
 !------------------------------------------------------------------------------
 
@@ -521,8 +509,6 @@ end function
           rc = ESMF_FAILURE
         endif
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,compp)
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,parent)
         ! Fill in values
         if (.not.associated(compp)) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -530,6 +516,11 @@ end function
                                      ESMF_CONTEXT, rc)
             return
         endif
+
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, parent, rc)
+
 
         ! component type
         compp%ctype = ctype
@@ -734,6 +725,9 @@ end function
    
         compp%compstatus = ESMF_STATUS_READY
 
+        ! Set init code
+        ESMF_INIT_SET_CREATED(compp)
+
         ! Set return values
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -779,7 +773,6 @@ end function
           rc = ESMF_FAILURE
         endif
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,compp)
 
         if (.not.associated(compp)) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -787,6 +780,11 @@ end function
                                      ESMF_CONTEXT, rc)
             return
         endif
+
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+
 
         if (compp%vm_info /= ESMF_NULL_POINTER) then
           ! shut down this component's VM
@@ -823,6 +821,10 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
         
+
+        ! Set init code
+        ESMF_INIT_SET_DELETED(compp)
+
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -906,7 +908,6 @@ end function
           rc = ESMF_FAILURE
         endif
         
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,compp)
 
         if (.not.associated(compp)) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -914,6 +915,11 @@ end function
                                      ESMF_CONTEXT, rc) 
             return
         endif
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+
+
 
         if (compp%compstatus .ne. ESMF_STATUS_READY) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -1117,14 +1123,16 @@ end function
           rc = ESMF_FAILURE
         endif
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,compp)
-
         if (.not.associated(compp)) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                                     "Uninitialized or destroyed component", &
                                      ESMF_CONTEXT, rc) 
             return
         endif
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+
 
         if (compp%compstatus .ne. ESMF_STATUS_READY) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -1223,8 +1231,6 @@ end function
           rc = ESMF_FAILURE
         endif
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,compp)
-
 
         if (.not.associated(compp)) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -1232,6 +1238,11 @@ end function
                                      ESMF_CONTEXT, rc) 
             return
         endif
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+
+
 
         if (compp%compstatus .ne. ESMF_STATUS_READY) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -1329,7 +1340,6 @@ end function
           rc = ESMF_FAILURE
         endif
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,compp)
 
         if (.not.associated(compp)) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -1337,6 +1347,10 @@ end function
                                      ESMF_CONTEXT, rc)
             return
         endif
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+
 
         if (compp%compstatus .ne. ESMF_STATUS_READY) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -1447,7 +1461,6 @@ end function
           rc = ESMF_FAILURE
         endif
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,compp)
 
         if (.not.associated(compp)) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -1455,6 +1468,10 @@ end function
                                      ESMF_CONTEXT, rc)
             return
         endif
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+
 
         if (compp%compstatus .ne. ESMF_STATUS_READY) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -1543,7 +1560,6 @@ end function
           rc = ESMF_FAILURE
         endif
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,compp)
 
         if (.not.associated(compp)) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -1551,6 +1567,10 @@ end function
                                      ESMF_CONTEXT, rc)
             return
         endif
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+
 
         if (compp%compstatus .ne. ESMF_STATUS_READY) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -1601,7 +1621,8 @@ end function
 !
         if (present(rc)) rc = ESMF_FAILURE
  
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,compp)
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
         end subroutine ESMF_CompWrite
 
@@ -1634,13 +1655,13 @@ end function
 !
         type (ESMF_CompClass) :: a
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,a)
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit, ESMF_CompRead)
 
 !       this is just to stop compiler warnings
         a%gridcomptype = ESMF_OTHER
 
         ESMF_CompRead = a 
+
+        ESMF_INIT_SET_CREATED(ESMF_CompRead)
  
         if (present(rc)) rc = ESMF_FAILURE
  
@@ -1681,14 +1702,16 @@ end function
          rc = ESMF_FAILURE
        endif
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,compp)
-
         if (.not.associated(compp)) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                                      "Uninitialized or destroyed component", &
                                      ESMF_CONTEXT, rc)
             return
         endif
+
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
        if (compp%compstatus .ne. ESMF_STATUS_READY) then
            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -1747,8 +1770,6 @@ end function
          rc = ESMF_FAILURE
        endif
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,compp)
-
        defaultopts = "brief"
 
        ! Parse options and decide what to print
@@ -1762,6 +1783,10 @@ end function
           write (*,*)  "Invalid or uninitialized Component"
           return
        endif
+
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
        if (compp%compstatus .ne. ESMF_STATUS_READY) then
           !nsc  call ESMF_LogWrite("Invalid or uninitialized Component",  &
@@ -1833,14 +1858,16 @@ end function
       rc = ESMF_FAILURE
     endif
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,compp)
-
         if (.not.associated(compp)) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                                      "Uninitialized or destroyed component", &
                                      ESMF_CONTEXT, rc)
             return
         endif
+
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     ! ensure that this is not a child_in_parent_vm plan
     if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
@@ -1914,7 +1941,6 @@ end function
       rc = ESMF_FAILURE
     endif
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,compp)
 
         if (.not.associated(compp)) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -1922,6 +1948,9 @@ end function
                                      ESMF_CONTEXT, rc)
             return
         endif
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     ! ensure that this is not a child_in_parent_vm plan
     if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
@@ -1995,7 +2024,6 @@ end function
       rc = ESMF_FAILURE
     endif
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,compp)
 
         if (.not.associated(compp)) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -2003,6 +2031,9 @@ end function
                                      ESMF_CONTEXT, rc)
             return
         endif
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     ! ensure that this is not a child_in_parent_vm plan
     if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
@@ -2072,7 +2103,6 @@ end function
       rc = ESMF_FAILURE
     endif
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_CompClassGetInit,ESMF_CompClassInit,compp)
 
         if (.not.associated(compp)) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -2080,6 +2110,9 @@ end function
                                      ESMF_CONTEXT, rc)
             return
         endif
+
+        ! Check init status of arguments
+        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     if (compp%compstatus .ne. ESMF_STATUS_READY) then
         call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &

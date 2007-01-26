@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.231 2007/01/19 23:19:35 oehmke Exp $
+! $Id: ESMF_Field.F90,v 1.232 2007/01/26 00:43:07 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -239,7 +239,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.231 2007/01/19 23:19:35 oehmke Exp $'
+      '$Id: ESMF_Field.F90,v 1.232 2007/01/26 00:43:07 oehmke Exp $'
 
 !==============================================================================
 !
@@ -4517,6 +4517,7 @@
       ! they are consistent.  the tfield is a temp wrapper so we can
       ! call the user level validate
       tfield%ftypep => ftype
+      ESMF_INIT_SET_CREATED(tfield)
       call ESMF_FieldValidate(tfield, "", status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -5231,6 +5232,7 @@
       !                           ESMF_CONTEXT, rc)) return
 
       ESMF_FieldDeserialize%ftypep => fp
+      ESMF_INIT_SET_CREATED(ESMF_FieldDeserialize)
       if  (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldDeserialize

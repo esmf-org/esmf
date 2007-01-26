@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.87 2007/01/22 21:42:02 oehmke Exp $
+! $Id: ESMF_Route.F90,v 1.88 2007/01/26 00:43:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.87 2007/01/22 21:42:02 oehmke Exp $'
+      '$Id: ESMF_Route.F90,v 1.88 2007/01/26 00:43:08 oehmke Exp $'
 
 !==============================================================================
 !
@@ -1594,7 +1594,7 @@ end subroutine rias
 
 	! Check initialization
         ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
-        ESMF_INIT_CHECK_DEEP(ESMF_XPacketGetInit,xp,rc)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_XPacketGetInit,ESMF_XPacketInit,xp)
 
 
         ! Call C++  code
@@ -1658,7 +1658,7 @@ end subroutine rias
 
 	! Check initialization
         ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
-        ESMF_INIT_CHECK_DEEP(ESMF_XPacketGetInit,xp,rc)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_XPacketGetInit,ESMF_XPacketInit,xp)
 
 
         ! Call C++  code

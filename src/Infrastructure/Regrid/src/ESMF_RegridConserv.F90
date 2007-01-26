@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.65 2007/01/08 23:42:47 donstark Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.66 2007/01/26 00:43:07 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.65 2007/01/08 23:42:47 donstark Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.66 2007/01/26 00:43:07 oehmke Exp $'
 
 !==============================================================================
 
@@ -868,7 +868,6 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! Check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_RegridIndexGetInit,index,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
 
       ! Create the RegridIndex structure for use in the AddLink calls
