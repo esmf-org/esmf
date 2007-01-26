@@ -1,0 +1,7 @@
+Settings for Linux, using the commercial NAGware Fortran compiler and the
+GNU C++ compiler (g++).
+
+Requires the following environment settings:
+
+ESMF_COMPILER nag
+

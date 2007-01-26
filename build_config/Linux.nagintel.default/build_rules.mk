@@ -1,0 +1,134 @@
+# $Id: build_rules.mk,v 1.1 2007/01/26 22:01:35 theurich Exp $
+#
+# Linux.nagintel.default
+#
+
+############################################################
+# Default compiler setting.
+#
+ESMF_F90DEFAULT         = f95
+ESMF_CXXDEFAULT         = icpc
+
+############################################################
+# Default MPI setting.
+#
+ifeq ($(ESMF_COMM),default)
+export ESMF_COMM := mpiuni
+endif
+
+############################################################
+# MPI dependent settings.
+#
+ifeq ($(ESMF_COMM),mpiuni)
+# MPI stub library -----------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
+else
+ifeq ($(ESMF_COMM),mpich)
+# Mpich ----------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_F90LINKLIBS       += 
+ESMF_CXXDEFAULT         = mpiCC
+ESMF_CXXCOMPILEOPTS    += -DESMF_MPICH
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPIRUNOPTIONS)
+else
+ifeq ($(ESMF_COMM),mpich2)
+# Mpich2 ---------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
+ifeq ($(ESMF_COMM),lam)
+# LAM (assumed to be built with nag f95) ----------------
+ESMF_F90DEFAULT         = mpif77
+ESMF_CXXDEFAULT         = mpic++
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
+ifeq ($(ESMF_COMM),openmpi)
+# OpenMPI --------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
+ifeq ($(ESMF_COMM),user)
+# User specified flags -------------------------------------
+else
+$(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
+endif
+endif
+endif
+endif
+endif
+
+############################################################
+# Print compiler version string
+#
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v -V -dryrun
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
+
+############################################################
+# Set kind numbering system to "byte"
+#
+ESMF_F90COMPILEOPTS += -kind=byte
+
+############################################################
+# Set f95 to be more premissive and issue warning before error
+#
+ESMF_F90COMPILEOPTS += -dusty
+
+############################################################
+# To compile with Intel's icpc but link with GCC's stdc++ lib
+# set ESMF_STDCXX_LIBRARY to gcc before building
+#
+ifeq ($(ESMF_STDCXX_LIBRARY),gcc)
+ESMF_F90LINKPATHS   += -L$(dir $(shell gcc -print-file-name=libstdc++.so))
+ESMF_F90LINKLIBS    += -lstdc++
+ESMF_CXXCOMPILEOPTS += -cxxlib-gcc
+ESMF_CXXLINKOPTS    += -cxxlib-gcc
+else
+ESMF_F90LINKPATHS   += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.icpc $(ESMF_CXXCOMPILER)))
+ESMF_F90LINKLIBS    += -lcprts
+ESMF_CXXCOMPILEOPTS += -cxxlib-icc
+ESMF_CXXLINKOPTS    += -cxxlib-icc
+endif
+
+############################################################
+# Conditionally add pthread compiler and linker flags
+#
+ifeq ($(ESMF_PTHREADS),ON)
+ESMF_CXXCOMPILEOPTS +=  -pthread
+ESMF_CXXLINKOPTS    += -pthread
+endif
+
+############################################################
+# Need this until the file convention is fixed (then remove these two lines)
+#
+ESMF_F90COMPILEFREENOCPP = -free
+ESMF_F90COMPILEFIXCPP    = -fixed -fpp
+
+############################################################
+# Blank out variables to prevent rpath encoding
+#
+ESMF_F90LINKRPATHS      =
+ESMF_CXXLINKRPATHS      =
+
+############################################################
+# Link against libesmf.a using the F90 linker front-end
+#
+ESMF_F90LINKLIBS += -lirc -lunwind -lrt -ldl
+
+############################################################
+# Link against libesmf.a using the C++ linker front-end
+#
+ESMF_CXXLINKLIBS += -lrt -ldl $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COMPILER))
+
+############################################################
+# Blank out shared library options
+#
+ESMF_SL_LIBS_TO_MAKE  =
