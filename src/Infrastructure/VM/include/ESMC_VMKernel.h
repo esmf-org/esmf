@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.39 2006/11/29 22:52:38 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.40 2007/01/26 18:48:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -180,8 +180,8 @@ class ESMC_VMK{
   // methods
   private:
     void vmk_obtain_args(void);
-    void vmk_commhandle_add(vmk_commhandle *commhandle);
-    int vmk_commhandle_del(vmk_commhandle *commhandle);
+    void vmk_commqueueitem_link(vmk_commhandle *commhandle);
+    int vmk_commqueueitem_unlink(vmk_commhandle *commhandle);
   public:
     void vmk_init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD);
       // initialize the physical machine and a default (all MPI) virtual machine
@@ -268,9 +268,9 @@ class ESMC_VMK{
       vmk_commhandle **commhandle);
     
     // non-blocking service calls
-    void vmk_wait(vmk_commhandle **commhandle, int nanopause=0);
-    void vmk_waitqueue(void);
-    void vmk_cancel(vmk_commhandle **commhandle);
+    void vmk_commwait(vmk_commhandle **commhandle, int nanopause=0);
+    void vmk_commqueuewait(void);
+    void vmk_commcancel(vmk_commhandle **commhandle);
     
     // IntraProcessSharedMemoryAllocation Table Methods
     void *vmk_ipshmallocate(int bytes, int *firstFlag=NULL);

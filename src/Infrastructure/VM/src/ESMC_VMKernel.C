@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.78 2006/11/29 22:52:39 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.79 2007/01/26 18:48:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -2277,7 +2277,7 @@ void ESMC_VMKPlan::vmkplan_print(void){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-void ESMC_VMK::vmk_commhandle_add(vmk_commhandle *commhandle){
+void ESMC_VMK::vmk_commqueueitem_link(vmk_commhandle *commhandle){
   vmk_commhandle *handle;
   pthread_mutex_lock(pth_mutex2);
   if (nhandles==0){
@@ -2296,7 +2296,7 @@ void ESMC_VMK::vmk_commhandle_add(vmk_commhandle *commhandle){
   pthread_mutex_unlock(pth_mutex2);
 }
 
-int ESMC_VMK::vmk_commhandle_del(vmk_commhandle *commhandle){
+int ESMC_VMK::vmk_commqueueitem_unlink(vmk_commhandle *commhandle){
   vmk_commhandle *handle;
   pthread_mutex_lock(pth_mutex2);
   if (nhandles==0){
@@ -2310,23 +2310,23 @@ int ESMC_VMK::vmk_commhandle_del(vmk_commhandle *commhandle){
   }else{
     handle=firsthandle;
     while (handle->next_handle!=NULL){
-//fprintf(stderr, "gjt in vmk_commhandle_del commhandle: %p handle: %p handle->next_handle=%p\n", commhandle, handle, handle->next_handle);
+//fprintf(stderr, "gjt in vmk_commqueueitem_unlink commhandle: %p handle: %p handle->next_handle=%p\n", commhandle, handle, handle->next_handle);
       
       if (handle==commhandle) break;
       handle=handle->next_handle;
     }
     if (handle==commhandle){
-//fprintf(stderr, "gjt in vmk_commhandle_del found commhandle in queue\n");
+//fprintf(stderr, "gjt in vmk_commqueueitem_unlink found commhandle in queue\n");
       --nhandles;
       // found commhandle in queue
       if (handle->prev_handle==NULL){
-//fprintf(stderr, "gjt in vmk_commhandle_del commhandle was firsthandle: %p\n",
+//fprintf(stderr, "gjt in vmk_commqueueitem_unlink commhandle was firsthandle: %p\n",
 //         firsthandle);
         
         firsthandle=handle->next_handle;
         firsthandle->prev_handle=NULL;
         
-//fprintf(stderr, "gjt in vmk_commhandle_del now firsthandle: %p\n",
+//fprintf(stderr, "gjt in vmk_commqueueitem_unlink now firsthandle: %p\n",
 //         firsthandle);
         
         
@@ -2493,7 +2493,7 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest,
   // check if this needs a new entry in the request queue
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
-    vmk_commhandle_add(*commhandle);
+    vmk_commqueueitem_link(*commhandle);
   }
   // switch into the appropriate implementation
   switch(commarray[mypet][dest].comm_type){
@@ -2784,7 +2784,7 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source,
   // check if this needs a new entry in the request queue
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
-    vmk_commhandle_add(*commhandle);
+    vmk_commqueueitem_link(*commhandle);
   }
   // switch into the appropriate implementation
   switch(commarray[source][mypet].comm_type){
@@ -3025,7 +3025,7 @@ void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
 //fprintf(stderr, "vmk_sendrecv: commhandle=%p\n", *commhandle);
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
-    vmk_commhandle_add(*commhandle);
+    vmk_commqueueitem_link(*commhandle);
   }
   // p2p sendrecv non-blocking
   (*commhandle)->nelements = 2; // 2 requests for send/recv
@@ -3626,7 +3626,7 @@ void ESMC_VMK::vmk_scatter(void *in, void *out, int len, int root,
   // check if this needs a new entry in the request queue
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
-    vmk_commhandle_add(*commhandle);
+    vmk_commqueueitem_link(*commhandle);
   }
   // MPI does not offer a non-blocking scatter operation, hence there is no
   // point in checking if the mpionly flag is set in this VM, in either case
@@ -3701,7 +3701,7 @@ void ESMC_VMK::vmk_gather(void *in, void *out, int len, int root,
   // check if this needs a new entry in the request queue
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
-    vmk_commhandle_add(*commhandle);
+    vmk_commqueueitem_link(*commhandle);
   }
   // MPI does not offer a non-blocking gather operation, hence there is no
   // point in checking if the mpionly flag is set in this VM, in either case
@@ -3779,7 +3779,7 @@ void ESMC_VMK::vmk_allgather(void *in, void *out, int len,
   // check if this needs a new entry in the request queue
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
-    vmk_commhandle_add(*commhandle);
+    vmk_commqueueitem_link(*commhandle);
   }
   // MPI does not offer a non-blocking allgather operation, hence there is no
   // point in checking if the mpionly flag is set in this VM, in either case
@@ -3941,7 +3941,7 @@ void ESMC_VMK::vmk_broadcast(void *data, int len, int root,
   // check if this needs a new entry in the request queue
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
-    vmk_commhandle_add(*commhandle);
+    vmk_commqueueitem_link(*commhandle);
   }
   // MPI does not offer a non-blocking broadcast operation, hence there is no
   // point in checking if the mpionly flag is set in this VM, in either case
@@ -3975,15 +3975,19 @@ void ESMC_VMK::vmk_broadcast(void *data, int len, int root,
 }
 
 
-void ESMC_VMK::vmk_wait(vmk_commhandle **commhandle, int nanopause){
-//fprintf(stderr, "vmk_wait: nhandles=%d\n", nhandles);
-//fprintf(stderr, "vmk_wait: commhandle=%p\n", (*commhandle));
-  if ((*commhandle)!=NULL){
+void ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, int nanopause){
+  // wait for all of the communications pointed to by *commhandle to complete
+  // and delete all of the inside contents of *commhandle (even if it is a tree)
+  // finally unlink the *commhandle container from the commqueue and delete the
+  // container (only) if the *commhandle was part of the commqueue!
+//fprintf(stderr, "vmk_commwait: nhandles=%d\n", nhandles);
+//fprintf(stderr, "vmk_commwait: *commhandle=%p\n", *commhandle);
+  if ((commhandle!=NULL) && ((*commhandle)!=NULL)){
     // wait for all non-blocking requests in commhandle to complete
     if ((*commhandle)->type==0){
       // this is a commhandle container
       for (int i=0; i<(*commhandle)->nelements; i++){
-        vmk_wait(&((*commhandle)->handles[i]));  // recursive call
+        vmk_commwait(&((*commhandle)->handles[i]));  // recursive call
         delete (*commhandle)->handles[i];
       }
       delete [] (*commhandle)->handles;
@@ -4022,36 +4026,36 @@ void ESMC_VMK::vmk_wait(vmk_commhandle **commhandle, int nanopause){
     }else{
       printf("ESMC_VMK: only MPI non-blocking implemented\n");
     }
-    // now look for this commhandle in the request queue and remove if found
-    if (vmk_commhandle_del(*commhandle)){ 
-      delete *commhandle;    
-      *commhandle = NULL;
+    // if this *commhandle is in the request queue x-> unlink and delete
+    if (vmk_commqueueitem_unlink(*commhandle)){ 
+      delete *commhandle; // delete the container commhandle that was linked
+      *commhandle = NULL; // ensure this container will not point to anything
     }
   }
 }
 
 
-void ESMC_VMK::vmk_waitqueue(void){
+void ESMC_VMK::vmk_commqueuewait(void){
   int n=nhandles;
   vmk_commhandle *fh;
   for (int i=0; i<n; i++){
-//    printf("vmk_waitqueue: %d\n", nhandles);
+//    printf("vmk_commqueuewait: %d\n", nhandles);
     fh = firsthandle;
-    vmk_wait(&fh);
+    vmk_commwait(&fh);
   }
-//  printf("vmk_waitqueue: %d\n", nhandles);
+//  printf("vmk_commqueuewait: %d\n", nhandles);
 }
 
 
-void ESMC_VMK::vmk_cancel(vmk_commhandle **commhandle){
-//fprintf(stderr, "vmk_cancel: nhandles=%d\n", nhandles);
-//fprintf(stderr, "vmk_cancel: commhandle=%p\n", (*commhandle));
+void ESMC_VMK::vmk_commcancel(vmk_commhandle **commhandle){
+//fprintf(stderr, "vmk_commcancel: nhandles=%d\n", nhandles);
+//fprintf(stderr, "vmk_commcancel: commhandle=%p\n", (*commhandle));
   if ((*commhandle)!=NULL){
     // cancel all non-blocking requests in commhandle to complete
     if ((*commhandle)->type==0){
       // this is a commhandle container
       for (int i=0; i<(*commhandle)->nelements; i++){
-        vmk_cancel(&((*commhandle)->handles[i]));  // recursive call
+        vmk_commcancel(&((*commhandle)->handles[i]));  // recursive call
       }
     }else if ((*commhandle)->type==1){
       // this commhandle contains MPI_Requests

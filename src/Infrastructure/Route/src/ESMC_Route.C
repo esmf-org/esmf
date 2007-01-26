@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.156 2006/11/16 05:21:16 cdeluca Exp $
+//$Id: ESMC_Route.C,v 1.157 2007/01/26 18:48:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.156 2006/11/16 05:21:16 cdeluca Exp $";
+               "$Id: ESMC_Route.C,v 1.157 2007/01/26 18:48:01 theurich Exp $";
 //-----------------------------------------------------------------------------
 class permuteLocal {
 public:
@@ -1694,7 +1694,7 @@ int compare2(const void *item1, const void *item2) {
           // copy - nothing to wait for.  otherwise, call the wait routine 
           // to be sure the communication has completed.
           if (myPET != theirPET) {
-            vm->vmk_wait(&handle[req]);
+            vm->vmk_commwait(&handle[req]);
           }
           // uncomment for profiling
           // vmk_wtime(&time);
@@ -1758,7 +1758,7 @@ int compare2(const void *item1, const void *item2) {
             // (if the pet numbers were the same, we did an immediate copy and
             // didn't start an async communication, so nothing to wait for.)
             if (myPET != theirPET) {
-              vm->vmk_wait(&handle[req]);
+              vm->vmk_commwait(&handle[req]);
             }
            
             // if the receive buffer is not contig, we still need to unpack
@@ -1846,7 +1846,7 @@ int compare2(const void *item1, const void *item2) {
               // only necessary if myPET != theirPET, because for same-PET
               // transfers we do an immediate operation and not async.
               if (myPET != theirPET) 
-                vm->vmk_wait(&handle[req]);
+                vm->vmk_commwait(&handle[req]);
 
               req++;
 

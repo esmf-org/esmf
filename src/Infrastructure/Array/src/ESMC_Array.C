@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.57 2007/01/19 22:06:24 theurich Exp $
+// $Id: ESMC_Array.C,v 1.58 2007/01/26 18:48:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.57 2007/01/19 22:06:24 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.58 2007/01/26 18:48:01 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2430,7 +2430,7 @@ int ESMC_Array::ESMC_ArrayScatter(
   // wait until all the local receives are complete
   // wait until all the local sends are complete
   // for now wait on _all_ outstanding non-blocking comms for this PET
-  vm->vmk_waitqueue();
+  vm->vmk_commqueuewait();
     
   // distribute received data into non-contiguous exclusive regions
   for (int i=0; i<localDeCount; i++){
@@ -3117,7 +3117,7 @@ int ESMC_ArraySparseMatMul(
 
   // wait until all local receive calls have completed
   for (int i=0; i<storage->recvTable->count; i++)
-    vm->vmk_wait(&(storage->recvTable->commh[i]));
+    vm->vmk_commwait(&(storage->recvTable->commh[i]));
   
   // loop through termStorage and compute local results
   for (int i=0; i<storage->termCount; i++){
@@ -3135,7 +3135,7 @@ int ESMC_ArraySparseMatMul(
   
   // wait until all local send calls have completed
   for (int i=0; i<storage->sendTable->count; i++)
-    vm->vmk_wait(&(storage->sendTable->commh[i]));
+    vm->vmk_commwait(&(storage->sendTable->commh[i]));
   
   return ESMF_SUCCESS;
 }
@@ -4687,7 +4687,7 @@ int ESMC_newArray::ESMC_newArrayWait(
 #endif
   // wait for all the communication handles to clear
   for (int i=0; i<*cc; i++){
-    vm->vmk_wait(&(commh->vmk_commh[i]), 1);  // use nanopause=1ns to lower load
+    vm->vmk_commwait(&(commh->vmk_commh[i]), 1);  // use nanopause=1ns to lower load
   }
   if (*cc) delete [] commh->vmk_commh;
   *cc = 0;  // reset
@@ -4752,7 +4752,7 @@ int ESMC_newArray::ESMC_newArrayWait(
   // wait for all the communication handles to clear
   for (int i=0; i<*cc; i++){
     // use nanopause=1ns to lower load
-    vm->vmk_wait(&(commhArray[localDe].vmk_commh[i]), 1);
+    vm->vmk_commwait(&(commhArray[localDe].vmk_commh[i]), 1);
   }
   if (*cc) delete [] commhArray[localDe].vmk_commh;
 #if (VERBOSITY > 9)
@@ -5181,8 +5181,8 @@ void *ESMC_newArrayScatterThread(
   for (int i=0; i<localDeCount; i++)
     localArrays[i]->ESMC_LocalArrayGetBaseAddr(&localDeArrayBase[i]);
   // prepare a temporary buffer
-  vm->vmk_wait(&ch_laLength, 1);     // need this variable in a couple of lines
-  vm->vmk_wait(&ch_laByteCount, 1);  // need this variable in a couple of lines
+  vm->vmk_commwait(&ch_laLength, 1);     // need this variable in a couple of lines
+  vm->vmk_commwait(&ch_laByteCount, 1);  // need this variable in a couple of lines
   int blockCount = 1;
   for (int i=1; i<rank; i++)
     blockCount *= laLength[i];
@@ -5203,7 +5203,7 @@ void *ESMC_newArrayScatterThread(
     blockID[i] = 0;
   int *blockLocalIndex = new int[rank];
   int *blockGlobalIndex = new int[rank];
-  vm->vmk_wait(&ch_laLbound, 1);
+  vm->vmk_commwait(&ch_laLbound, 1);
   blockGlobalIndex[0] = laLbound[0];
   // prepare for loop over all blocks
   vmk_commhandle *ch_buffer = NULL; // mark as invalid
@@ -5361,7 +5361,7 @@ void *ESMC_newArrayScatterThread(
         baseOverlap);
 #endif
       // going to need the data in buffer for the following memcpy call...
-      vm->vmk_wait(&ch_buffer, 1);
+      vm->vmk_commwait(&ch_buffer, 1);
       // finally memcpy from buffer into DE's local array.
       memcpy(baseOverlap, blockOverlap, overlapCount * elementSize);
     }else{
@@ -5374,7 +5374,7 @@ void *ESMC_newArrayScatterThread(
       // cancel and remove the message correctly there will need to be
       // communication between sender and receiver! For this to be done behind
       // the scenes in a non-blocking approach will require extra threads!
-      vm->vmk_wait(&ch_buffer, 1);
+      vm->vmk_commwait(&ch_buffer, 1);
     }
     // update the blockID
     ++blockID[1];
@@ -5485,23 +5485,23 @@ void *ESMC_newArrayScalarReduceThread(
       case ESMF_SUM:
         *tempResult = 0;  // prime the result variable
         for (int i=0; i<deCount; i++){
-          vm->vmk_wait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
+          vm->vmk_commwait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
           *tempResult += tempBase[i];
         }
         break;
       case ESMF_MIN:
-        vm->vmk_wait(&(vmk_commh[0]), 1);   // complete receive, nanopause=1ns
+        vm->vmk_commwait(&(vmk_commh[0]), 1);   // complete receive, nanopause=1ns
         *tempResult = tempBase[0];          // prime the result variable
         for (int i=1; i<deCount; i++){
-          vm->vmk_wait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
+          vm->vmk_commwait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
           if (tempBase[i] < *tempResult) *tempResult = tempBase[i];
         }
         break;
       case ESMF_MAX:
-        vm->vmk_wait(&(vmk_commh[0]), 1);   // complete receive, nanopause=1ns
+        vm->vmk_commwait(&(vmk_commh[0]), 1);   // complete receive, nanopause=1ns
         *tempResult = tempBase[0];          // prime the result variable
         for (int i=1; i<deCount; i++){
-          vm->vmk_wait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
+          vm->vmk_commwait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
           if (tempBase[i] > *tempResult) *tempResult = tempBase[i];
         }
         break;
@@ -5516,23 +5516,23 @@ void *ESMC_newArrayScalarReduceThread(
       case ESMF_SUM:
         *tempResult = 0.;  // prime the result variable
         for (int i=0; i<deCount; i++){
-          vm->vmk_wait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
+          vm->vmk_commwait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
           *tempResult += tempBase[i];
         }
         break;
       case ESMF_MIN:
-        vm->vmk_wait(&(vmk_commh[0]), 1);   // complete receive, nanopause=1ns
+        vm->vmk_commwait(&(vmk_commh[0]), 1);   // complete receive, nanopause=1ns
         *tempResult = tempBase[0];          // prime the result variable
         for (int i=1; i<deCount; i++){
-          vm->vmk_wait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
+          vm->vmk_commwait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
           if (tempBase[i] < *tempResult) *tempResult = tempBase[i];
         }
         break;
       case ESMF_MAX:
-        vm->vmk_wait(&(vmk_commh[0]), 1);   // complete receive, nanopause=1ns
+        vm->vmk_commwait(&(vmk_commh[0]), 1);   // complete receive, nanopause=1ns
         *tempResult = tempBase[0];          // prime the result variable
         for (int i=1; i<deCount; i++){
-          vm->vmk_wait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
+          vm->vmk_commwait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
           if (tempBase[i] > *tempResult) *tempResult = tempBase[i];
         }
         break;
@@ -5547,23 +5547,23 @@ void *ESMC_newArrayScalarReduceThread(
       case ESMF_SUM:
         *tempResult = 0.;  // prime the result variable
         for (int i=0; i<deCount; i++){
-          vm->vmk_wait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
+          vm->vmk_commwait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
           *tempResult += tempBase[i];
         }
         break;
       case ESMF_MIN:
-        vm->vmk_wait(&(vmk_commh[0]), 1);   // complete receive, nanopause=1ns
+        vm->vmk_commwait(&(vmk_commh[0]), 1);   // complete receive, nanopause=1ns
         *tempResult = tempBase[0];          // prime the result variable
         for (int i=1; i<deCount; i++){
-          vm->vmk_wait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
+          vm->vmk_commwait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
           if (tempBase[i] < *tempResult) *tempResult = tempBase[i];
         }
         break;
       case ESMF_MAX:
-        vm->vmk_wait(&(vmk_commh[0]), 1);   // complete receive, nanopause=1ns
+        vm->vmk_commwait(&(vmk_commh[0]), 1);   // complete receive, nanopause=1ns
         *tempResult = tempBase[0];          // prime the result variable
         for (int i=1; i<deCount; i++){
-          vm->vmk_wait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
+          vm->vmk_commwait(&(vmk_commh[i]), 1);  // complete receive, nanopause=1ns
           if (tempBase[i] > *tempResult) *tempResult = tempBase[i];
         }
         break;
