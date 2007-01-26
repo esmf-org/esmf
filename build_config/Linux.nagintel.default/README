@@ -1,5 +1,5 @@
 Settings for Linux, using the commercial NAGware Fortran compiler and the
-GNU C++ compiler (g++).
+commercial Intel C++ compiler (icpc).
 
 Requires the following environment settings:
 
