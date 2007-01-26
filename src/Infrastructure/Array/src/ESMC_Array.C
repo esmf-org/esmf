@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.60 2007/01/26 20:45:49 theurich Exp $
+// $Id: ESMC_Array.C,v 1.61 2007/01/26 20:49:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.60 2007/01/26 20:45:49 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.61 2007/01/26 20:49:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2333,7 +2333,7 @@ int ESMC_Array::ESMC_ArrayScatter(
       } // jj
       sendBuffer[i] = new char[cellCount*dataSize]; // contiguous sendBuffer
       
-fprintf(stderr, "gjt in ArrayScatter: sending to DE %d - cellCount: %d \n", de, cellCount);
+//fprintf(stderr, "gjt in ArrayScatter: sending to DE %d - cellCount: %d \n", de, cellCount);
 
       if (cellCount){
         // only send data to current DE if there are associated DistGrid cells
@@ -2411,21 +2411,11 @@ fprintf(stderr, "gjt in ArrayScatter: sending to DE %d - cellCount: %d \n", de, 
     if (deAssociatedFlag[i] == 0) continue; // skip to next DE
     int de = localDeList[i];
     int cellCount = 1;  // reset
-fprintf(stderr, "%d, gjt in ArrayScatter cellCount: %p: %d\n", de, &cellCount, cellCount);
-    for (int j=0; j<dimCount; j++){
-      cellCount = cellCount * (exclusiveUBound[i*dimCount+j] 
-        - exclusiveLBound[i*dimCount+j] + 1);
-
-//fprintf(stderr, "%d, %d\n", de, de);
-//fprintf(stderr, "%d, gjt in ArrayScatter distr dims: j=%d, cellCount=%d\n", de, j, cellCount);
-    }
-    for (int j=0; j<tensorCount; j++){
-      cellCount = cellCount * (ubounds[j] - lbounds[j] + 1);
-//fprintf(stderr, "%d, gjt in ArrayScatter tensor: j=%d, cellCount=%d\n", de, j, cellCount);
-    }
-fprintf(stderr, "%d, gjt in ArrayScatter cellCount: %p: %d\n", de, &cellCount, cellCount);
-fprintf(stderr, "gjt in ArrayScatter: receiver DE %d - cellCount: %d \n", 
-  de, cellCount);
+    for (int j=0; j<dimCount; j++)
+      cellCount *= exclusiveUBound[i*dimCount+j] 
+        - exclusiveLBound[i*dimCount+j] + 1;
+    for (int j=0; j<tensorCount; j++)
+      cellCount *= ubounds[j] - lbounds[j] + 1;
     recvBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
     if (!contiguousFlag[i])
       recvBuffer[i] = new char[cellCount*dataSize];
