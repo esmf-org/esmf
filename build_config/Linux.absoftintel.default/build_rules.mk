@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1 2007/01/26 18:33:54 theurich Exp $
+# $Id: build_rules.mk,v 1.2 2007/01/26 19:37:16 theurich Exp $
 #
 # Linux.absoftintel.default
 #
@@ -92,6 +92,7 @@ ESMF_F90LINKLIBS    += -lstdc++
 ESMF_CXXCOMPILEOPTS += -cxxlib-gcc
 ESMF_CXXLINKOPTS    += -cxxlib-gcc
 else
+ESMF_F90LINKPATHS   += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.icpc $(ESMF_CXXCOMPILER)))
 ESMF_F90LINKLIBS    += -lcprts
 ESMF_CXXCOMPILEOPTS += -cxxlib-icc
 ESMF_CXXLINKOPTS    += -cxxlib-icc
