@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2 2007/01/26 19:37:16 theurich Exp $
+# $Id: build_rules.mk,v 1.3 2007/01/26 20:39:30 theurich Exp $
 #
 # Linux.absoftintel.default
 #
@@ -32,7 +32,7 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKLIBS       += 
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_CXXCOMPILEOPTS    += -DESMF_MPICH
-ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPIRUNOPTIONS)
 else
 ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
@@ -122,7 +122,7 @@ ESMF_CXXLINKRPATHS += $(addprefix $(ESMF_RPATHPREFIXFIXED), $(shell $(ESMF_DIR)/
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lrt
+ESMF_F90LINKLIBS += -lirc -lunwind -lrt -ldl
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
