@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.8 2007/01/22 17:44:44 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.9 2007/01/26 21:45:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.8 2007/01/22 17:44:44 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.9 2007/01/26 21:45:52 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -394,15 +394,12 @@ program ESMF_ArrayScatterUTest
   ! cleanup  
   call ESMF_ArrayDestroy(array, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   deallocate(srcfarray3d)  
   
 #endif
   
-  !------------------------------------------------------------------------
-  ! cleanup  
-  call ESMF_DistGridDestroy(distgrid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
 
 10 continue
   !------------------------------------------------------------------------
