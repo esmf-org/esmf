@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.58 2007/01/26 18:48:01 theurich Exp $
+// $Id: ESMC_Array.C,v 1.59 2007/01/26 19:05:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.58 2007/01/26 18:48:01 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.59 2007/01/26 19:05:37 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2183,7 +2183,7 @@ int ESMC_Array::ESMC_ArrayScatter(
   if (vm == ESMC_NULL_POINTER){
     vm = ESMC_VMGetCurrent(&status);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
-    return localrc;
+      return localrc;
   }
 
   // query the VM for localPet and petCount
@@ -2335,64 +2335,64 @@ int ESMC_Array::ESMC_ArrayScatter(
       
 //printf("gjt in ArrayScatter: sender DE %d - cellCount: %d \n", de, cellCount);
 
-      if (cellCount){ // skip to next DE
-
-      int sendBufferIndex = 0;  // reset
-      // reset counters
-      tensorIndex=0;  // reset
-      for (int jj=0; jj<rank; jj++){
-        ii[jj] = 0;  // reset
-        int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor dims
-        if (j){
-          // decomposed dimension 
-          --j;  // shift to basis 0
-          iiEnd[jj] = dimExtent[de*dimCount+j];
-        }else{
-          // tensor dimension
-          iiEnd[jj] = ubounds[tensorIndex] - lbounds[tensorIndex] + 1;
-          ++tensorIndex;
-        }
-      }
-      // loop over all cells in exclusive region for this DE
-      while(ii[rank-1] < iiEnd[rank-1]){        
-        // determine linear index for this cell into farray
-        int linearIndex = indexList[rank-1][ii[rank-1]];  // init
-        for (int j=rank-2; j>=0; j--){
-          linearIndex *= counts[j];
-          linearIndex += indexList[j][ii[j]];
-        }
-        
-        // copy this element into the contiguous sendBuffer
-        if (indexContigFlag[0]){
-          // contiguous data in first dimension
-          memcpy(sendBuffer[i]+sendBufferIndex*dataSize,
-            farray+linearIndex*dataSize, iiEnd[0]*dataSize);
-          ii[0] = iiEnd[0];
-          sendBufferIndex += iiEnd[0];
-        }else{
-          // non-contiguous data in first dimension
-          memcpy(sendBuffer[i]+sendBufferIndex*dataSize,
-            farray+linearIndex*dataSize, dataSize);
-          ++ii[0];
-          ++sendBufferIndex;
-        }
-                
-        // multi-dim index increment
-        for (int j=0; j<rank-1; j++){
-          if (ii[j] == iiEnd[j]){
-            ii[j] = 0;  // reset
-            ++ii[j+1];
+      if (cellCount){
+        // only send data to current DE if there are associated DistGrid cells
+        int sendBufferIndex = 0;  // reset
+        // reset counters
+        tensorIndex=0;  // reset
+        for (int jj=0; jj<rank; jj++){
+          ii[jj] = 0;  // reset
+          int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tens dims
+          if (j){
+            // decomposed dimension 
+            --j;  // shift to basis 0
+            iiEnd[jj] = dimExtent[de*dimCount+j];
+          }else{
+            // tensor dimension
+            iiEnd[jj] = ubounds[tensorIndex] - lbounds[tensorIndex] + 1;
+            ++tensorIndex;
           }
         }
-      } // while
+        // loop over all cells in exclusive region for this DE
+        while(ii[rank-1] < iiEnd[rank-1]){        
+          // determine linear index for this cell into farray
+          int linearIndex = indexList[rank-1][ii[rank-1]];  // init
+          for (int j=rank-2; j>=0; j--){
+            linearIndex *= counts[j];
+            linearIndex += indexList[j][ii[j]];
+          }
+        
+          // copy this element into the contiguous sendBuffer
+          if (indexContigFlag[0]){
+            // contiguous data in first dimension
+            memcpy(sendBuffer[i]+sendBufferIndex*dataSize,
+              farray+linearIndex*dataSize, iiEnd[0]*dataSize);
+            ii[0] = iiEnd[0];
+            sendBufferIndex += iiEnd[0];
+          }else{
+            // non-contiguous data in first dimension
+            memcpy(sendBuffer[i]+sendBufferIndex*dataSize,
+              farray+linearIndex*dataSize, dataSize);
+            ++ii[0];
+            ++sendBufferIndex;
+          }
+                
+          // multi-dim index increment
+          for (int j=0; j<rank-1; j++){
+            if (ii[j] == iiEnd[j]){
+              ii[j] = 0;  // reset
+              ++ii[j+1];
+            }
+          }
+        } // while
     
-      // ready to send the sendBuffer
-      int dstPet;
-      delayout->ESMC_DELayoutGetDEMatchPET(de, *vm, NULL, &dstPet, 1);
-      *commh = NULL; // invalidate
-      vm->vmk_send(sendBuffer[i], cellCount*dataSize, dstPet, commh);
+        // ready to send the sendBuffer
+        int dstPet;
+        delayout->ESMC_DELayoutGetDEMatchPET(de, *vm, NULL, &dstPet, 1);
+        *commh = NULL; // invalidate
+        vm->vmk_send(sendBuffer[i], cellCount*dataSize, dstPet, commh);
       
-      } // skip to next DE
+      } // if DE is not associated with DistGrid cells then skip to next DE
       
       // clean-up
       for (int j=0; j<rank; j++)
@@ -2400,11 +2400,11 @@ int ESMC_Array::ESMC_ArrayScatter(
       delete [] indexList;
       delete [] indexContigFlag;
     } // i
+    
     delete [] ii;
     delete [] iiEnd;
   }
   
-    
   // all PETs may be receivers
   char **recvBuffer = new char*[localDeCount];
   for (int i=0; i<localDeCount; i++){
