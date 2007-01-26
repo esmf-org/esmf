@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.59 2007/01/26 19:05:37 theurich Exp $
+// $Id: ESMC_Array.C,v 1.60 2007/01/26 20:45:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.59 2007/01/26 19:05:37 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.60 2007/01/26 20:45:49 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -269,8 +269,8 @@ ESMC_Array *ESMC_ArrayCreate(
   // delayout -> deCount, localDeCount, localDeList
   int deCount;
   int localDeCount;
-  status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, NULL, NULL, NULL,
-    NULL, NULL, &localDeCount, NULL, NULL, NULL, NULL, NULL);
+  status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, 0, NULL, 0,
+    NULL, NULL, &localDeCount, NULL, 0, NULL, NULL, 0);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete array;
     array = ESMC_NULL_POINTER;
@@ -285,8 +285,8 @@ ESMC_Array *ESMC_ArrayCreate(
     return ESMC_NULL_POINTER;
   }
   int *localDeList = new int[localDeCount];
-  status=delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, localDeList, localDeCount, NULL, NULL, NULL);
+  status=delayout->ESMC_DELayoutGet(NULL, NULL, NULL, 0, NULL, 0,
+    NULL, NULL, NULL, localDeList, localDeCount, NULL, NULL, 0);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete array;
     array = ESMC_NULL_POINTER;
@@ -818,16 +818,16 @@ ESMC_Array *ESMC_ArrayCreate(
   // delayout -> deCount, localDeCount, localDeList
   int deCount;
   int localDeCount;
-  status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, NULL, NULL, NULL,
-    NULL, NULL, &localDeCount, NULL, NULL, NULL, NULL, NULL);
+  status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, 0, NULL, 0,
+    NULL, NULL, &localDeCount, NULL, 0, NULL, NULL, 0);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete array;
     array = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
   int *localDeList = new int[localDeCount];
-  status=delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, localDeList, localDeCount, NULL, NULL, NULL);
+  status=delayout->ESMC_DELayoutGet(NULL, NULL, NULL, 0, NULL, 0,
+    NULL, NULL, NULL, localDeList, localDeCount, NULL, NULL, 0);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete array;
     array = ESMC_NULL_POINTER;
@@ -1246,13 +1246,13 @@ int ESMC_Array::ESMC_ArrayConstruct(
     NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
     return localrc;
-  status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, NULL, NULL, NULL,
-    NULL, NULL, &localDeCount, NULL, NULL, NULL, NULL, NULL);
+  status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, 0, NULL, 0,
+    NULL, NULL, &localDeCount, NULL, 0, NULL, NULL, 0);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
     return localrc;
   localDeList = new int[localDeCount];
-  status=delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, localDeList, localDeCount, NULL, NULL, NULL);
+  status=delayout->ESMC_DELayoutGet(NULL, NULL, NULL, 0, NULL, 0,
+    NULL, NULL, NULL, localDeList, localDeCount, NULL, NULL, 0);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
     return localrc;
   // copy the PET-local LocalArray pointers
@@ -2333,7 +2333,7 @@ int ESMC_Array::ESMC_ArrayScatter(
       } // jj
       sendBuffer[i] = new char[cellCount*dataSize]; // contiguous sendBuffer
       
-//printf("gjt in ArrayScatter: sender DE %d - cellCount: %d \n", de, cellCount);
+fprintf(stderr, "gjt in ArrayScatter: sending to DE %d - cellCount: %d \n", de, cellCount);
 
       if (cellCount){
         // only send data to current DE if there are associated DistGrid cells
@@ -2411,13 +2411,21 @@ int ESMC_Array::ESMC_ArrayScatter(
     if (deAssociatedFlag[i] == 0) continue; // skip to next DE
     int de = localDeList[i];
     int cellCount = 1;  // reset
-    for (int j=0; j<dimCount; j++)
-      cellCount *= exclusiveUBound[i*dimCount+j] 
-        - exclusiveLBound[i*dimCount+j] + 1;
-    for (int j=0; j<tensorCount; j++)
-      cellCount *= ubounds[j] - lbounds[j] + 1;
-//printf("gjt in ArrayScatter: receiver DE %d - cellCount: %d \n", 
-//  de, cellCount);
+fprintf(stderr, "%d, gjt in ArrayScatter cellCount: %p: %d\n", de, &cellCount, cellCount);
+    for (int j=0; j<dimCount; j++){
+      cellCount = cellCount * (exclusiveUBound[i*dimCount+j] 
+        - exclusiveLBound[i*dimCount+j] + 1);
+
+//fprintf(stderr, "%d, %d\n", de, de);
+//fprintf(stderr, "%d, gjt in ArrayScatter distr dims: j=%d, cellCount=%d\n", de, j, cellCount);
+    }
+    for (int j=0; j<tensorCount; j++){
+      cellCount = cellCount * (ubounds[j] - lbounds[j] + 1);
+//fprintf(stderr, "%d, gjt in ArrayScatter tensor: j=%d, cellCount=%d\n", de, j, cellCount);
+    }
+fprintf(stderr, "%d, gjt in ArrayScatter cellCount: %p: %d\n", de, &cellCount, cellCount);
+fprintf(stderr, "gjt in ArrayScatter: receiver DE %d - cellCount: %d \n", 
+  de, cellCount);
     recvBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
     if (!contiguousFlag[i])
       recvBuffer[i] = new char[cellCount*dataSize];
@@ -2790,7 +2798,7 @@ int ESMC_ArraySparseMatMulStore(
   // allocate and initialize memory to hold associated receive addresses
   storage->factorStorage->receiveAddr =
     new void*[storage->factorStorage->factorListCount];
-  memset(storage->factorStorage->receiveAddr, NULL,
+  memset(storage->factorStorage->receiveAddr, 0,
     storage->factorStorage->factorListCount*sizeof(void *));
   // allocate and initialize arrays to hold associated send information
   storage->factorStorage->localSendDe =
@@ -4313,7 +4321,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   vm->vmk_reduce(localResult, result, 1, vmt, (vmOp)op, rootPET);
   
   // garbage collection
-  delete localResult;
+  // need to typcast back before: delete localResult;
   
   return ESMF_SUCCESS;
 }
