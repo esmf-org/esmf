@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.30 2007/01/24 05:36:11 oehmke Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.31 2007/01/26 00:29:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.30 2007/01/24 05:36:11 oehmke Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.31 2007/01/26 00:29:04 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -53,7 +53,7 @@
       logical :: bool
       ! instantiate a clock 
       type(ESMF_Clock) :: clock, clock1, clock2, domainClock
-      type(ESMF_Alarm) :: alarm, alarm1, alarm2, alarm3, alarm4
+      type(ESMF_Alarm) :: alarm, alarm1, alarm2, alarm3, alarm4, alarm6
       type(ESMF_Alarm) :: beforeAlarm, afterAlarm
       type(ESMF_Alarm) :: alarm5(200)
       type(ESMF_Alarm) :: alarmList(201)
@@ -175,6 +175,267 @@
       
 
 #ifdef ESMF_EXHAUSTIVE
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Destroy a destroyed Alarm Test"
+      call ESMF_AlarmDestroy(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Destroy a non-created Alarm Test"
+      call ESMF_AlarmDestroy(alarm6, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Check if destroyed Alarm is sticky Test"
+      sticky =  ESMF_AlarmIsSticky(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Check if non-created Alarm is sticky Test"
+      sticky =  ESMF_AlarmIsSticky(alarm6, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Validate destroyed Alarm Test"
+      call ESMF_AlarmValidate(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Validate non-created Alarm Test"
+      call ESMF_AlarmValidate(alarm6, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Check if destroyed Alarm is enabled Test"
+      enabled =  ESMF_AlarmIsEnabled(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Check if non-created Alarm is enabled Test"
+      enabled =  ESMF_AlarmIsEnabled(alarm6, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Check if destroyed Alarm is not ringing Test"
+      isringing = ESMF_AlarmIsRinging(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Check if non-created Alarm is not ringing Test"
+      isringing = ESMF_AlarmIsRinging(alarm6, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Get name of destroyed Alarm Test"
+      call  ESMF_AlarmGet(alarm1, name=aName, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Get name of destroyed Alarm Test"
+      call  ESMF_AlarmGet(alarm6, name=aName, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Set  name of destroyed Alarm Test"
+      call  ESMF_AlarmSet(alarm1, name="ALARM1", rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Set  name of non-created Alarm Test"
+      call  ESMF_AlarmSet(alarm6, name="ALARM1", rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Turn on Ringing on destroyed Alarm "
+      call ESMF_AlarmRingerOn(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Turn on Ringing on non-created Alarm "
+      call ESMF_AlarmRingerOn(alarm6, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Turn off Ringing on destroyed Alarm "
+      call ESMF_AlarmRingerOff(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Turn off Ringing on non-created Alarm "
+      call ESMF_AlarmRingerOff(alarm6, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Enable destroyed Alarm Test"
+      call ESMF_AlarmEnable(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Enable non-create Alarm Test"
+      call ESMF_AlarmEnable(alarm6, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Check if destroyed Alarm is enabled Test"
+      enabled =  ESMF_AlarmIsEnabled(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Check if non-created Alarm is enabled Test"
+      enabled =  ESMF_AlarmIsEnabled(alarm6, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Disable destroyed Alarm Test"
+      call ESMF_AlarmDisable(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Disable non-created Alarm Test"
+      call ESMF_AlarmDisable(alarm6, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      !Test if destroyed Alarm Previously ringing
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Destroyed Alarm Was Previously ringing Test"
+      bool =  ESMF_AlarmWasPrevRinging(alarm1, rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      !Test if non-created Alarm Previously ringing
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Non-created Alarm Was Previously ringing Test"
+      bool =  ESMF_AlarmWasPrevRinging(alarm6, rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Turn off Ringing on destroyed Alarm "
+      call ESMF_AlarmRingerOff(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Turn off Ringing on non-created Alarm "
+      call ESMF_AlarmRingerOff(alarm6, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test destroyed Alarm will ring next
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Destroyed Alarm will ring next Test"
+      willRingNext = ESMF_AlarmWillRingNext(alarm1, timeStep, rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test non-created Alarm will ring next
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Non-created Alarm will ring next Test"
+      willRingNext = ESMF_AlarmWillRingNext(alarm6, timeStep, rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
