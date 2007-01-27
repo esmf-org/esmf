@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.145 2007/01/26 00:44:27 oehmke Exp $
+! $Id: ESMF_Comp.F90,v 1.146 2007/01/27 00:03:19 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.145 2007/01/26 00:44:27 oehmke Exp $'
+      '$Id: ESMF_Comp.F90,v 1.146 2007/01/27 00:03:19 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -509,6 +509,7 @@ end function
           rc = ESMF_FAILURE
         endif
 
+
         ! Fill in values
         if (.not.associated(compp)) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -519,7 +520,8 @@ end function
 
 
         ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, parent, rc)
+        ! (a non-present pointer argument seems to cause an error on some systems)
+!!        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, parent, rc)
 
 
         ! component type
@@ -584,7 +586,7 @@ end function
               ESMF_CONTEXT, rc)) return
           endif
         endif
-      
+
         ! for gridded components, the model type it represents
         if (present(gridcomptype)) then
           compp%gridcomptype = gridcomptype
