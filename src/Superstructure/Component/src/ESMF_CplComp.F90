@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.70 2007/01/12 00:11:38 oehmke Exp $
+! $Id: ESMF_CplComp.F90,v 1.71 2007/01/28 07:56:26 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.70 2007/01/12 00:11:38 oehmke Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.71 2007/01/28 07:56:26 oehmke Exp $'
 
 !==============================================================================
 !
@@ -897,9 +897,6 @@
 !EOP
 
         ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
-        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
-        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
-        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
 
         call ESMF_CompGet(cplcomp%compp, name, vm=vm, contextflag=contextflag, &
           clock=clock, configFile=configFile, config=config, rc=rc)

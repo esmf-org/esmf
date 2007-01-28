@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.146 2007/01/27 00:03:19 oehmke Exp $
+! $Id: ESMF_Comp.F90,v 1.147 2007/01/28 07:56:25 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -248,6 +248,7 @@
 
       public ESMF_CompClassGetInit 
       public ESMF_CompClassValidate
+      public ESMF_CompClassSetInitCreated
 
       public ESMF_CompConstruct, ESMF_CompDestruct
       public ESMF_CompExecute
@@ -269,7 +270,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.146 2007/01/27 00:03:19 oehmke Exp $'
+      '$Id: ESMF_Comp.F90,v 1.147 2007/01/28 07:56:25 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -343,6 +344,51 @@ end interface
     
   end subroutine ESMF_CompClassValidate
 !------------------------------------------------------------------------------
+
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompClassSetInitCreated()"
+!BOPI
+! !IROUTINE: ESMF_CompClassSetInitCreated - Set CompClass init code to "CREATED"
+
+! !INTERFACE:
+  subroutine ESMF_CompClassSetInitCreated(cc, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CompClass), intent(inout)           :: cc
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in CompClass object to "CREATED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[cc] 
+!          Specified {\tt ESMF\_CompClass} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(cc)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_CompClassSetInitCreated
+!------------------------------------------------------------------------------
+
 
 
 ! -------------------------- ESMF-private method ------------------------------
