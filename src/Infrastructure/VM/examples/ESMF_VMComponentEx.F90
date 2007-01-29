@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentEx.F90,v 1.5 2006/11/16 05:21:21 cdeluca Exp $
+! $Id: ESMF_VMComponentEx.F90,v 1.6 2007/01/29 23:30:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -165,8 +165,6 @@ program ESMF_VMComponentEx
   ! local variables
   integer:: rc
   type(ESMF_GridComp):: gcomp
-  type(ESMF_Clock):: clock
-  type(ESMF_State):: dummystate
   ! result code
   integer :: finalrc
   finalrc = ESMF_SUCCESS
@@ -185,15 +183,15 @@ program ESMF_VMComponentEx
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC  
-  call ESMF_GridCompInitialize(gcomp, dummystate, dummystate, clock, rc=rc)
+  call ESMF_GridCompInitialize(gcomp, rc=rc)
 !EOC  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC  
-  call ESMF_GridCompRun(gcomp, dummystate, dummystate, clock, rc=rc)
+  call ESMF_GridCompRun(gcomp, rc=rc)
 !EOC  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC  
-  call ESMF_GridCompFinalize(gcomp, dummystate, dummystate, clock, rc=rc)
+  call ESMF_GridCompFinalize(gcomp, rc=rc)
 !EOC  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
