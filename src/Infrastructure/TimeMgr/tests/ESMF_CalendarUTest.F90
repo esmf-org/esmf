@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.39 2006/11/16 05:21:20 cdeluca Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.40 2007/01/29 21:02:33 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.39 2006/11/16 05:21:20 cdeluca Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.40 2007/01/29 21:02:33 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -113,28 +113,144 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      ! ----------------------------------------------------------------------------
 #ifdef ESMF_EXHAUSTIVE
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Destroy a destroyed Calendar
+      ! Test Calendar Destroy
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Destroy a destroyed Gregorian Type Calendar Test"
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Destroy a uncreated Calendar
+      ! Test Calendar Destroy
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Destroy a uncreated Gregorian Type Calendar Test"
+      call ESMF_CalendarDestroy(gregorianCalendar1, rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
+
       !EX_UTest
       ! print out initialized variables
-      ! Test that print subroutine doesn't return ESMF_SUCESS
-      write(failMsg, *) " Should not return ESMF_SUCCESS"
-      write(name, *) "Un-initialized Calendar Print Test"
+      ! Test that print subroutine returns ESMF_RC_OBJ_DELETED
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Deleted Calendar Print Test"
       call ESMF_CalendarPrint(gregorianCalendar, rc=rc)
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! Validate No Leap Calendar
-      ! Test that validate subroutine doesn't return ESMF_SUCESS
-      write(failMsg, *) " Should not return ESMF_SUCCESS"
-      write(name, *) "Validate un-initialized Calendar Test"
-      call ESMF_CalendarValidate(gregorianCalendar, rc=rc)
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      ! print out initialized variables
+      ! Test that print subroutine returns ESMF_RC_OBJ_NOT_CREATED
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Uncreated Calendar Print Test"
+      call ESMF_CalendarPrint(gregorianCalendar1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Validate deleted Calendar
+      ! Test that validate subroutine returns ESMF_RC_OBJ_DELETED
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Validate desttroyed Calendar Test"
+      call ESMF_CalendarValidate(gregorianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Validate uncreated Calendar
+      ! Test that validate subroutine returns ESMF_RC_OBJ_NOT_CREATED
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Validate uncreated Calendar Test"
+      call ESMF_CalendarValidate(gregorianCalendar1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get calendar type of deleted Calendar
+      write(name, *) "Get deleted Calendar Type Test"
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      call ESMF_CalendarGet(gregorianCalendar, calendarType=cal_type, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get calendar type of uncreated Calendar
+      write(name, *) "Get deleted Calendar Type Test"
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      call ESMF_CalendarGet(gregorianCalendar1, calendarType=cal_type, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing for calendar equality
+      ! calendarsEqual = ESMF_CalendarOperator(==)(calendar1,calendar2)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Calendar Equal of deleted and uncreated Calendars Test"
+      calendarsEqual = (gregorianCalendar == gregorianCalendar1)
+      call ESMF_Test((calendarsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Set calendar type of deleted Calendar
+      write(name, *) "Set Calendar Type of deleted Calendar Test"
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      call ESMF_CalendarSet(gregorianCalendar, calendarType=ESMF_CAL_NOLEAP, &
+                            rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Set calendar type of uncreated Calendar
+      write(name, *) "Set Calendar Type of uncreated Calendar Test"
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      call ESMF_CalendarSet(gregorianCalendar1, calendarType=ESMF_CAL_NOLEAP, &
+                            rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Leap Year method I8 test 4
+      year = 500000000  ! break up initialization,
+      year = year * 10  !  since F90 constants
+      year = year + 100 !    are 32-bit
+      bool = ESMF_CalendarIsLeapYear(gregorianCalendar, year, rc=rc)
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "IsLeapYear of deleted Calendar Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Leap Year method I8 test 4
+      year = 500000000  ! break up initialization,
+      year = year * 10  !  since F90 constants
+      year = year + 100 !    are 32-bit
+      bool = ESMF_CalendarIsLeapYear(gregorianCalendar1, year, rc=rc)
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "IsLeapYear of uncreated Calendar Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
@@ -144,6 +260,16 @@
       gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
                                               ESMF_CAL_GREGORIAN, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing for calendar equality
+      ! calendarsEqual = ESMF_CalendarOperator(==)(calendar1,calendar2)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Calendar Equal of created  and uncreated Calendars Test"
+      calendarsEqual = (gregorianCalendar == gregorianCalendar1)
+      call ESMF_Test((.not.calendarsEqual), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
