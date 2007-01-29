@@ -1,5 +1,5 @@
 Settings for Darwin (Mac OS X), using the commercial NAGware Fortran
-compiler and the GCC C++ compiler.
+compiler and the GNU C++ compiler (g++).
 
 If you have problems with compiling files foo.F90, then change 
 the f95 to f90 in the makefile and use the f90 command in this directory.

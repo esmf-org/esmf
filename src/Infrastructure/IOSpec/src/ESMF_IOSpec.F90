@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.14 2005/05/31 17:39:57 nscollins Exp $
+! $Id: ESMF_IOSpec.F90,v 1.15 2007/01/29 18:55:40 theurich Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -226,13 +226,13 @@ end function
       print *, "need to call flush() here"
 #elif defined(PARCH_IRIX64)
       call flush(unitNumber, status)
-#elif defined(PARCH_rs6000)
+#elif defined(PARCH_aix)
       call flush_(unitNumber, status)
-#elif defined(PARCH_mac_osx)
+#elif defined(PARCH_darwin)
       print *, "need to call flush() here"
-#elif defined(PARCH_solaris)
+#elif defined(PARCH_sunos)
       print *, "need to call flush() here"
-#elif defined(PARCH_alpha)
+#elif defined(PARCH_osf1)
       call flush(unitNumber, status)
 #else
       print *, "unknown architecture in ESMF_IOFlush()"

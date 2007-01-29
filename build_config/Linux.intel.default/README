@@ -1,4 +1,4 @@
-Settings for Linux, using the commercial Intel ifort Fortran and icpc C++
+Settings for Linux, using the commercial Intel Fortran (ifort) and C++ (icpc)
 compilers.
 
 !!! This is also the correct configuration for SGI Altix systems !!!

@@ -1,4 +1,5 @@
-Settings for Linux, using the g95 fortran compiler and the GCC C++ compiler.
+Settings for Linux, using the GNU g95 fortran compiler and the 
+GNU C++ compiler (g++).
  
 Requires the following environment settings:
 

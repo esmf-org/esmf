@@ -1,6 +1,5 @@
 Settings for SGI IRIX64 operating system, using the MIPSPro Fortran
-and C compilers.  (If you are looking for the Altix makefiles,
+and C++ compilers. (If you are looking for the Altix makefiles,
 see the Linux.intel directory.)
 
 Default ESMF_ABI is 64. To compile for 32-bit set ESMF_ABI to 32.
-

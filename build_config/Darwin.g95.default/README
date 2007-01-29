@@ -1,4 +1,5 @@
-Settings for Darwin (Mac OS X), using the g95 compiler and the GNU C++ compiler.
+Settings for Darwin (Mac OS X), using the GNU g95 compiler and the GNU C++
+compiler (g++).
 
 Requires the following environment settings:
 

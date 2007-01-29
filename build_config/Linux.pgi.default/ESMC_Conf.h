@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.12 2006/11/27 19:22:32 theurich Exp $"
+"$Id: ESMC_Conf.h,v 1.13 2007/01/29 18:55:40 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -17,44 +17,8 @@ Licensed under the University of Illinois-NCSA License.
 #define INCLUDED_CONF_H
 
 #define PARCH_linux
-#define ESMF_ARCH_NAME "linux"
 
-#define ESMC_HAVE_LIMITS_H
-#define ESMC_HAVE_PWD_H 
-#define ESMC_HAVE_MALLOC_H 
-#define ESMC_HAVE_STRING_H 
-#define ESMC_HAVE_GETDOMAINNAME
-#define ESMC_HAVE_DRAND48 
-#define ESMC_HAVE_UNAME 
-#define ESMC_HAVE_UNISTD_H 
-#define ESMC_HAVE_SYS_TIME_H 
-#define ESMC_HAVE_STDLIB_H
-
-#define ESMC_HAVE_FORTRAN_UNDERSCORE 
-#define ESMC_HAVE_FORTRAN_UNDERSCORE_UNDERSCORE
 #define FTN(func) func##_
-
-#define ESMC_HAVE_OMP_THREADS 1
-
-#define ESMC_HAVE_MPI 1
-
-#define ESMC_HAVE_READLINK
-#define ESMC_HAVE_MEMMOVE
-#define ESMC_HAVE_TEMPLATED_COMPLEX
-
-#define ESMC_HAVE_DOUBLE_ALIGN_MALLOC
-#define ESMC_HAVE_MEMALIGN
-#define ESMC_HAVE_SYS_RESOURCE_H
-#define ESMC_SIZEOF_VOIDP 4
-#define ESMC_SIZEOF_INT 4
-#define ESMC_SIZEOF_DOUBLE 8
-
-#if defined(fixedsobug)
-#define ESMC_USE_DYNAMIC_LIBRARIES 1
-#define ESMC_HAVE_RTLD_GLOBAL 1
-#endif
-
-#define ESMC_HAVE_SYS_UTSNAME_H
 
 #if 0
 PGI method for marking F90 "not present" optional arguments uses
@@ -105,6 +69,5 @@ extern char pghpf_0c_;
 #define ESMF_F90_PTR_PLUS_RANK 48
 #define ESMC_POINTER_SIZE 8
 #endif
-
 
 #endif

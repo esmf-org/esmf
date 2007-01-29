@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.5 2006/11/16 05:20:51 cdeluca Exp $"
+"$Id: ESMC_Conf.h,v 1.6 2007/01/29 18:55:39 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -16,85 +16,36 @@ Licensed under the University of Illinois-NCSA License.
 #if !defined(INCLUDED_CONF_H)
 #define INCLUDED_CONF_H
 
-#define PARCH_mac_osx
-#define ESMF_ARCH_NAME "mac_osx"
-#define ESMC_USE_READ_REAL_TIME
-
-#define ESMC_HAVE_LIMITS_H
-#define ESMC_HAVE_STROPTS_H 
-#define ESMC_HAVE_SEARCH_H 
-#define ESMC_HAVE_PWD_H 
-#define ESMC_HAVE_STDLIB_H
-#define ESMC_HAVE_STRING_H 
-#define ESMC_HAVE_STRINGS_H 
-#define ESMC_HAVE_MALLOC_H 
-#define _POSIX_SOURCE 
-#define ESMC_HAVE_DRAND48  
-#define ESMC_HAVE_GETDOMAINNAME 
-#if !defined(_XOPEN_SOURCE)
-#define _XOPEN_SOURCE 
-#endif
-#define ESMC_HAVE_UNISTD_H 
-#define ESMC_HAVE_SYS_TIME_H 
-#define ESMC_HAVE_UNAME 
-#if !defined(_XOPEN_SOURCE_EXTENDED)
-#define _XOPEN_SOURCE_EXTENDED 1
-#endif
-#define _ALL_SOURCE   
-#define ESMC_HAVE_BROKEN_REQUEST_FREE 
-#define ESMC_HAVE_STRINGS_H
-#define ESMC_HAVE_DOUBLE_ALIGN_MALLOC
-
-#define ESMC_HAVE_PTHREADS 1
-#define ESMC_HAVE_MPI 1
-
-#define ESMC_SUBSTITUTE_CTRL_CHARS 1
+#define PARCH_darwin
 
 #define FTN(func) func
 
-#define ESMC_HAVE_XLF90
-
-#define ESMC_PREFER_BZERO
-
-#define ESMC_HAVE_READLINK
-#define ESMC_HAVE_MEMMOVE
-
-#define ESMC_HAVE_PRAGMA_DISJOINT
-#define ESMC_RESTRICT __restrict
-
-#define ESMC_USE_DBX_DEBUGGER
-#define ESMC_HAVE_SYS_RESOURCE_H
-
-#define ESMC_SIZEOF_INT 4
-#define ESMC_SIZEOF_DOUBLE 8
-
-#define ESMC_WORDS_BIGENDIAN 1
-#define ESMC_NEED_SOCKET_PROTO
-#define ESMC_HAVE_ACCEPT_SIZE_T
-
-#define ESMC_HAVE_SYS_UTSNAME_H
-
-#define ESMC_HAVE_SLEEP_RETURNS_EARLY
-#define ESMC_USE_KBYTES_FOR_SIZE
-
-#define ESMC_USE_A_FOR_DEBUGGER
-
 #define ESMC_PRESENT(arg) ( (arg) != 0 )
-
 
 #if S32
 #define ESMF_IS_32BIT_MACHINE 1
-#define ESMC_SIZEOF_VOIDP 4
 #define ESMF_F90_PTR_BASE_SIZE 32
 #define ESMF_F90_PTR_PLUS_RANK 12
 #define ESMC_POINTER_SIZE 4
 #endif
 #if S64
 #define ESMF_IS_64BIT_MACHINE 1
-#define ESMC_SIZEOF_VOIDP 8
 #define ESMF_F90_PTR_BASE_SIZE 56
 #define ESMF_F90_PTR_PLUS_RANK 24
 #define ESMC_POINTER_SIZE 8
 #endif
+
+#if 0
+Special defines necessary on this platform:
+#endif
+
+#define _POSIX_SOURCE 
+#if !defined(_XOPEN_SOURCE)
+#define _XOPEN_SOURCE 
+#endif
+#if !defined(_XOPEN_SOURCE_EXTENDED)
+#define _XOPEN_SOURCE_EXTENDED 1
+#endif
+#define _ALL_SOURCE   
 
 #endif

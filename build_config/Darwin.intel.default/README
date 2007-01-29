@@ -1,5 +1,5 @@
-Settings for Darwin (Mac OS X) machines with Intel chips,
-using the Intel fortran compiler and either Intel or gcc C compiler.
+Settings for Darwin (Mac OS X) machines with Intel processors,
+using the Intel fortran compiler and either Intel or GNU C++ compiler.
 
 Requires the following environment settings:
 

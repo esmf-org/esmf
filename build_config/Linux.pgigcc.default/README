@@ -1,5 +1,5 @@
 Settings for Linux, using the commercial Portland Group PGI Fortran compiler
-and the GCC C++ compiler.
+and the GNU C++ compiler (g++).
 
 Requires the following environment settings:
 

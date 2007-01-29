@@ -1,7 +1,6 @@
 Settings for a Blue Gene/L system, which runs Linux, using the IBM xlf Fortran
-and C compilers.
+and C++ compilers.
 
 Requires the following environment settings:
 
 ESMF_COMPILER xlf
-

@@ -1,7 +1,6 @@
 Settings for Linux, using the commercial Pathscale Fortran compiler and the
-GCC C++ compiler.
+GNU C++ compiler (g++).
 
 Requires the following environment settings:
 
 ESMF_COMPILER pathscale
-
