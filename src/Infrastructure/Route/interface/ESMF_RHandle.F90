@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.33 2007/01/19 23:19:38 oehmke Exp $
+! $Id: ESMF_RHandle.F90,v 1.34 2007/01/29 23:45:17 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.33 2007/01/19 23:19:38 oehmke Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.34 2007/01/29 23:45:17 oehmke Exp $'
 
 !==============================================================================
 
@@ -826,6 +826,9 @@ end function ESMF_RouteHandleGetInit
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
+
+        ! check input variable
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
 
         ! was handle already destroyed?
         if (rhandle%this .eq. ESMF_NULL_POINTER) then
