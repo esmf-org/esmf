@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseUTest.F90,v 1.22 2007/01/29 16:43:26 oehmke Exp $
+! $Id: ESMF_BaseUTest.F90,v 1.23 2007/01/29 17:11:13 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BaseUTest.F90,v 1.22 2007/01/29 16:43:26 oehmke Exp $'
+      '$Id: ESMF_BaseUTest.F90,v 1.23 2007/01/29 17:11:13 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -92,7 +92,7 @@
 #ifdef ESMF_EXHAUSTIVE
 
                       
-      !NEX_UTest
+      !EX_UTest
       ! destroy base object
       call ESMF_BaseDestroy(base, rc)
       write(name, *) "Destroy a destroyed Base"
@@ -101,7 +101,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
                       
-      !NEX_UTest
+      !EX_UTest
       ! destroy base object
       call ESMF_BaseDestroy(base1, rc)
       write(name, *) "Destroy a non-created Base"
