@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseUTest.F90,v 1.21 2007/01/23 23:54:53 svasquez Exp $
+! $Id: ESMF_BaseUTest.F90,v 1.22 2007/01/29 16:43:26 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BaseUTest.F90,v 1.21 2007/01/23 23:54:53 svasquez Exp $'
+      '$Id: ESMF_BaseUTest.F90,v 1.22 2007/01/29 16:43:26 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -109,24 +109,6 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      !EX_UTest
-      ! test setting of ESMF_Base members values of uncreated Base
-      name_set = "fred"
-      call ESMF_SetName(base1, name_set, "Base", rc)
-      write(name, *) "ESMF_SetName of non-created Base"
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-
-      !EX_UTest
-      ! test setting of ESMF_Base members values of deleted Base
-      name_set = "fred"
-      call ESMF_SetName(base, name_set, "Base", rc)
-      write(name, *) "ESMF_SetName of deleted Base"
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
       ! test print method of deleted base via option string
@@ -136,7 +118,6 @@
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
-	print *, "rc = ", rc
 
 
       !EX_UTest
@@ -148,8 +129,6 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-	print *, "rc = ", rc
-
 
       !EX_UTest
       ! test setting of ESMF Base attribute values of deleted Base
@@ -159,7 +138,34 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-	print *, "rc = ", rc
+
+
+      !EX_UTest
+      ! test setting of ESMF_Base members values of uncreated Base
+      ! Note That this will recreate the base
+      name_set = "fred"
+      call ESMF_SetName(base1, name_set, "Base", rc)
+      write(name, *) "ESMF_SetName of non-created Base"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      !EX_UTest
+      ! test setting of ESMF_Base members values of deleted Base
+      ! Note That this will recreate the base
+      name_set = "fred"
+      call ESMF_SetName(base, name_set, "Base", rc)
+      write(name, *) "ESMF_SetName of deleted Base"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! destroy base objects created by ESMF_SetName
+      call ESMF_BaseDestroy(base, rc)
+      call ESMF_BaseDestroy(base1, rc)
+
 
       
       !EX_UTest
