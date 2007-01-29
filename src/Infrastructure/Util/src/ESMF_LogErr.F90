@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.23 2007/01/09 23:06:43 oehmke Exp $
+! $Id: ESMF_LogErr.F90,v 1.24 2007/01/29 19:08:48 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -24,8 +24,8 @@
 !! log macros, it can't be included here.  so just include each file 
 !! individually.  If we add files to ESMF.h they also need to be added here.
 #include "ESMF_Macros.inc"
-#include "ESMF_InitMacros.inc"
 #include "ESMF_Conf.inc"
+#include "ESMF_InitMacros.inc"
 #include "ESMF_Version.inc"
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrReturnCodes.inc"
