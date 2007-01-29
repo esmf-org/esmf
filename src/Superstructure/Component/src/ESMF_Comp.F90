@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.147 2007/01/28 07:56:25 oehmke Exp $
+! $Id: ESMF_Comp.F90,v 1.148 2007/01/29 23:29:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 #else
          type(ESMF_CompClass), pointer :: compp
 #endif
-
+         ESMF_INIT_DECLARE
       end type
 
 !------------------------------------------------------------------------------
@@ -159,8 +159,8 @@
          type(ESMF_Pointer) :: vm_info            ! holding pointer to info
          type(ESMF_Pointer) :: vm_cargo           ! holding pointer to cargo
 
-! gjt - added these here to make things safe for non-blocking mode...
-         type(ESMF_State)   :: is, es
+         type(ESMF_State)   :: is, es   ! hold state args refs for thread-safety
+         type(ESMF_Clock)   :: argclock ! hold clock arg ref for thread-safety
 #ifdef ESMF_IS_32BIT_MACHINE
 
          integer            :: npetlist           ! number of PETs in petlist
@@ -176,7 +176,6 @@
          integer :: finalphasecount               ! max finals, for error check
          logical            :: vm_released        ! flag whether vm is running
 
-         logical            :: isdel, esdel
          integer            :: status
 
 ! gjt - I added this new member at the end as to not disturb the above order
@@ -270,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.147 2007/01/28 07:56:25 oehmke Exp $'
+      '$Id: ESMF_Comp.F90,v 1.148 2007/01/29 23:29:12 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -604,8 +603,6 @@ end function
         compp%finalphasecount = 0 
         compp%vm_released = .FALSE.
 
-        compp%isdel = .FALSE.
-        compp%esdel = .FALSE.
         compp%status = 0
 
         compp%contextflag = ESMF_CHILD_IN_NEW_VM
@@ -947,6 +944,10 @@ end function
         integer                 :: callrc       ! return code from user code
         type(ESMF_BlockingFlag) :: blocking     ! local blocking flag
         type(ESMF_VM)           :: vm           ! VM for current context
+        
+        ! dummys that will provide initializer values if args are not present
+        type(ESMF_State)        :: dummyis, dummyes
+        type(ESMF_Clock)        :: dummyclock
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -986,47 +987,33 @@ end function
         ! supply default objects if unspecified by the caller
         if (present(importState)) then
           compp%is = importState
-          compp%isdel = .FALSE.
         else
-          ! create an empty state
-          compp%is = ESMF_StateCreate("dummy import", ESMF_STATE_IMPORT, &
-            rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-          compp%isdel = .TRUE.
+          ! use dummy variable
+          compp%is = dummyis
         endif
 
         if (present(exportState)) then
           compp%es = exportState
-          compp%esdel = .FALSE.
         else
-          ! create an empty state
-          compp%es = ESMF_StateCreate("dummy export", ESMF_STATE_EXPORT, &
-            rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-          compp%esdel = .TRUE.
+          ! use dummy variable
+          compp%es = dummyes
         endif
 
         ! and something for clocks?
         if (present(clock)) then
-            ! all is well
+          compp%argclock = clock
         else
-            call ESMF_LogWrite("Component Initialize called without a clock", &
-                               ESMF_LOG_WARNING)
-            !TODO: don't we need to bail out in this case to avoid passing a 
-            ! non-present object into the C interface?
+          ! use dummy variable
+          compp%argclock = dummyclock
         endif
 
         ! Wrap comp so it's passed to C++ correctly.
         compp%compw%compp => compp
+        ESMF_INIT_SET_CREATED(compp%compw)
 
         ! Set up the arguments
         call c_ESMC_FTableSetStateArgs(compp%this, methodtype, phase, &
-                                       compp%compw, compp%is, compp%es, clock, &
-                                       status)
+          compp%compw, compp%is, compp%es, compp%argclock, status)
         if (ESMF_LogMsgFoundError(status, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
@@ -1055,19 +1042,6 @@ end function
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
           compp%vm_released = .false.       ! indicate child VM has been caught
-          ! now it is safe to destroy temp. dummy states if they were created
-          if (compp%isdel) then
-            call ESMF_StateDestroy(compp%is, rc=status)
-            if (ESMF_LogMsgFoundError(status, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rc)) return
-          endif
-          if (compp%esdel) then
-            call ESMF_StateDestroy(compp%es, rc=status)
-            if (ESMF_LogMsgFoundError(status, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rc)) return
-          endif
           ! for ESMF_BLOCKING _all_ parent PETs will be synced on exit
           if (blocking == ESMF_BLOCKING) then
             ! the current context _is_ the parent context...
@@ -2181,19 +2155,6 @@ end function
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
       compp%vm_released = .false.       ! indicate child VM has been caught
-      ! now it is safe to destroy temp. dummy states if they were created
-      if (compp%isdel) then
-        call ESMF_StateDestroy(compp%is, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rc)) return
-      endif
-      if (compp%esdel) then
-        call ESMF_StateDestroy(compp%es, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rc)) return
-      endif
       ! set the default mode to ESMF_VASBLOCKING
       if (present(blockingFlag)) then
         blocking = blockingFlag
