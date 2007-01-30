@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.34 2007/01/29 23:45:17 oehmke Exp $
+! $Id: ESMF_RHandle.F90,v 1.35 2007/01/30 17:50:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -137,6 +137,7 @@
       public ESMF_TransformValuesPrint
  
       public ESMF_RouteHandleGetInit
+      public ESMF_RouteHandleSetInitCreated
 
       public ESMF_RouteHandleCreate               ! interface only, deep class
       public ESMF_RouteHandleDestroy              ! interface only, deep class
@@ -154,7 +155,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.34 2007/01/29 23:45:17 oehmke Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.35 2007/01/30 17:50:59 theurich Exp $'
 
 !==============================================================================
 
@@ -734,6 +735,49 @@ end function ESMF_TransformValuesGetInit
   endif 
 end function ESMF_RouteHandleGetInit
 
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleSetInitCreated()"
+!BOPI
+! !IROUTINE: ESMF_RouteHandleSetInitCreated - Set RouteHandle init code to "CREATED"
+
+! !INTERFACE:
+  subroutine ESMF_RouteHandleSetInitCreated(rh, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_RouteHandle), intent(inout)           :: rh
+    integer,                intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in RouteHandle object to "CREATED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[rh] 
+!          Specified {\tt ESMF\_RouteHandle} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(rh)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_RouteHandleSetInitCreated
+!------------------------------------------------------------------------------
+
 !==============================================================================
 !
 ! This section includes the RouteHandle methods.
@@ -877,6 +921,9 @@ end function ESMF_RouteHandleGetInit
 !     \end{description}
 !
 !EOPI
+
+        ! check input variable
+        ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
         call ESMF_RouteHandleDestroy(routehandle, rc)
 
