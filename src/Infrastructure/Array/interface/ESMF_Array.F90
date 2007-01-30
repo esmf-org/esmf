@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.41 2007/01/29 23:24:46 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.42 2007/01/30 17:51:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -149,7 +149,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.41 2007/01/29 23:24:46 theurich Exp $'
+      '$Id: ESMF_Array.F90,v 1.42 2007/01/30 17:51:57 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2227,6 +2227,11 @@ contains
     
     ! Garbage collection
 
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2280,11 +2285,7 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
-
-!    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
-! gjt: took this out because we do allow uninitialized routehandles to be
-!      passed in (first time)
-
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySparseMatMul(srcArray, dstArray, routehandle, status)
