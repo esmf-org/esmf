@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.40 2007/01/29 21:02:33 svasquez Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.41 2007/01/30 16:56:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.40 2007/01/29 21:02:33 svasquez Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.41 2007/01/30 16:56:43 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -198,14 +198,15 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !EX_UTest
+      !EX_____UTest
+      ! Commented out until bug 1648057 is closed
       ! Testing for calendar equality
       ! calendarsEqual = ESMF_CalendarOperator(==)(calendar1,calendar2)
-      write(failMsg, *) "Returned not equal"
-      write(name, *) "Calendar Equal of deleted and uncreated Calendars Test"
-      calendarsEqual = (gregorianCalendar == gregorianCalendar1)
-      call ESMF_Test((calendarsEqual), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      !write(failMsg, *) "Returned not equal"
+      !write(name, *) "Calendar Equal of deleted and uncreated Calendars Test"
+      !calendarsEqual = (gregorianCalendar == gregorianCalendar1)
+      !call ESMF_Test((calendarsEqual), &
+                      !name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -263,14 +264,15 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !EX_UTest
+      !EX_____UTest
+      ! Commented out until bug 1648057 is closed
       ! Testing for calendar equality
       ! calendarsEqual = ESMF_CalendarOperator(==)(calendar1,calendar2)
-      write(failMsg, *) "Returned equal"
-      write(name, *) "Calendar Equal of created  and uncreated Calendars Test"
-      calendarsEqual = (gregorianCalendar == gregorianCalendar1)
-      call ESMF_Test((.not.calendarsEqual), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      !write(failMsg, *) "Returned equal"
+      !write(name, *) "Calendar Equal of created  and uncreated Calendars Test"
+      !calendarsEqual = (gregorianCalendar == gregorianCalendar1)
+      !call ESMF_Test((.not.calendarsEqual), &
+                      !name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 
