@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.232 2007/01/26 00:43:07 oehmke Exp $
+! $Id: ESMF_Field.F90,v 1.233 2007/01/30 06:15:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -113,6 +113,13 @@
 
         integer :: rwaccess                      ! reserved for future use
         integer :: accesscount                   ! reserved for future use
+        
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
+        logical :: localFlag = .true.            ! .true. if local data present
+#else        
+        logical :: localFlag                     ! .true. if local data present
+#endif
+
         ESMF_INIT_DECLARE
 
       end type
@@ -239,7 +246,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.232 2007/01/26 00:43:07 oehmke Exp $'
+      '$Id: ESMF_Field.F90,v 1.233 2007/01/30 06:15:50 theurich Exp $'
 
 !==============================================================================
 !
@@ -439,6 +446,7 @@
 !     \end{description}
 !
 !EOPI
+       s%localFlag = .true.
 
        ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_LocalFieldInit
@@ -3839,6 +3847,8 @@
       ! make sure there is data before asking it questions.
       if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
 
+        if (ftypep%localfield%localFlag) then
+        
           ! get array counts and other info
           call ESMF_InternArrayGet(ftypep%localfield%localdata, counts=arraycounts, &
                              haloWidth=halo, rank=arrayrank, rc=status)
@@ -3853,6 +3863,7 @@
           do i = 1, arrayrank
               arraycellcount = arraycellcount * arraycounts(i)
           enddo
+        endif
       endif
 
       ! and now see if it is at all consistent.
@@ -5177,6 +5188,10 @@
         integer :: rwaccess                      ! reserved for future use
         integer :: accesscount                   ! reserved for future use
 #endif
+    
+      
+      ESMF_INIT_SET_DEFINED(fp%localfield)  ! indicate that this localfield
+      fp%localfield%localFlag = .false.     ! is a proxy object
 
       call ESMF_BaseCreate(fp%base, "Field", "dummy", 0, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
