@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArray.F90,v 1.6 2007/01/22 21:42:02 oehmke Exp $
+! $Id: ESMF_InternArray.F90,v 1.7 2007/01/30 05:02:48 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -129,6 +129,7 @@ module ESMF_InternArrayMod
 
 ! - ESMF-private methods:
   public ESMF_InternArrayGetInit
+  public ESMF_InternArraySetInitCreated
 
   public ESMF_HaloDirectionInit
   public ESMF_HaloDirectionGetInit
@@ -141,7 +142,7 @@ module ESMF_InternArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArray.F90,v 1.6 2007/01/22 21:42:02 oehmke Exp $'
+    '$Id: ESMF_InternArray.F90,v 1.7 2007/01/30 05:02:48 oehmke Exp $'
 !
 !==============================================================================
 !
@@ -2599,6 +2600,51 @@ end subroutine
 
 
 !------------------------------------------------------------------------------
+
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InternArraySetInitCreated()"
+!BOPI
+! !IROUTINE: ESMF_InternArraySetInitCreated - Set InternArray init code to "CREATED"
+
+! !INTERFACE:
+  subroutine ESMF_InternArraySetInitCreated(array, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_InternArray), intent(inout)           :: array
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in InternArray object to "CREATED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!          Specified {\tt ESMF\_InternArray} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(array)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_InternArraySetInitCreated
+!------------------------------------------------------------------------------
+
 
 
 ! -------------------------- ESMF-private method ------------------------------
