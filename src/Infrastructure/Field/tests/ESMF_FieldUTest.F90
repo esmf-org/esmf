@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.94 2007/01/29 17:39:13 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.95 2007/01/30 05:04:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.94 2007/01/29 17:39:13 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.95 2007/01/30 05:04:00 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@
       integer, dimension(3) :: cellCounts
       type(ESMF_DELayout) :: delayout
       type(ESMF_VM) :: vm
-      type(ESMF_Grid) :: grid, grid2, grid3, grid4, grid5, nogrid
+      type(ESMF_Grid) :: grid, grid2, grid3, grid4, grid5
       type(ESMF_ArraySpec) :: arrayspec
       real, dimension(:,:), pointer :: f90ptr2, f90ptr4, f90ptr5
       real(ESMF_KIND_R8) :: minCoord(2), deltas(10)
@@ -64,7 +64,7 @@
       character (len = 20) :: gname, gname3
       type(ESMF_IOSpec) :: ios
       !type(ESMF_Mask) :: mask
-      type(ESMF_Field) :: f1, f2, f3, f4, f5, f6, f7, nofield
+      type(ESMF_Field) :: f1, f2, f3, f4, f5, f6, f7
       integer(ESMF_KIND_I4) :: intattr, intattr2
       integer(ESMF_KIND_I4) :: intattrlist(6)
       real(ESMF_KIND_R8) :: rattr, rattrlist(2)
@@ -117,12 +117,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
-
-      ! set up a known deleted field - will be used below.  same for grid.
-      nofield = ESMF_FieldCreateNoData(rc=rc)
-      call ESMF_FieldDestroy(nofield, rc=rc)
-      nogrid = ESMF_GridCreate(rc=rc)
-      call ESMF_GridDestroy(nogrid, rc=rc)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -220,15 +214,12 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Verifing that printing an uninitialized Field is handled properly.
-#ifdef ESMF_NO_INITIALIZERS
-      f6 = nofield
-#endif
       call ESMF_FieldPrint(f6, rc=rc)
-      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Printing an uninitialized Field Test"
 
 #ifdef ESMF_INITMACROS_ON
-      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 #else
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
@@ -495,9 +486,6 @@
       !EX_UTest
       ! Verifing that a Field cannot be created with an uninitialized Grid 
       ! and Array.  f6 is *not* created here and should be invalid.
-#ifdef ESMF_NO_INITIALIZERS
-      grid2 = nogrid
-#endif
       grid2 = ESMF_GridCreate(rc=rc)
       call ESMF_GridDestroy(grid2, rc=rc)
       f6 = ESMF_FieldCreate(grid2, arrayspec, allocflag=ESMF_ALLOC, &
