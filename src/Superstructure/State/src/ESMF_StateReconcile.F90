@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.33 2007/01/04 23:19:17 oehmke Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.34 2007/01/30 06:04:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.33 2007/01/04 23:19:17 oehmke Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.34 2007/01/30 06:04:18 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -769,6 +769,8 @@
 !!DEBUG "need to create proxy internarray, remote id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     call c_ESMC_IArrayDeserializeNoData(iarray, bptr, offset, localrc)
+                    ! Set init code
+                    call ESMF_InternArraySetInitCreated(iarray, rc=localrc)
 !!DEBUG "created array, ready to set id and add to local state"
                     call c_ESMC_SetVMId(iarray, si%vmidrecv(k), localrc)
                     call ESMF_StateAddInternArray(state, iarray, rc=localrc)
