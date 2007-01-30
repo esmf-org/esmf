@@ -1,4 +1,4 @@
-! $Id: ESMF_RedistUTest.F90,v 1.7 2006/11/16 05:21:18 cdeluca Exp $
+! $Id: ESMF_RedistUTest.F90,v 1.8 2007/01/30 16:23:14 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -13,6 +13,7 @@
       program ESMF_RedistUTest
 
 #include "ESMF_Macros.inc"
+#include <ESMF.h>
 
 !------------------------------------------------------------------------------
 !
@@ -40,7 +41,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RedistUTest.F90,v 1.7 2006/11/16 05:21:18 cdeluca Exp $'
+      '$Id: ESMF_RedistUTest.F90,v 1.8 2007/01/30 16:23:14 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -58,7 +59,7 @@
       character(ESMF_MAXSTR) :: print_options = "all"
 
       ! local args needed to create/construct objects
-      type(ESMF_RouteHandle) :: redist_rh
+      type(ESMF_RouteHandle) :: redist_rh, redist_rh1
       type(ESMF_Field) :: field1, field2
       type(ESMF_VM) :: vm
       real(ESMF_KIND_R8) :: val1, val2
@@ -169,6 +170,23 @@
       write(name, *) "Releasing route"
       write(failMsg, *) "Releasing route"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! release previously released routehandle
+      call ESMF_FieldRedistRelease(redist_rh, rc=rc)
+      write(name, *) "Releasing previously released route test"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! release uncreated route handle
+      call ESMF_FieldRedistRelease(redist_rh1, rc=rc)
+      write(name, *) "Releasing uncreated Routehandle"
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
