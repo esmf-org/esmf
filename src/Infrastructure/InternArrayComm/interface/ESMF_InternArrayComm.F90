@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.12 2007/01/23 19:25:02 svasquez Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.13 2007/01/30 05:03:46 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.12 2007/01/23 19:25:02 svasquez Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.13 2007/01/30 05:03:46 oehmke Exp $'
 !
 !==============================================================================
 !
@@ -332,6 +332,9 @@ module ESMF_InternArrayCommMod
     call c_ESMC_IArrayGather(array, delayout, decompids, size_decomp, &
                             localAxisLengths, globalCellDim, localMaxDimCount, &
                             rootDE, gatheredArray, status)
+    ! Init gathered Array as created
+    call ESMF_InternArraySetInitCreated(gatheredArray)
+
 #if 0
         call c_ESMC_IArrayAllGather(array, delayout, decompids, datarank, &
                                    localAxisLengths, globalCellDim, &
@@ -3018,6 +3021,8 @@ module ESMF_InternArrayCommMod
         size_decomp = size(decompids)
         call c_ESMC_IArrayScatter(array, delayout, decompids, size_decomp, &
                                  rootDE, scatteredArray, localrc)
+        ! Init gathered Array as created
+        call ESMF_InternArraySetInitCreated(scatteredArray)
 
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
