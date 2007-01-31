@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.100 2007/01/30 19:51:13 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.101 2007/01/31 20:43:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.100 2007/01/30 19:51:13 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.101 2007/01/31 20:43:55 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -718,15 +718,16 @@
 
       ! ----------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX____UTest
+      ! This test is commented out bug 1649164 has been opened.
       ! Initialize clock with uninitialized Start Time.
-       write(name, *) "Clock Initialization Test with uninitialized startTime"
-       write(failMsg, *) " Returned ESMF_SUCCESS"
-       clock = ESMF_ClockCreate("Clock 1", timeStep, startTime2, &
-                                          stopTime, rc=rc)
-       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                       name, failMsg, result, ESMF_SRCLINE)
-       call ESMF_ClockDestroy(clock, rc)
+      ! write(name, *) "Clock Initialization Test with uninitialized startTime"
+       !write(failMsg, *) " Returned ESMF_SUCCESS"
+       !clock = ESMF_ClockCreate("Clock 1", timeStep, startTime2, &
+                                          !stopTime, rc=rc)
+       !call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                       !name, failMsg, result, ESMF_SRCLINE)
+       !call ESMF_ClockDestroy(clock, rc)
 
       ! ----------------------------------------------------------------------------
 
