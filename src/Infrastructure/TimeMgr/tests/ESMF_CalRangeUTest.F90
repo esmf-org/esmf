@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.27 2006/12/12 22:33:17 samsoncheung Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.28 2007/01/31 06:42:50 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.27 2006/12/12 22:33:17 samsoncheung Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.28 2007/01/31 06:42:50 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       integer, parameter :: CONVERT_TO_TIME = 1, CONVERT_TO_DATE = 2, &
@@ -93,7 +93,6 @@
       ! initialize calendar to be Gregorian type
       gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
                                               ESMF_CAL_GREGORIAN, rc)
-
       ! Julian Calendar
 
       ! initialize calendar to be Julian type
@@ -135,6 +134,7 @@
       call ESMF_TimeSet(Time, yy_i8=YYl, mm=MM, dd=DD, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeGet(Time, yy_i8=rYYl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
+    
       print *, "Low range test"
       print *, "  Start Time Gregorian = ", rYYl, "/", rMM, "/", rDD
       print *, "  Start Julian Days = ", rDl
@@ -475,6 +475,10 @@
 
         ! set date via given ESMF calendar
         call ESMF_TimeSet(time, yy_i8=YYl, mm=MM, dd=DD, calendar=cal, rc=rc)
+        if (rc .ne. ESMF_SUCCESS) then
+           ESMF_CheckTime = .true.
+           return
+        endif
 
         ! see what we get back
         call ESMF_TimeGet(time, yy_i8=rYYl, mm=rMM, dd=rDD, d_i8=rDl)
