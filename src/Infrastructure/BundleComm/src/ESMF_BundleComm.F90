@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.61 2006/12/08 23:36:06 theurich Exp $
+! $Id: ESMF_BundleComm.F90,v 1.62 2007/02/01 05:04:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.61 2006/12/08 23:36:06 theurich Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.62 2007/02/01 05:04:21 theurich Exp $'
 
 !==============================================================================
 !
@@ -636,6 +636,7 @@
       if (ESMF_BundleIsCongruent(bundle, rc=status) .and. bundlepack) then
         call ESMF_IArrayHaloStore( &
                                   btypep%flist(1)%ftypep%localfield%localdata, &
+                                  btypep%flist(1)%ftypep%localfield%localFlag, &
                                   1, ESMF_ALLTO1HANDLEMAP, 1, &
                                   btypep%grid, &
                                   btypep%flist(1)%ftypep%mapping, routehandle, &
@@ -650,6 +651,7 @@
  
           call ESMF_IArrayHaloStore( &
                                   btypep%flist(i)%ftypep%localfield%localdata, &
+                                  btypep%flist(i)%ftypep%localfield%localFlag, &
                                   i, ESMF_1TO1HANDLEMAP, btypep%field_count, &
                                   btypep%grid, &
                                   btypep%flist(i)%ftypep%mapping, &
@@ -937,9 +939,11 @@
 
          ! routehandle now internally stores multiple routes
          call ESMF_IArrayRedist(stypep%flist(i)%ftypep%localfield%localdata, &
-                               dtypep%flist(i)%ftypep%localfield%localdata, &
-                               routehandle, i, blocking, &
-                               routeOptions, status)
+                                stypep%flist(i)%ftypep%localfield%localFlag, &
+                                dtypep%flist(i)%ftypep%localfield%localdata, &
+                                dtypep%flist(i)%ftypep%localfield%localFlag, &
+                                routehandle, i, blocking, &
+                                routeOptions, status)
          if (ESMF_LogMsgFoundError(status, &
                                    ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rc)) return
@@ -970,9 +974,10 @@
                 dstArrayList(i) = dtypep%flist(i)%ftypep%localfield%localdata
             enddo
       
-            call ESMF_IArrayRedist(srcArrayList, dstArrayList, &
-                                  routehandle, 1, blocking, &
-                                  routeOptions, status)
+            call ESMF_IArrayRedist(srcArrayList, &
+              dtypep%flist(1)%ftypep%localfield%localFlag, &
+              dstArrayList, stypep%flist(1)%ftypep%localfield%localFlag, &
+              routehandle, 1, blocking, routeOptions, status)
             if (ESMF_LogMsgFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) then
@@ -988,7 +993,9 @@
   
               call ESMF_IArrayRedist( &
                                  stypep%flist(i)%ftypep%localfield%localdata, &
+                                 stypep%flist(i)%ftypep%localfield%localFlag, &
                                  dtypep%flist(i)%ftypep%localfield%localdata, &
+                                 dtypep%flist(i)%ftypep%localfield%localFlag, &
                                  routehandle, 1, blocking, &
                                  routeOptions, status)
               if (ESMF_LogMsgFoundError(status, &
@@ -1147,9 +1154,11 @@
       if ((condition .eq. ESMF_BUNDLECOMM_CONGRUENT) .and. bundlepack) then 
          call ESMF_IArrayRedistStore( &
                                  stypep%flist(1)%ftypep%localfield%localdata, &
+                                 stypep%flist(1)%ftypep%localfield%localFlag, &
                                  stypep%grid, &
                                  stypep%flist(1)%ftypep%mapping, &
                                  dtypep%flist(1)%ftypep%localfield%localdata, &
+                                 dtypep%flist(1)%ftypep%localfield%localFlag, &
                                  dtypep%grid, &
                                  dtypep%flist(1)%ftypep%mapping, &
                                  1, ESMF_ALLTO1HANDLEMAP, 1, &
@@ -1165,9 +1174,11 @@
  
            call ESMF_IArrayRedistStore( &
                                stypep%flist(i)%ftypep%localfield%localdata, &
+                               stypep%flist(i)%ftypep%localfield%localFlag, &
                                stypep%grid, &
                                stypep%flist(i)%ftypep%mapping, &
                                dtypep%flist(i)%ftypep%localfield%localdata, &
+                               dtypep%flist(i)%ftypep%localfield%localFlag, &
                                dtypep%grid, &
                                dtypep%flist(i)%ftypep%mapping, &
                                i, ESMF_1TO1HANDLEMAP, stypep%field_count, &

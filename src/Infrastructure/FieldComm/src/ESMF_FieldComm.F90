@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.87 2006/12/08 23:36:06 theurich Exp $
+! $Id: ESMF_FieldComm.F90,v 1.88 2007/02/01 05:03:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.87 2006/12/08 23:36:06 theurich Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.88 2007/02/01 05:03:26 theurich Exp $'
 
 !==============================================================================
 !
@@ -612,12 +612,12 @@
       endif
 
 
-      call ESMF_IArrayHaloStore(ftypep%localfield%localdata, ftypep%grid, &
-                               ftypep%mapping, routehandle, &
-                               halodirection, routeOptions, rc=status)
+      call ESMF_IArrayHaloStore(ftypep%localfield%localdata, &
+        ftypep%localfield%localFlag, ftypep%grid, &
+        ftypep%mapping, routehandle, halodirection, routeOptions, rc=status)
       if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -850,12 +850,12 @@
                                 ESMF_CONTEXT, rc)) return
 
       call ESMF_IArrayRedist(srcFtypep%localfield%localdata, &
-                            dstFtypep%localfield%localdata, &
-                            routehandle, 1, blockingflag, &
-                            routeOptions, localrc)
+        srcFtypep%localfield%localFlag, dstFtypep%localfield%localdata, &
+        dstFtypep%localfield%localFlag, routehandle, 1, blockingflag, &
+        routeOptions, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
 
       call ESMF_FieldRedistRelease(routehandle, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -968,12 +968,12 @@
 
 
       call ESMF_IArrayRedist(srcFtypep%localfield%localdata, &
-                            dstFtypep%localfield%localdata, &
-                            routehandle, 1, blockingflag, &
-                            routeOptions, localrc)
+        srcFtypep%localfield%localFlag, dstFtypep%localfield%localdata, &
+        dstFtypep%localfield%localFlag, routehandle, 1, blockingflag, &
+        routeOptions, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1097,6 +1097,12 @@
       ! have identical halo widths.  Add a check here for that, which 
       ! can be removed if we augment the code to support halo mismatches.
       ! TODO: fix redist to not impose this restriction
+#ifdef NOSKIP
+      ! TODO: currently this assumes that srcField and dstField have data
+      ! that is local (i.e. have InternArrays associated with this DE). This
+      ! is _not_ the case when coupling Components that run on exlusive sets
+      ! of PETs. Hence the halo test must be taken out until halos are kept 
+      ! outside the InternArray (where they never should have been).
       call ESMF_FieldGet(srcField, haloWidth=srcHalo, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1112,22 +1118,21 @@
                                    ESMF_CONTEXT, rc)
           return
       endif
+#endif
 
       dstFtypep => dstField%ftypep
       srcFtypep => srcField%ftypep
 
 
+
       call ESMF_IArrayRedistStore(srcFtypep%localfield%localdata, &
-                                 srcFtypep%grid, &
-                                 srcFtypep%mapping, &
-                                 dstFtypep%localfield%localdata, &
-                                 dstFtypep%grid, &
-                                 dstFtypep%mapping, &
-                                 parentVM, &
-                                 routeOptions, routehandle, localrc)
+        srcFtypep%localfield%localFlag, srcFtypep%grid, srcFtypep%mapping, &
+        dstFtypep%localfield%localdata, dstFtypep%localfield%localFlag, &
+        dstFtypep%grid, dstFtypep%mapping, parentVM, &
+        routeOptions, routehandle, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1235,17 +1240,15 @@
       ! dstField = ESMF_FieldCreate ...  TODO: pass in any other needed arguments
       ! dstFtypep => dstField%ftypep
 
+
       call ESMF_IArrayRedistStore(srcFtypep%localfield%localdata, &
-                                 srcFtypep%grid, &
-                                 srcFtypep%mapping, &
-                                 dstFtypep%localfield%localdata, &
-                                 dstFtypep%grid, &
-                                 dstFtypep%mapping, &
-                                 parentVM, routeOptions, &
-                                 routehandle, status)
+        srcFtypep%localfield%localFlag, srcFtypep%grid, srcFtypep%mapping, &
+        dstFtypep%localfield%localdata, dstFtypep%localfield%localFlag, &
+        dstFtypep%grid, dstFtypep%mapping, parentVM, &
+        routeOptions, routehandle, status)
       if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
