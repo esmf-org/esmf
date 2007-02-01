@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.99 2007/01/30 06:16:21 theurich Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.100 2007/02/01 05:00:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.99 2007/01/30 06:16:21 theurich Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.100 2007/02/01 05:00:54 theurich Exp $'
 
 !==============================================================================
 
@@ -169,8 +169,12 @@
       ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,recvDomainList)
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,srcArray,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,dstArray,rc)
+      if (hasSrcData) then
+        ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,srcArray,rc)
+      endif
+      if (hasDstData) then
+        ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,dstArray,rc)
+      endif
       ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rh,rc)
 
@@ -207,7 +211,11 @@
 !                               ESMF_CONTEXT, rc)) return
 
       ! get dataRank and allocate rank-sized arrays
-      call ESMF_InternArrayGet(srcArray, rank=dataRank, rc=localrc)
+      if (hasSrcData) then
+        call ESMF_InternArrayGet(srcArray, rank=dataRank, rc=localrc)
+      else
+        call ESMF_InternArrayGet(dstArray, rank=dataRank, rc=localrc)
+      endif
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return

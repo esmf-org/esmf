@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.109 2007/01/19 23:19:37 oehmke Exp $
+! $Id: ESMF_Regrid.F90,v 1.110 2007/02/01 05:00:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.109 2007/01/19 23:19:37 oehmke Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.110 2007/02/01 05:00:54 theurich Exp $'
 
 !==============================================================================
 !
@@ -311,6 +311,12 @@
       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
+      if (hasSrcData) then
+        ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,srcArray,rc)
+      endif
+      if (hasDstData) then
+        ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,dstArray,rc)
+      endif
 
       ! TODO: error check for regridnormOpt only for conservative methods
       
@@ -951,8 +957,13 @@
 
       ! to get into this code we have already verified the types match in all
       ! the arrays, so just check the first one.
-      call ESMF_InternArrayGet(srcArrayList(1), rank=rank, type=type, kind=kind, &
+      if (hasSrcData) then
+        call ESMF_InternArrayGet(srcArrayList(1), rank=rank, type=type, kind=kind, &
                            counts=counts, rc=localrc)
+      else
+        call ESMF_InternArrayGet(dstArrayList(1), rank=rank, type=type, kind=kind, &
+                           counts=counts, rc=localrc)
+      endif
   
       allocate(gatheredArrayList(narrays), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "intermediate array pointers", &
@@ -1706,7 +1717,7 @@
 
       integer :: localrc        ! local error status
       logical :: dummy
-      type(ESMF_DataKind) :: srcKind, dstKind
+      type(ESMF_DataKind) :: srcKind, dstKind, dataKind
       type(ESMF_Route) :: route
       type(ESMF_InternArray) :: srcArrayList(1), dstArrayList(1)
       integer :: routenum
@@ -1727,14 +1738,20 @@
       endif
 
       ! get datakinds from the two arrays
-      call ESMF_InternArrayGet(srcArray, kind=srcKind, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (hasSrcData) then
+        call ESMF_InternArrayGet(srcArray, kind=srcKind, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_InternArrayGet(dstArray, kind=dstKind, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+        dataKind = srcKind
+      endif
+      if (hasDstData) then
+        call ESMF_InternArrayGet(dstArray, kind=dstKind, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+        dataKind = dstKind
+      endif
 
       ! default to 1 if routeIndex not specified
       if (present(routeIndex)) then
@@ -1765,11 +1782,11 @@
       dstArrayList(1) = dstArray
 
       ! Execute the communications call based on datakinds
-      if (srcKind.eq.ESMF_R4 .AND. dstKind.eq.ESMF_R4) then
+      if (dataKind.eq.ESMF_R4) then
         call ESMF_RegridRunR4(srcArrayList, srcDataMap, hasSrcData, &
                               dstArrayList, dstDataMap, hasDstData, &
                               routehandle, routenum, localrc)
-      elseif (srcKind.eq.ESMF_R8 .AND. dstKind.eq.ESMF_R8) then
+      elseif (dataKind.eq.ESMF_R8) then
         call ESMF_RegridRunR8(srcArrayList, srcDataMap, hasSrcData, &
                               dstArrayList, dstDataMap, hasDstData, &
                               routehandle, routenum, localrc)
