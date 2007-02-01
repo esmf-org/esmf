@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.13 2007/01/30 05:03:46 oehmke Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.14 2007/02/01 04:59:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define ESMF_FILENAME "ESMF_IArrayComm.F90"
+#define ESMF_FILENAME "ESMF_InternArrayComm.F90"
 !==============================================================================
 !
 ! ESMF Array Comm module
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.13 2007/01/30 05:03:46 oehmke Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.14 2007/02/01 04:59:05 theurich Exp $'
 !
 !==============================================================================
 !
@@ -436,7 +436,7 @@ module ESMF_InternArrayCommMod
     type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+!    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
@@ -580,7 +580,7 @@ module ESMF_InternArrayCommMod
     type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+!    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
@@ -959,7 +959,7 @@ module ESMF_InternArrayCommMod
     if (present(rc)) rc = ESMF_FAILURE
  
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+!    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
     if (present(routeIndex)) then
@@ -1037,11 +1037,12 @@ module ESMF_InternArrayCommMod
 !
 ! !INTERFACE:
       ! Private interface; call using ESMF_IArrayHaloStore()
-  subroutine ESMF_IArrayHaloStoreOne(array, grid, datamap, routehandle, &
-                                     halodirection, routeOptions, rc)
+  subroutine ESMF_IArrayHaloStoreOne(array, localFlag, grid, datamap, &
+    routehandle, halodirection, routeOptions, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(inout) :: array
+    logical, intent(in) :: localFlag
     type(ESMF_Grid), intent(inout) :: grid
     type(ESMF_FieldDataMap), intent(inout) :: datamap
     type(ESMF_RouteHandle), intent(out) :: routehandle
@@ -1094,14 +1095,15 @@ module ESMF_InternArrayCommMod
 
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+    if (localFlag) then
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+    endif
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
       ! passthru call, setting index to 1 and type 1-to-1
-      call ESMF_IArrayHaloStoreIndex(array, 1, ESMF_1TO1HANDLEMAP, 1, &
-                                grid, datamap, &
-                                routehandle, halodirection, routeOptions, rc)
+      call ESMF_IArrayHaloStoreIndex(array, localFlag, 1, ESMF_1TO1HANDLEMAP, &
+        1, grid, datamap, routehandle, halodirection, routeOptions, rc)
 
   end subroutine ESMF_IArrayHaloStoreOne
 
@@ -1113,12 +1115,12 @@ module ESMF_InternArrayCommMod
 !
 ! !INTERFACE:
       ! Internal routine, intended to be called directly by Bundle code only
-  subroutine ESMF_IArrayHaloStoreIndex(array, index, rmaptype, maxindex, &
-                                      grid, datamap, routehandle, &
-                                      halodirection, routeOptions, rc)
+  subroutine ESMF_IArrayHaloStoreIndex(array, localFlag, index, rmaptype, &
+    maxindex, grid, datamap, routehandle, halodirection, routeOptions, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(inout) :: array
+      logical, intent(in) :: localFlag
       integer, intent(in) :: index
       integer, intent(in) :: rmaptype
       integer, intent(in) :: maxindex
@@ -1196,7 +1198,9 @@ module ESMF_InternArrayCommMod
       if (present(rc)) rc = ESMF_FAILURE
  
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+    if (localFlag) then
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+    endif
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
@@ -1285,17 +1289,21 @@ module ESMF_InternArrayCommMod
                                   ESMF_CONTEXT, rc)) return
 
       ! And get the Array sizes
-      call ESMF_InternArrayGet(array, rank=datarank, counts=dimlengths, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (localFlag) then
+        call ESMF_InternArrayGet(array, rank=datarank, counts=dimlengths, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+      endif
 
       ! TODO: apply dimorder and decompids to get mapping of array to data
 
       ! set up things we need to find a cached route or precompute one
-      call ESMF_IArrayGetAllAxisIndices(array, grid, datamap, totalindex=dst_AI, &
+      if (localFlag) then
+        call ESMF_IArrayGetAllAxisIndices(array, grid, datamap, totalindex=dst_AI, &
                                        compindex=src_AI, rc=status)
-
+      endif
+      
       ! translate AI's into global numbering
       call ESMF_GridDELocalToGlobalAI(grid, horzRelLoc=horzRelLoc, &
                                       vertRelLoc=vertRelloc, &
@@ -1575,13 +1583,14 @@ module ESMF_InternArrayCommMod
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_IArrayRedist()
-  subroutine ESMF_IArrayRedistList(srcArrayList, dstArrayList, routehandle, &
-                                      routeIndex, blocking, &
-                                      routeOptions, rc) 
+  subroutine ESMF_IArrayRedistList(srcArrayList, srcLocalFlag, dstArrayList, &
+    dstLocalFlag, routehandle, routeIndex, blocking, routeOptions, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(inout) :: srcArrayList(:)
+      logical, intent(in) :: srcLocalFlag
       type(ESMF_InternArray), intent(inout) :: dstArrayList(:)
+      logical, intent(in) :: dstLocalFlag
       type(ESMF_RouteHandle), intent(in) :: routehandle
       integer, intent(in), optional :: routeIndex
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
@@ -1642,12 +1651,16 @@ module ESMF_InternArrayCommMod
       if (present(rc)) rc = ESMF_FAILURE
 
     ! Check init status of arguments
-    do i=1, size(srcArrayList)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArrayList(i), rc)
-    enddo
-    do i=1, size(dstArrayList)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArrayList(i), rc)
-    enddo
+    if (srcLocalFlag) then
+      do i=1, size(srcArrayList)
+        ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArrayList(i), rc)
+      enddo
+    endif
+    if (dstLocalFlag) then
+      do i=1, size(dstArrayList)
+        ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArrayList(i), rc)
+      enddo
+    endif
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
       if (present(routeIndex)) then
@@ -1676,15 +1689,19 @@ module ESMF_InternArrayCommMod
       if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
                                        ESMF_CONTEXT, rc)) return
 
-      do i=1, nitemsSrc
-        srcLocalArrayList(i)%this%ptr = srcArrayList(i)%this%ptr
-        ESMF_INIT_COPY(srcLocalArrayList(i),srcArrayList(i))
-      enddo
+      if (srcLocalFlag) then
+        do i=1, nitemsSrc
+          srcLocalArrayList(i)%this%ptr = srcArrayList(i)%this%ptr
+          ESMF_INIT_COPY(srcLocalArrayList(i),srcArrayList(i))
+        enddo
+      endif
 
-      do i=1, nitemsDst
-        dstLocalArrayList(i)%this%ptr = dstArrayList(i)%this%ptr
-        ESMF_INIT_COPY(dstLocalArrayList(i),dstArrayList(i))
-      enddo
+      if (dstLocalFlag) then
+        do i=1, nitemsDst
+          dstLocalArrayList(i)%this%ptr = dstArrayList(i)%this%ptr
+          ESMF_INIT_COPY(dstLocalArrayList(i),dstArrayList(i))
+        enddo
+      endif
 
       ! Set the route options if given.
       if (present(routeOptions)) then
@@ -1720,13 +1737,14 @@ module ESMF_InternArrayCommMod
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_IArrayRedist()
-  subroutine ESMF_IArrayRedistOne(srcArray, dstArray, routehandle, &
-                                     routeIndex, blocking, &
-                                     routeOptions, rc) 
+  subroutine ESMF_IArrayRedistOne(srcArray, srcLocalFlag, dstArray, &
+    dstLocalFlag, routehandle, routeIndex, blocking, routeOptions, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(in) :: srcArray
+      logical, intent(in) :: srcLocalFlag
       type(ESMF_InternArray), intent(in) :: dstArray
+      logical, intent(in) :: dstLocalFlag
       type(ESMF_RouteHandle), intent(in) :: routehandle
       integer, intent(in), optional :: routeIndex
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
@@ -1783,10 +1801,21 @@ module ESMF_InternArrayCommMod
 
       ! initialize return code; assume failure until success certain
       if (present(rc)) rc = ESMF_FAILURE
+      
+    ! Before going further down into this code, make sure
+    ! that this DE has at least src or dst data.   If neither, return now.
+    if ((.not.srcLocalFlag) .and. (.not.dstLocalFlag)) then
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+    endif
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArray, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArray, rc)
+    if (srcLocalFlag) then
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArray, rc)
+    endif
+    if (dstLocalFlag) then
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArray, rc)
+    endif
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
       if (present(routeIndex)) then
@@ -1811,11 +1840,14 @@ module ESMF_InternArrayCommMod
 
 
       ! Convert from Intern to Local Arrays
-      dstLocalArray%this%ptr = dstArray%this%ptr
-      ESMF_INIT_COPY(dstLocalArray,dstArray)
-      srcLocalArray%this%ptr = srcArray%this%ptr
-      ESMF_INIT_COPY(srcLocalArray,srcArray)
-
+!      if (srcLocalFlag) then
+        srcLocalArray%this%ptr = srcArray%this%ptr
+        ESMF_INIT_COPY(srcLocalArray,srcArray)
+!      endif
+!      if (dstLocalFlag) then
+        dstLocalArray%this%ptr = dstArray%this%ptr
+        ESMF_INIT_COPY(dstLocalArray,dstArray)
+!      endif
 
       ! Execute the communications call
       call ESMF_RouteRun(route, srcLocalArray, dstLocalArray, rc=status)
@@ -1870,15 +1902,17 @@ module ESMF_InternArrayCommMod
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_IArrayRedistStore()
-  subroutine ESMF_IArrayRedistStoreOne(srcArray, srcGrid, srcDataMap, &
-                                       dstArray, dstGrid, dstDataMap, &
-                                       parentVM, routeOptions, routehandle, rc)
+  subroutine ESMF_IArrayRedistStoreOne(srcArray, srcLocalFlag, srcGrid, &
+    srcDataMap, dstArray, dstLocalFlag, dstGrid, dstDataMap, parentVM, &
+    routeOptions, routehandle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(in) :: srcArray
+      logical, intent(in) :: srcLocalFlag
       type(ESMF_Grid), intent(inout) :: srcGrid
       type(ESMF_FieldDataMap), intent(inout) :: srcDataMap
       type(ESMF_InternArray), intent(in) :: dstArray
+      logical, intent(in) :: dstLocalFlag
       type(ESMF_Grid), intent(inout) :: dstGrid
       type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       type(ESMF_VM), intent(in) :: parentVM
@@ -1934,19 +1968,21 @@ module ESMF_InternArrayCommMod
     ! suggestions regarding intent(out) vs intent(inout).
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArray, rc)
+    if (srcLocalFlag) then
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArray, rc)
+    endif
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, srcGrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, srcDatamap)
-    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArray, rc)
+    if (dstLocalFlag) then
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArray, rc)
+    endif
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, dstGrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, dstDatamap)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, parentVM, rc)
 
-    call ESMF_IArrayRedistStoreIndex(srcArray, srcGrid, srcDataMap, &
-                               dstArray, dstGrid, dstDataMap, &
-                               1, ESMF_1TO1HANDLEMAP, 1, &
-                               parentVM, routehandle, routeOptions, rc)
-
+    call ESMF_IArrayRedistStoreIndex(srcArray, srcLocalFlag, srcGrid, &
+      srcDataMap, dstArray, dstLocalFlag, dstGrid, dstDataMap, &
+      1, ESMF_1TO1HANDLEMAP, 1, parentVM, routehandle, routeOptions, rc)
 
   end subroutine ESMF_IArrayRedistStoreOne
 
@@ -1958,16 +1994,17 @@ module ESMF_InternArrayCommMod
 !
 ! !INTERFACE:
       ! internal use only; called by Bundle code for multi-fields
-  subroutine ESMF_IArrayRedistStoreIndex(srcArray, srcGrid, srcDataMap, &
-                                       dstArray, dstGrid, dstDataMap, &
-                                       index, rmaptype, maxindex, &
-                                       parentVM, routehandle, routeOptions, rc)
+  subroutine ESMF_IArrayRedistStoreIndex(srcArray, srcLocalFlag, srcGrid, &
+    srcDataMap, dstArray, dstLocalFlag, dstGrid, dstDataMap, index, &
+    rmaptype, maxindex, parentVM, routehandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(in) :: srcArray
+      logical, intent(in) :: srcLocalFlag
       type(ESMF_Grid), intent(inout) :: srcGrid
       type(ESMF_FieldDataMap), intent(inout) :: srcDataMap
       type(ESMF_InternArray), intent(in) :: dstArray
+      logical, intent(in) :: dstLocalFlag
       type(ESMF_Grid), intent(inout) :: dstGrid
       type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       integer, intent(in) :: index
@@ -2059,10 +2096,14 @@ module ESMF_InternArrayCommMod
       if (present(rc)) rc = ESMF_FAILURE
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArray, rc)
+    if (srcLocalFlag) then
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArray, rc)
+    endif
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, srcGrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, srcDatamap)
-    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArray, rc)
+    if (dstLocalFlag) then
+      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArray, rc)
+    endif
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, dstGrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, dstDatamap)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, parentVM, rc)
@@ -2172,7 +2213,8 @@ module ESMF_InternArrayCommMod
                             localDE=mySrcDE, rc=status)
 
       ! And get the Array sizes
-      call ESMF_InternArrayGet(srcArray, rank=datarank, counts=dimlengths, rc=status)
+      call ESMF_InternArrayGet(srcArray, rank=datarank, counts=dimlengths, &
+        rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
