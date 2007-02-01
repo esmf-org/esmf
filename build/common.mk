@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.170 2007/01/12 22:57:11 theurich Exp $
+#  $Id: common.mk,v 1.171 2007/02/01 22:38:18 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -154,6 +154,10 @@ endif
 
 ifndef ESMF_NO_INTEGER_2_BYTE
 export ESMF_NO_INTEGER_2_BYTE = default
+endif
+
+ifndef ESMF_FORTRANSYMBOLS
+export ESMF_FORTRANSYMBOLS = default
 endif
 
 #-------------------------------------------------------------------------------
