@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayUTest.F90,v 1.5 2007/01/25 20:34:41 svasquez Exp $
+! $Id: ESMF_InternArrayUTest.F90,v 1.6 2007/02/01 17:30:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayUTest.F90,v 1.5 2007/01/25 20:34:41 svasquez Exp $'
+      '$Id: ESMF_InternArrayUTest.F90,v 1.6 2007/02/01 17:30:15 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -133,20 +133,20 @@
 !-------------------------------------------------------------------------------
 !   !  Get Array Name  of deleted Array Test
  
-    !EX_UTest
-    write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-    write(name, *) "Get Array Name of destroyed Array Test"
-    call ESMF_InternArrayGet(array1, name=array_name, rc=rc)
-    call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+    !EX_____UTest
+!    write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+!    write(name, *) "Get Array Name of destroyed Array Test"
+!    call ESMF_InternArrayGet(array1, name=array_name, rc=rc)
+!    call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
 !   !  Get Array Name  of non-created Array Test
  
-    !EX_UTest
-    write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
-    write(name, *) "Get Array Name of non-created Array Test"
-    call ESMF_InternArrayGet(array2, name=array_name, rc=rc)
-    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+    !EX_____UTest
+!    write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+!    write(name, *) "Get Array Name of non-created Array Test"
+!    call ESMF_InternArrayGet(array2, name=array_name, rc=rc)
+!    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
 !  !  Print a destroyed Array
