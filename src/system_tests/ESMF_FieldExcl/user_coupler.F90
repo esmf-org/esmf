@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.16 2005/07/01 16:39:02 nscollins Exp $
+! $Id: user_coupler.F90,v 1.17 2007/02/01 04:53:59 theurich Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -99,19 +99,24 @@
       ! this coupler.  When the call returns all objects which were not
       ! in existence on all PETs now have an object which represents them.
       call ESMF_StateReconcile(importState, vm, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
       ! call ESMF_StatePrint(importState, rc=status)
 
       call ESMF_StateReconcile(exportState, vm, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
       ! call ESMF_StatePrint(exportState, rc=status)
 
       call ESMF_StateGet(importState, itemcount=itemcount, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
       !print *, "Import State contains ", itemcount, " items."
 
       ! Get input data for Regrid test
       call ESMF_StateGetField(importState, "humidity1", humidity1, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Get location of output data for Regrid test
       call ESMF_StateGetField(exportState, "humidity2", humidity2, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
 
       ! These are fields on different Grids - call RegridStore to set
       ! up the Regrid structure
@@ -119,6 +124,7 @@
       call ESMF_FieldRegridStore(humidity1, humidity2, vm, regridRH, &
                                  regridmethod=ESMF_REGRID_METHOD_BILINEAR, &
                                  rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
 
       ! for debugging, this prints who is planning to send data and where 
       ! call ESMF_RouteHandlePrint(regridRH, "", rc=status)
