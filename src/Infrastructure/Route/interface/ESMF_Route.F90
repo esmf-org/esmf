@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.88 2007/01/26 00:43:08 oehmke Exp $
+! $Id: ESMF_Route.F90,v 1.89 2007/02/01 05:07:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.88 2007/01/26 00:43:08 oehmke Exp $'
+      '$Id: ESMF_Route.F90,v 1.89 2007/02/01 05:07:34 theurich Exp $'
 
 !==============================================================================
 !
@@ -1789,8 +1789,8 @@ end subroutine rias
 
 	! Check initialization
         ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
-        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,srcarray,rc)
-        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,dstarray,rc)
+!        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,srcarray,rc)
+!        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,dstarray,rc)
  
        ! translate F90 LocalArrays to C++ version of LocalArray
        if (present(srcarray)) then
@@ -1898,16 +1898,16 @@ end subroutine rias
         endif
 
 	! Check initialization
-	if (srcCount .ne. 0) then
-  	  do i=1,srcCount,1
-	    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,srcarrayList(i),rc)
-	  end do
-	end if
-	if (dstCount .ne. 0) then
-  	  do i=1,dstCount,1
-	    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,dstarrayList(i),rc)
-	  end do
-	end if
+!	if (srcCount .ne. 0) then
+!  	  do i=1,srcCount,1
+!	    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,srcarrayList(i),rc)
+!	  end do
+!	end if
+!	if (dstCount .ne. 0) then
+!  	  do i=1,dstCount,1
+!	    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,dstarrayList(i),rc)
+!	  end do
+!	end if
 
         ! Translate F90 LocalArray into C++ Version
        if (present(srcarrayList)) then

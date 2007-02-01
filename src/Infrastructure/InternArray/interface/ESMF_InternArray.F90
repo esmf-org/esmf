@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArray.F90,v 1.7 2007/01/30 05:02:48 oehmke Exp $
+! $Id: ESMF_InternArray.F90,v 1.8 2007/02/01 05:06:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -142,7 +142,7 @@ module ESMF_InternArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArray.F90,v 1.7 2007/01/30 05:02:48 oehmke Exp $'
+    '$Id: ESMF_InternArray.F90,v 1.8 2007/02/01 05:06:39 theurich Exp $'
 !
 !==============================================================================
 !
@@ -347,7 +347,7 @@ end subroutine
       endif
 
       ! Check init status of arguments
-      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+!      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       if (present(rank)) then
          call c_ESMC_IArrayGetRank(array, rank, status)
@@ -1281,7 +1281,7 @@ end subroutine
         integer :: status, i
 
         ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+!        ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
         ! call c routine to get index
         call c_ESMC_IArrayGetAxisIndex(array, domainTypeFlag, AIPerRank,&
