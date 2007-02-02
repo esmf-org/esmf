@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.7 2007/02/01 22:38:18 theurich Exp $"
+"$Id: ESMC_Conf.h,v 1.8 2007/02/02 05:51:06 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -18,10 +18,10 @@ Licensed under the University of Illinois-NCSA License.
 
 #define PARCH_linux
 
-#ifdef LOWERCASE_SINGLEUNDERSCORE 
+#ifdef ESMF_LOWERCASE_SINGLEUNDERSCORE 
 #define FTN(func) func##_
 #endif
-#ifdef LOWERCASE_DOUBLEUNDERSCORE 
+#ifdef ESMF_LOWERCASE_DOUBLEUNDERSCORE 
 #define FTN(func) func##__
 #endif
 

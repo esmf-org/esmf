@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.9 2007/02/01 22:38:18 theurich Exp $
+# $Id: build_rules.mk,v 1.10 2007/02/02 05:51:06 theurich Exp $
 #
 # Linux.g95.default
 #
@@ -77,19 +77,19 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 # Fortran symbol convention
 #
 ifeq ($(ESMF_FORTRANSYMBOLS),default)
-ESMF_F90COMPILEOPTS       += -fno-second-underscore
-ESMF_F90LINKOPTS          += -fno-second-underscore
-ESMF_CXXCOMPILEOPTS       += -DLOWERCASE_SINGLEUNDERSCORE
+ESMF_F90COMPILEOPTS       +=
+ESMF_F90LINKOPTS          +=
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
 else
 ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_singleunderscore)
 ESMF_F90COMPILEOPTS       += -fno-second-underscore
 ESMF_F90LINKOPTS          += -fno-second-underscore
-ESMF_CXXCOMPILEOPTS       += -DLOWERCASE_SINGLEUNDERSCORE
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
 else
 ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_doubleunderscore)
 ESMF_F90COMPILEOPTS       +=
 ESMF_F90LINKOPTS          +=
-ESMF_CXXCOMPILEOPTS       += -DLOWERCASE_DOUBLEUNDERSCORE
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
 else
 $(error "ESMF_FORTRANSYMBOLS = $(ESMF_FORTRANSYMBOLS)" not supported by ESMF and/or this platform)
 endif
