@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.95 2007/01/17 04:47:48 oehmke Exp $
+! $Id: ESMF_Bundle.F90,v 1.96 2007/02/02 23:01:37 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -1205,10 +1205,15 @@ end function
       ! set the return bundle
       ESMF_BundleCreateNew%btypep => btypep
 
+
+      ! do this before ESMF_BundleIsConguent so it doesn't complain
+      ! about uniniitalize bundles
+      ESMF_INIT_SET_CREATED(ESMF_BundleCreateNew)
+
+
       ! this resets the congruent flag as a side effect
       dummy = ESMF_BundleIsCongruent(ESMF_BundleCreateNew, rc)
 
-      ESMF_INIT_SET_CREATED(ESMF_BundleCreateNew)
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
