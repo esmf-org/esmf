@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_InitMacros.inc,v 1.24 2007/02/03 00:33:11 oehmke Exp $
+$Id: ESMF_InitMacros.inc,v 1.25 2007/02/03 05:27:08 oehmke Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,6 +32,7 @@ automatic initialization of types.
 #define ESMF_INIT_CREATED 82949521
 #define ESMF_INIT_DELETED 12594838
 
+#define ESMF_INITMACROS_ON
 #ifdef ESMF_INITMACROS_ON
 
 #define ESMF_INIT_GET(var) var%isInit
