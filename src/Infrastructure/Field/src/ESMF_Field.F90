@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.233 2007/01/30 06:15:50 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.234 2007/02/03 05:23:26 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -246,7 +246,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.233 2007/01/30 06:15:50 theurich Exp $'
+      '$Id: ESMF_Field.F90,v 1.234 2007/02/03 05:23:26 oehmke Exp $'
 
 !==============================================================================
 !
@@ -4613,6 +4613,9 @@
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
 
+      ! init local flag
+      ftype%localfield%localFlag=.true.
+
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -4731,6 +4734,9 @@
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
+     
+      ! init local flag
+      ftype%localfield%localFlag=.true.
 
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, status)
@@ -4837,6 +4843,9 @@
       ftypep%gridstatus = ESMF_STATUS_UNINIT
       ftypep%datastatus = ESMF_STATUS_UNINIT
       ftypep%datamapstatus = ESMF_STATUS_UNINIT
+
+      ! Init Local flag 
+      ftypep%localfield%localFlag=.true.
 
       ! Set the mapping as unknown/invalid
       call ESMF_FieldDataMapSetInvalid(ftypep%mapping, status)
