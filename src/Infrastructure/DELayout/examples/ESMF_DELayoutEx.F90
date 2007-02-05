@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.11 2006/11/16 05:20:57 cdeluca Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.12 2007/02/05 23:12:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -83,9 +83,13 @@ program ESMF_DELayoutEx
 ! to the provided PETs in their given order. It is erroneous to specify PETs 
 ! that are not part of the VM context on which the DELayout is defined. 
 !EOE
+  if (petCount > 1) then
 !BOC
   delayout = ESMF_DELayoutCreate(petList=(/(i,i=petCount-1,1,-1)/), rc=rc)
-!EOC  
+!EOC
+  else
+    delayout = ESMF_DELayoutCreate(rc=rc)
+  endif
   if (rc /= ESMF_SUCCESS) goto 99
 !  call ESMF_DELayoutPrint(delayout, rc=rc)
   call ESMF_DELayoutDestroy(delayout, rc=rc)
