@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.234 2007/02/03 05:23:26 oehmke Exp $
+! $Id: ESMF_Field.F90,v 1.235 2007/02/06 22:14:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -231,6 +231,8 @@
    public ESMF_FieldSerialize
    public ESMF_FieldDeserialize
 
+   public assignment(=)
+
 !  !subroutine ESMF_FieldWriteRestart(field, iospec, rc)
 !  !function ESMF_FieldReadRestart(name, iospec, rc)
 !  !subroutine ESMF_FieldWrite(field, subset, iospec, rc)
@@ -246,7 +248,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.234 2007/02/03 05:23:26 oehmke Exp $'
+      '$Id: ESMF_Field.F90,v 1.235 2007/02/06 22:14:14 oehmke Exp $'
 
 !==============================================================================
 !
@@ -385,12 +387,70 @@
       end interface
 !
 !
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: assignment (=) - set on field equal to another
+!
+! !INTERFACE:
+      interface assignment (=)
+   
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_FieldAssign
+
+
+! !DESCRIPTION:
+!    Set one field equal to another note that since its 
+!    a pointer copy the fields are actually the same
+ 
+!EOPI
+      end interface
+!
+!
+
+
 !
 !==============================================================================
 !
       contains
 !
 !==============================================================================
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldAssign()"
+!BOPI
+! !IROUTINE:  ESMF_FieldAssign - set one field struct equal to another
+
+! !INTERFACE:
+
+   subroutine ESMF_FieldAssign(dval, sval)
+!
+! !ARGUMENTS:
+ type(ESMF_Field), intent(out) :: dval
+ type(ESMF_Field), intent(in) :: sval
+!
+! !DESCRIPTION:
+!      Set one field structure equal to another
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [dval]
+!           destination structure
+!     \item [dval]
+!           source structure
+!     \end{description}
+!
+!EOPI
+
+ dval%ftypep => sval%ftypep
+
+ ESMF_INIT_COPY(dval,sval)
+
+ end subroutine
+
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
