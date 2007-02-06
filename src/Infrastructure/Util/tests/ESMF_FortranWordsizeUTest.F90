@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsizeUTest.F90,v 1.2 2007/01/17 00:25:02 rosalind Exp $
+! $Id: ESMF_FortranWordsizeUTest.F90,v 1.3 2007/02/06 22:17:26 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FortranWordsizeUTest.F90,v 1.2 2007/01/17 00:25:02 rosalind Exp $'
+      '$Id: ESMF_FortranWordsizeUTest.F90,v 1.3 2007/02/06 22:17:26 rosalind Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -51,8 +51,12 @@
 
       ! local variables
       integer :: vint
+#ifndef ESMF_NO_INTEGER_1_BYTE
       integer(ESMF_KIND_I1) :: vint1(5)
+#endif
+#ifndef ESMF_NO_INTEGER_2_BYTE
       integer(ESMF_KIND_I2) :: vint2
+#endif
       integer(ESMF_KIND_I4) :: vint4
       integer(ESMF_KIND_I8) :: vint8
 
@@ -83,18 +87,21 @@
     !------------------------------------------------------------------------
     !NEX_UTest
     ! ESMF_KIND_I1 Integer size
+#ifndef ESMF_NO_INTEGER_1_BYTE
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Getting size of ESMF_KIND_I1 integer"
     datasize=ESMF_FortranWordsize(vint1(1), rc )
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
+#endif
     !------------------------------------------------------------------------
     !NEX_UTest
     !ESMF_KIND_I2 Integer size
+#ifndef ESMF_NO_INTEGER_2_BYTE
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Getting size of ESMF_KIND_I2 integer"
     datasize=ESMF_FortranWordsize(vint2, rc )
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
     !------------------------------------------------------------------------
     !NEX_UTest
