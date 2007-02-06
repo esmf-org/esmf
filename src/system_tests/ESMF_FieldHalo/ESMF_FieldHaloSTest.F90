@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.41 2006/03/28 21:52:35 theurich Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.42 2007/02/06 19:35:41 theurich Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -135,7 +135,7 @@
       write(testname, *) "System Test FieldHalo: Field Halo Test"
 
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                        testname, failMsg, testresult, ESMF_SRCLINE)
+        testname, failMsg, testresult, ESMF_SRCLINE)
 
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
