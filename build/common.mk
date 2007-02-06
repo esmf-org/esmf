@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.34 2006/11/21 21:15:52 theurich Exp $
+#  $Id: common.mk,v 1.155.2.35 2007/02/06 19:24:06 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2291,7 +2291,7 @@ shared:
 		    $(ESMF_RM) -r tmp_$$NEXTLIB ;\
 		fi ;\
 		done ; \
-	fi \
+	fi
 
 #-------------------------------------------------------------------------------
 # Pattern rules for making Tex files using protex script.  Input to 
