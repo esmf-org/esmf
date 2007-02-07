@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.15 2007/02/02 03:36:32 svasquez Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.16 2007/02/07 23:32:29 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.15 2007/02/02 03:36:32 svasquez Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.16 2007/02/07 23:32:29 oehmke Exp $'
 !
 !==============================================================================
 !
@@ -576,7 +576,7 @@ module ESMF_InternArrayCommMod
     integer :: datarank
     integer :: dimOrder(ESMF_MAXDIM)
     integer :: gridOffsets(ESMF_MAXGRIDDIM)
-    type(ESMF_AxisIndex) :: localAIsPerRank(ESMF_MAXDIM)
+    type(ESMF_AxisIndex),pointer :: localAIsPerRank(:)
     type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
     ! Check init status of arguments
@@ -586,6 +586,11 @@ module ESMF_InternArrayCommMod
 
     ! get layout from the grid in order to get the number of DEs
     call ESMF_InternArrayGet(array, rank=datarank, rc=localrc)
+
+    ! allocate array for localAIs
+    allocate(localAIsPerRank(datarank), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "allocating localAIsPerRank", &
+                                     ESMF_CONTEXT, rc)) return
 
     ! get information from the datamap
     call ESMF_FieldDataMapGet(datamap, dataIndexList=dimOrder, &
@@ -614,6 +619,9 @@ module ESMF_InternArrayCommMod
       endif
     enddo
 
+    ! deallocate localAIsPerRank
+    deallocate(localAIsPerRank)
+  
     if (present(rc)) rc = localrc
 
   end subroutine ESMF_IArrayGetGlobalAIs
