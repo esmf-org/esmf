@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2005/12/01 22:24:17 nscollins Exp $ 
+# $Id: makefile,v 1.14 2007/02/07 01:44:39 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -68,5 +68,5 @@ lamrestart:
 	sleep 1
 	-lamwipe
 	sleep 5
-	-lamboot $(LAM_ARGS)
+	-lamboot $(ESMF_LAMARGS)
 	
