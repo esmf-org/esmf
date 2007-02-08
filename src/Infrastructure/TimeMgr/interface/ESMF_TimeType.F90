@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeType.F90,v 1.7 2007/01/11 17:06:01 oehmke Exp $
+! $Id: ESMF_TimeType.F90,v 1.8 2007/02/08 06:46:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -40,7 +40,6 @@
 !------------------------------------------------------------------------------
 ! !USES:
       ! inherit from base time class
-      use ESMF_BaseTimeMod
       use ESMF_INITMacrosMod
       use ESMF_UtilTypesMod
 
@@ -65,8 +64,30 @@
       type ESMF_Time
       sequence                              ! match C++ storage order
       private                               !  (members opaque on Fortran side)
+      
+      ! first members must match ESMC_BaseTime, i.e. ESMC_Fraction on C++ side
+#ifndef ESMF_NO_INITIALIZERS
+      integer(ESMF_KIND_I8) :: s    = 0   ! whole seconds
+      integer(ESMF_KIND_I4) :: sN   = 0   ! fractional seconds, numerator
+      integer(ESMF_KIND_I4) :: sD   = 0   ! fractional seconds, denominator
+#else
+      integer(ESMF_KIND_I8) :: s          ! whole seconds
+      integer(ESMF_KIND_I4) :: sN         ! fractional seconds, numerator
+      integer(ESMF_KIND_I4) :: sD         ! fractional seconds, denominator
+#endif      
+      ! following members must match additional ESMC_Time members on C++ side
+#ifndef ESMF_NO_INITIALIZERS
+      type(ESMF_Pointer)    :: calendar = ESMF_NULL_POINTER ! associated calendar
+      integer               :: timeZone = 0       ! local timezone
+#else
+      type(ESMF_Pointer)    :: calendar           ! associated calendar
+      integer               :: timeZone           ! local timezone
+#endif
+
+
+#ifdef NOSKIP
       type(ESMF_BaseTime)          :: baseTime  ! inherit base class
-#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
+#ifndef ESMF_NO_INITIALIZERS
       type(ESMF_Calendar), pointer :: calendar => NULL() ! associated calendar
       integer                      :: timeZone = 0 ! local timezone
       integer                      :: pad      = 0 ! to satisfy halem compiler
@@ -75,6 +96,8 @@
       integer                      :: timeZone  ! local timezone
       integer                      :: pad       ! to satisfy halem compiler
 #endif
+#endif
+
       ESMF_INIT_DECLARE
      end type
 
@@ -88,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeType.F90,v 1.7 2007/01/11 17:06:01 oehmke Exp $'
+      '$Id: ESMF_TimeType.F90,v 1.8 2007/02/08 06:46:54 theurich Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -148,9 +171,11 @@
 !
 !EOPI
     ! Note: ESMF_TimeType is private
-        nullify(s%calendar)
+        s%s        = 0
+        s%sN       = 0
+        s%sD       = 0
+        s%calendar = ESMF_NULL_POINTER
         s%timeZone = 0
-        s%pad = 0
         ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_TimeInit
 

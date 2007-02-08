@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalType.F90,v 1.9 2007/01/11 17:06:01 oehmke Exp $
+! $Id: ESMF_TimeIntervalType.F90,v 1.10 2007/02/08 06:46:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -42,9 +42,6 @@
       ! inherit from ESMF base class
       use ESMF_UtilTypesMod
 
-      ! inherit from base time class
-      use ESMF_BaseTimeMod
-
       ! associated derived types
       use ESMF_TimeTypeMod
       use ESMF_CalendarMod
@@ -67,12 +64,65 @@
       type ESMF_TimeInterval
       sequence                             ! match C++ storage order
       private                              !   (members opaque on Fortran side)
+
+      ! match ESMC_BaseTime, i.e. ESMC_Fraction on C++ side
+#ifndef ESMF_NO_INITIALIZERS
+      integer(ESMF_KIND_I8) :: s    = 0   ! whole seconds
+      integer(ESMF_KIND_I4) :: sN   = 0   ! fractional seconds, numerator
+      integer(ESMF_KIND_I4) :: sD   = 0   ! fractional seconds, denominator
+#else
+      integer(ESMF_KIND_I8) :: s          ! whole seconds
+      integer(ESMF_KIND_I4) :: sN         ! fractional seconds, numerator
+      integer(ESMF_KIND_I4) :: sD         ! fractional seconds, denominator
+#endif      
+      ! match ESMC_Time on C++ side
+#ifndef ESMF_NO_INITIALIZERS
+      integer(ESMF_KIND_I8) :: s1    = 0   ! whole seconds
+      integer(ESMF_KIND_I4) :: sN1   = 0   ! fractional seconds, numerator
+      integer(ESMF_KIND_I4) :: sD1   = 0   ! fractional seconds, denominator
+      type(ESMF_Pointer)    :: calendar1 = ESMF_NULL_POINTER ! associated calendar
+      integer               :: timeZone1 = 0       ! local timezone
+#else
+      integer(ESMF_KIND_I8) :: s1          ! whole seconds
+      integer(ESMF_KIND_I4) :: sN1         ! fractional seconds, numerator
+      integer(ESMF_KIND_I4) :: sD1         ! fractional seconds, denominator
+      type(ESMF_Pointer)    :: calendar1           ! associated calendar
+      integer               :: timeZone1           ! local timezone
+#endif
+      ! match ESMC_Time on C++ side
+#ifndef ESMF_NO_INITIALIZERS
+      integer(ESMF_KIND_I8) :: s2    = 0   ! whole seconds
+      integer(ESMF_KIND_I4) :: sN2   = 0   ! fractional seconds, numerator
+      integer(ESMF_KIND_I4) :: sD2   = 0   ! fractional seconds, denominator
+      type(ESMF_Pointer)    :: calendar2 = ESMF_NULL_POINTER ! associated calendar
+      integer               :: timeZone2 = 0       ! local timezone
+#else
+      integer(ESMF_KIND_I8) :: s2          ! whole seconds
+      integer(ESMF_KIND_I4) :: sN2         ! fractional seconds, numerator
+      integer(ESMF_KIND_I4) :: sD2         ! fractional seconds, denominator
+      type(ESMF_Pointer)    :: calendar2           ! associated calendar
+      integer               :: timeZone2           ! local timezone
+#endif
+      ! match additional ESMC_TimeInterval members on C++ side
+#ifndef ESMF_NO_INITIALIZERS
+      type(ESMF_Pointer)    :: calendar = ESMF_NULL_POINTER ! associated calendar
+      integer(ESMF_KIND_I8) :: yy = 0    ! calendar interval number of years
+      integer(ESMF_KIND_I8) :: mm = 0    ! calendar interval number of months
+      integer(ESMF_KIND_I8) :: d  = 0    ! calendar interval number of days
+#else
+      type(ESMF_Pointer)    :: calendar           ! associated calendar
+      integer(ESMF_KIND_I8) :: yy        ! calendar interval number of years
+      integer(ESMF_KIND_I8) :: mm        ! calendar interval number of months
+      integer(ESMF_KIND_I8) :: d         ! calendar interval number of days
+#endif
+
+#ifdef NOSKIP
         type(ESMF_BaseTime)   :: baseTime  ! inherit base class
         type(ESMF_Time)       :: startTime ! start time for absolute calendar
 !                                              intervals
         type(ESMF_Time)       :: endTime   ! end time for absolute calendar
 !                                              intervals
-#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
+#ifndef ESMF_NO_INITIALIZERS
         type(ESMF_Calendar), pointer :: calendar => NULL() ! associated calendar
         integer(ESMF_KIND_I8) :: yy = 0    ! calendar interval number of years
         integer(ESMF_KIND_I8) :: mm = 0    ! calendar interval number of months
@@ -83,6 +133,8 @@
         integer(ESMF_KIND_I8) :: mm        ! calendar interval number of months
         integer(ESMF_KIND_I8) :: d         ! calendar interval number of days
 #endif
+#endif
+
         ESMF_INIT_DECLARE
       end type
 
@@ -96,7 +148,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeIntervalType.F90,v 1.9 2007/01/11 17:06:01 oehmke Exp $'
+      '$Id: ESMF_TimeIntervalType.F90,v 1.10 2007/02/08 06:46:54 theurich Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -156,7 +208,20 @@
 !     \end{description}
 !
 !EOPI
-        nullify(s%calendar)
+        s%s        = 0
+        s%sN       = 0
+        s%sD       = 0
+        s%s1        = 0
+        s%sN1       = 0
+        s%sD1       = 0
+        s%calendar1 = ESMF_NULL_POINTER
+        s%timeZone1 = 0
+        s%s2        = 0
+        s%sN2       = 0
+        s%sD2       = 0
+        s%calendar2 = ESMF_NULL_POINTER
+        s%timeZone2 = 0
+        s%calendar = ESMF_NULL_POINTER
         s%yy = 0
         s%mm = 0
         s%d  = 0

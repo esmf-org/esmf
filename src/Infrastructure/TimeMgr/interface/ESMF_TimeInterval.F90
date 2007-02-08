@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.80 2007/01/25 00:09:08 oehmke Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.81 2007/02/08 06:46:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -41,9 +41,6 @@
       ! inherit from ESMF base class
       use ESMF_UtilTypesMod
       use ESMF_BaseMod
-
-      ! inherit from base time class
-      use ESMF_BaseTimeMod
 
       ! for ReadRestart()/WriteRestart()
       use ESMF_IOSpecMod
@@ -125,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.80 2007/01/25 00:09:08 oehmke Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.81 2007/02/08 06:46:54 theurich Exp $'
 
 !==============================================================================
 !
@@ -967,6 +964,7 @@
 ! !REQUIREMENTS:
 !     TMG1.5.8
     
+      call ESMF_TimeIntervalInit(ESMF_TimeIntervalAbsValue)
       call c_ESMC_TimeIntervalAbsValue(timeinterval, ESMF_TimeIntervalAbsValue)
 
       end function ESMF_TimeIntervalAbsValue
@@ -1837,6 +1835,7 @@
 !     TMG1.5.8
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      call ESMF_TimeIntervalInit(ESMF_TimeIntervalNegAbsValue)
     
       call c_ESMC_TimeIntervalNegAbsValue(timeinterval, &
                                           ESMF_TimeIntervalNegAbsValue)
@@ -2606,6 +2605,7 @@
 !
 !EOPI
 
+      call ESMF_TimeIntervalInit(ESMF_TimeIntervalQuotI)
       call c_ESMC_TimeIntervalQuotI(timeinterval, divisor, &
                                     ESMF_TimeIntervalQuotI)
 
@@ -2631,6 +2631,7 @@
 !
 !EOPI
 
+      call ESMF_TimeIntervalInit(ESMF_TimeIntervalQuotR)
       call c_ESMC_TimeIntervalQuotR(timeinterval, divisor, &
                                     ESMF_TimeIntervalQuotR)
 
@@ -2656,6 +2657,7 @@
 !
 !EOPI
 
+      call ESMF_FractionInit(ESMF_TimeIntervalFQuot)
       call c_ESMC_TimeIntervalFQuot(timeinterval1, timeinterval2, &
                                     ESMF_TimeIntervalFQuot)
 
@@ -2682,6 +2684,7 @@
 !
 !EOPI
 
+      call ESMF_TimeIntervalInit(ESMF_TimeIntervalRemainder)
       call c_ESMC_TimeIntervalRemainder(timeinterval1, timeinterval2, &
                                         ESMF_TimeIntervalRemainder)
 
@@ -2707,6 +2710,7 @@
 !
 !EOPI
 
+      call ESMF_TimeIntervalInit(ESMF_TimeIntervalProdTI)
       call c_ESMC_TimeIntervalProdTI(timeinterval, multiplier, &
                                      ESMF_TimeIntervalProdTI)
 
@@ -2732,6 +2736,7 @@
 !
 !EOPI
 
+      call ESMF_TimeIntervalInit(ESMF_TimeIntervalProdIT)
       call c_ESMC_TimeIntervalProdIT(multiplier, timeinterval, &
                                      ESMF_TimeIntervalProdIT)
 
@@ -2757,6 +2762,7 @@
 !
 !EOPI
 
+      call ESMF_TimeIntervalInit(ESMF_TimeIntervalProdTF)
       call c_ESMC_TimeIntervalProdTF(timeinterval, multiplier, &
                                      ESMF_TimeIntervalProdTF)
 
@@ -2782,6 +2788,7 @@
 !
 !EOPI
 
+      call ESMF_TimeIntervalInit(ESMF_TimeIntervalProdFT)
       call c_ESMC_TimeIntervalProdFT(multiplier, timeinterval, &
                                      ESMF_TimeIntervalProdFT)
 
@@ -2807,6 +2814,7 @@
 !
 !EOPI
 
+      call ESMF_TimeIntervalInit(ESMF_TimeIntervalProdTR)
       call c_ESMC_TimeIntervalProdTR(timeinterval, multiplier, &
                                      ESMF_TimeIntervalProdTR)
 
@@ -2832,6 +2840,7 @@
 !
 !EOPI
 
+      call ESMF_TimeIntervalInit(ESMF_TimeIntervalProdRT)
       call c_ESMC_TimeIntervalProdRT(multiplier, timeinterval, &
                                      ESMF_TimeIntervalProdRT)
 
@@ -2864,6 +2873,7 @@
 !
 !EOPI
 
+      call ESMF_TimeIntervalInit(ESMF_TimeIntervalSum)
       call c_ESMC_TimeIntervalSum(timeinterval1, timeinterval2, &
                                   ESMF_TimeIntervalSum)
 
@@ -2890,6 +2900,7 @@
 !EOPI
 ! !REQUIREMENTS:
 
+      call ESMF_TimeIntervalInit(ESMF_TimeIntervalDiff)
       call c_ESMC_TimeIntervalDiff(timeinterval1, timeinterval2, &
                                    ESMF_TimeIntervalDiff)
 
@@ -2915,6 +2926,7 @@
 !EOPI
 ! !REQUIREMENTS:
 
+      call ESMF_TimeIntervalInit(ESMF_TimeIntervalNegate)
       call c_ESMC_TimeIntervalNegate(timeinterval, ESMF_TimeIntervalNegate)
 
       end function ESMF_TimeIntervalNegate

@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.92 2007/01/24 23:55:49 oehmke Exp $
+! $Id: ESMF_Time.F90,v 1.93 2007/02/08 06:46:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -42,9 +42,6 @@
       use ESMF_UtilTypesMod
       use ESMF_BaseMod
       use ESMF_InitMacrosMod
-
-      ! inherit from base time class
-      use ESMF_BaseTimeMod
 
       ! for ReadRestart()/WriteRestart()
       use ESMF_IOSpecMod
@@ -104,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.92 2007/01/24 23:55:49 oehmke Exp $'
+      '$Id: ESMF_Time.F90,v 1.93 2007/02/08 06:46:54 theurich Exp $'
 
 !==============================================================================
 !
@@ -1223,6 +1220,7 @@
 !
 !EOPI
 
+      call ESMF_TimeInit(ESMF_TimeInc)
       call c_ESMC_TimeInc(time, timeinterval, ESMF_TimeInc)
 
       end function ESMF_TimeInc
@@ -1246,6 +1244,7 @@
 !
 !EOPI
 
+       call ESMF_TimeInit(ESMF_TimeDec)
        call c_ESMC_TimeDec(time, timeinterval, ESMF_TimeDec)
 
       end function ESMF_TimeDec
@@ -1270,6 +1269,7 @@
 !
 !EOPI
 
+      call ESMF_TimeIntervalInit(ESMF_TimeDiff)
       call c_ESMC_TimeDiff(time1, time2, ESMF_TimeDiff)
 
       end function ESMF_TimeDiff
