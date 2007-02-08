@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.23 2006/11/16 05:21:21 cdeluca Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.24 2007/02/08 20:08:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.23 2006/11/16 05:21:21 cdeluca Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.24 2007/02/08 20:08:31 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -873,9 +873,7 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Leap Year Test 4
-      year = 500000000  ! break up initialization,
-      year = year * 10  !  since F90 constants
-      year = year + 10  !   are 32-bit
+      year = year - 90  !   reuse the year variable set above
       call ESMF_TimeSet(time1, yy_i8=year, mm=2, dd=28, &
                                    calendar=julianCalendar, rc=rc)
       bool =  ESMF_TimeIsLeapYear(time1, rc=rc)
