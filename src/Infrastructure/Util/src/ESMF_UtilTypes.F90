@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.35 2007/01/11 16:38:25 oehmke Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.36 2007/02/09 17:18:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -272,6 +272,7 @@
           integer :: min
           integer :: max
           integer :: stride
+          integer :: pad    ! insure F90/C++ memory alignment
           ESMF_INIT_DECLARE
       end type
 

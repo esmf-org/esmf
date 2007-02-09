@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.18 2007/01/24 05:36:11 oehmke Exp $
+// $Id: ESMC_Util.h,v 1.19 2007/02/09 17:18:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -166,7 +166,7 @@ class ESMC_AxisIndex {
     int     min;
     int     max;
     int  stride;
-
+    int     pad;    // insure F90/C++ memory alignment
     ESMF_INIT_C_PAD 
 
 };
