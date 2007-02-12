@@ -1,4 +1,4 @@
-! $Id: ESMF_StateLimitUTest.F90,v 1.4 2006/11/16 05:21:25 cdeluca Exp $
+! $Id: ESMF_StateLimitUTest.F90,v 1.5 2007/02/12 17:48:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateLimitUTest.F90,v 1.4 2006/11/16 05:21:25 cdeluca Exp $'
+      '$Id: ESMF_StateLimitUTest.F90,v 1.5 2007/02/12 17:48:46 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -57,7 +57,7 @@
 
       ! local args needed to create/construct objects
       type(ESMF_Grid) :: grid(2)
-      type(ESMF_Field) :: sfield(20), dfield(25)
+      type(ESMF_Field) :: sfield(20), dfield(30)
       type(ESMF_Bundle) :: bundle(2)
       type(ESMF_VM) :: vm
       character(ESMF_MAXSTR) :: placeholders(5)
@@ -216,8 +216,8 @@
 		        vrelloc4=ESMF_CELL_CELL, &
 		        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
-      write(name, *) "Creating first 5 dst fields"
-      write(failMsg, *) "Unable to create first 5 dst fields"
+      write(name, *) "Creating 1st set of 5 dst fields"
+      write(failMsg, *) "Unable to create 1st set 5 dst fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -232,8 +232,8 @@
 		        vrelloc4=ESMF_CELL_CELL, &
 		        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
-      write(name, *) "Creating last 5 dst fields"
-      write(failMsg, *) "Unable to create last 5 dst fields"
+      write(name, *) "Creating 2nd set of 5 dst fields"
+      write(failMsg, *) "Unable to create 2nd set of 5 dst fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -248,8 +248,8 @@
 		        vrelloc4=ESMF_CELL_CELL, &
 		        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
-      write(name, *) "Creating next 5 dst fields"
-      write(failMsg, *) "Unable to create next 5 dst fields"
+      write(name, *) "Creating 3rd set of 5 dst fields"
+      write(failMsg, *) "Unable to create 3rd set of 5 dst fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -264,8 +264,8 @@
 		        vrelloc4=ESMF_CELL_CELL, &
 		        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
-      write(name, *) "Creating next 5 dst fields"
-      write(failMsg, *) "Unable to create next 5 dst fields"
+      write(name, *) "Creating 4th set of 5 dst fields"
+      write(failMsg, *) "Unable to create 4th set of 5 dst fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -280,8 +280,24 @@
 		        vrelloc4=ESMF_CELL_CELL, &
 		        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
-      write(name, *) "Creating last 5 dst fields"
-      write(failMsg, *) "Unable to create last 5 dst fields"
+      write(name, *) "Creating 5th set of 5 dst fields"
+      write(failMsg, *) "Unable to create 5th set of 5 dst fields"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! create fields, cont.
+      call CreateFields(grid(2), &
+                        dfield(26), dfield(27), dfield(28), dfield(29), dfield(30),&
+                        dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
+		        vrelloc1=ESMF_CELL_CELL, &
+		        vrelloc2=ESMF_CELL_CELL, &
+		        vrelloc3=ESMF_CELL_CELL, &
+		        vrelloc4=ESMF_CELL_CELL, &
+		        vrelloc5=ESMF_CELL_CELL, &
+                        rc=rc)
+      write(name, *) "Creating 6th set of 5 dst fields"
+      write(failMsg, *) "Unable to create 6th set of 5 dst fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -325,6 +341,15 @@
       ! add more fields
       call AddBundle(bundle(2), dfield(21), dfield(22), dfield(23), &
                                 dfield(24), dfield(25), rc=rc)
+      write(name, *) "Adding to dst bundle"
+      write(failMsg, *) "Unable to add to dst bundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! add more fields
+      call AddBundle(bundle(2), dfield(26), dfield(27), dfield(28), &
+                                dfield(29), dfield(30), rc=rc)
       write(name, *) "Adding to dst bundle"
       write(failMsg, *) "Unable to add to dst bundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
