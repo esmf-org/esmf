@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.96 2007/02/02 23:01:37 oehmke Exp $
+! $Id: ESMF_Bundle.F90,v 1.97 2007/02/12 20:17:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -1423,6 +1423,12 @@ end function
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
+
+
+     ! Set initialize fieldCount to 0
+      if (present(fieldCount)) then
+          fieldCount = 0
+      endif
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2959,6 +2965,9 @@ end function
       integer :: i, status
       type(ESMF_BundleType), pointer :: bp
 
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
       bp => bundle%btypep
 
       if (present(nameCount)) nameCount = bp%field_count
@@ -3283,6 +3292,9 @@ end function
       !type(ESMF_Field) :: field
       integer :: i
       integer :: status
+
+
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
     !jw  call ESMF_LogWrite("Bundle Print:", ESMF_LOG_INFO)
       write (*, *)  "Bundle print:"

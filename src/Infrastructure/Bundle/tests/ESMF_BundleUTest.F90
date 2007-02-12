@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.44 2007/01/25 17:39:43 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.45 2007/02/12 20:17:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.44 2007/01/25 17:39:43 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.45 2007/02/12 20:17:08 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -218,25 +218,27 @@
       write(failMsg, *) "Returned ESMF_SUCCESS"
       write(name, *) "Getting Field count from an uninitialized Bundle Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
       !------------------------------------------------------------------------
      
-      !EX____UTest
+      !EX_UTest
       ! This test is commented out because it fails on several platforms.
       ! Bug 1446672 has been opened. This test should be uncommented when
       ! the bug is fixed.
+      ! (I think its fixed - Bob 2/12/2007)
       !  Verify the Field count query from an uninitialized Bundle is 0
-      !write(failMsg, *) "Field count not zero"
-      !write(name, *) "Verify Field count from an uninitialized Bundle is zero Test"
-      !call ESMF_Test((fieldCount.eq.0), name, failMsg, result, ESMF_SRCLINE)
-
+      write(failMsg, *) "Field count not zero"
+      write(name, *) "Verify Field count from an uninitialized Bundle is zero Test"
+      call ESMF_Test((fieldCount.eq.0), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
+      !EX_UTest
       !This test crashes, bug 1169299 created, commented out
       !  Verify the getting Field names query from an uninitialized Bundle is handled
-      !call ESMF_BundleGetFieldNames(bundle1, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Getting Field names from an uninitialized Bundle Test"
-      !call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      ! (I think its fixed - Bob 2/12/2007)
+      call ESMF_BundleGetFieldNames(bundle1, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting Field names from an uninitialized Bundle Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !print *, "Field count of uninitialized Bundle = ", fieldcount
       !------------------------------------------------------------------------
