@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.6 2007/01/29 18:55:40 theurich Exp $"
+"$Id: ESMC_Conf.h,v 1.7 2007/02/12 17:29:02 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -39,7 +39,6 @@ Licensed under the University of Illinois-NCSA License.
 Special defines necessary on this platform:
 #endif
 
-#define _POSIX_SOURCE 
 #if !defined(_XOPEN_SOURCE)
 #define _XOPEN_SOURCE 
 #endif
