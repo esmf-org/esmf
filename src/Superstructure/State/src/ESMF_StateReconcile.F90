@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.34 2007/01/30 06:04:18 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.35 2007/02/12 05:55:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
       use ESMF_InitMacrosMod
       implicit none
 
-      integer :: bufsize = 81920
+      integer :: bufsize = 102400   ! 100 kB buffer
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.34 2007/01/30 06:04:18 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.35 2007/02/12 05:55:16 theurich Exp $'
 
 !==============================================================================
 ! 
