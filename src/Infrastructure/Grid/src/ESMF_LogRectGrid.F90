@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.163 2007/01/19 23:19:36 oehmke Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.164 2007/02/13 03:56:07 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.163 2007/01/19 23:19:36 oehmke Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.164 2007/02/13 03:56:07 oehmke Exp $'
 
 !==============================================================================
 !
@@ -5098,7 +5098,8 @@
                                globalStartPerDimUse, order
       logical :: reorderUse, totalUse
       real(ESMF_KIND_R8), dimension(3) :: minLCPDUse, maxLCPDUse
-      type(ESMF_AxisIndex), dimension(3) :: globalAIPerDimUse
+      type(ESMF_AxisIndex), pointer :: globalAIPerDimUse(:)
+!      type(ESMF_AxisIndex), dimension(3) :: globalAIPerDimUse
       type(ESMF_GridStorage) :: gridStorage
       type(ESMF_PhysCoord) :: coord
       type(ESMF_DELayout) :: delayout
@@ -5115,6 +5116,9 @@
                                 "Invalid Grid object", &
                                  ESMF_CONTEXT, rc)) return
       endif
+
+      ! allocate local axis index list
+     allocate(globalAIPerDimUse(3))
 
       ! Initialize other variables
       horzDistIdUse = -1
@@ -5245,6 +5249,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
         endif
+
         ! load local values into return arguments
         if (reorderUse) then
           order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
@@ -5336,6 +5341,9 @@
           enddo
         endif
       endif
+
+      ! deallocate local axis index list
+      deallocate(globalAIPerDimUse)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
