@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.100 2007/02/01 05:00:54 theurich Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.101 2007/02/13 17:35:22 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.100 2007/02/01 05:00:54 theurich Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.101 2007/02/13 17:35:22 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -154,7 +154,7 @@
       type(ESMF_InternArray), dimension(:), pointer :: srcLocalCoordArray
       type(ESMF_DomainList) :: recvDomainList, recvDomainListTot
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
-      type(ESMF_Route) :: route, tempRoute
+      type(ESMF_Route) :: route, tempRoute1, tempRoute
 ! TODO: currently the ESMF_Regrid object is not used anywhere, so all references
 !       are commented out.  
 !     type(ESMF_Regrid) :: tempRegrid
@@ -327,7 +327,7 @@
 
       ! just do this to get a recDomainList with the right rank -- could be
       ! different using arrays
-      tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
+      tempRoute1 = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
                                             recvDomainList, parentVM, &
                                             srcDataMap=srcDataMap, dstDataMap=dstDataMap, &
                                             hasSrcData=hasSrcData, hasDstData=hasDstData, &
@@ -482,6 +482,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! clean up
+      call ESMF_RouteDestroy(tempRoute1, localrc)
       call ESMF_RouteDestroy(tempRoute, localrc)
       deallocate(dataOrder, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
@@ -520,6 +521,7 @@
         if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
                                        ESMF_CONTEXT, rc)) return
       endif
+      call ESMF_TransformValuesDestroy(tv, localrc)
       
       if (present(rc)) rc = ESMF_SUCCESS
 
