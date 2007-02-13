@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.C,v 1.13 2006/11/16 05:21:16 cdeluca Exp $
+// $Id: ESMC_RHandle.C,v 1.14 2007/02/13 17:26:23 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-       "$Id: ESMC_RHandle.C,v 1.13 2006/11/16 05:21:16 cdeluca Exp $";
+       "$Id: ESMC_RHandle.C,v 1.14 2007/02/13 17:26:23 samsoncheung Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -102,6 +102,7 @@
 //EOP
 
     rhandle->ESMC_RouteHandleDestruct();
+    delete rhandle;                      // delete container
     return ESMF_SUCCESS;
 
  } // end ESMC_RouteHandleDestroy
@@ -170,17 +171,30 @@
 //
 //EOP
 
+    int i;
+
     // call into the respective distributed data class to release route handle
     switch (htype){
       case ESMC_ARRAYSPARSEMATMULHANDLE:
         ESMC_ArraySparseMatMulRelease(this);
+        if (routes != NULL) delete [] routes;
         break;
       default:
+        for (i=0; i<nroutes; i++) {
+          routes[i].ESMC_RouteDestruct();
+        }
+        if (routes != NULL) delete [] routes;
         break;
     }
 
-    if (routes != NULL) delete [] routes;
+    for (i=0; i<ntvalues; i++) {
+       tvalues[i].ESMC_TransformValuesDestruct();
+    }
     if (tvalues != NULL) delete [] tvalues;
+
+    if (rmap != NULL) delete [] rmap;
+    if (label != NULL) delete [] label;
+    if (tvmap != NULL) delete [] tvmap;
     
     return ESMF_SUCCESS;
 
