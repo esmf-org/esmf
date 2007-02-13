@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.6 2007/02/13 19:09:57 theurich Exp $
+! $Id: ESMF_Test.F90,v 1.7 2007/02/13 19:24:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.6 2007/02/13 19:09:57 theurich Exp $'
+      '$Id: ESMF_Test.F90,v 1.7 2007/02/13 19:24:00 theurich Exp $'
 
 !==============================================================================
 
@@ -138,9 +138,9 @@
 
 
       if(condition) then
-        localResult = 0
+        localResult = ESMF_SUCCESS
       else
-        localResult = 1
+        localResult = ESMF_FAILURE
         result = result + 1  ! count total failures; 0 = all pass
       end if
       
@@ -454,7 +454,7 @@
       allocate(array2(1))
       ! Store test results
       array2(1) = testResults
-      gatherRoot = petCount - 1
+      gatherRoot = 0
 
       ! Don't Gather until all pets are done
       call ESMF_VMBarrier(vm, rc=localrc)
@@ -469,7 +469,7 @@
       
 
       ! Gather test results
-      call ESMF_VMGather(vm, sendData=array2, recvData=array1, count=petCount, &
+      call ESMF_VMGather(vm, sendData=array2, recvData=array1, count=1, &
       root=gatherRoot, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) then
           write(msg, *) " FAIL  ESMF_VMGather failed.  Error code ", localrc
