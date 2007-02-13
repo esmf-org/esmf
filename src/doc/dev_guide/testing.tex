@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: testing.tex,v 1.9 2006/12/13 20:19:08 cdeluca Exp $
+% CVS $Id: testing.tex,v 1.10 2007/02/13 16:46:04 murphysj Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/testing.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -27,14 +27,14 @@ The ESMF team keeps track of test coverage on a per-method basis.
 This information is on the {\bf Metrics} page under the {\bf Development}
 link on the navigation bar.
 
-Testing information is stored on a {\bf Test and Validation} webpage,
+Testing information is stored on a {\bf Test and Validation} Web page,
 under the {\bf Development} link on the ESMF 
-website.  This webpage includes:
+web site.  This Web page includes:
 \begin{itemize}
-\item separate webpages for each system test and UTC;
+\item separate Web pages for each system test and UTC;
 \item links to the {\it Developer's Guide}, SourceForge Tracker, Requirements 
 Spreadsheet, and any other pertinent information; and
-\item separate webpage for automated regression test information and results.
+\item separate Web page for automated regression test information and results.
 \end{itemize}
 
 The ESMF is designed to run on several target platforms, in different 
@@ -63,8 +63,8 @@ framework {\tt make} system will have an option to build and run unit tests.
 The user has the option of building either a "sanity check" type test
 or an exhaustive suite. The exhaustive tests include tests of many 
 functionalities and a variety of valid and invalid input values. The sanity 
-check tests are a minumum set of tests to indicate whether, for example, the 
-software has been installed correctly. It is the responsiblity of the 
+check tests are a minimum set of tests to indicate whether, for example, the 
+software has been installed correctly. It is the responsibility of the 
 software developer to write and execute the unit tests. Unit tests 
 are distributed with the framework software.
 
@@ -97,7 +97,7 @@ simultaneously.
 \end{itemize}
 
 The system tester should issue a test log after each software release is tested,
-which is recorded on the {\bf Test and Validation} webpage. The test 
+which is recorded on the {\bf Test and Validation} Web page. The test 
 log shall
 include: a test ID number, a software release ID number, testing environment 
 descriptions, a list of test cases executed, results, and any unexpected 
@@ -112,7 +112,7 @@ software.  They were initiated when the ESMF team and its users saw that
 often ESMF capabilities could pass simple system tests but would fail
 out in the field, for real customer problems.  UTCs have realistic
 processor counts, data set sizes, and grid and data array sizes.  UTCs are
-listed on the {\bf Test \& Validation} page of the ESMF website.  They
+listed on the {\bf Test \& Validation} page of the ESMF Web site.  They
 are not distributed with the ESMF software; instead they are stored in
 a separate module in the main repository called {\tt use\_test\_cases}.
 
@@ -131,14 +131,14 @@ releases, and bad bug fixes).
 Regression tests regularly exercise all interfaces of the code on 
 all target platforms.  The Integrator runs 
 automated nightly builds on a wide variety of machines, listed on the
-{\bf Test and Validation} website. This site stores log files of the
+{\bf Test and Validation} Web site. This site stores log files of the
 build results.
 The log files are kept on a monthly basis in 
 separate directories. For example, the December 2002 directory is named {\tt 0212\_test}. The 
 directory contains an {\tt ESMFdailyLog} file which has a one line entry for each platform on 
 which the build was attempted indicating whether the build was successful or not. 
 
-The {\tt ESMFdailyLog} file for the current month is available on the {\bf Test and Validation} website.
+The {\tt ESMFdailyLog} file for the current month is available on the {\bf Test and Validation} Web site.
 
 If the build is not successful, then a file containing the build output is stored in 
 the:\\
@@ -155,7 +155,7 @@ Email is sent daily to the ESMF core team listing all the platforms on which the
 
 We provide two types of tar files, the ESMF source and the shared
 libraries of the supported platforms. Consequently, there are two test
-procedures followed before placing the tar files on the ESMF download website. 
+procedures followed before placing the tar files on the ESMF download Web site. 
 
 The {\bf Source Code Test Procedure} is followed on all the supported
 platforms for the particular release.

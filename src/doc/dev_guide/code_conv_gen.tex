@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_gen.tex,v 1.8 2006/12/13 20:19:07 cdeluca Exp $
+% CVS $Id: code_conv_gen.tex,v 1.9 2007/02/13 16:46:04 murphysj Exp $
 
 \subsection{Code and Documentation Templates and Associated Scripts}
 \label{sec:code_templates}
@@ -40,7 +40,7 @@ file (ESMC\_class.h) in the component include directory, if one does not exist.
 
 \subsubsection{Accessibility}
 
-ESMF documents are available on the ESMF website on the
+ESMF documents are available on the ESMF Web site on the
 {\bf Downloads \& Documentation} page.  They are available
 to developers for editing through the ESMF repository on the SourceForge site.
 
@@ -72,7 +72,7 @@ in ESMF documents. \newline
 {\tt courier}  & code fragments & {\tt ESMF\_TRUE}\\
 {\tt courier()}  & ESMF method name & {\tt ESMF\_FieldGet()} \\
 {\bf boldface} & first definitions & An {\bf address space} is ...\\
-{\bf boldface} & web links & {\bf Development} webpage \\
+{\bf boldface} & web links & {\bf Development} Web page \\
 {Capitals}     & ESMF class name & DataMap \\
 \end{tabular} 
  
@@ -89,7 +89,7 @@ Measurements and analyses of ESMF performance are documented in
 performance reports.  These reports are used to communicate 
 information about framework performance, and are used to
 define and assess the success of optimization efforts.
-They are posted on the ESMF website under the {\bf Performance}
+They are posted on the ESMF Web site under the {\bf Performance}
 link.  Reports typically contain the following sections:  Objective,
 Description of the Benchmark,  Results, Optimizations 
 and Conclusions.
@@ -348,14 +348,14 @@ The first line of every file in ESMF
   must be its CVS version identification. For example, each \LaTeX
   file must begin:
 \begin{verbatim}
-% $Id: code_conv_gen.tex,v 1.8 2006/12/13 20:19:07 cdeluca Exp $ 
+% $Id: code_conv_gen.tex,v 1.9 2007/02/13 16:46:04 murphysj Exp $ 
 \end{verbatim}
 
 In addition, for source code, the CVS identifier must have the 
 ability to be written to a variable for output to a configuration log.  
 Therefore each F90 module must contain a declaration:
 \begin{verbatim}
-character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.8 2006/12/13 20:19:07 cdeluca Exp $'
+character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.9 2007/02/13 16:46:04 murphysj Exp $'
 \end{verbatim}
 
 \subsubsection{License and Copyright Information}
