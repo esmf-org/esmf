@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.33 2006/12/14 18:22:58 oehmke Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.34 2007/02/13 19:47:58 theurich Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -199,16 +199,11 @@
     !EX_UTest
     write(failMsg, *) "Returned ESMF_SUCCESS incorrectly."
     write(name, *) "Local Array Destroy a destroyed Array Test"
-
-#ifdef ESMF_INITMACROS_ON 
     call ESMF_LocalArrayDestroy(array1, rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1c re-destroy returned"
-#else
-   call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE)
-#endif
-    deallocate(intptr)
 
+    deallocate(intptr)
 
 !-------------------------------------------------------------------------------
 !   ! Test 2a:
