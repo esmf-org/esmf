@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.34 2006/10/03 18:03:58 theurich Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.35 2007/02/13 20:10:40 theurich Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -281,15 +281,15 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-20    print *, "System Test FieldRedist complete."
+20  print *, "System Test FieldRedist complete."
+
+    write(failMsg, *)  "Transposed transpose not same as original"
+    write(testname, *) "System Test FieldRedist: Field Transpose/Redistribute"
+
+    call ESMF_TestGlobal(((miscount.eq.0).and.(rc.eq.ESMF_SUCCESS)), &
+      testname, failMsg, testresult, ESMF_SRCLINE)
 
     if ((my_pet .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
-      write(failMsg, *)  "Transposed transpose not same as original"
-      write(testname, *) "System Test FieldRedist: Field Transpose/Redistribute"
-
-      call ESMF_Test((miscount.eq.0) .and. (rc.eq.ESMF_SUCCESS), &
-                     testname, failMsg, testresult, ESMF_SRCLINE)
-
       ! Separate message to console, for quick confirmation of success/failure
       if ((miscount.eq.0) .and. (rc .eq. ESMF_SUCCESS)) then
         write(finalMsg, *) "SUCCESS: Data transposed twice same as original."

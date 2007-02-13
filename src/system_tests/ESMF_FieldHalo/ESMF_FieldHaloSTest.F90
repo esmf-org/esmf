@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.42 2007/02/06 19:35:41 theurich Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.43 2007/02/13 20:05:59 theurich Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -128,15 +128,15 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test FieldHalo complete"
+10  print *, "System Test FieldHalo complete"
+
+    write(failMsg, *) "System Test failure"
+    write(testname, *) "System Test FieldHalo: Field Halo Test"
+
+    call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), &
+      testname, failMsg, testresult, ESMF_SRCLINE)
 
     if ((my_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
-      write(failMsg, *) "System Test failure"
-      write(testname, *) "System Test FieldHalo: Field Halo Test"
-
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-        testname, failMsg, testresult, ESMF_SRCLINE)
-
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
         write(finalMsg, *) "SUCCESS.  Halo values are as expected."

@@ -1,4 +1,4 @@
-! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.18 2006/02/02 02:00:07 theurich Exp $
+! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.19 2007/02/13 20:01:34 theurich Exp $
 !
 ! System test code CouplingOnExclDEs
 !  Description on Sourceforge under System Test #62503
@@ -260,18 +260,17 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test CouplingOnExclDEs complete."
+10  print *, "System Test CouplingOnExclDEs complete."
 
-      ! Only on de 0 or any DE with an error. 
+
+    ! Normal ESMF Test output
+    write(failMsg, *) "System Test failure"
+    write(testname, *) "System Test CouplingOnExclDEs: Components on Exclusive DE sets"
+ 
+    call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), &
+      testname, failMsg, testresult, ESMF_SRCLINE)
+  
       if ((pe_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
-
-        ! Normal ESMF Test output
-        write(failMsg, *) "System Test failure"
-        write(testname, *) "System Test CouplingOnExclDEs: Components on Exclusive DE sets"
-  
-        call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                          testname, failMsg, testresult, ESMF_SRCLINE)
-  
         ! Separate message to console, for quick confirmation of success/failure
         if (rc .eq. ESMF_SUCCESS) then
           write(finalMsg, *) "SUCCESS: Component test finished correctly."

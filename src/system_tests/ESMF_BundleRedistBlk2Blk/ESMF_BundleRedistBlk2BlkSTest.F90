@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistBlk2BlkSTest.F90,v 1.2 2006/10/03 20:40:01 theurich Exp $
+! $Id: ESMF_BundleRedistBlk2BlkSTest.F90,v 1.3 2007/02/13 19:55:05 theurich Exp $
 !
 ! System test BundleRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -312,15 +312,15 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-20    print *, "System Test BundleRedistBlk2Blk complete."
+20  print *, "System Test BundleRedistBlk2Blk complete."
+
+    write(failMsg, *)  "Redistribution back not same as original"
+    write(testname, *) "System Test BundleRedistBlk2Blk: Bundle Redistribute"
+
+    call ESMF_TestGlobal(((miscount.eq.0).and.(status.eq.ESMF_SUCCESS)), &
+      testname, failMsg, testresult, ESMF_SRCLINE)
 
     if ((myPet .eq. 0) .or. (status .ne. ESMF_SUCCESS)) then
-      write(failMsg, *)  "Redistribution back not same as original"
-      write(testname, *) "System Test BundleRedistBlk2Blk: Bundle Redistribute"
-
-      call ESMF_Test((miscount.eq.0) .and. (status.eq.ESMF_SUCCESS), &
-                     testname, failMsg, testresult, ESMF_SRCLINE)
-
       ! Separate message to console, for quick confirmation of success/failure
       if ((miscount.eq.0) .and. (status .eq. ESMF_SUCCESS)) then
         write(finalMsg, *) "SUCCESS: Data redistributed twice same as original."
