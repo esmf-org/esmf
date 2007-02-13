@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.7 2006/02/02 02:00:08 theurich Exp $
+! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.8 2007/02/13 20:27:29 theurich Exp $
 !
 ! System test code FieldRegridConserv
 
@@ -256,18 +256,18 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test FieldRegridConserv complete."
+10  print *, "System Test FieldRegridConserv complete."
+
+
+    ! Normal ESMF Test output
+    write(failMsg, *) "System Test failure"
+    write(testname, *) "System Test FieldRegridConserv: Field Regrid"
+
+    call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), &
+      testname, failMsg, testresult, ESMF_SRCLINE)
 
     ! Only on PET 0 or any PET with an error. 
     if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
-
-      ! Normal ESMF Test output
-      write(failMsg, *) "System Test failure"
-      write(testname, *) "System Test FieldRegridConserv: Field Regrid"
-
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                        testname, failMsg, testresult, ESMF_SRCLINE)
-
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
         write(finalMsg, *) "SUCCESS: RegridConserv test finished correctly."

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.26 2006/02/02 02:00:08 theurich Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.27 2007/02/13 20:25:11 theurich Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -258,18 +258,18 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test FieldRegrid complete."
+10  print *, "System Test FieldRegrid complete."
+
+
+    ! Normal ESMF Test output
+    write(failMsg, *) "System Test failure"
+    write(testname, *) "System Test FieldRegrid: Field Regrid"
+
+    call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), &
+      testname, failMsg, testresult, ESMF_SRCLINE)
 
     ! Only on PET 0 or any PET with an error. 
     if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
-
-      ! Normal ESMF Test output
-      write(failMsg, *) "System Test failure"
-      write(testname, *) "System Test FieldRegrid: Field Regrid"
-
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                        testname, failMsg, testresult, ESMF_SRCLINE)
-
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
         write(finalMsg, *) "SUCCESS: Regrid test finished correctly."

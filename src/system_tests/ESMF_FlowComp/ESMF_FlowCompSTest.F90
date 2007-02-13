@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.19 2006/02/02 02:00:08 theurich Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.20 2007/02/13 20:33:54 theurich Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -202,13 +202,13 @@
 10    print *, "System Test FlowComp complete."
 
 
-      if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
-        write(failMsg, *)  "System Test failure"
-        write(testname, *) "System Test FlowComp: Fluid Solver, single component"
+      write(failMsg, *)  "System Test failure"
+      write(testname, *) "System Test FlowComp: Fluid Solver, single component"
   
-        call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                          testname, failMsg, testresult, ESMF_SRCLINE)
+      call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), &
+        testname, failMsg, testresult, ESMF_SRCLINE)
 
+      if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
         ! Separate message to console, for quick confirmation of success/failure
         if (rc .eq. ESMF_SUCCESS) then
           write(finalMsg, *) "SUCCESS: See output files for computed values"

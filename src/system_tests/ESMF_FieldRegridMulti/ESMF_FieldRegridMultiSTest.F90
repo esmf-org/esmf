@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.17 2006/02/17 18:54:35 theurich Exp $
+! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.18 2007/02/13 20:30:04 theurich Exp $
 !
 ! System test code FieldRegridMulti
 !  Description on Sourceforge under System Test #xxxxx
@@ -259,17 +259,17 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test FieldRegridMulti complete."
+10  print *, "System Test FieldRegridMulti complete."
+
+    ! Normal ESMF Test output
+    write(failMsg, *) "System Test failure"
+    write(testname, *) "System Test FieldRegridMulti: Field Regrid Multiple Values"
+
+    call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), &
+      testname, failMsg, testresult, ESMF_SRCLINE)
 
     ! Only on PET 0 or any PET with an error. 
     if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
-
-      ! Normal ESMF Test output
-      write(failMsg, *) "System Test failure"
-      write(testname, *) "System Test FieldRegridMulti: Field Regrid Multiple Values"
-
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                        testname, failMsg, testresult, ESMF_SRCLINE)
 
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
