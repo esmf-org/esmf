@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.5 2006/11/16 05:21:26 cdeluca Exp $
+! $Id: ESMF_Test.F90,v 1.6 2007/02/13 19:09:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,6 +39,7 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_Test
+      public ESMF_TestGlobal
       public ESMF_TestEnd
       public ESMF_TestNumPETs
       public ESMF_TestMinPETs
@@ -50,7 +51,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.5 2006/11/16 05:21:26 cdeluca Exp $'
+      '$Id: ESMF_Test.F90,v 1.6 2007/02/13 19:09:57 theurich Exp $'
 
 !==============================================================================
 
@@ -102,6 +103,56 @@
       end if
 
       end subroutine ESMF_Test
+
+
+!-------------------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE:  ESMF_TestGlobal - Print PASS/FAIL messages for global test results
+!
+! !INTERFACE:
+      subroutine ESMF_TestGlobal(condition, name, failMsg, result, file, line, &
+        unit)
+
+! !ARGUMENTS:
+      logical, intent(in) :: condition      ! pass/fail condition
+      character(*), intent(in) :: name      ! test name
+      character(*), intent(in) :: failMsg   ! fail message
+      integer, intent(inout) :: result      ! accumulated result
+      character(*), intent(in) :: file      ! test file name
+      integer, intent(in) :: line           ! test file line number
+      integer, intent(in), optional :: unit ! additional output unit number
+
+! !DESCRIPTION:
+!     Prints a {\tt PASS} message to stdout if {\tt condition} is true on all
+!     PETs, and a {\tt FAIL} message otherwise.  If {\tt unit}
+!     is specified, will in addition write the same message to that 
+!     Fortran unit number.
+!
+!EOP
+!-------------------------------------------------------------------------------
+
+      character(2*ESMF_MAXSTR) :: msg
+      type(ESMF_VM):: vm
+      integer:: petCount, localPet, localResult, localrc
+
+
+      if(condition) then
+        localResult = 0
+      else
+        localResult = 1
+        result = result + 1  ! count total failures; 0 = all pass
+      end if
+      
+      ! for now "name" and "failMsg" are ignored because this impl. is 
+      ! based on ESMF_TestResultsGather() which does not take those arguments
+
+      call ESMF_VMGetGlobal(vm, rc=localrc)
+      call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
+      call ESMF_TestResultsGather(vm, localPet, petCount, localResult, &
+        file, line, unit, rc=localrc)
+
+      end subroutine ESMF_TestGlobal
 
 
 !------------------------------------------------------------------------------
@@ -438,9 +489,9 @@
                 if (array1(i).EQ.ESMF_FAILURE) finalrc = ESMF_FAILURE
         enddo
         if (finalrc.EQ.ESMF_SUCCESS) then
-            print *, " PASS: ", trim(file)
+            print *, " PASS: ", trim(file), line
         else
-            print *, " FAIL: ", trim(file)
+            print *, " FAIL: ", trim(file), line
         endif
       endif
       deallocate(array1)
