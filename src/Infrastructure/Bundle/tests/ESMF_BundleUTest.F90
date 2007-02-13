@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.45 2007/02/12 20:17:08 oehmke Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.46 2007/02/13 19:04:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.45 2007/02/12 20:17:08 oehmke Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.46 2007/02/13 19:04:18 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -49,8 +49,8 @@
       character(len = ESMF_MAXSTR), dimension(10) :: fieldNameList
       type(ESMF_Field) :: fields(10)
       type(ESMF_Field) :: returnedfield1, returnedfield2, returnedfield3
-      type(ESMF_Field) :: simplefield, nofield
-      type(ESMF_Bundle) :: bundle1, bundle2, bundle3, nobundle
+      type(ESMF_Field) :: simplefield
+      type(ESMF_Bundle) :: bundle1, bundle2, bundle3
       real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr2
       real (ESMF_KIND_R8) :: mincoord(2)
 
@@ -193,19 +193,9 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      ! set these up for use later
-      nobundle = ESMF_BundleCreate()
-      call ESMF_BundleDestroy(nobundle)
-      nofield = ESMF_FieldCreateNoData()
-      call ESMF_FieldDestroy(nofield)
-
-      !------------------------------------------------------------------------
       !EX_UTest
       ! Test Requirement FLD2.4 Deletion
       ! Verify getting the name of an uninitialized Bundle is handled properly.
-#if ESMF_NO_INITIALIZERS
-      bundle1 = nobundle
-#endif
       call ESMF_BundleGet(bundle1, name=bname1, rc=rc)
       write(failMsg, *) "Subroutine should have returned ESMF_FAILURE"
       write(name, *) "Getting name of uninitalized Bundle Test"
@@ -296,9 +286,6 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-#if ESMF_NO_INITIALIZERS
-      simplefield = nofield
-#endif
       call ESMF_BundleAddField(bundle2, simplefield, rc=rc)
       write(failMsg, *) "Add uninitialized Field to uncreated Bundle failed"
       write(name, *) "Adding an uninitialized Field to an uncreated Bundle Test"
