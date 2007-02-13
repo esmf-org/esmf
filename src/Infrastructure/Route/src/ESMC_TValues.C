@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.C,v 1.12 2006/11/16 05:21:17 cdeluca Exp $
+// $Id: ESMC_TValues.C,v 1.13 2007/02/13 17:24:36 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TValues.C,v 1.12 2006/11/16 05:21:17 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_TValues.C,v 1.13 2007/02/13 17:24:36 samsoncheung Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -143,7 +143,18 @@
 //
 //EOP
 
-    tv->ESMC_TransformValuesDestruct();
+    // TODO:
+    // A flag may needed to indicate to remove the content or the
+    // container
+    //
+    // this will delete the content:
+    // tv->ESMC_TransformValuesDestruct();
+    //
+    // this will delete the container:
+    // delete tv;
+
+    delete tv;
+
     return ESMF_SUCCESS;
 
  } // end ESMC_TransformValuesDestroy
@@ -225,6 +236,9 @@
 
     // TODO:  do we own the things we are pointing to?  should we destroy
     // them here??
+    if (srcindex) ESMC_LocalArrayDestroy(srcindex);
+    if (dstindex) ESMC_LocalArrayDestroy(dstindex);
+    if (weights)  ESMC_LocalArrayDestroy(weights);
 
     return ESMF_SUCCESS;
 
