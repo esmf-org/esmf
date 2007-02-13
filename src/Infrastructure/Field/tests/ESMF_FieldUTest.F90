@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.95 2007/01/30 05:04:00 theurich Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.96 2007/02/13 19:37:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.95 2007/01/30 05:04:00 theurich Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.96 2007/02/13 19:37:18 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -217,15 +217,7 @@
       call ESMF_FieldPrint(f6, rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Printing an uninitialized Field Test"
-
-#ifdef ESMF_INITMACROS_ON
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
-#else
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#endif
-
-
-
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -241,15 +233,7 @@
       call ESMF_FieldPrint(f1, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Printing destroyed Field Test"
-
-#ifdef ESMF_INITMACROS_ON
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
-#else
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#endif
-
-
-
 
       !------------------------------------------------------------------------
       !EX_UTest
