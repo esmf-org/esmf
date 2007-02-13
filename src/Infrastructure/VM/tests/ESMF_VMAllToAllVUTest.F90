@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllToAllVUTest.F90,v 1.4 2007/02/12 22:00:10 theurich Exp $
+! $Id: ESMF_VMAllToAllVUTest.F90,v 1.5 2007/02/13 06:11:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-program ESMF_VMAllToAllUTest
+program ESMF_VMAllToAllVUTest
 
 !------------------------------------------------------------------------------
  
@@ -18,12 +18,11 @@ program ESMF_VMAllToAllUTest
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_VMAllGatherUTest - Unit test for VM AllGather Functions
+! !PROGRAM: ESMF_VMAllToAllVUTest - Unit test for VMAllToAllV Functions
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives the F90 VM  AllGather tests.  The VM
-! AllGather function is complex enough to require a separate test file.
+! The code in this file drives the F90 VMAllToAllV tests.
 !   It runs on multiple processors.
 !
 !-----------------------------------------------------------------------------
@@ -36,7 +35,7 @@ program ESMF_VMAllToAllUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMAllToAllVUTest.F90,v 1.4 2007/02/12 22:00:10 theurich Exp $'
+    '$Id: ESMF_VMAllToAllVUTest.F90,v 1.5 2007/02/13 06:11:58 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -138,7 +137,10 @@ program ESMF_VMAllToAllUTest
   write(name, *) "Verify iarray3 data against iarray1 after alltoallv"
   rc = ESMF_SUCCESS
   do i=1, nlen1
-    if (iarray3(i)/=iarray1(i)) rc = ESMF_FAILURE
+    if (iarray3(i)/=iarray1(i)) then
+      rc = ESMF_FAILURE
+      print *, i, iarray1(i), iarray3(i)
+    endif
   enddo
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -170,7 +172,10 @@ program ESMF_VMAllToAllUTest
   write(name, *) "Verify f4array3 data against f4array1 after alltoallv"
   rc = ESMF_SUCCESS
   do i=1, nlen1
-    if (f4array3(i)/=f4array1(i)) rc = ESMF_FAILURE
+    if (f4array3(i)/=f4array1(i)) then
+      rc = ESMF_FAILURE
+      print *, i, f4array1(i), f4array3(i)
+    endif
   enddo
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -202,7 +207,10 @@ program ESMF_VMAllToAllUTest
   write(name, *) "Verify f8array3 data against f8array1 after alltoallv"
   rc = ESMF_SUCCESS
   do i=1, nlen1
-    if (f8array3(i)/=f8array1(i)) rc = ESMF_FAILURE
+    if (f8array3(i)/=f8array1(i)) then
+      rc = ESMF_FAILURE
+      print *, i, f8array1(i), f8array3(i)
+    endif
   enddo
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -224,4 +232,4 @@ program ESMF_VMAllToAllUTest
   deallocate(f8array2)
   deallocate(f8array3)
 
-end program ESMF_VMAllToAllUTest
+end program ESMF_VMAllToAllVUTest
