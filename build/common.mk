@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.172 2007/02/06 19:31:01 theurich Exp $
+#  $Id: common.mk,v 1.173 2007/02/14 22:53:15 cdeluca Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2043,12 +2043,15 @@ tree_build_quick_start: chkdir_quick_start
 doc:  chkdir_doc
 	@echo "========================================="
 	@echo "doc rule from common.mk"
-	@echo "========================================="
-	cd $(ESMF_DIR)/src/doc ;\
-	$(MAKE) dvi html pdf
-	@echo "Build doc completed."
-
-
+	@echo "=========================================" 
+	@if [ ! -d $(ESMF_DIR)/src/doc ] ; then \
+	  echo "This distribution does not include documentation." ;\
+	  echo "See the User's Guide for more information." ;\
+	else \
+	  cd $(ESMF_DIR)/src/doc ;\
+	  $(MAKE) dvi html pdf ;\
+	  echo "Build documentation completed." ;\
+	fi
 
 # 'doc' and 'alldoc' do identical things now.
 alldoc: doc
