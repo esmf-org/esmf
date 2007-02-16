@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid_F.C,v 1.6 2006/11/16 05:21:01 cdeluca Exp $
+// $Id: ESMC_Grid_F.C,v 1.7 2007/02/16 05:27:44 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Grid_F.C,v 1.6 2006/11/16 05:21:01 cdeluca Exp $";
+             "$Id: ESMC_Grid_F.C,v 1.7 2007/02/16 05:27:44 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -57,13 +57,13 @@ void FTN(c_esmc_gridserialize)(int *dimCount,
                                int *coordOrder,
                                int *coordIndex,
                                int *periodic,                  // array of logicals
-                               double *minGlobalCoordPerDim,   // array of reals
-                               double *maxGlobalCoordPerDim,   // array of reals
+                               ESMC_R8 *minGlobalCoordPerDim,   // array of reals
+                               ESMC_R8 *maxGlobalCoordPerDim,   // array of reals
                                void *buffer, int *length, int *offset, int *localrc){
 
     int *ip, i;
-    long l;
-    double *dp;
+     ESMC_I8 l;
+    ESMC_R8 *dp;
 
     // TODO: verify length > needed, and if not, make room.
     int fixedpart =  24 * sizeof(int *);   // rough estimate
@@ -94,14 +94,14 @@ void FTN(c_esmc_gridserialize)(int *dimCount,
     for (i=0; i<*dimCount; i++) 
       *ip++ = periodic[i];               // array of logicals
 
-    // make sure pointer is aligned on good double address before the cast
-    l = (long) ip;
+    // make sure pointer is aligned on good ESMC_R8 address before the cast
+    l = (ESMC_I8) ip;
     if (l%8) {
         l += 8 - (l%8);
         ip = (int *)l;
     }
 
-    dp = (double *)ip;
+    dp = (ESMC_R8 *)ip;
     for (i=0; i<*dimCount; i++) {
       *dp++ = minGlobalCoordPerDim[i];   // array of reals
       *dp++ = maxGlobalCoordPerDim[i];   // array of reals
@@ -127,13 +127,13 @@ void FTN(c_esmc_griddeserialize)(int *dimCount,
                                  int *coordOrder,
                                  int *coordIndex,
                                  int *periodic,                  // array of logicals
-                                 double *minGlobalCoordPerDim,   // array of reals
-                                 double *maxGlobalCoordPerDim,   // array of reals
+                                 ESMC_R8 *minGlobalCoordPerDim,   // array of reals
+                                 ESMC_R8 *maxGlobalCoordPerDim,   // array of reals
                                  void *buffer, int *offset, int *localrc){
 
     int *ip, i;
-    long l;
-    double *dp;
+     ESMC_I8 l;
+    ESMC_R8 *dp;
 
     ip = (int *)((char *)(buffer) + *offset);
     *dimCount        = *ip++; 
@@ -151,14 +151,14 @@ void FTN(c_esmc_griddeserialize)(int *dimCount,
     for (i=0; i<*dimCount; i++)
       periodic[i] = *ip++;    // array of logicals
 
-    // make sure pointer is aligned on good double address before the cast
-    l = (long) ip;
+    // make sure pointer is aligned on good ESMC_R8 address before the cast
+    l = (ESMC_I8) ip;
     if (l%8) {
         l += 8 - (l%8);
         ip = (int *)l;
     }
 
-    dp = (double *)ip;
+    dp = (ESMC_R8 *)ip;
     for (i=0; i<*dimCount; i++) {
       minGlobalCoordPerDim[i] = *dp++;    // array of reals
       maxGlobalCoordPerDim[i] = *dp++;    // array of reals

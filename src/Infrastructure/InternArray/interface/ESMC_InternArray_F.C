@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray_F.C,v 1.3 2006/11/16 05:21:03 cdeluca Exp $
+// $Id: ESMC_InternArray_F.C,v 1.4 2007/02/16 05:27:45 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 extern "C" {
 
      void FTN(c_esmc_iarraycreateall)(ESMC_InternArray **ptr, int *rank, 
-                                     ESMC_DataType *dt, ESMC_DataKind *dk,
+                                     ESMC_DataType *dt, ESMC_TypeKind *dk,
                                      int *counts, int *lbounds, int *ubounds,
                                      int *status)  {
          (*ptr) = ESMC_InternArrayCreate_F(*rank, *dt, *dk, counts, 
@@ -57,7 +57,7 @@ extern "C" {
      }
 
      void FTN(c_esmc_iarraycreatenodata)(ESMC_InternArray **ptr, int *rank, 
-                                        ESMC_DataType *dt, ESMC_DataKind *dk, 
+                                        ESMC_DataType *dt, ESMC_TypeKind *dk, 
                                         ESMC_ArrayOrigin *oflag, int *status) {
              
              (*ptr) = ESMC_InternArrayCreateNoData(*rank, *dt, *dk, *oflag, status);
@@ -163,14 +163,14 @@ extern "C" {
          *status = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_iarraygetkind)(ESMC_InternArray **ptr, int *kind, int *status) {
+     void FTN(c_esmc_iarraygettypekind)(ESMC_InternArray **ptr, int *kind, int *status) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
           }
 
-         *kind = (*ptr)->ESMC_ArrayGetKind();
+         *kind = (*ptr)->ESMC_ArrayGetTypeKind();
          *status = ESMF_SUCCESS;
      }
 
@@ -292,7 +292,7 @@ extern "C" {
 
      void FTN(c_esmc_iarraysetf90ptr)(ESMC_InternArray **ptr, struct c_F90ptr *p, int *status) {
         //fprintf(stderr, "interface code, setting f90 ptr to %lx, this = %lx, &this = %lx\n", 
-        //                                (long int)p, (long int)(*ptr), (long int)ptr);
+        //                                (ESMC_I8)p, (ESMC_I8)(*ptr), (ESMC_I8)ptr);
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
@@ -303,7 +303,7 @@ extern "C" {
 
      void FTN(c_esmc_iarraygetf90ptr)(ESMC_InternArray **ptr, struct c_F90ptr *p, int *status) {
         //fprintf(stderr, "interface code, getting f90 ptr into %lx, this = %lx, &this = %lx\n", 
-        //                                (long int)p, (long int)(*ptr), (long int)ptr);
+        //                                (ESMC_I8)p, (ESMC_I8)(*ptr), (ESMC_I8)ptr);
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;

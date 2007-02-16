@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.97 2007/02/12 20:17:08 oehmke Exp $
+! $Id: ESMF_Bundle.F90,v 1.98 2007/02/16 05:27:42 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
         ! for starters:
         integer :: datarank
         type(ESMF_DataType) :: datatype
-        type(ESMF_DataKind) :: datakind
+        type(ESMF_TypeKind) :: datakind
         integer :: indexorders(ESMF_MAXDIM)
         integer :: nonindexcounts(ESMF_MAXDIM) 
         type(ESMF_Relloc) :: datahorzrelloc, datavertrelloc
@@ -2380,7 +2380,7 @@ end function
       type(ESMF_Bundle), intent(inout) :: bundle  
       character(len=*), intent(in) :: name
       type(ESMF_DataType), intent(out), optional :: datatype
-      type(ESMF_DataKind), intent(out), optional :: datakind
+      type(ESMF_TypeKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
@@ -2417,7 +2417,7 @@ end function
 
       integer :: status                           ! Error status
       type(ESMF_DataType) :: localDt
-      type(ESMF_DataKind) :: localDk
+      type(ESMF_TypeKind) :: localDk
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
@@ -2462,7 +2462,7 @@ end function
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out), optional :: name
       type(ESMF_DataType), intent(out), optional :: datatype
-      type(ESMF_DataKind), intent(out), optional :: datakind
+      type(ESMF_TypeKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
@@ -2503,7 +2503,7 @@ end function
       integer :: status                           ! Error status
       character(len=ESMF_MAXSTR) :: localName
       type(ESMF_DataType) :: localDt
-      type(ESMF_DataKind) :: localDk
+      type(ESMF_TypeKind) :: localDk
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
@@ -4300,7 +4300,7 @@ end function
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle
       integer, dimension (:), intent(in) :: index
-      real, dimension (:), intent(in) :: value
+      real(ESMF_KIND_R8), dimension (:), intent(in) :: value
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:

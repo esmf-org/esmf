@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.38 2007/02/15 17:14:27 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.39 2007/02/16 05:27:48 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -152,7 +152,7 @@
 !     ! WARNING: 
 !     !  constants MUST match corresponding values in ../include/ESMC_Util.h
 
-      type ESMF_DataKind
+      type ESMF_TypeKind
       sequence
       ! TODO: can this be made private now?
       !!private
@@ -160,20 +160,20 @@
       end type
 
       ! these work well for internal ESMF use, arguments, etc
-      type(ESMF_DataKind), parameter :: &
+      type(ESMF_TypeKind), parameter :: &
 #ifndef ESMF_NO_INTEGER_1_BYTE 
-                   ESMF_I1 = ESMF_DataKind(1), &
+                   ESMF_I1 = ESMF_TypeKind(1), &
 #endif
 #ifndef ESMF_NO_INTEGER_2_BYTE 
-                   ESMF_I2 = ESMF_DataKind(2), &
+                   ESMF_I2 = ESMF_TypeKind(2), &
 #endif
-                   ESMF_I4 = ESMF_DataKind(3), &
-                   ESMF_I8 = ESMF_DataKind(4), &
-                   ESMF_R4 = ESMF_DataKind(5), &
-                   ESMF_R8 = ESMF_DataKind(6), &
-                   ESMF_C8 = ESMF_DataKind(7), &
-                   ESMF_C16 = ESMF_DataKind(8), &
-                   ESMF_NOKIND = ESMF_DataKind(99)
+                   ESMF_I4 = ESMF_TypeKind(3), &
+                   ESMF_I8 = ESMF_TypeKind(4), &
+                   ESMF_R4 = ESMF_TypeKind(5), &
+                   ESMF_R8 = ESMF_TypeKind(6), &
+                   ESMF_C8 = ESMF_TypeKind(7), &
+                   ESMF_C16 = ESMF_TypeKind(8), &
+                   ESMF_NOKIND = ESMF_TypeKind(99)
 
       ! these work where you have to declare an array or something that
       ! the compiler needs to have a fixed 'kind' for.
@@ -560,7 +560,7 @@
       public ESMF_DOMAIN_OLDEXCLUSIVE, ESMF_DOMAIN_OLDCOMPUTATIONAL
       public ESMF_DOMAIN_OLDTOTAL
 
-      public ESMF_Status, ESMF_Pointer, ESMF_DataType, ESMF_DataKind
+      public ESMF_Status, ESMF_Pointer, ESMF_DataType, ESMF_TypeKind
       public ESMF_DataValue
       public ESMF_Domain, ESMF_DomainGetInit, ESMF_DomainInit, &
              ESMF_DomainValidate
@@ -1038,25 +1038,25 @@ subroutine ESMF_dtas(intval, dtval)
 end subroutine
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_DataKinds to see if they're the same or not
+! function to compare two ESMF_TypeKinds to see if they're the same or not
 
 function ESMF_dkeq(dk1, dk2)
  logical ESMF_dkeq
- type(ESMF_DataKind), intent(in) :: dk1, dk2
+ type(ESMF_TypeKind), intent(in) :: dk1, dk2
 
  ESMF_dkeq = (dk1%dkind .eq. dk2%dkind)
 end function
 
 function ESMF_dkne(dk1, dk2)
  logical ESMF_dkne
- type(ESMF_DataKind), intent(in) :: dk1, dk2
+ type(ESMF_TypeKind), intent(in) :: dk1, dk2
 
  ESMF_dkne = (dk1%dkind .ne. dk2%dkind)
 end function
 
 subroutine ESMF_dkas(intval, dkval)
  integer, intent(out) :: intval
- type(ESMF_DataKind), intent(in) :: dkval
+ type(ESMF_TypeKind), intent(in) :: dkval
 
  intval = dkval%dkind
 end subroutine

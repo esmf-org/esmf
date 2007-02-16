@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayCreate.cpp,v 1.5 2007/01/11 20:11:18 oehmke Exp $
+! $Id: ESMF_InternArrayCreate.cpp,v 1.6 2007/02/16 05:27:45 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayCreate.cpp,v 1.5 2007/01/11 20:11:18 oehmke Exp $'
+    '$Id: ESMF_InternArrayCreate.cpp,v 1.6 2007/02/16 05:27:45 rosalind Exp $'
       
 !==============================================================================
 ! 
@@ -195,7 +195,7 @@ DeclarationMacro(ArrayCreateByFullPtr)
 ! !ARGUMENTS:
       integer, intent(in) :: rank
       type(ESMF_DataType), intent(in) :: type
-      type(ESMF_DataKind), intent(in) :: kind
+      type(ESMF_TypeKind), intent(in) :: kind
       integer, dimension(:), intent(in) :: counts
       integer, intent(in), optional :: haloWidth 
       integer, dimension(:), intent(in), optional :: lbounds
@@ -353,7 +353,7 @@ DeclarationMacro(ArrayCreateByMTPtr)
         logical :: rcpresent                ! did user specify rc?
         integer :: rank
         type(ESMF_DataType) :: type
-        type(ESMF_DataKind) :: kind
+        type(ESMF_TypeKind) :: kind
 
         status = ESMF_FAILURE
         rcpresent = .FALSE.
@@ -430,7 +430,7 @@ DeclarationMacro(ArrayDeallocate)
         logical :: needsdealloc             ! do we need to free space?
         integer :: rank
         type(ESMF_DataType) :: type
-        type(ESMF_DataKind) :: kind
+        type(ESMF_TypeKind) :: kind
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -455,7 +455,7 @@ DeclarationMacro(ArrayDeallocate)
         if (needsdealloc) then
           call c_ESMC_IArrayGetRank(array, rank, status)
           call c_ESMC_IArrayGetType(array, type, status)
-          call c_ESMC_IArrayGetKind(array, kind, status)
+          call c_ESMC_IArrayGetTypeKind(array, kind, status)
           call ESMF_InternArrayF90Deallocate(array, rank, type, kind, status)
           if (ESMF_LogMsgFoundAllocError(status, "Array deallocate", &
                                          ESMF_CONTEXT, rc)) return
@@ -499,7 +499,7 @@ DeclarationMacro(ArrayDeallocate)
       integer, intent(in) :: hwidth
       integer, intent(in) :: rank
       type(ESMF_DataType), intent(in) :: type
-      type(ESMF_DataKind), intent(in) :: kind
+      type(ESMF_TypeKind), intent(in) :: kind
       integer, dimension(:), intent(in) :: lbounds
       integer, dimension(:), intent(in) :: ubounds
       integer, intent(out) :: rc 
@@ -887,7 +887,7 @@ DeclarationMacro(ArrayConstructF90Ptr)
       type(ESMF_InternArray), intent(inout) :: array 
       integer, intent(in) :: rank   
       type(ESMF_DataType), intent(in) :: type
-      type(ESMF_DataKind), intent(in) :: kind
+      type(ESMF_TypeKind), intent(in) :: kind
       integer, dimension(:), intent(in) :: counts 
       integer, dimension(:), intent(in) :: lbounds 
       integer, dimension(:), intent(in) :: ubounds 
@@ -1208,7 +1208,7 @@ AllocAllocateMacro(R8, 7, RNG7, LOC7)
       type(ESMF_InternArray) :: array 
       integer :: rank   
       type(ESMF_DataType) :: type
-      type(ESMF_DataKind) :: kind
+      type(ESMF_TypeKind) :: kind
       integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 

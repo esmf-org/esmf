@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.61 2007/01/26 20:49:51 theurich Exp $
+// $Id: ESMC_Array.C,v 1.62 2007/02/16 05:27:41 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.61 2007/01/26 20:49:51 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.62 2007/02/16 05:27:41 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -127,7 +127,7 @@ ESMC_Array *ESMC_ArrayCreate(
     return ESMC_NULL_POINTER;
   }
   ESMC_DataType type = larrayListArg[0]->ESMC_LocalArrayGetType();
-  ESMC_DataKind kind = larrayListArg[0]->ESMC_LocalArrayGetKind();
+  ESMC_TypeKind kind = larrayListArg[0]->ESMC_LocalArrayGetTypeKind();
   int rank = larrayListArg[0]->ESMC_LocalArrayGetRank();
   for (int i=1; i<larrayCount; i++){
     if (larrayListArg[0]->ESMC_LocalArrayGetType() != type){
@@ -137,9 +137,9 @@ ESMC_Array *ESMC_ArrayCreate(
       array = ESMC_NULL_POINTER;
       return ESMC_NULL_POINTER;
     }
-    if (larrayListArg[0]->ESMC_LocalArrayGetKind() != kind){
+    if (larrayListArg[0]->ESMC_LocalArrayGetTypeKind() != kind){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-        "- Kind mismatch in the elements of larrayList argument", rc);
+        "- TypeKind mismatch in the elements of larrayList argument", rc);
       delete array;
       array = ESMC_NULL_POINTER;
       return ESMC_NULL_POINTER;
@@ -701,7 +701,7 @@ ESMC_Array *ESMC_ArrayCreate(
     return ESMC_NULL_POINTER;
   }
   ESMC_DataType type = arrayspec->ESMC_ArraySpecGetType();
-  ESMC_DataKind kind = arrayspec->ESMC_ArraySpecGetKind();
+  ESMC_TypeKind kind = arrayspec->ESMC_ArraySpecGetTypeKind();
   int rank = arrayspec->ESMC_ArraySpecGetRank();
   // distgrid -> delayout, dimCount
   if (distgrid == NULL){
@@ -1202,7 +1202,7 @@ int ESMC_Array::ESMC_ArrayConstruct(
 // !ARGUMENTS:
 //
   ESMC_DataType typeArg,                  // (in)
-  ESMC_DataKind kindArg,                  // (in)
+  ESMC_TypeKind kindArg,                  // (in)
   int rankArg,                            // (in)
   ESMC_LocalArray **larrayListArg,        // (in)
   ESMC_DistGrid *distgridArg,             // (in)
@@ -1447,7 +1447,7 @@ int ESMC_Array::ESMC_ArrayGet(
 // !ARGUMENTS:
 //
   ESMC_DataType *typeArg,                 // out - type
-  ESMC_DataKind *kindArg,                 // out - kind
+  ESMC_TypeKind *kindArg,                 // out - kind
   int *rankArg,                           // out - rank
   ESMC_LocalArray **localArrayList,       // out - localArrayList
   int localArrayListCount,                // in  - localArrayList elmt count
@@ -1927,7 +1927,7 @@ int ESMC_Array::ESMC_ArrayPrint(){
   // print info about the ESMC_Array object
   printf("--- ESMC_ArrayPrint start ---\n");
   printf("Array type/kind/rank: %s / %s / %d \n", ESMC_DataTypeString(type),
-    ESMC_DataKindString(kind), rank);
+    ESMC_TypeKindString(kind), rank);
   printf("~ cached values ~\n");
   printf("DistGrid dimCount = %d\n", dimCount);
   printf("deCount = %d\n", deCount);
@@ -2006,7 +2006,7 @@ int ESMC_Array::ESMC_ArraySerialize(
   char *cp;
   int *ip;
   ESMC_DataType *dtp;
-  ESMC_DataKind *dkp;
+  ESMC_TypeKind *dkp;
   ESMC_IndexFlag *ifp;
 
   if ((*length - *offset) < sizeof(ESMC_Array)){
@@ -2026,7 +2026,7 @@ int ESMC_Array::ESMC_ArraySerialize(
   // Then, serialize Array meta data
   dtp = (ESMC_DataType *)(buffer + *offset);
   *dtp++ = type;
-  dkp = (ESMC_DataKind *)dtp;
+  dkp = (ESMC_TypeKind *)dtp;
   *dkp++ = kind;
   ip = (int *)dkp;
   *ip++ = rank;
@@ -2078,7 +2078,7 @@ int ESMC_Array::ESMC_ArrayDeserialize(
   char *cp;
   int *ip;
   ESMC_DataType *dtp;
-  ESMC_DataKind *dkp;
+  ESMC_TypeKind *dkp;
   ESMC_IndexFlag *ifp;
 
   // First, deserialize the base class
@@ -2095,7 +2095,7 @@ int ESMC_Array::ESMC_ArrayDeserialize(
   // Then, deserialize Array meta data
   dtp = (ESMC_DataType *)(buffer + *offset);
   type = *dtp++;
-  dkp = (ESMC_DataKind *)dtp;
+  dkp = (ESMC_TypeKind *)dtp;
   kind = *dkp++;
   ip = (int *)dkp;
   rank = *ip++;
@@ -2149,7 +2149,7 @@ int ESMC_Array::ESMC_ArrayScatter(
 //
   void *farrayArg,                      // in -
   ESMC_DataType typeArg,                // in -
-  ESMC_DataKind kindArg,                // in -
+  ESMC_TypeKind kindArg,                // in -
   int rankArg,                          // in -
   int *counts,                          // in -
   int *patchArg,                        // in -
@@ -2191,7 +2191,7 @@ int ESMC_Array::ESMC_ArrayScatter(
   vm->ESMC_VMGet(&localPet, &petCount, NULL, NULL, NULL);
   
 //printf("gjt in ArrayScatter: type/kind/rank: %s / %s / %d \n",
-//ESMC_DataTypeString(typeArg), ESMC_DataKindString(kindArg), rankArg);
+//ESMC_DataTypeString(typeArg), ESMC_TypeKindString(kindArg), rankArg);
 //printf("gjt in ArrayScatter: counts: %d, %d, %d\n", counts[0], counts[1],
 //counts[2]);
 
@@ -2226,7 +2226,7 @@ int ESMC_Array::ESMC_ArrayScatter(
     }
     if (kindArg != kind){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- Kind mismatch between farray argument and Array object", rc);
+        "- TypeKind mismatch between farray argument and Array object", rc);
       return localrc;
     }
     if (rankArg != rank){
@@ -2260,7 +2260,7 @@ int ESMC_Array::ESMC_ArrayScatter(
   }
 
   // size in bytes of each piece of data  
-  int dataSize = ESMC_DataKindSize(kindArg);
+  int dataSize = ESMC_TypeKindSize(kindArg);
 
   // prepare for comms
   vmk_commhandle **commh = new vmk_commhandle*; // used by all comm calls
@@ -2602,7 +2602,7 @@ int ESMC_Array::ESMC_ArrayScatter(
 
 typedef struct{
   int factorListCount;
-  double *factorList;
+  ESMC_R8 *factorList;
   int *factorIndexList;
   void **receiveAddr;
   int *localSendDe;
@@ -2614,8 +2614,8 @@ typedef struct{
   int linIndex;           // linearized index into dstArray's data array
   int seqIndex;           // sequentialized DistGrid index for this cell
   int factorCount;        // number of factors in this cell's linear combination
-  double *factorList;     // sparse matrix factors for terms
-  double *valueList;      // srcArray values for terms
+  ESMC_R8 *factorList;     // sparse matrix factors for terms
+  ESMC_R8 *valueList;      // srcArray values for terms
   //todo: for now assume that this is for double prec. data!
 }TermStorage;
 
@@ -2663,7 +2663,7 @@ int ESMC_ArraySparseMatMulStore(
 //
   ESMC_Array *srcArray,                 // in    -
   ESMC_Array *dstArray,                 // inout -
-  double *factorList,                   // in    -
+  ESMC_R8 *factorList,                   // in    -
   int factorListCount,                  // in    -
   ESMC_InterfaceInt *factorIndexList,   // in    -
   int rootPet,                          // in    -
@@ -2772,12 +2772,12 @@ int ESMC_ArraySparseMatMulStore(
   vm->vmk_broadcast(&(storage->factorStorage->factorListCount), sizeof(int),
     rootPet);
   storage->factorStorage->factorList =
-    new double[storage->factorStorage->factorListCount];
+    new ESMC_R8[storage->factorStorage->factorListCount];
   if (localPet == rootPet)
     memcpy(storage->factorStorage->factorList, factorList,
-      factorListCount*sizeof(double));
+      factorListCount*sizeof(ESMC_R8));
   vm->vmk_broadcast(storage->factorStorage->factorList,
-    storage->factorStorage->factorListCount*sizeof(double), rootPet);
+    storage->factorStorage->factorListCount*sizeof(ESMC_R8), rootPet);
   storage->factorStorage->factorIndexList =
     new int[2*storage->factorStorage->factorListCount];
   if (localPet == rootPet)
@@ -2855,8 +2855,8 @@ int ESMC_ArraySparseMatMulStore(
           dstArray->ESMC_ArrayGetLinearIndexExclusive(i, ii);
         tempTermStorage[termIndex]->seqIndex = seqindex;
         tempTermStorage[termIndex]->factorCount = factorCount;
-        tempTermStorage[termIndex]->factorList = new double[factorCount];
-        tempTermStorage[termIndex]->valueList = new double[factorCount];
+        tempTermStorage[termIndex]->factorList = new ESMC_R8[factorCount];
+        tempTermStorage[termIndex]->valueList = new ESMC_R8[factorCount];
         // fill in sparse mat factors
         int j=0;  // reset
         for (int k=0; k<storage->factorStorage->factorListCount; k++){
@@ -2901,7 +2901,7 @@ int ESMC_ArraySparseMatMulStore(
   // construct local receive table
   storage->recvTable = new RecvTable;
   storage->recvTable->count = totalRecvCount;
-  storage->recvTable->baseSize = sizeof(double);  //todo: don't hardcode this!
+  storage->recvTable->baseSize = sizeof(ESMC_R8);  //todo: don't hardcode this!
   storage->recvTable->srcPet = new int[totalRecvCount];
   storage->recvTable->addr = new void*[totalRecvCount];
   storage->recvTable->commh = new vmk_commhandle*[totalRecvCount];
@@ -2979,7 +2979,7 @@ int ESMC_ArraySparseMatMulStore(
   // construct local send table
   storage->sendTable = new SendTable;
   storage->sendTable->count = totalSendCount;
-  storage->sendTable->baseSize = sizeof(double);  //todo: don't hardcode this!
+  storage->sendTable->baseSize = sizeof(ESMC_R8);  //todo: don't hardcode this!
   storage->sendTable->dstPet = new int[totalSendCount];
   storage->sendTable->localSrcDe = new int[totalSendCount];
   storage->sendTable->linSrcIndex = new int[totalSendCount];
@@ -3120,12 +3120,12 @@ int ESMC_ArraySparseMatMul(
   // loop through termStorage and compute local results
   for (int i=0; i<storage->termCount; i++){
     TermStorage *termStorage = storage->termStorage[i];
-    //todo: don't hardcode double here
-    double *element = 
-      (double *)dstArray->larrayBaseAddrList[termStorage->localDe];
+    //todo: don't hardcode ESMC_R8 here
+    ESMC_R8 *element = 
+      (ESMC_R8 *)dstArray->larrayBaseAddrList[termStorage->localDe];
     element += termStorage->linIndex; // shift to correct element
-    double *factorList = termStorage->factorList;
-    double *valueList = termStorage->valueList;
+    ESMC_R8 *factorList = termStorage->factorList;
+    ESMC_R8 *valueList = termStorage->valueList;
     for (int j=0; j<termStorage->factorCount; j++){
       *element += factorList[j] * valueList[j]; // compute sparse mat mul term
     }
@@ -3415,11 +3415,11 @@ int ESMC_newArray::ESMC_newArrayConstruct(
   if (localPET == rootPET){
     type = larray->ESMC_LocalArrayGetType();
     vm->vmk_broadcast(&type, sizeof(ESMC_DataType), rootPET);
-    kind = larray->ESMC_LocalArrayGetKind();
-    vm->vmk_broadcast(&kind, sizeof(ESMC_DataKind), rootPET);
+    kind = larray->ESMC_LocalArrayGetTypeKind();
+    vm->vmk_broadcast(&kind, sizeof(ESMC_TypeKind), rootPET);
   }else{
     vm->vmk_broadcast(&type, sizeof(ESMC_DataType), rootPET);
-    vm->vmk_broadcast(&kind, sizeof(ESMC_DataKind), rootPET);
+    vm->vmk_broadcast(&kind, sizeof(ESMC_TypeKind), rootPET);
   }
   if (localTid == 0){
     // this is the master thread of an ESMF-thread group
@@ -3569,8 +3569,8 @@ int ESMC_newArray::ESMC_newArrayScatter(
         "- types don't match", &localrc);
       return localrc;
     }
-    ESMC_DataKind laKind = larray->ESMC_LocalArrayGetKind();
-    if (laKind != kind){
+    ESMC_TypeKind laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
+    if (laTypeKind != kind){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
         "- kinds don't match", &localrc);
       return localrc;
@@ -3859,8 +3859,8 @@ int ESMC_newArray::ESMC_newArrayScatter(
       "- types don't match", &localrc);
     return localrc;
   }
-  ESMC_DataKind laKind = larray->ESMC_LocalArrayGetKind();
-  if (laKind != kind){
+  ESMC_TypeKind laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
+  if (laTypeKind != kind){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
       "- kinds don't match", &localrc);
     return localrc;
@@ -4036,8 +4036,8 @@ int ESMC_newArray::ESMC_newArrayScatter(
         "- types don't match", &localrc);
       return localrc;
     }
-    ESMC_DataKind laKind = larray->ESMC_LocalArrayGetKind();
-    if (laKind != kind){
+    ESMC_TypeKind laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
+    if (laTypeKind != kind){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
         "- kinds don't match", &localrc);
       return localrc;
@@ -4080,7 +4080,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 // !ARGUMENTS:
 //
   void *result,             // result value (scalar)
-  ESMC_DataKind dtk,        // data type kind
+  ESMC_TypeKind dtk,        // data type kind
   ESMC_Operation op,        // reduce operation
   int rootPET,              // root
   ESMC_VM *vm){             // optional VM argument to speed up things
@@ -4117,10 +4117,10 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
     localResult = new int;
     break;
   case ESMF_R4:
-    localResult = new float;
+    localResult = new ESMC_R4;
     break;
   case ESMF_R8:
-    localResult = new double;
+    localResult = new ESMC_R8;
     break;
   default:
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
@@ -4225,8 +4225,8 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
           break;
         case ESMF_R4:
           {
-            float *tempResult = (float *)localResult;
-            float *tempBase = (float *)base;
+            ESMC_R4 *tempResult = (ESMC_R4 *)localResult;
+            ESMC_R4 *tempBase = (ESMC_R4 *)base;
             switch (op){
             case ESMF_SUM:
               if (primeFlag)
@@ -4254,8 +4254,8 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
           break;
         case ESMF_R8:
           {
-            double *tempResult = (double *)localResult;
-            double *tempBase = (double *)base;
+            ESMC_R8 *tempResult = (ESMC_R8 *)localResult;
+            ESMC_R8 *tempBase = (ESMC_R8 *)base;
             switch (op){
             case ESMF_SUM:
               if (primeFlag)
@@ -4334,7 +4334,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 // !ARGUMENTS:
 //
   void *result,             // result value (scalar)
-  ESMC_DataKind dtk,        // data type kind
+  ESMC_TypeKind dtk,        // data type kind
   ESMC_Operation op,        // reduce operation
   int rootPET,              // root
   ESMC_newArrayCommHandle *commh, // commu handle for non-blocking mode
@@ -4402,7 +4402,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 // !ARGUMENTS:
 //
   void *result,             // result value (scalar)
-  ESMC_DataKind dtk,        // data type kind
+  ESMC_TypeKind dtk,        // data type kind
   ESMC_Operation op,        // reduce operation
   int rootPET,              // root
   int de,                   // DE for DE-based non-blocking reduce
@@ -4444,11 +4444,11 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
     size = 4;
     break;
   case ESMF_R4:
-    localResult = new float;
+    localResult = new ESMC_R4;
     size = 4;
     break;
   case ESMF_R8:
-    localResult = new double;
+    localResult = new ESMC_R8;
     size = 8;
     break;
   default:
@@ -4548,8 +4548,8 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
       break;
     case ESMF_R4:
       {
-        float *tempResult = (float *)localResult;
-        float *tempBase = (float *)base;
+        ESMC_R4 *tempResult = (ESMC_R4 *)localResult;
+        ESMC_R4 *tempBase = (ESMC_R4 *)base;
         switch (op){
         case ESMF_SUM:
           if (primeFlag)
@@ -4577,8 +4577,8 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
       break;
     case ESMF_R8:
       {
-        double *tempResult = (double *)localResult;
-        double *tempBase = (double *)base;
+        ESMC_R8 *tempResult = (ESMC_R8 *)localResult;
+        ESMC_R8 *tempBase = (ESMC_R8 *)base;
         switch (op){
         case ESMF_SUM:
           if (primeFlag)
@@ -4618,7 +4618,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
     &(commhArray[localDe].vmk_commh[0]), de+5000);
 #if (VERBOSITY > 9)
   printf("gjt in ESMC_newArrayScalarReduce: sent localResult=%g for de = %d\n",
-    *(double *)localResult, de);
+    *(ESMC_R8 *)localResult, de);
 #endif
 
   // garbage collection must be done _after_ associated wait
@@ -5432,7 +5432,7 @@ void *ESMC_newArrayScalarReduceThread(
   ESMC_VM *vm = tharg->vm;
   int rootPET = tharg->rootPET;
   void *result = tharg->result;
-  ESMC_DataKind dtk = tharg->dtk;
+  ESMC_TypeKind dtk = tharg->dtk;
   ESMC_Operation op = tharg->op;
   // prepeare PET-local temporary result variable
   int deCount = array->deCount;
@@ -5444,11 +5444,11 @@ void *ESMC_newArrayScalarReduceThread(
     size = 4;
     break;
   case ESMF_R4:
-    localResult = new float[deCount];
+    localResult = new ESMC_R4[deCount];
     size = 4;
     break;
   case ESMF_R8:
-    localResult = new double[deCount];
+    localResult = new ESMC_R8[deCount];
     size = 8;
     break;
   default:
@@ -5508,8 +5508,8 @@ void *ESMC_newArrayScalarReduceThread(
     break;
   case ESMF_R4:
     {
-      float *tempResult = (float *)result;
-      float *tempBase = (float *)localResult;
+      ESMC_R4 *tempResult = (ESMC_R4 *)result;
+      ESMC_R4 *tempBase = (ESMC_R4 *)localResult;
       switch (op){
       case ESMF_SUM:
         *tempResult = 0.;  // prime the result variable
@@ -5539,8 +5539,8 @@ void *ESMC_newArrayScalarReduceThread(
     break;
   case ESMF_R8:
     {
-      double *tempResult = (double *)result;
-      double *tempBase = (double *)localResult;
+      ESMC_R8 *tempResult = (ESMC_R8 *)result;
+      ESMC_R8 *tempBase = (ESMC_R8 *)localResult;
       switch (op){
       case ESMF_SUM:
         *tempResult = 0.;  // prime the result variable

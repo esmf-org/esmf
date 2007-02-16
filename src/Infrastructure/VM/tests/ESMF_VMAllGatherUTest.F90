@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllGatherUTest.F90,v 1.2 2006/11/16 05:21:22 cdeluca Exp $
+! $Id: ESMF_VMAllGatherUTest.F90,v 1.3 2007/02/16 05:27:48 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMAllGatherUTest.F90,v 1.2 2006/11/16 05:21:22 cdeluca Exp $'
+      '$Id: ESMF_VMAllGatherUTest.F90,v 1.3 2007/02/16 05:27:48 rosalind Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -91,7 +91,7 @@
       ! prepare data array2
       do i=1, nsize
         array2(i) = 2*localPet + i
-        farray2(i) = real( 2*localPet + i)
+        farray2(i) = real( 2*localPet + i , ESMF_KIND_R8 )
         f4array2(i) = farray2(i)
       enddo
 
@@ -164,7 +164,7 @@
       write(name, *) "Verifying farray2 data after allgather Test"
       rc = ESMF_SUCCESS
       do i=1, nsize
-        if (farray2(i)/=real(i + 2 * localPet)) rc = ESMF_FAILURE
+        if (farray2(i)/=real(i + 2 * localPet , ESMF_KIND_R8)) rc = ESMF_FAILURE
       enddo
 
       print *, 'contents after allgather (should be 1.,2.,...):'
@@ -206,7 +206,8 @@
       write(name, *) "Verifying f4array2 data after allgather Test"
       rc = ESMF_SUCCESS
       do i=1, nsize
-        if (f4array2(i)/=real(i + 2 * localPet)) rc = ESMF_FAILURE
+        if (f4array2(i)/=real(i + 2 * localPet , ESMF_KIND_R4))  &
+                        rc = ESMF_FAILURE
       enddo
 
       print *, 'contents after allgather (should be 1.,2.,...):'

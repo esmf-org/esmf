@@ -34,9 +34,9 @@
       integer           nf_fill_short
       integer           nf_fill_int2
       integer           nf_fill_int
-      real              nf_fill_float
-      real              nf_fill_real
-      doubleprecision   nf_fill_double
+      real(ESMF_KIND_R4) ::  f_fill_float
+      real(ESMF_KIND_R4) :: nf_fill_real
+      real(ESMF_KIND_R8) :: nf_fill_double
 
       parameter (nf_fill_byte = -127)
       parameter (nf_fill_int1 = nf_fill_byte)
@@ -489,14 +489,14 @@
 !                          character(*)        name,
 !                          integer             xtype,
 !                          integer             len,
-!                          real                rvals(1))
+!                          real(ESMF_KIND_R4) ::  rvals(1))
       external        nf_put_att_real
 
       integer         nf_get_att_real
 !                         (integer             ncid,
 !                          integer             varid,
 !                          character(*)        name,
-!                          real                rvals(1))
+!                          real(ESMF_KIND_R4) ::  rvals(1))
       external        nf_get_att_real
 
       integer         nf_put_att_double
@@ -641,13 +641,13 @@
       integer         nf_put_var_real
 !                         (integer             ncid,
 !                          integer             varid,
-!                          real                rvals(1))
+!                          real(ESMF_KIND_R4) :: rvals(1))
       external        nf_put_var_real
 
       integer         nf_get_var_real
 !                         (integer             ncid,
 !                          integer             varid,
-!                          real                rvals(1))
+!                          real(ESMF_KIND_R4) :: rvals(1))
       external        nf_get_var_real
 
       integer         nf_put_var_double
@@ -823,7 +823,7 @@
 !                          integer             varid,
 !                          integer             start(1),
 !                          integer             count(1),
-!                          real                rvals(1))
+!                          real(ESMF_KIND_R4) :: rvals(1))
       external        nf_put_vara_real
 
       integer         nf_get_vara_real
@@ -831,7 +831,7 @@
 !                          integer             varid,
 !                          integer             start(1),
 !                          integer             count(1),
-!                          real                rvals(1))
+!                          real(ESMF_KIND_R4) :: rvals(1))
       external        nf_get_vara_real
 
       integer         nf_put_vara_double
@@ -932,7 +932,7 @@
 !                          integer             start(1),
 !                          integer             count(1),
 !                          integer             stride(1),
-!                          real                rvals(1))
+!                          real(ESMF_KIND_R4) :: rvals(1))
       external        nf_put_vars_real
 
       integer         nf_get_vars_real
@@ -941,7 +941,7 @@
 !                          integer             start(1),
 !                          integer             count(1),
 !                          integer             stride(1),
-!                          real                rvals(1))
+!                          real(ESMF_KIND_R4) :: rvals(1))
       external        nf_get_vars_real
 
       integer         nf_put_vars_double
@@ -1053,7 +1053,7 @@
 !                          integer             count(1),
 !                          integer             stride(1),
 !                          integer             imap(1),
-!                          real                rvals(1))
+!                          real(ESMF_KIND_R4) :: rvals(1))
       external        nf_put_varm_real
 
       integer         nf_get_varm_real
@@ -1063,7 +1063,7 @@
 !                          integer             count(1),
 !                          integer             stride(1),
 !                          integer             imap(1),
-!                          real                rvals(1))
+!                          real(ESMF_KIND_R4) :: rvals(1))
       external        nf_get_varm_real
 
       integer         nf_put_varm_double
@@ -1301,8 +1301,8 @@
       integer filchar
       integer filshort
       integer fillong
-      real filfloat
-      doubleprecision fildoub
+      real(ESMF_KIND_R4) :: filfloat
+      real(ESMF_KIND_R8) :: fildoub
 
       parameter (filbyte = -127)
       parameter (filchar = 0)

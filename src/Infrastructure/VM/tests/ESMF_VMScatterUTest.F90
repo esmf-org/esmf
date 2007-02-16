@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterUTest.F90,v 1.4 2006/11/16 05:21:22 cdeluca Exp $
+! $Id: ESMF_VMScatterUTest.F90,v 1.5 2007/02/16 05:27:49 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMScatterUTest.F90,v 1.4 2006/11/16 05:21:22 cdeluca Exp $'
+      '$Id: ESMF_VMScatterUTest.F90,v 1.5 2007/02/16 05:27:49 rosalind Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -85,7 +85,7 @@
       ! prepare data array1
       do i=1, nlen
         array1(i) = localPet * 100 + i
-        farray1(i) = real(array1(i))
+        farray1(i) = real(array1(i),ESMF_KIND_R8)
         f4array1(i) = farray1(i)
       enddo
 
@@ -158,7 +158,8 @@
       write(name, *) "Verifying farray1 data after scatter Test"
       rc = ESMF_SUCCESS
       do i=1, nlen
-        if ( farray1(i)/=( real(localPet*100+i) ) ) rc = ESMF_FAILURE
+        if ( farray1(i)/=( real(localPet*100+i , ESMF_KIND_R8) ) ) &
+                          rc = ESMF_FAILURE
       enddo
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -174,8 +175,9 @@
       write(name, *) "Verifying farray2 data after scatter Test"
       rc = ESMF_SUCCESS
       do i=1, nsize
-        if (farray2(i) /= ( real( scatterRoot*100+i+2*localPet ) ) ) &
-         rc = ESMF_FAILURE
+        if (farray2(i) /=    &
+         ( real( scatterRoot*100+i+2*localPet , ESMF_KIND_R8 ) ) ) &
+             rc = ESMF_FAILURE
       enddo
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -202,7 +204,8 @@
       write(name, *) "Verifying f4array1 data after scatter Test"
       rc = ESMF_SUCCESS
       do i=1, nlen
-        if ( f4array1(i)/=( real(localPet*100+i) ) ) rc = ESMF_FAILURE
+        if ( f4array1(i)/=( real(localPet*100+i , ESMF_KIND_R4 ) ) )  &
+                          rc = ESMF_FAILURE
       enddo
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -218,8 +221,9 @@
       write(name, *) "Verifying f4array2 data after scatter Test"
       rc = ESMF_SUCCESS
       do i=1, nsize
-        if (f4array2(i) /= ( real( scatterRoot*100+i+2*localPet ) ) ) &
-         rc = ESMF_FAILURE
+        if (f4array2(i) /=      &
+          ( real( scatterRoot*100+i+2*localPet , ESMF_KIND_R4 ) ) ) &
+             rc = ESMF_FAILURE
       enddo
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 

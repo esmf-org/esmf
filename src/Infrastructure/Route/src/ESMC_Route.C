@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.157 2007/01/26 18:48:01 theurich Exp $
+//$Id: ESMC_Route.C,v 1.158 2007/02/16 05:27:47 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.157 2007/01/26 18:48:01 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.158 2007/02/16 05:27:47 rosalind Exp $";
 //-----------------------------------------------------------------------------
 class permuteLocal {
 public:
@@ -596,7 +596,7 @@ int compare2(const void *item1, const void *item2) {
 // !ARGUMENTS:
     void *sendAddr,         // in, single local send buffer base address
     void *recvAddr,         // in, single local receive buffer base address
-    ESMC_DataKind dk) {     // in, data kind for both src & dest
+    ESMC_TypeKind dk) {     // in, data kind for both src & dest
 //
 // !DESCRIPTION:
 //     Calls the communications routines to send/recv the information
@@ -629,7 +629,7 @@ int compare2(const void *item1, const void *item2) {
 // !ARGUMENTS:
       void **sendAddr,       // in, list of local send buffer base addresses
       void **recvAddr,       // in, list of local receive buffer base addresses
-      ESMC_DataKind dk,      // in, data kind for both src & dest
+      ESMC_TypeKind dk,      // in, data kind for both src & dest
       int numAddrs) {        // in, count of src and dst addresses (must be = )
 //
 // !DESCRIPTION:
@@ -677,13 +677,13 @@ int compare2(const void *item1, const void *item2) {
     vmk_commhandle **handle;
     
     // uncomment for profiling
-    // double time, starttime;
+    // ESMC_R8 time, starttime;
 
     // debug
     // ESMC_RoutePrint();
 
     VMType = 0;   // TODO: unused so far, here for future use
-    nbytes = ESMC_DataKindSize(dk);
+    nbytes = ESMC_TypeKindSize(dk);
     useOptions = options;
 
 // make sure at least one sync/async option set, and one

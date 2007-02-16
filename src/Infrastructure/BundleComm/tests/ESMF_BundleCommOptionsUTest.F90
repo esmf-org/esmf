@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.7 2006/12/07 05:28:53 samsoncheung Exp $
+! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.8 2007/02/16 05:27:43 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.7 2006/12/07 05:28:53 samsoncheung Exp $'
+      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.8 2007/02/16 05:27:43 rosalind Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -63,7 +63,7 @@
     type(ESMF_RouteHandle) :: routehandle
     type(ESMF_RouteOptions) :: roption
 
-    real :: maxerror
+    real(ESMF_KIND_R8) :: maxerror
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -852,7 +852,7 @@ contains
 
     subroutine verifyResults(userfield, returnedError, result, rc)
       type(ESMF_Field), intent(inout) :: userfield
-      real, intent(out) :: returnedError
+      real(ESMF_KIND_R8), intent(out) :: returnedError
       integer, intent(inout) :: result
       integer, intent(out) :: rc
 

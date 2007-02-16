@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.18 2006/03/28 21:52:36 theurich Exp $
+! $Id: FlowMod.F90,v 1.19 2007/02/16 05:27:52 rosalind Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -148,7 +148,7 @@
 ! Local variables
 !
       integer :: i, j, x, y, nx, ny, ncounts(2), pos(2), de_id
-      double precision :: s_
+      real(ESMF_KIND_R8) :: s_
       type(ESMF_Grid) :: grid
       type(ESMF_DELayout) :: layout
 !
@@ -385,7 +385,7 @@
 !
 ! Local variables
 !
-      double precision :: s_
+      real(ESMF_KIND_R8) :: s_
 !
 ! Set initial values
 !

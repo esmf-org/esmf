@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray.h,v 1.3 2006/11/16 05:21:03 cdeluca Exp $
+// $Id: ESMC_InternArray.h,v 1.4 2007/02/16 05:27:45 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ class ESMC_InternArray : public ESMC_LocalArray { // inherit from LocalArray cls
 //
   public:
     int ESMC_ArrayConstruct(int irank, ESMC_DataType dt, 
-            ESMC_DataKind dk, int *counts, void *base, 
+            ESMC_TypeKind dk, int *counts, void *base, 
             ESMC_ArrayOrigin oflag, struct c_F90ptr *f90ptr, 
             ESMC_ArrayDoAllocate aflag, 
             ESMC_DataCopy docopy, ESMC_Logical dflag, 
@@ -112,9 +112,9 @@ class ESMC_InternArray : public ESMC_LocalArray { // inherit from LocalArray cls
                                                      return ESMF_SUCCESS;}
     ESMC_DataType ESMC_ArrayGetType(void) { return this->type; }
 
-    int ESMC_ArraySetKind(ESMC_DataKind kind) { this->kind = kind; 
+    int ESMC_ArraySetTypeKind(ESMC_TypeKind kind) { this->kind = kind; 
                                                      return ESMF_SUCCESS;}
-    ESMC_DataKind ESMC_ArrayGetKind(void) { return this->kind; }
+    ESMC_TypeKind ESMC_ArrayGetTypeKind(void) { return this->kind; }
 
     int ESMC_ArrayGetHWidth(int *hw) { *hw = this->hwidth[0][0]; 
                                                      return ESMF_SUCCESS; }
@@ -209,16 +209,16 @@ class ESMC_InternArray : public ESMC_LocalArray { // inherit from LocalArray cls
 
 
 // these are functions, but not class methods.
-ESMC_InternArray *ESMC_InternArrayCreate(int rank, ESMC_DataType dt, ESMC_DataKind dk, 
+ESMC_InternArray *ESMC_InternArrayCreate(int rank, ESMC_DataType dt, ESMC_TypeKind dk, 
                     int *counts = NULL, void *base = NULL, 
                     ESMC_DataCopy docopy = ESMC_DATA_REF,
                     int *rc = NULL);
-ESMC_InternArray *ESMC_InternArrayCreate(int rank, ESMC_DataType dt, ESMC_DataKind dk, 
+ESMC_InternArray *ESMC_InternArrayCreate(int rank, ESMC_DataType dt, ESMC_TypeKind dk, 
                     int *counts, void *base, 
                     ESMC_DataCopy docopy,
                     int halo_widths, int *rc);
 int ESMC_InternArrayDestroy(ESMC_InternArray *array);
-ESMC_InternArray *ESMC_InternArrayCreate_F(int rank, ESMC_DataType dt, ESMC_DataKind dk, 
+ESMC_InternArray *ESMC_InternArrayCreate_F(int rank, ESMC_DataType dt, ESMC_TypeKind dk, 
                     int *icounts = NULL, struct c_F90ptr *f90ptr = NULL, 
                     void *base = NULL, 
                     ESMC_DataCopy docopy = ESMC_DATA_REF,
@@ -226,7 +226,7 @@ ESMC_InternArray *ESMC_InternArrayCreate_F(int rank, ESMC_DataType dt, ESMC_Data
                     int *offsets = NULL, 
                     int halo_widths = 0, int *rc = NULL);
 ESMC_InternArray *ESMC_InternArrayCreateNoData(int rank, ESMC_DataType dt, 
-                                   ESMC_DataKind dk, ESMC_ArrayOrigin oflag,
+                                   ESMC_TypeKind dk, ESMC_ArrayOrigin oflag,
                                    int *rc = NULL);
 
 
@@ -239,17 +239,17 @@ ESMC_InternArray *ESMC_InternArrayCreateNoData(int rank, ESMC_DataType dt,
 
 extern "C" {
   void FTN(f_esmf_arrayf90allocate)(ESMC_InternArray**, int *, ESMC_DataType*,
-                                    ESMC_DataKind*, int*, int*, 
+                                    ESMC_TypeKind*, int*, int*, 
                                     int *, int *, int *);
   void FTN(f_esmf_arrayf90deallocate)(ESMC_InternArray**, int*, ESMC_DataType*,
-                                      ESMC_DataKind *, int*);
+                                      ESMC_TypeKind *, int*);
 
   void FTN(c_esmc_arraycreateall)(ESMC_InternArray **ptr, int *rank, 
-                                  ESMC_DataType *dt, ESMC_DataKind *dk,
+                                  ESMC_DataType *dt, ESMC_TypeKind *dk,
                                   int *counts, int *lbounds, int *ubounds,
                                   int *status);
   void FTN(c_esmc_arraycreatenodata)(ESMC_InternArray **ptr, int *rank, 
-                                     ESMC_DataType *dt, ESMC_DataKind *dk, 
+                                     ESMC_DataType *dt, ESMC_TypeKind *dk, 
                                      ESMC_ArrayOrigin *oflag, int *status);
   void FTN(c_esmc_arraysetinfo)(ESMC_InternArray **ptr, 
                             struct c_F90ptr *fptr, void XD *base, int *counts,
@@ -264,7 +264,7 @@ extern "C" {
   void FTN(c_esmc_arraygethwidthlist)(ESMC_InternArray **ptr, int *hwidth, int *status);
   void FTN(c_esmc_arraygetrank)(ESMC_InternArray **ptr, int *rank, int *status);
   void FTN(c_esmc_arraygettype)(ESMC_InternArray **ptr, int *type, int *status);
-  void FTN(c_esmc_arraygetkind)(ESMC_InternArray **ptr, int *kind, int *status);
+  void FTN(c_esmc_arraygettypekind)(ESMC_InternArray **ptr, int *kind, int *status);
   void FTN(c_esmc_arraygetname)(ESMC_InternArray **ptr, char *name, int *status, int nlen);
   void FTN(c_esmc_arraydestroy)(ESMC_InternArray **ptr, int *status);
   void FTN(c_esmc_arraysetaxisindex)(ESMC_InternArray **ptr, ESMC_DomainType *dt, 

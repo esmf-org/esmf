@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.18 2006/12/07 23:46:30 oehmke Exp $
+! $Id: ESMF_VMUTest.F90,v 1.19 2007/02/16 05:27:49 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -400,7 +400,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      fsum=0
+      sum=0
       do i=1,nsize
         f4array3_soln(i) = minval( f4array2(i,:) )
         print *, localPet,'f4array3(',i,')=',f4array3(i), &
@@ -522,7 +522,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.18 2006/12/07 23:46:30 oehmke Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.19 2007/02/16 05:27:49 rosalind Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -585,7 +585,7 @@
       ! prepare data array1, farray1, f4array1
       do i=1, nsize
         array1(i) = localPet * 100 + i
-        farray1(i)= real( array1(i) )
+        farray1(i)= real( array1(i) , ESMF_KIND_R8)
         f4array1(i)=farray1(i)
       enddo
 
@@ -596,7 +596,7 @@
       do j=1, npets 
       	do i=1, nsize
         	array2(i,j) = (j-1) * 100 + i
-               farray2(i,j) = real( array2(i,j) )
+               farray2(i,j) = real( array2(i,j) , ESMF_KIND_R8)
               f4array2(i,j) = farray2(i,j)
       	enddo
       enddo

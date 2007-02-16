@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.82 2007/02/16 03:25:34 rosalind Exp $
+// $Id: ESMC_TimeInterval.C,v 1.83 2007/02/16 05:27:48 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.82 2007/02/16 03:25:34 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.83 2007/02/16 05:27:48 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1197,7 +1197,7 @@
                                                       //        to divide by
 //
 // !DESCRIPTION:
-//    Returns this time interval divided by given time interval as a double
+//    Returns this time interval divided by given time interval as a ESMC_R8
 //    precision quotient.
 //
 //EOP
@@ -1472,14 +1472,14 @@
       const ESMC_R8 &divisor) const {   // in - double precision divisor
 //
 // !DESCRIPTION:
-//    Divides a {\tt ESMC\_TimeInterval} by an double divisor,
+//    Divides a {\tt ESMC\_TimeInterval} by an ESMC_R8 divisor,
 //    returns quotient as a {\tt ESMC\_TimeInterval}
 //
 //EOP
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeInterval::operator/(double)"
+ #define ESMC_METHOD "ESMC_TimeInterval::operator/(ESMC_R8)"
 
     // copy calendar, startTime, endTime from this time interval
     ESMC_TimeInterval quotient = *this;
@@ -2972,8 +2972,8 @@
       // strict ISO 8601 format PyYmMdDThHmMs[.f]S 
 
       // convert integer fractional seconds to decimal form
-      double fractionalSeconds = 0.0;
-      if (sD != 0) fractionalSeconds = (double) sN / (double) sD;
+      ESMC_R8 fractionalSeconds = 0.0;
+      if (sD != 0) fractionalSeconds = (ESMC_R8) sN / (ESMC_R8) sD;
 
       // if fractionalSeconds non-zero (>= 0.5 ns) append full fractional value
       if (fabs(fractionalSeconds) >= 5e-10) {

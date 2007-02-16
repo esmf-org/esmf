@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayGetEx.F90,v 1.3 2006/11/16 05:21:03 cdeluca Exp $
+! $Id: ESMF_InternArrayGetEx.F90,v 1.4 2007/02/16 05:27:45 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
     integer :: arank, rc
     integer :: i, j, ni, nj
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_DataKind) :: akind
+    type(ESMF_TypeKind) :: akind
     type(ESMF_DataType) :: atype
     type(ESMF_Array) :: array1, array2
     real(selected_real_kind(6,45)), dimension(:,:), pointer :: realptr, realptr2

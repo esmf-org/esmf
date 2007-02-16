@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.19 2006/12/08 18:39:06 oehmke Exp $
+! $Id: user_model1.F90,v 1.20 2007/02/16 05:27:51 rosalind Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -149,8 +149,8 @@
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set initial data values over whole arrays to our de id
-        humidityData = real(pet_id)
-        pressureData = real(pet_id)
+        humidityData = real(pet_id,ESMF_KIND_R8)
+        pressureData = real(pet_id,ESMF_KIND_R8)
 
         ! Add a "humidity" fields to the export state.
         call ESMF_StateAddField(exportState, humidity1, rc=status)

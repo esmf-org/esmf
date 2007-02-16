@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.38 2006/11/16 05:21:23 cdeluca Exp $
+// $Id: ESMC_Comp_F.C,v 1.39 2007/02/16 05:27:49 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -52,8 +52,8 @@ static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase,
      void *f90comp = ptr;
      ESMC_FTable *tabptr;
 
-     //printf("ptr = 0x%08x\n", (unsigned long)ptr);
-     //printf("*ptr = 0x%08x\n", (unsigned long)(*(int*)ptr));
+     //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
+     //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
      if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
                                               "null pointer found", status);
@@ -61,7 +61,7 @@ static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase,
      }
 
      tabptr = **(ESMC_FTable***)ptr;
-     //printf("tabptr = 0x%08x\n", (unsigned long)(tabptr));
+     //printf("tabptr = 0x%08x\n", (ESMC_POINTER)(tabptr));
      newtrim(tname, slen, phase, &nstate, &name);
          
      //printf("SetTypedEP: setting function name = '%s'\n", name);
@@ -87,8 +87,8 @@ static void ESMC_GetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     enum dtype dtype;
     int localrc;
 
-     //printf("ptr = 0x%08x\n", (unsigned long)ptr);
-     //printf("*ptr = 0x%08x\n", (unsigned long)(*(int*)ptr));
+     //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
+     //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
     if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
                                               "null pointer found", status);
@@ -106,8 +106,8 @@ static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     enum dtype dtype = DT_VOIDP;
     int localrc;
 
-     //printf("ptr = 0x%08x\n", (unsigned long)ptr);
-     //printf("*ptr = 0x%08x\n", (unsigned long)(*(int*)ptr));
+     //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
+     //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
     if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
                                               "null pointer found", status);
@@ -133,8 +133,8 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
      
      if (status) *status = ESMF_SUCCESS;  // assume success 'till problems found
 
-     //printf("ptr = 0x%08x\n", (unsigned long)ptr);
-     //printf("*ptr = 0x%08x\n", (unsigned long)(*(int*)ptr));
+     //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
+     //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
      //if ((ptr == ESMC_NULL_POINTER)) {
      if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
@@ -142,7 +142,7 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
         return;
      }
      tabptr = **(ESMC_FTable***)ptr;
-     //printf("tabptr = 0x%08x\n", (unsigned long)(tabptr));
+     //printf("tabptr = 0x%08x\n", (ESMC_POINTER)(tabptr));
 
      // TODO: shouldn't need to expand the table here - should be buried
      // inside ftable code.

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.47 2007/01/19 22:06:24 theurich Exp $
+// $Id: ESMC_Array.h,v 1.48 2007/02/16 05:27:40 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
   private:
     // global information
     ESMC_DataType type;
-    ESMC_DataKind kind;
+    ESMC_TypeKind kind;
     int rank;
     ESMC_IndexFlag indexflag;
     //todo: the LocalArray pointers should be shared between PETs in the same
@@ -89,7 +89,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     
   public:
     // Construct and Destruct
-    int ESMC_ArrayConstruct(ESMC_DataType type, ESMC_DataKind kind, int rank,
+    int ESMC_ArrayConstruct(ESMC_DataType type, ESMC_TypeKind kind, int rank,
       ESMC_LocalArray **larrayList,
       ESMC_DistGrid *distgrid, int *exclusiveLBound, int *exclusiveUBound, 
       int *computationalLBound, int *computationalUBound, 
@@ -104,7 +104,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     char *ESMC_ArrayGet(void){
       return ESMC_BaseGetName();
     }
-    int ESMC_ArrayGet(ESMC_DataType *type, ESMC_DataKind *kind, int *rank,
+    int ESMC_ArrayGet(ESMC_DataType *type, ESMC_TypeKind *kind, int *rank,
       ESMC_LocalArray **localArrayList, int localArrayListCount,
       ESMC_DistGrid **distgridArg, ESMC_DELayout **delayoutArg,
       ESMC_IndexFlag *indexflag, ESMC_InterfaceInt *dimmapArg,
@@ -125,12 +125,12 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_ArrayDeserialize(char *buffer, int *offset);
     
     // comm methods
-    int ESMC_ArrayScatter(void *farray, ESMC_DataType type, ESMC_DataKind kind,
+    int ESMC_ArrayScatter(void *farray, ESMC_DataType type, ESMC_TypeKind kind,
       int rank, int *counts, int *patch, int rootPet, ESMC_VM *vm);
     
     // external friend functions
     friend int ESMC_ArraySparseMatMulStore(ESMC_Array *srcArray, 
-      ESMC_Array *dstArray, double *factorList, int factorListCount,
+      ESMC_Array *dstArray, ESMC_R8 *factorList, int factorListCount,
       ESMC_InterfaceInt *factorIndexList, int rootPet, 
       ESMC_RouteHandle **routehandle);
     friend int ESMC_ArraySparseMatMul(ESMC_Array *srcArray, 
@@ -182,7 +182,7 @@ typedef struct{
   int de;                   // DE for DE-based non-blocking operation
   int rootPET;              // root
   void *result;             // result memory location
-  ESMC_DataKind dtk;        // data type kind
+  ESMC_TypeKind dtk;        // data type kind
   ESMC_Operation op;        // operation flag
 }ESMC_newArrayThreadArg;
 
@@ -192,7 +192,7 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
   private:
     int rank;                 // rank of newArray
     ESMC_DataType type;       // type of newArray (for F90)
-    ESMC_DataKind kind;       // kind of newArray (for F90)
+    ESMC_TypeKind kind;       // kind of newArray (for F90)
     int **globalDataLBound;   // dataBox for this DE [de][dim]
     int **globalDataUBound;   // dataBox for this DE [de][dim]
     int **localFullLBound;    // fullBox (data + halo) for this DE [de][dim]
@@ -259,14 +259,14 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
 
     int ESMC_newArrayScalarReduce(
       void *result,             // result value (scalar)
-      ESMC_DataKind dtk,        // data type kind
+      ESMC_TypeKind dtk,        // data type kind
       ESMC_Operation op,        // reduce operation
       int rootPET,              // root
       ESMC_VM *vm=NULL);        // optional VM argument to speed up things
 
     int ESMC_newArrayScalarReduce(
       void *result,             // result value (scalar)
-      ESMC_DataKind dtk,        // data type kind
+      ESMC_TypeKind dtk,        // data type kind
       ESMC_Operation op,        // reduce operation
       int rootPET,              // root
       ESMC_newArrayCommHandle *commh, // commu handle for non-blocking mode
@@ -274,7 +274,7 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
 
     int ESMC_newArrayScalarReduce(
       void *result,             // result value (scalar)
-      ESMC_DataKind dtk,        // data type kind
+      ESMC_TypeKind dtk,        // data type kind
       ESMC_Operation op,        // reduce operation
       int rootPET,              // root
       int de,                   // DE for DE-based non-blocking reduce

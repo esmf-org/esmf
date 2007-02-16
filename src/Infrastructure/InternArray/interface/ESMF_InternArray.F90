@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArray.F90,v 1.8 2007/02/01 05:06:39 theurich Exp $
+! $Id: ESMF_InternArray.F90,v 1.9 2007/02/16 05:27:45 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -142,7 +142,7 @@ module ESMF_InternArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArray.F90,v 1.8 2007/02/01 05:06:39 theurich Exp $'
+    '$Id: ESMF_InternArray.F90,v 1.9 2007/02/16 05:27:45 rosalind Exp $'
 !
 !==============================================================================
 !
@@ -278,7 +278,7 @@ end subroutine
       type(ESMF_InternArray), intent(in) :: array
       integer, intent(out), optional :: rank
       type(ESMF_DataType), intent(out), optional :: type
-      type(ESMF_DataKind), intent(out), optional :: kind
+      type(ESMF_TypeKind), intent(out), optional :: kind
       integer, dimension(:), intent(out), optional :: counts
       integer, dimension(:), intent(out), optional :: lbounds
       integer, dimension(:), intent(out), optional :: ubounds
@@ -307,7 +307,7 @@ end subroutine
 !           {\tt ESMF\_DATA\_LOGICAL}, {\tt ESMF\_DATA\_CHARACTER}, or
 !           {\tt ESMF\_DATA\_COMPLEX}.
 !     \item [{[kind]}]
-!           {\tt ESMF\_DataKind} variable which indicates 
+!           {\tt ESMF\_DataTypeKind} variable which indicates 
 !           the item size in bytes.  Will be one of:
 !           {\tt ESMF\_I1}, {\tt ESMF\_I2}, {\tt ESMF\_I4},
 !           {\tt ESMF\_I8}, {\tt ESMF\_R4}, {\tt ESMF\_R8},
@@ -360,7 +360,7 @@ end subroutine
       endif
 
       if (present(kind)) then
-         call c_ESMC_IArrayGetKind(array, kind, status)
+         call c_ESMC_IArrayGetTypeKind(array, kind, status)
          if (status .ne. ESMF_SUCCESS) return
       endif
 
@@ -1109,7 +1109,7 @@ end subroutine
       type(ESMF_InternArray), intent(in) :: array  
       character(len=*), intent(in) :: name
       type(ESMF_DataType), intent(out), optional :: datatype
-      type(ESMF_DataKind), intent(out), optional :: datakind
+      type(ESMF_TypeKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
@@ -1146,7 +1146,7 @@ end subroutine
 
       integer :: status                           ! Error status
       type(ESMF_DataType) :: localDt
-      type(ESMF_DataKind) :: localDk
+      type(ESMF_TypeKind) :: localDk
       integer :: localCount
 
       ! Check init status of arguments
@@ -1183,7 +1183,7 @@ end subroutine
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out), optional :: name
       type(ESMF_DataType), intent(out), optional :: datatype
-      type(ESMF_DataKind), intent(out), optional :: datakind
+      type(ESMF_TypeKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
@@ -1224,7 +1224,7 @@ end subroutine
       integer :: status                           ! Error status
       character(len=ESMF_MAXSTR) :: localName
       type(ESMF_DataType) :: localDt
-      type(ESMF_DataKind) :: localDk
+      type(ESMF_TypeKind) :: localDk
       integer :: localCount
 
       ! Check init status of arguments

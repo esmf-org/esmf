@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArrayComm.C,v 1.3 2006/11/16 05:21:05 cdeluca Exp $
+// $Id: ESMC_InternArrayComm.C,v 1.4 2007/02/16 05:27:46 rosalind Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArrayComm.C,v 1.3 2006/11/16 05:21:05 cdeluca Exp $";
+            "$Id: ESMC_InternArrayComm.C,v 1.4 2007/02/16 05:27:46 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -117,7 +117,7 @@ static int ESMC_newDELayoutGatherArray(
                                  //       structures for exclusive data
       ESMC_AxisIndex *AIPtr2,    // in  - pointer to array of AxisIndex
                                  //       structures for total data
-      ESMC_DataKind datatype,    // in  - real, integer, *4, *8
+      ESMC_TypeKind datatype,    // in  - real, integer, *4, *8
       void *GlobalArray) {       // out - global array
 //
 // !DESCRIPTION:
@@ -139,7 +139,7 @@ static int ESMC_newDELayoutGatherArray(
   ny = ncount[1];
   
   int rankx, ranky;
-  int bytesperitem = ESMC_DataKindSize(datatype);
+  int bytesperitem = ESMC_TypeKindSize(datatype);
  
 
   // switch based on array rank
@@ -442,7 +442,7 @@ static int ESMC_newDELayoutGatherArray(
     int i, j, k, l, m;     // general counter vars
     int thisde;
     int i_exc, j_exc;
-    float *fp, *fp0;
+    ESMC_R4 *fp, *fp0;
     int *ip, *ip0;
     int counts[ESMF_MAXDIM];
     ESMC_InternArray *scattered;
@@ -472,10 +472,10 @@ static int ESMC_newDELayoutGatherArray(
         if (thisde == deid) {
           scattered = ESMC_InternArrayCreate(this->rank, this->type, this->kind, counts);
           // allocate global array from this size
-          fp = (float *)(scattered->base_addr);
+          fp = (ESMC_R4 *)(scattered->base_addr);
 
           // call layoutscatter to fill this array
-          fp0 = (float *)this->base_addr;
+          fp0 = (ESMC_R4 *)this->base_addr;
 
           // call something which will do a receive
           delayout->ESMC_DELayoutScatterArrayF(fp0, decompids, size_decomp, 
@@ -575,7 +575,7 @@ static int ESMC_newDELayoutGatherArray(
     }
 
     // allocate global array from this size
-    vp = (void *)(new char[gsize * ESMC_DataKindSize(this->kind)]);
+    vp = (void *)(new char[gsize * ESMC_TypeKindSize(this->kind)]);
 
     // call layoutgather to fill this array
 //jw    delayout->ESMC_DELayoutGatherArray(this->base_addr, global_dimlengths, 

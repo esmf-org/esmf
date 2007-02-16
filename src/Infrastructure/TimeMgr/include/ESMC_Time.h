@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.45 2007/02/16 03:25:33 rosalind Exp $
+// $Id: ESMC_Time.h,v 1.46 2007/02/16 05:27:47 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@
     int ESMC_TimeSet(ESMC_Calendar *calendar, int timeZone,
                      const char *timeList, ...);
     int ESMC_TimeSet(const char *timeList, ...);
-    // e.g. ESMC_TimeSet("s" , (double) s);
+    // e.g. ESMC_TimeSet("s" , (ESMC_R8) s);
 
     bool ESMC_TimeIsLeapYear(int *rc=0) const;
     bool ESMC_TimeIsSameCalendar(const ESMC_Time *time, int *rc=0) const;

@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.45 2007/02/16 03:25:33 rosalind Exp $
+// $Id: ESMC_TimeInterval.h,v 1.46 2007/02/16 05:27:47 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -150,7 +150,7 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     //   corresponds to F90 named-optional-arguments interface
 
     int ESMC_TimeIntervalSet(const char *timeList, ...);
-    // e.g. Set("s" , (double) s);
+    // e.g. Set("s" , (ESMC_R8) s);
 
     // (TMG 1.1)
     int ESMC_TimeIntervalGet(const char *timeList, ...) const;

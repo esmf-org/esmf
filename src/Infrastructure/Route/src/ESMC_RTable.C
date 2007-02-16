@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.27 2006/11/16 05:21:16 cdeluca Exp $
+// $Id: ESMC_RTable.C,v 1.28 2007/02/16 05:27:47 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_RTable.C,v 1.27 2006/11/16 05:21:16 cdeluca Exp $";
+            "$Id: ESMC_RTable.C,v 1.28 2007/02/16 05:27:47 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -528,7 +528,7 @@ int compare(const void* item1, const void* item2) {
         // do not print out 0 entries
         if (entry[i].xpcount == 0) continue;
         sprintf(msgbuf, "%2d: pet=%2d, xpcount=%2d, xpaddr=0x%08lx\n",
-                 i, entry[i].vmid, entry[i].xpcount, (long int)(entry[i].xp)); 
+                 i, entry[i].vmid, entry[i].xpcount, (ESMC_I8)(entry[i].xp)); 
         //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
         printf(msgbuf);
         for (j=0, xptr=&(entry[i].xp[0]); j<entry[i].xpcount; j++, xptr++)

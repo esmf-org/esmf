@@ -1,4 +1,4 @@
-!  $Id: ESMF_Alloc_C.F90,v 1.3 2006/11/16 05:21:03 cdeluca Exp $
+!  $Id: ESMF_Alloc_C.F90,v 1.4 2007/02/16 05:27:45 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Alloc_C.F90,v 1.3 2006/11/16 05:21:03 cdeluca Exp $'
+!      '$Id: ESMF_Alloc_C.F90,v 1.4 2007/02/16 05:27:45 rosalind Exp $'
 !==============================================================================
    subroutine f_esmf_arrayf90allocate(array, rank, type, kind, counts, &
                                       lbounds, ubounds, hwidth, rc)
@@ -35,7 +35,7 @@
      type(ESMF_InternArray) :: array
      integer :: rank
      type(ESMF_DataType) :: type
-     type(ESMF_DataKind) :: kind
+     type(ESMF_TypeKind) :: kind
      integer :: counts(rank)
      integer :: lbounds(rank)
      integer :: ubounds(rank)
@@ -56,7 +56,7 @@
      type(ESMF_InternArray) :: array
      integer :: rank
      type(ESMF_DataType) :: type
-     type(ESMF_DataKind) :: kind
+     type(ESMF_TypeKind) :: kind
      integer, intent(out) :: rc     
 
      call ESMF_InternArrayF90Deallocate(array, rank, type, kind, rc)

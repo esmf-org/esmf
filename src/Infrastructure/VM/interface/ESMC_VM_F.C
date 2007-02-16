@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.61 2007/01/26 18:48:02 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.62 2007/02/16 05:27:48 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ extern "C" {
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
   void FTN(c_esmc_vmallfullreduce)(ESMC_VM **vm, void *input, void *output, 
-    int *count, ESMC_DataKind *dtk, ESMC_Operation *op, int *rc){
+    int *count, ESMC_TypeKind *dtk, ESMC_Operation *op, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmallfullreduce()"
     // start assuming local success
@@ -90,7 +90,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_vmallgatherv)(ESMC_VM **vm, void *sendData, int *sendCount,
-    void *recvData, int *recvCounts, int *recvOffsets, ESMC_DataKind *dtk, 
+    void *recvData, int *recvCounts, int *recvOffsets, ESMC_TypeKind *dtk, 
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmallgatherv()"
@@ -119,7 +119,7 @@ extern "C" {
   }
   
   void FTN(c_esmc_vmallreduce)(ESMC_VM **vm, void *input, void *output, 
-    int *count, ESMC_DataKind *dtk, ESMC_Operation *op, int *rc){
+    int *count, ESMC_TypeKind *dtk, ESMC_Operation *op, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmallreduce()"
     // start assuming local success
@@ -147,7 +147,7 @@ extern "C" {
 
   void FTN(c_esmc_vmalltoallv)(ESMC_VM **vm, void *sendData, int *sendCounts,
     int *sendOffsets, void *recvData, int *recvCounts, int *recvOffsets, 
-    ESMC_DataKind *dtk, int *rc){
+    ESMC_TypeKind *dtk, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmalltoallv()"
     // start assuming local success
@@ -290,7 +290,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_vmreduce)(ESMC_VM **vm, void *input, void *output, 
-    int *count, ESMC_DataKind *dtk, ESMC_Operation *op, int *root, int *rc){
+    int *count, ESMC_TypeKind *dtk, ESMC_Operation *op, int *root, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmreduce()"
     // start assuming local success
@@ -384,14 +384,14 @@ extern "C" {
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
-  void FTN(c_esmc_vmwtime)(double *time, int *rc){
+  void FTN(c_esmc_vmwtime)(ESMC_R8 *time, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmwtime()"
     vmk_wtime(time);
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
-  void FTN(c_esmc_vmwtimedelay)(double *delay, int *rc){
+  void FTN(c_esmc_vmwtimedelay)(ESMC_R8 *delay, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmwtime()"
     vmk_wtimedelay(*delay);

@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.17 2006/11/16 05:21:06 cdeluca Exp $
+// $Id: ESMC_LocalArray.h,v 1.18 2007/02/16 05:27:46 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -84,13 +84,13 @@ typedef enum {
 extern "C" {
 
   void FTN(f_esmf_localarrayf90allocate)(ESMC_LocalArray**, int *, 
-    ESMC_DataType*, ESMC_DataKind*, int *, int *, int *, int *);
+    ESMC_DataType*, ESMC_TypeKind*, int *, int *, int *, int *);
  
   void FTN(f_esmf_localarrayf90deallocate)(ESMC_LocalArray**, int*, 
-    ESMC_DataType*, ESMC_DataKind *, int *);
+    ESMC_DataType*, ESMC_TypeKind *, int *);
  
   void FTN(f_esmf_localarrayadjust)(ESMC_LocalArray**, int *,
-    ESMC_DataType*, ESMC_DataKind*, int *, int *, int *, int *);
+    ESMC_DataType*, ESMC_TypeKind*, int *, int *, int *, int *);
 }
 
 
@@ -100,7 +100,7 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
    protected:
     int rank;                      // dimensionality (1, 2, ..., 7)
     ESMC_DataType type;            // int, real, etc.
-    ESMC_DataKind kind;            // short, long (*4, *8)
+    ESMC_TypeKind kind;            // short, long (*4, *8)
     ESMC_ArrayOrigin origin;       // was the create called from F90 or C++?
     ESMC_Logical needs_dealloc;    // is array responsible for deallocation?
     ESMC_Logical iscontig;         // optimization possible if all contig
@@ -125,7 +125,7 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
 
   public:
     int ESMC_LocalArrayConstruct(int irank, ESMC_DataType dt, 
-            ESMC_DataKind dk, int *counts, void *base, 
+            ESMC_TypeKind dk, int *counts, void *base, 
             ESMC_ArrayOrigin oflag, struct c_F90ptr *f90ptr, 
             ESMC_ArrayDoAllocate aflag, 
             ESMC_DataCopy docopy, ESMC_Logical dflag, char *name,
@@ -159,9 +159,9 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
                                                      return ESMF_SUCCESS;}
     ESMC_DataType ESMC_LocalArrayGetType(void) { return this->type; }
 
-    int ESMC_LocalArraySetKind(ESMC_DataKind kind) { this->kind = kind; 
+    int ESMC_LocalArraySetTypeKind(ESMC_TypeKind kind) { this->kind = kind; 
                                                      return ESMF_SUCCESS;}
-    ESMC_DataKind ESMC_LocalArrayGetKind(void) { return this->kind; }
+    ESMC_TypeKind ESMC_LocalArrayGetTypeKind(void) { return this->kind; }
 
     int ESMC_LocalArraySetLengths(int n, int *l) { for (int i = 0; i < n; i++)
                                                   this->counts[i] = l[i]; 
@@ -249,21 +249,21 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
 
 // these are functions, but not class methods.
 ESMC_LocalArray *ESMC_LocalArrayCreate(int rank, ESMC_DataType dt,    
-  ESMC_DataKind dk, int *counts = NULL, void *base = NULL, 
+  ESMC_TypeKind dk, int *counts = NULL, void *base = NULL, 
   ESMC_DataCopy docopy = ESMC_DATA_REF, char *name = NULL, int *rc = NULL);
 ESMC_LocalArray *ESMC_LocalArrayCreate(int rank, ESMC_DataType dt,    
-  ESMC_DataKind dk, int *counts, int *lbounds, int *ubounds, 
+  ESMC_TypeKind dk, int *counts, int *lbounds, int *ubounds, 
   void *base = NULL, 
   ESMC_DataCopy docopy = ESMC_DATA_REF, char *name = NULL, int *rc = NULL);
 int ESMC_LocalArrayDestroy(ESMC_LocalArray *array);
-ESMC_LocalArray *ESMC_LocalArrayCreate_F(int rank, ESMC_DataType dt, ESMC_DataKind dk, 
+ESMC_LocalArray *ESMC_LocalArrayCreate_F(int rank, ESMC_DataType dt, ESMC_TypeKind dk, 
                     int *icounts = NULL, struct c_F90ptr *f90ptr = NULL, 
                     void *base = NULL, 
                     ESMC_DataCopy docopy = ESMC_DATA_REF, char *name = NULL,
                     int *lbounds = NULL, int *ubounds = NULL, 
                     int *offsets = NULL, int *rc = NULL);
 ESMC_LocalArray *ESMC_LocalArrayCreateNoData(int rank, ESMC_DataType dt, 
-                                   ESMC_DataKind dk, ESMC_ArrayOrigin oflag,
+                                   ESMC_TypeKind dk, ESMC_ArrayOrigin oflag,
                                    char *name = NULL, int *rc = NULL);
 
 // private static data - address of fortran callback funcs

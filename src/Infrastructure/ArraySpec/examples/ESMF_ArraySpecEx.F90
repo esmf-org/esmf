@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpecEx.F90,v 1.3 2006/11/16 05:20:55 cdeluca Exp $
+! $Id: ESMF_ArraySpecEx.F90,v 1.4 2007/02/16 05:27:41 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
       type(ESMF_ArraySpec) :: arrayDS
       integer :: myrank
       type(ESMF_DataType) :: mytype
-      type(ESMF_DataKind) :: mykind
+      type(ESMF_TypeKind) :: mykind
 
 
       ! return code

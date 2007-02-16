@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.63 2006/11/16 05:21:15 cdeluca Exp $
+// $Id: ESMC_Route.h,v 1.64 2007/02/16 05:27:47 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@
      ESMC_RTable *recvRT;   // receive route table
      int recvitems;         // if >0, numitems needed in the destination array
      ESMC_CommTable *ct;    // communication scheduling table
-     double timer1, timer2, timer3;
+     ESMC_R8 timer1, timer2, timer3;
 
 // !PUBLIC MEMBER FUNCTIONS:
 
@@ -165,8 +165,8 @@
     // most frequently used interface is the first; the second one allows
     // a list of src and dst addrs to be passed in.
 
-    int ESMC_RouteRun(void *srcaddr, void *dstaddr, ESMC_DataKind dk);
-    int ESMC_RouteRun(void **srcaddr, void **dstaddr, ESMC_DataKind dk, 
+    int ESMC_RouteRun(void *srcaddr, void *dstaddr, ESMC_TypeKind dk);
+    int ESMC_RouteRun(void **srcaddr, void **dstaddr, ESMC_TypeKind dk, 
                            int numAddrs=1);
 
  // required methods inherited and overridden from the ESMC_Base class

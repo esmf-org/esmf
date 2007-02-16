@@ -55,26 +55,26 @@ module config_subrs
       integer :: rc, npets
       logical :: unique
       integer   :: nDE
-      real      :: tau
+      real(ESMF_KIND_R4) :: tau
       logical   :: optimize
       logical   :: Doing_QC
       character(len=1)   :: answer
       character(len=10) :: u_dataType, v_dataType, vf_dataType
       integer           :: nu, nv
-      real              :: sigU(6), sigV(6)
+      real(ESMF_KIND_R4) :: sigU(6), sigV(6)
       logical           :: sigVf(6)
       integer, parameter :: MAXLEV = 100, EOL = 111
-      real    :: plev(MAXLEV), vCorr(MAXLEV, MAXLEV)
+      real(ESMF_KIND_R4) :: plev(MAXLEV), vCorr(MAXLEV, MAXLEV)
       integer :: nlev
       integer :: line, col, nlines
       integer, allocatable, dimension(:) :: ncol
       logical :: end
-      real temp
+      real(ESMF_KIND_R4) temp
       type(ESMF_VM),save:: vm
       
       integer :: counter_total, counter_success
       integer :: rc_opening
-      real :: success_rate
+      real(ESMF_KIND_R4) :: success_rate
 
         contains
 !--------------------------------------------------------------------
@@ -130,7 +130,7 @@ module config_subrs
      subroutine SinglePar()
 !--------------------------------------------------------------------
       integer, parameter   :: nDE_0 = 32      
-      real, parameter      :: tau_0 = 14.0
+      real(ESMF_KIND_R4), parameter      :: tau_0 = 14.0
       character, parameter :: restart_file_0 = 'RestartFile123'
       character, parameter   :: answer_0 = 'y'
       logical, parameter     :: optimize_0 = .false.
@@ -337,7 +337,7 @@ module config_subrs
 !--------------------------------------------------------------------
       character(len=12), parameter :: u_dataType_0 = 'u_UprAir'
       integer, parameter   :: nu_0 = 6
-      real, dimension(nu_0), parameter :: sigU_0 = &
+      real(ESMF_KIND_R4), dimension(nu_0), parameter :: sigU_0 = &
            (/ 2.0, 2.0, 2.2, 2.3, 2.7, 3.2 /)
  
       character(ESMF_MAXSTR) :: failMsg
@@ -469,7 +469,7 @@ subroutine MultPar_SingleLine_V
 !--------------------------------------------------------------------
       character(len=12), parameter :: v_dataType_0 = 'v_UprAir'
       integer, parameter   :: nv_0 = 6
-      real, dimension(nv_0), parameter :: sigV_0 = &
+      real(ESMF_KIND_R4), dimension(nv_0), parameter :: sigV_0 = &
            (/ 2.2, 2.2, 2.3, 2.7, 3.2, 3.4 /)
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
@@ -737,9 +737,9 @@ subroutine MultPar_SingleLine_Vf
       character(len=10), parameter :: v_dataType_1 = 'v_UprAir.u'
       integer, parameter   :: nu_1 = 6
       integer, parameter   :: nv_1 = 6
-      real, dimension(nu_1), parameter :: sigU_1 = &
+      real(ESMF_KIND_R4), dimension(nu_1), parameter :: sigU_1 = &
            (/ 2.0, 2.0, 2.2, 2.3, 2.7, 3.2 /)
-      real, dimension(nv_1), parameter :: sigV_1 = &
+      real(ESMF_KIND_R4), dimension(nv_1), parameter :: sigV_1 = &
            (/ 2.0, 2.0, 2.2, 2.3, 2.7, 3.2 /)  
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
@@ -999,10 +999,10 @@ subroutine MultPar_SingleLine_Vf
       integer, parameter   :: nlines_0 = 11
       integer, dimension(nlines_0), parameter :: ncol_0 = &
            (/ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11/)
-      real, dimension(nlines_0), parameter ::plev_0 = &
+      real(ESMF_KIND_R4), dimension(nlines_0), parameter ::plev_0 = &
            (/1000, 925, 850, 700, 500, 400, 300, 250, 200, 150, 100/)
-      real, dimension(nlines_0, nlines_0) :: vCorr_0
-!!!      real :: vCorr_aux(121)
+      real(ESMF_KIND_R4), dimension(nlines_0, nlines_0) :: vCorr_0
+!!!      real(ESMF_KIND_R4) :: vCorr_aux(121)
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
       integer :: result = 0
@@ -1275,7 +1275,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.23 2007/01/24 23:06:57 svasquez Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.24 2007/02/16 05:27:43 rosalind Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0

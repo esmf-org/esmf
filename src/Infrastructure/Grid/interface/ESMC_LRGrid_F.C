@@ -1,4 +1,4 @@
-// $Id: ESMC_LRGrid_F.C,v 1.4 2006/11/16 05:21:01 cdeluca Exp $
+// $Id: ESMC_LRGrid_F.C,v 1.5 2007/02/16 05:27:44 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_LRGrid_F.C,v 1.4 2006/11/16 05:21:01 cdeluca Exp $";
+             "$Id: ESMC_LRGrid_F.C,v 1.5 2007/02/16 05:27:44 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -47,13 +47,13 @@ extern "C" {
 // non-method functions
 void FTN(c_esmc_lrgridserialize)(int *dimCount,
                                  int *countPerDim,               // array of ints
-                                 double *deltaPerDim,            // array of reals
+                                 ESMC_R8 *deltaPerDim,            // array of reals
                                  void *buffer, int *length, 
                                  int *offset, int *localrc){
 
     int *ip, i;
-    long l;
-    double *dp;
+     ESMC_I8 l;
+    ESMC_R8 *dp;
 
     // TODO: verify length > needed, and if not, make room.
     int fixedpart = 12 * sizeof (int *);
@@ -74,14 +74,14 @@ void FTN(c_esmc_lrgridserialize)(int *dimCount,
     for (i=0; i<*dimCount; i++)
       *ip++ = countPerDim[i]; 
 
-    // make sure pointer is aligned on good double address before the cast
-    l = (long) ip;
+    // make sure pointer is aligned on good ESMC_R8 address before the cast
+    l = (ESMC_I8) ip;
     if (l%8) {
         l += 8 - (l%8);
         ip = (int *)l;
     }
 
-    dp = (double *) ip;
+    dp = (ESMC_R8 *) ip;
     for (i=0; i<*dimCount; i++)
       *dp++ = deltaPerDim[i];
 
@@ -94,26 +94,26 @@ void FTN(c_esmc_lrgridserialize)(int *dimCount,
 
 
 void FTN(c_esmc_lrgriddeserialize)(int *countPerDim,            // array of ints
-                                   double *deltaPerDim,            // array of reals
+                                   ESMC_R8 *deltaPerDim,            // array of reals
                                    void *buffer, int *offset, int *localrc){
 
     int *ip, i, dimCount;
-    long l;
-    double *dp;
+     ESMC_I8 l;
+    ESMC_R8 *dp;
 
     ip = (int *)((char *)(buffer) + *offset);
     dimCount = *ip++;
     for (i=0; i<dimCount; i++)
       countPerDim[i] = *ip++; 
 
-    // make sure pointer is aligned on good double address before the cast
-    l = (long) ip;
+    // make sure pointer is aligned on good ESMC_R8 address before the cast
+    l = (ESMC_I8) ip;
     if (l%8) {
         l += 8 - (l%8);
         ip = (int *)l;
     }
 
-    dp = (double *) ip;
+    dp = (ESMC_R8 *) ip;
     for (i=0; i<dimCount; i++)
       deltaPerDim[i] = *dp++; 
 

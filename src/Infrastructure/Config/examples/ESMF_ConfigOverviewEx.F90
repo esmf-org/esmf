@@ -36,8 +36,8 @@
       character(ESMF_MAXSTR) :: fname     ! file name
       character*20  :: fn1, fn2, fn3
       integer       :: rc                 ! error return code (0 is OK)
-      integer       :: n 
-      real          :: r
+      integer       :: i_n 
+      real          :: radius
       real          :: table(7,3)
 
       type(ESMF_Config)   :: cf
@@ -107,13 +107,13 @@
       endif
 
 !BOE
-! Two constants, r and n, can be retrieved with the following code
+! Two constants, radius and i_n, can be retrieved with the following code
 ! fragment:
 !EOE
 
 !BOC
-      call ESMF_ConfigGetAttribute(cf, r, rc=rc)      ! results in r = 3.1415
-      call ESMF_ConfigGetAttribute(cf, n, rc=rc)      ! results in n = 25
+      call ESMF_ConfigGetAttribute(cf, radius, rc=rc)      ! results in radius = 3.1415
+      call ESMF_ConfigGetAttribute(cf, i_n, rc=rc)      ! results in i_n = 25
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -121,7 +121,7 @@
         print*, "' call ESMF_ConfigGetAttribute' failed"
       endif
 
-      if (r.ne.3.1415 .OR. n.ne.25) then
+      if (radius.ne.3.1415 .OR. i_n.ne.25) then
         finalrc = ESMF_FAILURE
         print*, "bad results from ConfigGetAttribute"
       endif

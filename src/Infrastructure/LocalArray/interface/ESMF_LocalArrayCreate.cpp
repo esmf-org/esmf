@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cpp,v 1.6 2007/01/11 18:05:38 oehmke Exp $
+! $Id: ESMF_LocalArrayCreate.cpp,v 1.7 2007/02/16 05:27:46 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -161,7 +161,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cpp,v 1.6 2007/01/11 18:05:38 oehmke Exp $'
+    '$Id: ESMF_LocalArrayCreate.cpp,v 1.7 2007/02/16 05:27:46 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -292,7 +292,7 @@ end function
 ! !ARGUMENTS:
     integer, intent(in) :: rank
     type(ESMF_DataType), intent(in) :: type
-    type(ESMF_DataKind), intent(in) :: kind
+    type(ESMF_TypeKind), intent(in) :: kind
     integer, intent(in) :: counts   !! this is what differs from ...ByList
     integer, intent(in), optional :: lbounds
     integer, intent(in), optional :: ubounds
@@ -372,7 +372,7 @@ end function
 ! !ARGUMENTS:
     integer, intent(in) :: rank
     type(ESMF_DataType), intent(in) :: type
-    type(ESMF_DataKind), intent(in) :: kind
+    type(ESMF_TypeKind), intent(in) :: kind
     integer, dimension(:), intent(in) :: counts
     integer, dimension(:), intent(in), optional :: lbounds
     integer, dimension(:), intent(in), optional :: ubounds
@@ -499,7 +499,7 @@ end function
     integer                :: localrc   ! local return code
     integer :: rank
     type(ESMF_DataType) :: type
-    type(ESMF_DataKind) :: kind
+    type(ESMF_TypeKind) :: kind
 
     array%this = ESMF_NULL_POINTER
 
@@ -545,7 +545,7 @@ end function
       integer, dimension(:), intent(in) :: counts
       integer, intent(in) :: rank
       type(ESMF_DataType), intent(in) :: type
-      type(ESMF_DataKind), intent(in) :: kind
+      type(ESMF_TypeKind), intent(in) :: kind
       integer, dimension(:), intent(in) :: lbounds
       integer, dimension(:), intent(in) :: ubounds
       integer, intent(out), optional :: rc 
@@ -988,7 +988,7 @@ DeclarationMacro(LocalArrayDeallocate)
     logical :: needsdealloc             ! do we need to free space?
     integer :: rank
     type(ESMF_DataType) :: type
-    type(ESMF_DataKind) :: kind
+    type(ESMF_TypeKind) :: kind
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_FAILURE
@@ -1017,7 +1017,7 @@ DeclarationMacro(LocalArrayDeallocate)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-      call c_ESMC_LocalArrayGetKind(array, kind, localrc)
+      call c_ESMC_LocalArrayGetTypeKind(array, kind, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1142,7 +1142,7 @@ DeclarationMacro(LocalArrayDeallocate)
 !
 ! !ARGUMENTS:
     type(ESMF_LocalArray), intent(inout) :: array 
-    real, dimension (:), pointer :: databuf    
+    real(ESMF_KIND_R8), dimension (:), pointer :: databuf    
     type(ESMF_CopyFlag), intent(in) :: docopy 
     integer, intent(out), optional :: rc     
 !
@@ -1184,7 +1184,7 @@ DeclarationMacro(LocalArrayDeallocate)
     type(ESMF_LocalArray), intent(in) :: array
     integer, intent(out), optional :: rank
     type(ESMF_DataType), intent(out), optional :: type
-    type(ESMF_DataKind), intent(out), optional :: kind
+    type(ESMF_TypeKind), intent(out), optional :: kind
     integer, dimension(:), intent(out), optional :: counts
     integer, dimension(:), intent(out), optional :: lbounds
     integer, dimension(:), intent(out), optional :: ubounds
@@ -1224,7 +1224,7 @@ DeclarationMacro(LocalArrayDeallocate)
     endif
 
     if (present(kind)) then
-      call c_ESMC_LocalArrayGetKind(array, kind, localrc)
+      call c_ESMC_LocalArrayGetTypeKind(array, kind, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1350,7 +1350,7 @@ DeclarationMacro(LocalArrayDeallocate)
       type(ESMF_LocalArray), intent(inout) :: array 
       integer, intent(in) :: rank   
       type(ESMF_DataType), intent(in) :: type
-      type(ESMF_DataKind), intent(in) :: kind
+      type(ESMF_TypeKind), intent(in) :: kind
       integer, dimension(:), intent(in) :: counts 
       integer, dimension(:), intent(in) :: lbounds
       integer, dimension(:), intent(in) :: ubounds
@@ -1667,7 +1667,7 @@ AllocAllocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
       type(ESMF_LocalArray), intent(inout) :: array 
       integer :: rank   
       type(ESMF_DataType) :: type
-      type(ESMF_DataKind) :: kind
+      type(ESMF_TypeKind) :: kind
       integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1998,7 +1998,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         integer :: status                   ! local error status
         logical :: rcpresent                ! did user specify rc?
         integer :: rank
-        type (ESMF_DataKind) :: kind
+        type (ESMF_TypeKind) :: kind
         type (ESMF_DataType) :: type
         integer :: i, counts(ESMF_MAXDIM), lb(ESMF_MAXDIM), ub(ESMF_MAXDIM)
 
@@ -2018,7 +2018,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         ! Get info from the existing array
         call c_ESMC_LocalArrayGetRank(array, rank, status)
         call c_ESMC_LocalArrayGetType(array, type, status)  
-        call c_ESMC_LocalArrayGetKind(array, kind, status)    
+        call c_ESMC_LocalArrayGetTypeKind(array, kind, status)    
         call c_ESMC_LocalArrayGetLengths(array, rank, counts, status)  
 
         ! Basic sanity checks - slice dim is ok, sliced location exists, etc.
@@ -2381,7 +2381,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
       integer, dimension(:), intent(in) :: counts
       integer, intent(in) :: rank
       type(ESMF_DataType), intent(in) :: type
-      type(ESMF_DataKind), intent(in) :: kind
+      type(ESMF_TypeKind), intent(in) :: kind
       integer, dimension(:), intent(in) :: lbounds
       integer, dimension(:), intent(in) :: ubounds
       integer, intent(out), optional :: rc 

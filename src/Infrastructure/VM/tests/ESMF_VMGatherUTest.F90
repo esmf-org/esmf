@@ -1,4 +1,4 @@
-! $Id: ESMF_VMGatherUTest.F90,v 1.3 2006/11/16 05:21:22 cdeluca Exp $
+! $Id: ESMF_VMGatherUTest.F90,v 1.4 2007/02/16 05:27:48 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMGatherUTest.F90,v 1.3 2006/11/16 05:21:22 cdeluca Exp $'
+      '$Id: ESMF_VMGatherUTest.F90,v 1.4 2007/02/16 05:27:48 rosalind Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -92,7 +92,7 @@
       ! prepare data array2
       do i=1, nsize
         array2(i) = 2*localPet + i
-        farray2(i) = real( 2*localPet + i)
+        farray2(i) = real( 2*localPet + i , ESMF_KIND_R8)
         f4array2(i) = farray2(i)
       enddo
 
@@ -160,7 +160,7 @@
       rc = ESMF_SUCCESS
       if (localPet==gatherRoot) then
         do i=1, nlen
-                if (farray1(i)/=real(i)) rc = ESMF_FAILURE
+                if (farray1(i)/=real(i,ESMF_KIND_R8)) rc = ESMF_FAILURE
         enddo
       else
         do i=1, nlen
@@ -182,7 +182,7 @@
       write(name, *) "Verifying farray2 data after gather Test"
       rc = ESMF_SUCCESS
       do i=1, nsize
-        if (farray2(i)/=real(i + 2 * localPet)) rc = ESMF_FAILURE
+        if (farray2(i)/=real(i + 2 * localPet,ESMF_KIND_R8)) rc = ESMF_FAILURE
       enddo
 
       print *, 'contents after gather (should be localPet*2+1, localPet*2+2):'
@@ -210,7 +210,7 @@
       rc = ESMF_SUCCESS
       if (localPet==gatherRoot) then
         do i=1, nlen
-                if (f4array1(i)/=real(i)) rc = ESMF_FAILURE
+                if (f4array1(i)/=real(i,ESMF_KIND_R4)) rc = ESMF_FAILURE
         enddo
       else
         do i=1, nlen
@@ -232,7 +232,7 @@
       write(name, *) "Verifying f4array2 data after gather Test"
       rc = ESMF_SUCCESS
       do i=1, nsize
-        if (f4array2(i)/=real(i + 2 * localPet)) rc = ESMF_FAILURE
+        if (f4array2(i)/=real(i + 2 * localPet,ESMF_KIND_R4)) rc = ESMF_FAILURE
       enddo
 
       print *, 'contents after gather (should be localPet*2+1, localPet*2+2):'

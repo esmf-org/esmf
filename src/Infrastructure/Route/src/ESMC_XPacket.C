@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.62 2007/02/16 03:25:33 rosalind Exp $
+// $Id: ESMC_XPacket.C,v 1.63 2007/02/16 05:27:47 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.62 2007/02/16 03:25:33 rosalind Exp $";
+              "$Id: ESMC_XPacket.C,v 1.63 2007/02/16 05:27:47 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -820,7 +820,7 @@
 // !ARGUMENTS
       int xpCount,               // in  - count of xp's to pack
       ESMC_XPacket **xpList,     // in  - list of xp's to pack
-      ESMC_DataKind dk,          // in  - data kind
+      ESMC_TypeKind dk,          // in  - data kind
       int nbytes,                // in  - number of bytes per item
       int numAddrs,              // in  - number of addrs to apply this to
       void **dataAddr,           // in  - list of addresses to be packed
@@ -892,7 +892,7 @@
 // !ARGUMENTS:
       int xpCount,            // in  - count of xp's to unpack
       ESMC_XPacket **xpList,  // in  - list of xp's to unpack
-      ESMC_DataKind dk,       // in  - data kind 
+      ESMC_TypeKind dk,       // in  - data kind 
       int nbytes,             // in  - number of bytes per item
       int numAddrs,           // in  - number of addrs to apply this to
       char *buffer,           // in  - raw buffer to unpack

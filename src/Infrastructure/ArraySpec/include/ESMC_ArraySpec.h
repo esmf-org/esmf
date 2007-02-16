@@ -1,4 +1,4 @@
-// $Id: ESMC_ArraySpec.h,v 1.3 2006/11/16 05:20:55 cdeluca Exp $
+// $Id: ESMC_ArraySpec.h,v 1.4 2007/02/16 05:27:42 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ class ESMC_ArraySpec {   // NOT inherited from Base class
  private:
     int rank;
     ESMC_DataType type;
-    ESMC_DataKind kind;    
+    ESMC_TypeKind kind;    
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
@@ -60,11 +60,11 @@ class ESMC_ArraySpec {   // NOT inherited from Base class
                                                      return ESMF_SUCCESS;}
     ESMC_DataType ESMC_ArraySpecGetType(void) { return this->type; }
 
-    int ESMC_ArraySpecSetKind(ESMC_DataKind kind) { this->kind = kind; 
+    int ESMC_ArraySpecSetTypeKind(ESMC_TypeKind kind) { this->kind = kind; 
                                                      return ESMF_SUCCESS;}
-    ESMC_DataKind ESMC_ArraySpecGetKind(void) { return this->kind; }
+    ESMC_TypeKind ESMC_ArraySpecGetTypeKind(void) { return this->kind; }
 
-    int ESMC_ArraySpecSetRank(int rank, ESMC_DataType type, ESMC_DataKind kind)
+    int ESMC_ArraySpecSetRank(int rank, ESMC_DataType type, ESMC_TypeKind kind)
     { if ((rank >= 1) && (rank <= 7)) 
           this->rank = rank; 
       else {
@@ -75,7 +75,7 @@ class ESMC_ArraySpec {   // NOT inherited from Base class
       this->kind = kind;
       return ESMF_SUCCESS; 
     }
-    int ESMC_ArraySpecGetRank(int *rank, ESMC_DataType *type, ESMC_DataKind *kind)
+    int ESMC_ArraySpecGetRank(int *rank, ESMC_DataType *type, ESMC_TypeKind *kind)
     { if (rank) *rank = this->rank;
       if (type) *type = this->type;
       if (kind) *kind = this->kind;

@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.242 2007/01/10 00:16:56 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.243 2007/02/16 05:27:44 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.242 2007/01/10 00:16:56 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.243 2007/02/16 05:27:44 rosalind Exp $'
 
 !==============================================================================
 !
@@ -2856,7 +2856,7 @@
       type(ESMF_Grid), intent(in) :: grid
       character(len=*), intent(in) :: name
       type(ESMF_DataType), intent(out), optional :: datatype
-      type(ESMF_DataKind), intent(out), optional :: datakind
+      type(ESMF_TypeKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count
       integer, intent(out), optional :: rc
 !
@@ -2893,7 +2893,7 @@
 
       integer :: localrc                          ! local error status
       type(ESMF_DataType) :: localDt
-      type(ESMF_DataKind) :: localDk
+      type(ESMF_TypeKind) :: localDk
       integer :: localCount
       
       ! Initialize return code; assume failure until success is certain
@@ -2949,7 +2949,7 @@
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out), optional :: name
       type(ESMF_DataType), intent(out), optional :: datatype
-      type(ESMF_DataKind), intent(out), optional :: datakind
+      type(ESMF_TypeKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count
       integer, intent(out), optional :: rc
 
@@ -2990,7 +2990,7 @@
       integer :: localrc                          ! local error status
       character(len=ESMF_MAXSTR) :: localName
       type(ESMF_DataType) :: localDt
-      type(ESMF_DataKind) :: localDk
+      type(ESMF_TypeKind) :: localDk
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
@@ -5129,7 +5129,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      real, dimension (:), pointer :: buffer
+      real(ESMF_KIND_R8), dimension (:), pointer :: buffer
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -5306,7 +5306,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      real, dimension (:), pointer :: buffer
+      real(ESMF_KIND_R8), dimension (:), pointer :: buffer
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !

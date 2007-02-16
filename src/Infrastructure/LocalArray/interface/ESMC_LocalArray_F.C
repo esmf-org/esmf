@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.18 2006/11/16 05:21:06 cdeluca Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.19 2007/02/16 05:27:46 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ extern "C" {
 char *name = NULL;
 
      void FTN(c_esmc_localarraycreateall)(ESMC_LocalArray **ptr, int *rank, 
-                                     ESMC_DataType *dt, ESMC_DataKind *dk,
+                                     ESMC_DataType *dt, ESMC_TypeKind *dk,
                                      int *counts, int *lbounds, int *ubounds,
                                      int *status)  {
          (*ptr) = ESMC_LocalArrayCreate_F(*rank, *dt, *dk, counts, 
@@ -55,7 +55,7 @@ char *name = NULL;
      }
 
      void FTN(c_esmc_localarraycreatenodata)(ESMC_LocalArray **ptr, int *rank, 
-                                        ESMC_DataType *dt, ESMC_DataKind *dk, 
+                                        ESMC_DataType *dt, ESMC_TypeKind *dk, 
                                         ESMC_ArrayOrigin *oflag, int *status) {
              
              (*ptr) = ESMC_LocalArrayCreateNoData(*rank, *dt, *dk, *oflag, 
@@ -162,13 +162,13 @@ char *name = NULL;
          *status = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_localarraygetkind)(ESMC_LocalArray **ptr, int *kind, int *status) {
+     void FTN(c_esmc_localarraygettypekind)(ESMC_LocalArray **ptr, int *kind, int *status) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
           }
-         *kind = (*ptr)->ESMC_LocalArrayGetKind();
+         *kind = (*ptr)->ESMC_LocalArrayGetTypeKind();
          *status = ESMF_SUCCESS;
      }
 
@@ -216,7 +216,7 @@ char *name = NULL;
               return;
           }
         //fprintf(stderr, "interface code, setting f90 ptr to %lx, this = %lx, &this = %lx\n", 
-        //                                (long int)p, (long int)(*ptr), (long int)ptr);
+        //                                (ESMC_I8)p, (ESMC_I8)(*ptr), (ESMC_I8)ptr);
           *status = (*ptr)->ESMC_LocalArraySetF90Ptr(p);
      }
 
@@ -226,7 +226,7 @@ char *name = NULL;
               return;
           }
         //fprintf(stderr, "interface code, getting f90 ptr into %lx, this = %lx, &this = %lx\n", 
-        //                                (long int)p, (long int)(*ptr), (long int)ptr);
+        //                                (ESMC_I8)p, (ESMC_I8)(*ptr), (ESMC_I8)ptr);
           *status = (*ptr)->ESMC_LocalArrayGetF90Ptr(p);
      }
 

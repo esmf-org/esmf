@@ -1,4 +1,4 @@
-! $Id: ArraysGlobalMod.F90,v 1.8 2006/03/28 21:52:35 theurich Exp $
+! $Id: ArraysGlobalMod.F90,v 1.9 2007/02/16 05:27:52 rosalind Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -26,7 +26,8 @@
     public :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
     public :: nbc
 
-    real, dimension(:,:), pointer, save :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
+    real(ESMF_KIND_R4), dimension(:,:), pointer, save :: &
+                   sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
     integer, dimension(4), save :: nbc
 !
 ! Fields
@@ -48,10 +49,10 @@
     integer :: imin, imax, jmin, jmax
     integer :: imin_t, imax_t, jmin_t, jmax_t
     type(ESMF_TimeInterval), save :: time_step
-    real :: dt, dx, dy
-    real :: uin, rhoin, siein
-    real :: gamma, akb
-    real :: q0, u0, v0, sie0, rho0
+    real(ESMF_KIND_R8) :: dt, dx, dy
+    real(ESMF_KIND_R4) :: uin, rhoin, siein
+    real(ESMF_KIND_R4) :: gamma, akb
+    real(ESMF_KIND_R4) :: q0, u0, v0, sie0, rho0
 
     contains
 
@@ -148,8 +149,8 @@
       jmax = jmax_t - halo_width
 
 ! TODO  need to add calls to get dx and dy from physgrid -- hardcode for now.
-      dx = 5.0
-      dy = 2.50
+      dx = 5.0_ESMF_KIND_R8
+      dy = 2.50_ESMF_KIND_R8
 
       if(rcpresent) rc = ESMF_SUCCESS
 

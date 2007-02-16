@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.8 2007/01/11 16:39:06 oehmke Exp $
+! $Id: ESMF_Util.F90,v 1.9 2007/02/16 05:27:48 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -80,7 +80,7 @@
 !  Misc type-to-string methods
       public ESMF_StatusString
       public ESMF_DataTypeString
-      public ESMF_DataKindString
+      public ESMF_TypeKindString
       public ESMF_LogicalString
 
 !  Overloaded = operator functions
@@ -131,7 +131,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.8 2007/01/11 16:39:06 oehmke Exp $'
+               '$Id: ESMF_Util.F90,v 1.9 2007/02/16 05:27:48 rosalind Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -897,26 +897,26 @@
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DataKindString"
+#define ESMF_METHOD "ESMF_TypeKindString"
 !BOPI 
-!  !IROUTINE:  ESMF_DataKindString - Return DataKind as a string
+!  !IROUTINE:  ESMF_TypeKindString - Return DataTypeKind as a string
 !  
 ! !INTERFACE: 
-      subroutine ESMF_DataKindString(datakind, string, rc)
+      subroutine ESMF_TypeKindString(datakind, string, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DataKind), intent(in) :: datakind
+      type(ESMF_TypeKind), intent(in) :: datakind
       character(len=*), intent(out) :: string
       integer, intent(out), optional :: rc  
 
 !
 ! !DESCRIPTION:
-!   Return an {\tt ESMF\_DataKind} variable as a string.
+!   Return an {\tt ESMF\_DataTypeKind} variable as a string.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[datakind]
-!       The {\tt ESMF\_DataKind}.
+!       The {\tt ESMF\_DataTypeKind}.
 !     \item[string]
 !       The value as a string.
 !     \item[{[rc]}]
@@ -941,7 +941,7 @@
  
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DataKindString
+      end subroutine ESMF_TypeKindString
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD

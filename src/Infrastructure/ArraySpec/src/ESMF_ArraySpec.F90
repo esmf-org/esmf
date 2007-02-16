@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.16 2007/01/11 17:19:09 oehmke Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.17 2007/02/16 05:27:42 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@ module ESMF_ArraySpecMod
   private
     integer             :: rank   ! number of dimensions
     type(ESMF_DataType) :: type   ! real/float, integer, etc enum
-    type(ESMF_DataKind) :: kind   ! fortran "kind" enum/integer
+    type(ESMF_TypeKind) :: kind   ! fortran "kind" enum/integer
     ESMF_INIT_DECLARE
   end type
 
@@ -90,7 +90,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.16 2007/01/11 17:19:09 oehmke Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.17 2007/02/16 05:27:42 rosalind Exp $'
 
 !==============================================================================
 !
@@ -135,7 +135,7 @@ module ESMF_ArraySpecMod
     type(ESMF_ArraySpec), intent(inout)            :: arrayspec
     integer,              intent(out), optional :: rank
     type(ESMF_DataType),  intent(out), optional :: type
-    type(ESMF_DataKind),  intent(out), optional :: kind
+    type(ESMF_TypeKind),  intent(out), optional :: kind
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -202,7 +202,7 @@ module ESMF_ArraySpecMod
     type(ESMF_ArraySpec), intent(inout)         :: arrayspec
     integer,              intent(in)            :: rank
     type(ESMF_DataType),  intent(in)            :: type
-    type(ESMF_DataKind),  intent(in)            :: kind
+    type(ESMF_TypeKind),  intent(in)            :: kind
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -280,7 +280,7 @@ module ESMF_ArraySpecMod
 ! !ARGUMENTS:
     type(ESMF_ArraySpec), intent(inout)         :: arrayspec
     integer,              intent(in)            :: rank
-    type(ESMF_DataKind),  intent(in)            :: typekind
+    type(ESMF_TypeKind),  intent(in)            :: typekind
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:

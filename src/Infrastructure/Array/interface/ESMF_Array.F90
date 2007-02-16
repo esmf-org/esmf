@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.42 2007/01/30 17:51:57 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.43 2007/02/16 05:27:40 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -149,7 +149,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.42 2007/01/30 17:51:57 theurich Exp $'
+      '$Id: ESMF_Array.F90,v 1.43 2007/02/16 05:27:40 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -1075,7 +1075,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
     type(ESMF_DataType),           intent(out), optional :: type
-    type(ESMF_DataKind),           intent(out), optional :: kind
+    type(ESMF_TypeKind),           intent(out), optional :: kind
     integer,                       intent(out), optional :: rank
     type(ESMF_LocalArray), target, intent(out), optional :: larrayList(:)
     type(ESMF_DistGrid),           intent(out), optional :: distgrid
@@ -1109,7 +1109,7 @@ contains
 !     \item[{[type]}]
 !        Type of the Array object.
 !     \item[{[kind]}]
-!        Kind of the Array object.
+!        TypeKind of the Array object.
 !     \item[{[rank]}]
 !        Rank of the Array object.
 !     \item[{[larrayList]}]

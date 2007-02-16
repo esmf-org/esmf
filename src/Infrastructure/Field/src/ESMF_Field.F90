@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.235 2007/02/06 22:14:14 oehmke Exp $
+! $Id: ESMF_Field.F90,v 1.236 2007/02/16 05:27:43 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -248,7 +248,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.235 2007/02/06 22:14:14 oehmke Exp $'
+      '$Id: ESMF_Field.F90,v 1.236 2007/02/16 05:27:43 rosalind Exp $'
 
 !==============================================================================
 !
@@ -1018,7 +1018,7 @@
       integer, intent(out), optional :: haloWidth
       type(ESMF_IOSpec), intent(out), optional :: iospec 
       type(ESMF_DataType), intent(out), optional :: type
-      type(ESMF_DataKind), intent(out), optional :: kind
+      type(ESMF_TypeKind), intent(out), optional :: kind
       integer, intent(out), optional :: rank
       integer, dimension(:), intent(out), optional :: lbounds
       integer, dimension(:), intent(out), optional :: ubounds
@@ -1055,7 +1055,7 @@
 !     \item [{[type]}]
 !           Type of Field.
 !     \item [{[kind]}]
-!           Kind specifyer for type of Field.
+!           TypeKind specifyer for type of Field.
 !     \item [{[rank]}]
 !           Rank of Field data.
 !     \item [{[name]}]
@@ -2129,7 +2129,7 @@
       type(ESMF_Field), intent(inout) :: field  
       character(len=*), intent(in) :: name
       type(ESMF_DataType), intent(out), optional :: datatype
-      type(ESMF_DataKind), intent(out), optional :: datakind
+      type(ESMF_TypeKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
@@ -2166,7 +2166,7 @@
 
       integer :: status                           ! Error status
       type(ESMF_DataType) :: localDt
-      type(ESMF_DataKind) :: localDk
+      type(ESMF_TypeKind) :: localDk
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
@@ -2206,7 +2206,7 @@
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out), optional :: name
       type(ESMF_DataType), intent(out), optional :: datatype
-      type(ESMF_DataKind), intent(out), optional :: datakind
+      type(ESMF_TypeKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
@@ -2247,7 +2247,7 @@
       integer :: status                           ! Error status
       character(len=ESMF_MAXSTR) :: localName
       type(ESMF_DataType) :: localDt
-      type(ESMF_DataKind) :: localDk
+      type(ESMF_TypeKind) :: localDk
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
@@ -3747,7 +3747,7 @@
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field
       integer, dimension (:), intent(in) :: index
-      real, dimension (:), intent(in) :: value
+      real(ESMF_KIND_R4), dimension (:), intent(in) :: value
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -4037,7 +4037,7 @@
         integer :: status, de_id
         type(ESMF_InternArray) :: out_array
         type(ESMF_DataType) arr_type
-        type(ESMF_DataKind) arr_kind
+        type(ESMF_TypeKind) arr_kind
         integer out_rank
         integer out_kind
         integer out_type

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.62 2007/02/01 05:04:21 theurich Exp $
+! $Id: ESMF_BundleComm.F90,v 1.63 2007/02/16 05:27:43 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.62 2007/02/01 05:04:21 theurich Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.63 2007/02/16 05:27:43 rosalind Exp $'
 
 !==============================================================================
 !
@@ -1989,7 +1989,7 @@
       type(ESMF_GridStorage) :: sgridStorage, dgridStorage
       integer :: srank, drank
       type(ESMF_DataType) :: stype, dtype
-      type(ESMF_DataKind) :: skind, dkind
+      type(ESMF_TypeKind) :: skind, dkind
    
       ! Initialize return code   
       ESMF_BundleCommPrepCheck = ESMF_BUNDLECOMM_NOMATCH

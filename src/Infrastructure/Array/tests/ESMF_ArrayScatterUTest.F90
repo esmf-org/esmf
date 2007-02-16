@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.9 2007/01/26 21:45:52 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.10 2007/02/16 05:27:41 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.9 2007/01/26 21:45:52 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.10 2007/02/16 05:27:41 rosalind Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -49,7 +49,7 @@ program ESMF_ArrayScatterUTest
   character(ESMF_MAXSTR) :: name
 
   !LOCAL VARIABLES:
-  real(ESMF_KIND_R8), parameter :: double_min = 1d-10
+  real(ESMF_KIND_R8), parameter :: double_min = 1e-10_ESMF_KIND_R8
   type(ESMF_VM):: vm
   integer:: petCount, localPet, i, j
   type(ESMF_ArraySpec)  :: arrayspec
@@ -103,13 +103,14 @@ program ESMF_ArrayScatterUTest
 !call ESMF_ArrayPrint(array)
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  farrayPtr = real(localPet)  ! initialize each DE-local data chunk of Array
+  farrayPtr = real(localPet,ESMF_KIND_R8)  ! initialize each DE-local data chunk of Array
 !print *, "farrayPtr:", farrayPtr
   ! prepare srcfarray on all PETs -> serves as ref. in comparison after scatter
   allocate(srcfarray(1:15, 1:23))
   do j=1, 23
     do i=1, 15
-      srcfarray(i,j) = 123.d0*sin(real(i)) + 321.d0*cos(real(j))
+      srcfarray(i,j) = 123._ESMF_KIND_R8*sin(real(i,ESMF_KIND_R8)) +  &
+                       321._ESMF_KIND_R8*cos(real(j,ESMF_KIND_R8))
     enddo
   enddo
 !print *, "srcfarray:", srcfarray
@@ -128,7 +129,8 @@ program ESMF_ArrayScatterUTest
   rc = ESMF_SUCCESS
   do j=1, 23
     do i=1, 15
-      value = 123.d0*sin(real(i)) + 321.d0*cos(real(j))
+      value = 123._ESMF_KIND_R8*sin(real(i,ESMF_KIND_R8)) +  &
+               321._ESMF_KIND_R8*cos(real(j,ESMF_KIND_R8))
       value = srcfarray(i,j) / value - 1.d0
 !print *, value
       if (abs(value) > double_min) then
@@ -177,13 +179,14 @@ program ESMF_ArrayScatterUTest
 !call ESMF_ArrayPrint(array)
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  farrayPtr = real(localPet)  ! initialize each DE-local data chunk of Array
+  farrayPtr = real(localPet,ESMF_KIND_R8)  ! initialize each DE-local data chunk of Array
 !print *, "farrayPtr:", farrayPtr
   ! prepare srcfarray on all PETs -> serves as ref. in comparison after scatter
   allocate(srcfarray(1:1, 1:23))
   do j=1, 23
     do i=1, 1
-      srcfarray(i,j) = 123.d0*sin(real(i)) + 321.d0*cos(real(j))
+      srcfarray(i,j) = 123.d0*sin(real(i,ESMF_KIND_R8)) +  &
+                       321.d0*cos(real(j,ESMF_KIND_R8))
     enddo
   enddo
 !print *, "srcfarray:", srcfarray
@@ -202,7 +205,8 @@ program ESMF_ArrayScatterUTest
   rc = ESMF_SUCCESS
   do j=1, 23
     do i=1, 1
-      value = 123.d0*sin(real(i)) + 321.d0*cos(real(j))
+      value = 123.d0*sin(real(i,ESMF_KIND_R8)) +  &
+              321.d0*cos(real(j,ESMF_KIND_R8))
       value = srcfarray(i,j) / value - 1.d0
 !print *, value
       if (abs(value) > double_min) then
@@ -251,14 +255,16 @@ program ESMF_ArrayScatterUTest
 !call ESMF_ArrayPrint(array)
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr3d, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  farrayPtr3d = real(localPet)  ! initialize each DE-local data chunk of Array
+  farrayPtr3d = real(localPet,ESMF_KIND_R8)  ! initialize each DE-local data chunk of Array
 !print *, "farrayPtr3d:", farrayPtr3d
   ! prepare srcfarray on all PETs -> serves as ref. in comparison after scatter
   allocate(srcfarray3d(1:15, 1:23, 10))
   do k=lbound(srcfarray3d,3), ubound(srcfarray3d,3)
     do j=lbound(srcfarray3d,2), ubound(srcfarray3d,2)
       do i=lbound(srcfarray3d,1), ubound(srcfarray3d,1)
-        srcfarray3d(i,j,k) = 123.d0*sin(real(i)) + 321.d0*cos(real(j)) + 20.d0*real(k)
+        srcfarray3d(i,j,k) = 123.d0*sin(real(i,ESMF_KIND_R8)) +  &
+                             321.d0*cos(real(j,ESMF_KIND_R8)) +  &
+                             20.d0*real(k,ESMF_KIND_R8)
       enddo
     enddo
   enddo
@@ -280,7 +286,9 @@ program ESMF_ArrayScatterUTest
   do k=lbound(srcfarray3d,3), ubound(srcfarray3d,3)
     do j=lbound(srcfarray3d,2), ubound(srcfarray3d,2)
       do i=lbound(srcfarray3d,1), ubound(srcfarray3d,1)
-        value = 123.d0*sin(real(i)) + 321.d0*cos(real(j)) + 20.d0*real(k)
+        value = 123.d0*sin(real(i,ESMF_KIND_R8)) +   &
+                321.d0*cos(real(j,ESMF_KIND_R8)) +   &
+                20.d0*real(k,ESMF_KIND_R8)
         value = srcfarray3d(i,j,k) / value - 1.d0
         if (abs(value) > double_min) rc = ESMF_FAILURE
       enddo
@@ -325,14 +333,16 @@ program ESMF_ArrayScatterUTest
 !call ESMF_ArrayPrint(array)
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr3d, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  farrayPtr3d = real(localPet)  ! initialize each DE-local data chunk of Array
+  farrayPtr3d = real(localPet,ESMF_KIND_R8)  ! initialize each DE-local data chunk of Array
 !print *, "farrayPtr3d:", farrayPtr3d
   ! prepare srcfarray on all PETs -> serves as ref. in comparison after scatter
   allocate(srcfarray3d(1:15, 1:23, 10))
   do k=lbound(srcfarray3d,3), ubound(srcfarray3d,3)
     do j=lbound(srcfarray3d,2), ubound(srcfarray3d,2)
       do i=lbound(srcfarray3d,1), ubound(srcfarray3d,1)
-        srcfarray3d(i,j,k) = 123.d0*sin(real(i)) + 321.d0*cos(real(j)) + 20.d0*real(k)
+        srcfarray3d(i,j,k) = 123.d0*sin(real(i,ESMF_KIND_R8)) + &
+                             321.d0*cos(real(j,ESMF_KIND_R8)) + &
+                             20.d0*real(k,ESMF_KIND_R8)
       enddo
     enddo
   enddo
@@ -364,7 +374,9 @@ program ESMF_ArrayScatterUTest
   do k=lbound(srcfarray3d,3), ubound(srcfarray3d,3)
     do j=lbound(srcfarray3d,2), ubound(srcfarray3d,2)
       do i=lbound(srcfarray3d,1), ubound(srcfarray3d,1)
-        value = 123.d0*sin(real(i)) + 321.d0*cos(real(j)) + 20.d0*real(k)
+        value = 123.d0*sin(real(i,ESMF_KIND_R8)) +  &
+                321.d0*cos(real(j,ESMF_KIND_R8)) +  &
+                 20.d0*real(k,ESMF_KIND_R8)
         value = srcfarray3d(i,j,k) / value - 1.d0
         if (abs(value) > double_min) rc = ESMF_FAILURE
       enddo

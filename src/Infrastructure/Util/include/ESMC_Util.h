@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.20 2007/02/16 03:25:34 rosalind Exp $
+// $Id: ESMC_Util.h,v 1.21 2007/02/16 05:27:48 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -93,7 +93,7 @@ enum ESMC_DataType { ESMF_DATA_INTEGER=1,
                      ESMF_DATA_LOGICAL,
                      ESMF_DATA_CHARACTER };
 
-enum ESMC_DataKind { ESMF_I1=1,
+enum ESMC_TypeKind { ESMF_I1=1,
                      ESMF_I2,
                      ESMF_I4,
                      ESMF_I8,
@@ -111,7 +111,7 @@ enum ESMC_DataKind { ESMF_I1=1,
   typedef char      ESMC_I1;
   typedef double    ESMC_R8;
   typedef float     ESMC_R4;
-  typedef long      ESMC_POINTER;
+  typedef unsigned long      ESMC_POINTER;
 #else // 64-bit or larger machine
   typedef long      ESMC_I8;
   typedef int       ESMC_I4;
@@ -119,7 +119,7 @@ enum ESMC_DataKind { ESMF_I1=1,
   typedef char      ESMC_I1;
   typedef double    ESMC_R8;
   typedef float     ESMC_R4;
-  typedef long long ESMC_POINTER;
+  typedef unsigned long long ESMC_POINTER;
 #endif
 
 // are the index numbers relative to a local chunk or the overall
@@ -241,12 +241,12 @@ void  FTN(esmf_ctof90string)(char *src, char *dst, int *rc,
                              /* hidden */ int *slen, int *dlen);
 }
 
-// return byte counts for DataKinds
-int ESMC_DataKindSize(ESMC_DataKind dk);
+// return byte counts for DataTypeKinds
+int ESMC_TypeKindSize(ESMC_TypeKind dk);
 // return a static string name for various enums
 const char *ESMC_StatusString(ESMC_Status stat);
 const char *ESMC_DataTypeString(ESMC_DataType dt);
-const char *ESMC_DataKindString(ESMC_DataKind dk);
+const char *ESMC_TypeKindString(ESMC_TypeKind dk);
 const char *ESMC_LogicalString(ESMC_Logical tf);
 
 extern "C" {

@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.42 2006/11/16 05:20:55 cdeluca Exp $
+// $Id: ESMC_Base_F.C,v 1.43 2007/02/16 05:27:42 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.42 2006/11/16 05:20:55 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.43 2007/02/16 05:27:42 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -590,7 +590,7 @@ extern "C" {
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
       ESMC_DataType *dt,        // in - data type, any but character 
-      ESMC_DataKind *dk,        // in - data kind for int/real
+      ESMC_TypeKind *dk,        // in - data kind for int/real
       int *count,               // in - number of value(s)
       void *value,              // in - any value or list of values
       int *rc,                  // in - return code
@@ -725,7 +725,7 @@ extern "C" {
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
       ESMC_DataType *dt,        // in - data type expected to be returned
-      ESMC_DataKind *dk,        // in - expected data kind for int/real 
+      ESMC_TypeKind *dk,        // in - expected data kind for int/real 
       int *count,               // in - must match actual length
       void *value,              // out - value
       int *rc,                  // in - return code
@@ -738,7 +738,7 @@ extern "C" {
 
   int status, attrCount;
   ESMC_DataType attrDt;
-  ESMC_DataKind attrDk;
+  ESMC_TypeKind attrDk;
   char *cname;
 
   if (!base) {
@@ -784,7 +784,7 @@ extern "C" {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_INCOMP,
                          "attribute value not expected kind", &status);
     //printf("attribute %s not expected kind %s, actually kind %d\n", 
-    //       name, ESMC_DataKindString(*dk), ESMC_DataKindString(attrDk));
+    //       name, ESMC_TypeKindString(*dk), ESMC_TypeKindString(attrDk));
     delete [] cname;
     if (rc) *rc = status;
     return;
@@ -912,7 +912,7 @@ extern "C" {
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
       ESMC_DataType *dt,        // out - data type (int, float, etc)
-      ESMC_DataKind *dk,        // out - data kind (*4, *8)
+      ESMC_TypeKind *dk,        // out - data kind (*4, *8)
       int *count,               // out - item count
       int *rc,                  // in - return code
       int nlen) {               // hidden/in - strlen count for name
@@ -983,7 +983,7 @@ extern "C" {
       int *num,                 // in - attr number
       char *name,               // out - F90, non-null terminated string
       ESMC_DataType *dt,        // out - data type (int, float)
-      ESMC_DataKind *dk,        // out - data kind (*4, *8)
+      ESMC_TypeKind *dk,        // out - data kind (*4, *8)
       int *count,               // out - item count
       int *rc,                  // in - return code
       int nlen) {               // hidden/in - strlen count for name

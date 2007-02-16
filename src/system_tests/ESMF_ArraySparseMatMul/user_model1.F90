@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.2 2006/05/19 21:35:53 theurich Exp $
+! $Id: user_model1.F90,v 1.3 2007/02/16 05:27:51 rosalind Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -137,8 +137,8 @@ module user_model1
     do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
       do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
         farrayPtr(i,j) = 10.0d0 &
-          + 5.0d0 * sin(real(i)/100.d0*pi) &
-          + 2.0d0 * sin(real(j)/150.d0*pi)
+          + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
+          + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi)
       enddo
     enddo
  

@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.C,v 1.3 2007/02/16 03:25:34 rosalind Exp $
+// $Id: ESMC_Fraction.C,v 1.4 2007/02/16 05:27:48 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Fraction.C,v 1.3 2007/02/16 03:25:34 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Fraction.C,v 1.4 2007/02/16 05:27:48 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1056,7 +1056,7 @@
                                               //        to divide by
 //
 // !DESCRIPTION:
-//    Returns this fraction divided by given fraction as a double
+//    Returns this fraction divided by given fraction as a ESMC_R8
 //    precision quotient.
 //
 //EOP

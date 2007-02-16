@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayUTest.F90,v 1.6 2007/02/01 17:30:15 theurich Exp $
+! $Id: ESMF_InternArrayUTest.F90,v 1.7 2007/02/16 05:27:45 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayUTest.F90,v 1.6 2007/02/01 17:30:15 theurich Exp $'
+      '$Id: ESMF_InternArrayUTest.F90,v 1.7 2007/02/16 05:27:45 rosalind Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -44,11 +44,11 @@
     real(ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1
     integer :: width, attribute
     integer :: counts(2), lbounds(2), ubounds(2)
-    real :: attribute4
+    real(ESMF_KIND_R4) :: attribute4
     logical :: tf_result
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_DataType) :: att_datatype
-    type(ESMF_DataKind) :: att_datakind
+    type(ESMF_TypeKind) :: att_datakind
 
 
     ! individual test failure message

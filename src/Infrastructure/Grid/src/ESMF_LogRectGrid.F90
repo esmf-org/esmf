@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.164 2007/02/13 03:56:07 oehmke Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.165 2007/02/16 05:27:45 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.164 2007/02/13 03:56:07 oehmke Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.165 2007/02/16 05:27:45 rosalind Exp $'
 
 !==============================================================================
 !
@@ -6680,7 +6680,7 @@
       real(ESMF_KIND_R8), dimension(:,:), pointer :: center1, center2, corner
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: corner1, corner2
       type(ESMF_InternArray), dimension(:), pointer :: centerArray, cornerArray
-      type(ESMF_DataKind) :: kind
+      type(ESMF_TypeKind) :: kind
       type(ESMF_DataType) :: type
 
       ! Initialize return code; assume failure until success is certain
@@ -7154,7 +7154,7 @@
       real(ESMF_KIND_R8), dimension(:  ), pointer :: center, center1, center2
       real(ESMF_KIND_R8), dimension(:,:), pointer :: corner, corner1, corner2
       type(ESMF_InternArray), dimension(:), pointer :: centerArray, cornerArray
-      type(ESMF_DataKind) :: kind
+      type(ESMF_TypeKind) :: kind
       type(ESMF_DataType) :: type
 
       ! Initialize return code; assume failure until success is certain
@@ -8110,7 +8110,7 @@
       integer :: i, j, iMax1, jMax1, iType, jType
       integer, dimension(:,:), pointer :: temp
       type(ESMF_InternArray) :: arrayTemp
-      type(ESMF_DataKind) :: kind
+      type(ESMF_TypeKind) :: kind
       type(ESMF_DataType) :: type
 
       ! Initialize return code; assume failure until success is certain
@@ -8217,7 +8217,7 @@
       integer, dimension(1) :: counts
       integer, dimension(:), pointer :: temp
       type(ESMF_InternArray) :: arrayTemp
-      type(ESMF_DataKind) :: kind
+      type(ESMF_TypeKind) :: kind
       type(ESMF_DataType) :: type
 
       ! Initialize return code; assume failure until success is certain
@@ -8303,7 +8303,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      real, dimension (:), pointer :: buffer
+      real(ESMF_KIND_R8), dimension (:), pointer :: buffer
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -8476,7 +8476,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      real, dimension (:), pointer :: buffer
+      real(ESMF_KIND_R8), dimension (:), pointer :: buffer
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !

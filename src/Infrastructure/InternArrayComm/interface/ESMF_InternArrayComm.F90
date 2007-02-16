@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.16 2007/02/07 23:32:29 oehmke Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.17 2007/02/16 05:27:45 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.16 2007/02/07 23:32:29 oehmke Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.17 2007/02/16 05:27:45 rosalind Exp $'
 !
 !==============================================================================
 !
@@ -410,7 +410,7 @@ module ESMF_InternArrayCommMod
 !           or relative to the entire undecomposed grid (global).
 !           Valid values are {\tt ESMF\_LOCAL} or {\tt ESMF\_GLOBAL}.
 !     \item [domainTypeFlag]
-!           Kind of counts you want back.  Valid values are:
+!           TypeKind of counts you want back.  Valid values are:
 !           {\tt ESMF\_DOMAIN\_EXCLUSIVE}, 
 !           {\tt ESMF\_DOMAIN\_COMPUTATIONAL},
 !           {\tt ESMF\_DOMAIN\_TOTAL} or {\tt ESMF\_DOMAIN\_ALLOCATED}.
@@ -558,7 +558,7 @@ module ESMF_InternArrayCommMod
 !           data onto the cells in the {\tt ESMF\_Grid}.  Needed to match up
 !           the array axes and the grid axes.
 !     \item [domainTypeFlag]
-!           Kind of counts you want back.  Valid values are:
+!           TypeKind of counts you want back.  Valid values are:
 !           {\tt ESMF\_DOMAIN\_EXCLUSIVE}, 
 !           {\tt ESMF\_DOMAIN\_COMPUTATIONAL},
 !           {\tt ESMF\_DOMAIN\_TOTAL} or {\tt ESMF\_DOMAIN\_ALLOCATED}.

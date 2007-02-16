@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.99 2007/01/10 19:22:35 oehmke Exp $
+! $Id: ESMF_State.F90,v 1.100 2007/02/16 05:27:50 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.99 2007/01/10 19:22:35 oehmke Exp $'
+      '$Id: ESMF_State.F90,v 1.100 2007/02/16 05:27:50 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -2383,7 +2383,7 @@ end interface
       type(ESMF_State), intent(in) :: state  
       character(len=*), intent(in) :: name
       type(ESMF_DataType), intent(out), optional :: datatype
-      type(ESMF_DataKind), intent(out), optional :: datakind
+      type(ESMF_TypeKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
@@ -2421,7 +2421,7 @@ end interface
 
       integer :: localrc                           ! Error status
       type(ESMF_DataType) :: localDt
-      type(ESMF_DataKind) :: localDk
+      type(ESMF_TypeKind) :: localDk
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
@@ -2465,7 +2465,7 @@ end interface
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out), optional :: name
       type(ESMF_DataType), intent(out), optional :: datatype
-      type(ESMF_DataKind), intent(out), optional :: datakind
+      type(ESMF_TypeKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
@@ -2506,7 +2506,7 @@ end interface
       integer :: localrc                           ! Error status
       character(len=ESMF_MAXSTR) :: localName
       type(ESMF_DataType) :: localDt
-      type(ESMF_DataKind) :: localDk
+      type(ESMF_TypeKind) :: localDk
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain

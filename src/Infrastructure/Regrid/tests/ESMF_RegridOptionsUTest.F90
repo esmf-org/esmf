@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridOptionsUTest.F90,v 1.10 2007/01/22 21:42:02 oehmke Exp $
+! $Id: ESMF_RegridOptionsUTest.F90,v 1.12 2007/02/16 05:27:47 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_RegridOptionsUTest.F90,v 1.10 2007/01/22 21:42:02 oehmke Exp $'
+      '$Id: ESMF_RegridOptionsUTest.F90,v 1.12 2007/02/16 05:27:47 rosalind Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -58,7 +58,7 @@
     type(ESMF_RouteHandle) :: routehandle
     type(ESMF_RouteOptions) :: roption
 
-    real :: maxerror
+    real(ESMF_KIND_R8) :: maxerror
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -420,7 +420,7 @@ contains
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Set initial data values over whole array to our de id
-      idata(:,:,:) = real(de_id)
+      idata(:,:,:) = real(de_id,ESMF_KIND_R8)
 
       status = ESMF_SUCCESS
 
@@ -613,7 +613,7 @@ contains
  
     subroutine verifyResults(userfield, returnedError, result, rc)
       type(ESMF_Field), intent(inout) :: userfield
-      real, intent(out) :: returnedError
+      real(ESMF_KIND_R8), intent(out) :: returnedError
       integer, intent(inout) :: result
       integer, intent(out) :: rc
 
@@ -625,7 +625,7 @@ contains
       real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
       real(ESMF_KIND_R8), dimension(:,:), pointer :: calc, coordX, coordY
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: data
-      integer :: is,js,ks
+
 
       pi = 3.14159
 
@@ -673,12 +673,7 @@ contains
             minCValue   = min(minCValue, abs(calc(i,j)))
             maxCValue   = max(maxCValue, abs(calc(i,j)))
             minDValue   = min(minDValue, abs(data(k,i,j)))
-            if (abs(data(k,i,j)) .gt. maxDValue) then 
-                             maxDValue = abs(data(k,i,j))
-                             is=i
-                             js=j
-                             ks=k    
-            endif
+            maxDValue   = max(maxDValue, abs(data(k,i,j)))
             maxError    = max(maxError, abs(error))
             maxPerError = max(maxPerError, 100.*abs(error)/abs(calc(i,j)))
           enddo
@@ -688,7 +683,7 @@ contains
       write(*,*) " "
       write(*,*) "Detailed results for DE #", myDE, ":"
       write(*,*) "   minimum regridded value = ", minDValue
-      write(*,*) "   maximum regridded value = ", maxDValue," (",ks,is,js,")"
+      write(*,*) "   maximum regridded value = ", maxDValue
       write(*,*) "   minimum computed value  = ", minCValue
       write(*,*) "   maximum computed value  = ", maxCValue
       write(*,*) "   maximum error           = ", maxError

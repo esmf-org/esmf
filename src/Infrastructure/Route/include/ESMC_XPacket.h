@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.40 2006/11/16 05:21:15 cdeluca Exp $
+// $Id: ESMC_XPacket.h,v 1.41 2007/02/16 05:27:47 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -164,10 +164,10 @@
                                       int nbytes, int numAddrs, char **buffer,
                                       int *bufferSize);
     friend int ESMC_XPacketPackBuffer(int xpCount, ESMC_XPacket **xpList,
-      ESMC_DataKind dk, int nbytes, int numAddrs, void **dataAddr,
+      ESMC_TypeKind dk, int nbytes, int numAddrs, void **dataAddr,
       char *buffer);
     friend int ESMC_XPacketUnpackBuffer(int xpCount, ESMC_XPacket **xpList,
-      ESMC_DataKind dk, int nbytes, char *buffer, int numAddrs,
+      ESMC_TypeKind dk, int nbytes, char *buffer, int numAddrs,
       void **dataAddr);
     friend int ESMC_XPacketDoBuffer(ESMC_PackUnpackFlag packflag, 
                                     int xpCount, ESMC_XPacket **xpList,
@@ -197,10 +197,10 @@
                                int nbytes, int numAddrs, 
                                char **buffer, int *bufferSize);
     int ESMC_XPacketPackBuffer(int xpCount, ESMC_XPacket **xpList, 
-      ESMC_DataKind dk, int nbytes, int numAddrs, void **dataAddr, 
+      ESMC_TypeKind dk, int nbytes, int numAddrs, void **dataAddr, 
       char *buffer);
     int ESMC_XPacketUnpackBuffer(int xpCount, ESMC_XPacket **xpList,
-      ESMC_DataKind dk, int nbytes, int numAddrs, char *buffer, 
+      ESMC_TypeKind dk, int nbytes, int numAddrs, char *buffer, 
       void **dataAddr);
     int ESMC_XPacketDoBuffer(ESMC_PackUnpackFlag packflag, 
                              int xpCount, ESMC_XPacket **xpList,

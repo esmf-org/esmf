@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.85 2007/02/16 03:25:34 rosalind Exp $"
+// $Id: ESMC_Time.C,v 1.86 2007/02/16 05:27:47 rosalind Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.85 2007/02/16 03:25:34 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.86 2007/02/16 05:27:47 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1333,8 +1333,8 @@
       // strict ISO 8601 format YYYY-MM-DDThh:mm:ss[.f]
 
       // convert integer fractional seconds to decimal form
-      double fractionalSeconds = 0.0;
-      if (sD != 0) fractionalSeconds = (double) sN / (double) sD;
+      ESMC_R8 fractionalSeconds = 0.0;
+      if (sD != 0) fractionalSeconds = (ESMC_R8) sN / (ESMC_R8) sD;
 
       // if fractionalSeconds non-zero (>= 0.5 ns) append full fractional value
       if (fabs(fractionalSeconds) >= 5e-10) {
@@ -1677,7 +1677,7 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeGetDayOfYear(double)"
+ #define ESMC_METHOD "ESMC_TimeGetDayOfYear(ESMC_R8)"
 
     int rc = ESMF_SUCCESS;
 

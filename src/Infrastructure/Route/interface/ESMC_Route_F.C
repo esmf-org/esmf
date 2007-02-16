@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.44 2006/11/16 05:21:16 cdeluca Exp $
+// $Id: ESMC_Route_F.C,v 1.45 2007/02/16 05:27:47 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -92,25 +92,25 @@ extern "C" {
                                    ESMC_LocalArray **dst, int *status) {
            void *src_base_addr = NULL;
            void *dst_base_addr = NULL;
-           ESMC_DataKind sdk, ddk;
+           ESMC_TypeKind sdk, ddk;
 
            sdk = ESMF_NOKIND;
            ddk = ESMF_NOKIND;
 
-	   if (((long int)src != 0) && ((long int)src != -1) &&
-	       ((long int)*src != 0) && ((long int)*src != -1)) {
+	   if (((ESMC_I8)src != 0) && ((ESMC_I8)src != -1) &&
+	       ((ESMC_I8)*src != 0) && ((ESMC_I8)*src != -1)) {
                (*src)->ESMC_LocalArrayGetBaseAddr(&src_base_addr);
-               sdk = (*src)->ESMC_LocalArrayGetKind();
+               sdk = (*src)->ESMC_LocalArrayGetTypeKind();
                // allow destination to be optional; if not specified, use the
                // src as both src and dst.
                dst_base_addr = src_base_addr;
                ddk = sdk;
            }
 
-	   if (((long int)dst != 0) && ((long int)dst != -1) &&
-	       ((long int)*dst != 0) && ((long int)*dst != -1)) {
+	   if (((ESMC_I8)dst != 0) && ((ESMC_I8)dst != -1) &&
+	       ((ESMC_I8)*dst != 0) && ((ESMC_I8)*dst != -1)) {
                (*dst)->ESMC_LocalArrayGetBaseAddr(&dst_base_addr);
-               ddk = (*dst)->ESMC_LocalArrayGetKind();
+               ddk = (*dst)->ESMC_LocalArrayGetTypeKind();
            }
 
            if (sdk != ddk) {
@@ -129,7 +129,7 @@ extern "C" {
 
            void **src_base_addr = NULL;
            void **dst_base_addr = NULL;
-           ESMC_DataKind sdk, ddk;
+           ESMC_TypeKind sdk, ddk;
            bool hasdst;
            int n;
 
@@ -145,8 +145,8 @@ extern "C" {
 
            // TODO: how do arrays of derived types come across?  since
            // each contains only a pointer, is it simply an array of ptrs?
-	   if (((long int)src != 0) && ((long int)src != -1)
-	       && ((long int)*src != 0) && ((long int)*src != -1)
+	   if (((ESMC_I8)src != 0) && ((ESMC_I8)src != -1)
+	       && ((ESMC_I8)*src != 0) && ((ESMC_I8)*src != -1)
                && (*srcCount > 0)) {
                for (n=0; n<*srcCount; n++) {
                    // get the data start address for each array in the list   
@@ -158,9 +158,9 @@ extern "C" {
                    // identical, then in routerun the outer loop must be
                    // by block, and no packing is allowed between blocks.
                    if (n==0)
-                       sdk = (src[n])->ESMC_LocalArrayGetKind();
+                       sdk = (src[n])->ESMC_LocalArrayGetTypeKind();
                    else {
-                       if (sdk != (src[n])->ESMC_LocalArrayGetKind()) {
+                       if (sdk != (src[n])->ESMC_LocalArrayGetTypeKind()) {
                            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
                            "; all source datatypes must be the same", status);
                            return;
@@ -172,13 +172,13 @@ extern "C" {
            // This used to be a one-liner, but the optimizer on one of the
            // IRIX machines got confused.  Now check each step before going
            // on to dereference the pointers, etc. 
-	   if (hasdst && ((long int)dst == 0)) hasdst = false;
-           if (hasdst && ((long int)dst == -1)) hasdst = false;
-	   if (hasdst && ((long int)*dst == 0))  hasdst = false;
-           if (hasdst && ((long int)*dst == -1)) hasdst = false;
+	   if (hasdst && ((ESMC_I8)dst == 0)) hasdst = false;
+           if (hasdst && ((ESMC_I8)dst == -1)) hasdst = false;
+	   if (hasdst && ((ESMC_I8)*dst == 0))  hasdst = false;
+           if (hasdst && ((ESMC_I8)*dst == -1)) hasdst = false;
            if (hasdst && (*dstCount <= 0)) hasdst = false;
-	   //if (((long int)dst != 0) && ((long int)dst != -1)
-	   //    && ((long int)*dst != 0) && ((long int)*dst != -1)
+	   //if (((ESMC_I8)dst != 0) && ((ESMC_I8)dst != -1)
+	   //    && ((ESMC_I8)*dst != 0) && ((ESMC_I8)*dst != -1)
            //    && (*dstCount > 0)) {
            if (hasdst) {
                for (n=0; n<*dstCount; n++) {
@@ -186,9 +186,9 @@ extern "C" {
                    (dst[n])->ESMC_LocalArrayGetBaseAddr(dst_base_addr+n);
                    // TODO: ditto comment above about lists of ddks
                    if (n==0)
-                       ddk = (dst[n])->ESMC_LocalArrayGetKind();
+                       ddk = (dst[n])->ESMC_LocalArrayGetTypeKind();
                    else {
-                       if (ddk != (dst[n])->ESMC_LocalArrayGetKind()) {
+                       if (ddk != (dst[n])->ESMC_LocalArrayGetTypeKind()) {
                            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
                         "; all destination datatypes must be the same", status);
                            return;
@@ -230,7 +230,7 @@ extern "C" {
 #undef ESMC_METHOD
 
        void FTN(c_esmc_routerunna)(ESMC_Route **ptr, void *src,
-                                   void *dst, ESMC_DataKind *dk, int *status) {
+                                   void *dst, ESMC_TypeKind *dk, int *status) {
            *status = (*ptr)->ESMC_RouteRun(src, dst, *dk);
        }
 

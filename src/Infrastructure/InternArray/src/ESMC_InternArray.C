@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray.C,v 1.3 2006/11/16 05:21:04 cdeluca Exp $
+// $Id: ESMC_InternArray.C,v 1.4 2007/02/16 05:27:45 rosalind Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArray.C,v 1.3 2006/11/16 05:21:04 cdeluca Exp $";
+            "$Id: ESMC_InternArray.C,v 1.4 2007/02/16 05:27:45 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -64,8 +64,8 @@
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
-    ESMC_DataType dt,          // int, float, etc
-    ESMC_DataKind dk,          // short/long, etc
+    ESMC_DataType dt,          // int, ESMC_R4, etc
+    ESMC_TypeKind dk,          // short/long, etc
     int *icounts,              // number of items in each dim
     void *base,                // if non-null, this is already allocated memory
     ESMC_DataCopy docopy,      // if base != NULL, copy data?
@@ -131,8 +131,8 @@
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
-    ESMC_DataType dt,          // int, float, etc
-    ESMC_DataKind dk,          // short/long, etc
+    ESMC_DataType dt,          // int, ESMC_R4, etc
+    ESMC_TypeKind dk,          // short/long, etc
     int *icounts,              // number of items in each dim
     void *base,                // if non-null, this is already allocated memory
     ESMC_DataCopy docopy,      // if base != NULL, copy data?
@@ -206,8 +206,8 @@
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
-    ESMC_DataType dt,          // int, float, etc
-    ESMC_DataKind dk,          // short/long, etc
+    ESMC_DataType dt,          // int, ESMC_R4, etc
+    ESMC_TypeKind dk,          // short/long, etc
     ESMC_ArrayOrigin oflag,    // caller is fortran or C++?
     int *rc) {                 // return code
 //
@@ -250,8 +250,8 @@
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
-    ESMC_DataType dt,          // int, float, etc
-    ESMC_DataKind dk,          // short/long, etc
+    ESMC_DataType dt,          // int, ESMC_R4, etc
+    ESMC_TypeKind dk,          // short/long, etc
     int *icounts,              // counts along each dimension
     struct c_F90ptr *f90ptr,   // opaque type which fortran uses (dope v)
     void *base,                // real start of memory 
@@ -335,8 +335,8 @@
 //
 // !ARGUMENTS:
     int irank,                 // dimensionality
-    ESMC_DataType dt,          // int, float, etc
-    ESMC_DataKind dk,          // short/long, etc  (*2, *4, *8)
+    ESMC_DataType dt,          // int, ESMC_R4, etc
+    ESMC_TypeKind dk,          // short/long, etc  (*2, *4, *8)
     int *icounts,              // number of items in each dim
     void *base,                // base memory address of data block
     ESMC_ArrayOrigin oflag,    // create called from F90 or C++?
@@ -627,7 +627,7 @@
 	bytes += ESMF_F90_PTR_PLUS_RANK;
    
    //fprintf(stderr, "setting f90 ptr from %lx to %lx, %d bytes for rank %d\n", 
-   //                (long int)fptr, (long int)(&this->f90dopev), bytes, rank);
+   //                (ESMC_I8)fptr, (ESMC_I8)(&this->f90dopev), bytes, rank);
 
     memcpy((void *)(&this->f90dopev), (void *)fptr, bytes);
 
@@ -752,7 +752,7 @@
 	bytes += ESMF_F90_PTR_PLUS_RANK;
    
     //fprintf(stderr, "getting f90 ptr, from %lx to %lx, %d bytes for rank %d\n", 
-    //                 (long int)(&this->f90dopev), (long int)p, bytes, rank);
+    //                 (ESMC_I8)(&this->f90dopev), (ESMC_I8)p, bytes, rank);
 
     memcpy((void *)p, (void *)(&this->f90dopev), bytes);
 
@@ -788,7 +788,7 @@
 	bytes += ESMF_F90_PTR_PLUS_RANK;
    
     //fprintf(stderr, "setting f90 ptr, from %lx to %lx, %d bytes for rank %d\n", 
-    //                  (long int)p,  (long int)(&this->f90dopev), bytes, rank);
+    //                  (ESMC_I8)p,  (ESMC_I8)(&this->f90dopev), bytes, rank);
 
     memcpy((void *)(&this->f90dopev), (void *)p, bytes);
 
@@ -1086,7 +1086,7 @@
         beforeskip = '\n';
     }
 
-    sprintf(msgbuf,"ArrayPrint: InternArray at address 0x%08lx:\n", (unsigned long)this);
+    sprintf(msgbuf,"ArrayPrint: InternArray at address 0x%08lx:\n", (ESMC_POINTER)this);
     printf(msgbuf);
       // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
 
@@ -1094,7 +1094,7 @@
                              this->rank, this->type, this->kind);
     printf(msgbuf);
       // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-    sprintf(msgbuf,"base_addr = 0x%08lx\n", (unsigned long)this->base_addr);
+    sprintf(msgbuf,"base_addr = 0x%08lx\n", (ESMC_POINTER)this->base_addr);
     printf(msgbuf);
       // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     sprintf(msgbuf,"            ");
@@ -1124,9 +1124,9 @@
                 for (i=0; i<tcount; i++) {
                     if (!opt_byline)
                         sprintf(msgbuf,"(%2d) =  %lg\n", i+lbound[0], 
-                               *((float *)(this->base_addr) + i));
+                               *((ESMC_R4 *)(this->base_addr) + i));
                     else
-                        sprintf(msgbuf,"%lg ", *((float *)(this->base_addr) + i));
+                        sprintf(msgbuf,"%lg ", *((ESMC_R4 *)(this->base_addr) + i));
                     printf(msgbuf);
                       // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                     if (!opt_all && (tcount > 22) && ((i+1)==10)) {
@@ -1160,10 +1160,10 @@
                         if (!opt_byline)
                             sprintf(msgbuf,"(%2d,%2d) =  %lg\n", 
                                      i+lbound[0], j+lbound[1], 
-                                   *((float *)(this->base_addr) + i + j*imax) );
+                                   *((ESMC_R4 *)(this->base_addr) + i + j*imax) );
                         else
                             sprintf(msgbuf,"%lg ",  
-                                   *((float *)(this->base_addr) + i + j*imax) );
+                                   *((ESMC_R4 *)(this->base_addr) + i + j*imax) );
                         printf(msgbuf);
                           // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                         rcount++;
@@ -1203,10 +1203,10 @@
                         if (!opt_byline)
                             sprintf(msgbuf,"(%2d,%2d,%2d) =  %g\n", 
                                    i+lbound[0], j+lbound[1], k+lbound[2],
-                                   *((float *)(this->base_addr) + 
+                                   *((ESMC_R4 *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
                         else
-                             sprintf(msgbuf,"%g ", *((float *)(this->base_addr) + 
+                             sprintf(msgbuf,"%g ", *((ESMC_R4 *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
                         printf(msgbuf);
                           // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
@@ -1248,9 +1248,9 @@
                 for (i=0; i<tcount; i++) {
                     if (!opt_byline)
                         sprintf(msgbuf,"(%2d) =  %lg\n", i+lbound[0], 
-                                     *((double *)(this->base_addr) + i));
+                                     *((ESMC_R8 *)(this->base_addr) + i));
                     else
-                        sprintf(msgbuf,"%lg ", *((double *)(this->base_addr) + i));
+                        sprintf(msgbuf,"%lg ", *((ESMC_R8 *)(this->base_addr) + i));
                     printf(msgbuf);
                       // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                     if (!opt_all && (tcount > 22) && ((i+1)==10)) {
@@ -1284,10 +1284,10 @@
                         if (!opt_byline)
                             sprintf(msgbuf,"(%2d,%2d) =  %lg\n", 
                                             i+lbound[0], j+lbound[1], 
-                                   *((double *)(this->base_addr) + i + j*imax) );
+                                   *((ESMC_R8 *)(this->base_addr) + i + j*imax) );
                         else
                             sprintf(msgbuf,"%lg ",  
-                                   *((double *)(this->base_addr) + i + j*imax) );
+                                   *((ESMC_R8 *)(this->base_addr) + i + j*imax) );
                         printf(msgbuf);
                           // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                         rcount++;
@@ -1327,10 +1327,10 @@
                         if (!opt_byline)
                             sprintf(msgbuf,"(%2d,%2d,%2d) =  %lg\n", 
                                    i+lbound[0], j+lbound[1], k+lbound[2],
-                                   *((double *)(this->base_addr) + 
+                                   *((ESMC_R8 *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
                         else
-                             sprintf(msgbuf,"%lg ", *((double *)(this->base_addr) + 
+                             sprintf(msgbuf,"%lg ", *((ESMC_R8 *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
                         printf(msgbuf);
                           // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
@@ -1502,10 +1502,10 @@
                 for (i=0; i<imax; i++) {
                     if (!opt_byline)
                         sprintf(msgbuf,"(%2d) =  %ld\n", i+lbound[0], 
-                               *((long *)(this->base_addr) + i));
+                               *((ESMC_I8 *)(this->base_addr) + i));
                     else
                         sprintf(msgbuf,"%ld ",
-                               *((long *)(this->base_addr) + i));
+                               *((ESMC_I8 *)(this->base_addr) + i));
                     printf(msgbuf);
                       // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                     if (!opt_all && (tcount > 22) && ((i+1)==10)) {
@@ -1539,10 +1539,10 @@
                         if (!opt_byline)
                             sprintf(msgbuf,"(%2d,%2d) =  %ld\n", 
                                     i+lbound[0], j+lbound[1], 
-                                 *((long *)(this->base_addr) + i + j*imax) );
+                                 *((ESMC_I8 *)(this->base_addr) + i + j*imax) );
                         else
                             sprintf(msgbuf,"%ld ", 
-                                 *((long *)(this->base_addr) + i + j*imax) );
+                                 *((ESMC_I8 *)(this->base_addr) + i + j*imax) );
                         printf(msgbuf);
                           // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                         rcount++;
@@ -1582,11 +1582,11 @@
                         if (!opt_byline)
                             sprintf(msgbuf,"(%2d,%2d,%2d) =  %ld\n", 
                                    i+lbound[0], j+lbound[1], k+lbound[2],
-                                   *((long *)(this->base_addr) + 
+                                   *((ESMC_I8 *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
                         else
                             sprintf(msgbuf,"%ld ", 
-                                   *((long *)(this->base_addr) + 
+                                   *((ESMC_I8 *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
                         printf(msgbuf);
                           // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
@@ -1677,7 +1677,7 @@
     }
 
     fprintf(ffile, "ArrayWrite: InternArray at address 0x%08lx:  ", 
-                           (unsigned long)this);
+                           (ESMC_POINTER)this);
     fprintf(ffile, "rank = %d, type = %d, kind = %d\n", 
                              this->rank, this->type, this->kind);
     for (i=0; i<this->rank; i++) 
@@ -1695,7 +1695,7 @@
                 imax = this->counts[0];
                 tcount = imax;
                 for (i=0; i<tcount; i++) {
-                    fprintf(ffile, "%lg\n", *((float *)(this->base_addr) + i));
+                    fprintf(ffile, "%lg\n", *((ESMC_R4 *)(this->base_addr) + i));
                 }
                 break;
               case 2:
@@ -1706,7 +1706,7 @@
                 for (j=0; j<jmax; j++) {
                     for (i=0; i<imax; i++) {
                         fprintf(ffile, "%lg ",  
-                                   *((float *)(this->base_addr) + i + j*imax) );
+                                   *((ESMC_R4 *)(this->base_addr) + i + j*imax) );
                     }
                     fprintf(ffile, "\n");
                 }
@@ -1721,7 +1721,7 @@
                   for (j=0; j<jmax; j++) {
                     for (i=0; i<imax; i++) {
                         fprintf(ffile, "%lg ",
-                         *((float *)(this->base_addr) + i + j*imax + k*jmax*imax));
+                         *((ESMC_R4 *)(this->base_addr) + i + j*imax + k*jmax*imax));
                     }
                     fprintf(ffile, "\n");
                   }
@@ -1739,7 +1739,7 @@
                     for (j=0; j<jmax; j++) {
                       for (i=0; i<imax; i++) {
                           fprintf(ffile, "%lg ",
-                           *((float *)(this->base_addr) + i + j*imax + k*jmax*imax 
+                           *((ESMC_R4 *)(this->base_addr) + i + j*imax + k*jmax*imax 
                                                          + l*kmax*jmax*imax));
                       }
                       fprintf(ffile, "\n");
@@ -1758,7 +1758,7 @@
                 imax = this->counts[0];
                 tcount = imax;
                 for (i=0; i<tcount; i++) {
-                    fprintf(ffile, "%lg\n", *((double *)(this->base_addr) + i));
+                    fprintf(ffile, "%lg\n", *((ESMC_R8 *)(this->base_addr) + i));
                 }
                 break;
               case 2:
@@ -1769,7 +1769,7 @@
                 for (j=0; j<jmax; j++) {
                     for (i=0; i<imax; i++) {
                         fprintf(ffile, "%lg ",  
-                                   *((double *)(this->base_addr) + i + j*imax) );
+                                   *((ESMC_R8 *)(this->base_addr) + i + j*imax) );
                     }
                     fprintf(ffile, "\n");
                 }
@@ -1784,7 +1784,7 @@
                   for (j=0; j<jmax; j++) {
                     for (i=0; i<imax; i++) {
                         fprintf(ffile, "%lg ",
-                         *((double *)(this->base_addr) + i + j*imax + k*jmax*imax));
+                         *((ESMC_R8 *)(this->base_addr) + i + j*imax + k*jmax*imax));
                     }
                     fprintf(ffile, "\n");
                   }
@@ -1802,7 +1802,7 @@
                     for (j=0; j<jmax; j++) {
                       for (i=0; i<imax; i++) {
                           fprintf(ffile, "%lg ",
-                           *((double *)(this->base_addr) + i + j*imax + k*jmax*imax 
+                           *((ESMC_R8 *)(this->base_addr) + i + j*imax + k*jmax*imax 
                                                          + l*kmax*jmax*imax));
                       }
                       fprintf(ffile, "\n");
@@ -1888,7 +1888,7 @@
                 imax = this->counts[0];
                 tcount = imax;
                 for (i=0; i<imax; i++) {
-                    fprintf(ffile, "%ld\n", *((long *)(this->base_addr) + i));
+                    fprintf(ffile, "%ld\n", *((ESMC_I8 *)(this->base_addr) + i));
                 }
                 break;
               case 2:
@@ -1899,7 +1899,7 @@
                 for (j=0; j<jmax; j++) {
                     for (i=0; i<imax; i++) {
                         fprintf(ffile, "%ld ",
-                                    *((long *)(this->base_addr) + i + j*imax) );
+                                    *((ESMC_I8 *)(this->base_addr) + i + j*imax) );
                     }
                     fprintf(ffile, "\n");
                 }
@@ -1914,7 +1914,7 @@
                   for (j=0; j<jmax; j++) {
                     for (i=0; i<imax; i++) {
                         fprintf(ffile, "%ld ", 
-                           *((long *)(this->base_addr) + i + j*imax + k*jmax*imax));
+                           *((ESMC_I8 *)(this->base_addr) + i + j*imax + k*jmax*imax));
                     }
                     fprintf(ffile, "\n");
                   }
@@ -1932,7 +1932,7 @@
                     for (j=0; j<jmax; j++) {
                       for (i=0; i<imax; i++) {
                           fprintf(ffile, "%ld ",
-                           *((long *)(this->base_addr) + i + j*imax + k*jmax*imax 
+                           *((ESMC_I8 *)(this->base_addr) + i + j*imax + k*jmax*imax 
                                                          + l*kmax*jmax*imax));
                       }
                       fprintf(ffile, "\n");

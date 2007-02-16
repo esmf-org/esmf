@@ -1,4 +1,4 @@
-// $Id: ESMC_WordsizeSubr.C,v 1.5 2007/02/16 03:25:34 rosalind Exp $
+// $Id: ESMC_WordsizeSubr.C,v 1.6 2007/02/16 05:27:51 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ void FTN(c_ints)(int *i1, int *i2, int *i3, int *i4,
       printf("In C++: sizeof(long)      = %d\n", (int) sizeof(long));
       printf("In C++: sizeof(long long) = %d\n", (int) sizeof(long long));
       printf("In C++: sizeof(float)     = %d\n", (int) sizeof(float));
-      printf("In C++: sizeof(double)    = %d\n", (int) sizeof(double));
+      printf("In C++: sizeof(ESMC_R8)    = %d\n", (int) sizeof(ESMC_R8));
       printf("In C++: sizeof(pointer)   = %d\n", (int) sizeof(i1));
 
       *i1 = sizeof(ESMC_I1);

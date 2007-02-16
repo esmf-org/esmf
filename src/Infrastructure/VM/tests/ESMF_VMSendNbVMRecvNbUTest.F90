@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.2 2006/11/16 05:21:22 cdeluca Exp $
+! $Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.3 2007/02/16 05:27:49 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.2 2006/11/16 05:21:22 cdeluca Exp $'
+      '$Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.3 2007/02/16 05:27:49 rosalind Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -119,8 +119,8 @@
       !Assign values
       do i=1,count
         localData(i)    = localPet*100+i 
-        r4_localData(i) = real( localData(i) )
-        r8_localData(i) = real( localData(i) )
+        r4_localData(i) = real( localData(i), ESMF_KIND_R4 )
+        r8_localData(i) = real( localData(i), ESMF_KIND_R8 )
         if (mod(localData(i)+localPet,2).eq.0) then
           local_logical(i)= ESMF_TRUE
         else
@@ -149,7 +149,7 @@
       !The solution to test against is..
       do  i=1,count
         soln(i)    = src*100+i
-        r8_soln(i) = real( soln(i) )
+        r8_soln(i) = real( soln(i) , ESMF_KIND_R8 )
         r4_soln(i) = r8_soln(i)
         if ( mod(soln(i)+src,2) .eq. 0 ) then
           logical_soln(i)= ESMF_TRUE
@@ -365,7 +365,7 @@
       !The solution to test against is..
       do  i=1,count
         soln(i)    = src*100+i
-        r8_soln(i) = real( soln(i) )
+        r8_soln(i) = real( soln(i) , ESMF_KIND_R8 )
         r4_soln(i) = r8_soln(i)
         if ( mod(soln(i)+src,2) .eq. 0 ) then
           logical_soln(i)= ESMF_TRUE

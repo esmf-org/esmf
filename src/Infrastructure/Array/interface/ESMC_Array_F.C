@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.44 2006/11/16 05:20:54 cdeluca Exp $
+// $Id: ESMC_Array_F.C,v 1.45 2007/02/16 05:27:40 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ extern "C" {
 
   
   void FTN(c_esmc_arrayget)(ESMC_Array **ptr, ESMC_DataType *type,
-    ESMC_DataKind *kind, int *rank, ESMC_LocalArray **opt_localArrayList,
+    ESMC_TypeKind *kind, int *rank, ESMC_LocalArray **opt_localArrayList,
     int *len_localArrayList, ESMC_DistGrid **distgrid, ESMC_DELayout **delayout,
     ESMC_IndexFlag *indexflag, ESMC_InterfaceInt **dimmap,
     ESMC_InterfaceInt **inverseDimmap, ESMC_InterfaceInt **exclusiveLBound,
@@ -142,7 +142,7 @@ extern "C" {
   
 
   void FTN(c_esmc_arraysparsematmulstore)(ESMC_Array **srcArray,
-    ESMC_Array **dstArray, double *factorList, int *factorListCount,
+    ESMC_Array **dstArray, ESMC_R8 *factorList, int *factorListCount,
     ESMC_InterfaceInt **factorIndexList, int *rootPet,
     ESMC_RouteHandle **routehandle, int *rc){
 #undef  ESMC_METHOD
@@ -169,7 +169,7 @@ extern "C" {
 
   
   void FTN(c_esmc_arrayscatter)(ESMC_Array **array, void *farray,
-    ESMC_DataType *type, ESMC_DataKind *kind, int *rank, int *counts,
+    ESMC_DataType *type, ESMC_TypeKind *kind, int *rank, int *counts,
     int *patch, int *rootPet, ESMC_VM **vm, int *rc){
     ESMC_VM *opt_vm;
 #undef  ESMC_METHOD
@@ -378,7 +378,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_newarrayreducescalarb)(ESMC_newArray **ptr, void *result,
-    ESMC_DataKind *dtk, ESMC_Operation *op, int *rootPET, ESMC_VM **vm, 
+    ESMC_TypeKind *dtk, ESMC_Operation *op, int *rootPET, ESMC_VM **vm, 
     int *rc){
     // PET-based blocking scalar reduce
     int localrc;
@@ -396,7 +396,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_newarrayreducescalarnbroot)(ESMC_newArray **ptr, void *result,
-    ESMC_DataKind *dtk, ESMC_Operation *op, int *rootPET,
+    ESMC_TypeKind *dtk, ESMC_Operation *op, int *rootPET,
     ESMC_newArrayCommHandle **commh, ESMC_VM **vm, int *rc){
     // DE-based non-blocking reduce (root call)
     int localrc;
@@ -435,7 +435,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_newarrayreducescalarnb)(ESMC_newArray **ptr, void *result,
-    ESMC_DataKind *dtk, ESMC_Operation *op, int *rootPET, int *de, ESMC_VM **vm,
+    ESMC_TypeKind *dtk, ESMC_Operation *op, int *rootPET, int *de, ESMC_VM **vm,
     int *rc){
     // PET-based blocking scalar reduce
     int localrc;

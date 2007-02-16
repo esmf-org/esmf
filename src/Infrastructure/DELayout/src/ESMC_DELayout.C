@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.47 2006/11/16 05:20:57 cdeluca Exp $
+// $Id: ESMC_DELayout.C,v 1.48 2007/02/16 05:27:43 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.47 2006/11/16 05:20:57 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.48 2007/02/16 05:27:43 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1925,7 +1925,7 @@ int ESMC_DELayout::ESMC_DELayoutCopy(
   void *srcdata,    // input array
   void *destdata,   // output array
   int len,          // size in elements that need to be copied from src to dest
-  ESMC_DataKind dtk,// data type kind
+  ESMC_TypeKind dtk,// data type kind
   int srcDE,        // input DE
   int destDE        // output DE
   ){
@@ -1934,7 +1934,7 @@ int ESMC_DELayout::ESMC_DELayoutCopy(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  int blen = len * ESMC_DataKindSize(dtk);
+  int blen = len * ESMC_TypeKindSize(dtk);
   return ESMC_DELayoutCopy(srcdata, destdata, blen, srcDE, destDE);
 }
 //-----------------------------------------------------------------------------
@@ -2000,8 +2000,8 @@ int ESMC_DELayout::ESMC_DELayoutExchange(
   void *dstData2,     // output array
   int len1,           // size in elements to copy from srcData1 to dstData2
   int len2,           // size in elements to copy from srcData2 to dstData1
-  ESMC_DataKind dtk1, // data type kind
-  ESMC_DataKind dtk2, // data type kind
+  ESMC_TypeKind dtk1, // data type kind
+  ESMC_TypeKind dtk2, // data type kind
   int de1,            // de for data1
   int de2             // de for data2
   ){
@@ -2010,8 +2010,8 @@ int ESMC_DELayout::ESMC_DELayoutExchange(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  int blen1 = len1 * ESMC_DataKindSize(dtk1);
-  int blen2 = len2 * ESMC_DataKindSize(dtk2);
+  int blen1 = len1 * ESMC_TypeKindSize(dtk1);
+  int blen2 = len2 * ESMC_TypeKindSize(dtk2);
   return ESMC_DELayoutExchange(srcData1, srcData2, dstData1, dstData2,
     blen1, blen2, de1, de2);
 }
@@ -2065,7 +2065,7 @@ int ESMC_DELayout::ESMC_DELayoutBcast(
 //
   void *data,    // data 
   int len,       // message size in elements
-  ESMC_DataKind dtk,// data type kind
+  ESMC_TypeKind dtk,// data type kind
   int rootDE      // root DE
   ){
 //
@@ -2073,7 +2073,7 @@ int ESMC_DELayout::ESMC_DELayoutBcast(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  int blen = len * ESMC_DataKindSize(dtk);
+  int blen = len * ESMC_TypeKindSize(dtk);
   // very crude implementation of a layout wide bcast
   for (int i=0; i<deCount; i++)
     ESMC_DELayoutCopy(data, data, blen, rootDE, i);
@@ -2141,7 +2141,7 @@ int ESMC_DELayout::ESMC_DELayoutScatter(
   void *srcdata,    // input array
   void *destdata,   // output array
   int len,          // message size in elements
-  ESMC_DataKind dtk,// data type kind
+  ESMC_TypeKind dtk,// data type kind
   int rootDE        // root DE
   ){
 //
@@ -2149,7 +2149,7 @@ int ESMC_DELayout::ESMC_DELayoutScatter(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  int blen = len * ESMC_DataKindSize(dtk);
+  int blen = len * ESMC_TypeKindSize(dtk);
   return ESMC_DELayoutScatter(srcdata, destdata, blen, rootDE);
 }
 //-----------------------------------------------------------------------------
@@ -2214,7 +2214,7 @@ int ESMC_DELayout::ESMC_DELayoutGather(
   void *srcdata,    // input array
   void *destdata,   // output array
   int len,          // message size in bytes
-  ESMC_DataKind dtk,// data type kind
+  ESMC_TypeKind dtk,// data type kind
   int rootDE        // root DE
   ){
 //
@@ -2222,7 +2222,7 @@ int ESMC_DELayout::ESMC_DELayoutGather(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  int blen = len * ESMC_DataKindSize(dtk);
+  int blen = len * ESMC_TypeKindSize(dtk);
   return ESMC_DELayoutGather(srcdata, destdata, blen, rootDE);
 }
 //-----------------------------------------------------------------------------
@@ -2293,7 +2293,7 @@ int ESMC_DELayout::ESMC_DELayoutGatherV(
                   // - the PET that holds rootDE must provide all blen elementes
                   // - all other PETs only need to fill elements for their DEs
   int *destdispl, // displacement vector for destdata for each DE mes. in elem.
-  ESMC_DataKind dtk,// data type kind
+  ESMC_TypeKind dtk,// data type kind
   int rootDE      // root DE
   ){
 //
@@ -2304,7 +2304,7 @@ int ESMC_DELayout::ESMC_DELayoutGatherV(
   int rc;
   int *blen = new int[deCount];
   int *bdestdispl = new int[deCount];
-  int dtk_size = ESMC_DataKindSize(dtk);
+  int dtk_size = ESMC_TypeKindSize(dtk);
   for (int i=0; i<deCount; i++){
     blen[i] = len[i] * dtk_size;
     bdestdispl[i] = destdispl[i] * dtk_size;

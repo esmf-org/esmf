@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.23 2006/11/16 05:20:57 cdeluca Exp $
+// $Id: ESMC_DELayout.h,v 1.24 2007/02/16 05:27:43 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -143,28 +143,28 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_DELayoutCopy(void *srcdata, void *destdata, 
       int blen, int srcDE, int destDE);
     int ESMC_DELayoutCopy(void *srcdata, void *destdata, 
-      int len, ESMC_DataKind dtk, int srcDE, int destDE);
+      int len, ESMC_TypeKind dtk, int srcDE, int destDE);
     int ESMC_DELayoutExchange(void *srcData1, void *srcData2, 
       void *dstData1, void *dstData2, int blen1, int blen2, int de1, int de2);
     int ESMC_DELayoutExchange(void *srcData1, void *srcData2, 
-      void *dstData1, void *dstData2, int len1, int len2, ESMC_DataKind dtk1,
-      ESMC_DataKind dtk2, int de1, int de2);
+      void *dstData1, void *dstData2, int len1, int len2, ESMC_TypeKind dtk1,
+      ESMC_TypeKind dtk2, int de1, int de2);
     int ESMC_DELayoutBcast(void *data, int blen, int rootDE);
-    int ESMC_DELayoutBcast(void *data, int len, ESMC_DataKind dtk, int rootDE);
+    int ESMC_DELayoutBcast(void *data, int len, ESMC_TypeKind dtk, int rootDE);
     int ESMC_DELayoutScatter(void *srcdata, void *destdata, 
       int blen, int rootDE);
     int ESMC_DELayoutScatter(void *srcdata, void *destdata, 
-      int len, ESMC_DataKind dtk, int rootDE);
+      int len, ESMC_TypeKind dtk, int rootDE);
     int ESMC_DELayoutGather(void *srcdata, void *destdata, 
       int blen, int rootDE);
     int ESMC_DELayoutGather(void *srcdata, void *destdata, 
-      int len, ESMC_DataKind dtk, int rootDE);
+      int len, ESMC_TypeKind dtk, int rootDE);
     int ESMC_DELayoutGatherV(void *srcdata, void *destdata, 
       int *blen, int *bdestdispl, int rootDE);
     // ArrayComm.C uses the following DELayoutComm, so I leave it for now
   public:  
     int ESMC_DELayoutGatherV(void *srcdata, void *destdata, 
-      int *blen, int *bdestdispl, ESMC_DataKind dtk, int rootDE);
+      int *blen, int *bdestdispl, ESMC_TypeKind dtk, int rootDE);
     
     
   private:

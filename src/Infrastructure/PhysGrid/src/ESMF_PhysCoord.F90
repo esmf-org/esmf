@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.20 2006/12/21 21:59:37 samsoncheung Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.21 2007/02/16 05:27:46 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -191,7 +191,7 @@
          ESMF_COORD_SYSTEM_HYBRID         = ESMF_CoordSystem(14), &
          ESMF_COORD_SYSTEM_LAGRANGIAN     = ESMF_CoordSystem(15)   
 
-      ! Supported ESMF Coordinate Kinds
+      ! Supported ESMF Coordinate TypeKinds
       !   UNKNOWN     = unknown or undefined coord system
       !   USER        = user-defined coordinate system
       !   LAT         = latitude  (spherical coordinates)
@@ -240,7 +240,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.20 2006/12/21 21:59:37 samsoncheung Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.21 2007/02/16 05:27:46 rosalind Exp $'
 
 !==============================================================================
 !
@@ -1367,7 +1367,7 @@
       type (ESMF_CoordType), intent(in) :: CoordType2
 
 ! !DESCRIPTION:
-!     This routine compares two ESMF Coordinate Kind types to see if 
+!     This routine compares two ESMF Coordinate TypeKind types to see if 
 !     they are equivalent.
 !
 !     The arguments are:
@@ -1400,7 +1400,7 @@
       type (ESMF_CoordType), intent(in) :: CoordType2
 
 ! !DESCRIPTION:
-!     This routine compares two ESMF Coordinate Kind types to see if 
+!     This routine compares two ESMF Coordinate TypeKind types to see if 
 !     they are unequal.
 !
 !     The arguments are:

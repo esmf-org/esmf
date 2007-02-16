@@ -22,7 +22,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LocalAlloc_C.F90,v 1.8 2006/12/07 23:23:18 theurich Exp $'
+!      '$Id: ESMF_LocalAlloc_C.F90,v 1.9 2007/02/16 05:27:46 rosalind Exp $'
 !==============================================================================
 subroutine f_esmf_localarrayf90allocate(array, rank, type, kind, counts, &
   lbounds, ubounds, rc)
@@ -33,7 +33,7 @@ subroutine f_esmf_localarrayf90allocate(array, rank, type, kind, counts, &
   type(ESMF_LocalArray) :: array
   integer :: rank
   type(ESMF_DataType) :: type
-  type(ESMF_DataKind) :: kind
+  type(ESMF_TypeKind) :: kind
   integer :: counts(rank)
   integer :: lbounds(rank)
   integer :: ubounds(rank)
@@ -53,7 +53,7 @@ subroutine f_esmf_localarrayf90deallocate(array, rank, type, kind, rc)
   type(ESMF_LocalArray) :: array
   integer :: rank
   type(ESMF_DataType) :: type
-  type(ESMF_DataKind) :: kind
+  type(ESMF_TypeKind) :: kind
   integer, intent(out), optional :: rc     
 
   call ESMF_LocalArrayF90Deallocate(array, rank, type, kind, rc=rc)
@@ -69,7 +69,7 @@ subroutine f_esmf_localarrayadjust(array, rank, type, kind, counts, &
   type(ESMF_LocalArray) :: array
   integer :: rank
   type(ESMF_DataType) :: type
-  type(ESMF_DataKind) :: kind
+  type(ESMF_TypeKind) :: kind
   integer :: counts(rank)
   integer :: lbounds(rank)
   integer :: ubounds(rank)
