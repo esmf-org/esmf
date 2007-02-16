@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockEx.C,v 1.18 2006/11/16 05:21:18 cdeluca Exp $
+// $Id: ESMC_ClockEx.C,v 1.19 2007/02/16 03:25:33 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockEx.C,v 1.18 2006/11/16 05:21:18 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_ClockEx.C,v 1.19 2007/02/16 03:25:33 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -106,7 +106,7 @@
    }
 
    // get the number of times the clock was advanced
-   ESMF_KIND_I8 advanceCount;
+   ESMC_I8 advanceCount;
    rc = clock->ESMC_ClockGet(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                              0, 0, 0, &advanceCount);
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.h,v 1.3 2006/11/16 05:21:21 cdeluca Exp $
+// $Id: ESMC_Fraction.h,v 1.4 2007/02/16 03:25:34 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -52,29 +52,29 @@
 class ESMC_Fraction
 {
   private:
-    ESMF_KIND_I8 w;  // Integer (whole) seconds (signed)
-    ESMF_KIND_I4 n;  // Integer fraction (exact) n/d; numerator (signed)
-    ESMF_KIND_I4 d;  // Integer fraction (exact) n/d; denominator
+    ESMC_I8 w;  // Integer (whole) seconds (signed)
+    ESMC_I4 n;  // Integer fraction (exact) n/d; numerator (signed)
+    ESMC_I4 d;  // Integer fraction (exact) n/d; denominator
 
 // !PUBLIC MEMBER FUNCTIONS:
 
   public:
     // native C++ style Set/Get
-    int ESMC_FractionSet(ESMF_KIND_I8 w, ESMF_KIND_I4 n, ESMF_KIND_I4 d);
-    int ESMC_FractionSetw(ESMF_KIND_I8 w);
-    int ESMC_FractionSetn(ESMF_KIND_I4 n);
-    int ESMC_FractionSetd(ESMF_KIND_I4 d);
-    ESMF_KIND_I8 ESMC_FractionGetw(void) const;
-    ESMF_KIND_I4 ESMC_FractionGetn(void) const;
-    ESMF_KIND_I4 ESMC_FractionGetd(void) const;
+    int ESMC_FractionSet(ESMC_I8 w, ESMC_I4 n, ESMC_I4 d);
+    int ESMC_FractionSetw(ESMC_I8 w);
+    int ESMC_FractionSetn(ESMC_I4 n);
+    int ESMC_FractionSetd(ESMC_I4 d);
+    ESMC_I8 ESMC_FractionGetw(void) const;
+    ESMC_I4 ESMC_FractionGetn(void) const;
+    ESMC_I4 ESMC_FractionGetd(void) const;
 
     // Set/Get to support F90 optional argument style
-    int ESMC_FractionSet(ESMF_KIND_I8 *w, ESMF_KIND_I4 *n, ESMF_KIND_I4 *d);
-    int ESMC_FractionGet(ESMF_KIND_I8 *w, ESMF_KIND_I4 *n,
-                         ESMF_KIND_I4 *d) const;
+    int ESMC_FractionSet(ESMC_I8 *w, ESMC_I4 *n, ESMC_I4 *d);
+    int ESMC_FractionGet(ESMC_I8 *w, ESMC_I4 *n,
+                         ESMC_I4 *d) const;
 
     int ESMC_FractionSimplify(void);
-    int ESMC_FractionConvert(ESMF_KIND_I4 denominator);
+    int ESMC_FractionConvert(ESMC_I4 denominator);
 
     // comparison methods (TMG 1.5.3, 2.4.3, 7.2)
     bool operator==(const ESMC_Fraction &) const;
@@ -92,13 +92,13 @@ class ESMC_Fraction
     ESMC_Fraction& operator-=(const ESMC_Fraction &);
 
     // multiplication methods
-    ESMC_Fraction  operator* (ESMF_KIND_I4 multiplier) const;
-    ESMC_Fraction& operator*=(ESMF_KIND_I4 multiplier);
+    ESMC_Fraction  operator* (ESMC_I4 multiplier) const;
+    ESMC_Fraction& operator*=(ESMC_I4 multiplier);
 
     // division methods
-    ESMC_Fraction  operator/ (ESMF_KIND_I4 divisor) const;
-    ESMC_Fraction& operator/=(ESMF_KIND_I4 divisor);
-    ESMF_KIND_R8   operator/ (const ESMC_Fraction &) const;
+    ESMC_Fraction  operator/ (ESMC_I4 divisor) const;
+    ESMC_Fraction& operator/=(ESMC_I4 divisor);
+    ESMC_R8   operator/ (const ESMC_Fraction &) const;
 
     // modulus methods
     ESMC_Fraction  operator% (const ESMC_Fraction &) const;
@@ -117,7 +117,7 @@ class ESMC_Fraction
 
     // native C++ constructor/destructors
     ESMC_Fraction(void);
-    ESMC_Fraction(ESMF_KIND_I8 w, ESMF_KIND_I4 n=0, ESMF_KIND_I4 d=1);
+    ESMC_Fraction(ESMC_I8 w, ESMC_I4 n=0, ESMC_I4 d=1);
     ESMC_Fraction(int w, int n=0, int d=1);
     ~ESMC_Fraction(void);
 
@@ -136,7 +136,7 @@ class ESMC_Fraction
 
     // related general utility functions which do not operate on fraction
     //   objects directly
-    ESMF_KIND_I4 ESMC_FractionGCD(ESMF_KIND_I4 a, ESMF_KIND_I4 b);
-    ESMF_KIND_I4 ESMC_FractionLCM(ESMF_KIND_I4 a, ESMF_KIND_I4 b);
+    ESMC_I4 ESMC_FractionGCD(ESMC_I4 a, ESMC_I4 b);
+    ESMC_I4 ESMC_FractionLCM(ESMC_I4 a, ESMC_I4 b);
 
 #endif // ESMC_FRACTION_H

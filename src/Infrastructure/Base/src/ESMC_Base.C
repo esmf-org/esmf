@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.69 2006/11/16 05:20:55 cdeluca Exp $
+// $Id: ESMC_Base.C,v 1.70 2007/02/16 03:25:32 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.69 2006/11/16 05:20:55 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.70 2007/02/16 03:25:32 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -924,7 +924,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // 
 // !ARGUMENTS:
       char *name,              // in - attribute name
-      ESMF_KIND_I4 value) {    // in - attribute value
+      ESMC_I4 value) {    // in - attribute value
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
@@ -959,7 +959,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !ARGUMENTS:
       char *name,              // in - attribute name
       int count,               // in - number of ints in list
-      ESMF_KIND_I4 *value) {   // in - attribute values
+      ESMC_I4 *value) {   // in - attribute values
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
@@ -993,7 +993,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // 
 // !ARGUMENTS:
       char *name,              // in - attribute name
-      ESMF_KIND_I8 value) {    // in - attribute value
+      ESMC_I8 value) {    // in - attribute value
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
@@ -1028,7 +1028,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !ARGUMENTS:
       char *name,              // in - attribute name
       int count,               // in - number of ints in list
-      ESMF_KIND_I8 *value) {   // in - attribute values
+      ESMC_I8 *value) {   // in - attribute values
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
@@ -1062,7 +1062,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // 
 // !ARGUMENTS:
       char *name,              // in - attribute name
-      ESMF_KIND_R4 value) {    // in - attribute value
+      ESMC_R4 value) {    // in - attribute value
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
@@ -1097,7 +1097,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !ARGUMENTS:
       char *name,              // in - attribute name
       int count,               // in - number of doubles in list
-      ESMF_KIND_R4 *value) {   // in - attribute values
+      ESMC_R4 *value) {   // in - attribute values
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
@@ -1131,7 +1131,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // 
 // !ARGUMENTS:
       char *name,              // in - attribute name
-      ESMF_KIND_R8 value) {    // in - attribute value
+      ESMC_R8 value) {    // in - attribute value
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
@@ -1166,7 +1166,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !ARGUMENTS:
       char *name,              // in - attribute name
       int count,               // in - number of doubles in list
-      ESMF_KIND_R8 *value) {   // in - attribute values
+      ESMC_R8 *value) {   // in - attribute values
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
@@ -1384,7 +1384,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // 
 // !ARGUMENTS:
       char *name,                    // in - name of attribute to retrieve
-      ESMF_KIND_I4 *value) const {   // out - attribute value
+      ESMC_I4 *value) const {   // out - attribute value
 // 
 // !DESCRIPTION:
 //
@@ -1443,7 +1443,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !ARGUMENTS:
       char *name,                    // in - name of attribute to retrieve
       int *count,                    // out - number of values in list
-      ESMF_KIND_I4 *value) const {   // out - attribute value
+      ESMC_I4 *value) const {   // out - attribute value
 // 
 // !DESCRIPTION:
 //
@@ -1505,7 +1505,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // 
 // !ARGUMENTS:
       char *name,                    // in - name of attribute to retrieve
-      ESMF_KIND_I8 *value) const {   // out - attribute value
+      ESMC_I8 *value) const {   // out - attribute value
 // 
 // !DESCRIPTION:
 //
@@ -1564,7 +1564,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !ARGUMENTS:
       char *name,                    // in - name of attribute to retrieve
       int *count,                    // out - number of values in list
-      ESMF_KIND_I8 *value) const {   // out - attribute value
+      ESMC_I8 *value) const {   // out - attribute value
 // 
 // !DESCRIPTION:
 //
@@ -1626,7 +1626,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // 
 // !ARGUMENTS:
       char *name,                    // in - name of attribute to retrieve
-      ESMF_KIND_R4 *value) const {   // out - attribute value
+      ESMC_R4 *value) const {   // out - attribute value
 // 
 // !DESCRIPTION:
 //
@@ -1685,7 +1685,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !ARGUMENTS:
       char *name,                    // in - name of attribute to retrieve
       int *count,                    // out - number of values in list
-      ESMF_KIND_R4 *value) const {   // out - attribute value
+      ESMC_R4 *value) const {   // out - attribute value
 // 
 // !DESCRIPTION:
 //
@@ -1747,7 +1747,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // 
 // !ARGUMENTS:
       char *name,                    // in - name of attribute to retrieve
-      ESMF_KIND_R8 *value) const {   // out - attribute value
+      ESMC_R8 *value) const {   // out - attribute value
 // 
 // !DESCRIPTION:
 //
@@ -1806,7 +1806,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !ARGUMENTS:
       char *name,                    // in - name of attribute to retrieve
       int *count,                    // out - number of values in list
-      ESMF_KIND_R8 *value) const {   // out - attribute value
+      ESMC_R8 *value) const {   // out - attribute value
 // 
 // !DESCRIPTION:
 //
@@ -2082,15 +2082,15 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
           switch(attr->dt) {
             case ESMF_DATA_INTEGER: 
               if (attr->dk == ESMF_I4)
-                  *(ESMF_KIND_I4 *)value = attr->vi; 
+                  *(ESMC_I4 *)value = attr->vi; 
               else
-                  *(ESMF_KIND_I8 *)value = attr->vtl; 
+                  *(ESMC_I8 *)value = attr->vtl; 
               break;
             case ESMF_DATA_REAL: 
               if (attr->dk == ESMF_R4)
-                  *(ESMF_KIND_R4 *)value = attr->vf; 
+                  *(ESMC_R4 *)value = attr->vf; 
               else
-                  *(ESMF_KIND_R8 *)value = attr->vd; 
+                  *(ESMC_R8 *)value = attr->vd; 
               break;
             case ESMF_DATA_LOGICAL: 
               *(ESMC_Logical *)value = attr->vb; 
@@ -2111,19 +2111,19 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
             case ESMF_DATA_INTEGER:
               if (attr->dk == ESMF_I4) {
                   for (i=0; i<attr->items; i++)
-                      ((ESMF_KIND_I4 *)value)[i] = attr->vip[i];
+                      ((ESMC_I4 *)value)[i] = attr->vip[i];
               } else {
                   for (i=0; i<attr->items; i++)
-                      ((ESMF_KIND_I8 *)value)[i] = attr->vlp[i];
+                      ((ESMC_I8 *)value)[i] = attr->vlp[i];
               }
               break;
             case ESMF_DATA_REAL:
               if (attr->dk == ESMF_R4) {
                   for (i=0; i<attr->items; i++)
-                      ((ESMF_KIND_R4 *)value)[i] = attr->vfp[i];
+                      ((ESMC_R4 *)value)[i] = attr->vfp[i];
               } else {
                   for (i=0; i<attr->items; i++)
-                      ((ESMF_KIND_R8 *)value)[i] = attr->vdp[i];
+                      ((ESMC_R8 *)value)[i] = attr->vdp[i];
               }
               break;
             case ESMF_DATA_LOGICAL:
@@ -2198,15 +2198,15 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
           switch(attr->dt) {
             case ESMF_DATA_INTEGER: 
               if (attr->dk == ESMF_I4)
-                  *(ESMF_KIND_I4 *)value = attr->vi; 
+                  *(ESMC_I4 *)value = attr->vi; 
               else
-                  *(ESMF_KIND_I8 *)value = attr->vtl; 
+                  *(ESMC_I8 *)value = attr->vtl; 
               break;
             case ESMF_DATA_REAL: 
               if (attr->dk == ESMF_R4)
-                  *(ESMF_KIND_R4 *)value = attr->vf; 
+                  *(ESMC_R4 *)value = attr->vf; 
               else
-                  *(ESMF_KIND_R8 *)value = attr->vd; 
+                  *(ESMC_R8 *)value = attr->vd; 
               break;
             case ESMF_DATA_LOGICAL: 
               *(ESMC_Logical *)value = attr->vb; 
@@ -2228,19 +2228,19 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
             case ESMF_DATA_INTEGER:
               if (attr->dk == ESMF_I4) {
                   for (i=0; i<attr->items; i++)
-                      ((ESMF_KIND_I4 *)value)[i] = attr->vip[i];
+                      ((ESMC_I4 *)value)[i] = attr->vip[i];
               } else {
                   for (i=0; i<attr->items; i++)
-                      ((ESMF_KIND_I8 *)value)[i] = attr->vlp[i];
+                      ((ESMC_I8 *)value)[i] = attr->vlp[i];
               }
               break;
             case ESMF_DATA_REAL:
               if (attr->dk == ESMF_R4) {
                   for (i=0; i<attr->items; i++)
-                      ((ESMF_KIND_R4 *)value)[i] = attr->vfp[i];
+                      ((ESMC_R4 *)value)[i] = attr->vfp[i];
               } else {
                   for (i=0; i<attr->items; i++)
-                      ((ESMF_KIND_R8 *)value)[i] = attr->vdp[i];
+                      ((ESMC_R8 *)value)[i] = attr->vdp[i];
               }
               break;
             case ESMF_DATA_LOGICAL:
@@ -2771,22 +2771,22 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       switch (dt) {
         case ESMF_DATA_INTEGER:   
           if (dk == ESMF_I4) {
-              vip = new ESMF_KIND_I4[items];      
+              vip = new ESMC_I4[items];      
               for (i=0; i<items; i++)
                   vip[i] = source.vip[i];  
           } else {
-              vlp = new ESMF_KIND_I8[items];      
+              vlp = new ESMC_I8[items];      
               for (i=0; i<items; i++)
                   vlp[i] = source.vlp[i];  
           }
           break;
         case ESMF_DATA_REAL:      
           if (dk == ESMF_R4) {
-              vfp = new ESMF_KIND_R4[items];      
+              vfp = new ESMC_R4[items];      
               for (i=0; i<items; i++)
                   vfp[i] = source.vfp[i];  
           } else {
-              vdp = new ESMF_KIND_R8[items];      
+              vdp = new ESMC_R8[items];      
               for (i=0; i<items; i++)
                   vdp[i] = source.vdp[i];  
           }
@@ -2889,15 +2889,15 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
         switch (dt) {
           case ESMF_DATA_INTEGER:   
             if (dk == ESMF_I4)
-                vi = *(ESMF_KIND_I4 *)datap;  
+                vi = *(ESMC_I4 *)datap;  
             else
-                vtl = *(ESMF_KIND_I8 *)datap;  
+                vtl = *(ESMC_I8 *)datap;  
             break;
           case ESMF_DATA_REAL:      
             if (dk == ESMF_R4)
-                vf = *(ESMF_KIND_R4 *)datap;  
+                vf = *(ESMC_R4 *)datap;  
             else
-                vd = *(ESMF_KIND_R8 *)datap;  
+                vd = *(ESMC_R8 *)datap;  
             break;
           case ESMF_DATA_LOGICAL:   
             vb = *(ESMC_Logical *)datap;  
@@ -2919,32 +2919,32 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     switch (dt) {
       case ESMF_DATA_INTEGER:   
         if (dk == ESMF_I4) {
-            vip = new ESMF_KIND_I4[items];      
+            vip = new ESMC_I4[items];      
             if (!datap) 
                 break;
             for (i=0; i<items; i++)
-                vip[i] = ((ESMF_KIND_I4 *)datap)[i];  
+                vip[i] = ((ESMC_I4 *)datap)[i];  
         } else {
-            vlp = new ESMF_KIND_I8[items];      
+            vlp = new ESMC_I8[items];      
             if (!datap) 
                 break;
             for (i=0; i<items; i++)
-                vlp[i] = ((ESMF_KIND_I8 *)datap)[i];  
+                vlp[i] = ((ESMC_I8 *)datap)[i];  
         }
         break;
       case ESMF_DATA_REAL:      
         if (dk == ESMF_R4) {
-            vfp = new ESMF_KIND_R4[items];      
+            vfp = new ESMC_R4[items];      
             if (!datap) 
                 break;
             for (i=0; i<items; i++)
-                vfp[i] = ((ESMF_KIND_R4 *)datap)[i];  
+                vfp[i] = ((ESMC_R4 *)datap)[i];  
         } else {
-            vdp = new ESMF_KIND_R8[items];      
+            vdp = new ESMC_R8[items];      
             if (!datap) 
                 break;
             for (i=0; i<items; i++)
-                vdp[i] = ((ESMF_KIND_R8 *)datap)[i];  
+                vdp[i] = ((ESMC_R8 *)datap)[i];  
         }
         break;
       case ESMF_DATA_LOGICAL:   

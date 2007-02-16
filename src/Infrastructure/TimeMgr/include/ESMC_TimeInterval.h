@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.44 2006/11/16 05:21:19 cdeluca Exp $
+// $Id: ESMC_TimeInterval.h,v 1.45 2007/02/16 03:25:33 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -91,9 +91,9 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     ESMC_Time endTime;    // for absolute calendar intervals
     ESMC_Calendar *calendar;  // for calendar intervals on a 
                               //   specific calendar
-    ESMF_KIND_I8 yy;      // for relative Calendar intervals:  number of years
-    ESMF_KIND_I8 mm;      // for relative Calendar intervals:  number of months
-    ESMF_KIND_I8 d;       // for relative Calendar intervals:  number of days
+    ESMC_I8 yy;      // for relative Calendar intervals:  number of years
+    ESMC_I8 mm;      // for relative Calendar intervals:  number of months
+    ESMC_I8 d;       // for relative Calendar intervals:  number of days
 
 // !PUBLIC MEMBER FUNCTIONS:
 
@@ -106,34 +106,34 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     //   ESMC_BaseTime base class
 
     // Get/Set methods to support the F90 optional arguments interface
-    int ESMC_TimeIntervalSet(ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
-                             ESMF_KIND_I4 *mm=0, ESMF_KIND_I8 *mm_i8=0,
-                             ESMF_KIND_I4 *d=0,  ESMF_KIND_I8 *d_i8=0,
-                             ESMF_KIND_I4 *h=0,  ESMF_KIND_I4 *m=0,
-                             ESMF_KIND_I4 *s=0,  ESMF_KIND_I8 *s_i8=0,
-                             ESMF_KIND_I4 *ms=0, ESMF_KIND_I4 *us=0,
-                             ESMF_KIND_I4 *ns=0,
-                             ESMF_KIND_R8 *d_r8=0,  ESMF_KIND_R8 *h_r8=0,
-                             ESMF_KIND_R8 *m_r8=0,  ESMF_KIND_R8 *s_r8=0,
-                             ESMF_KIND_R8 *ms_r8=0, ESMF_KIND_R8 *us_r8=0,
-                             ESMF_KIND_R8 *ns_r8=0,
-                             ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
+    int ESMC_TimeIntervalSet(ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
+                             ESMC_I4 *mm=0, ESMC_I8 *mm_i8=0,
+                             ESMC_I4 *d=0,  ESMC_I8 *d_i8=0,
+                             ESMC_I4 *h=0,  ESMC_I4 *m=0,
+                             ESMC_I4 *s=0,  ESMC_I8 *s_i8=0,
+                             ESMC_I4 *ms=0, ESMC_I4 *us=0,
+                             ESMC_I4 *ns=0,
+                             ESMC_R8 *d_r8=0,  ESMC_R8 *h_r8=0,
+                             ESMC_R8 *m_r8=0,  ESMC_R8 *s_r8=0,
+                             ESMC_R8 *ms_r8=0, ESMC_R8 *us_r8=0,
+                             ESMC_R8 *ns_r8=0,
+                             ESMC_I4 *sN=0, ESMC_I4 *sD=0,
                              ESMC_Time *startTime=0, ESMC_Time *endTime=0,
                              ESMC_Calendar **calendar=0,
                              ESMC_CalendarType *calendarType=0);
 
-    int ESMC_TimeIntervalGet(ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
-                             ESMF_KIND_I4 *mm=0, ESMF_KIND_I8 *mm_i8=0,
-                             ESMF_KIND_I4 *d=0,  ESMF_KIND_I8 *d_i8=0,
-                             ESMF_KIND_I4 *h=0,  ESMF_KIND_I4 *m=0,
-                             ESMF_KIND_I4 *s=0,  ESMF_KIND_I8 *s_i8=0,
-                             ESMF_KIND_I4 *ms=0, ESMF_KIND_I4 *us=0,
-                             ESMF_KIND_I4 *ns=0,
-                             ESMF_KIND_R8 *d_r8=0,  ESMF_KIND_R8 *h_r8=0,
-                             ESMF_KIND_R8 *m_r8=0,  ESMF_KIND_R8 *s_r8=0,
-                             ESMF_KIND_R8 *ms_r8=0, ESMF_KIND_R8 *us_r8=0,
-                             ESMF_KIND_R8 *ns_r8=0,
-                             ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
+    int ESMC_TimeIntervalGet(ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
+                             ESMC_I4 *mm=0, ESMC_I8 *mm_i8=0,
+                             ESMC_I4 *d=0,  ESMC_I8 *d_i8=0,
+                             ESMC_I4 *h=0,  ESMC_I4 *m=0,
+                             ESMC_I4 *s=0,  ESMC_I8 *s_i8=0,
+                             ESMC_I4 *ms=0, ESMC_I4 *us=0,
+                             ESMC_I4 *ns=0,
+                             ESMC_R8 *d_r8=0,  ESMC_R8 *h_r8=0,
+                             ESMC_R8 *m_r8=0,  ESMC_R8 *s_r8=0,
+                             ESMC_R8 *ms_r8=0, ESMC_R8 *us_r8=0,
+                             ESMC_R8 *ns_r8=0,
+                             ESMC_I4 *sN=0, ESMC_I4 *sD=0,
                              ESMC_Time *startTime=0, ESMC_Time *endTime=0,
                              ESMC_Calendar **calendar=0,
                              ESMC_CalendarType *calendarType=0,
@@ -163,26 +163,26 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     ESMC_TimeInterval ESMC_TimeIntervalNegAbsValue(void) const;
 
     // subdivision (TMG 1.5.6, 5.3, 7.2)
-    ESMC_TimeInterval  operator/ (const ESMF_KIND_I4 &) const;
-    ESMC_TimeInterval& operator/=(const ESMF_KIND_I4 &);
-    ESMC_TimeInterval  operator/ (const ESMF_KIND_R8 &) const;
-    ESMC_TimeInterval& operator/=(const ESMF_KIND_R8 &);
+    ESMC_TimeInterval  operator/ (const ESMC_I4 &) const;
+    ESMC_TimeInterval& operator/=(const ESMC_I4 &);
+    ESMC_TimeInterval  operator/ (const ESMC_R8 &) const;
+    ESMC_TimeInterval& operator/=(const ESMC_R8 &);
 
     // division (TMG 1.5.5)
     ESMC_Fraction ESMC_TimeIntervalDiv(const ESMC_TimeInterval &) const;
-    ESMF_KIND_R8 operator/(const ESMC_TimeInterval &) const;
+    ESMC_R8 operator/(const ESMC_TimeInterval &) const;
 
     // modulus
     ESMC_TimeInterval  operator% (const ESMC_TimeInterval &) const;
     ESMC_TimeInterval& operator%=(const ESMC_TimeInterval &);
 
     // multiplication (TMG 1.5.7, 7.2)
-    ESMC_TimeInterval  operator* (const ESMF_KIND_I4 &) const;
-    ESMC_TimeInterval& operator*=(const ESMF_KIND_I4 &);
+    ESMC_TimeInterval  operator* (const ESMC_I4 &) const;
+    ESMC_TimeInterval& operator*=(const ESMC_I4 &);
     ESMC_TimeInterval  operator* (const ESMC_Fraction &) const;
     ESMC_TimeInterval& operator*=(const ESMC_Fraction &);
-    ESMC_TimeInterval  operator* (const ESMF_KIND_R8 &) const;
-    ESMC_TimeInterval& operator*=(const ESMF_KIND_R8 &);
+    ESMC_TimeInterval  operator* (const ESMC_R8 &) const;
+    ESMC_TimeInterval& operator*=(const ESMC_R8 &);
 
     // addition, subtraction
     ESMC_TimeInterval operator+(const ESMC_TimeInterval &) const;
@@ -219,13 +219,13 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
 
     // native C++ constructors/destructors
     ESMC_TimeInterval(void);
-    ESMC_TimeInterval(ESMF_KIND_I8 s, int sN=0, int sD=1,
-                      ESMF_KIND_I8 yy=0, ESMF_KIND_I8 mm=0, ESMF_KIND_I8 d=0,
+    ESMC_TimeInterval(ESMC_I8 s, int sN=0, int sD=1,
+                      ESMC_I8 yy=0, ESMC_I8 mm=0, ESMC_I8 d=0,
                       ESMC_Time *startTime=0, ESMC_Time *endTime=0,
                       ESMC_Calendar *calendar=0,
                       ESMC_CalendarType calendarType=(ESMC_CalendarType)0);
-    int ESMC_TimeIntervalSet(ESMF_KIND_I8 s, int sN=0, int sD=1,
-                      ESMF_KIND_I8 yy=0, ESMF_KIND_I8 mm=0, ESMF_KIND_I8 d=0,
+    int ESMC_TimeIntervalSet(ESMC_I8 s, int sN=0, int sD=1,
+                      ESMC_I8 yy=0, ESMC_I8 mm=0, ESMC_I8 d=0,
                       ESMC_Time *startTime=0, ESMC_Time *endTime=0,
                       ESMC_Calendar *calendar=0,
                       ESMC_CalendarType calendarType=(ESMC_CalendarType)0);
@@ -241,11 +241,11 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     // commutative complements to ESMC_TimeInterval class member overloaded
     //   "*" operators
     friend ESMC_TimeInterval
-                   operator* (const ESMF_KIND_I4 &, const ESMC_TimeInterval &);
+                   operator* (const ESMC_I4 &, const ESMC_TimeInterval &);
     friend ESMC_TimeInterval
                    operator* (const ESMC_Fraction &, const ESMC_TimeInterval &);
     friend ESMC_TimeInterval
-                   operator* (const ESMF_KIND_R8 &, const ESMC_TimeInterval &);
+                   operator* (const ESMC_R8 &, const ESMC_TimeInterval &);
 
 // !PRIVATE MEMBER FUNCTIONS:
 //

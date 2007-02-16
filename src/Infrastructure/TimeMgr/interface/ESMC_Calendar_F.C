@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.38 2006/11/16 05:21:19 cdeluca Exp $
+// $Id: ESMC_Calendar_F.C,v 1.39 2007/02/16 03:25:33 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -67,10 +67,10 @@ extern "C" {
                                     const char   *name,
                                     int          *daysPerMonth,
                                     int          *monthsPerYear,
-                                    ESMF_KIND_I4 *secondsPerDay,
-                                    ESMF_KIND_I4 *daysPerYear,
-                                    ESMF_KIND_I4 *daysPerYearDn,
-                                    ESMF_KIND_I4 *daysPerYearDd, int *status) {
+                                    ESMC_I4 *secondsPerDay,
+                                    ESMC_I4 *daysPerYear,
+                                    ESMC_I4 *daysPerYearDn,
+                                    ESMC_I4 *daysPerYearDd, int *status) {
            *ptr = ESMC_CalendarCreate(
                                            *nameLen,    // always present
                                                         //   internal argument.
@@ -91,10 +91,10 @@ extern "C" {
                                     int          *nameLen,
                                     const char   *name,
                                     int          *monthsPerYear,
-                                    ESMF_KIND_I4 *secondsPerDay,
-                                    ESMF_KIND_I4 *daysPerYear,
-                                    ESMF_KIND_I4 *daysPerYearDn,
-                                    ESMF_KIND_I4 *daysPerYearDd, int *status) {
+                                    ESMC_I4 *secondsPerDay,
+                                    ESMC_I4 *daysPerYear,
+                                    ESMC_I4 *daysPerYearDn,
+                                    ESMC_I4 *daysPerYearDd, int *status) {
            *ptr = ESMC_CalendarCreate(
                                            *nameLen,    // always present
                                                         //   internal argument.
@@ -159,10 +159,10 @@ extern "C" {
                                     const char   *name,
                                     int          *daysPerMonth,
                                     int          *monthsPerYear,
-                                    ESMF_KIND_I4 *secondsPerDay,
-                                    ESMF_KIND_I4 *daysPerYear,
-                                    ESMF_KIND_I4 *daysPerYearDn,
-                                    ESMF_KIND_I4 *daysPerYearDd, int *status) {
+                                    ESMC_I4 *secondsPerDay,
+                                    ESMC_I4 *daysPerYear,
+                                    ESMC_I4 *daysPerYearDn,
+                                    ESMC_I4 *daysPerYearDd, int *status) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->ESMC_CalendarSet(
                                             *nameLen,    // always present
@@ -184,10 +184,10 @@ extern "C" {
                                     int          *nameLen,
                                     const char   *name,
                                     int          *monthsPerYear,
-                                    ESMF_KIND_I4 *secondsPerDay,
-                                    ESMF_KIND_I4 *daysPerYear,
-                                    ESMF_KIND_I4 *daysPerYearDn,
-                                    ESMF_KIND_I4 *daysPerYearDd, int *status) {
+                                    ESMC_I4 *secondsPerDay,
+                                    ESMC_I4 *daysPerYear,
+                                    ESMC_I4 *daysPerYearDn,
+                                    ESMC_I4 *daysPerYearDd, int *status) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->ESMC_CalendarSet(
                                             *nameLen,    // always present
@@ -213,11 +213,11 @@ extern "C" {
                                     int          *daysPerMonth,
                                     int          *sizeofDaysPerMonth,
                                     int          *monthsPerYear,
-                                    ESMF_KIND_I4 *secondsPerDay,
-                                    ESMF_KIND_I4 *secondsPerYear,
-                                    ESMF_KIND_I4 *daysPerYear,
-                                    ESMF_KIND_I4 *daysPerYearDn,
-                                    ESMF_KIND_I4 *daysPerYearDd,
+                                    ESMC_I4 *secondsPerDay,
+                                    ESMC_I4 *secondsPerYear,
+                                    ESMC_I4 *daysPerYear,
+                                    ESMC_I4 *daysPerYearDn,
+                                    ESMC_I4 *daysPerYearDd,
                                     int *status) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->ESMC_CalendarGet(
@@ -249,11 +249,11 @@ extern "C" {
                                     ESMC_CalendarType *calendarType,
                                     int          *sizeofDaysPerMonth,
                                     int          *monthsPerYear,
-                                    ESMF_KIND_I4 *secondsPerDay,
-                                    ESMF_KIND_I4 *secondsPerYear,
-                                    ESMF_KIND_I4 *daysPerYear,
-                                    ESMF_KIND_I4 *daysPerYearDn,
-                                    ESMF_KIND_I4 *daysPerYearDd,
+                                    ESMC_I4 *secondsPerDay,
+                                    ESMC_I4 *secondsPerYear,
+                                    ESMC_I4 *daysPerYear,
+                                    ESMC_I4 *daysPerYearDn,
+                                    ESMC_I4 *daysPerYearDd,
                                     int *status) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->ESMC_CalendarGet(
@@ -278,16 +278,16 @@ extern "C" {
        }
 
        void FTN(c_esmc_calendarisleapyeari4)(ESMC_Calendar **ptr, 
-                                   ESMF_KIND_I4 *yy,
+                                   ESMC_I4 *yy,
                                    int *esmf_calendarIsLeapYear, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           *esmf_calendarIsLeapYear = (int) (*ptr)->ESMC_CalendarIsLeapYear(
-                                             (ESMF_KIND_I8) *yy,
+                                             (ESMC_I8) *yy,
                                              ESMC_NOT_PRESENT_FILTER(status) );
        }
 
        void FTN(c_esmc_calendarisleapyeari8)(ESMC_Calendar **ptr, 
-                                   ESMF_KIND_I8 *yy_i8,
+                                   ESMC_I8 *yy_i8,
                                    int *esmf_calendarIsLeapYear, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           *esmf_calendarIsLeapYear = (int) (*ptr)->ESMC_CalendarIsLeapYear(

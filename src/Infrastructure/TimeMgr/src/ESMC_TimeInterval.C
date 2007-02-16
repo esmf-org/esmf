@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.81 2006/11/16 05:21:20 cdeluca Exp $
+// $Id: ESMC_TimeInterval.C,v 1.82 2007/02/16 03:25:34 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.81 2006/11/16 05:21:20 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.82 2007/02/16 03:25:34 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -64,34 +64,34 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I4 *yy,        // in - integer number of interval years
+      ESMC_I4 *yy,        // in - integer number of interval years
                                //                           (>= 32-bit)
-      ESMF_KIND_I8 *yy_i8,     // in - integer number of interval years
+      ESMC_I8 *yy_i8,     // in - integer number of interval years
                                //                           (large, >= 64-bit)
-      ESMF_KIND_I4 *mm,        // in - integer number of interval months
+      ESMC_I4 *mm,        // in - integer number of interval months
                                //                           (>= 32-bit)
-      ESMF_KIND_I8 *mm_i8,     // in - integer number of interval months
+      ESMC_I8 *mm_i8,     // in - integer number of interval months
                                //                           (large, >= 64-bit)
-      ESMF_KIND_I4 *d,         // in - integer number of interval days
+      ESMC_I4 *d,         // in - integer number of interval days
                                //                           (>= 32-bit)
-      ESMF_KIND_I8 *d_i8,      // in - integer number of interval days
+      ESMC_I8 *d_i8,      // in - integer number of interval days
                                //                           (large, >= 64-bit)
-      ESMF_KIND_I4 *h,         // in - integer hours
-      ESMF_KIND_I4 *m,         // in - integer minutes
-      ESMF_KIND_I4 *s,         // in - integer seconds (>= 32-bit)
-      ESMF_KIND_I8 *s_i8,      // in - integer seconds (large, >= 64-bit)
-      ESMF_KIND_I4 *ms,        // in - integer milliseconds
-      ESMF_KIND_I4 *us,        // in - integer microseconds
-      ESMF_KIND_I4 *ns,        // in - integer nanoseconds
-      ESMF_KIND_R8 *d_r8,      // in - floating point days
-      ESMF_KIND_R8 *h_r8,      // in - floating point hours
-      ESMF_KIND_R8 *m_r8,      // in - floating point minutes
-      ESMF_KIND_R8 *s_r8,      // in - floating point seconds
-      ESMF_KIND_R8 *ms_r8,     // in - floating point milliseconds
-      ESMF_KIND_R8 *us_r8,     // in - floating point microseconds
-      ESMF_KIND_R8 *ns_r8,     // in - floating point nanoseconds
-      ESMF_KIND_I4 *sN,        // in - fractional seconds numerator
-      ESMF_KIND_I4 *sD,        // in - fractional seconds denominator
+      ESMC_I4 *h,         // in - integer hours
+      ESMC_I4 *m,         // in - integer minutes
+      ESMC_I4 *s,         // in - integer seconds (>= 32-bit)
+      ESMC_I8 *s_i8,      // in - integer seconds (large, >= 64-bit)
+      ESMC_I4 *ms,        // in - integer milliseconds
+      ESMC_I4 *us,        // in - integer microseconds
+      ESMC_I4 *ns,        // in - integer nanoseconds
+      ESMC_R8 *d_r8,      // in - floating point days
+      ESMC_R8 *h_r8,      // in - floating point hours
+      ESMC_R8 *m_r8,      // in - floating point minutes
+      ESMC_R8 *s_r8,      // in - floating point seconds
+      ESMC_R8 *ms_r8,     // in - floating point milliseconds
+      ESMC_R8 *us_r8,     // in - floating point microseconds
+      ESMC_R8 *ns_r8,     // in - floating point nanoseconds
+      ESMC_I4 *sN,        // in - fractional seconds numerator
+      ESMC_I4 *sD,        // in - fractional seconds denominator
       ESMC_Time *startTime,    // in - starting time for absolute calendar
                                //      interval
       ESMC_Time *endTime,      // in - ending time for absolute calendar
@@ -125,8 +125,8 @@
     this->yy = 0;
     this->mm = 0;
     this->d  = 0;
-    this->startTime.ESMC_TimeSet((ESMF_KIND_I8) 0); // |
-    this->endTime.ESMC_TimeSet((ESMF_KIND_I8) 0);   //  > init to invalid, unset
+    this->startTime.ESMC_TimeSet((ESMC_I8) 0); // |
+    this->endTime.ESMC_TimeSet((ESMC_I8) 0);   //  > init to invalid, unset
     this->calendar = ESMC_NULL_POINTER;             // |    state
                                                     // TODO: replace with
                                                     //       ESMC_Base logic
@@ -229,34 +229,34 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I4 *yy,         // out - integer number of interval years
+      ESMC_I4 *yy,         // out - integer number of interval years
                                 //                           (>= 32-bit)
-      ESMF_KIND_I8 *yy_i8,      // out - integer number of interval years
+      ESMC_I8 *yy_i8,      // out - integer number of interval years
                                 //                           (large, >= 64-bit)
-      ESMF_KIND_I4 *mm,         // out - integer number of interval months
+      ESMC_I4 *mm,         // out - integer number of interval months
                                 //                           (>= 32-bit)
-      ESMF_KIND_I8 *mm_i8,      // out - integer number of interval months
+      ESMC_I8 *mm_i8,      // out - integer number of interval months
                                 //                           (large, >= 64-bit)
-      ESMF_KIND_I4 *d,          // out - integer number of interval days
+      ESMC_I4 *d,          // out - integer number of interval days
                                 //                           (>= 32-bit)
-      ESMF_KIND_I8 *d_i8,       // out - integer number of interval days
+      ESMC_I8 *d_i8,       // out - integer number of interval days
                                 //                           (large, >= 64-bit)
-      ESMF_KIND_I4 *h,          // out - integer hours
-      ESMF_KIND_I4 *m,          // out - integer minutes
-      ESMF_KIND_I4 *s,          // out - integer seconds (>= 32-bit)
-      ESMF_KIND_I8 *s_i8,       // out - integer seconds (large, >= 64-bit)
-      ESMF_KIND_I4 *ms,         // out - integer milliseconds
-      ESMF_KIND_I4 *us,         // out - integer microseconds
-      ESMF_KIND_I4 *ns,         // out - integer nanoseconds
-      ESMF_KIND_R8 *d_r8,       // out - floating point days
-      ESMF_KIND_R8 *h_r8,       // out - floating point hours
-      ESMF_KIND_R8 *m_r8,       // out - floating point minutes
-      ESMF_KIND_R8 *s_r8,       // out - floating point seconds
-      ESMF_KIND_R8 *ms_r8,      // out - floating point milliseconds
-      ESMF_KIND_R8 *us_r8,      // out - floating point microseconds
-      ESMF_KIND_R8 *ns_r8,      // out - floating point nanoseconds
-      ESMF_KIND_I4 *sN,         // out - fractional seconds numerator
-      ESMF_KIND_I4 *sD,         // out - fractional seconds denominator
+      ESMC_I4 *h,          // out - integer hours
+      ESMC_I4 *m,          // out - integer minutes
+      ESMC_I4 *s,          // out - integer seconds (>= 32-bit)
+      ESMC_I8 *s_i8,       // out - integer seconds (large, >= 64-bit)
+      ESMC_I4 *ms,         // out - integer milliseconds
+      ESMC_I4 *us,         // out - integer microseconds
+      ESMC_I4 *ns,         // out - integer nanoseconds
+      ESMC_R8 *d_r8,       // out - floating point days
+      ESMC_R8 *h_r8,       // out - floating point hours
+      ESMC_R8 *m_r8,       // out - floating point minutes
+      ESMC_R8 *s_r8,       // out - floating point seconds
+      ESMC_R8 *ms_r8,      // out - floating point milliseconds
+      ESMC_R8 *us_r8,      // out - floating point microseconds
+      ESMC_R8 *ns_r8,      // out - floating point nanoseconds
+      ESMC_I4 *sN,         // out - fractional seconds numerator
+      ESMC_I4 *sD,         // out - fractional seconds denominator
       ESMC_Time *startTime,     // out - starting time of absolute calendar
                                 //       interval
       ESMC_Time *endTime,       // out - ending time of absolute calendar
@@ -401,7 +401,7 @@
     // convert from reduced units to any user-requested years
     if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) {
       // total relative and absolute years
-      ESMF_KIND_I8 years = tiToConvert.yy;
+      ESMC_I8 years = tiToConvert.yy;
       tiToConvert.yy = 0;
       switch (tiToConvert.calendar->calendarType)  
       {
@@ -514,7 +514,7 @@
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE, logMsg, &rc);
           return(rc);
         }
-        *yy = (ESMF_KIND_I4) years;  // >= 32-bit
+        *yy = (ESMC_I4) years;  // >= 32-bit
       }
       if (yy_i8 != ESMC_NULL_POINTER) {
         *yy_i8 = years;  // >= 64-bit
@@ -524,7 +524,7 @@
     // convert from remaining reduced units to any user-requested months
     if (mm != ESMC_NULL_POINTER || mm_i8 != ESMC_NULL_POINTER) {
       // total relative months
-      ESMF_KIND_I8 months = tiToConvert.mm;
+      ESMC_I8 months = tiToConvert.mm;
       tiToConvert.mm = 0;
       switch (tiToConvert.calendar->calendarType)
       {
@@ -620,7 +620,7 @@
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE, logMsg, &rc);
           return(rc);
         }
-        *mm = (ESMF_KIND_I4) months;  // >= 32-bit
+        *mm = (ESMC_I4) months;  // >= 32-bit
       }
       if (mm_i8 != ESMC_NULL_POINTER) {
         *mm_i8 = months;   // >= 64-bit
@@ -631,7 +631,7 @@
     if (d != ESMC_NULL_POINTER || d_i8 != ESMC_NULL_POINTER ||
         d_r8 != ESMC_NULL_POINTER) {
       // total relative and absolute days
-      ESMF_KIND_I8 days = tiToConvert.d; // relative part 
+      ESMC_I8 days = tiToConvert.d; // relative part 
       tiToConvert.d = 0;           // TODO: don't need tiToConvert.d,
                                    // always = 0?
 
@@ -734,7 +734,7 @@
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE, logMsg, &rc);
           return(rc);
         }
-        *d = (ESMF_KIND_I4) days;  // >= 32-bit
+        *d = (ESMC_I4) days;  // >= 32-bit
       }
       if (d_i8 != ESMC_NULL_POINTER) {
         *d_i8 = days;  // >= 64-bit
@@ -750,11 +750,11 @@
           return(rc);
         }
         // TODO: put floating point seconds calculation into Fraction class
-        *d_r8 = (ESMF_KIND_R8) days +
-                (((ESMF_KIND_R8) tiToConvert.ESMC_FractionGetw() + 
-                 (ESMF_KIND_R8) tiToConvert.ESMC_FractionGetn() /
-                 (ESMF_KIND_R8) tiToConvert.ESMC_FractionGetd()) /
-                 (ESMF_KIND_R8) tiToConvert.calendar->secondsPerDay);
+        *d_r8 = (ESMC_R8) days +
+                (((ESMC_R8) tiToConvert.ESMC_FractionGetw() + 
+                 (ESMC_R8) tiToConvert.ESMC_FractionGetn() /
+                 (ESMC_R8) tiToConvert.ESMC_FractionGetd()) /
+                 (ESMC_R8) tiToConvert.calendar->secondsPerDay);
       }
     }
 
@@ -870,12 +870,12 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 s,            // in - integer seconds
-      ESMF_KIND_I4 sN,           // in - fractional seconds, numerator
-      ESMF_KIND_I4 sD,           // in - fractional seconds, denominator
-      ESMF_KIND_I8 yy,           // in - calendar interval number of years
-      ESMF_KIND_I8 mm,           // in - calendar interval number of months
-      ESMF_KIND_I8 d,            // in - calendar interval number of days
+      ESMC_I8 s,            // in - integer seconds
+      ESMC_I4 sN,           // in - fractional seconds, numerator
+      ESMC_I4 sD,           // in - fractional seconds, denominator
+      ESMC_I8 yy,           // in - calendar interval number of years
+      ESMC_I8 mm,           // in - calendar interval number of months
+      ESMC_I8 d,            // in - calendar interval number of days
       ESMC_Time *startTime,      // in - interval startTime
       ESMC_Time *endTime,        // in - interval endTime
       ESMC_Calendar *calendar,   // in - associated calendar
@@ -905,11 +905,11 @@
 
     if (startTime != ESMC_NULL_POINTER) {
       this->startTime = *startTime;
-    } else this->startTime.ESMC_TimeSet((ESMF_KIND_I8) 0);
+    } else this->startTime.ESMC_TimeSet((ESMC_I8) 0);
 
     if (endTime != ESMC_NULL_POINTER) {
       this->endTime = *endTime;
-    } else this->endTime.ESMC_TimeSet((ESMF_KIND_I8) 0);
+    } else this->endTime.ESMC_TimeSet((ESMC_I8) 0);
 
     if (calendar != ESMC_NULL_POINTER) {
       // set to user's calendar
@@ -1187,10 +1187,10 @@
 // !IROUTINE:  ESMC_TimeInterval(/) - Divide two time intervals, return double precision result
 //
 // !INTERFACE:
-      ESMF_KIND_R8 ESMC_TimeInterval::operator/(
+      ESMC_R8 ESMC_TimeInterval::operator/(
 //
 // !RETURN VALUE:
-//    ESMF_KIND_R8 result
+//    ESMC_R8 result
 //
 // !ARGUMENTS:
       const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
@@ -1265,7 +1265,7 @@
         // all relative case (yy (reduced to mm), mm, no seconds)
         } else if (zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           if (ti2.mm != 0) {
-            return((ESMF_KIND_R8) ti1.mm / (ESMF_KIND_R8) ti2.mm);
+            return((ESMC_R8) ti1.mm / (ESMC_R8) ti2.mm);
           } else {
             ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, 
                                                ESMC_NULL_POINTER);
@@ -1323,7 +1323,7 @@
               zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // divide years only
           if (ti2.yy != 0) {
-            return((ESMF_KIND_R8) ti1.yy / (ESMF_KIND_R8) ti2.yy);
+            return((ESMC_R8) ti1.yy / (ESMC_R8) ti2.yy);
           } else {
             ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO,
                                                ESMC_NULL_POINTER);
@@ -1335,7 +1335,7 @@
                     zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // divide months only
           if (ti2.mm != 0) {
-            return((ESMF_KIND_R8) ti1.mm / (ESMF_KIND_R8) ti2.mm);
+            return((ESMC_R8) ti1.mm / (ESMC_R8) ti2.mm);
           } else {
             ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO,
                                                ESMC_NULL_POINTER);
@@ -1347,7 +1347,7 @@
                     zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // divide days only
           if (ti2.d != 0) {
-            return((ESMF_KIND_R8) ti1.d / (ESMF_KIND_R8) ti2.d);
+            return((ESMC_R8) ti1.d / (ESMC_R8) ti2.d);
           } else {
             ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO,
                                                ESMC_NULL_POINTER);
@@ -1392,7 +1392,7 @@
 //    ESMC_TimeInterval result
 //
 // !ARGUMENTS:
-      const ESMF_KIND_I4 &divisor) const {   // in - integer divisor
+      const ESMC_I4 &divisor) const {   // in - integer divisor
 //
 // !DESCRIPTION:
 //    Divides a {\tt ESMC\_TimeInterval} by an integer divisor,
@@ -1446,7 +1446,7 @@
 //    ESMC_TimeInterval& result
 //
 // !ARGUMENTS:
-      const ESMF_KIND_I4 &divisor) {   // in - integer divisor
+      const ESMC_I4 &divisor) {   // in - integer divisor
 //
 // !DESCRIPTION:
 //    Divides a {\tt ESMC\_TimeInterval} by an integer divisor
@@ -1469,7 +1469,7 @@
 //    ESMC_TimeInterval result
 //
 // !ARGUMENTS:
-      const ESMF_KIND_R8 &divisor) const {   // in - double precision divisor
+      const ESMC_R8 &divisor) const {   // in - double precision divisor
 //
 // !DESCRIPTION:
 //    Divides a {\tt ESMC\_TimeInterval} by an double divisor,
@@ -1491,13 +1491,13 @@
 
     // divide relative yy, mm, d parts
     if (fabs(divisor) > FLT_EPSILON) {
-      quotient.yy = (ESMF_KIND_I8) ((ESMF_KIND_R8) quotient.yy / divisor);
-      quotient.mm = (ESMF_KIND_I8) ((ESMF_KIND_R8) quotient.mm / divisor);
-      quotient.d  = (ESMF_KIND_I8) ((ESMF_KIND_R8) quotient.d  / divisor);
+      quotient.yy = (ESMC_I8) ((ESMC_R8) quotient.yy / divisor);
+      quotient.mm = (ESMC_I8) ((ESMC_R8) quotient.mm / divisor);
+      quotient.d  = (ESMC_I8) ((ESMC_R8) quotient.d  / divisor);
 
       // divide absolute s part  // TODO: fractions
-      quotient.ESMC_FractionSetw((ESMF_KIND_I8)
-                      ((ESMF_KIND_R8) quotient.ESMC_FractionGetw() / divisor));
+      quotient.ESMC_FractionSetw((ESMC_I8)
+                      ((ESMC_R8) quotient.ESMC_FractionGetw() / divisor));
 
     } else {
       // TODO: write LogErr message (divide-by-zero)
@@ -1524,7 +1524,7 @@
 //    ESMC_TimeInterval& result
 //
 // !ARGUMENTS:
-      const ESMF_KIND_R8 &divisor) {   // in - double precision divisor
+      const ESMC_R8 &divisor) {   // in - double precision divisor
 //
 // !DESCRIPTION:
 //    Divides a {\tt ESMC\_TimeInterval} by a double precision divisor
@@ -1812,7 +1812,7 @@
 //    ESMC_TimeInterval result
 //
 // !ARGUMENTS:
-      const ESMF_KIND_I4 &multiplier) const {   // in - integer multiplier
+      const ESMC_I4 &multiplier) const {   // in - integer multiplier
 //
 // !DESCRIPTION:
 //     Multiply a {\tt ESMC\_TimeInterval} by an integer, return product as a
@@ -1853,7 +1853,7 @@
 //    ESMC_TimeInterval result
 //
 // !ARGUMENTS:
-      const ESMF_KIND_I4 &multiplier,  // in - integer multiplier
+      const ESMC_I4 &multiplier,  // in - integer multiplier
       const ESMC_TimeInterval &ti) {   // in - TimeInterval multiplicand
 //
 // !DESCRIPTION:
@@ -1879,7 +1879,7 @@
 //    ESMC_TimeInterval& result
 //
 // !ARGUMENTS:
-      const ESMF_KIND_I4 &multiplier) {   // in - integer multiplier
+      const ESMC_I4 &multiplier) {   // in - integer multiplier
 //
 // !DESCRIPTION:
 //     Multiply a {\tt ESMC\_TimeInterval} by an integer
@@ -1979,7 +1979,7 @@
 //    ESMC_TimeInterval result
 //
 // !ARGUMENTS:
-      const ESMF_KIND_R8 &multiplier) const {   // in - double precision
+      const ESMC_R8 &multiplier) const {   // in - double precision
                                                  //   multiplier
 //
 // !DESCRIPTION:
@@ -1999,13 +1999,13 @@
     // TODO: check for overflow/underflow, return 0 with LogErr message
 
     // multiply relative yy, mm, d parts
-    product.yy = (ESMF_KIND_I8) ((ESMF_KIND_R8) product.yy * multiplier);
-    product.mm = (ESMF_KIND_I8) ((ESMF_KIND_R8) product.mm * multiplier);
-    product.d  = (ESMF_KIND_I8) ((ESMF_KIND_R8) product.d  * multiplier);
+    product.yy = (ESMC_I8) ((ESMC_R8) product.yy * multiplier);
+    product.mm = (ESMC_I8) ((ESMC_R8) product.mm * multiplier);
+    product.d  = (ESMC_I8) ((ESMC_R8) product.d  * multiplier);
 
     // multiply absolute s part  // TODO: fractions
-    product.ESMC_FractionSetw((ESMF_KIND_I8)
-                    ((ESMF_KIND_R8) product.ESMC_FractionGetw() * multiplier));
+    product.ESMC_FractionSetw((ESMC_I8)
+                    ((ESMC_R8) product.ESMC_FractionGetw() * multiplier));
 
     // note: result not normalized here -- it is done during a Get() or use
     // in an arithmetic or comparison operation.
@@ -2025,7 +2025,7 @@
 //    ESMC_TimeInterval result
 //
 // !ARGUMENTS:
-      const ESMF_KIND_R8 &multiplier,  // in - double precision
+      const ESMC_R8 &multiplier,  // in - double precision
       const ESMC_TimeInterval &ti) {   // in - TimeInterval multiplicand
                                                  //   multiplier
 //
@@ -2052,7 +2052,7 @@
 //    ESMC_TimeInterval& result
 //
 // !ARGUMENTS:
-      const ESMF_KIND_R8 &multiplier) {   // in - double precision multiplier
+      const ESMC_R8 &multiplier) {   // in - double precision multiplier
 //
 // !DESCRIPTION:
 //     Multiply a {\tt ESMC\_TimeInterval} by a double precision
@@ -2817,12 +2817,12 @@
 //    none
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 s,             // in - integer seconds
-      ESMF_KIND_I4 sN,            // in - fractional seconds, numerator
-      ESMF_KIND_I4 sD,            // in - fractional seconds, denominator
-      ESMF_KIND_I8 yy,            // in - calendar interval number of years
-      ESMF_KIND_I8 mm,            // in - calendar interval number of months
-      ESMF_KIND_I8 d,             // in - calendar interval number of days
+      ESMC_I8 s,             // in - integer seconds
+      ESMC_I4 sN,            // in - fractional seconds, numerator
+      ESMC_I4 sD,            // in - fractional seconds, denominator
+      ESMC_I8 yy,            // in - calendar interval number of years
+      ESMC_I8 mm,            // in - calendar interval number of months
+      ESMC_I8 d,             // in - calendar interval number of days
       ESMC_Time *startTime,       // in - interval start time
       ESMC_Time *endTime,         // in - interval end time
       ESMC_Calendar *calendar,    // in - calendar
@@ -2943,11 +2943,11 @@
       return(rc);
     }
 
-    ESMF_KIND_I8 yy_i8, mm_i8, d_i8;
-    ESMF_KIND_I4 h, m, s, sN, sD;
+    ESMC_I8 yy_i8, mm_i8, d_i8;
+    ESMC_I4 h, m, s, sN, sD;
 
     // TODO: use native C++ Get, not F90 entry point, when ready
-    rc = ESMC_TimeIntervalGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+    rc = ESMC_TimeIntervalGet((ESMC_I4 *)ESMC_NULL_POINTER,
                           &yy_i8, ESMC_NULL_POINTER,
                           &mm_i8, ESMC_NULL_POINTER,
                           &d_i8, &h, &m, &s, ESMC_NULL_POINTER,

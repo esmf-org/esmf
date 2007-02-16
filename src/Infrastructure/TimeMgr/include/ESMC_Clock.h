@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.44 2006/11/16 05:21:18 cdeluca Exp $
+// $Id: ESMC_Clock.h,v 1.45 2007/02/16 03:25:33 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -91,7 +91,7 @@
     ESMC_Time         currTime;  // current time
     ESMC_Time         prevTime;  // previous time
 
-    ESMF_KIND_I8      advanceCount;             // number of times
+    ESMC_I8      advanceCount;             // number of times
                                                 //   ESMC_ClockAdvance has
                                                 //   been called (number of
                                                 //   time steps taken so far)
@@ -132,10 +132,10 @@
                       ESMC_Time         *stopTime=0,
                       ESMC_TimeInterval *runDuration=0,
                       int               *runTimeStepCount=0,
-// TODO: add overload for ESMF_KIND_R8  *runTimeStepCount=0,
+// TODO: add overload for ESMC_R8  *runTimeStepCount=0,
                       ESMC_Time         *refTime=0,    // (TMG 3.1, 3.4.4)
                       ESMC_Time         *currTime=0,
-                      ESMF_KIND_I8      *advanceCount=0,
+                      ESMC_I8      *advanceCount=0,
                       ESMC_Direction    *direction=0);
 
     int ESMC_ClockGet(int                nameLen,
@@ -145,7 +145,7 @@
                       ESMC_Time         *startTime=0,
                       ESMC_Time         *stopTime=0,
                       ESMC_TimeInterval *runDuration=0,
-                      ESMF_KIND_R8      *runTimeStepCount=0,
+                      ESMC_R8      *runTimeStepCount=0,
                       ESMC_Time         *refTime=0,    // (TMG 3.1, 3.4.4)
                       ESMC_Time         *currTime=0, 
                       ESMC_Time         *prevTime=0, 
@@ -154,7 +154,7 @@
                       ESMC_Calendar    **calendar=0,
                       ESMC_CalendarType *calendarType=0,
                       int               *timeZone=0,
-                      ESMF_KIND_I8      *advanceCount=0, 
+                      ESMC_I8      *advanceCount=0, 
                       int               *alarmCount=0,
                       ESMC_Direction    *direction=0);
 
@@ -224,7 +224,7 @@
     friend ESMC_Clock *ESMC_ClockCreate(int, const char*, ESMC_TimeInterval*,
                                  ESMC_Time*, ESMC_Time*, ESMC_TimeInterval*,
                                  int*, ESMC_Time*, int*);
-// TODO: add overload for ESMF_KIND_R8  *runTimeStepCount
+// TODO: add overload for ESMC_R8  *runTimeStepCount
 
     // friend function to copy a clock
     friend ESMC_Clock *ESMC_ClockCreate(ESMC_Clock*, int*);
@@ -269,7 +269,7 @@
                                  ESMC_Time*         stopTime=0,
                                  ESMC_TimeInterval *runDuration=0,
                                  int               *runTimeStepCount=0,
-// TODO: add overload for ESMF_KIND_R8             *runTimeStepCount=0,
+// TODO: add overload for ESMC_R8             *runTimeStepCount=0,
                                  ESMC_Time*         refTime=0,
                                  int*               rc=0);
 

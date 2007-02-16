@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.77 2006/11/16 05:21:20 cdeluca Exp $
+// $Id: ESMC_Clock.C,v 1.78 2007/02/16 03:25:34 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.77 2006/11/16 05:21:20 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.78 2007/02/16 03:25:34 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -264,7 +264,7 @@ int ESMC_Clock::count=0;
       int               *runTimeStepCount, // in
       ESMC_Time         *refTime,          // in
       ESMC_Time         *currTime,         // in
-      ESMF_KIND_I8      *advanceCount,     // in
+      ESMC_I8      *advanceCount,     // in
       ESMC_Direction    *direction) {      // in
 
 // !DESCRIPTION:
@@ -373,7 +373,7 @@ int ESMC_Clock::count=0;
       ESMC_Time         *startTime,        // out
       ESMC_Time         *stopTime,         // out
       ESMC_TimeInterval *runDuration,      // out
-      ESMF_KIND_R8      *runTimeStepCount, // out
+      ESMC_R8      *runTimeStepCount, // out
       ESMC_Time         *refTime,          // out
       ESMC_Time         *currTime,         // out
       ESMC_Time         *prevTime,         // out
@@ -382,7 +382,7 @@ int ESMC_Clock::count=0;
       ESMC_Calendar    **calendar,         // out
       ESMC_CalendarType *calendarType,     // out
       int               *timeZone,         // out
-      ESMF_KIND_I8      *advanceCount,     // out
+      ESMC_I8      *advanceCount,     // out
       int               *alarmCount,       // out
       ESMC_Direction    *direction) {      // out
 
@@ -452,7 +452,7 @@ int ESMC_Clock::count=0;
       // get calendar from currTime, but could get from any other clock Time,
       //   since they all use the same calendar
       // TODO: use native C++ Get, not F90 entry point, when ready
-      rc = this->currTime.ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+      rc = this->currTime.ESMC_TimeGet((ESMC_I4 *)ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -469,7 +469,7 @@ int ESMC_Clock::count=0;
       // get calendar type from currTime, but could get from any other clock
       // Time, since they all use the same calendar
       // TODO: use native C++ Get, not F90 entry point, when ready
-      rc = this->currTime.ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+      rc = this->currTime.ESMC_TimeGet((ESMC_I4 *)ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -486,7 +486,7 @@ int ESMC_Clock::count=0;
       // get timeZone from currTime, but could get from any other clock Time,
       //   since they all are in the same timezone
       // TODO: use native C++ Get, not F90 entry point, when ready
-      rc = this->currTime.ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+      rc = this->currTime.ESMC_TimeGet((ESMC_I4 *)ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1570,7 +1570,7 @@ int ESMC_Clock::count=0;
       //   (TODO: check only if stopTime set)
       // TODO: use native C++ Get, not F90 entry point, when ready
       ESMC_Calendar *startCal, *stopCal;
-      int rc = startTime.ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, 
+      int rc = startTime.ESMC_TimeGet((ESMC_I4 *)ESMC_NULL_POINTER, 
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1588,7 +1588,7 @@ int ESMC_Clock::count=0;
         return(rc);   
       }
 
-      rc = stopTime.ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, 
+      rc = stopTime.ESMC_TimeGet((ESMC_I4 *)ESMC_NULL_POINTER, 
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,

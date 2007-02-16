@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.69 2006/11/16 05:20:55 cdeluca Exp $
+// $Id: ESMC_Base.h,v 1.70 2007/02/16 03:25:32 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -59,15 +59,15 @@ class ESMC_Attribute
     int items;                  // number of items (NOT byte count) for lists
     int slen;                   // for string, length, inc trailing NULL. 
     union {                     // overload pointers to conserve space 
-      ESMF_KIND_I4    vi;       // integer, or
-      ESMF_KIND_I4  *vip;       // pointer to integer list, or
-      ESMF_KIND_I8   vtl;       // long, or
+      ESMC_I4    vi;       // integer, or
+      ESMC_I4  *vip;       // pointer to integer list, or
+      ESMC_I8   vtl;       // long, or
                   //  ^  TODO: change back to vl when Cray X1 compiler fixed
-      ESMF_KIND_I8  *vlp;       // pointer to long list, or
-      ESMF_KIND_R4    vf;       // float (real*4), or
-      ESMF_KIND_R4  *vfp;       // pointer to float (real*4) list, or
-      ESMF_KIND_R8    vd;       // double (real*8), or
-      ESMF_KIND_R8  *vdp;       // pointer to double (real*8) list, or
+      ESMC_I8  *vlp;       // pointer to long list, or
+      ESMC_R4    vf;       // float (real*4), or
+      ESMC_R4  *vfp;       // pointer to float (real*4) list, or
+      ESMC_R8    vd;       // double (real*8), or
+      ESMC_R8  *vdp;       // pointer to double (real*8) list, or
       ESMC_Logical    vb;       // boolean (logical), or
       ESMC_Logical  *vbp;       // pointer to boolean (logical) list, or
       char          *vcp;       // pointer to a NULL term character string, or
@@ -162,14 +162,14 @@ class ESMC_Base
     virtual int ESMC_Print(const char *options=0) const;
 
     // attribute methods - set
-    int ESMC_AttributeSet(char *name, ESMF_KIND_I4 value);
-    int ESMC_AttributeSet(char *name, int count, ESMF_KIND_I4 *value);
-    int ESMC_AttributeSet(char *name, ESMF_KIND_I8 value);
-    int ESMC_AttributeSet(char *name, int count, ESMF_KIND_I8 *value);
-    int ESMC_AttributeSet(char *name, ESMF_KIND_R4 value);
-    int ESMC_AttributeSet(char *name, int count, ESMF_KIND_R4 *value);
-    int ESMC_AttributeSet(char *name, ESMF_KIND_R8 value);
-    int ESMC_AttributeSet(char *name, int count, ESMF_KIND_R8 *value);
+    int ESMC_AttributeSet(char *name, ESMC_I4 value);
+    int ESMC_AttributeSet(char *name, int count, ESMC_I4 *value);
+    int ESMC_AttributeSet(char *name, ESMC_I8 value);
+    int ESMC_AttributeSet(char *name, int count, ESMC_I8 *value);
+    int ESMC_AttributeSet(char *name, ESMC_R4 value);
+    int ESMC_AttributeSet(char *name, int count, ESMC_R4 *value);
+    int ESMC_AttributeSet(char *name, ESMC_R8 value);
+    int ESMC_AttributeSet(char *name, int count, ESMC_R8 *value);
     int ESMC_AttributeSet(char *name, ESMC_Logical value);
     int ESMC_AttributeSet(char *name, int count, ESMC_Logical *value);
     int ESMC_AttributeSet(char *name, char *value);
@@ -177,14 +177,14 @@ class ESMC_Base
                           int count, void *value);
 
     // attribute methods - get
-    int ESMC_AttributeGet(char *name, ESMF_KIND_I4 *value) const;
-    int ESMC_AttributeGet(char *name, int *count, ESMF_KIND_I4 *value) const;
-    int ESMC_AttributeGet(char *name, ESMF_KIND_I8 *value) const;
-    int ESMC_AttributeGet(char *name, int *count, ESMF_KIND_I8 *value) const;
-    int ESMC_AttributeGet(char *name, ESMF_KIND_R4 *value) const;
-    int ESMC_AttributeGet(char *name, int *count, ESMF_KIND_R4 *value) const;
-    int ESMC_AttributeGet(char *name, ESMF_KIND_R8 *value) const;
-    int ESMC_AttributeGet(char *name, int *count, ESMF_KIND_R8 *value) const;
+    int ESMC_AttributeGet(char *name, ESMC_I4 *value) const;
+    int ESMC_AttributeGet(char *name, int *count, ESMC_I4 *value) const;
+    int ESMC_AttributeGet(char *name, ESMC_I8 *value) const;
+    int ESMC_AttributeGet(char *name, int *count, ESMC_I8 *value) const;
+    int ESMC_AttributeGet(char *name, ESMC_R4 *value) const;
+    int ESMC_AttributeGet(char *name, int *count, ESMC_R4 *value) const;
+    int ESMC_AttributeGet(char *name, ESMC_R8 *value) const;
+    int ESMC_AttributeGet(char *name, int *count, ESMC_R8 *value) const;
     int ESMC_AttributeGet(char *name, ESMC_Logical *value) const;
     int ESMC_AttributeGet(char *name, int *count, ESMC_Logical *value) const;
     int ESMC_AttributeGet(char *name, char *value) const;

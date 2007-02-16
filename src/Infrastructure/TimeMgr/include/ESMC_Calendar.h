@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.49 2006/11/16 05:21:18 cdeluca Exp $
+// $Id: ESMC_Calendar.h,v 1.50 2007/02/16 03:25:33 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -113,13 +113,13 @@ class ESMC_Calendar {
     int daysPerMonth[MONTHS_PER_YEAR];
     int monthsPerYear;
 // TODO: make dynamically allocatable with monthsPerYear
-    ESMF_KIND_I4 secondsPerDay;
-    ESMF_KIND_I4 secondsPerYear;
+    ESMC_I4 secondsPerDay;
+    ESMC_I4 secondsPerYear;
     struct daysPerYear_s
     {
-        ESMF_KIND_I4 d;    // integer number of days per year
-        ESMF_KIND_I4 dN;   // fractional number of days per year (numerator)
-        ESMF_KIND_I4 dD;   //                                    (denominator)
+        ESMC_I4 d;    // integer number of days per year
+        ESMC_I4 dN;   // fractional number of days per year (numerator)
+        ESMC_I4 dD;   //                                    (denominator)
     } daysPerYear;    // e.g. for Venus, d=0, dN=926, dD=1000
 
     // array of calendar type name strings
@@ -152,10 +152,10 @@ class ESMC_Calendar {
                          const char   *name=0,
                          int          *daysPerMonth=0,
                          int           monthsPerYear=0,
-                         ESMF_KIND_I4 *secondsPerDay=0,
-                         ESMF_KIND_I4 *daysPerYear=0,
-                         ESMF_KIND_I4 *daysPerYearDn=0,
-                         ESMF_KIND_I4 *daysPerYearDd=0);
+                         ESMC_I4 *secondsPerDay=0,
+                         ESMC_I4 *daysPerYear=0,
+                         ESMC_I4 *daysPerYearDn=0,
+                         ESMC_I4 *daysPerYearDd=0);
 
     // get properties of any calendar type
     int ESMC_CalendarGet(int                nameLen,
@@ -165,24 +165,24 @@ class ESMC_Calendar {
                          int               *daysPerMonth=0,
                          int                sizeofDaysPerMonth=0,
                          int               *monthsPerYear=0,
-                         ESMF_KIND_I4      *secondsPerDay=0,
-                         ESMF_KIND_I4      *secondsPerYear=0,
-                         ESMF_KIND_I4      *daysPerYear=0,
-                         ESMF_KIND_I4      *daysPerYeardN=0,
-                         ESMF_KIND_I4      *daysPerYeardD=0);
+                         ESMC_I4      *secondsPerDay=0,
+                         ESMC_I4      *secondsPerYear=0,
+                         ESMC_I4      *daysPerYear=0,
+                         ESMC_I4      *daysPerYeardN=0,
+                         ESMC_I4      *daysPerYeardD=0);
 
     // Calendar doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
 
     // conversions based on UTC: time zone offset done by client
     //  (TMG 2.4.5, 2.5.6)
-    int ESMC_CalendarConvertToTime(ESMF_KIND_I8 yy, int mm, int dd,
-                                   ESMF_KIND_I8 d, ESMC_BaseTime *t) const;
+    int ESMC_CalendarConvertToTime(ESMC_I8 yy, int mm, int dd,
+                                   ESMC_I8 d, ESMC_BaseTime *t) const;
     int ESMC_CalendarConvertToDate(ESMC_BaseTime *t,
-                                   ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
+                                   ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
                                    int *mm=0, int *dd=0,
-                                   ESMF_KIND_I4 *d=0, ESMF_KIND_I8 *d_i8=0,
-                                   ESMF_KIND_R8 *d_r8=0) const;
+                                   ESMC_I4 *d=0, ESMC_I8 *d_i8=0,
+                                   ESMC_R8 *d_r8=0) const;
 
     ESMC_Time ESMC_CalendarIncrement(const ESMC_Time *time,
                                      const ESMC_TimeInterval &timeinterval)
@@ -192,7 +192,7 @@ class ESMC_Calendar {
                                      const ESMC_TimeInterval &timeinterval)
                                      const;
 
-    bool ESMC_CalendarIsLeapYear(ESMF_KIND_I8 yy, int *rc=0) const;
+    bool ESMC_CalendarIsLeapYear(ESMC_I8 yy, int *rc=0) const;
 
     bool operator==(const ESMC_Calendar &) const;
     bool operator==(const ESMC_CalendarType &) const;
@@ -223,8 +223,8 @@ class ESMC_Calendar {
     ESMC_Calendar(const ESMC_Calendar &calendar);  // copy constructor
     ESMC_Calendar(const char *name, ESMC_CalendarType calendarType);
     ESMC_Calendar(const char *name, int *daysPerMonth, int monthsPerYear,
-                  ESMF_KIND_I4 *secondsPerDay, ESMF_KIND_I4 *daysPerYear,
-                  ESMF_KIND_I4 *daysPerYeardN, ESMF_KIND_I4 *daysPerYearDd);
+                  ESMC_I4 *secondsPerDay, ESMC_I4 *daysPerYear,
+                  ESMC_I4 *daysPerYeardN, ESMC_I4 *daysPerYearDd);
     ~ESMC_Calendar(void);
 
  // < declare the rest of the public interface methods here >
@@ -239,10 +239,10 @@ class ESMC_Calendar {
     // friend function to allocate and initialize custom calendar from heap
     friend ESMC_Calendar *ESMC_CalendarCreate(int, const char*,
                                               int*, int,
-                                              ESMF_KIND_I4*,
-                                              ESMF_KIND_I4*,
-                                              ESMF_KIND_I4*,
-                                              ESMF_KIND_I4*, int*);
+                                              ESMC_I4*,
+                                              ESMC_I4*,
+                                              ESMC_I4*,
+                                              ESMC_I4*, int*);
 
     // friend function to copy a calendar
     friend ESMC_Calendar *ESMC_CalendarCreate(ESMC_Calendar*, int*);
@@ -293,10 +293,10 @@ class ESMC_Calendar {
                                        const char   *name=0,
                                        int          *daysPerMonth=0,
                                        int           monthsPerYear=0,
-                                       ESMF_KIND_I4 *secondsPerDay=0,
-                                       ESMF_KIND_I4 *daysPerYear=0,
-                                       ESMF_KIND_I4 *daysPerYearDn=0,
-                                       ESMF_KIND_I4 *daysPerYearDd=0,
+                                       ESMC_I4 *secondsPerDay=0,
+                                       ESMC_I4 *daysPerYear=0,
+                                       ESMC_I4 *daysPerYearDn=0,
+                                       ESMC_I4 *daysPerYearDd=0,
                                        int          *rc=0);
 
     // friend function to copy a calendar

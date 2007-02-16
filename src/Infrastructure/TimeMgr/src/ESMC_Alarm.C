@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.56 2006/11/16 05:21:20 cdeluca Exp $
+// $Id: ESMC_Alarm.C,v 1.57 2007/02/16 03:25:34 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.56 2006/11/16 05:21:20 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.57 2007/02/16 03:25:34 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -1626,7 +1626,7 @@ int ESMC_Alarm::count=0;
     // copy = false;  // TODO: see notes in constructors and destructor below
 
     // initialize ring interval to zero
-    ESMF_KIND_I4 s = 0;
+    ESMC_I4 s = 0;
     // TODO: use native C++ method when ready
     int rc = ringInterval.ESMC_TimeIntervalSet(ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,

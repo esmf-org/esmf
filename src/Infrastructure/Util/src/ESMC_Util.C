@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.15 2006/11/16 17:44:07 cdeluca Exp $
+// $Id: ESMC_Util.C,v 1.16 2007/02/16 03:25:34 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.15 2006/11/16 17:44:07 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.16 2007/02/16 03:25:34 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -905,7 +905,7 @@ extern "C" {
 // !ARGUMENTS:
     int *n,                    // in - number of expected bytes in a pointer
     short *s,                  // in - F90 pointer of some kind
-    ESMF_KIND_POINTER *len) {  // out - that same value cast to an int/long
+    ESMC_POINTER *len) {  // out - that same value cast to an int/long
 //EOPI
 
     // if n does not match the actual pointer size, return an error.
@@ -918,17 +918,17 @@ extern "C" {
         return;
     }
 
-    if (sizeof(n) != sizeof(ESMF_KIND_POINTER)) {
+    if (sizeof(n) != sizeof(ESMC_POINTER)) {
         printf("error: C pointer size does not match include file value\n");
-        printf("  C pointer is %d bytes, ESMF_KIND_POINTER is %d bytes\n",  
-                   sizeof(n), sizeof(ESMF_KIND_POINTER));
+        printf("  C pointer is %d bytes, ESMC_POINTER is %d bytes\n",  
+                   sizeof(n), sizeof(ESMC_POINTER));
         *len = 0;
         return;
     }
 
     // if we passed those tests, this should give valid results.
 
-    *len = (ESMF_KIND_POINTER)s;
+    *len = (ESMC_POINTER)s;
     return;
  }
 }
@@ -955,7 +955,7 @@ extern "C" {
     short *s2,         // in - F90 pointer of some kind
     int *len) {        // out - that same value cast to an int
 //EOPI
-    ESMF_KIND_POINTER t1, t2; 
+    ESMC_POINTER t1, t2; 
 
     // if n does not match the actual pointer size, return an error.
     // we cannot return good values if n is not correct.
@@ -967,18 +967,18 @@ extern "C" {
         return;
     }
 
-    if (sizeof(n) != sizeof(ESMF_KIND_POINTER)) {
+    if (sizeof(n) != sizeof(ESMC_POINTER)) {
         printf("error: C pointer size does not match include file value\n");
-        printf("  C pointer is %d bytes, ESMF_KIND_POINTER is %d bytes\n",  
-                   sizeof(n), sizeof(ESMF_KIND_POINTER));
+        printf("  C pointer is %d bytes, ESMC_POINTER is %d bytes\n",  
+                   sizeof(n), sizeof(ESMC_POINTER));
         *len = 0;
         return;
     }
 
     // if we passed those tests, this should give valid results.
 
-    t1 = (ESMF_KIND_POINTER)s1;
-    t2 = (ESMF_KIND_POINTER)s2;
+    t1 = (ESMC_POINTER)s1;
+    t2 = (ESMC_POINTER)s2;
     if (t1 > t2)
         *len = (int)(t1 - t2);
     else

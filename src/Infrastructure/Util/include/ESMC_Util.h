@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.19 2007/02/09 17:18:22 theurich Exp $
+// $Id: ESMC_Util.h,v 1.20 2007/02/16 03:25:34 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -105,21 +105,21 @@ enum ESMC_DataKind { ESMF_I1=1,
 
 // ESMF platform-dependent data types
 #ifdef ESMF_IS_32BIT_MACHINE
-  typedef long long ESMF_KIND_I8;
-  typedef int       ESMF_KIND_I4;
-  typedef short     ESMF_KIND_I2;
-  typedef char      ESMF_KIND_I1;
-  typedef double    ESMF_KIND_R8;
-  typedef float     ESMF_KIND_R4;
-  typedef long      ESMF_KIND_POINTER;
+  typedef long long ESMC_I8;
+  typedef int       ESMC_I4;
+  typedef short     ESMC_I2;
+  typedef char      ESMC_I1;
+  typedef double    ESMC_R8;
+  typedef float     ESMC_R4;
+  typedef long      ESMC_POINTER;
 #else // 64-bit or larger machine
-  typedef long      ESMF_KIND_I8;
-  typedef int       ESMF_KIND_I4;
-  typedef short     ESMF_KIND_I2;
-  typedef char      ESMF_KIND_I1;
-  typedef double    ESMF_KIND_R8;
-  typedef float     ESMF_KIND_R4;
-  typedef long long ESMF_KIND_POINTER;
+  typedef long      ESMC_I8;
+  typedef int       ESMC_I4;
+  typedef short     ESMC_I2;
+  typedef char      ESMC_I1;
+  typedef double    ESMC_R8;
+  typedef float     ESMC_R4;
+  typedef long long ESMC_POINTER;
 #endif
 
 // are the index numbers relative to a local chunk or the overall
@@ -253,7 +253,7 @@ extern "C" {
 void FTN(f_esmf_domainlistgetde)(ESMC_DomainList *, int *, int *, int *);
 void FTN(f_esmf_domainlistgetai)(ESMC_DomainList *, int *, int *, 
                                                     ESMC_AxisIndex *ai, int *);
-void FTN(esmf_pointertoint)(int *n, short *s, ESMF_KIND_POINTER *len);
+void FTN(esmf_pointertoint)(int *n, short *s, ESMC_POINTER *len);
 void FTN(esmf_pointerdifference)(int *n, short *s1, short *s2, int *len);
 
 }

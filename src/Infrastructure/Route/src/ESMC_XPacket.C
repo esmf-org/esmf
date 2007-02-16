@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.61 2006/11/16 05:21:18 cdeluca Exp $
+// $Id: ESMC_XPacket.C,v 1.62 2007/02/16 03:25:33 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.61 2006/11/16 05:21:18 cdeluca Exp $";
+              "$Id: ESMC_XPacket.C,v 1.62 2007/02/16 03:25:33 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -503,16 +503,16 @@
 	    if (packflag == ESMC_BUFFER_PACK)  {
 	      // slow   memcpy(bufPtr, dataPtr, nbytes);
               if (nbytes == 8)
-                 *(ESMF_KIND_R8 *)bufPtr = *(ESMF_KIND_R8 * )dataPtr;
+                 *(ESMC_R8 *)bufPtr = *(ESMC_R8 * )dataPtr;
               if (nbytes == 4)
-                 *(ESMF_KIND_R4 *)bufPtr = *(ESMF_KIND_R4 * )dataPtr;
+                 *(ESMC_R4 *)bufPtr = *(ESMC_R4 * )dataPtr;
               }
 	    else  {
 	      // slow   memcpy(dataPtr, bufPtr, nbytes);
               if (nbytes == 8)
-                 *(ESMF_KIND_R8 *)dataPtr = *(ESMF_KIND_R8 * )bufPtr;
+                 *(ESMC_R8 *)dataPtr = *(ESMC_R8 * )bufPtr;
               if (nbytes == 4)
-                 *(ESMF_KIND_R4 *)dataPtr = *(ESMF_KIND_R4 * )bufPtr;
+                 *(ESMC_R4 *)dataPtr = *(ESMC_R4 * )bufPtr;
               }
 	    bufPtr += nbytes;
 	  }
@@ -569,9 +569,9 @@
                     // Proposed replacement :
                     // for (i=0; i<contigLength; i++) {
                     //   if (nbytes == 8)
-                    //     *(ESMF_KIND_R8 *)bufPtr = *(ESMF_KIND_R8 * )dataPtr; 
+                    //     *(ESMC_R8 *)bufPtr = *(ESMC_R8 * )dataPtr; 
                     //   if (nbytes == 4)
-                    //     *(ESMF_KIND_R4 *)bufPtr = *(ESMF_KIND_R4 * )dataPtr;
+                    //     *(ESMC_R4 *)bufPtr = *(ESMC_R4 * )dataPtr;
                     //   bufPtr += nbytes;
                     //   dataPtr += nbytes;
                     // }
@@ -584,9 +584,9 @@
                     // Proposed replacement :
                     // for (i=0; i<contigLength; i++) {
                     //   if (nbytes == 8)
-                    //     *(ESMF_KIND_R8 *)dataPtr = *(ESMF_KIND_R8 * )bufPtr;
+                    //     *(ESMC_R8 *)dataPtr = *(ESMC_R8 * )bufPtr;
                     //   if (nbytes == 4)
-                    //     *(ESMF_KIND_R4 *)dataPtr = *(ESMF_KIND_R4 * )bufPtr;
+                    //     *(ESMC_R4 *)dataPtr = *(ESMC_R4 * )bufPtr;
                     //   bufPtr += nbytes;
                     //   dataPtr += nbytes;
                     // }
@@ -676,23 +676,23 @@
 	    if (packflag == ESMC_BUFFER_PACK)
 	      // slow   memcpy(bufPtr, dataPtr, nbytes);
               if (nbytes == 1)
-                 *(ESMF_KIND_I1 *)bufPtr = *(ESMF_KIND_I1 * )dataPtr;
+                 *(ESMC_I1 *)bufPtr = *(ESMC_I1 * )dataPtr;
               if (nbytes == 2)
-                 *(ESMF_KIND_I2 *)bufPtr = *(ESMF_KIND_I2 * )dataPtr;
+                 *(ESMC_I2 *)bufPtr = *(ESMC_I2 * )dataPtr;
               if (nbytes == 4)
-                 *(ESMF_KIND_I4 *)bufPtr = *(ESMF_KIND_I4 * )dataPtr;
+                 *(ESMC_I4 *)bufPtr = *(ESMC_I4 * )dataPtr;
               if (nbytes == 8)
-                 *(ESMF_KIND_I8 *)bufPtr = *(ESMF_KIND_I8 * )dataPtr;
+                 *(ESMC_I8 *)bufPtr = *(ESMC_I8 * )dataPtr;
 	    else
 	      // slow   memcpy(dataPtr, bufPtr, nbytes);
               if (nbytes == 1)
-                 *(ESMF_KIND_I1 *)dataPtr = *(ESMF_KIND_I1 * )bufPtr;
+                 *(ESMC_I1 *)dataPtr = *(ESMC_I1 * )bufPtr;
               if (nbytes == 2)
-                 *(ESMF_KIND_I2 *)dataPtr = *(ESMF_KIND_I2 * )bufPtr;
+                 *(ESMC_I2 *)dataPtr = *(ESMC_I2 * )bufPtr;
               if (nbytes == 4)
-                 *(ESMF_KIND_I4 *)dataPtr = *(ESMF_KIND_I4 * )bufPtr;
+                 *(ESMC_I4 *)dataPtr = *(ESMC_I4 * )bufPtr;
               if (nbytes == 8)
-                 *(ESMF_KIND_I8 *)dataPtr = *(ESMF_KIND_I8 * )bufPtr;
+                 *(ESMC_I8 *)dataPtr = *(ESMC_I8 * )bufPtr;
 	    bufPtr += nbytes;
 	  }
 	  continue;
@@ -748,13 +748,13 @@
                     // Proposed replacement :
                     // for (i=0; i<contigLength; i++) {
                     //   if (nbytes == 1)
-                    //   *(ESMF_KIND_I1 *)bufPtr = *(ESMF_KIND_I1 * )dataPtr;
+                    //   *(ESMC_I1 *)bufPtr = *(ESMC_I1 * )dataPtr;
                     //   if (nbytes == 2)
-                    //   *(ESMF_KIND_I2 *)bufPtr = *(ESMF_KIND_I2 * )dataPtr;
+                    //   *(ESMC_I2 *)bufPtr = *(ESMC_I2 * )dataPtr;
                     //   if (nbytes == 4)
-                    //   *(ESMF_KIND_I4 *)bufPtr = *(ESMF_KIND_I4 * )dataPtr;
+                    //   *(ESMC_I4 *)bufPtr = *(ESMC_I4 * )dataPtr;
                     //   if (nbytes == 8)
-                    //   *(ESMF_KIND_I8 *)bufPtr = *(ESMF_KIND_I8 * )dataPtr;
+                    //   *(ESMC_I8 *)bufPtr = *(ESMC_I8 * )dataPtr;
                     //   bufPtr += nbytes;
                     //   dataPtr += nbytes;
                     // }
@@ -767,13 +767,13 @@
                     // Proposed replacement :
                     // for (i=0; i<contigLength; i++) {
                     //   if (nbytes == 1)
-                    //   *(ESMF_KIND_I1 *)dataPtr = *(ESMF_KIND_I1 * )bufPtr;
+                    //   *(ESMC_I1 *)dataPtr = *(ESMC_I1 * )bufPtr;
                     //   if (nbytes == 2)
-                    //   *(ESMF_KIND_I2 *)dataPtr = *(ESMF_KIND_I2 * )bufPtr;
+                    //   *(ESMC_I2 *)dataPtr = *(ESMC_I2 * )bufPtr;
                     //   if (nbytes == 4)
-                    //   *(ESMF_KIND_I4 *)dataPtr = *(ESMF_KIND_I4 * )bufPtr;
+                    //   *(ESMC_I4 *)dataPtr = *(ESMC_I4 * )bufPtr;
                     //   if (nbytes == 8)
-                    //   *(ESMF_KIND_I8 *)dataPtr = *(ESMF_KIND_I8 * )bufPtr;
+                    //   *(ESMC_I8 *)dataPtr = *(ESMC_I8 * )bufPtr;
                     //   bufPtr += nbytes;
                     //   dataPtr += nbytes;
                     // }

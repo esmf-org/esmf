@@ -1,4 +1,4 @@
-// $Id: ESMC_WordsizeSubr.C,v 1.4 2006/11/16 05:21:26 cdeluca Exp $
+// $Id: ESMC_WordsizeSubr.C,v 1.5 2007/02/16 03:25:34 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -40,21 +40,21 @@ void FTN(c_ints)(int *i1, int *i2, int *i3, int *i4,
       printf("In C++: sizeof(double)    = %d\n", (int) sizeof(double));
       printf("In C++: sizeof(pointer)   = %d\n", (int) sizeof(i1));
 
-      *i1 = sizeof(ESMF_KIND_I1);
-      *i2 = sizeof(ESMF_KIND_I2);
-      *i3 = sizeof(ESMF_KIND_I4);
-      *i4 = sizeof(ESMF_KIND_I8);
-      *i5 = sizeof(ESMF_KIND_R4);
-      *i6 = sizeof(ESMF_KIND_R8);
-      *i7 = sizeof(ESMF_KIND_POINTER);
+      *i1 = sizeof(ESMC_I1);
+      *i2 = sizeof(ESMC_I2);
+      *i3 = sizeof(ESMC_I4);
+      *i4 = sizeof(ESMC_I8);
+      *i5 = sizeof(ESMC_R4);
+      *i6 = sizeof(ESMC_R8);
+      *i7 = sizeof(ESMC_POINTER);
 
-      printf("In C++: sizeof(ESMF_KIND_I1) = %d\n", *i1);
-      printf("In C++: sizeof(ESMF_KIND_I2) = %d\n", *i2);
-      printf("In C++: sizeof(ESMF_KIND_I4) = %d\n", *i3);
-      printf("In C++: sizeof(ESMF_KIND_I8) = %d\n", *i4);
-      printf("In C++: sizeof(ESMF_KIND_R4) = %d\n", *i5);
-      printf("In C++: sizeof(ESMF_KIND_R8) = %d\n", *i6);
-      printf("In C++: sizeof(ESMF_KIND_POINTER) = %d\n", *i7);
+      printf("In C++: sizeof(ESMC_I1) = %d\n", *i1);
+      printf("In C++: sizeof(ESMC_I2) = %d\n", *i2);
+      printf("In C++: sizeof(ESMC_I4) = %d\n", *i3);
+      printf("In C++: sizeof(ESMC_I8) = %d\n", *i4);
+      printf("In C++: sizeof(ESMC_R4) = %d\n", *i5);
+      printf("In C++: sizeof(ESMC_R8) = %d\n", *i6);
+      printf("In C++: sizeof(ESMC_POINTER) = %d\n", *i7);
 
       *rc = ESMF_SUCCESS;
 

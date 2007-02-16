@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.30 2006/11/16 05:21:18 cdeluca Exp $
+// $Id: ESMC_BaseTime.h,v 1.31 2007/02/16 03:25:33 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -136,28 +136,28 @@ class ESMC_BaseTime : public ESMC_Fraction { // it is a fraction !
   public:
 
     // Get/Set methods (primarily to support F90 interface)
-    int ESMC_BaseTimeSet(ESMF_KIND_I4 *h=0, ESMF_KIND_I4 *m=0,
-                         ESMF_KIND_I4 *s=0, ESMF_KIND_I8 *s_i8=0,
-                         ESMF_KIND_I4 *ms=0, ESMF_KIND_I4 *us=0,
-                         ESMF_KIND_I4 *ns=0,
-                         ESMF_KIND_R8 *h_r8=0, ESMF_KIND_R8 *m_r8=0,
-                         ESMF_KIND_R8 *s_r8=0,
-                         ESMF_KIND_R8 *ms_r8=0, ESMF_KIND_R8 *us_r8=0,
-                         ESMF_KIND_R8 *ns_r8=0,
-                         ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0);
+    int ESMC_BaseTimeSet(ESMC_I4 *h=0, ESMC_I4 *m=0,
+                         ESMC_I4 *s=0, ESMC_I8 *s_i8=0,
+                         ESMC_I4 *ms=0, ESMC_I4 *us=0,
+                         ESMC_I4 *ns=0,
+                         ESMC_R8 *h_r8=0, ESMC_R8 *m_r8=0,
+                         ESMC_R8 *s_r8=0,
+                         ESMC_R8 *ms_r8=0, ESMC_R8 *us_r8=0,
+                         ESMC_R8 *ns_r8=0,
+                         ESMC_I4 *sN=0, ESMC_I4 *sD=0);
 
-    int ESMC_BaseTimeSet(ESMF_KIND_I8 S, int sN, int sD);
+    int ESMC_BaseTimeSet(ESMC_I8 S, int sN, int sD);
 
     int ESMC_BaseTimeGet(const ESMC_BaseTime *timeToConvert,
-                         ESMF_KIND_I4 *h=0, ESMF_KIND_I4 *m=0,
-                         ESMF_KIND_I4 *s=0, ESMF_KIND_I8 *s_i8=0,
-                         ESMF_KIND_I4 *ms=0, ESMF_KIND_I4 *us=0,
-                         ESMF_KIND_I4 *ns=0,
-                         ESMF_KIND_R8 *h_r8=0, ESMF_KIND_R8 *m_r8=0,
-                         ESMF_KIND_R8 *s_r8=0,
-                         ESMF_KIND_R8 *ms_r8=0, ESMF_KIND_R8 *us_r8=0,
-                         ESMF_KIND_R8 *ns_r8=0,
-                         ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0) const;
+                         ESMC_I4 *h=0, ESMC_I4 *m=0,
+                         ESMC_I4 *s=0, ESMC_I8 *s_i8=0,
+                         ESMC_I4 *ms=0, ESMC_I4 *us=0,
+                         ESMC_I4 *ns=0,
+                         ESMC_R8 *h_r8=0, ESMC_R8 *m_r8=0,
+                         ESMC_R8 *s_r8=0,
+                         ESMC_R8 *ms_r8=0, ESMC_R8 *us_r8=0,
+                         ESMC_R8 *ns_r8=0,
+                         ESMC_I4 *sN=0, ESMC_I4 *sD=0) const;
 
     // ESMC_BaseTime doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
@@ -182,7 +182,7 @@ class ESMC_BaseTime : public ESMC_Fraction { // it is a fraction !
 
     // native C++ constructors/destructors
     ESMC_BaseTime(void);
-    ESMC_BaseTime(ESMF_KIND_I8 S, ESMF_KIND_I4 sN, ESMF_KIND_I4 sD);
+    ESMC_BaseTime(ESMC_I8 S, ESMC_I4 sN, ESMC_I4 sD);
     ~ESMC_BaseTime(void);
 
  // < declare the rest of the public interface methods here >

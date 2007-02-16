@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.82 2006/11/16 05:21:20 cdeluca Exp $
+// $Id: ESMC_Calendar.C,v 1.83 2007/02/16 03:25:34 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.82 2006/11/16 05:21:20 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.83 2007/02/16 03:25:34 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static array of calendar type names
@@ -306,10 +306,10 @@ int ESMC_Calendar::count=0;
       const char   *name,          // in
       int          *daysPerMonth,  // in
       int           monthsPerYear, // in  
-      ESMF_KIND_I4 *secondsPerDay, // in
-      ESMF_KIND_I4 *daysPerYear,   // in
-      ESMF_KIND_I4 *daysPerYearDn, // in
-      ESMF_KIND_I4 *daysPerYearDd, // in
+      ESMC_I4 *secondsPerDay, // in
+      ESMC_I4 *daysPerYear,   // in
+      ESMC_I4 *daysPerYearDn, // in
+      ESMC_I4 *daysPerYearDd, // in
       int          *rc) {          // out - return code
 
 // !DESCRIPTION:
@@ -690,10 +690,10 @@ int ESMC_Calendar::count=0;
       const char   *name,             // in
       int          *daysPerMonth,     // in
       int           monthsPerYear,    // in
-      ESMF_KIND_I4 *secondsPerDay,    // in
-      ESMF_KIND_I4 *daysPerYear,      // in
-      ESMF_KIND_I4 *daysPerYeardN,    // in
-      ESMF_KIND_I4 *daysPerYeardD) {  // in
+      ESMC_I4 *secondsPerDay,    // in
+      ESMC_I4 *daysPerYear,      // in
+      ESMC_I4 *daysPerYeardN,    // in
+      ESMC_I4 *daysPerYeardD) {  // in
 // 
 // !DESCRIPTION:
 //      Initialzes a {\tt EMSC\_Calendar} to be a custom, user-defined type
@@ -805,11 +805,11 @@ int ESMC_Calendar::count=0;
       int               *daysPerMonth,    // out
       int                sizeofDaysPerMonth, // in
       int               *monthsPerYear,   // out
-      ESMF_KIND_I4      *secondsPerDay,   // out
-      ESMF_KIND_I4      *secondsPerYear,  // out
-      ESMF_KIND_I4      *daysPerYear,     // out
-      ESMF_KIND_I4      *daysPerYeardN,   // out
-      ESMF_KIND_I4      *daysPerYeardD) { // out
+      ESMC_I4      *secondsPerDay,   // out
+      ESMC_I4      *secondsPerYear,  // out
+      ESMC_I4      *daysPerYear,     // out
+      ESMC_I4      *daysPerYeardN,   // out
+      ESMC_I4      *daysPerYeardD) { // out
 // 
 // !DESCRIPTION:
 //      Gets a {\tt EMSC\_Calendar}'s properties
@@ -909,7 +909,7 @@ int ESMC_Calendar::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 yy, int mm, int dd, ESMF_KIND_I8 d,    // in
+      ESMC_I8 yy, int mm, int dd, ESMC_I8 d,    // in
       ESMC_BaseTime *t) const {                           // out
 //
 // !DESCRIPTION:
@@ -1019,7 +1019,7 @@ int ESMC_Calendar::count=0;
             // convert Gregorian date to Julian days
             // Gregorian date (yy, mm, dd) => Julian days (jdays)
             int temp            = (mm - 14) / 12;
-            ESMF_KIND_I8 jdays = (1461 * (yy + 4800 + temp)) / 4 +
+            ESMC_I8 jdays = (1461 * (yy + 4800 + temp)) / 4 +
                              (367 * (mm - 2 - 12 * temp )) / 12 -
                              (3 * ((yy + 4900 + temp) / 100)) / 4 + dd - 32075;
 
@@ -1083,11 +1083,11 @@ int ESMC_Calendar::count=0;
 
             // Algorithm is from D.A. Hatcher, Q. Jl R. astr. Soc. (1984),
             //  volume 25, pp. 53-55.
-            ESMF_KIND_I8 yyprime = yy - ((12-mm) / 10);
+            ESMC_I8 yyprime = yy - ((12-mm) / 10);
             int          mmprime = (mm+9) % 12;
-            ESMF_KIND_I8 y = (ESMF_KIND_I8) (365.25 * (yyprime + 4712));
+            ESMC_I8 y = (ESMC_I8) (365.25 * (yyprime + 4712));
             int          d = (int)((30.6 * mmprime) + 0.5);
-            ESMF_KIND_I8 jdays = y + d + dd + 59;
+            ESMC_I8 jdays = y + d + dd + 59;
 
             // convert Julian days to basetime seconds (>= 64 bit)
             t->ESMC_FractionSetw(jdays * secondsPerDay);
@@ -1199,8 +1199,8 @@ int ESMC_Calendar::count=0;
 //
 // !ARGUMENTS:
       ESMC_BaseTime *t,                                                // in/out
-      ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8, int *mm, int *dd,         // out
-      ESMF_KIND_I4 *d, ESMF_KIND_I8 *d_i8, ESMF_KIND_R8 *d_r8) const { // out
+      ESMC_I4 *yy, ESMC_I8 *yy_i8, int *mm, int *dd,         // out
+      ESMC_I4 *d, ESMC_I8 *d_i8, ESMC_R8 *d_r8) const { // out
 //
 // !DESCRIPTION:
 //     Converts a core {\tt ESMC\_BaseTime} representation to a
@@ -1266,7 +1266,7 @@ int ESMC_Calendar::count=0;
             //    (4*templ = 2^63)
 
             // convert basetime seconds to Julian days
-            ESMF_KIND_I8 jdays = t->ESMC_FractionGetw() / secondsPerDay;
+            ESMC_I8 jdays = t->ESMC_FractionGetw() / secondsPerDay;
 
             // Validate input
             // From Fliegel algorithm:  lower limit of 3/1/-4900 Gregorian
@@ -1282,7 +1282,7 @@ int ESMC_Calendar::count=0;
 
             if (d != ESMC_NULL_POINTER) {
               if (jdays > INT_MIN && jdays <= INT_MAX) {
-                *d = (ESMF_KIND_I4) jdays;
+                *d = (ESMC_I4) jdays;
                 // adjust for negative time (reverse integer division)
                 if (t->ESMC_FractionGetw() % secondsPerDay < 0) (*d)--;
               } else {
@@ -1300,24 +1300,24 @@ int ESMC_Calendar::count=0;
               if (t->ESMC_FractionGetw() % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMF_KIND_R8) t->ESMC_FractionGetw() /
-                                     (ESMF_KIND_R8) secondsPerDay;
+              *d_r8 = (ESMC_R8) t->ESMC_FractionGetw() /
+                                     (ESMC_R8) secondsPerDay;
             }
 
             // convert Julian days to Gregorian date
             // Julian days (jdays) => Gregorian date (yy, mm, dd)
 
             int day, month; 
-            ESMF_KIND_I8 year;
+            ESMC_I8 year;
             if (dd != ESMC_NULL_POINTER || mm    != ESMC_NULL_POINTER ||
                 yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) {
 
-              ESMF_KIND_I8 templ = jdays + 68569;
-              ESMF_KIND_I8 tempn = (4 * templ) / 146097;
+              ESMC_I8 templ = jdays + 68569;
+              ESMC_I8 tempn = (4 * templ) / 146097;
                            templ = templ - (146097 * tempn + 3) / 4;
-              ESMF_KIND_I8 tempi = (4000 * (templ + 1)) / 1461001;
+              ESMC_I8 tempi = (4000 * (templ + 1)) / 1461001;
                            templ = templ - (1461 * tempi) / 4 + 31;
-              ESMF_KIND_I8 tempj = (80 * templ) / 2447;
+              ESMC_I8 tempj = (80 * templ) / 2447;
 
               day   = templ - (2447 * tempj) / 80;
               templ = tempj / 11;
@@ -1332,7 +1332,7 @@ int ESMC_Calendar::count=0;
               }
               if (yy != ESMC_NULL_POINTER) {
                 if (year >= INT_MIN && year <= INT_MAX) {
-                  *yy = (ESMF_KIND_I4) year;  // >= 32-bit
+                  *yy = (ESMC_I4) year;  // >= 32-bit
                 } else {
                   // too large to fit in given int
                   char logMsg[ESMF_MAXSTR];
@@ -1360,7 +1360,7 @@ int ESMC_Calendar::count=0;
               // TODO: use native C++ Set(), not F90 entry point
               ESMC_Calendar *cal = (ESMC_Calendar *) this;
               ESMC_Time begnningOfYear; 
-              begnningOfYear.ESMC_TimeSet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+              begnningOfYear.ESMC_TimeSet((ESMC_I4 *)ESMC_NULL_POINTER,
                                            &year, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1374,7 +1374,7 @@ int ESMC_Calendar::count=0;
                                            ESMC_NULL_POINTER, &cal);
               ESMC_TimeInterval secondsOfTheYear;
               secondsOfTheYear = *t - begnningOfYear;
-              ESMF_KIND_I8 seconds;
+              ESMC_I8 seconds;
               secondsOfTheYear.ESMC_TimeIntervalGet(ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
@@ -1394,7 +1394,7 @@ int ESMC_Calendar::count=0;
         case ESMC_CAL_JULIAN:
         {
             // convert basetime seconds to Julian days
-            ESMF_KIND_I8 jdays = t->ESMC_FractionGetw() / secondsPerDay;
+            ESMC_I8 jdays = t->ESMC_FractionGetw() / secondsPerDay;
 
             // Validate input
             // From Hatcher algorithm:  lower limit of 2/29/-4712 Julian
@@ -1410,7 +1410,7 @@ int ESMC_Calendar::count=0;
 
             if (d != ESMC_NULL_POINTER) {
               if (jdays > INT_MIN && jdays <= INT_MAX) {
-                *d = (ESMF_KIND_I4) jdays;
+                *d = (ESMC_I4) jdays;
                 // adjust for negative time (reverse integer division)
                 if (t->ESMC_FractionGetw() % secondsPerDay < 0) (*d)--;
               } else {
@@ -1428,20 +1428,20 @@ int ESMC_Calendar::count=0;
               if (t->ESMC_FractionGetw() % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMF_KIND_R8) t->ESMC_FractionGetw() /
-                                     (ESMF_KIND_R8) secondsPerDay;
+              *d_r8 = (ESMC_R8) t->ESMC_FractionGetw() /
+                                     (ESMC_R8) secondsPerDay;
             }
 
             // Julian day (D) => Julian date (yy, mm, dd)
 
             int day, month; 
-            ESMF_KIND_I8 year;
+            ESMC_I8 year;
             if (dd != ESMC_NULL_POINTER || mm    != ESMC_NULL_POINTER ||
                 yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) {
 
               // Algorithm is from D.A. Hatcher, Q. Jl R. astr. Soc. (1984),
               //  Volume 25, No. 1, pp. 53-55.
-                  year   = (ESMF_KIND_I8)(jdays / 365.25) - 4712;
+                  year   = (ESMC_I8)(jdays / 365.25) - 4712;
               int dprime = (int)fmod((jdays - 59.25), 365.25);
                   month  = ((int)((dprime + 0.5) / 30.6) + 2) % 12 + 1;
                   day    =  (int)(fmod((dprime + 0.5), 30.6)) + 1;
@@ -1454,7 +1454,7 @@ int ESMC_Calendar::count=0;
               }
               if (yy != ESMC_NULL_POINTER) {
                 if (year >= INT_MIN && year <= INT_MAX) {
-                  *yy = (ESMF_KIND_I4) year;  // >= 32-bit
+                  *yy = (ESMC_I4) year;  // >= 32-bit
                 } else {
                   // too large to fit in given int
                   char logMsg[ESMF_MAXSTR];
@@ -1482,7 +1482,7 @@ int ESMC_Calendar::count=0;
               // TODO: use native C++ Set(), not F90 entry point
               ESMC_Calendar *cal = (ESMC_Calendar *) this;
               ESMC_Time begnningOfYear; 
-              begnningOfYear.ESMC_TimeSet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+              begnningOfYear.ESMC_TimeSet((ESMC_I4 *)ESMC_NULL_POINTER,
                                            &year, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1496,7 +1496,7 @@ int ESMC_Calendar::count=0;
                                            ESMC_NULL_POINTER, &cal);
               ESMC_TimeInterval secondsOfTheYear;
               secondsOfTheYear = *t - begnningOfYear;
-              ESMF_KIND_I8 seconds;
+              ESMC_I8 seconds;
               secondsOfTheYear.ESMC_TimeIntervalGet(ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
@@ -1514,15 +1514,15 @@ int ESMC_Calendar::count=0;
         // convert Time => No Leap Date
         case ESMC_CAL_NOLEAP:
         {
-            ESMF_KIND_I8 tmpS = t->ESMC_FractionGetw();
- // TODO: ? ESMF_KIND_I8 tmpS = t->ESMC_FractionGetw() - 148600915200LL;
+            ESMC_I8 tmpS = t->ESMC_FractionGetw();
+ // TODO: ? ESMC_I8 tmpS = t->ESMC_FractionGetw() - 148600915200LL;
                                      // ^ adjust to match Julian time zero
                                      // = (1/1/0000) - (11/24/-4713)
 
             if (yy != ESMC_NULL_POINTER) {
-              ESMF_KIND_I8 year = tmpS / secondsPerYear;
+              ESMC_I8 year = tmpS / secondsPerYear;
               if (year > INT_MIN && year <= INT_MAX) {
-                  *yy = (ESMF_KIND_I4) year;  // >= 32-bit
+                  *yy = (ESMC_I4) year;  // >= 32-bit
                   // adjust for negative time (reverse integer division)
                   if (tmpS % secondsPerYear < 0) (*yy)--;
               } else {
@@ -1557,9 +1557,9 @@ int ESMC_Calendar::count=0;
 
             // convert basetime seconds to Julian days
             if (d != ESMC_NULL_POINTER) {
-              ESMF_KIND_I8 day = tmpS / secondsPerDay;
+              ESMC_I8 day = tmpS / secondsPerDay;
               if (day > INT_MIN && day <= INT_MAX) {
-                *d = (ESMF_KIND_I4) day;   // >= 32-bit
+                *d = (ESMC_I4) day;   // >= 32-bit
                 // adjust for negative time (reverse integer division)
                 if (tmpS % secondsPerDay < 0) (*d)--;
               } else {
@@ -1577,7 +1577,7 @@ int ESMC_Calendar::count=0;
               if (tmpS % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMF_KIND_R8) tmpS / (ESMF_KIND_R8) secondsPerDay;
+              *d_r8 = (ESMC_R8) tmpS / (ESMC_R8) secondsPerDay;
             }
 
             // remove smallest requested date unit from given time for
@@ -1597,15 +1597,15 @@ int ESMC_Calendar::count=0;
         // convert Time => 360 Day Date
         case ESMC_CAL_360DAY:
         {
-            ESMF_KIND_I8 tmpS = t->ESMC_FractionGetw();
- // TODO: ? ESMF_KIND_I8 tmpS = t->ESMC_FractionGetw() - 146565244800LL;
+            ESMC_I8 tmpS = t->ESMC_FractionGetw();
+ // TODO: ? ESMC_I8 tmpS = t->ESMC_FractionGetw() - 146565244800LL;
                                      // ^ adjust to match Julian time zero
                                      // = (1/1/0000) - (11/24/-4713)
 
             if (yy != ESMC_NULL_POINTER) {
-              ESMF_KIND_I8 year = tmpS / secondsPerYear;
+              ESMC_I8 year = tmpS / secondsPerYear;
               if (year > INT_MIN && year <= INT_MAX) {
-                *yy = (ESMF_KIND_I4) year;
+                *yy = (ESMC_I4) year;
                 // adjust for negative time (reverse integer division)
                 if (tmpS % secondsPerYear < 0) (*yy)--;
               } else {
@@ -1636,9 +1636,9 @@ int ESMC_Calendar::count=0;
 
             // convert basetime seconds to Julian days
             if (d != ESMC_NULL_POINTER) {
-              ESMF_KIND_I8 day = tmpS / secondsPerDay;
+              ESMC_I8 day = tmpS / secondsPerDay;
               if (day > INT_MIN && day <= INT_MAX) {
-                *d = (ESMF_KIND_I4) day;   // >= 32-bit
+                *d = (ESMC_I4) day;   // >= 32-bit
                 // adjust for negative time (reverse integer division)
                 if (tmpS % secondsPerDay < 0) (*d)--;
               } else {
@@ -1656,7 +1656,7 @@ int ESMC_Calendar::count=0;
               if (tmpS % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMF_KIND_R8) tmpS / (ESMF_KIND_R8) secondsPerDay;
+              *d_r8 = (ESMC_R8) tmpS / (ESMC_R8) secondsPerDay;
             }
 
             // remove smallest requested date unit from given time for
@@ -1678,9 +1678,9 @@ int ESMC_Calendar::count=0;
         {
             // convert basetime seconds to Julian days
             if (d != ESMC_NULL_POINTER) {
-              ESMF_KIND_I8 day = t->ESMC_FractionGetw() / secondsPerDay;
+              ESMC_I8 day = t->ESMC_FractionGetw() / secondsPerDay;
               if (day > INT_MIN && day <= INT_MAX) {
-                *d = (ESMF_KIND_I4) day;    // >= 32-bit
+                *d = (ESMC_I4) day;    // >= 32-bit
                 // adjust for negative time (reverse integer division)
                 if (t->ESMC_FractionGetw() % secondsPerDay < 0) (*d)--;
               } else {
@@ -1698,8 +1698,8 @@ int ESMC_Calendar::count=0;
                 if (t->ESMC_FractionGetw() % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMF_KIND_R8) t->ESMC_FractionGetw() /
-                                     (ESMF_KIND_R8) secondsPerDay;
+              *d_r8 = (ESMC_R8) t->ESMC_FractionGetw() /
+                                     (ESMC_R8) secondsPerDay;
             }
 
             // if days specified, remove them from given time for
@@ -1785,9 +1785,9 @@ int ESMC_Calendar::count=0;
         case ESMC_CAL_NOLEAP:
         case ESMC_CAL_360DAY:
         {
-            ESMF_KIND_I8 yy_i8;
+            ESMC_I8 yy_i8;
             int mm, dd, timeZone;
-            ESMF_KIND_I4 h, m, s;
+            ESMC_I4 h, m, s;
             ESMC_Calendar *cal;
 
             // TODO:  This algorithm operates on yy, mm, dd units the way
@@ -1936,9 +1936,9 @@ int ESMC_Calendar::count=0;
         case ESMC_CAL_NOLEAP:
         case ESMC_CAL_360DAY:
         {
-            ESMF_KIND_I8 yy_i8;
+            ESMC_I8 yy_i8;
             int mm, dd, timeZone;
-            ESMF_KIND_I4 h, m, s;
+            ESMC_I4 h, m, s;
             ESMC_Calendar *cal;
 
             // TODO:  This algorithm operates on yy, mm, dd units the way
@@ -2044,7 +2044,7 @@ int ESMC_Calendar::count=0;
 //    bool is leap year or not
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 yy_i8,      // in  - year
+      ESMC_I8 yy_i8,      // in  - year
       int  *rc) const {        // out - error return code
 //
 // !DESCRIPTION:
@@ -2410,7 +2410,7 @@ int ESMC_Calendar::count=0;
     //        ESMC_CalendarIsLeapYear() )
     bool isLeapYear = false;
     if (time != ESMC_NULL_POINTER) {
-      ESMF_KIND_I8 yy_i8;
+      ESMC_I8 yy_i8;
       rc = time->ESMC_TimeGet(ESMC_NULL_POINTER, &yy_i8);
                               // TODO: use native C++ interface when ready
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
@@ -2581,10 +2581,10 @@ int ESMC_Calendar::count=0;
       const char   *name,              // in
       int          *daysPerMonth,      // in
       int           monthsPerYear,     // in
-      ESMF_KIND_I4 *secondsPerDay,     // in
-      ESMF_KIND_I4 *daysPerYear,       // in
-      ESMF_KIND_I4 *daysPerYeardN,     // in
-      ESMF_KIND_I4 *daysPerYeardD) {   // in
+      ESMC_I4 *secondsPerDay,     // in
+      ESMC_I4 *daysPerYear,       // in
+      ESMC_I4 *daysPerYeardN,     // in
+      ESMC_I4 *daysPerYeardD) {   // in
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_Time} to be of a custom user-defined type

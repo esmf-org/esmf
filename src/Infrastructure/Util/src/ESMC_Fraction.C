@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.C,v 1.2 2006/11/16 05:21:21 cdeluca Exp $
+// $Id: ESMC_Fraction.C,v 1.3 2007/02/16 03:25:34 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Fraction.C,v 1.2 2006/11/16 05:21:21 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Fraction.C,v 1.3 2007/02/16 03:25:34 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -55,7 +55,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 w) {   // input - the whole number value to set
+      ESMC_I8 w) {   // input - the whole number value to set
 //
 // !DESCRIPTION:
 //     Sets the fraction's whole number value.
@@ -84,7 +84,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I4 n) {   // input - the numerator value to set
+      ESMC_I4 n) {   // input - the numerator value to set
 //
 // !DESCRIPTION:
 //     Sets the fraction's numerator value.
@@ -113,7 +113,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I4 d) {   // input - the denominator value to set
+      ESMC_I4 d) {   // input - the denominator value to set
 //
 // !DESCRIPTION:
 //     Sets the fraction's denominator value.
@@ -136,7 +136,7 @@
 // !IROUTINE:  ESMC_FractionGetw - Get fraction's whole number
 //
 // !INTERFACE:
-      ESMF_KIND_I8 ESMC_Fraction::ESMC_FractionGetw(void) const {
+      ESMC_I8 ESMC_Fraction::ESMC_FractionGetw(void) const {
 //
 // !RETURN VALUE:
 //    The fraction's whole number value
@@ -162,7 +162,7 @@
 // !IROUTINE:  ESMC_FractionGetn - Get fraction's numerator
 //
 // !INTERFACE:
-      ESMF_KIND_I4 ESMC_Fraction::ESMC_FractionGetn(void) const {
+      ESMC_I4 ESMC_Fraction::ESMC_FractionGetn(void) const {
 //
 // !RETURN VALUE:
 //    The fraction's numerator value.
@@ -188,7 +188,7 @@
 // !IROUTINE:  ESMC_FractionGetd - Get fraction's denominator
 //
 // !INTERFACE:
-      ESMF_KIND_I4 ESMC_Fraction::ESMC_FractionGetd(void) const {
+      ESMC_I4 ESMC_Fraction::ESMC_FractionGetd(void) const {
 //
 // !RETURN VALUE:
 //    The fraction's denominator value.
@@ -220,9 +220,9 @@
 //    none.
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 *w,
-      ESMF_KIND_I4 *n,
-      ESMF_KIND_I4 *d) {
+      ESMC_I8 *w,
+      ESMC_I4 *n,
+      ESMC_I4 *d) {
 //
 // !DESCRIPTION:
 //     Sets the fraction's value.  Supports F90 optional args interface
@@ -253,9 +253,9 @@
 //    none.
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 w,
-      ESMF_KIND_I4 n,
-      ESMF_KIND_I4 d) {
+      ESMC_I8 w,
+      ESMC_I4 n,
+      ESMC_I4 d) {
 //
 // !DESCRIPTION:
 //     Sets the fraction's value.
@@ -286,9 +286,9 @@
 //    none.
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 *w,
-      ESMF_KIND_I4 *n,
-      ESMF_KIND_I4 *d) const {
+      ESMC_I8 *w,
+      ESMC_I4 *n,
+      ESMC_I4 *d) const {
 //
 // !DESCRIPTION:
 //     Gets the fraction's value.
@@ -337,7 +337,7 @@
     }
 
     // normalize to proper fraction (labs(n/d) < 1)
-    ESMF_KIND_I4 whole;
+    ESMC_I4 whole;
     if (labs((whole = n/d)) >= 1) {
       w += whole;
       n %= d;
@@ -363,7 +363,7 @@
 
     // reduce to lowest denominator
 
-    ESMF_KIND_I4 gcd = ESMC_FractionGCD(n,d);
+    ESMC_I4 gcd = ESMC_FractionGCD(n,d);
     // this should never happen since GCD never returns zero!
     if (gcd == 0) {
       ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
@@ -388,7 +388,7 @@
 //    none.
 //
 // !ARGUMENTS:
-      ESMF_KIND_I4 denominator) {  // input
+      ESMC_I4 denominator) {  // input
 //
 // !DESCRIPTION:
 //     Convert fraction in terms of given denominator
@@ -404,17 +404,17 @@
       return(ESMF_FAILURE);
     }
 
-    // TODO:  Consider making n/d of type ESMF_KIND_I8.
+    // TODO:  Consider making n/d of type ESMC_I8.
     // used by ESMC_BaseTimeGet()
 
-    ESMF_KIND_I8 w_i8 = w;                      // TODO: ensures 
-    ESMF_KIND_I8 n_i8 = n;                      //         correct
-    ESMF_KIND_I8 d_i8 = d;                      //           cast
-    ESMF_KIND_I8 denominator_i8 = denominator;  //             on Cray X1 !
-    ESMF_KIND_I8 conversion = w_i8 * denominator_i8 +
+    ESMC_I8 w_i8 = w;                      // TODO: ensures 
+    ESMC_I8 n_i8 = n;                      //         correct
+    ESMC_I8 d_i8 = d;                      //           cast
+    ESMC_I8 denominator_i8 = denominator;  //             on Cray X1 !
+    ESMC_I8 conversion = w_i8 * denominator_i8 +
                                 (n_i8 * denominator_i8) / d_i8;
-//    ESMF_KIND_I8 conversion = (ESMF_KIND_I8) w * denominator +
-//          ((ESMF_KIND_I8) n * (ESMF_KIND_I8) denominator) / (ESMF_KIND_I8) d;
+//    ESMC_I8 conversion = (ESMC_I8) w * denominator +
+//          ((ESMC_I8) n * (ESMC_I8) denominator) / (ESMC_I8) d;
 
     if (conversion < INT_MIN || conversion > INT_MAX) {
         char logMsg[ESMF_MAXSTR];
@@ -439,14 +439,14 @@
 // !IROUTINE:  ESMC_FractionGCD - determine the Greatest Common Divisor
 //
 // !INTERFACE:
-      ESMF_KIND_I4 ESMC_FractionGCD(
+      ESMC_I4 ESMC_FractionGCD(
 //
 // !RETURN VALUE:
 //    The GCD of a and b.
 //
 // !ARGUMENTS:
-      ESMF_KIND_I4 a,    // in - the first number 
-      ESMF_KIND_I4 b) {  // in - the second number
+      ESMC_I4 a,    // in - the first number 
+      ESMC_I4 b) {  // in - the second number
 //
 // !DESCRIPTION:
 //     Uses Euclid's algorithm to determine the Greatest Common Divisor of 
@@ -458,11 +458,11 @@
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_FractionGCD()"
 
-    ESMF_KIND_I4 abs_a = labs(a);
-    ESMF_KIND_I4 abs_b = labs(b);
-    ESMF_KIND_I4 large = MAX(abs_a, abs_b);
-    ESMF_KIND_I4 small = MIN(abs_a, abs_b);
-    ESMF_KIND_I4 remainder;
+    ESMC_I4 abs_a = labs(a);
+    ESMC_I4 abs_b = labs(b);
+    ESMC_I4 large = MAX(abs_a, abs_b);
+    ESMC_I4 small = MIN(abs_a, abs_b);
+    ESMC_I4 remainder;
 
     // deal with a zero input
     if      (small == 0 && large != 0) return(large);
@@ -489,14 +489,14 @@
 // !IROUTINE:  ESMC_FractionLCM - determine the Least Common Multiple
 //
 // !INTERFACE:
-      ESMF_KIND_I4 ESMC_FractionLCM(
+      ESMC_I4 ESMC_FractionLCM(
 //
 // !RETURN VALUE:
 //    the LCM of a and b
 //
 // !ARGUMENTS:
-      ESMF_KIND_I4 a,    // in - the first number 
-      ESMF_KIND_I4 b) {  // in - the second number
+      ESMC_I4 a,    // in - the first number 
+      ESMC_I4 b) {  // in - the second number
 //
 // !DESCRIPTION:
 //      Uses GCD to determine the Least Common Multiple of a and b.
@@ -508,7 +508,7 @@
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_FractionLCM()"
 
-    ESMF_KIND_I4 gcd = ESMC_FractionGCD(a,b);
+    ESMC_I4 gcd = ESMC_FractionGCD(a,b);
 
     // this should never happen since GCD never returns zero!
     if (gcd == 0) {
@@ -554,7 +554,7 @@
     f2.ESMC_FractionSimplify();
 
     // put both fractions on the same denominator, then compare
-    ESMF_KIND_I4 lcm = ESMC_FractionLCM(f1.d, f2.d);
+    ESMC_I4 lcm = ESMC_FractionLCM(f1.d, f2.d);
     return(f1.w == f2.w && f1.n*(lcm/f1.d) == f2.n*(lcm/f2.d));
 
 }  // end ESMC_Fraction::operator==
@@ -591,7 +591,7 @@
     f2.ESMC_FractionSimplify();
 
     // put both fractions on the same denominator, then compare
-    ESMF_KIND_I4 lcm = ESMC_FractionLCM(f1.d, f2.d);
+    ESMC_I4 lcm = ESMC_FractionLCM(f1.d, f2.d);
     return(f1.w != f2.w || f1.n*(lcm/f1.d) != f2.n*(lcm/f2.d));
 
 }  // end ESMC_Fraction::operator!=
@@ -631,7 +631,7 @@
     if (f1.w != f2.w) return(f1.w < f2.w);
     else { // must look at fractional part
       // put both fractions on the same denominator, then compare
-      ESMF_KIND_I4 lcm = ESMC_FractionLCM(f1.d, f2.d);
+      ESMC_I4 lcm = ESMC_FractionLCM(f1.d, f2.d);
       return(f1.n*(lcm/f1.d) < f2.n*(lcm/f2.d));
     }
 
@@ -672,7 +672,7 @@
     if (f1.w != f2.w) return(f1.w > f2.w);
     else { // must look at fractional part
       // put both fractions on the same denominator, then compare
-      ESMF_KIND_I4 lcm = ESMC_FractionLCM(f1.d, f2.d);
+      ESMC_I4 lcm = ESMC_FractionLCM(f1.d, f2.d);
       return(f1.n*(lcm/f1.d) > f2.n*(lcm/f2.d));
     }
 
@@ -882,7 +882,7 @@
 //    ESMC_Fraction result
 //
 // !ARGUMENTS:
-      ESMF_KIND_I4 multiplier) const {   // in - integer multiplier
+      ESMC_I4 multiplier) const {   // in - integer multiplier
 //
 // !DESCRIPTION:
 //      Multiply current object's (this) {\tt ESMC\_Fraction} with given
@@ -921,7 +921,7 @@
 //    ESMC_Fraction& result
 //
 // !ARGUMENTS:
-      ESMF_KIND_I4 multiplier) {   // in - integer multiplier
+      ESMC_I4 multiplier) {   // in - integer multiplier
 //
 // !DESCRIPTION:
 //      Multiply current object's (this) {\tt ESMC\_Fraction} with given
@@ -950,7 +950,7 @@
 //    ESMC_Fraction result
 //
 // !ARGUMENTS:
-      ESMF_KIND_I4 divisor) const {   // in - integer divisor
+      ESMC_I4 divisor) const {   // in - integer divisor
 //
 // !DESCRIPTION:
 //      Divide current object's (this) {\tt ESMC\_Fraction} with given
@@ -969,8 +969,8 @@
     }
 
     ESMC_Fraction quotient;
-    ESMF_KIND_I4 remainder;
-    ESMF_KIND_I8 denominator;
+    ESMC_I4 remainder;
+    ESMC_I8 denominator;
 
     // fractional part division.  don't just blindly multiply denominator;
     //   avoid overflow, especially with large denominators such as
@@ -982,10 +982,10 @@
     // check remainder and add back
     if ((remainder = n % divisor) != 0) {
       // upper bounds check of (d * divisor)
-      ESMF_KIND_I8 d_i8 = d;              // TODO: ensures correct
-      ESMF_KIND_I8 divisor_i8 = divisor;  //         cast on
+      ESMC_I8 d_i8 = d;              // TODO: ensures correct
+      ESMC_I8 divisor_i8 = divisor;  //         cast on
       denominator = d_i8 * divisor_i8;    //           Cray X1 !
-      //denominator = (ESMF_KIND_I8) d * (ESMF_KIND_I8) divisor; // must do it!
+      //denominator = (ESMC_I8) d * (ESMC_I8) divisor; // must do it!
 
       if (denominator < INT_MIN || denominator > INT_MAX) {
         char logMsg[ESMF_MAXSTR];
@@ -1023,7 +1023,7 @@
 //    ESMC_Fraction& result
 //
 // !ARGUMENTS:
-      ESMF_KIND_I4 divisor) {   // in - integer divisor
+      ESMC_I4 divisor) {   // in - integer divisor
 //
 // !DESCRIPTION:
 //      Divide current object's (this) {\tt ESMC\_Fraction} with given
@@ -1046,10 +1046,10 @@
 // !IROUTINE:  ESMC_Fraction(/) - Divide two fractions, return double precision result
 //
 // !INTERFACE:
-      ESMF_KIND_R8 ESMC_Fraction::operator/(
+      ESMC_R8 ESMC_Fraction::operator/(
 //
 // !RETURN VALUE:
-//    ESMF_KIND_R8 result
+//    ESMC_R8 result
 //
 // !ARGUMENTS:
       const ESMC_Fraction &fraction) const {  // in - ESMC_Fraction
@@ -1072,9 +1072,9 @@
       return(ESMF_FAILURE);
     }
 
-    ESMF_KIND_R8 quotient = 
-      (w + (ESMF_KIND_R8) n / (ESMF_KIND_R8) d) /
-        (fraction.w + (ESMF_KIND_R8) fraction.n / (ESMF_KIND_R8) fraction.d);
+    ESMC_R8 quotient = 
+      (w + (ESMC_R8) n / (ESMC_R8) d) /
+        (fraction.w + (ESMC_R8) fraction.n / (ESMC_R8) fraction.d);
 
     return(quotient);
 
@@ -1121,7 +1121,7 @@
         return(ESMF_FAILURE);
       }
 
-      ESMF_KIND_I4 lcm = ESMC_FractionLCM(d, fraction.d);
+      ESMC_I4 lcm = ESMC_FractionLCM(d, fraction.d);
 
       // convert *this fraction and given fraction into improper form with a 
       // common denominator and then compute remainder
@@ -1300,9 +1300,9 @@
 //    none
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 w,   // Integer (whole) seconds (signed)
-      ESMF_KIND_I4 n,   // Integer fraction (exact) n/d; numerator (signed)
-      ESMF_KIND_I4 d) { // Integer fraction (exact) n/d; denominator
+      ESMC_I8 w,   // Integer (whole) seconds (signed)
+      ESMC_I4 n,   // Integer fraction (exact) n/d; numerator (signed)
+      ESMC_I4 d) { // Integer fraction (exact) n/d; denominator
 
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_Fraction} with given values

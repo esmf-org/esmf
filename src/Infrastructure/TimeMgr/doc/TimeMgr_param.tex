@@ -1,4 +1,4 @@
-% $Id: TimeMgr_param.tex,v 1.4 2003/09/04 18:57:56 cdeluca Exp $
+% $Id: TimeMgr_param.tex,v 1.5 2007/02/16 03:25:33 rosalind Exp $
 
 Platform-independent specification of 64-bit integers are done via
 compile-time constants in the F90 and C++ {\tt ESMF\_Base} classes as follows:
@@ -12,7 +12,7 @@ from ESMF_Base.F90:
         .
         .
         integer, parameter :: &
-                     ESMF_KIND_I8 = selected_int_kind(18), ! 18 decimal digits
+                     ESMC_I8 = selected_int_kind(18), ! 18 decimal digits
         .
         .
         .
@@ -29,7 +29,7 @@ from ESMC_Base.h:
 .
 .
 .
-  typedef long long ESMF_KIND_I8;
+  typedef long long ESMC_I8;
 .
 .
 .
@@ -37,7 +37,7 @@ from ESMC_Base.h:
 .
 .
 .
-  typedef long      ESMF_KIND_I8;
+  typedef long      ESMC_I8;
 .
 .
 .

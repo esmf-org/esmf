@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.38 2006/11/16 05:21:19 cdeluca Exp $
+// $Id: ESMC_Clock_F.C,v 1.39 2007/02/16 03:25:33 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ extern "C" {
                                  int *runTimeStepCount,
                                  ESMC_Time *refTime,
                                  ESMC_Time *currTime,
-                                 ESMF_KIND_I8 *advanceCount,
+                                 ESMC_I8 *advanceCount,
                                  ESMC_Direction *direction,
                                  int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
@@ -108,7 +108,7 @@ extern "C" {
                                  ESMC_Time *startTime,
                                  ESMC_Time *stopTime,
                                  ESMC_TimeInterval *runDuration,
-                                 ESMF_KIND_R8 *runTimeStepCount,
+                                 ESMC_R8 *runTimeStepCount,
                                  ESMC_Time *refTime,
                                  ESMC_Time *currTime,
                                  ESMC_Time *prevTime,
@@ -117,7 +117,7 @@ extern "C" {
                                  ESMC_Calendar **calendar, 
                                  ESMC_CalendarType *calendarType, 
                                  int *timeZone,
-                                 ESMF_KIND_I8 *advanceCount,
+                                 ESMC_I8 *advanceCount,
                                  int *alarmCount,
                                  ESMC_Direction *direction,
                                  int *status) {
