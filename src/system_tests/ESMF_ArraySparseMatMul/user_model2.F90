@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.3 2007/01/18 18:11:47 theurich Exp $
+! $Id: user_model2.F90,v 1.4 2007/02/16 04:50:43 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -76,6 +76,7 @@ module user_model2
     type(ESMF_Array)      :: array
     type(ESMF_VM)         :: vm
     integer               :: petCount, status
+    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
     
     ! Determine petCount
     call ESMF_GridCompGet(comp, vm=vm, rc=status)
@@ -83,7 +84,7 @@ module user_model2
     call ESMF_VMGet(vm, petCount=petCount, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 10
     
-    ! Create the source Array and add it to the import State
+    ! Create the destination Array and add it to the import State
     call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, &
       rank=2, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 10
@@ -98,7 +99,10 @@ module user_model2
     call ESMF_StateAddArray(importState, array, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 10
    
-    rc = ESMF_SUCCESS
+    ! Reset the destination Array
+    call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=status)
+    farrayPtr = 0.d0
+
     return
     
     ! get here only on error exit
