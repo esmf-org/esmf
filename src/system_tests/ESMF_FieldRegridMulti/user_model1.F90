@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.26 2007/02/16 05:27:52 rosalind Exp $
+! $Id: user_model1.F90,v 1.27 2007/02/19 23:44:47 rosalind Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -147,7 +147,7 @@
 
         ! Set up a 3D real array
         call ESMF_ArraySpecSet(arrayspec, rank=3, type=ESMF_DATA_REAL, &
-                                kind=ESMF_R8)
+                                kind=ESMF_TYPEKIND_R8)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set up a datamap to tell the framework which of the 2 axes

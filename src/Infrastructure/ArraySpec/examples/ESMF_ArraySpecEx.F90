@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpecEx.F90,v 1.4 2007/02/16 05:27:41 rosalind Exp $
+! $Id: ESMF_ArraySpecEx.F90,v 1.5 2007/02/19 23:44:40 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@
 
 !BOC
       call ESMF_ArraySpecSet(arrayDS, rank=2, type=ESMF_DATA_REAL, &
-                             kind=ESMF_R8, rc=rc)
+                             kind=ESMF_TYPEKIND_R8, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

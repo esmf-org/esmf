@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.39 2007/02/16 05:27:48 rosalind Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.40 2007/02/19 23:44:45 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -162,15 +162,15 @@
       ! these work well for internal ESMF use, arguments, etc
       type(ESMF_TypeKind), parameter :: &
 #ifndef ESMF_NO_INTEGER_1_BYTE 
-                   ESMF_I1 = ESMF_TypeKind(1), &
+                   ESMF_TYPEKIND_I1 = ESMF_TypeKind(1), &
 #endif
 #ifndef ESMF_NO_INTEGER_2_BYTE 
-                   ESMF_I2 = ESMF_TypeKind(2), &
+                   ESMF_TYPEKIND_I2 = ESMF_TypeKind(2), &
 #endif
-                   ESMF_I4 = ESMF_TypeKind(3), &
-                   ESMF_I8 = ESMF_TypeKind(4), &
-                   ESMF_R4 = ESMF_TypeKind(5), &
-                   ESMF_R8 = ESMF_TypeKind(6), &
+                   ESMF_TYPEKIND_I4 = ESMF_TypeKind(3), &
+                   ESMF_TYPEKIND_I8 = ESMF_TypeKind(4), &
+                   ESMF_TYPEKIND_R4 = ESMF_TypeKind(5), &
+                   ESMF_TYPEKIND_R8 = ESMF_TypeKind(6), &
                    ESMF_C8 = ESMF_TypeKind(7), &
                    ESMF_C16 = ESMF_TypeKind(8), &
                    ESMF_NOKIND = ESMF_TypeKind(99)
@@ -493,14 +493,14 @@
              ESMF_DATA_LOGICAL, ESMF_DATA_CHARACTER, ESMF_DATA_COMPLEX
 
 #ifndef ESMF_NO_INTEGER_1_BYTE 
-      public ESMF_I1
+      public ESMF_TYPEKIND_I1
 #endif
 #ifndef ESMF_NO_INTEGER_2_BYTE 
-      public ESMF_I2
+      public ESMF_TYPEKIND_I2
 #endif
 
-      public ESMF_I4, ESMF_I8, & 
-             ESMF_R4, ESMF_R8, ESMF_C8, ESMF_C16, ESMF_NOKIND
+      public ESMF_TYPEKIND_I4, ESMF_TYPEKIND_I8, & 
+             ESMF_TYPEKIND_R4, ESMF_TYPEKIND_R8, ESMF_C8, ESMF_C16, ESMF_NOKIND
 
 #ifndef ESMF_NO_INTEGER_1_BYTE 
       public ESMF_KIND_I1

@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.8 2006/03/28 21:52:36 theurich Exp $
+! $Id: FlowArraysMod.F90,v 1.9 2007/02/19 23:44:48 rosalind Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -111,7 +111,7 @@
 !     and kind ESMF\_KIND\_R4:
 !\begin{verbatim}
       call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
-                              kind=ESMF_R4)
+                              kind=ESMF_TYPEKIND_R4)
 !\end{verbatim}
 !     Next, create a Field named "SIE" using the ArraySpec with a relative
 !     location (relloc) at the cell centers:

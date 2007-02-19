@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.17 2007/02/16 05:27:42 rosalind Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.18 2007/02/19 23:44:40 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -90,7 +90,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.17 2007/02/16 05:27:42 rosalind Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.18 2007/02/19 23:44:40 rosalind Exp $'
 
 !==============================================================================
 !
@@ -338,20 +338,20 @@ module ESMF_ArraySpecMod
     arrayspec%kind = typekind
     select case (typekind%dkind)
 #ifndef ESMF_NO_INTEGER_1_BYTE 
-    case (ESMF_I1%dkind)
+    case (ESMF_TYPEKIND_I1%dkind)
       arrayspec%type = ESMF_DATA_INTEGER
 #endif
 #ifndef ESMF_NO_INTEGER_2_BYTE 
-    case (ESMF_I2%dkind)
+    case (ESMF_TYPEKIND_I2%dkind)
       arrayspec%type = ESMF_DATA_INTEGER
 #endif
-    case (ESMF_I4%dkind)
+    case (ESMF_TYPEKIND_I4%dkind)
       arrayspec%type = ESMF_DATA_INTEGER
-    case (ESMF_I8%dkind)
+    case (ESMF_TYPEKIND_I8%dkind)
       arrayspec%type = ESMF_DATA_INTEGER
-    case (ESMF_R4%dkind)
+    case (ESMF_TYPEKIND_R4%dkind)
       arrayspec%type = ESMF_DATA_REAL
-    case (ESMF_R8%dkind)
+    case (ESMF_TYPEKIND_R8%dkind)
       arrayspec%type = ESMF_DATA_REAL
     case (ESMF_C8%dkind)
       arrayspec%type = ESMF_DATA_COMPLEX

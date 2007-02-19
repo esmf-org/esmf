@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.96 2007/02/13 19:37:18 theurich Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.97 2007/02/19 23:44:42 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.96 2007/02/13 19:37:18 theurich Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.97 2007/02/19 23:44:42 rosalind Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -347,7 +347,7 @@
       ! and an optional I/O specification. In this case a field will 
       ! allocate its own data. The grid passed into the argument list 
       ! is referenced and not copied.
-      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc=rc)
+      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_TYPEKIND_R4, rc=rc)
       write(name, *) "Creating an ArraySpec Test "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -371,7 +371,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! verify we can create a 3d data on a 2d grid
-      call ESMF_ArraySpecSet(arrayspec, 3, ESMF_DATA_REAL, ESMF_R4, rc=rc)
+      call ESMF_ArraySpecSet(arrayspec, 3, ESMF_DATA_REAL, ESMF_TYPEKIND_R4, rc=rc)
       f2 = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                           name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -384,7 +384,7 @@
       ! Fields may be created as in FLD1.1.1 with a data array passed into 
       ! the argument list. The data array is referenced and not copied.
       ! Verifing that a Field can be created with a Grid and DataMap
-      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc=rc)
+      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_TYPEKIND_R4, rc=rc)
       call ESMF_FieldDataMapSetDefault(dm, ESMF_INDEX_IJ)
       f3 = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_ALLOC, &
                         horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
@@ -417,7 +417,7 @@
       ! try rank 1,2,3 :-)
       !TODO: with the removal of the old Array class (now called InternArray)
       !TODO: this test really does not work. 
-      ! call ESMF_ArraySpecSet(arrayspec, 1, ESMF_DATA_REAL, ESMF_R4, rc=rc)
+      ! call ESMF_ArraySpecSet(arrayspec, 1, ESMF_DATA_REAL, ESMF_TYPEKIND_R4, rc=rc)
 !      f6 = ESMF_FieldCreate(grid4, arrayspec, allocflag=ESMF_ALLOC, &
 !                        horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
 !                        haloWidth=2, datamap=dm, name="Field 1", iospec=ios, rc=rc)
@@ -496,7 +496,7 @@
       ! A field shall be able to return a reference to its grid.
       ! f3 gets created here and used thru the rest of the tests.
       gname="oceangrid"
-      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc=rc)
+      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_TYPEKIND_R4, rc=rc)
       f3 = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_ALLOC, &
                         horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
                         haloWidth=1, datamap=dm, name="Field 0", iospec=ios, rc=rc)
@@ -540,7 +540,7 @@
       !E-X_UTest
       ! TODO: this fails.
       ! Create a Field with 3D grid and 3D data array, vertex centered in vert
-      !call ESMF_ArraySpecSet(arrayspec, 3, ESMF_DATA_REAL, ESMF_R4, rc=rc)
+      !call ESMF_ArraySpecSet(arrayspec, 3, ESMF_DATA_REAL, ESMF_TYPEKIND_R4, rc=rc)
       !f7 = ESMF_FieldCreate(grid5, arrayspec, ESMF_ALLOC, ESMF_CELL_CENTER, &
       !                      ESMF_CELL_VERTEX, 3, name="Field 7", rc=rc)
       !write(failMsg, *) ""
@@ -550,7 +550,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Create a Field with 3D grid and 3D data array, cell centered
-      call ESMF_ArraySpecSet(arrayspec, 3, ESMF_DATA_REAL, ESMF_R4, rc=rc)
+      call ESMF_ArraySpecSet(arrayspec, 3, ESMF_DATA_REAL, ESMF_TYPEKIND_R4, rc=rc)
       f7 = ESMF_FieldCreate(grid5, arrayspec, ESMF_ALLOC, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 3, name="Field 7", rc=rc)
       write(failMsg, *) ""
@@ -563,7 +563,7 @@
       ! fails in field validate when the grid is queried for the
       ! number of counts in the local decomposition.
       ! Create a Field with 3D grid and 3D data array
-!      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc=rc)
+!      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_TYPEKIND_R4, rc=rc)
 !      f7 = ESMF_FieldCreate(grid5, arrayspec, ESMF_ALLOC, ESMF_CELL_CENTER, &
 !                            ESMF_CELL_VERTEX, 3, name="Field 7", rc=rc)
 !      write(failMsg, *) ""

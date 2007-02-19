@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayUTest.F90,v 1.7 2007/02/16 05:27:45 rosalind Exp $
+! $Id: ESMF_InternArrayUTest.F90,v 1.8 2007/02/19 23:44:44 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayUTest.F90,v 1.7 2007/02/16 05:27:45 rosalind Exp $'
+      '$Id: ESMF_InternArrayUTest.F90,v 1.8 2007/02/19 23:44:44 rosalind Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -427,7 +427,7 @@
     !EX_UTest
     write(failMsg, *) "Attribute datakind is wrong" 
     write(name, *) "Verify Attribute datakind from an Array Test"
-    call ESMF_Test((att_datakind.eq.ESMF_I4), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((att_datakind.eq.ESMF_TYPEKIND_I4), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
 !  !  Verify count of Attribute
@@ -490,7 +490,7 @@
     !EX_UTest
     write(failMsg, *) "Attribute datakind is wrong" 
     write(name, *) "Verify Attribute datakind from an Array Test"
-    call ESMF_Test((att_datakind.eq.ESMF_R4), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((att_datakind.eq.ESMF_TYPEKIND_R4), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
 !  !  Verify count of Attribute
@@ -528,7 +528,7 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Create ArraySpec for use in ArrayCreate"
     call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
-                             kind=ESMF_R8, rc=rc)
+                             kind=ESMF_TYPEKIND_R8, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------

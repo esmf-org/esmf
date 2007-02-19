@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayGetEx.F90,v 1.4 2007/02/16 05:27:45 rosalind Exp $
+! $Id: ESMF_InternArrayGetEx.F90,v 1.5 2007/02/19 23:44:43 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -166,7 +166,7 @@
 
     arank = 2
     atype = ESMF_DATA_REAL
-    akind = ESMF_R8
+    akind = ESMF_TYPEKIND_R8
 
     call ESMF_ArraySpecSet(arrayspec, arank, atype, akind)
     array2 = ESMF_ArrayCreate(arrayspec, (/10, 20 /), rc=rc)

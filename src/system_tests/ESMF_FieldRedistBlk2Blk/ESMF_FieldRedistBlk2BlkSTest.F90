@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.3 2007/02/13 20:22:50 theurich Exp $
+! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.4 2007/02/19 23:44:47 rosalind Exp $
 !
 ! System test FieldRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -138,10 +138,10 @@
 
      ! Set up a 2D (distributed Field) and a 2D real array
      call ESMF_ArraySpecSet(arrayspec1, rank=2, type=ESMF_DATA_REAL, &
-                            kind=ESMF_R8)
+                            kind=ESMF_TYPEKIND_R8)
      if (status .ne. ESMF_SUCCESS) goto 20
      call ESMF_ArraySpecSet(arrayspec2, rank=2, type=ESMF_DATA_REAL, &
-                            kind=ESMF_R8)
+                            kind=ESMF_TYPEKIND_R8)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Create the field and have it create the array internally for each grid

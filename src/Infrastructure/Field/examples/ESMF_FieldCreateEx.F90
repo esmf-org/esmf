@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.37 2006/12/11 23:40:02 oehmke Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.38 2007/02/19 23:44:41 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !   !  Field create call allocates the appropriate memory for it. 
 
 !BOC
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc)
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_TYPEKIND_R4, rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC

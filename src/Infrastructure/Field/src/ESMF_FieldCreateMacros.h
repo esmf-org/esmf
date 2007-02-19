@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.13 2006/12/07 05:31:19 samsoncheung Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.14 2007/02/19 23:44:41 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -305,7 +305,7 @@
         endif @\
  @\
         ! Get rank, type, kind from ptr and initialize arrayspec @\
-        call ESMF_ArraySpecSet(arrayspec, mrank, ESMF_##mtypekind, status) @\
+        call ESMF_ArraySpecSet(arrayspec, mrank, ESMF_TYPEKIND_##mtypekind, status) @\
  @\
         allocate(ftype, stat=status) @\
         if (ESMF_LogMsgFoundAllocError(status, & @\

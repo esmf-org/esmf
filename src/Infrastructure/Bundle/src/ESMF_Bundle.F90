@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.98 2007/02/16 05:27:42 rosalind Exp $
+! $Id: ESMF_Bundle.F90,v 1.99 2007/02/19 23:44:40 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -1642,7 +1642,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_I4, 1, &
+                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I4, 1, &
                                     value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1714,7 +1714,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_I4, count, &
+                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I4, count, &
                                     valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1774,7 +1774,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_I8, 1, &
+                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I8, 1, &
                                     value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1846,7 +1846,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_I8, count, &
+                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I8, count, &
                                     valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1905,7 +1905,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, ESMF_R4, 1, value, status)
+                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R4, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1976,7 +1976,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, ESMF_R4, count, &
+                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R4, count, &
                                     valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2035,7 +2035,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, ESMF_R8, 1, value, status)
+                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R8, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -2106,7 +2106,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, ESMF_R8, count, &
+                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R8, count, &
                                     valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3610,7 +3610,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_I4, 1, &
+                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I4, 1, &
                                     value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3683,7 +3683,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_I4, count, &
+                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I4, count, &
                                     valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3744,7 +3744,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_I8, 1, &
+                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I8, 1, &
                                     value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3817,7 +3817,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_I8, count, &
+                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I8, count, &
                                     valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3878,7 +3878,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, ESMF_R4, 1, &
+                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R4, 1, &
                                     value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3939,7 +3939,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, ESMF_R8, 1, &
+                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R8, 1, &
                                     value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4012,7 +4012,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, ESMF_R4, count, &
+                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R4, count, &
                                     valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4085,7 +4085,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, ESMF_R8, count, &
+                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R8, count, &
                                     valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridEx.F90,v 1.9 2006/11/16 05:21:14 cdeluca Exp $
+! $Id: ESMF_RegridEx.F90,v 1.10 2007/02/19 23:44:44 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -88,7 +88,7 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_TYPEKIND_R8, rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     

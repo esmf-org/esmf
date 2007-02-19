@@ -1,4 +1,4 @@
-! $Id: ArraysGlobalMod.F90,v 1.9 2007/02/16 05:27:52 rosalind Exp $
+! $Id: ArraysGlobalMod.F90,v 1.10 2007/02/19 23:44:48 rosalind Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -87,7 +87,7 @@
 !
       halo_width = 1
       call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
-                              kind=ESMF_R4)
+                              kind=ESMF_TYPEKIND_R4)
 
       field_sie  = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=halo_width, name="SIE", rc=status)

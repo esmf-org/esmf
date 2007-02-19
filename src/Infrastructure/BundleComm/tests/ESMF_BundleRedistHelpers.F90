@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.17 2007/02/16 05:27:43 rosalind Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.18 2007/02/19 23:44:41 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -249,11 +249,11 @@ subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
     if (present(dim5)) dimf5 = dim5
 
     ! set default data type/size
-    dkindf1 = ESMF_R8
-    dkindf2 = ESMF_R8
-    dkindf3 = ESMF_R8
-    dkindf4 = ESMF_R8
-    dkindf5 = ESMF_R8
+    dkindf1 = ESMF_TYPEKIND_R8
+    dkindf2 = ESMF_TYPEKIND_R8
+    dkindf3 = ESMF_TYPEKIND_R8
+    dkindf4 = ESMF_TYPEKIND_R8
+    dkindf5 = ESMF_TYPEKIND_R8
     dtypef1 = ESMF_DATA_REAL
     dtypef2 = ESMF_DATA_REAL
     dtypef3 = ESMF_DATA_REAL
@@ -543,7 +543,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
     select case (rank)
       case (2)
         select case (kind)
-          case (ESMF_R8%dkind)
+          case (ESMF_TYPEKIND_R8%dkind)
             if (.not.present(r8val)) then
                 print *, "Error: data value does not match Field data type (R8)"
                 return
@@ -554,7 +554,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
 
             ptr2dr8(:,:) = r8val
 
-          case (ESMF_R4%dkind)
+          case (ESMF_TYPEKIND_R4%dkind)
             if (.not.present(r4val)) then
                 print *, "Error: data value does not match Field data type (R4)"
                 return
@@ -565,7 +565,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
 
             ptr2dr4(:,:) = r4val
 
-          case (ESMF_I8%dkind)
+          case (ESMF_TYPEKIND_I8%dkind)
             if (.not.present(i8val)) then
                 print *, "Error: data value does not match Field data type (I8)"
                 return
@@ -576,7 +576,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
 
             ptr2di8(:,:) = i8val
 
-          case (ESMF_I4%dkind)
+          case (ESMF_TYPEKIND_I4%dkind)
             if (.not.present(i4val)) then
                 print *, "Error: data value does not match Field data type (I4)"
                 return
@@ -594,7 +594,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
 
       case (3)
         select case (kind)
-          case (ESMF_R8%dkind)
+          case (ESMF_TYPEKIND_R8%dkind)
             if (.not.present(r8val)) then
                 print *, "Error: data value does not match Field data type (R8)"
                 return
@@ -605,7 +605,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
 
             ptr3dr8(:,:,:) = r8val
 
-          case (ESMF_R4%dkind)
+          case (ESMF_TYPEKIND_R4%dkind)
             if (.not.present(r4val)) then
                 print *, "Error: data value does not match Field data type (R4)"
                 return
@@ -616,7 +616,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
 
             ptr3dr4(:,:,:) = r4val
 
-          case (ESMF_I8%dkind)
+          case (ESMF_TYPEKIND_I8%dkind)
             if (.not.present(i8val)) then
                 print *, "Error: data value does not match Field data type (I8)"
                 return
@@ -627,7 +627,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
 
             ptr3di8(:,:,:) = i8val
 
-          case (ESMF_I4%dkind)
+          case (ESMF_TYPEKIND_I4%dkind)
             if (.not.present(i4val)) then
                 print *, "Error: data value does not match Field data type (I4)"
                 return
@@ -645,7 +645,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
 
       case (4)
         select case (kind)
-          case (ESMF_R8%dkind)
+          case (ESMF_TYPEKIND_R8%dkind)
             if (.not.present(r8val)) then
                 print *, "Error: data value does not match Field data type (R8)"
                 return
@@ -656,7 +656,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
 
             ptr4dr8(:,:,:,:) = r8val
 
-          case (ESMF_R4%dkind)
+          case (ESMF_TYPEKIND_R4%dkind)
             if (.not.present(r4val)) then
                 print *, "Error: data value does not match Field data type (R4)"
                 return
@@ -667,7 +667,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
 
             ptr4dr4(:,:,:,:) = r4val
 
-          case (ESMF_I8%dkind)
+          case (ESMF_TYPEKIND_I8%dkind)
             if (.not.present(i8val)) then
                 print *, "Error: data value does not match Field data type (I8)"
                 return
@@ -678,7 +678,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
 
             ptr4di8(:,:,:,:) = i8val
 
-          case (ESMF_I4%dkind)
+          case (ESMF_TYPEKIND_I4%dkind)
             if (.not.present(i4val)) then
                 print *, "Error: data value does not match Field data type (I4)"
                 return
@@ -697,7 +697,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
 #ifndef ESMF_NO_GREATER_THAN_4D
       case (5)
         select case (kind)
-          case (ESMF_R8%dkind)
+          case (ESMF_TYPEKIND_R8%dkind)
             if (.not.present(r8val)) then
                 print *, "Error: data value does not match Field data type (R8)"
                 return
@@ -708,7 +708,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
 
             ptr5dr8(:,:,:,:,:) = r8val
 
-          case (ESMF_R4%dkind)
+          case (ESMF_TYPEKIND_R4%dkind)
             if (.not.present(r4val)) then
                 print *, "Error: data value does not match Field data type (R4)"
                 return
@@ -719,7 +719,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
 
             ptr5dr4(:,:,:,:,:) = r4val
 
-          case (ESMF_I8%dkind)
+          case (ESMF_TYPEKIND_I8%dkind)
             if (.not.present(i8val)) then
                 print *, "Error: data value does not match Field data type (I8)"
                 return
@@ -730,7 +730,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
 
             ptr5di8(:,:,:,:,:) = i8val
 
-          case (ESMF_I4%dkind)
+          case (ESMF_TYPEKIND_I4%dkind)
             if (.not.present(i4val)) then
                 print *, "Error: data value does not match Field data type (I4)"
                 return
@@ -1054,7 +1054,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
     select case (rank)
       case (2)
         select case (kind)
-          case (ESMF_R8%dkind)
+          case (ESMF_TYPEKIND_R8%dkind)
             if (.not.present(r8val)) then
                 print *, "Error: data value does not match Field data type (R8)"
                 return
@@ -1079,7 +1079,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
               enddo
             enddo
 
-          case (ESMF_R4%dkind)
+          case (ESMF_TYPEKIND_R4%dkind)
             if (.not.present(r4val)) then
                 print *, "Error: data value does not match Field data type (R4)"
                 return
@@ -1104,7 +1104,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
               enddo
             enddo
 
-          case (ESMF_I8%dkind)
+          case (ESMF_TYPEKIND_I8%dkind)
             if (.not.present(i8val)) then
                 print *, "Error: data value does not match Field data type (I8)"
                 return
@@ -1129,7 +1129,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
               enddo
             enddo
 
-          case (ESMF_I4%dkind)
+          case (ESMF_TYPEKIND_I4%dkind)
             if (.not.present(i4val)) then
                 print *, "Error: data value does not match Field data type (I4)"
                 return
@@ -1162,7 +1162,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
 
       case (3)
         select case (kind)
-          case (ESMF_R8%dkind)
+          case (ESMF_TYPEKIND_R8%dkind)
             if (.not.present(r8val)) then
                 print *, "Error: data value does not match Field data type (R8)"
                 return
@@ -1189,7 +1189,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
               enddo
             enddo
 
-          case (ESMF_R4%dkind)
+          case (ESMF_TYPEKIND_R4%dkind)
             if (.not.present(r4val)) then
                 print *, "Error: data value does not match Field data type (R4)"
                 return
@@ -1216,7 +1216,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
               enddo
             enddo
 
-          case (ESMF_I8%dkind)
+          case (ESMF_TYPEKIND_I8%dkind)
             if (.not.present(i8val)) then
                 print *, "Error: data value does not match Field data type (I8)"
                 return
@@ -1243,7 +1243,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
               enddo
             enddo
   
-          case (ESMF_I4%dkind)
+          case (ESMF_TYPEKIND_I4%dkind)
             if (.not.present(i4val)) then
                 print *, "Error: data value does not match Field data type (I4)"
                 return
@@ -1278,7 +1278,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
 
       case (4)
         select case (kind)
-          case (ESMF_R8%dkind)
+          case (ESMF_TYPEKIND_R8%dkind)
             if (.not.present(r8val)) then
                 print *, "Error: data value does not match Field data type (R8)"
                 return
@@ -1307,7 +1307,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
               enddo
             enddo
 
-          case (ESMF_R4%dkind)
+          case (ESMF_TYPEKIND_R4%dkind)
             if (.not.present(r4val)) then
                 print *, "Error: data value does not match Field data type (R4)"
                 return
@@ -1336,7 +1336,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
               enddo
             enddo
 
-          case (ESMF_I8%dkind)
+          case (ESMF_TYPEKIND_I8%dkind)
             if (.not.present(i8val)) then
                 print *, "Error: data value does not match Field data type (I8)"
                 return
@@ -1365,7 +1365,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
               enddo
             enddo
   
-          case (ESMF_I4%dkind)
+          case (ESMF_TYPEKIND_I4%dkind)
             if (.not.present(i4val)) then
                 print *, "Error: data value does not match Field data type (I4)"
                 return
@@ -1403,7 +1403,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
 #ifndef ESMF_NO_GREATER_THAN_4D
       case (5)
         select case (kind)
-          case (ESMF_R8%dkind)
+          case (ESMF_TYPEKIND_R8%dkind)
             if (.not.present(r8val)) then
                 print *, "Error: data value does not match Field data type (R8)"
                 return
@@ -1434,7 +1434,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
               enddo
             enddo
 
-          case (ESMF_R4%dkind)
+          case (ESMF_TYPEKIND_R4%dkind)
             if (.not.present(r4val)) then
                 print *, "Error: data value does not match Field data type (R4)"
                 return
@@ -1465,7 +1465,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
               enddo
             enddo
 
-          case (ESMF_I8%dkind)
+          case (ESMF_TYPEKIND_I8%dkind)
             if (.not.present(i8val)) then
                 print *, "Error: data value does not match Field data type (I8)"
                 return
@@ -1496,7 +1496,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
               enddo
             enddo
   
-          case (ESMF_I4%dkind)
+          case (ESMF_TYPEKIND_I4%dkind)
             if (.not.present(i4val)) then
                 print *, "Error: data value does not match Field data type (I4)"
                 return
@@ -2049,10 +2049,10 @@ function CreateDataField(name, grid, layout, relloc, r4value, r8value, rc)
   ! fixed items:  2d array, data type real, halo width of 2.
   if (use_r8) then
       call ESMF_ArraySpecSet(as, rank=2, type=ESMF_DATA_REAL, &
-                             kind=ESMF_R8, rc=status)
+                             kind=ESMF_TYPEKIND_R8, rc=status)
   else
       call ESMF_ArraySpecSet(as, rank=2, type=ESMF_DATA_REAL, &
-                             kind=ESMF_R4, rc=status)
+                             kind=ESMF_TYPEKIND_R4, rc=status)
   endif
   if (ESMF_LogMsgFoundError(status, &
                             ESMF_ERR_PASSTHRU, &

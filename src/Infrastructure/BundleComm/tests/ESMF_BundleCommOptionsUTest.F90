@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.8 2007/02/16 05:27:43 rosalind Exp $
+! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.9 2007/02/19 23:44:41 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.8 2007/02/16 05:27:43 rosalind Exp $'
+      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.9 2007/02/19 23:44:41 rosalind Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -454,10 +454,10 @@ contains
       ! Set up either a 2D or 3D real array
       if (do2d) then
           call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
-                                 kind=ESMF_R8)
+                                 kind=ESMF_TYPEKIND_R8)
       else
           call ESMF_ArraySpecSet(arrayspec, rank=3, type=ESMF_DATA_REAL, &
-                                 kind=ESMF_R8)
+                                 kind=ESMF_TYPEKIND_R8)
       endif
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
@@ -582,10 +582,10 @@ contains
       ! Set up a 2d or 3D real array
       if (do2d) then
           call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
-                                 kind=ESMF_R8)
+                                 kind=ESMF_TYPEKIND_R8)
       else
           call ESMF_ArraySpecSet(arrayspec, rank=3, type=ESMF_DATA_REAL, &
-                                 kind=ESMF_R8)
+                                 kind=ESMF_TYPEKIND_R8)
       endif
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
@@ -719,7 +719,7 @@ contains
 
       ! Set up a 3D real array
       call ESMF_ArraySpecSet(arrayspec, rank=3, type=ESMF_DATA_REAL, &
-                             kind=ESMF_R8)
+                             kind=ESMF_TYPEKIND_R8)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 

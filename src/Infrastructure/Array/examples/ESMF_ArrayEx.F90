@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.8 2006/11/16 05:20:54 cdeluca Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.9 2007/02/19 23:44:39 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -86,7 +86,7 @@ program ESMF_ArrayEx
 ! a 2D Array of double precision real numbers is to be created:
 !EOE
 !BOC
-  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, rank=2, &
+  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_TYPEKIND_R8, rank=2, &
     rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1598,7 +1598,7 @@ program ESMF_ArrayEx
 ! hence requires the following {\tt arrayspec}.
 !EOE  
 !BOC
-  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, rank=1, &
+  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_TYPEKIND_R8, rank=1, &
     rc=rc)
 !EOC
 !BOE
@@ -1623,7 +1623,7 @@ program ESMF_ArrayEx
 ! {\tt arrayspec} must be changed to 3
 !EOE
 !BOC
-  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, rank=3, &
+  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_TYPEKIND_R8, rank=3, &
     rc=rc)
 !EOC
 !BOE
@@ -1687,7 +1687,7 @@ program ESMF_ArrayEx
   call ESMF_DistGridGet(distgrid3D, delayout=delayout, rc=rc) ! get DELayout
   distgrid2D = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/16,16/), &
     regDecomp=(/4,4/), delayout=delayout, rc=rc)
-  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, rank=2, &
+  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_TYPEKIND_R8, rank=2, &
     rc=rc)
   array2D = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid2D, rc=rc)
 !EOC
@@ -1760,7 +1760,7 @@ program ESMF_ArrayEx
 ! extra Array dimension. 
 !EOE
 !BOC
-  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, rank=3, &
+  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_TYPEKIND_R8, rank=3, &
     rc=rc)
 !EOC
 !BOE
@@ -1986,7 +1986,7 @@ program ESMF_ArrayEx
 ! real data the ArraySpec variable must be set correctly.
 !EOEI
 !BOCI
-  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R4, rank=2, &
+  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_TYPEKIND_R4, rank=2, &
     rc=rc)
 !EOCI
 !BOEI

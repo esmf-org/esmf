@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateEx.F90,v 1.33 2006/11/16 05:21:01 cdeluca Exp $
+! $Id: ESMF_GridCreateEx.F90,v 1.34 2007/02/19 23:44:42 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -293,7 +293,7 @@
       ! for a 3D Grid.
       ! Set up 2D Array for the Field
       call ESMF_ArraySpecSet(arrayspec1, rank=2, type=ESMF_DATA_REAL,&
-           kind=ESMF_R8)
+           kind=ESMF_TYPEKIND_R8)
 
       ! Create the Field 
       humidity1 = ESMF_FieldCreate(grid3, arrayspec1, &

@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridTimeUTest.F90,v 1.3 2006/11/16 05:21:15 cdeluca Exp $'
+      '$Id: ESMF_RegridTimeUTest.F90,v 1.4 2007/02/19 23:44:44 rosalind Exp $'
 !------------------------------------------------------------------------------
 
     integer :: lrc,iFunction
@@ -228,7 +228,7 @@
 
    !Specify settings for the field array
    !====================================
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_TYPEKIND_R8, rc)
 
    !Create the field (with halo width of 3)
    !=======================================

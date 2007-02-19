@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.35 2007/02/16 05:27:46 rosalind Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.36 2007/02/19 23:44:44 rosalind Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -654,7 +654,7 @@
     arank = 2
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Initializing an Array Spec of rank 2 Test"
-    call ESMF_ArraySpecSet(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
+    call ESMF_ArraySpecSet(arrayspec, arank, ESMF_DATA_REAL, ESMF_TYPEKIND_R4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     ! set all counts to 1 first, then alter the ones you want to change
@@ -688,14 +688,14 @@
     write(failMsg, *) "kind not correct" 
     write(name, *) "Get Spec kind and verify Test"
     call ESMF_ArraySpecGet(arrayspec, kind=akind, rc=rc)
-    call ESMF_Test((akind.eq.ESMF_R4), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((akind.eq.ESMF_TYPEKIND_R4), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !EX_UTest
     arank = 10
     write(failMsg, *) "Did not return ESMF_FAILURE"
     write(name, *) "Initializing an Array Spec of rank 10 Test"
-    call ESMF_ArraySpecSet(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
+    call ESMF_ArraySpecSet(arrayspec, arank, ESMF_DATA_REAL, ESMF_TYPEKIND_R4, rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
@@ -710,7 +710,7 @@
     arank = 5
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Initializing an Array Spec of rank 5 Test"
-    call ESMF_ArraySpecSet(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
+    call ESMF_ArraySpecSet(arrayspec, arank, ESMF_DATA_REAL, ESMF_TYPEKIND_R4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
@@ -729,7 +729,7 @@
     arank = 4
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Initializing an Array Spec of rank 4 Test"
-    call ESMF_ArraySpecSet(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
+    call ESMF_ArraySpecSet(arrayspec, arank, ESMF_DATA_REAL, ESMF_TYPEKIND_R4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------

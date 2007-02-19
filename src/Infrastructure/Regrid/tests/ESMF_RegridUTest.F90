@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridUTest.F90,v 1.17 2006/11/16 05:21:15 cdeluca Exp $
+! $Id: ESMF_RegridUTest.F90,v 1.18 2007/02/19 23:44:44 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridUTest.F90,v 1.17 2006/11/16 05:21:15 cdeluca Exp $'
+      '$Id: ESMF_RegridUTest.F90,v 1.18 2007/02/19 23:44:44 rosalind Exp $'
 !------------------------------------------------------------------------------
       type(ESMF_VM):: vm
 
@@ -85,7 +85,7 @@
       !NEX_UTest_Multi_Proc_Only
       ! Set up a 2D real arrayspec
       call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
-                             kind=ESMF_R8)
+                             kind=ESMF_TYPEKIND_R8)
       write(failMsg, *) "setting an arrayspec rc =", rc
       write(name, *) "Initializing an ArraySpec"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

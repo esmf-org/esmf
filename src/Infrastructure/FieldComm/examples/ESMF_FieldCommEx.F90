@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.13 2006/11/16 05:20:59 cdeluca Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.14 2007/02/19 23:44:42 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -83,7 +83,7 @@
     call ESMF_GridDistribute(dstgrid, delayout=layout2, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_TYPEKIND_R8, rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! allow for a halo width of 3

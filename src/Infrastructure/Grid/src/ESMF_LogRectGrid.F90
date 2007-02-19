@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.165 2007/02/16 05:27:45 rosalind Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.166 2007/02/19 23:44:43 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.165 2007/02/16 05:27:45 rosalind Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.166 2007/02/19 23:44:43 rosalind Exp $'
 
 !==============================================================================
 !
@@ -6710,7 +6710,7 @@
       enddo
 
       ! create ESMF_Arrays
-      kind = ESMF_R8
+      kind = ESMF_TYPEKIND_R8
       type = ESMF_DATA_REAL
       do i = 1,dimCount
         centerArray(i) = ESMF_InternArrayCreate(dimCount, type, kind, counts, &
@@ -7177,7 +7177,7 @@
       cornerCounts(2) = myCount
 
       ! set up ESMF arrays
-      kind = ESMF_R8
+      kind = ESMF_TYPEKIND_R8
       type = ESMF_DATA_REAL
       do i = 1,dimCount
         centerArray(i) = ESMF_InternArrayCreate(1, type, kind, counts, &
@@ -8122,7 +8122,7 @@
       ! TODO: different subroutines for different dimCount?  or case?
 
       ! create ESMF_Array
-      kind = ESMF_I4
+      kind = ESMF_TYPEKIND_I4
       type = ESMF_DATA_INTEGER
       arrayTemp = ESMF_InternArrayCreate(dimCount, type, kind, counts, &
                                    haloWidth=gridBoundWidth, rc=localrc)
@@ -8227,7 +8227,7 @@
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
 
       ! create ESMF_Array
-      kind = ESMF_I4
+      kind = ESMF_TYPEKIND_I4
       type = ESMF_DATA_INTEGER
       counts(1) = myCount
       arrayTemp = ESMF_InternArrayCreate(1, type, kind, counts, &

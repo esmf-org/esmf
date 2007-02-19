@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.7 2007/02/16 05:27:51 rosalind Exp $
+! $Id: user_model1.F90,v 1.8 2007/02/19 23:44:46 rosalind Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -160,7 +160,7 @@
 
         ! Set up a 2D integer array
         call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
-                                kind=ESMF_I4)
+                                kind=ESMF_TYPEKIND_I4)
 
         ! Create the field and have it create the array internally
         humidity = ESMF_FieldCreate(grid1, arrayspec, relloc=ESMF_CELL_CENTER, &

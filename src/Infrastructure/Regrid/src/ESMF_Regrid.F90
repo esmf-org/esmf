@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.111 2007/02/16 05:27:46 rosalind Exp $
+! $Id: ESMF_Regrid.F90,v 1.112 2007/02/19 23:44:44 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.111 2007/02/16 05:27:46 rosalind Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.112 2007/02/19 23:44:44 rosalind Exp $'
 
 !==============================================================================
 !
@@ -1782,11 +1782,11 @@
       dstArrayList(1) = dstArray
 
       ! Execute the communications call based on datakinds
-      if (dataTypeKind.eq.ESMF_R4) then
+      if (dataTypeKind.eq.ESMF_TYPEKIND_R4) then
         call ESMF_RegridRunR4(srcArrayList, srcDataMap, hasSrcData, &
                               dstArrayList, dstDataMap, hasDstData, &
                               routehandle, routenum, localrc)
-      elseif (dataTypeKind.eq.ESMF_R8) then
+      elseif (dataTypeKind.eq.ESMF_TYPEKIND_R8) then
         call ESMF_RegridRunR8(srcArrayList, srcDataMap, hasSrcData, &
                               dstArrayList, dstDataMap, hasDstData, &
                               routehandle, routenum, localrc)
@@ -1945,11 +1945,13 @@
       ! are the "has data" args required or not?
 
       ! Execute the communications call based on datakinds
-      if (srcTypeKind.eq.ESMF_R4 .AND. dstTypeKind.eq.ESMF_R4) then
+      if (srcTypeKind.eq.ESMF_TYPEKIND_R4 .AND. &
+          dstTypeKind.eq.ESMF_TYPEKIND_R4) then
         call ESMF_RegridRunR4(srcArrayList, srcDataMap, hasSrcData,  &
                               dstArrayList, dstDataMap, hasDstData, &
                               routehandle, routenum, localrc)
-      elseif (srcTypeKind.eq.ESMF_R8 .AND. dstTypeKind.eq.ESMF_R8) then
+      elseif (srcTypeKind.eq.ESMF_TYPEKIND_R8 .AND. &
+              dstTypeKind.eq.ESMF_TYPEKIND_R8) then
         call ESMF_RegridRunR8(srcArrayList, srcDataMap, hasSrcData, &
                               dstArrayList, dstDataMap, hasDstData, &
                               routehandle, routenum, localrc)

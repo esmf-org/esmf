@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.90 2007/02/07 23:35:32 oehmke Exp $
+! $Id: ESMF_Route.F90,v 1.91 2007/02/19 23:44:45 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.90 2007/02/07 23:35:32 oehmke Exp $'
+      '$Id: ESMF_Route.F90,v 1.91 2007/02/19 23:44:45 rosalind Exp $'
 
 !==============================================================================
 !
@@ -2022,15 +2022,15 @@ end subroutine rias
         ! Call C++  code
         if (associated(srcarray)) then
           if (associated(dstarray)) then
-            call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_I4, status)
+            call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_TYPEKIND_I4, status)
           else
-            call c_ESMC_RouteRunNA(route, srcarray, empty, ESMF_I4, status)
+            call c_ESMC_RouteRunNA(route, srcarray, empty, ESMF_TYPEKIND_I4, status)
           endif
         else
           if (associated(dstarray)) then
-            call c_ESMC_RouteRunNA(route, empty, dstarray, ESMF_I4, status)
+            call c_ESMC_RouteRunNA(route, empty, dstarray, ESMF_TYPEKIND_I4, status)
           else
-            call c_ESMC_RouteRunNA(route, empty, empty, ESMF_I4, status)
+            call c_ESMC_RouteRunNA(route, empty, empty, ESMF_TYPEKIND_I4, status)
           endif
         endif
         if (ESMF_LogMsgFoundError(status, &
@@ -2096,15 +2096,15 @@ end subroutine rias
         ! Call C++  code
         if (associated(srcarray)) then
           if (associated(dstarray)) then
-            call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_I4, status)
+            call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_TYPEKIND_I4, status)
           else
-            call c_ESMC_RouteRunNA(route, srcarray, empty, ESMF_I4, status)
+            call c_ESMC_RouteRunNA(route, srcarray, empty, ESMF_TYPEKIND_I4, status)
           endif
         else
           if (associated(dstarray)) then
-            call c_ESMC_RouteRunNA(route, empty, dstarray, ESMF_I4, status)
+            call c_ESMC_RouteRunNA(route, empty, dstarray, ESMF_TYPEKIND_I4, status)
           else
-            call c_ESMC_RouteRunNA(route, empty, empty, ESMF_I4, status)
+            call c_ESMC_RouteRunNA(route, empty, empty, ESMF_TYPEKIND_I4, status)
           endif
         endif
         if (ESMF_LogMsgFoundError(status, &
@@ -2170,15 +2170,15 @@ end subroutine rias
         ! Call C++  code
         if (associated(srcarray)) then
           if (associated(dstarray)) then
-            call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_TYPEKIND_R8, status)
           else
-            call c_ESMC_RouteRunNA(route, srcarray, empty, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, srcarray, empty, ESMF_TYPEKIND_R8, status)
           endif
         else
           if (associated(dstarray)) then
-            call c_ESMC_RouteRunNA(route, empty, dstarray, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, empty, dstarray, ESMF_TYPEKIND_R8, status)
           else
-            call c_ESMC_RouteRunNA(route, empty, empty, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, empty, empty, ESMF_TYPEKIND_R8, status)
           endif
         endif
         if (ESMF_LogMsgFoundError(status, &
@@ -2245,15 +2245,15 @@ end subroutine rias
         ! Call C++  code
         if (associated(srcarray)) then
           if (associated(dstarray)) then
-            call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_TYPEKIND_R8, status)
           else
-            call c_ESMC_RouteRunNA(route, srcarray, empty, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, srcarray, empty, ESMF_TYPEKIND_R8, status)
           endif
         else
           if (associated(dstarray)) then
-            call c_ESMC_RouteRunNA(route, empty, dstarray, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, empty, dstarray, ESMF_TYPEKIND_R8, status)
           else
-            call c_ESMC_RouteRunNA(route, empty, empty, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, empty, empty, ESMF_TYPEKIND_R8, status)
           endif
         endif
         if (ESMF_LogMsgFoundError(status, &
@@ -2319,15 +2319,15 @@ end subroutine rias
         ! Call C++  code
         if (associated(srcarray)) then
           if (associated(dstarray)) then
-            call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_TYPEKIND_R8, status)
           else
-            call c_ESMC_RouteRunNA(route, srcarray, empty, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, srcarray, empty, ESMF_TYPEKIND_R8, status)
           endif
         else
           if (associated(dstarray)) then
-            call c_ESMC_RouteRunNA(route, empty, dstarray, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, empty, dstarray, ESMF_TYPEKIND_R8, status)
           else
-            call c_ESMC_RouteRunNA(route, empty, empty, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, empty, empty, ESMF_TYPEKIND_R8, status)
           endif
         endif
         if (ESMF_LogMsgFoundError(status, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.43 2007/02/16 05:27:40 rosalind Exp $
+! $Id: ESMF_Array.F90,v 1.44 2007/02/19 23:44:40 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -149,7 +149,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.43 2007/02/16 05:27:40 rosalind Exp $'
+      '$Id: ESMF_Array.F90,v 1.44 2007/02/19 23:44:40 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -2657,7 +2657,7 @@ contains
     enddo
     
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayScatter(array, farray(1,1), ESMF_DATA_REAL, ESMF_R8, &
+    call c_ESMC_ArrayScatter(array, farray(1,1), ESMF_DATA_REAL, ESMF_TYPEKIND_R8, &
       2, counts, patch, rootPet, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2739,7 +2739,7 @@ contains
     enddo
     
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayScatter(array, farray(1,1,1), ESMF_DATA_REAL, ESMF_R8, &
+    call c_ESMC_ArrayScatter(array, farray(1,1,1), ESMF_DATA_REAL, ESMF_TYPEKIND_R8, &
       3, counts, patch, rootPet, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3199,7 +3199,7 @@ contains
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayReduceScalarB(array, result, ESMF_R8, reduceflag, &
+!    call c_ESMC_ArrayReduceScalarB(array, result, ESMF_TYPEKIND_R8, reduceflag, &
 !      rootPET, vm, localrc)
 
     ! Use LogErr to handle return code
@@ -3269,7 +3269,7 @@ contains
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayReduceScalarNBRoot(array, result, ESMF_R8, reduceflag, &
+!    call c_ESMC_ArrayReduceScalarNBRoot(array, result, ESMF_TYPEKIND_R8, reduceflag, &
 !      rootPET, commhandle, vm, localrc)
 
     ! Use LogErr to handle return code
@@ -3337,7 +3337,7 @@ contains
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayReduceScalarNB(array, result, ESMF_R8, reduceflag, &
+!    call c_ESMC_ArrayReduceScalarNB(array, result, ESMF_TYPEKIND_R8, reduceflag, &
 !      rootPET, de, vm, localrc)
 
     ! Use LogErr to handle return code

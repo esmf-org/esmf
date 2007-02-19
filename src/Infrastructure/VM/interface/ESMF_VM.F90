@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.82 2006/12/07 23:23:19 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.83 2007/02/19 23:44:45 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -181,7 +181,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.82 2006/12/07 23:23:19 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.83 2007/02/19 23:44:45 rosalind Exp $"
 
 !==============================================================================
 
@@ -528,7 +528,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, ESMF_I4, &
+    call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, ESMF_TYPEKIND_I4, &
       reduceflag, localrc)
 
     ! Use LogErr to handle return code
@@ -631,7 +631,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, ESMF_R4, &
+    call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, ESMF_TYPEKIND_R4, &
       reduceflag, localrc)
 
     ! Use LogErr to handle return code
@@ -734,7 +734,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, ESMF_R8, &
+    call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, ESMF_TYPEKIND_R8, &
       reduceflag, localrc)
 
     ! Use LogErr to handle return code
@@ -1250,7 +1250,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllGatherV(vm, sendData(1), sendCount, &
-      recvData(1), recvCounts(1), recvOffsets(1), ESMF_I4, localrc)
+      recvData(1), recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1357,7 +1357,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllGatherV(vm, sendData(1), sendCount, &
-      recvData(1), recvCounts(1), recvOffsets(1), ESMF_R4, localrc)
+      recvData(1), recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1464,7 +1464,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllGatherV(vm, sendData(1), sendCount, &
-      recvData(1), recvCounts(1), recvOffsets(1), ESMF_R8, localrc)
+      recvData(1), recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1567,7 +1567,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, ESMF_I4, &
+    call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, ESMF_TYPEKIND_I4, &
       reduceflag, localrc)
 
     ! Use LogErr to handle return code
@@ -1671,7 +1671,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, ESMF_R4, &
+    call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, ESMF_TYPEKIND_R4, &
       reduceflag, localrc)
 
     ! Use LogErr to handle return code
@@ -1775,7 +1775,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, ESMF_R8, &
+    call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, ESMF_TYPEKIND_R8, &
       reduceflag, localrc)
 
     ! Use LogErr to handle return code
@@ -1888,7 +1888,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllToAllV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
-      recvData(1), recvCounts(1), recvOffsets(1), ESMF_I4, localrc)
+      recvData(1), recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2000,7 +2000,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllToAllV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
-      recvData(1), recvCounts(1), recvOffsets(1), ESMF_R4, localrc)
+      recvData(1), recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2112,7 +2112,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllToAllV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
-      recvData(1), recvCounts(1), recvOffsets(1), ESMF_R8, localrc)
+      recvData(1), recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3941,7 +3941,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, ESMF_I4, &
+    call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, ESMF_TYPEKIND_I4, &
       reduceflag, root, localrc)
 
     ! Use LogErr to handle return code
@@ -4048,7 +4048,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, ESMF_R4, &
+    call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, ESMF_TYPEKIND_R4, &
       reduceflag, root, localrc)
 
     ! Use LogErr to handle return code
@@ -4155,7 +4155,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, ESMF_R8, &
+    call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, ESMF_TYPEKIND_R8, &
       reduceflag, root, localrc)
 
     ! Use LogErr to handle return code

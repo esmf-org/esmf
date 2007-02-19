@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayCreate.cpp,v 1.6 2007/02/16 05:27:45 rosalind Exp $
+! $Id: ESMF_InternArrayCreate.cpp,v 1.7 2007/02/19 23:44:43 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayCreate.cpp,v 1.6 2007/02/16 05:27:45 rosalind Exp $'
+    '$Id: ESMF_InternArrayCreate.cpp,v 1.7 2007/02/19 23:44:43 rosalind Exp $'
       
 !==============================================================================
 ! 
@@ -569,19 +569,19 @@ DeclarationMacro(ArrayDeallocate)
               case (1)
                 select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-                  case (ESMF_I1%dkind)
+                  case (ESMF_TYPEKIND_I1%dkind)
                     call ESMF_ArrayConstructF90Ptr1DI1(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-                  case (ESMF_I2%dkind)
+                  case (ESMF_TYPEKIND_I2%dkind)
                     call ESMF_ArrayConstructF90Ptr1DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
 ^endif
-                  case (ESMF_I4%dkind)
+                  case (ESMF_TYPEKIND_I4%dkind)
                     call ESMF_ArrayConstructF90Ptr1DI4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
-                  case (ESMF_I8%dkind)
+                  case (ESMF_TYPEKIND_I8%dkind)
                     call ESMF_ArrayConstructF90Ptr1DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
@@ -593,19 +593,19 @@ DeclarationMacro(ArrayDeallocate)
               case (2)
                 select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-                  case (ESMF_I1%dkind)
+                  case (ESMF_TYPEKIND_I1%dkind)
                     call ESMF_ArrayConstructF90Ptr2DI1(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-                  case (ESMF_I2%dkind)
+                  case (ESMF_TYPEKIND_I2%dkind)
                     call ESMF_ArrayConstructF90Ptr2DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
 ^endif
-                  case (ESMF_I4%dkind)
+                  case (ESMF_TYPEKIND_I4%dkind)
                     call ESMF_ArrayConstructF90Ptr2DI4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
-                  case (ESMF_I8%dkind)
+                  case (ESMF_TYPEKIND_I8%dkind)
                     call ESMF_ArrayConstructF90Ptr2DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
@@ -617,19 +617,19 @@ DeclarationMacro(ArrayDeallocate)
               case (3)
                 select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-                  case (ESMF_I1%dkind)
+                  case (ESMF_TYPEKIND_I1%dkind)
                     call ESMF_ArrayConstructF90Ptr3DI1(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-                  case (ESMF_I2%dkind)
+                  case (ESMF_TYPEKIND_I2%dkind)
                     call ESMF_ArrayConstructF90Ptr3DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
 ^endif
-                  case (ESMF_I4%dkind)
+                  case (ESMF_TYPEKIND_I4%dkind)
                     call ESMF_ArrayConstructF90Ptr3DI4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
-                  case (ESMF_I8%dkind)
+                  case (ESMF_TYPEKIND_I8%dkind)
                     call ESMF_ArrayConstructF90Ptr3DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
@@ -641,19 +641,19 @@ DeclarationMacro(ArrayDeallocate)
               case (4)
                 select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-                  case (ESMF_I1%dkind)
+                  case (ESMF_TYPEKIND_I1%dkind)
                     call ESMF_ArrayConstructF90Ptr4DI1(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-                  case (ESMF_I2%dkind)
+                  case (ESMF_TYPEKIND_I2%dkind)
                     call ESMF_ArrayConstructF90Ptr4DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
 ^endif
-                  case (ESMF_I4%dkind)
+                  case (ESMF_TYPEKIND_I4%dkind)
                     call ESMF_ArrayConstructF90Ptr4DI4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
-                  case (ESMF_I8%dkind)
+                  case (ESMF_TYPEKIND_I8%dkind)
                     call ESMF_ArrayConstructF90Ptr4DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
@@ -666,19 +666,19 @@ DeclarationMacro(ArrayDeallocate)
               case (5)
                 select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-                  case (ESMF_I1%dkind)
+                  case (ESMF_TYPEKIND_I1%dkind)
                     call ESMF_ArrayConstructF90Ptr5DI1(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-                  case (ESMF_I2%dkind)
+                  case (ESMF_TYPEKIND_I2%dkind)
                     call ESMF_ArrayConstructF90Ptr5DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
 ^endif
-                  case (ESMF_I4%dkind)
+                  case (ESMF_TYPEKIND_I4%dkind)
                     call ESMF_ArrayConstructF90Ptr5DI4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
-                  case (ESMF_I8%dkind)
+                  case (ESMF_TYPEKIND_I8%dkind)
                     call ESMF_ArrayConstructF90Ptr5DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
@@ -690,19 +690,19 @@ DeclarationMacro(ArrayDeallocate)
               case (6)
                 select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-                  case (ESMF_I1%dkind)
+                  case (ESMF_TYPEKIND_I1%dkind)
                     call ESMF_ArrayConstructF90Ptr6DI1(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-                  case (ESMF_I2%dkind)
+                  case (ESMF_TYPEKIND_I2%dkind)
                     call ESMF_ArrayConstructF90Ptr6DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
 ^endif
-                  case (ESMF_I4%dkind)
+                  case (ESMF_TYPEKIND_I4%dkind)
                     call ESMF_ArrayConstructF90Ptr6DI4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
-                  case (ESMF_I8%dkind)
+                  case (ESMF_TYPEKIND_I8%dkind)
                     call ESMF_ArrayConstructF90Ptr6DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
@@ -714,19 +714,19 @@ DeclarationMacro(ArrayDeallocate)
               case (7)
                 select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-                  case (ESMF_I1%dkind)
+                  case (ESMF_TYPEKIND_I1%dkind)
                     call ESMF_ArrayConstructF90Ptr7DI1(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-                  case (ESMF_I2%dkind)
+                  case (ESMF_TYPEKIND_I2%dkind)
                     call ESMF_ArrayConstructF90Ptr7DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
 ^endif
-                  case (ESMF_I4%dkind)
+                  case (ESMF_TYPEKIND_I4%dkind)
                     call ESMF_ArrayConstructF90Ptr7DI4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
-                  case (ESMF_I8%dkind)
+                  case (ESMF_TYPEKIND_I8%dkind)
                     call ESMF_ArrayConstructF90Ptr7DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
@@ -746,10 +746,10 @@ DeclarationMacro(ArrayDeallocate)
             select case (rank)
               case (1)
                 select case (localkind)
-                  case (ESMF_R4%dkind)
+                  case (ESMF_TYPEKIND_R4%dkind)
                     call ESMF_ArrayConstructF90Ptr1DR4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
-                  case (ESMF_R8%dkind)
+                  case (ESMF_TYPEKIND_R8%dkind)
                     call ESMF_ArrayConstructF90Ptr1DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
@@ -760,10 +760,10 @@ DeclarationMacro(ArrayDeallocate)
     
               case (2)
                 select case (localkind)
-                  case (ESMF_R4%dkind)
+                  case (ESMF_TYPEKIND_R4%dkind)
                     call ESMF_ArrayConstructF90Ptr2DR4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
-                  case (ESMF_R8%dkind)
+                  case (ESMF_TYPEKIND_R8%dkind)
                     call ESMF_ArrayConstructF90Ptr2DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
@@ -774,10 +774,10 @@ DeclarationMacro(ArrayDeallocate)
     
               case (3)
                 select case (localkind)
-                  case (ESMF_R4%dkind)
+                  case (ESMF_TYPEKIND_R4%dkind)
                     call ESMF_ArrayConstructF90Ptr3DR4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
-                  case (ESMF_R8%dkind)
+                  case (ESMF_TYPEKIND_R8%dkind)
                     call ESMF_ArrayConstructF90Ptr3DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
@@ -788,10 +788,10 @@ DeclarationMacro(ArrayDeallocate)
     
               case (4)
                 select case (localkind)
-                  case (ESMF_R4%dkind)
+                  case (ESMF_TYPEKIND_R4%dkind)
                     call ESMF_ArrayConstructF90Ptr4DR4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
-                  case (ESMF_R8%dkind)
+                  case (ESMF_TYPEKIND_R8%dkind)
                     call ESMF_ArrayConstructF90Ptr4DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
@@ -803,10 +803,10 @@ DeclarationMacro(ArrayDeallocate)
 ^ifndef ESMF_NO_GREATER_THAN_4D
               case (5)
                 select case (localkind)
-                  case (ESMF_R4%dkind)
+                  case (ESMF_TYPEKIND_R4%dkind)
                     call ESMF_ArrayConstructF90Ptr5DR4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
-                  case (ESMF_R8%dkind)
+                  case (ESMF_TYPEKIND_R8%dkind)
                     call ESMF_ArrayConstructF90Ptr5DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
@@ -817,10 +817,10 @@ DeclarationMacro(ArrayDeallocate)
     
               case (6)
                 select case (localkind)
-                  case (ESMF_R4%dkind)
+                  case (ESMF_TYPEKIND_R4%dkind)
                     call ESMF_ArrayConstructF90Ptr6DR4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
-                  case (ESMF_R8%dkind)
+                  case (ESMF_TYPEKIND_R8%dkind)
                     call ESMF_ArrayConstructF90Ptr6DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
@@ -831,10 +831,10 @@ DeclarationMacro(ArrayDeallocate)
     
               case (7)
                 select case (localkind)
-                  case (ESMF_R4%dkind)
+                  case (ESMF_TYPEKIND_R4%dkind)
                     call ESMF_ArrayConstructF90Ptr7DR4(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
-                  case (ESMF_R8%dkind)
+                  case (ESMF_TYPEKIND_R8%dkind)
                     call ESMF_ArrayConstructF90Ptr7DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
@@ -946,16 +946,16 @@ AllTypesMacro(ArrayLocalVar)
           case (1)
             select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-              case (ESMF_I1%dkind)
+              case (ESMF_TYPEKIND_I1%dkind)
 AllocAllocateMacro(I1, 1, RNG1, LOC1)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-              case (ESMF_I2%dkind)
+              case (ESMF_TYPEKIND_I2%dkind)
 AllocAllocateMacro(I2, 1, RNG1, LOC1)
 ^endif
-              case (ESMF_I4%dkind)
+              case (ESMF_TYPEKIND_I4%dkind)
 AllocAllocateMacro(I4, 1, RNG1, LOC1)
-              case (ESMF_I8%dkind)
+              case (ESMF_TYPEKIND_I8%dkind)
 AllocAllocateMacro(I8, 1, RNG1, LOC1)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -966,16 +966,16 @@ AllocAllocateMacro(I8, 1, RNG1, LOC1)
           case (2)
             select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-              case (ESMF_I1%dkind)
+              case (ESMF_TYPEKIND_I1%dkind)
 AllocAllocateMacro(I1, 2, RNG2, LOC2)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-              case (ESMF_I2%dkind)
+              case (ESMF_TYPEKIND_I2%dkind)
 AllocAllocateMacro(I2, 2, RNG2, LOC2)
 ^endif
-              case (ESMF_I4%dkind)
+              case (ESMF_TYPEKIND_I4%dkind)
 AllocAllocateMacro(I4, 2, RNG2, LOC2)
-              case (ESMF_I8%dkind)
+              case (ESMF_TYPEKIND_I8%dkind)
 AllocAllocateMacro(I8, 2, RNG2, LOC2)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -986,16 +986,16 @@ AllocAllocateMacro(I8, 2, RNG2, LOC2)
           case (3)
             select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-              case (ESMF_I1%dkind)
+              case (ESMF_TYPEKIND_I1%dkind)
 AllocAllocateMacro(I1, 3, RNG3, LOC3)       
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-              case (ESMF_I2%dkind)
+              case (ESMF_TYPEKIND_I2%dkind)
 AllocAllocateMacro(I2, 3, RNG3, LOC3)       
 ^endif
-              case (ESMF_I4%dkind)
+              case (ESMF_TYPEKIND_I4%dkind)
 AllocAllocateMacro(I4, 3, RNG3, LOC3)       
-              case (ESMF_I8%dkind)
+              case (ESMF_TYPEKIND_I8%dkind)
 AllocAllocateMacro(I8, 3, RNG3, LOC3)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1006,16 +1006,16 @@ AllocAllocateMacro(I8, 3, RNG3, LOC3)
           case (4)
             select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-              case (ESMF_I1%dkind)
+              case (ESMF_TYPEKIND_I1%dkind)
 AllocAllocateMacro(I1, 4, RNG4, LOC4)       
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-              case (ESMF_I2%dkind)
+              case (ESMF_TYPEKIND_I2%dkind)
 AllocAllocateMacro(I2, 4, RNG4, LOC4)       
 ^endif
-              case (ESMF_I4%dkind)
+              case (ESMF_TYPEKIND_I4%dkind)
 AllocAllocateMacro(I4, 4, RNG4, LOC4)       
-              case (ESMF_I8%dkind)
+              case (ESMF_TYPEKIND_I8%dkind)
 AllocAllocateMacro(I8, 4, RNG4, LOC4)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1027,16 +1027,16 @@ AllocAllocateMacro(I8, 4, RNG4, LOC4)
           case (5)
             select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-              case (ESMF_I1%dkind)
+              case (ESMF_TYPEKIND_I1%dkind)
 AllocAllocateMacro(I1, 5, RNG5, LOC5)       
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-              case (ESMF_I2%dkind)
+              case (ESMF_TYPEKIND_I2%dkind)
 AllocAllocateMacro(I2, 5, RNG5, LOC5)       
 ^endif
-              case (ESMF_I4%dkind)
+              case (ESMF_TYPEKIND_I4%dkind)
 AllocAllocateMacro(I4, 5, RNG5, LOC5)       
-              case (ESMF_I8%dkind)
+              case (ESMF_TYPEKIND_I8%dkind)
 AllocAllocateMacro(I8, 5, RNG5, LOC5)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1047,16 +1047,16 @@ AllocAllocateMacro(I8, 5, RNG5, LOC5)
           case (6)
             select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-              case (ESMF_I1%dkind)
+              case (ESMF_TYPEKIND_I1%dkind)
 AllocAllocateMacro(I1, 6, RNG6, LOC6)       
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-              case (ESMF_I2%dkind)
+              case (ESMF_TYPEKIND_I2%dkind)
 AllocAllocateMacro(I2, 6, RNG6, LOC6)       
 ^endif
-              case (ESMF_I4%dkind)
+              case (ESMF_TYPEKIND_I4%dkind)
 AllocAllocateMacro(I4, 6, RNG6, LOC6)       
-              case (ESMF_I8%dkind)
+              case (ESMF_TYPEKIND_I8%dkind)
 AllocAllocateMacro(I8, 6, RNG6, LOC6)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1067,16 +1067,16 @@ AllocAllocateMacro(I8, 6, RNG6, LOC6)
           case (7)
             select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-              case (ESMF_I1%dkind)
+              case (ESMF_TYPEKIND_I1%dkind)
 AllocAllocateMacro(I1, 7, RNG7, LOC7)       
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-              case (ESMF_I2%dkind)
+              case (ESMF_TYPEKIND_I2%dkind)
 AllocAllocateMacro(I2, 7, RNG7, LOC7)       
 ^endif
-              case (ESMF_I4%dkind)
+              case (ESMF_TYPEKIND_I4%dkind)
 AllocAllocateMacro(I4, 7, RNG7, LOC7)       
-              case (ESMF_I8%dkind)
+              case (ESMF_TYPEKIND_I8%dkind)
 AllocAllocateMacro(I8, 7, RNG7, LOC7)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1095,9 +1095,9 @@ AllocAllocateMacro(I8, 7, RNG7, LOC7)
         select case (rank)
           case (1)
             select case (localkind)
-              case (ESMF_R4%dkind)
+              case (ESMF_TYPEKIND_R4%dkind)
 AllocAllocateMacro(R4, 1, RNG1, LOC1)
-              case (ESMF_R8%dkind)
+              case (ESMF_TYPEKIND_R8%dkind)
 AllocAllocateMacro(R8, 1, RNG1, LOC1)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1107,9 +1107,9 @@ AllocAllocateMacro(R8, 1, RNG1, LOC1)
 
           case (2)
             select case (localkind)
-              case (ESMF_R4%dkind)
+              case (ESMF_TYPEKIND_R4%dkind)
 AllocAllocateMacro(R4, 2, RNG2, LOC2)
-              case (ESMF_R8%dkind)
+              case (ESMF_TYPEKIND_R8%dkind)
 AllocAllocateMacro(R8, 2, RNG2, LOC2)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1119,9 +1119,9 @@ AllocAllocateMacro(R8, 2, RNG2, LOC2)
 
           case (3)
             select case (localkind)
-              case (ESMF_R4%dkind)
+              case (ESMF_TYPEKIND_R4%dkind)
 AllocAllocateMacro(R4, 3, RNG3, LOC3)       
-              case (ESMF_R8%dkind)
+              case (ESMF_TYPEKIND_R8%dkind)
 AllocAllocateMacro(R8, 3, RNG3, LOC3)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1131,9 +1131,9 @@ AllocAllocateMacro(R8, 3, RNG3, LOC3)
 
           case (4)
             select case (localkind)
-              case (ESMF_R4%dkind)
+              case (ESMF_TYPEKIND_R4%dkind)
 AllocAllocateMacro(R4, 4, RNG4, LOC4)       
-              case (ESMF_R8%dkind)
+              case (ESMF_TYPEKIND_R8%dkind)
 AllocAllocateMacro(R8, 4, RNG4, LOC4)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1144,9 +1144,9 @@ AllocAllocateMacro(R8, 4, RNG4, LOC4)
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             select case (localkind)
-              case (ESMF_R4%dkind)
+              case (ESMF_TYPEKIND_R4%dkind)
 AllocAllocateMacro(R4, 5, RNG5, LOC5)       
-              case (ESMF_R8%dkind)
+              case (ESMF_TYPEKIND_R8%dkind)
 AllocAllocateMacro(R8, 5, RNG5, LOC5)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1156,9 +1156,9 @@ AllocAllocateMacro(R8, 5, RNG5, LOC5)
 
           case (6)
             select case (localkind)
-              case (ESMF_R4%dkind)
+              case (ESMF_TYPEKIND_R4%dkind)
 AllocAllocateMacro(R4, 6, RNG6, LOC6)       
-              case (ESMF_R8%dkind)
+              case (ESMF_TYPEKIND_R8%dkind)
 AllocAllocateMacro(R8, 6, RNG6, LOC6)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1168,9 +1168,9 @@ AllocAllocateMacro(R8, 6, RNG6, LOC6)
 
           case (7)
             select case (localkind)
-              case (ESMF_R4%dkind)
+              case (ESMF_TYPEKIND_R4%dkind)
 AllocAllocateMacro(R4, 7, RNG7, LOC7)       
-              case (ESMF_R8%dkind)
+              case (ESMF_TYPEKIND_R8%dkind)
 AllocAllocateMacro(R8, 7, RNG7, LOC7)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1250,16 +1250,16 @@ AllTypesMacro(ArrayLocalVar)
           case (1)
             select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-              case (ESMF_I1%dkind)
+              case (ESMF_TYPEKIND_I1%dkind)
 AllocDeallocateMacro(I1, 1)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-              case (ESMF_I2%dkind)
+              case (ESMF_TYPEKIND_I2%dkind)
 AllocDeallocateMacro(I2, 1)
 ^endif
-              case (ESMF_I4%dkind)
+              case (ESMF_TYPEKIND_I4%dkind)
 AllocDeallocateMacro(I4, 1)
-              case (ESMF_I8%dkind)
+              case (ESMF_TYPEKIND_I8%dkind)
 AllocDeallocateMacro(I8, 1)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1270,16 +1270,16 @@ AllocDeallocateMacro(I8, 1)
           case (2)
             select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-              case (ESMF_I1%dkind)
+              case (ESMF_TYPEKIND_I1%dkind)
 AllocDeallocateMacro(I1, 2)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-              case (ESMF_I2%dkind)
+              case (ESMF_TYPEKIND_I2%dkind)
 AllocDeallocateMacro(I2, 2)
 ^endif
-              case (ESMF_I4%dkind)
+              case (ESMF_TYPEKIND_I4%dkind)
 AllocDeallocateMacro(I4, 2)
-              case (ESMF_I8%dkind)
+              case (ESMF_TYPEKIND_I8%dkind)
 AllocDeallocateMacro(I8, 2)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1290,16 +1290,16 @@ AllocDeallocateMacro(I8, 2)
           case (3)
             select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-              case (ESMF_I1%dkind)
+              case (ESMF_TYPEKIND_I1%dkind)
 AllocDeallocateMacro(I1, 3)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-              case (ESMF_I2%dkind)
+              case (ESMF_TYPEKIND_I2%dkind)
 AllocDeallocateMacro(I2, 3)
 ^endif
-              case (ESMF_I4%dkind)
+              case (ESMF_TYPEKIND_I4%dkind)
 AllocDeallocateMacro(I4, 3)
-              case (ESMF_I8%dkind)
+              case (ESMF_TYPEKIND_I8%dkind)
 AllocDeallocateMacro(I8, 3)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1310,16 +1310,16 @@ AllocDeallocateMacro(I8, 3)
           case (4)
             select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-              case (ESMF_I1%dkind)
+              case (ESMF_TYPEKIND_I1%dkind)
 AllocDeallocateMacro(I1, 4)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-              case (ESMF_I2%dkind)
+              case (ESMF_TYPEKIND_I2%dkind)
 AllocDeallocateMacro(I2, 4)
 ^endif
-              case (ESMF_I4%dkind)
+              case (ESMF_TYPEKIND_I4%dkind)
 AllocDeallocateMacro(I4, 4)
-              case (ESMF_I8%dkind)
+              case (ESMF_TYPEKIND_I8%dkind)
 AllocDeallocateMacro(I8, 4)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1331,16 +1331,16 @@ AllocDeallocateMacro(I8, 4)
           case (5)
             select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-              case (ESMF_I1%dkind)
+              case (ESMF_TYPEKIND_I1%dkind)
 AllocDeallocateMacro(I1, 5)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-              case (ESMF_I2%dkind)
+              case (ESMF_TYPEKIND_I2%dkind)
 AllocDeallocateMacro(I2, 5)
 ^endif
-              case (ESMF_I4%dkind)
+              case (ESMF_TYPEKIND_I4%dkind)
 AllocDeallocateMacro(I4, 5)
-              case (ESMF_I8%dkind)
+              case (ESMF_TYPEKIND_I8%dkind)
 AllocDeallocateMacro(I8, 5)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1351,16 +1351,16 @@ AllocDeallocateMacro(I8, 5)
           case (6)
             select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-              case (ESMF_I1%dkind)
+              case (ESMF_TYPEKIND_I1%dkind)
 AllocDeallocateMacro(I1, 6)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-              case (ESMF_I2%dkind)
+              case (ESMF_TYPEKIND_I2%dkind)
 AllocDeallocateMacro(I2, 6)
 ^endif
-              case (ESMF_I4%dkind)
+              case (ESMF_TYPEKIND_I4%dkind)
 AllocDeallocateMacro(I4, 6)
-              case (ESMF_I8%dkind)
+              case (ESMF_TYPEKIND_I8%dkind)
 AllocDeallocateMacro(I8, 6)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1371,16 +1371,16 @@ AllocDeallocateMacro(I8, 6)
           case (7)
             select case (localkind)
 ^ifndef ESMF_NO_INTEGER_1_BYTE
-              case (ESMF_I1%dkind)
+              case (ESMF_TYPEKIND_I1%dkind)
 AllocDeallocateMacro(I1, 7)
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
-              case (ESMF_I2%dkind)
+              case (ESMF_TYPEKIND_I2%dkind)
 AllocDeallocateMacro(I2, 7)
 ^endif
-              case (ESMF_I4%dkind)
+              case (ESMF_TYPEKIND_I4%dkind)
 AllocDeallocateMacro(I4, 7)
-              case (ESMF_I8%dkind)
+              case (ESMF_TYPEKIND_I8%dkind)
 AllocDeallocateMacro(I8, 7)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1399,9 +1399,9 @@ AllocDeallocateMacro(I8, 7)
         select case (rank)
           case (1)
             select case (localkind)
-              case (ESMF_R4%dkind)
+              case (ESMF_TYPEKIND_R4%dkind)
 AllocDeallocateMacro(R4, 1)
-              case (ESMF_R8%dkind)
+              case (ESMF_TYPEKIND_R8%dkind)
 AllocDeallocateMacro(R8, 1)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1411,9 +1411,9 @@ AllocDeallocateMacro(R8, 1)
 
           case (2)
             select case (localkind)
-              case (ESMF_R4%dkind)
+              case (ESMF_TYPEKIND_R4%dkind)
 AllocDeallocateMacro(R4, 2)
-              case (ESMF_R8%dkind)
+              case (ESMF_TYPEKIND_R8%dkind)
 AllocDeallocateMacro(R8, 2)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1423,9 +1423,9 @@ AllocDeallocateMacro(R8, 2)
 
           case (3)
             select case (localkind)
-              case (ESMF_R4%dkind)
+              case (ESMF_TYPEKIND_R4%dkind)
 AllocDeallocateMacro(R4, 3)
-              case (ESMF_R8%dkind)
+              case (ESMF_TYPEKIND_R8%dkind)
 AllocDeallocateMacro(R8, 3)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1435,9 +1435,9 @@ AllocDeallocateMacro(R8, 3)
 
           case (4)
             select case (localkind)
-              case (ESMF_R4%dkind)
+              case (ESMF_TYPEKIND_R4%dkind)
 AllocDeallocateMacro(R4, 4)
-              case (ESMF_R8%dkind)
+              case (ESMF_TYPEKIND_R8%dkind)
 AllocDeallocateMacro(R8, 4)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1448,9 +1448,9 @@ AllocDeallocateMacro(R8, 4)
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             select case (localkind)
-              case (ESMF_R4%dkind)
+              case (ESMF_TYPEKIND_R4%dkind)
 AllocDeallocateMacro(R4, 5)
-              case (ESMF_R8%dkind)
+              case (ESMF_TYPEKIND_R8%dkind)
 AllocDeallocateMacro(R8, 5)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1460,9 +1460,9 @@ AllocDeallocateMacro(R8, 5)
 
           case (6)
             select case (localkind)
-              case (ESMF_R4%dkind)
+              case (ESMF_TYPEKIND_R4%dkind)
 AllocDeallocateMacro(R4, 6)
-              case (ESMF_R8%dkind)
+              case (ESMF_TYPEKIND_R8%dkind)
 AllocDeallocateMacro(R8, 6)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1472,9 +1472,9 @@ AllocDeallocateMacro(R8, 6)
 
           case (7)
             select case (localkind)
-              case (ESMF_R4%dkind)
+              case (ESMF_TYPEKIND_R4%dkind)
 AllocDeallocateMacro(R4, 7)
-              case (ESMF_R8%dkind)
+              case (ESMF_TYPEKIND_R8%dkind)
 AllocDeallocateMacro(R8, 7)
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &

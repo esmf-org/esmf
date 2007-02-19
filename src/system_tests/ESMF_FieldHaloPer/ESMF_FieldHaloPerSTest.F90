@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.40 2007/02/13 20:08:32 theurich Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.41 2007/02/19 23:44:47 rosalind Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -383,7 +383,7 @@
 
       ! Create an arrayspec for a 2-D array 
       call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
-                              kind=ESMF_I4)
+                              kind=ESMF_TYPEKIND_I4)
 
       ! Create 4 Fields using the Grids and ArraySpec created above
       fname = "Periodic in X"

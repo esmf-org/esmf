@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.27 2005/10/12 19:06:17 nscollins Exp $
+! $Id: ESMF_RouteEx.F90,v 1.28 2007/02/19 23:44:45 rosalind Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -79,7 +79,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! Real*8, 2D data
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_TYPEKIND_R8, rc)
     
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.49 2007/02/16 05:27:45 rosalind Exp $
+! $Id: ESMF_GridUTest.F90,v 1.50 2007/02/19 23:44:43 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.49 2007/02/16 05:27:45 rosalind Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.50 2007/02/19 23:44:43 rosalind Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -427,7 +427,7 @@
       !  Verify datakind of Attribute
       write(failMsg, *) "Attribute datakind is wrong"
       write(name, *) "Verify Attribute datakind from a Grid Test"
-      call ESMF_Test((att_datakind.eq.ESMF_I4), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((att_datakind.eq.ESMF_TYPEKIND_I4), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest
       !  Verify count of Attribute
