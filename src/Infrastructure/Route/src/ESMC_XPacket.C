@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.63 2007/02/16 05:27:47 rosalind Exp $
+// $Id: ESMC_XPacket.C,v 1.64 2007/02/20 02:36:49 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.63 2007/02/16 05:27:47 rosalind Exp $";
+              "$Id: ESMC_XPacket.C,v 1.64 2007/02/20 02:36:49 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -833,32 +833,32 @@
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
     switch (dk) {
-       case ESMF_I1: 
+       case ESMC_TYPEKIND_I1: 
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
         break;
 
-       case ESMF_I2:
+       case ESMC_TYPEKIND_I2:
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
         break;
 
-       case ESMF_I4:
+       case ESMC_TYPEKIND_I4:
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
         break;
 
-       case ESMF_I8:
+       case ESMC_TYPEKIND_I8:
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
         break;
 
-       case ESMF_R4:
+       case ESMC_TYPEKIND_R4:
         return ESMC_XPacketDoRBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
         break;
 
-       case ESMF_R8:
+       case ESMC_TYPEKIND_R8:
         return ESMC_XPacketDoRBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
         break;
@@ -906,32 +906,32 @@
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
     switch (dk) {
-       case ESMF_I1:
+       case ESMC_TYPEKIND_I1:
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
         break;
 
-       case ESMF_I2:
+       case ESMC_TYPEKIND_I2:
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
         break;
 
-       case ESMF_I4:
+       case ESMC_TYPEKIND_I4:
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
         break;
 
-       case ESMF_I8:
+       case ESMC_TYPEKIND_I8:
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
         break;
 
-       case ESMF_R4:
+       case ESMC_TYPEKIND_R4:
         return ESMC_XPacketDoRBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
         break;
 
-       case ESMF_R8:
+       case ESMC_TYPEKIND_R8:
         return ESMC_XPacketDoRBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
         break;

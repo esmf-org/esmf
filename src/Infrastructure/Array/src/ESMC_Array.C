@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.62 2007/02/16 05:27:41 rosalind Exp $
+// $Id: ESMC_Array.C,v 1.63 2007/02/20 02:36:45 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.62 2007/02/16 05:27:41 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.63 2007/02/20 02:36:45 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4113,13 +4113,13 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   // prepeare PET-local temporary result variable
   void *localResult;
   switch (dtk){
-  case ESMF_I4:
+  case ESMC_TYPEKIND_I4:
     localResult = new int;
     break;
-  case ESMF_R4:
+  case ESMC_TYPEKIND_R4:
     localResult = new ESMC_R4;
     break;
-  case ESMF_R8:
+  case ESMC_TYPEKIND_R8:
     localResult = new ESMC_R8;
     break;
   default:
@@ -4194,7 +4194,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 #endif
         // reduce the block into localResult
         switch (dtk){
-        case ESMF_I4:
+        case ESMC_TYPEKIND_I4:
           {
             int *tempResult = (int *)localResult;
             int *tempBase = (int *)base;
@@ -4223,7 +4223,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
             }
           }
           break;
-        case ESMF_R4:
+        case ESMC_TYPEKIND_R4:
           {
             ESMC_R4 *tempResult = (ESMC_R4 *)localResult;
             ESMC_R4 *tempBase = (ESMC_R4 *)base;
@@ -4252,7 +4252,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
             }
           }
           break;
-        case ESMF_R8:
+        case ESMC_TYPEKIND_R8:
           {
             ESMC_R8 *tempResult = (ESMC_R8 *)localResult;
             ESMC_R8 *tempBase = (ESMC_R8 *)base;
@@ -4293,13 +4293,13 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   // prepare for VM operation
   vmType vmt;
   switch (dtk){
-  case ESMF_I4:
+  case ESMC_TYPEKIND_I4:
     vmt = vmI4;
     break;
-  case ESMF_R4:
+  case ESMC_TYPEKIND_R4:
     vmt = vmR4;
     break;
-  case ESMF_R8:
+  case ESMC_TYPEKIND_R8:
     vmt = vmR8;
     break;
   default:
@@ -4439,15 +4439,15 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   void *localResult;
   int size;
   switch (dtk){
-  case ESMF_I4:
+  case ESMC_TYPEKIND_I4:
     localResult = new int;
     size = 4;
     break;
-  case ESMF_R4:
+  case ESMC_TYPEKIND_R4:
     localResult = new ESMC_R4;
     size = 4;
     break;
-  case ESMF_R8:
+  case ESMC_TYPEKIND_R8:
     localResult = new ESMC_R8;
     size = 8;
     break;
@@ -4517,7 +4517,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 #endif
     // reduce the block into localResult
     switch (dtk){
-    case ESMF_I4:
+    case ESMC_TYPEKIND_I4:
       {
         int *tempResult = (int *)localResult;
         int *tempBase = (int *)base;
@@ -4546,7 +4546,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
         }
       }
       break;
-    case ESMF_R4:
+    case ESMC_TYPEKIND_R4:
       {
         ESMC_R4 *tempResult = (ESMC_R4 *)localResult;
         ESMC_R4 *tempBase = (ESMC_R4 *)base;
@@ -4575,7 +4575,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
         }
       }
       break;
-    case ESMF_R8:
+    case ESMC_TYPEKIND_R8:
       {
         ESMC_R8 *tempResult = (ESMC_R8 *)localResult;
         ESMC_R8 *tempBase = (ESMC_R8 *)base;
@@ -5439,15 +5439,15 @@ void *ESMC_newArrayScalarReduceThread(
   void *localResult;
   int size;
   switch (dtk){
-  case ESMF_I4:
+  case ESMC_TYPEKIND_I4:
     localResult = new int[deCount];
     size = 4;
     break;
-  case ESMF_R4:
+  case ESMC_TYPEKIND_R4:
     localResult = new ESMC_R4[deCount];
     size = 4;
     break;
-  case ESMF_R8:
+  case ESMC_TYPEKIND_R8:
     localResult = new ESMC_R8[deCount];
     size = 8;
     break;
@@ -5475,7 +5475,7 @@ void *ESMC_newArrayScalarReduceThread(
   }
   // reduce to final result
   switch (dtk){
-  case ESMF_I4:
+  case ESMC_TYPEKIND_I4:
     {
       int *tempResult = (int *)result;
       int *tempBase = (int *)localResult;
@@ -5506,7 +5506,7 @@ void *ESMC_newArrayScalarReduceThread(
       }
     }
     break;
-  case ESMF_R4:
+  case ESMC_TYPEKIND_R4:
     {
       ESMC_R4 *tempResult = (ESMC_R4 *)result;
       ESMC_R4 *tempBase = (ESMC_R4 *)localResult;
@@ -5537,7 +5537,7 @@ void *ESMC_newArrayScalarReduceThread(
       }
     }
     break;
-  case ESMF_R8:
+  case ESMC_TYPEKIND_R8:
     {
       ESMC_R8 *tempResult = (ESMC_R8 *)result;
       ESMC_R8 *tempBase = (ESMC_R8 *)localResult;

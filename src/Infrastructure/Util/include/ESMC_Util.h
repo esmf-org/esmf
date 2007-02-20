@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.21 2007/02/16 05:27:48 rosalind Exp $
+// $Id: ESMC_Util.h,v 1.22 2007/02/20 02:36:49 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -93,12 +93,12 @@ enum ESMC_DataType { ESMF_DATA_INTEGER=1,
                      ESMF_DATA_LOGICAL,
                      ESMF_DATA_CHARACTER };
 
-enum ESMC_TypeKind { ESMF_I1=1,
-                     ESMF_I2,
-                     ESMF_I4,
-                     ESMF_I8,
-                     ESMF_R4,
-                     ESMF_R8,
+enum ESMC_TypeKind { ESMC_TYPEKIND_I1=1,
+                     ESMC_TYPEKIND_I2,
+                     ESMC_TYPEKIND_I4,
+                     ESMC_TYPEKIND_I8,
+                     ESMC_TYPEKIND_R4,
+                     ESMC_TYPEKIND_R8,
                      ESMF_C8,
                      ESMF_C16,
                      ESMF_NOKIND=99 };

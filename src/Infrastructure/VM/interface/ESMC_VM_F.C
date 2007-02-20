@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.62 2007/02/16 05:27:48 rosalind Exp $
+// $Id: ESMC_VM_F.C,v 1.63 2007/02/20 02:36:49 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -54,13 +54,13 @@ extern "C" {
     // need to type cast or transform dtk and op into ESMC_VMK types
     vmType vmt;
     switch (*dtk){
-    case ESMF_I4:
+    case ESMC_TYPEKIND_I4:
       vmt = vmI4;
       break;
-    case ESMF_R4:
+    case ESMC_TYPEKIND_R4:
       vmt = vmR4;
       break;
-    case ESMF_R8:
+    case ESMC_TYPEKIND_R8:
       vmt = vmR8;
       break;
     default:
@@ -99,13 +99,13 @@ extern "C" {
     // need to type cast or transform dtk and op into ESMC_VMK types
     vmType vmt;
     switch (*dtk){
-    case ESMF_I4:
+    case ESMC_TYPEKIND_I4:
       vmt = vmI4;
       break;
-    case ESMF_R4:
+    case ESMC_TYPEKIND_R4:
       vmt = vmR4;
       break;
-    case ESMF_R8:
+    case ESMC_TYPEKIND_R8:
       vmt = vmR8;
       break;
     default:
@@ -127,13 +127,13 @@ extern "C" {
     // need to type cast or transform dtk and op into ESMC_VMK types
     vmType vmt;
     switch (*dtk){
-    case ESMF_I4:
+    case ESMC_TYPEKIND_I4:
       vmt = vmI4;
       break;
-    case ESMF_R4:
+    case ESMC_TYPEKIND_R4:
       vmt = vmR4;
       break;
-    case ESMF_R8:
+    case ESMC_TYPEKIND_R8:
       vmt = vmR8;
       break;
     default:
@@ -155,13 +155,13 @@ extern "C" {
     // need to type cast or transform dtk and op into ESMC_VMK types
     vmType vmt;
     switch (*dtk){
-    case ESMF_I4:
+    case ESMC_TYPEKIND_I4:
       vmt = vmI4;
       break;
-    case ESMF_R4:
+    case ESMC_TYPEKIND_R4:
       vmt = vmR4;
       break;
-    case ESMF_R8:
+    case ESMC_TYPEKIND_R8:
       vmt = vmR8;
       break;
     default:
@@ -298,13 +298,13 @@ extern "C" {
     // need to type cast or transform dtk and op into ESMC_VMK types
     vmType vmt;
     switch (*dtk){
-    case ESMF_I4:
+    case ESMC_TYPEKIND_I4:
       vmt = vmI4;
       break;
-    case ESMF_R4:
+    case ESMC_TYPEKIND_R4:
       vmt = vmR4;
       break;
-    case ESMF_R8:
+    case ESMC_TYPEKIND_R8:
       vmt = vmR8;
       break;
     default:

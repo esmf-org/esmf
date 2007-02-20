@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.71 2007/02/16 05:27:42 rosalind Exp $
+// $Id: ESMC_Base.C,v 1.72 2007/02/20 02:36:45 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.71 2007/02/16 05:27:42 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.72 2007/02/20 02:36:45 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -934,7 +934,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMF_I4, 1, &value);  
+  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMC_TYPEKIND_I4, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -969,7 +969,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMF_I4, count, value);  
+  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMC_TYPEKIND_I4, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1003,7 +1003,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMF_I8, 1, &value);  
+  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMC_TYPEKIND_I8, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1038,7 +1038,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMF_I8, count, value);  
+  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMC_TYPEKIND_I8, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1072,7 +1072,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMF_R4, 1, &value);  
+  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMC_TYPEKIND_R4, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1107,7 +1107,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMF_R4, count, value);  
+  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMC_TYPEKIND_R4, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1141,7 +1141,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMF_R8, 1, &value);  
+  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMC_TYPEKIND_R8, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1176,7 +1176,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMF_R8, count, value);  
+  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMC_TYPEKIND_R8, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1412,7 +1412,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
                   "attribute not type integer", &rc);
        return rc;
   }
-  if (attr->dk != ESMF_I4) {
+  if (attr->dk != ESMC_TYPEKIND_I4) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind I4", &rc);
        return rc;
@@ -1471,7 +1471,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
                   "attribute not type integer", &rc);
        return rc;
   }
-  if (attr->dk != ESMF_I4) {
+  if (attr->dk != ESMC_TYPEKIND_I4) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind I4", &rc);
        return rc;
@@ -1533,7 +1533,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
                   "attribute not type integer", &rc);
        return rc;
   }
-  if (attr->dk != ESMF_I8) {
+  if (attr->dk != ESMC_TYPEKIND_I8) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind I8", &rc);
        return rc;
@@ -1592,7 +1592,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
                   "attribute not type integer", &rc);
        return rc;
   }
-  if (attr->dk != ESMF_I8) {
+  if (attr->dk != ESMC_TYPEKIND_I8) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind I8", &rc);
        return rc;
@@ -1654,7 +1654,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
                   "attribute not type real", &rc);
        return rc;
   }
-  if (attr->dk != ESMF_R4) {
+  if (attr->dk != ESMC_TYPEKIND_R4) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind R4", &rc);
        return rc;
@@ -1713,7 +1713,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
                   "attribute not type real", &rc);
        return rc;
   }
-  if (attr->dk != ESMF_R4) {
+  if (attr->dk != ESMC_TYPEKIND_R4) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind R4", &rc);
        return rc;
@@ -1775,7 +1775,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
                   "attribute not type real", &rc);
        return rc;
   }
-  if (attr->dk != ESMF_R8) {
+  if (attr->dk != ESMC_TYPEKIND_R8) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind R8", &rc);
        return rc;
@@ -1834,7 +1834,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
                   "attribute not type real", &rc);
        return rc;
   }
-  if (attr->dk != ESMF_R8) {
+  if (attr->dk != ESMC_TYPEKIND_R8) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind R8", &rc);
        return rc;
@@ -2081,13 +2081,13 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       if (attr->items == 1) {
           switch(attr->dt) {
             case ESMF_DATA_INTEGER: 
-              if (attr->dk == ESMF_I4)
+              if (attr->dk == ESMC_TYPEKIND_I4)
                   *(ESMC_I4 *)value = attr->vi; 
               else
                   *(ESMC_I8 *)value = attr->vtl; 
               break;
             case ESMF_DATA_REAL: 
-              if (attr->dk == ESMF_R4)
+              if (attr->dk == ESMC_TYPEKIND_R4)
                   *(ESMC_R4 *)value = attr->vf; 
               else
                   *(ESMC_R8 *)value = attr->vd; 
@@ -2109,7 +2109,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       } else {
           switch(attr->dt) {
             case ESMF_DATA_INTEGER:
-              if (attr->dk == ESMF_I4) {
+              if (attr->dk == ESMC_TYPEKIND_I4) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_I4 *)value)[i] = attr->vip[i];
               } else {
@@ -2118,7 +2118,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
               }
               break;
             case ESMF_DATA_REAL:
-              if (attr->dk == ESMF_R4) {
+              if (attr->dk == ESMC_TYPEKIND_R4) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_R4 *)value)[i] = attr->vfp[i];
               } else {
@@ -2197,13 +2197,13 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       if (attr->items == 1) {
           switch(attr->dt) {
             case ESMF_DATA_INTEGER: 
-              if (attr->dk == ESMF_I4)
+              if (attr->dk == ESMC_TYPEKIND_I4)
                   *(ESMC_I4 *)value = attr->vi; 
               else
                   *(ESMC_I8 *)value = attr->vtl; 
               break;
             case ESMF_DATA_REAL: 
-              if (attr->dk == ESMF_R4)
+              if (attr->dk == ESMC_TYPEKIND_R4)
                   *(ESMC_R4 *)value = attr->vf; 
               else
                   *(ESMC_R8 *)value = attr->vd; 
@@ -2226,7 +2226,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       } else {
           switch(attr->dt) {
             case ESMF_DATA_INTEGER:
-              if (attr->dk == ESMF_I4) {
+              if (attr->dk == ESMC_TYPEKIND_I4) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_I4 *)value)[i] = attr->vip[i];
               } else {
@@ -2235,7 +2235,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
               }
               break;
             case ESMF_DATA_REAL:
-              if (attr->dk == ESMF_R4) {
+              if (attr->dk == ESMC_TYPEKIND_R4) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_R4 *)value)[i] = attr->vfp[i];
               } else {
@@ -2584,13 +2584,13 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       //ESMC_LogDefault.ESMC_LogWrite(", value: ", ESMC_LOG_INFO);
       switch (dt) {
         case ESMF_DATA_INTEGER:   
-             if (dk == ESMF_I4)
+             if (dk == ESMC_TYPEKIND_I4)
                  sprintf(msgbuf, "%d\n", vi); 
              else
                  sprintf(msgbuf, "%ld\n", vtl); 
              break;
         case ESMF_DATA_REAL:      
-             if (dk == ESMF_R4)
+             if (dk == ESMC_TYPEKIND_R4)
                  sprintf(msgbuf, "%f\n", vf); 
              else
                  sprintf(msgbuf, "%g\n", vd); 
@@ -2617,7 +2617,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       for (int i=0; i<items; i++) {
           switch (dt) {
             case ESMF_DATA_INTEGER: 
-                if (dk == ESMF_I4) {
+                if (dk == ESMC_TYPEKIND_I4) {
                     sprintf(msgbuf, " item %d: %d\n", i, vip[i]); 
                     break; 
                 } else {
@@ -2625,7 +2625,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
                     break; 
                 }
             case ESMF_DATA_REAL:    
-                if (dk == ESMF_R4) {
+                if (dk == ESMC_TYPEKIND_R4) {
                     sprintf(msgbuf, " item %d: %f\n", i, vfp[i]); 
                     break; 
                 } else {
@@ -2742,13 +2742,13 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   else if (items == 1) {
     switch (dt) {
       case ESMF_DATA_INTEGER:   
-        if (dk == ESMF_I4)
+        if (dk == ESMC_TYPEKIND_I4)
             vi = source.vi;  
         else
             vtl = source.vtl;  
         break;
       case ESMF_DATA_REAL:      
-        if (dk == ESMF_R4)
+        if (dk == ESMC_TYPEKIND_R4)
             vf = source.vf;  
         else
             vd = source.vd;  
@@ -2770,7 +2770,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     // items > 1, alloc space for a list and do the copy
       switch (dt) {
         case ESMF_DATA_INTEGER:   
-          if (dk == ESMF_I4) {
+          if (dk == ESMC_TYPEKIND_I4) {
               vip = new ESMC_I4[items];      
               for (i=0; i<items; i++)
                   vip[i] = source.vip[i];  
@@ -2781,7 +2781,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
           }
           break;
         case ESMF_DATA_REAL:      
-          if (dk == ESMF_R4) {
+          if (dk == ESMC_TYPEKIND_R4) {
               vfp = new ESMC_R4[items];      
               for (i=0; i<items; i++)
                   vfp[i] = source.vfp[i];  
@@ -2888,13 +2888,13 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       else  {
         switch (dt) {
           case ESMF_DATA_INTEGER:   
-            if (dk == ESMF_I4)
+            if (dk == ESMC_TYPEKIND_I4)
                 vi = *(ESMC_I4 *)datap;  
             else
                 vtl = *(ESMC_I8 *)datap;  
             break;
           case ESMF_DATA_REAL:      
-            if (dk == ESMF_R4)
+            if (dk == ESMC_TYPEKIND_R4)
                 vf = *(ESMC_R4 *)datap;  
             else
                 vd = *(ESMC_R8 *)datap;  
@@ -2918,7 +2918,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     // items > 1, alloc space for a list and do the copy
     switch (dt) {
       case ESMF_DATA_INTEGER:   
-        if (dk == ESMF_I4) {
+        if (dk == ESMC_TYPEKIND_I4) {
             vip = new ESMC_I4[items];      
             if (!datap) 
                 break;
@@ -2933,7 +2933,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
         }
         break;
       case ESMF_DATA_REAL:      
-        if (dk == ESMF_R4) {
+        if (dk == ESMC_TYPEKIND_R4) {
             vfp = new ESMC_R4[items];      
             if (!datap) 
                 break;
@@ -2988,11 +2988,11 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (items > 1) {
     switch (dt) {
       case ESMF_DATA_INTEGER:   
-        if (dk == ESMF_I4) delete [] vip;
+        if (dk == ESMC_TYPEKIND_I4) delete [] vip;
         else delete [] vlp;
         break;
       case ESMF_DATA_REAL:      
-        if (dk == ESMF_R8) delete [] vfp;
+        if (dk == ESMC_TYPEKIND_R8) delete [] vfp;
         else delete [] vdp;  
         break;
       case ESMF_DATA_LOGICAL:   

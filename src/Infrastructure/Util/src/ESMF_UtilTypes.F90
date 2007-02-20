@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.40 2007/02/19 23:44:45 rosalind Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.41 2007/02/20 02:36:49 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -173,6 +173,8 @@
                    ESMF_TYPEKIND_R8 = ESMF_TypeKind(6), &
                    ESMF_C8 = ESMF_TypeKind(7), &
                    ESMF_C16 = ESMF_TypeKind(8), &
+                   ESMF_TYPEKIND_I  = ESMF_TypeKind(9), &
+                   ESMF_TYPEKIND_R  = ESMF_TypeKind(10), &
                    ESMF_NOKIND = ESMF_TypeKind(99)
 
       ! these work where you have to declare an array or something that

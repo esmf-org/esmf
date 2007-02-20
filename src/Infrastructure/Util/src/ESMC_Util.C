@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.17 2007/02/16 05:27:48 rosalind Exp $
+// $Id: ESMC_Util.C,v 1.18 2007/02/20 02:36:49 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.17 2007/02/16 05:27:48 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.18 2007/02/20 02:36:49 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -483,12 +483,12 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 //EOPI
 
     switch (dk) {
-      case ESMF_I1:  return  1;
-      case ESMF_I2:  return  2;
-      case ESMF_I4:  return  4;
-      case ESMF_I8:  return  8;
-      case ESMF_R4:  return  4;
-      case ESMF_R8:  return  8;
+      case ESMC_TYPEKIND_I1:  return  1;
+      case ESMC_TYPEKIND_I2:  return  2;
+      case ESMC_TYPEKIND_I4:  return  4;
+      case ESMC_TYPEKIND_I8:  return  8;
+      case ESMC_TYPEKIND_R4:  return  4;
+      case ESMC_TYPEKIND_R8:  return  8;
       case ESMF_C8:  return  8;
       case ESMF_C16: return 16;
       default:
@@ -579,12 +579,12 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 //EOPI
 
     switch (dk) {
-      case ESMF_I1:      return  "Integer*1";
-      case ESMF_I2:      return  "Integer*2";
-      case ESMF_I4:      return  "Integer*4";
-      case ESMF_I8:      return  "Integer*8";
-      case ESMF_R4:      return  "Real*4";
-      case ESMF_R8:      return  "Real*8";
+      case ESMC_TYPEKIND_I1:      return  "Integer*1";
+      case ESMC_TYPEKIND_I2:      return  "Integer*2";
+      case ESMC_TYPEKIND_I4:      return  "Integer*4";
+      case ESMC_TYPEKIND_I8:      return  "Integer*8";
+      case ESMC_TYPEKIND_R4:      return  "Real*4";
+      case ESMC_TYPEKIND_R8:      return  "Real*8";
       case ESMF_C8:      return  "Complex*8";
       case ESMF_C16:     return  "Complex*16";
       default:

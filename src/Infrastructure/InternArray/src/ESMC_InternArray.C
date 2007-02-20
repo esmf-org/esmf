@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray.C,v 1.4 2007/02/16 05:27:45 rosalind Exp $
+// $Id: ESMC_InternArray.C,v 1.5 2007/02/20 02:36:46 rosalind Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArray.C,v 1.4 2007/02/16 05:27:45 rosalind Exp $";
+            "$Id: ESMC_InternArray.C,v 1.5 2007/02/20 02:36:46 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1113,7 +1113,7 @@
     switch (this->type) {
       case ESMF_DATA_REAL:
         switch (this->kind) {
-          case ESMF_R4:
+          case ESMC_TYPEKIND_R4:
             switch (this->rank) {
               case 1:
                 sprintf(msgbuf,"  Real, *4, Dim 1, Data values:\n");
@@ -1237,7 +1237,7 @@
                 break;    
             }
             break;
-          case ESMF_R8:
+          case ESMC_TYPEKIND_R8:
             switch (this->rank) {
               case 1:
                 sprintf(msgbuf,"  Real, *8, Dim 1, Data values:\n");
@@ -1365,7 +1365,7 @@
         break;
       case ESMF_DATA_INTEGER:
         switch (this->kind) {
-          case ESMF_I4:
+          case ESMC_TYPEKIND_I4:
             switch (this->rank) {
               case 1:
                 imax = this->counts[0];
@@ -1491,7 +1491,7 @@
                 break;    
             }
             break;
-          case ESMF_I8:
+          case ESMC_TYPEKIND_I8:
             switch (this->rank) {
               case 1:
                 imax = this->counts[0];
@@ -1689,7 +1689,7 @@
     switch (this->type) {
       case ESMF_DATA_REAL:
         switch (this->kind) {
-          case ESMF_R4:
+          case ESMC_TYPEKIND_R4:
             switch (this->rank) {
               case 1:
                 imax = this->counts[0];
@@ -1752,7 +1752,7 @@
                 break;    
             }
             break;
-          case ESMF_R8:
+          case ESMC_TYPEKIND_R8:
             switch (this->rank) {
               case 1:
                 imax = this->counts[0];
@@ -1819,7 +1819,7 @@
           break;
       case ESMF_DATA_INTEGER:
         switch (this->kind) {
-          case ESMF_I4:
+          case ESMC_TYPEKIND_I4:
             switch (this->rank) {
               case 1:
                 imax = this->counts[0];
@@ -1882,7 +1882,7 @@
                 break;    
             }
             break;
-          case ESMF_I8:
+          case ESMC_TYPEKIND_I8:
             switch (this->rank) {
               case 1:
                 imax = this->counts[0];
