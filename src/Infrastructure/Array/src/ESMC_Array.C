@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.63 2007/02/20 02:36:45 rosalind Exp $
+// $Id: ESMC_Array.C,v 1.64 2007/02/22 23:35:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.63 2007/02/20 02:36:45 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.64 2007/02/22 23:35:26 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -353,8 +353,8 @@ ESMC_Array *ESMC_ArrayCreate(
         exclusiveLBound[i*dimCount+j] += shift;
         exclusiveUBound[i*dimCount+j] += shift;
         // clean-up
-        delete [] indexList;
         delete indexListArg;
+        delete [] indexList;
       } // j
     } // i
   }
@@ -894,8 +894,8 @@ ESMC_Array *ESMC_ArrayCreate(
         exclusiveLBound[i*dimCount+j] += shift;
         exclusiveUBound[i*dimCount+j] += shift;
         // clean-up
-        delete [] indexList;
         delete indexListArg;
+        delete [] indexList;
       } // j
     } // i
   }
@@ -1353,7 +1353,7 @@ int ESMC_Array::ESMC_ArrayConstruct(
         }
         // clean-up
         delete indexListArg;
-        delete indexList;
+        delete [] indexList;
       }
     } // jj
         
@@ -1403,6 +1403,7 @@ int ESMC_Array::ESMC_ArrayDestruct(void){
   for (int i=0; i<localDeCount; i++)
     ESMC_LocalArrayDestroy(larrayList[i]);
   delete [] larrayList;
+  delete [] larrayBaseAddrList;
   delete [] exclusiveLBound;
   delete [] exclusiveUBound;
   delete [] computationalLBound;
