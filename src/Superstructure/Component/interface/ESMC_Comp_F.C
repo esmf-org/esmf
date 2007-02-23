@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.39 2007/02/16 05:27:49 rosalind Exp $
+// $Id: ESMC_Comp_F.C,v 1.40 2007/02/23 23:25:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -400,7 +400,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   // The status returned by VMEnter() indicates that success of entering the
   // child VM, not failure or success of the callback.
   // The return code of the callback code will be valid in all cases (threading
-  // or no threading) _after_ VMWait() returns.
+  // or no threading) _after_ vmk_exit() returns.
   
   delete[] name;  // delete memory that "newtrim" allocated above
 }
