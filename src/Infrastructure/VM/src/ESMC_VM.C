@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.46 2007/02/23 17:46:41 theurich Exp $
+// $Id: ESMC_VM.C,v 1.47 2007/02/23 23:28:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.46 2007/02/23 17:46:41 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.47 2007/02/23 23:28:23 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -60,18 +60,18 @@ static ESMC_VM *GlobalVM = NULL;
 
 
 //-----------------------------------------------------------------------------
-// Module arrays to hold association between tid <-> vm <-> vmID
-#define ESMC_VM_MAXTIDS 1000    // maximum number of entries in association list
-static pthread_t matchArray_tid[ESMC_VM_MAXTIDS];
-static ESMC_VM *matchArray_vm[ESMC_VM_MAXTIDS];
-static ESMC_VMId matchArray_vmID[ESMC_VM_MAXTIDS];
-//gjtNotYet static pthread_t *matchArray_tid;
-//gjtNotYet static ESMC_VM **matchArray_vm;
-//gjtNotYet static ESMC_VMId *matchArray_vmID;
-static int vmKeyWidth = 0;        // in units of 8-bit chars
-static int vmKeyOff = 0;          // extra bits in last char
-static int matchArray_count = 0;  // number of valid entries in association list
-static int matchIndex = 0;        // process wide index for non-thread based VMs
+// Module arrays to hold association table between tid <-> vm <-> vmID
+#define ESMC_VM_MATCHTABLEMAX 10000  // maximum number of entries in table
+static pthread_t matchTable_tid[ESMC_VM_MATCHTABLEMAX];
+static ESMC_VM *matchTable_vm[ESMC_VM_MATCHTABLEMAX];
+static ESMC_VMId matchTable_vmID[ESMC_VM_MATCHTABLEMAX];
+//gjtNotYet static pthread_t *matchTable_tid;
+//gjtNotYet static ESMC_VM **matchTable_vm;
+//gjtNotYet static ESMC_VMId *matchTable_vmID;
+static int vmKeyWidth = 0;      // width in units of 8-bit chars
+static int vmKeyOff = 0;        // extra bits in last char (bits to be ignored)
+static int matchTableBound = 0; // upper bound of currently filled entries
+static int matchTableIndex = 0; // process wide index for non-thread based VMs
 //-----------------------------------------------------------------------------
 
 
@@ -326,56 +326,154 @@ void *ESMC_VM::ESMC_VMStartup(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // startup the VM
-  void *info = vmk_startup(static_cast<ESMC_VMKPlan *>(vmp), fctp, cargo, rc);
-  // the rc set by vmk_startup indicates failure in pthread_create() if used
-  // translate error code to ESMF error codes
-  if (*rc){
+  int localrc;
+  // Initialize return code
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  
+  // Startup the VM
+  void *info = vmk_startup(static_cast<ESMC_VMKPlan *>(vmp), fctp, cargo,
+    &localrc);
+  // The return code set by vmk_startup indicates failure in pthread_create() 
+  // [if pthread_create() is used -- which depends on the VMKPlan].
+  // Translate vmk_startup() error code into ESMF error code.
+  if (localrc){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_SYS, " - VMKernel could not "
     "create additional pthreads! Please check stack limit.", rc);
     return NULL;  // bail out if pthreads could not be created
-  }else
-    *rc=ESMF_SUCCESS;
+  }
 
-  if (!(vmp->parentVMflag)){
-    // for new VM context take care of VMId book keeping for ESMF...
+  // For new VM context take care of VMId book keeping for ESMF...
+  if (!(vmp->parentVMflag) && vmp->nspawn>0){
+    // Only do this if this is really a new VM context (not the parent's)
+    // and the local PET spawns any child PETs.
     int i, vas, m, n;
-    int localrc;
-    int matchArray_count_old = matchArray_count;
-    // enter information for all threads of this new VM into the matchArray
-    // TODO: make this thread-safe for when we allow ESMF-threading!
-    for (int j=0; j<vmp->nspawn; j++){
-      matchArray_tid[matchArray_count]  = vmp->myvms[j]->vmk_mypthid(); // pthid
-      matchArray_vm[matchArray_count]   = vmp->myvms[j];
+    // TODO: make this section thread-safe for when we allow ESMF-threading!
+    // TODO: the issue is that multiple threads within the same VAS may access
+    // TODO: the same matchTable instance at the same time (read & write access)
 
-      matchArray_vmID[matchArray_count] = ESMC_VMIdCreate(&localrc);// new VMId
-      for (i=0; i<vmp->myvms[j]->vmk_npets(); i++){
-        // loop through all the pets in the VM
-        vas = vmp->myvms[j]->vmk_vas(i);
-        m = vas / 8;
-        n = vas % 8;
-        matchArray_vmID[matchArray_count].vmKey[m] |= 0x80>>n;  // set the bits
+    // The VMId is that same for all PETs spawned by local PET
+    ESMC_VMId vmID = ESMC_VMIdCreate(&localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      return NULL;  // bail out on error
+    // vmKey part of the vmID gets set to the appropriate bit pattern:
+    // ->  set the bit in vmKey for each VAS in which this VM exists <-
+    for (i=0; i<vmp->myvms[0]->vmk_npets(); i++){
+      // loop through all the pets in the VM
+      vas = vmp->myvms[0]->vmk_vas(i);
+      m = vas / 8;
+      n = vas % 8;
+      vmID.vmKey[m] |= 0x80>>n;  // set the bits
+    }
+    vmID.localID = 0;  // reset localID
+    // Search through the valid entries in the matchTable,
+    // consider the localIDs of all entries with the same vmKey
+    // and determine a localID for the current VM that uniquely identifies it.
+    // At the same time construct a list of empty entries to be used further
+    // down.
+    int *emptyList = new int[matchTableBound];  // can't be larger than that
+    int emptyListBound = 0; // reset
+    for (i=0; i<matchTableBound; i++){
+      if (matchTable_vm[i]!=NULL){
+        // This is a valid entry to consider
+        if (ESMC_VMKeyCompare(matchTable_vmID[i].vmKey, vmID.vmKey)
+          == ESMF_TRUE){
+          if (matchTable_vmID[i].localID > vmID.localID)
+            vmID.localID = matchTable_vmID[i].localID;
+        }
+      }else{
+        // This is an empty entry that can be used further down
+        emptyList[emptyListBound] = i;
+        ++emptyListBound;
       }
-      matchArray_vmID[matchArray_count].localID = 0;  // assume this is first
-      for (i=matchArray_count_old-1; i>=0; i--){
-        if (ESMC_VMKeyCompare(matchArray_vmID[i].vmKey,
-          matchArray_vmID[matchArray_count].vmKey) == ESMF_TRUE){
-          matchArray_vmID[matchArray_count].localID = 
-            matchArray_vmID[i].localID + 1; // overwrite the previous default
-          break;
+    }
+    ++(vmID.localID); // Make this localID unique to all other entries
+    
+    // Enter information for each spawned PET of this new VM into the matchTable
+    for (int j=0; j<vmp->nspawn; j++){
+      // Each thread spawned by this PET gets its own entry because it will
+      // have a unique tid which will be used to associate the thread with 
+      // this entry in the matchTable.
+      int index;
+      if (emptyListBound){
+        // There are still empty entries in the matchTable below matchTableBound
+        --emptyListBound;
+        index = emptyList[emptyListBound];
+      }else{
+        // No more empty entries below matchTableBound -> up matchTableBound
+        if (matchTableBound < ESMC_VM_MATCHTABLEMAX){
+          // Still space in the matchTable
+          index = matchTableBound;
+          ++matchTableBound;
+        }else{
+          // No more space left -> fatal error!
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_MEM,
+            " - VM ran out of matchTable space.", rc);
+          return NULL;  // bail out on error
         }
       }
-      ++matchArray_count;         // done
+      matchTable_tid[index]  = vmp->myvms[j]->vmk_mypthid();  // pthid
+      matchTable_vm[index]   = vmp->myvms[j];                 // ptr to this VM
+      matchTable_vmID[index] = vmID;                          // vmID
     }
+    delete [] emptyList;
   }
   
-  // return pointer to info structure
-  return info;
+  if (rc) *rc = ESMF_SUCCESS; // Return successfully
+  return info;  // Return pointer to info structure
 }
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMShutdown()"
+//BOPI
+// !IROUTINE:  ESMC_VMShutdown
+//
+// !INTERFACE:
+void ESMC_VM::ESMC_VMShutdown(
+//
+// !RETURN VALUE:
+//    void
+//
+// !ARGUMENTS:
+//
+  class ESMC_VMPlan *vmp,         // plan for this child VM
+  void *info,                     // info structure
+  int *rc){                       // error return code
+//
+// !DESCRIPTION:
+//    Startup a new child VM according to plan.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+  // Initialize return code
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  vmk_shutdown(static_cast<ESMC_VMKPlan *>(vmp), info);
+
+  // For each locally spawned PET mark the matchTable entry invalid
+  for (int j=0; j<vmp->nspawn; j++){
+    int i;
+    for (i=0; i<matchTableBound; i++)
+      if (matchTable_vm[i]==vmp->myvms[j]) break;
+    if(i < matchTableBound){
+      // found matching entry in the matchTable
+      matchTable_vm[i] = NULL;  // mark this entry invalid
+      ESMC_VMIdDestroy(&(matchTable_vmID[i]), &localrc);
+    }else{
+      // matchTable must be corrupted
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_MEMC,
+        " - VM matchTable corrupted.", rc);
+      return; // bail out on error
+    }
+  }
+
+  if (rc) *rc = ESMF_SUCCESS; // Return successfully
+}
+  
+  //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMEnter()"
 //BOPI
@@ -399,23 +497,28 @@ int ESMC_VM::ESMC_VMEnter(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int oldMatchIndex;
+  int matchTableIndex_old;
   if(vmp->nothreadflag){
     // take care of book keeping for ESMF...
-    oldMatchIndex = matchIndex;
+    matchTableIndex_old = matchTableIndex;
     int i;
-    for (i=0; i<matchArray_count; i++)
-      if (matchArray_vm[i]==vmp->myvms[0]) break;
-    if(i<matchArray_count)
-      matchIndex=i;
+    for (i=0; i<matchTableBound; i++)
+      if (matchTable_vm[i]==vmp->myvms[0]) break;
+    if(i < matchTableBound){
+      // found matching entry in the matchTable
+      matchTableIndex = i;
+    }else{
+      // TODO: this branch needs to be treated as an error because
+      //       the matchTable must be corrupted if no match can be found!
+    }
   }
 
-  // startup the VM
+  // enter the VM
   vmk_enter(static_cast<ESMC_VMKPlan *>(vmp), info, cargo);
 
   if(vmp->nothreadflag){
     // restore book keeping for ESMF...
-    matchIndex = oldMatchIndex;
+    matchTableIndex = matchTableIndex_old;
   }
   return ESMF_SUCCESS;
 }
@@ -594,11 +697,11 @@ ESMC_VMId *ESMC_VM::ESMC_VMGetVMId(
 //-----------------------------------------------------------------------------
   *rc = ESMF_FAILURE; // assume failure
   pthread_t mytid = vmk_mypthid();
-  int i = matchIndex;
-  if (matchArray_tid[i] != mytid){
-    for (i=0; i<matchArray_count; i++)
-      if (matchArray_tid[i] == mytid) break;
-    if (i == matchArray_count){
+  int i = matchTableIndex;
+  if (matchTable_tid[i] != mytid){
+    for (i=0; i<matchTableBound; i++)
+      if (matchTable_tid[i] == mytid) break;
+    if (i == matchTableBound){
       ESMC_LogDefault.ESMC_LogWrite("could not determine VMId",
         ESMC_LOG_ERROR);
       return NULL;  // bail out
@@ -606,7 +709,7 @@ ESMC_VMId *ESMC_VM::ESMC_VMGetVMId(
   }
   // found a match
   *rc = ESMF_SUCCESS;
-  return &matchArray_vmID[i];
+  return &matchTable_vmID[i];
 }
 //-----------------------------------------------------------------------------
 
@@ -812,11 +915,11 @@ ESMC_VM *ESMC_VMGetCurrent(
 //-----------------------------------------------------------------------------
   *rc = ESMF_FAILURE; // assume failure
   pthread_t mytid = pthread_self();
-  int i = matchIndex;
-  if (matchArray_tid[i] != mytid){
-    for (i=0; i<matchArray_count; i++)
-      if (matchArray_tid[i] == mytid) break;
-    if (i == matchArray_count){
+  int i = matchTableIndex;
+  if (matchTable_tid[i] != mytid){
+    for (i=0; i<matchTableBound; i++)
+      if (matchTable_tid[i] == mytid) break;
+    if (i == matchTableBound){
       ESMC_LogDefault.ESMC_LogWrite("could not determine current VM",
         ESMC_LOG_ERROR);
       return NULL;  // bail out
@@ -824,7 +927,7 @@ ESMC_VM *ESMC_VMGetCurrent(
   }
   // found a match
   *rc = ESMF_SUCCESS;
-  return matchArray_vm[i];
+  return matchTable_vm[i];
 }
 //-----------------------------------------------------------------------------
 
@@ -852,11 +955,11 @@ ESMC_VMId *ESMC_VMGetCurrentID(
 //-----------------------------------------------------------------------------
   *rc = ESMF_FAILURE; // assume failure
   pthread_t mytid = pthread_self();
-  int i = matchIndex;
-  if (matchArray_tid[i] != mytid){
-    for (i=0; i<matchArray_count; i++)
-      if (matchArray_tid[i] == mytid) break;
-    if (i == matchArray_count){
+  int i = matchTableIndex;
+  if (matchTable_tid[i] != mytid){
+    for (i=0; i<matchTableBound; i++)
+      if (matchTable_tid[i] == mytid) break;
+    if (i == matchTableBound){
       ESMC_LogDefault.ESMC_LogWrite("could not determine current VMId",
         ESMC_LOG_ERROR);
       return NULL;  // bail out
@@ -864,7 +967,7 @@ ESMC_VMId *ESMC_VMGetCurrentID(
   }
   // found a match
   *rc = ESMF_SUCCESS;
-  return &matchArray_vmID[i];
+  return &matchTable_vmID[i];
 }
 //-----------------------------------------------------------------------------
 
@@ -902,13 +1005,13 @@ ESMC_VM *ESMC_VMInitialize(
   }
   
   // allocate the VM association table
-//gjtNotYet  matchArray_tid = new pthread_t[ESMC_VM_MAXTIDS];
-//gjtNotYet  matchArray_vm = new ESMC_VM*[ESMC_VM_MAXTIDS];
-//gjtNotYet  matchArray_vmID = new ESMC_VMId[ESMC_VM_MAXTIDS];
+//gjtNotYet  matchTable_tid = new pthread_t[ESMC_VM_MATCHTABLEMAX];
+//gjtNotYet  matchTable_vm = new ESMC_VM*[ESMC_VM_MATCHTABLEMAX];
+//gjtNotYet  matchTable_vmID = new ESMC_VMId[ESMC_VM_MATCHTABLEMAX];
 
-  matchArray_count = 0;       // reset
-  matchArray_tid[matchArray_count]  = pthread_self();
-  matchArray_vm[matchArray_count]   = GlobalVM;
+  matchTableBound = 0;       // reset
+  matchTable_tid[matchTableBound]  = pthread_self();
+  matchTable_vm[matchTableBound]   = GlobalVM;
   
   // set vmID
   vmKeyWidth = GlobalVM->vmk_npets()/8;
@@ -919,14 +1022,14 @@ ESMC_VM *ESMC_VMInitialize(
   }
 //printf("gjt in ESMC_VMInitialize, vmKeyWidth = %d\n", vmKeyWidth);
   int localrc;
-  matchArray_vmID[matchArray_count] = ESMC_VMIdCreate(&localrc);
+  matchTable_vmID[matchTableBound] = ESMC_VMIdCreate(&localrc);
   for (int i=0; i<vmKeyWidth; i++)
-    matchArray_vmID[matchArray_count].vmKey[i] = 0xff;  // globalVM in all VASs
-  matchArray_vmID[matchArray_count].vmKey[vmKeyWidth-1] =
-    matchArray_vmID[matchArray_count].vmKey[vmKeyWidth-1]<<vmKeyOff; // shift
-  matchArray_vmID[matchArray_count].localID = 0;        // globalVM is first
+    matchTable_vmID[matchTableBound].vmKey[i] = 0xff;  // globalVM in all VASs
+  matchTable_vmID[matchTableBound].vmKey[vmKeyWidth-1] =
+    matchTable_vmID[matchTableBound].vmKey[vmKeyWidth-1]<<vmKeyOff; // shift
+  matchTable_vmID[matchTableBound].localID = 0;        // globalVM is first
 
-  ++matchArray_count;         // done
+  ++matchTableBound;         // done
 
                              // totalview cannot handle events during the init
                              // call - it freezes or crashes or ignores input.
@@ -961,6 +1064,7 @@ void ESMC_VMFinalize(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  int localrc;
   *rc = ESMF_FAILURE;         // assume failure
   if (GlobalVM==NULL){
     ESMC_LogDefault.ESMC_LogWrite("invalid GlobalVM", ESMC_LOG_ERROR);
@@ -971,11 +1075,12 @@ void ESMC_VMFinalize(
     if (*keepMpiFlag==ESMF_TRUE) finalizeMpi = 0; // reset
   }
   GlobalVM->vmk_finalize(finalizeMpi);
-  matchArray_count = 0;
+  matchTableBound = 0;
   // delete the VM association table
-//gjtNotYet  delete [] matchArray_tid;
-//gjtNotYet  delete [] matchArray_vm;
-//gjtNotYet  delete [] matchArray_vmID;
+  ESMC_VMIdDestroy(&(matchTable_vmID[0]), &localrc);
+//gjtNotYet  delete [] matchTable_tid;
+//gjtNotYet  delete [] matchTable_vm;
+//gjtNotYet  delete [] matchTable_vmID;
   *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -1008,7 +1113,7 @@ void ESMC_VMAbort(
     return; // bail out
   }
   GlobalVM->vmk_abort();
-  matchArray_count = 0;
+  matchTableBound = 0;
   *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------

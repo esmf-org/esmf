@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.63 2007/02/20 02:36:49 rosalind Exp $
+// $Id: ESMC_VM_F.C,v 1.64 2007/02/23 23:28:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -458,11 +458,11 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmshutdown()"
     int localrc;
-    (*ptr_vmparent)->vmk_shutdown(static_cast<ESMC_VMKPlan *>(*ptr_vmplan),
-         *vm_info);
+    (*ptr_vmparent)->ESMC_VMShutdown(*ptr_vmplan, *vm_info, &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      return; // bail out on error
     
-    localrc=ESMF_SUCCESS;
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    if (rc) *rc = ESMF_SUCCESS; // Return successfully
   }
   
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
