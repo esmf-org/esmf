@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.45 2007/02/23 00:25:00 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.46 2007/02/23 17:29:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -149,7 +149,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.45 2007/02/23 00:25:00 theurich Exp $'
+      '$Id: ESMF_Array.F90,v 1.46 2007/02/23 17:29:22 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2736,7 +2736,7 @@ contains
     enddo
     
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayScatter(array, farray(1,1,1), ESMF_DATA_REAL, ESMF_TYPEKIND_R8, &
+    call c_ESMC_ArrayScatter(array, farray(1,1,1), ESMF_TYPEKIND_R8, &
       3, counts, patch, rootPet, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
