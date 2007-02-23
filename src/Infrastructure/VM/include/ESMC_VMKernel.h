@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.40 2007/01/26 18:48:02 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.41 2007/02/23 17:46:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@ class ESMC_VMK{
     MPI_Comm vmk_mpi_comm(void);   // return mpi_c
     int vmk_nthreads(int i);       // return number of threads in group PET
     int vmk_tid(int i);            // return tid for PET
-    int vmk_pid(int i);            // return pid for PET
+    int vmk_vas(int i);            // return vas for PET
     int vmk_lpid(int i);           // return lpid for PET
     
     

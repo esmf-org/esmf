@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.79 2007/01/26 18:48:02 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.80 2007/02/23 17:46:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -1734,7 +1734,7 @@ int ESMC_VMK::vmk_tid(int i){
   return tid[i];
 }
 
-int ESMC_VMK::vmk_pid(int i){
+int ESMC_VMK::vmk_vas(int i){
   return pid[i];
 }
 

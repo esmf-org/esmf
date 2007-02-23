@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.48 2007/02/16 05:27:43 rosalind Exp $
+// $Id: ESMC_DELayout.C,v 1.49 2007/02/23 17:46:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.48 2007/02/16 05:27:43 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.49 2007/02/23 17:46:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -481,7 +481,7 @@ int ESMC_DELayout::ESMC_DELayoutConstruct(
   // query the VM for localPet and petCount
   int localPet, petCount, localVas;
   vmArg->ESMC_VMGet(&localPet, &petCount, NULL, NULL, NULL);
-  localVas = vmArg->vmk_pid(localPet);
+  localVas = vmArg->vmk_vas(localPet);
   
   // by default pin DEs to PETs
   if (dePinFlagArg == ESMC_NULL_POINTER)
@@ -508,7 +508,7 @@ int ESMC_DELayout::ESMC_DELayoutConstruct(
   for (int i=0; i<deCount; i++){
     deList[i].de = i;                // by default start at 0
     deList[i].pet = petMap[i];
-    deList[i].vas = vmArg->vmk_pid(petMap[i]);
+    deList[i].vas = vmArg->vmk_vas(petMap[i]);
   }
   
   // clean up petMap if necessary
@@ -718,7 +718,7 @@ int ESMC_DELayout::ESMC_DELayoutConstruct1D(ESMC_VM &vmArg, int deCountArg,
   // Now that the layout is pretty much set up it is time to go through once
   // more to set the correct VAS.
   for (int i=0; i<deCount; i++)
-    deList[i].vas = vm->vmk_pid(deList[i].pet);
+    deList[i].vas = vm->vmk_vas(deList[i].pet);
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -828,7 +828,7 @@ int ESMC_DELayout::ESMC_DELayoutConstructND(ESMC_VM &vmArg, int *deCountArg,
   // Now that the layout is pretty much set up it is time to go through once
   // more to set the correct VAS.
   for (int i=0; i<deCount; i++)
-    deList[i].vas = vm->vmk_pid(deList[i].pet);
+    deList[i].vas = vm->vmk_vas(deList[i].pet);
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -1248,10 +1248,10 @@ int ESMC_DELayout::ESMC_DELayoutGetDEMatchDE(
 //-----------------------------------------------------------------------------
   int *tempMatchList = new int[layoutMatch.deCount]; // maximum number of DEs
   int tempMatchCount = 0;
-  int comparePID = deList[de].vas;
+  int vasCompare = deList[de].vas;
   int j=0;
   for (int i=0; i<layoutMatch.deCount; i++)
-    if (layoutMatch.deList[i].vas == comparePID){
+    if (layoutMatch.deList[i].vas == vasCompare){
       tempMatchList[j] = i;
       ++j;
     }
@@ -1300,10 +1300,10 @@ int ESMC_DELayout::ESMC_DELayoutGetDEMatchPET(
   int npets = vmMatch.vmk_npets();  // maximum number of PETs in vmMatch
   int *tempMatchList = new int[npets];
   int tempMatchCount = 0;
-  int comparePID = deList[de].vas; // this is the virtual address space id
+  int vasCompare = deList[de].vas; // this is the virtual address space id
   int j=0;
   for (int i=0; i<npets; i++)
-    if (vmMatch.vmk_pid(i) == comparePID){
+    if (vmMatch.vmk_vas(i) == vasCompare){
       tempMatchList[j] = i;
       ++j;
     }
@@ -1718,7 +1718,7 @@ ESMC_DELayoutServiceReply ESMC_DELayout::ESMC_DELayoutServiceOffer(
 
   int localPet, localVas;
   vm->ESMC_VMGet(&localPet, NULL, NULL, NULL, NULL);
-  localVas = vm->vmk_pid(localPet);
+  localVas = vm->vmk_vas(localPet);
   
   // DE to PET pinning is more restrictive -> check first
   if (dePinFlag == ESMF_DE_PIN_PET){
@@ -1808,7 +1808,7 @@ int ESMC_DELayout::ESMC_DELayoutServiceComplete(
 
   int localPet, localVas;
   vm->ESMC_VMGet(&localPet, NULL, NULL, NULL, NULL);
-  localVas = vm->vmk_pid(localPet);
+  localVas = vm->vmk_vas(localPet);
   
   // DE to PET pinning is more restrictive -> check first
   if (dePinFlag == ESMF_DE_PIN_PET){

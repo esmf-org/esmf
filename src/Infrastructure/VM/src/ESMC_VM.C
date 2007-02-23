@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.45 2006/11/29 22:52:38 theurich Exp $
+// $Id: ESMC_VM.C,v 1.46 2007/02/23 17:46:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.45 2006/11/29 22:52:38 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.46 2007/02/23 17:46:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -339,7 +339,7 @@ void *ESMC_VM::ESMC_VMStartup(
 
   if (!(vmp->parentVMflag)){
     // for new VM context take care of VMId book keeping for ESMF...
-    int i, pid, m, n;
+    int i, vas, m, n;
     int localrc;
     int matchArray_count_old = matchArray_count;
     // enter information for all threads of this new VM into the matchArray
@@ -351,9 +351,9 @@ void *ESMC_VM::ESMC_VMStartup(
       matchArray_vmID[matchArray_count] = ESMC_VMIdCreate(&localrc);// new VMId
       for (i=0; i<vmp->myvms[j]->vmk_npets(); i++){
         // loop through all the pets in the VM
-        pid = vmp->myvms[j]->vmk_pid(i);
-        m = pid / 8;
-        n = pid % 8;
+        vas = vmp->myvms[j]->vmk_vas(i);
+        m = vas / 8;
+        n = vas % 8;
         matchArray_vmID[matchArray_count].vmKey[m] |= 0x80>>n;  // set the bits
       }
       matchArray_vmID[matchArray_count].localID = 0;  // assume this is first
@@ -503,7 +503,7 @@ int ESMC_VM::ESMC_VMGetPETLocalInfo(
   if (threadId != ESMC_NULL_POINTER)
     *threadId = this->vmk_tid(pet);
   if (vas != ESMC_NULL_POINTER)
-    *vas = this->vmk_pid(pet);
+    *vas = this->vmk_vas(pet);
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -544,10 +544,10 @@ int ESMC_VM::ESMC_VMGetPETMatchPET(
 //-----------------------------------------------------------------------------
   int npets = vmMatch.vmk_npets();  // maximum number of PETs in vmMatch
   int *tempMatchList = new int[npets];
-  int comparePID = pid[pet];        // this is pet's virtual address space id
+  int vasCompare = pid[pet];        // this is pet's virtual address space id
   int j=0;
   for (int i=0; i<npets; i++)
-    if (vmMatch.vmk_pid(i) == comparePID){
+    if (vmMatch.vmk_vas(i) == vasCompare){
       tempMatchList[j] = i;
       ++j;
     }
