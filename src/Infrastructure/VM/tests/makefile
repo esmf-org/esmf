@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 2006/09/22 23:55:42 theurich Exp $ 
+# $Id: makefile,v 1.31 2007/02/23 23:18:44 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -28,7 +28,8 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_VMUTest \
 		$(ESMF_TESTDIR)/ESMF_VMAllGatherUTest \
 		$(ESMF_TESTDIR)/ESMF_VMBroadcastUTest \
 		$(ESMF_TESTDIR)/ESMF_VMAllToAllVUTest \
-		$(ESMF_TESTDIR)/ESMF_VMBarrierUTest
+		$(ESMF_TESTDIR)/ESMF_VMBarrierUTest \
+		$(ESMF_TESTDIR)/ESMF_VMComponentUTest
 
 TESTS_RUN     = RUN_ESMF_VMUTest \
                 RUN_ESMF_VMUserMpiInitUTest \
@@ -41,7 +42,8 @@ TESTS_RUN     = RUN_ESMF_VMUTest \
                 RUN_ESMF_VMAllGatherUTest \
 		RUN_ESMF_VMBroadcastUTest \
                 RUN_ESMF_VMAllToAllVUTest \
-		RUN_ESMF_VMBarrierUTest
+		RUN_ESMF_VMBarrierUTest \
+		RUN_ESMF_VMComponentUTest 
 
 TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI \
                 RUN_ESMF_VMUserMpiInitUTestUNI \
@@ -54,7 +56,8 @@ TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI \
                 RUN_ESMF_VMAllGatherUTestUNI \
                 RUN_ESMF_VMBroadcastUTestUNI \
                 RUN_ESMF_VMAllToAllVUTestUNI \
-                RUN_ESMF_VMBarrierUTestUNI
+                RUN_ESMF_VMBarrierUTestUNI \
+                RUN_ESMF_VMComponentUTestUNI
 
 
 include ${ESMF_DIR}/makefile
@@ -173,5 +176,14 @@ RUN_ESMF_VMBarrierUTest:
 
 RUN_ESMF_VMBarrierUTestUNI:
 	$(MAKE) TNAME=VMBarrier NP=1 ftest
+
+#
+# VM Component
+#
+RUN_ESMF_VMComponentUTest:
+	$(MAKE) TNAME=VMComponent NP=4 ftest
+
+RUN_ESMF_VMComponentUTestUNI:
+	$(MAKE) TNAME=VMComponent NP=1 ftest
 
 
