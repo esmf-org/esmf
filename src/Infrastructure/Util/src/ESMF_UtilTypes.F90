@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.41 2007/02/20 02:36:49 rosalind Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.42 2007/02/23 23:58:46 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -177,8 +177,9 @@
                    ESMF_TYPEKIND_R  = ESMF_TypeKind(10), &
                    ESMF_NOKIND = ESMF_TypeKind(99)
 
-      ! these work where you have to declare an array or something that
-      ! the compiler needs to have a fixed 'kind' for.
+      ! these are the only Fortran kind parameters supported
+      ! by ESMF.
+
       integer, parameter :: &
 #ifndef ESMF_NO_INTEGER_1_BYTE 
                    ESMF_KIND_I1 = selected_int_kind(2), &
@@ -196,6 +197,12 @@
                    ESMF_KIND_R8 = selected_real_kind(6,45), &
                    ESMF_KIND_C8 = selected_real_kind(3,25), &
                    ESMF_KIND_C16 = selected_real_kind(6,45)
+
+      integer :: defaultIntegerDummy    ! Needed to define ESMF_KIND_I
+      real    :: defaultRealDummy       ! Needed to define ESMF_KIND_R
+      integer, parameter :: &
+                   ESMF_KIND_I = kind(defaultIntegerDummy), &
+                   ESMF_KIND_R = kind(defaultRealDummy)
 
 !------------------------------------------------------------------------------
 !
@@ -502,7 +509,8 @@
 #endif
 
       public ESMF_TYPEKIND_I4, ESMF_TYPEKIND_I8, & 
-             ESMF_TYPEKIND_R4, ESMF_TYPEKIND_R8, ESMF_C8, ESMF_C16, ESMF_NOKIND
+             ESMF_TYPEKIND_R4, ESMF_TYPEKIND_R8, ESMF_C8, &
+             ESMF_C16, ESMF_KIND_I, ESMF_KIND_R, ESMF_NOKIND
 
 #ifndef ESMF_NO_INTEGER_1_BYTE 
       public ESMF_KIND_I1
