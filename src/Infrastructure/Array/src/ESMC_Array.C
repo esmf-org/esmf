@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.64 2007/02/22 23:35:26 theurich Exp $
+// $Id: ESMC_Array.C,v 1.65 2007/02/23 00:24:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.64 2007/02/22 23:35:26 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.65 2007/02/23 00:24:47 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -110,7 +110,7 @@ ESMC_Array *ESMC_ArrayCreate(
   }
 
   // check the input and get the information together to call ArrayConstruct
-  // larrayListArg -> type/kind/rank
+  // larrayListArg -> typekind/rank
   if (larrayListArg == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to larrayList argument", rc);
@@ -126,18 +126,10 @@ ESMC_Array *ESMC_ArrayCreate(
     array = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  ESMC_DataType type = larrayListArg[0]->ESMC_LocalArrayGetType();
-  ESMC_TypeKind kind = larrayListArg[0]->ESMC_LocalArrayGetTypeKind();
+  ESMC_TypeKind typekind = larrayListArg[0]->ESMC_LocalArrayGetTypeKind();
   int rank = larrayListArg[0]->ESMC_LocalArrayGetRank();
   for (int i=1; i<larrayCount; i++){
-    if (larrayListArg[0]->ESMC_LocalArrayGetType() != type){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-        "- Type mismatch in the elements of larrayList argument", rc);
-      delete array;
-      array = ESMC_NULL_POINTER;
-      return ESMC_NULL_POINTER;
-    }
-    if (larrayListArg[0]->ESMC_LocalArrayGetTypeKind() != kind){
+    if (larrayListArg[0]->ESMC_LocalArrayGetTypeKind() != typekind){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
         "- TypeKind mismatch in the elements of larrayList argument", rc);
       delete array;
@@ -607,7 +599,7 @@ ESMC_Array *ESMC_ArrayCreate(
   delete [] temp_ubounds;
   
   // call into ArrayConstruct
-  status = array->ESMC_ArrayConstruct(type, kind, rank, larrayList, distgrid,
+  status = array->ESMC_ArrayConstruct(typekind, rank, larrayList, distgrid,
     exclusiveLBound, exclusiveUBound, computationalLBound, computationalUBound,
     totalLBound, totalUBound, tensorCount, lboundsArray, uboundsArray,
     staggerLoc, vectorDim, dimmapArray, inverseDimmapArray, indexflag);
@@ -692,7 +684,7 @@ ESMC_Array *ESMC_ArrayCreate(
   }
 
   // check the input and get the information together to call ArrayConstruct
-  // arrayspec -> type/kind/rank
+  // arrayspec -> typekind/rank
   if (arrayspec == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to arrayspec", rc);
@@ -701,7 +693,7 @@ ESMC_Array *ESMC_ArrayCreate(
     return ESMC_NULL_POINTER;
   }
   ESMC_DataType type = arrayspec->ESMC_ArraySpecGetType();
-  ESMC_TypeKind kind = arrayspec->ESMC_ArraySpecGetTypeKind();
+  ESMC_TypeKind typekind = arrayspec->ESMC_ArraySpecGetTypeKind();
   int rank = arrayspec->ESMC_ArraySpecGetRank();
   // distgrid -> delayout, dimCount
   if (distgrid == NULL){
@@ -1089,7 +1081,7 @@ ESMC_Array *ESMC_ArrayCreate(
       }
     }
     // allocate LocalArray object with specific lbounds and ubounds
-    larrayList[i] = ESMC_LocalArrayCreate(rank, type, kind, temp_counts,
+    larrayList[i] = ESMC_LocalArrayCreate(rank, type, typekind, temp_counts,
       temp_lbounds, temp_ubounds);
   }
   delete [] temp_counts;
@@ -1097,7 +1089,7 @@ ESMC_Array *ESMC_ArrayCreate(
   delete [] temp_ubounds;
   
   // call into ArrayConstruct
-  status = array->ESMC_ArrayConstruct(type, kind, rank, larrayList, distgrid,
+  status = array->ESMC_ArrayConstruct(typekind, rank, larrayList, distgrid,
     exclusiveLBound, exclusiveUBound, computationalLBound, computationalUBound,
     totalLBound, totalUBound, tensorCount, lboundsArray, uboundsArray,
     staggerLoc, vectorDim, dimmapArray, inverseDimmapArray, indexflag);
@@ -1201,8 +1193,7 @@ int ESMC_Array::ESMC_ArrayConstruct(
 //
 // !ARGUMENTS:
 //
-  ESMC_DataType typeArg,                  // (in)
-  ESMC_TypeKind kindArg,                  // (in)
+  ESMC_TypeKind typekindArg,              // (in)
   int rankArg,                            // (in)
   ESMC_LocalArray **larrayListArg,        // (in)
   ESMC_DistGrid *distgridArg,             // (in)
@@ -1238,8 +1229,7 @@ int ESMC_Array::ESMC_ArrayConstruct(
     *rc = ESMF_FAILURE;
 
   // fill in the Array object
-  type = typeArg;
-  kind = kindArg;
+  typekind = typekindArg;
   rank = rankArg;
   distgrid = distgridArg;
   status = distgrid->ESMC_DistGridGet(&delayout, NULL, NULL, &dimCount, NULL,
@@ -1447,8 +1437,7 @@ int ESMC_Array::ESMC_ArrayGet(
 //
 // !ARGUMENTS:
 //
-  ESMC_DataType *typeArg,                 // out - type
-  ESMC_TypeKind *kindArg,                 // out - kind
+  ESMC_TypeKind *typekindArg,             // out - kind
   int *rankArg,                           // out - rank
   ESMC_LocalArray **localArrayList,       // out - localArrayList
   int localArrayListCount,                // in  - localArrayList elmt count
@@ -1485,10 +1474,8 @@ int ESMC_Array::ESMC_ArrayGet(
     *rc = ESMF_FAILURE;
   
   // fill simple return values
-  if (typeArg != NULL)
-    *typeArg = type;
-  if (kindArg != NULL)
-    *kindArg = kind;
+  if (typekindArg != NULL)
+    *typekindArg = typekind;
   if (rankArg != NULL)
     *rankArg = rank;
   if (distgridArg != NULL)
@@ -1927,8 +1914,8 @@ int ESMC_Array::ESMC_ArrayPrint(){
 
   // print info about the ESMC_Array object
   printf("--- ESMC_ArrayPrint start ---\n");
-  printf("Array type/kind/rank: %s / %s / %d \n", ESMC_DataTypeString(type),
-    ESMC_TypeKindString(kind), rank);
+  printf("Array typekind/rank: %s / %d \n", ESMC_TypeKindString(typekind),
+    rank);
   printf("~ cached values ~\n");
   printf("DistGrid dimCount = %d\n", dimCount);
   printf("deCount = %d\n", deCount);
@@ -2006,7 +1993,6 @@ int ESMC_Array::ESMC_ArraySerialize(
 
   char *cp;
   int *ip;
-  ESMC_DataType *dtp;
   ESMC_TypeKind *dkp;
   ESMC_IndexFlag *ifp;
 
@@ -2025,10 +2011,8 @@ int ESMC_Array::ESMC_ArraySerialize(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
     return localrc;
   // Then, serialize Array meta data
-  dtp = (ESMC_DataType *)(buffer + *offset);
-  *dtp++ = type;
-  dkp = (ESMC_TypeKind *)dtp;
-  *dkp++ = kind;
+  dkp = (ESMC_TypeKind *)(buffer + *offset);
+  *dkp++ = typekind;
   ip = (int *)dkp;
   *ip++ = rank;
   ifp = (ESMC_IndexFlag *)ip;
@@ -2078,7 +2062,6 @@ int ESMC_Array::ESMC_ArrayDeserialize(
 
   char *cp;
   int *ip;
-  ESMC_DataType *dtp;
   ESMC_TypeKind *dkp;
   ESMC_IndexFlag *ifp;
 
@@ -2094,10 +2077,8 @@ int ESMC_Array::ESMC_ArrayDeserialize(
     return localrc;
   
   // Then, deserialize Array meta data
-  dtp = (ESMC_DataType *)(buffer + *offset);
-  type = *dtp++;
-  dkp = (ESMC_TypeKind *)dtp;
-  kind = *dkp++;
+  dkp = (ESMC_TypeKind *)(buffer + *offset);
+  typekind = *dkp++;
   ip = (int *)dkp;
   rank = *ip++;
   ifp = (ESMC_IndexFlag *)ip;
@@ -2149,8 +2130,7 @@ int ESMC_Array::ESMC_ArrayScatter(
 // !ARGUMENTS:
 //
   void *farrayArg,                      // in -
-  ESMC_DataType typeArg,                // in -
-  ESMC_TypeKind kindArg,                // in -
+  ESMC_TypeKind typekindArg,            // in -
   int rankArg,                          // in -
   int *counts,                          // in -
   int *patchArg,                        // in -
@@ -2191,8 +2171,8 @@ int ESMC_Array::ESMC_ArrayScatter(
   int localPet, petCount;
   vm->ESMC_VMGet(&localPet, &petCount, NULL, NULL, NULL);
   
-//printf("gjt in ArrayScatter: type/kind/rank: %s / %s / %d \n",
-//ESMC_DataTypeString(typeArg), ESMC_TypeKindString(kindArg), rankArg);
+//printf("gjt in ArrayScatter: typekind/rank: %s / %d \n",
+//ESMC_TypeKindString(typekindArg), rankArg);
 //printf("gjt in ArrayScatter: counts: %d, %d, %d\n", counts[0], counts[1],
 //counts[2]);
 
@@ -2211,7 +2191,7 @@ int ESMC_Array::ESMC_ArrayScatter(
     return localrc;
   }
 
-  // check consistency of input information: shape = (type, kind, rank, extents)
+  // check consistency of input information: shape = (typekind, rank, extents)
   int *minCorner, *maxCorner;
   minCorner = new int[dimCount];
   maxCorner = new int[dimCount];
@@ -2220,12 +2200,7 @@ int ESMC_Array::ESMC_ArrayScatter(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
     return localrc;
   if (localPet == rootPet){
-    if (typeArg != type){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- Type mismatch between farray argument and Array object", rc);
-      return localrc;
-    }
-    if (kindArg != kind){
+    if (typekindArg != typekind){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- TypeKind mismatch between farray argument and Array object", rc);
       return localrc;
@@ -2261,7 +2236,7 @@ int ESMC_Array::ESMC_ArrayScatter(
   }
 
   // size in bytes of each piece of data  
-  int dataSize = ESMC_TypeKindSize(kindArg);
+  int dataSize = ESMC_TypeKindSize(typekindArg);
 
   // prepare for comms
   vmk_commhandle **commh = new vmk_commhandle*; // used by all comm calls

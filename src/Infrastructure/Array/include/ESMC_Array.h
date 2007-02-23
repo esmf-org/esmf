@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.48 2007/02/16 05:27:40 rosalind Exp $
+// $Id: ESMC_Array.h,v 1.49 2007/02/23 00:25:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -49,8 +49,7 @@ class ESMC_Array;
 class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
   private:
     // global information
-    ESMC_DataType type;
-    ESMC_TypeKind kind;
+    ESMC_TypeKind typekind;
     int rank;
     ESMC_IndexFlag indexflag;
     //todo: the LocalArray pointers should be shared between PETs in the same
@@ -89,7 +88,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     
   public:
     // Construct and Destruct
-    int ESMC_ArrayConstruct(ESMC_DataType type, ESMC_TypeKind kind, int rank,
+    int ESMC_ArrayConstruct(ESMC_TypeKind typekind, int rank,
       ESMC_LocalArray **larrayList,
       ESMC_DistGrid *distgrid, int *exclusiveLBound, int *exclusiveUBound, 
       int *computationalLBound, int *computationalUBound, 
@@ -104,7 +103,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     char *ESMC_ArrayGet(void){
       return ESMC_BaseGetName();
     }
-    int ESMC_ArrayGet(ESMC_DataType *type, ESMC_TypeKind *kind, int *rank,
+    int ESMC_ArrayGet(ESMC_TypeKind *typekind, int *rank,
       ESMC_LocalArray **localArrayList, int localArrayListCount,
       ESMC_DistGrid **distgridArg, ESMC_DELayout **delayoutArg,
       ESMC_IndexFlag *indexflag, ESMC_InterfaceInt *dimmapArg,
@@ -125,8 +124,8 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_ArrayDeserialize(char *buffer, int *offset);
     
     // comm methods
-    int ESMC_ArrayScatter(void *farray, ESMC_DataType type, ESMC_TypeKind kind,
-      int rank, int *counts, int *patch, int rootPet, ESMC_VM *vm);
+    int ESMC_ArrayScatter(void *farray, ESMC_TypeKind typekind, int rank,
+      int *counts, int *patch, int rootPet, ESMC_VM *vm);
     
     // external friend functions
     friend int ESMC_ArraySparseMatMulStore(ESMC_Array *srcArray, 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.44 2007/02/19 23:44:40 rosalind Exp $
+! $Id: ESMF_Array.F90,v 1.45 2007/02/23 00:25:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -149,7 +149,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.44 2007/02/19 23:44:40 rosalind Exp $'
+      '$Id: ESMF_Array.F90,v 1.45 2007/02/23 00:25:00 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1066,7 +1066,7 @@ contains
 ! !IROUTINE: ESMF_ArrayGet - Get Array internals
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayGet(array, type, kind, rank, larrayList, distgrid, &
+  subroutine ESMF_ArrayGet(array, typekind, rank, larrayList, distgrid, &
     delayout, indexflag, dimmap, inverseDimmap, exclusiveLBound, exclusiveUBound,&
     computationalLBound, computationalUBound, totalLBound, totalUBound, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
@@ -1074,8 +1074,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
-    type(ESMF_DataType),           intent(out), optional :: type
-    type(ESMF_TypeKind),           intent(out), optional :: kind
+    type(ESMF_TypeKind),           intent(out), optional :: typekind
     integer,                       intent(out), optional :: rank
     type(ESMF_LocalArray), target, intent(out), optional :: larrayList(:)
     type(ESMF_DistGrid),           intent(out), optional :: distgrid
@@ -1106,9 +1105,7 @@ contains
 !     \begin{description}
 !     \item[array] 
 !        Queried {\tt ESMF\_Array} object.
-!     \item[{[type]}]
-!        Type of the Array object.
-!     \item[{[kind]}]
+!     \item[{[typekind]}]
 !        TypeKind of the Array object.
 !     \item[{[rank]}]
 !        Rank of the Array object.
@@ -1247,7 +1244,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayGet(array, type, kind, rank, opt_larrayPtrList, &
+    call c_ESMC_ArrayGet(array, typekind, rank, opt_larrayPtrList, &
       len_larrayPtrList, distgrid, delayout, indexflag, dimmapArg, &
       inverseDimmapArg, exclusiveLBoundArg, exclusiveUBoundArg, &
       computationalLBoundArg, computationalUBoundArg, &
@@ -2657,7 +2654,7 @@ contains
     enddo
     
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayScatter(array, farray(1,1), ESMF_DATA_REAL, ESMF_TYPEKIND_R8, &
+    call c_ESMC_ArrayScatter(array, farray(1,1), ESMF_TYPEKIND_R8, &
       2, counts, patch, rootPet, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.45 2007/02/16 05:27:40 rosalind Exp $
+// $Id: ESMC_Array_F.C,v 1.46 2007/02/23 00:25:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -95,8 +95,8 @@ extern "C" {
   }
 
   
-  void FTN(c_esmc_arrayget)(ESMC_Array **ptr, ESMC_DataType *type,
-    ESMC_TypeKind *kind, int *rank, ESMC_LocalArray **opt_localArrayList,
+  void FTN(c_esmc_arrayget)(ESMC_Array **ptr, ESMC_TypeKind *typekind, 
+    int *rank, ESMC_LocalArray **opt_localArrayList,
     int *len_localArrayList, ESMC_DistGrid **distgrid, ESMC_DELayout **delayout,
     ESMC_IndexFlag *indexflag, ESMC_InterfaceInt **dimmap,
     ESMC_InterfaceInt **inverseDimmap, ESMC_InterfaceInt **exclusiveLBound,
@@ -120,9 +120,9 @@ extern "C" {
     else opt_delayout = delayout;
     // call into C++, dealing with optional arguments 
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_ArrayGet(
-      ESMC_NOT_PRESENT_FILTER(type), ESMC_NOT_PRESENT_FILTER(kind),
-      ESMC_NOT_PRESENT_FILTER(rank), opt_localArrayList, *len_localArrayList,
-      opt_distgrid, opt_delayout, ESMC_NOT_PRESENT_FILTER(indexflag),
+      ESMC_NOT_PRESENT_FILTER(typekind), ESMC_NOT_PRESENT_FILTER(rank),
+      opt_localArrayList, *len_localArrayList, opt_distgrid, opt_delayout,
+      ESMC_NOT_PRESENT_FILTER(indexflag),
       *dimmap, *inverseDimmap, *exclusiveLBound, *exclusiveUBound,
       *computationalLBound, *computationalUBound, *totalLBound, *totalUBound,
       *computationalLWidth, *computationalUWidth, *totalLWidth, *totalUWidth),
@@ -169,7 +169,7 @@ extern "C" {
 
   
   void FTN(c_esmc_arrayscatter)(ESMC_Array **array, void *farray,
-    ESMC_DataType *type, ESMC_TypeKind *kind, int *rank, int *counts,
+    ESMC_TypeKind *typekind, int *rank, int *counts,
     int *patch, int *rootPet, ESMC_VM **vm, int *rc){
     ESMC_VM *opt_vm;
 #undef  ESMC_METHOD
@@ -179,7 +179,7 @@ extern "C" {
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->ESMC_ArrayScatter(
-      farray, *type, *kind, *rank, counts, ESMC_NOT_PRESENT_FILTER(patch),
+      farray, *typekind, *rank, counts, ESMC_NOT_PRESENT_FILTER(patch),
       *rootPet, opt_vm),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
