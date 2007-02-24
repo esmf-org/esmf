@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.47 2007/02/23 23:28:23 theurich Exp $
+// $Id: ESMC_VM.C,v 1.48 2007/02/24 04:54:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.47 2007/02/23 23:28:23 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.48 2007/02/24 04:54:32 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -454,19 +454,22 @@ void ESMC_VM::ESMC_VMShutdown(
   vmk_shutdown(static_cast<ESMC_VMKPlan *>(vmp), info);
 
   // For each locally spawned PET mark the matchTable entry invalid
-  for (int j=0; j<vmp->nspawn; j++){
-    int i;
-    for (i=0; i<matchTableBound; i++)
-      if (matchTable_vm[i]==vmp->myvms[j]) break;
-    if(i < matchTableBound){
-      // found matching entry in the matchTable
-      matchTable_vm[i] = NULL;  // mark this entry invalid
-      ESMC_VMIdDestroy(&(matchTable_vmID[i]), &localrc);
-    }else{
-      // matchTable must be corrupted
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_MEMC,
-        " - VM matchTable corrupted.", rc);
-      return; // bail out on error
+  if (!(vmp->parentVMflag)){
+    // This is really a separate VM context (not the parent's)
+    for (int j=0; j<vmp->nspawn; j++){
+      int i;
+      for (i=0; i<matchTableBound; i++)
+        if (matchTable_vm[i]==vmp->myvms[j]) break;
+      if (i < matchTableBound){
+        // found matching entry in the matchTable
+        matchTable_vm[i] = NULL;  // mark this entry invalid
+        ESMC_VMIdDestroy(&(matchTable_vmID[i]), &localrc);
+      }else{
+        // matchTable must be corrupted
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_MEMC,
+          " - VM matchTable corrupted.", rc);
+        return; // bail out on error
+      }
     }
   }
 
