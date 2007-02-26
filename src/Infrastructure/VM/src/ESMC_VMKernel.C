@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.80 2007/02/23 17:46:41 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.81 2007/02/26 23:36:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -1258,6 +1258,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
     grouplist[i] = vmp->lpid_mpi_g_part_map[lpid_list[0][i]];
   }
   MPI_Group_incl(vmp->mpi_g_part, num_diff_pids, grouplist, &new_mpi_g);
+  delete [] grouplist;
 #else
   MPI_Group_incl(mpi_g, num_diff_pids, lpid_list[0], &new_mpi_g);
 #endif
@@ -1353,17 +1354,22 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
         for (int pet1=0; pet1<new_npets; pet1++){
           for (int pet2=0; pet2<new_npets; pet2++){
             if (new_pid[pet1]==new_pid[pet2] && new_pid[pet1]==pid[mypet]){
-              // pet1 and pet2 will be threads under the same process as mypet
+              // pet1 and pet2 are either identical PETs or run as threads in
+              // the same VAS as mypet.
+#ifdef ESMF_MPIUNI
               // -> allocate shared_mp structure for such PETs
               new_commarray[pet1][pet2].shmp = new shared_mp;
               // reset the shms structure in shared_mp preparing for use
               sync_reset(&(new_commarray[pet1][pet2].shmp->shms));
-#ifdef ESMF_MPIUNI
               // todo: check that pet1 and pet2 are both really 0
               // todo: and that new_npets == 1 
               new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_MPIUNI;
 #else
               if (pet1 != pet2){
+                // -> allocate shared_mp structure for such PETs
+                new_commarray[pet1][pet2].shmp = new shared_mp;
+                // reset the shms structure in shared_mp preparing for use
+                sync_reset(&(new_commarray[pet1][pet2].shmp->shms));
                 // don't modify intra-PET comm_type
                 if (vmp->pref_intra_process == PREF_INTRA_PROCESS_SHMHACK){
                   new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_SHMHACK;
