@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.81 2007/02/26 23:36:18 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.82 2007/02/26 23:39:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -87,8 +87,6 @@
 #define VM_COMM_TYPE_SHMHACK  (2)
 #define VM_COMM_TYPE_POSIXIPC (3)
 
-
-#define PARTCOMM (1)
 
 // initialization of class static variables
 MPI_Group ESMC_VMK::default_mpi_g;
@@ -1250,7 +1248,6 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   // since this is a local MPI operation each pet can call this here...
   MPI_Group new_mpi_g;
   
-#ifdef PARTCOMM  
   // the new group will be derived from the mpi_g_part group so there is an
   // additional level of indirection here
   int *grouplist = new int[num_diff_pids];
@@ -1259,9 +1256,6 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   }
   MPI_Group_incl(vmp->mpi_g_part, num_diff_pids, grouplist, &new_mpi_g);
   delete [] grouplist;
-#else
-  MPI_Group_incl(mpi_g, num_diff_pids, lpid_list[0], &new_mpi_g);
-#endif
   
 #if (VERBOSITY > 9)
   printf("successfully derived new_mpi_g\n");
@@ -1276,11 +1270,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   int foundfirstflag=0;
   int foundfirstpet;
   int mylpid = lpid[mypet];
-#ifdef PARTCOMM  
   for (int ii=0; ii<vmp->nplist; ii++){
-#else
-  for (int ii=0; ii<npets; ii++){
-#endif
     int i = vmp->petlist[ii];     // indirection to preserve petlist order
     if (mylpid == lpid[i]){
       // found lpid match
@@ -1293,11 +1283,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
         // I am this pet
         if (foundfirstpet == i){
           // I am the first under this lpid and must create communicator
-#ifdef PARTCOMM
           MPI_Comm_create(vmp->mpi_c_part, new_mpi_g, &new_mpi_c);
-#else
-          MPI_Comm_create(mpi_c, new_mpi_g, &new_mpi_c);
-#endif
         }else{
           // I am not the first under this lpid and must receive 
 #if (VERBOSITY > 9)
