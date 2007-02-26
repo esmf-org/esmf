@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.31 2007/02/23 23:18:44 theurich Exp $ 
+# $Id: makefile,v 1.32 2007/02/26 23:57:01 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -181,9 +181,9 @@ RUN_ESMF_VMBarrierUTestUNI:
 # VM Component
 #
 RUN_ESMF_VMComponentUTest:
-	$(MAKE) TNAME=VMComponent NP=4 ftest
+	env MPI_COMM_MAX=5000 MPI_GROUP_MAX=5000 $(MAKE) TNAME=VMComponent NP=4 ftest
 
 RUN_ESMF_VMComponentUTestUNI:
-	$(MAKE) TNAME=VMComponent NP=1 ftest
+	env MPI_COMM_MAX=5000 MPI_GROUP_MAX=5000 $(MAKE) TNAME=VMComponent NP=1 ftest
 
 
