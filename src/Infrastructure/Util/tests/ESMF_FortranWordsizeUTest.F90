@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsizeUTest.F90,v 1.4 2007/02/07 00:04:59 svasquez Exp $
+! $Id: ESMF_FortranWordsizeUTest.F90,v 1.5 2007/02/27 21:58:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FortranWordsizeUTest.F90,v 1.4 2007/02/07 00:04:59 svasquez Exp $'
+      '$Id: ESMF_FortranWordsizeUTest.F90,v 1.5 2007/02/27 21:58:11 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,7 +52,7 @@
       ! local variables
       integer :: vint
 #ifndef ESMF_NO_INTEGER_1_BYTE
-      integer(ESMF_KIND_I1) :: vint1(5)
+      integer(ESMF_KIND_I1) :: vint1
 #endif
 #ifndef ESMF_NO_INTEGER_2_BYTE
       integer(ESMF_KIND_I2) :: vint2
@@ -60,8 +60,10 @@
       integer(ESMF_KIND_I4) :: vint4
       integer(ESMF_KIND_I8) :: vint8
 
+      real                :: vreal
       real (ESMF_KIND_R4) :: vreal4
       real (ESMF_KIND_R8) :: vreal8
+      
       integer :: datasize
 
 !-------------------------------------------------------------------------------
@@ -82,6 +84,7 @@
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Getting size of default integer"
     datasize=ESMF_FortranWordsize(vint, rc )
+    print *, "Size of default integer: ", datasize, " bytes"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
@@ -90,7 +93,8 @@
 #ifndef ESMF_NO_INTEGER_1_BYTE
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Getting size of ESMF_KIND_I1 integer"
-    datasize=ESMF_FortranWordsize(vint1(1), rc )
+    datasize=ESMF_FortranWordsize(vint1, rc )
+    print *, "Size of ESMF_KIND_I1 integer: ", datasize, " bytes"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
     write(name, *) "Dummy test to keep number of tests correct"
@@ -103,6 +107,7 @@
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Getting size of ESMF_KIND_I2 integer"
     datasize=ESMF_FortranWordsize(vint2, rc )
+    print *, "Size of ESMF_KIND_I2 integer: ", datasize, " bytes"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
     write(name, *) "Dummy test to keep number of tests correct"
@@ -115,6 +120,7 @@
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Getting size of ESMF_KIND_I4 integer"
     datasize=ESMF_FortranWordsize(vint4, rc )
+    print *, "Size of ESMF_KIND_I4 integer: ", datasize, " bytes"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
@@ -123,14 +129,26 @@
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Getting size of ESMF_KIND_I8 integer"
     datasize=ESMF_FortranWordsize(vint8, rc )
+    print *, "Size of ESMF_KIND_I8 integer: ", datasize, " bytes"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!Test Real Data Sizes
+!=======================
+    !NEX_UTest
+    ! Default real
+    write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+    write(name, *) "Getting size of default real"
+    datasize=ESMF_FortranWordsize(vreal, rc )
+    print *, "Size of default real: ", datasize, " bytes"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !NEX_UTest
     !ESMF_KIND_R4 Real size
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-    write(name, *) "Getting size of ESMF_KIND_4 real"
+    write(name, *) "Getting size of ESMF_KIND_R4 real"
     datasize=ESMF_FortranWordsize(vreal4, rc )
+    print *, "Size of ESMF_KIND_R4 real: ", datasize, " bytes"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
@@ -139,6 +157,7 @@
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Getting size of ESMF_KIND_R8 real"
     datasize=ESMF_FortranWordsize(vreal8, rc )
+    print *, "Size of ESMF_KIND_R8 real: ", datasize, " bytes"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     call ESMF_TestEnd(result, ESMF_SRCLINE)
