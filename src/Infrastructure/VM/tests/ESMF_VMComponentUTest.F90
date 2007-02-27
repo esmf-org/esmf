@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.1 2007/02/23 23:18:44 theurich Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.2 2007/02/27 04:52:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -40,6 +40,27 @@ module ESMF_VMComponentUTest_gcomp_mod
     ! register FINAL method
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, mygcomp_final, &
       ESMF_SINGLEPHASE, rc)
+
+#ifdef ESMF_TESTWITHTHREADS
+    ! The following call will turn on ESMF-threading (single threaded)
+    ! for this component. If you are using this file as a template for 
+    ! your own code development you probably don't want to include the 
+    ! following call unless you are interested in exploring ESMF's 
+    ! threading features.
+    !call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
+    ! TODO: Many systems are not able to run this test in ESMF-threaded mode
+    ! because it will spawn 1000 concurrent Pthreads. This is *not* an ESMF
+    ! problem but a system issue that originates from the stacklimit being 
+    ! too small as to allow 1000 additional threads within the same VAS.
+    ! On some systems the default stacklimit can be set to unlimited in which
+    ! case this test _will_ run, but there are some systems out there where
+    ! the admin has set the hardlimit of the stacksize too small as to allow
+    ! this test to run successful in ESMF-threaded mode.
+    ! Alternatively one could lower the number of components created in this
+    ! test to get below the typical stacksize limit, but the whole point of
+    ! this test is to stress test ESMF's VM/Component implementation.
+#endif
+
   end subroutine !--------------------------------------------------------------
   
   recursive subroutine mygcomp_init(gcomp, istate, estate, clock, rc)
@@ -137,7 +158,7 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.1 2007/02/23 23:18:44 theurich Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.2 2007/02/27 04:52:29 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
