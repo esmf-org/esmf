@@ -1,4 +1,5 @@
-! $Id: ESMF_TypeKindGet.cpp,v 1.1 2007/02/27 20:48:27 rosalind Exp $
+! $Id: ESMF_TypeKindGet.cpp,v 1.2 2007/02/27 23:36:12 theurich Exp $
+!
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
