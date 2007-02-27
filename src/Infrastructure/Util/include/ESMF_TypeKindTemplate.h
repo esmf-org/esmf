@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_TypeKindTemplate.h,v 1.4 2007/01/25 20:03:07 rosalind Exp $
+! $Id: ESMF_TypeKindTemplate.h,v 1.5 2007/02/27 23:37:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -88,6 +88,7 @@
  @\
 !! < start of macros which become actual subroutine bodies after expansion > @\
  @\
+funcname##Doc() @\
 ^ifndef ESMF_NO_INTEGER_1_BYTE @\
 funcname##Macro(integer, I1) @\
 ^endif @\
