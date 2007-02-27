@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FortranWordsizeMacros.h,v 1.3 2007/02/27 22:30:11 theurich Exp $
+! $Id: ESMF_FortranWordsizeMacros.h,v 1.1 2007/02/27 22:41:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
