@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_TypeKindGetMacros.h,v 1.2 2007/02/27 22:35:45 theurich Exp $
+! $Id: ESMF_TypeKindGetMacros.h,v 1.1 2007/02/27 22:51:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
