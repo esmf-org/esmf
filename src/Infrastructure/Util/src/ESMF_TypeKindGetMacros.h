@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_TypeKindGetMacros.h,v 1.1 2007/02/27 22:51:52 theurich Exp $
+! $Id: ESMF_TypeKindGetMacros.h,v 1.2 2007/02/27 23:37:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -12,6 +12,11 @@
 !==============================================================================
 !
 #endif
+
+
+#define ESMF_TypeKindGetDoc() \
+!TODO: add interface documentation @\
+
 
 #define ESMF_TypeKindGetMacro(mname, mtypekind) \
 !------------------------------------------------------------------------------ @\

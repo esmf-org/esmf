@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FortranWordsizeMacros.h,v 1.1 2007/02/27 22:41:36 theurich Exp $
+! $Id: ESMF_FortranWordsizeMacros.h,v 1.2 2007/02/27 23:37:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -13,12 +13,9 @@
 !
 #endif
 
-#if 0
-!------------------------------------------------------------------------------
-! Declare a wrapper for a Fortran array pointer which is expanded later to
-! one of every type, and a local variable of every type.
-!------------------------------------------------------------------------------
-#endif
+
+#define ESMF_FortranWordsizeDoc() \
+!TODO: add interface documentation @\
 
 
 #define ESMF_FortranWordsizeMacro(mname, mtypekind) \
