@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FortranWordsizeMacros.h,v 1.2 2007/01/15 20:10:43 rosalind Exp $
+! $Id: ESMF_FortranWordsizeMacros.h,v 1.3 2007/02/27 22:30:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,8 +38,6 @@
      integer :: size @\
      mname(ESMF_KIND_##mtypekind) :: varTK(2)   ! varTK is same TK as var @\
      logical :: rcpresent                    ! Return code present @\
-@\
-^include "ESMC_Conf.h" @\
 @\
      ! Initialize return code; assume failure until success is certain @\
      rcpresent = .FALSE. @\
