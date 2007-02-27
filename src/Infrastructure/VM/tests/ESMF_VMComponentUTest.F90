@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.3 2007/02/27 05:12:28 theurich Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.4 2007/02/27 21:10:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@ module ESMF_VMComponentUTest_gcomp_mod
     type(ESMF_GridComp), intent(inout):: gcomp
     integer, intent(out):: rc
     
-    print *, '*** hi from mygcomp_register ***'
+    print *, '*** hi from mygcomp_register_nexh ***'
     
     ! register INIT method
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, mygcomp_init, &
@@ -57,7 +57,7 @@ module ESMF_VMComponentUTest_gcomp_mod
     type(ESMF_GridComp), intent(inout):: gcomp
     integer, intent(out):: rc
     
-    print *, '*** hi from mygcomp_register ***'
+    print *, '*** hi from mygcomp_register_exh ***'
     
     ! register INIT method
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, mygcomp_init, &
@@ -186,7 +186,7 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.3 2007/02/27 05:12:28 theurich Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.4 2007/02/27 21:10:43 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
