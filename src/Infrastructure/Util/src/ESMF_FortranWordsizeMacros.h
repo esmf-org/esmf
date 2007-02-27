@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FortranWordsizeMacros.h,v 1.2 2007/02/27 23:37:47 theurich Exp $
+! $Id: ESMF_FortranWordsizeMacros.h,v 1.3 2007/02/27 23:53:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -18,7 +18,7 @@
 !TODO: add interface documentation @\
 
 
-#define ESMF_FortranWordsizeMacro(mname, mtypekind) \
+#define ESMF_FortranWordsizeMacro(mtypename, mtypekind) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !------------------------------------------------------------------------------ @\
@@ -28,12 +28,12 @@
 ^define ESMF_METHOD "ESMF_FortranWordsize" @\
     integer function ESMF_FortranWordsize##mtypekind(var, rc) @\
 @\
-     mname(ESMF_KIND_##mtypekind), intent(in) :: var @\
+     mtypename(ESMF_KIND_##mtypekind), intent(in) :: var @\
      integer, intent(out), optional :: rc @\
 @\
      ! local data @\
      integer :: size @\
-     mname(ESMF_KIND_##mtypekind) :: varTK(2)   ! varTK is same TK as var @\
+     mtypename(ESMF_KIND_##mtypekind) :: varTK(2) ! varTK is same TK as var @\
      logical :: rcpresent                    ! Return code present @\
 @\
      ! Initialize return code; assume failure until success is certain @\

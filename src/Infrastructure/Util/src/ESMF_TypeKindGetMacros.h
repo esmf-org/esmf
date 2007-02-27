@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_TypeKindGetMacros.h,v 1.2 2007/02/27 23:37:47 theurich Exp $
+! $Id: ESMF_TypeKindGetMacros.h,v 1.3 2007/02/27 23:53:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -18,7 +18,7 @@
 !TODO: add interface documentation @\
 
 
-#define ESMF_TypeKindGetMacro(mname, mtypekind) \
+#define ESMF_TypeKindGetMacro(mtypename, mtypekind) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !------------------------------------------------------------------------------ @\
@@ -28,7 +28,7 @@
 ^define ESMF_METHOD "ESMF_TypeKindGet" @\
  type(ESMF_TypeKind) function ESMF_TypeKindGet##mtypekind(var, rc) @\
 @\
-    mname(ESMF_KIND_##mtypekind), intent(in) :: var @\
+    mtypename(ESMF_KIND_##mtypekind), intent(in) :: var @\
     integer, intent(out), optional :: rc @\
     type(ESMF_TypeKind) :: TypeKindGet##mtypekind @\
 @\
