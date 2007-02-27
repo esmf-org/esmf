@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.2 2007/02/27 04:52:29 theurich Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.3 2007/02/27 05:12:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -20,11 +20,39 @@ module ESMF_VMComponentUTest_gcomp_mod
   
   private
   
-  public mygcomp_register
+  public mygcomp_register_nexh, mygcomp_register_exh
     
   contains !--------------------------------------------------------------------
 
-  subroutine mygcomp_register(gcomp, rc)
+  subroutine mygcomp_register_nexh(gcomp, rc)
+    ! arguments
+    type(ESMF_GridComp), intent(inout):: gcomp
+    integer, intent(out):: rc
+    
+    print *, '*** hi from mygcomp_register ***'
+    
+    ! register INIT method
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, mygcomp_init, &
+      ESMF_SINGLEPHASE, rc)
+    ! register RUN method
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, mygcomp_run, &
+      ESMF_SINGLEPHASE, rc)
+    ! register FINAL method
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, mygcomp_final, &
+      ESMF_SINGLEPHASE, rc)
+
+#ifdef ESMF_TESTWITHTHREADS
+    ! The following call will turn on ESMF-threading (single threaded)
+    ! for this component. If you are using this file as a template for 
+    ! your own code development you probably don't want to include the 
+    ! following call unless you are interested in exploring ESMF's 
+    ! threading features.
+    call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
+#endif
+
+  end subroutine !--------------------------------------------------------------
+  
+  subroutine mygcomp_register_exh(gcomp, rc)
     ! arguments
     type(ESMF_GridComp), intent(inout):: gcomp
     integer, intent(out):: rc
@@ -48,14 +76,14 @@ module ESMF_VMComponentUTest_gcomp_mod
     ! following call unless you are interested in exploring ESMF's 
     ! threading features.
     !call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
-    ! TODO: Many systems are not able to run this test in ESMF-threaded mode
-    ! because it will spawn 1000 concurrent Pthreads. This is *not* an ESMF
-    ! problem but a system issue that originates from the stacklimit being 
-    ! too small as to allow 1000 additional threads within the same VAS.
-    ! On some systems the default stacklimit can be set to unlimited in which
-    ! case this test _will_ run, but there are some systems out there where
-    ! the admin has set the hardlimit of the stacksize too small as to allow
-    ! this test to run successful in ESMF-threaded mode.
+    ! TODO: Many systems are not able to run the exhaustive version of this
+    ! test in ESMF-threaded mode because it will spawn 1000 concurrent Pthreads.
+    ! This is *not* an ESMF problem but a system issue that originates from 
+    ! the stacklimit being too small as to allow 1000 concurrent threads within
+    ! the same VAS. On some systems the default stacklimit can be set to unlimited
+    ! in which case this test _will_ run, but there are other systems out there
+    ! where the admin has set the hardlimit of the stacksize too small as to 
+    ! allow this test to run successful in ESMF-threaded mode!
     ! Alternatively one could lower the number of components created in this
     ! test to get below the typical stacksize limit, but the whole point of
     ! this test is to stress test ESMF's VM/Component implementation.
@@ -158,7 +186,7 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.2 2007/02/27 04:52:29 theurich Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.3 2007/02/27 05:12:28 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -186,19 +214,20 @@ program ESMF_VMComponentUTest
   call ESMF_VMGetGlobal(vm, rc=rc)
   call ESMF_VMPrint(vm)
   
+  ! Prepare for non-exhaustive test section
   loop_rc=ESMF_SUCCESS 
 
-  do j=1, 20
-    do i=1, 1000
+  do j=1, 2
+    do i=1, 100
 
       gcomp(i) = ESMF_GridCompCreate(name='My gridded component', rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
   
-      call ESMF_GridCompSetServices(gcomp(i), mygcomp_register, loop_rc)
+      call ESMF_GridCompSetServices(gcomp(i), mygcomp_register_nexh, loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
 
     enddo
-    do i=1, 1000
+    do i=1, 100
 
       call ESMF_GridCompDestroy(gcomp(i), rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
@@ -206,7 +235,6 @@ program ESMF_VMComponentUTest
     enddo
   enddo
   
-
 10 continue
   !----------------------------------------------------------------
   !Verify loop test results
@@ -214,6 +242,41 @@ program ESMF_VMComponentUTest
   write(name, *) "Component Create/SetServices/Destroy Test"
   write(failMsg, *) "Failure codes returned!"
   call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+#ifdef ESMF_EXHAUSTIVE
+
+  ! Prepare for exhaustive test section
+  loop_rc=ESMF_SUCCESS 
+
+  do j=1, 20
+    do i=1, 1000
+
+      gcomp(i) = ESMF_GridCompCreate(name='My gridded component', rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 20
+  
+      call ESMF_GridCompSetServices(gcomp(i), mygcomp_register_exh, loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 20
+
+    enddo
+    do i=1, 1000
+
+      call ESMF_GridCompDestroy(gcomp(i), rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 20
+      
+    enddo
+  enddo
+  
+20 continue
+  !----------------------------------------------------------------
+  !Verify loop test results
+  !EX_UTest
+  write(name, *) "Exhaustive Component Create/SetServices/Destroy Test"
+  write(failMsg, *) "Failure codes returned!"
+  call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#endif
+
 
   call ESMF_TestEnd(result, ESMF_SRCLINE)
   
