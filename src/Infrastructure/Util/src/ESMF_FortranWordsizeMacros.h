@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FortranWordsizeMacros.h,v 1.4 2007/02/28 20:36:28 rosalind Exp $
+! $Id: ESMF_FortranWordsizeMacros.h,v 1.5 2007/02/28 23:16:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -18,7 +18,6 @@
 ! <Created by macro - do not edit directly > @\
 !BOP @\
 ! !IROUTINE: ESMF_FortranWordsize - Return the size in byte units of a scalar @\
- a scalar @\
 ! @\
 ! !INTERFACE: @\
 !   ! Private name; call using ESMF_FortranWordsize() @\
