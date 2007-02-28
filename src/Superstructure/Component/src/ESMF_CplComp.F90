@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.72 2007/01/31 00:30:14 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.73 2007/02/28 00:35:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.72 2007/01/31 00:30:14 theurich Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.73 2007/02/28 00:35:19 theurich Exp $'
 
 !==============================================================================
 !
@@ -111,7 +111,6 @@
       interface ESMF_CplCompCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
-        !module procedure ESMF_CplCompCreateNew
         module procedure ESMF_CplCompCreate
 
 ! !DESCRIPTION:
@@ -142,88 +141,6 @@
 !
 ! compp = rval%compp
 !end subroutine
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompCreateNew"
-!BOPI
-! !IROUTINE: ESMF_CplCompCreate - Create a new CplComp
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_CplCompCreate()      
-      function ESMF_CplCompCreateNew(name, config, clock, rc)
-!
-! !RETURN VALUE:
-      ! Private name; call using ESMF_CplCompCreate()      
-      type(ESMF_CplComp) :: ESMF_CplCompCreateNew
-!
-! !ARGUMENTS:
-      character(len=*), intent(in) :: name
-      type(ESMF_Config), intent(inout) :: config
-      type(ESMF_Clock), intent(inout) :: clock
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Create a new {\tt ESMF\_CplComp}, specifying all arguments.
-!
-!  The return value is the new {\tt ESMF\_CplComp}.
-!    
-!  The arguments are:
-!  \begin{description}
-!   \item[name]
-!    Name of the newly-created {\tt ESMF\_CplComp}.  This name can be altered 
-!    from within the {\tt ESMF\_CplComp} code once the initialization routine
-!    is called.
-!   \item[config]
-!    An already-created {\tt ESMF\_Config} configuration object 
-!    from which the new {\tt ESMF\_CplComp}
-!    can read in namelist-type information to set parameters for this run.
-!   \item[clock]
-!    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
-!    queried and updated by the new {\tt ESMF\_CplComp} as it chooses.  
-!    This should
-!    not be the parent component clock, which should be maintained and passed
-!    down to the initialize/run/finalize routines separately.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-
-        ! local vars
-        type (ESMF_CompClass), pointer :: compclass      ! generic comp
-        integer :: localrc                               ! local error status
-
-        ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
-        ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
-
-        ! Initialize the pointer to null.
-        nullify(ESMF_CplCompCreateNew%compp)
-        nullify(compclass)
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
-
-        ! Allocate a new comp class
-        allocate(compclass, stat=localrc)
-	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", &
-                                       ESMF_CONTEXT, rc)) return
-
-        ! Call construction method to initialize cplcomp internals
-        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
-                                    config=config, clock=clock, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        ! Set return values
-        ESMF_CplCompCreateNew%compp => compclass
-
-        ESMF_INIT_SET_CREATED(ESMF_CplCompCreateNew)
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        end function ESMF_CplCompCreateNew
 
 
 !------------------------------------------------------------------------------
