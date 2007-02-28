@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FortranWordsizeMacros.h,v 1.3 2007/02/27 23:53:19 theurich Exp $
+! $Id: ESMF_FortranWordsizeMacros.h,v 1.4 2007/02/28 20:36:28 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -15,7 +15,44 @@
 
 
 #define ESMF_FortranWordsizeDoc() \
-!TODO: add interface documentation @\
+! <Created by macro - do not edit directly > @\
+!BOP @\
+! !IROUTINE: ESMF_FortranWordsize - Return the size in byte units of a scalar @\
+ a scalar @\
+! @\
+! !INTERFACE: @\
+!   ! Private name; call using ESMF_FortranWordsize() @\
+!   function ESMF_FortranWordsize<typekind>(var, rc) @\
+! @\
+! !RETURN VALUE: @\
+!      integer :: ESMF_FortranWordsize<typekind> @\
+! @\
+! !ARGUMENTS: @\
+!     <type>(ESMF_KIND_<typekind>), intent(in) :: var @\
+!     integer, intent(out), optional :: rc @\
+! @\
+! !DESCRIPTION: @\
+!   Return the size in units of bytes of a scalar (var) argument. @\
+!   Valid types and kinds supported by the framework are: @\
+!   integers of 1-byte, 2-byte, 4-byte, and 8-byte size, and @\
+!   reals of 4-byte and 8-bytes size.  @\
+! @\
+!   The arguments are: @\
+!   \begin{description} @\
+!   \item [var] @\
+!      Scalar of any supported type and kind
+!   \item [rc] @\
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!   \end{description} @\
+! @\
+!EOP @\
+
+#if 0
+!------------------------------------------------------------------------------
+! Return the size in bytes of a scalar
+!------------------------------------------------------------------------------
+#endif
+
 
 
 #define ESMF_FortranWordsizeMacro(mtypename, mtypekind) \
