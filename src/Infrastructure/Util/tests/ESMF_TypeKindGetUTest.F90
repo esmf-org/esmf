@@ -1,4 +1,4 @@
-! $Id: ESMF_TypeKindGetUTest.F90,v 1.3 2007/03/01 14:42:19 rosalind Exp $
+! $Id: ESMF_TypeKindGetUTest.F90,v 1.4 2007/03/01 22:32:28 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TypeKindGetUTest.F90,v 1.3 2007/03/01 14:42:19 rosalind Exp $'
+      '$Id: ESMF_TypeKindGetUTest.F90,v 1.4 2007/03/01 22:32:28 rosalind Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -95,6 +95,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
     !NEX_UTest
+     write(failMsg, *) "Returned wrong ESMF_TypeKind"
      write(name, *) "Checking ESMF_TypeKind parameter for ESMF_KIND_I1 integer"
     call ESMF_Test((typekind%dkind .eq. ESMF_TYPEKIND_I1%dkind), &
                     name, failMsg, result, ESMF_SRCLINE)
@@ -108,6 +109,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
     !NEX_UTest
+     write(failMsg, *) "Returned wrong ESMF_TypeKind"
      write(name, *) "Checking ESMF_TypeKind parameter for ESMF_KIND_I2 integer"
     call ESMF_Test((typekind%dkind .eq. ESMF_TYPEKIND_I2%dkind), &
                     name, failMsg, result, ESMF_SRCLINE)
@@ -121,6 +123,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
     !NEX_UTest
+     write(failMsg, *) "Returned wrong ESMF_TypeKind"
      write(name, *) "Checking ESMF_TypeKind parameter for ESMF_KIND_I4 integer"
     call ESMF_Test((typekind%dkind .eq. ESMF_TYPEKIND_I4%dkind), &
                     name, failMsg, result, ESMF_SRCLINE)
@@ -134,6 +137,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
     !NEX_UTest
+     write(failMsg, *) "Returned wrong ESMF_TypeKind"
      write(name, *) "Checking ESMF_TypeKind parameter for ESMF_KIND_I8 integer"
     call ESMF_Test((typekind%dkind .eq. ESMF_TYPEKIND_I8%dkind), &
                     name, failMsg, result, ESMF_SRCLINE)
@@ -161,6 +165,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
     !NEX_UTest
+     write(failMsg, *) "Returned wrong ESMF_TypeKind"
      write(name, *) "Checking ESMF_TypeKind parameter for ESMF_KIND_R4 real"
     call ESMF_Test((typekind%dkind .eq. ESMF_TYPEKIND_R4%dkind), &
                     name, failMsg, result, ESMF_SRCLINE)
@@ -174,6 +179,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
     !NEX_UTest
+     write(failMsg, *) "Returned wrong ESMF_TypeKind"
      write(name, *) "Checking ESMF_TypeKind parameter for ESMF_KIND_R8 real"
     call ESMF_Test((typekind%dkind .eq. ESMF_TYPEKIND_R8%dkind), &
                     name, failMsg, result, ESMF_SRCLINE)
