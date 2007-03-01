@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StateMacros.h,v 1.12 2007/01/04 23:19:17 oehmke Exp $
+! $Id: ESMF_StateMacros.h,v 1.13 2007/03/01 19:10:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -17,8 +17,6 @@
 ! Macros for the State class.
 !------------------------------------------------------------------------------
 #endif
-
-#include "ESMF_StdCppMacros.h"
 
 #if 0
 !------------------------------------------------------------------------------

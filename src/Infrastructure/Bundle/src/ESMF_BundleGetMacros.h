@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_BundleGetMacros.h,v 1.8 2006/12/05 23:02:25 samsoncheung Exp $
+! $Id: ESMF_BundleGetMacros.h,v 1.9 2007/03/01 19:10:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -17,8 +17,6 @@
 ! Macros for the Bundle class.
 !------------------------------------------------------------------------------
 #endif
-
-#include "ESMF_StdCppMacros.h"
 
 #if 0
 !------------------------------------------------------------------------------

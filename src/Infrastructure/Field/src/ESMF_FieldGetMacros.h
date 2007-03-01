@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.10 2006/12/07 05:31:19 samsoncheung Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.11 2007/03/01 19:10:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -17,8 +17,6 @@
 ! Macros for the Field class.
 !------------------------------------------------------------------------------
 #endif
-
-#include "ESMF_StdCppMacros.h"
 
 #if 0
 !------------------------------------------------------------------------------

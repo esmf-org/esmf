@@ -1,4 +1,4 @@
-! $Id: ESMF_StateGet.cpp,v 1.9 2007/01/04 23:19:17 oehmke Exp $
+! $Id: ESMF_StateGet.cpp,v 1.10 2007/03/01 19:10:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -25,8 +25,10 @@
 ! INCLUDES
 ! < ignore blank lines below.  they are created by the files which
 !   define various macros. >
-#include "ESMF_StateMacros.h"
 ^include "ESMF.h"
+#include "ESMF_StdCppMacros.h"
+#include "ESMF_StateMacros.h"
+
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_UtilTypesMod
@@ -53,7 +55,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateGet.cpp,v 1.9 2007/01/04 23:19:17 oehmke Exp $'
+      '$Id: ESMF_StateGet.cpp,v 1.10 2007/03/01 19:10:01 theurich Exp $'
 
 !==============================================================================
 ! 
