@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.65 2007/02/23 00:24:47 theurich Exp $
+// $Id: ESMC_Array.C,v 1.66 2007/03/01 14:46:34 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.65 2007/02/23 00:24:47 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.66 2007/03/01 14:46:34 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4090,7 +4090,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   void *localResult;
   switch (dtk){
   case ESMC_TYPEKIND_I4:
-    localResult = new int;
+    localResult = new ESMC_I4;
     break;
   case ESMC_TYPEKIND_R4:
     localResult = new ESMC_R4;
@@ -4172,8 +4172,8 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
         switch (dtk){
         case ESMC_TYPEKIND_I4:
           {
-            int *tempResult = (int *)localResult;
-            int *tempBase = (int *)base;
+            ESMC_I4 *tempResult = (ESMC_I4 *)localResult;
+            ESMC_I4 *tempBase = (ESMC_I4 *)base;
             switch (op){
             case ESMF_SUM:
               if (primeFlag)
@@ -4416,7 +4416,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   int size;
   switch (dtk){
   case ESMC_TYPEKIND_I4:
-    localResult = new int;
+    localResult = new ESMC_I4;
     size = 4;
     break;
   case ESMC_TYPEKIND_R4:
@@ -4495,8 +4495,8 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
     switch (dtk){
     case ESMC_TYPEKIND_I4:
       {
-        int *tempResult = (int *)localResult;
-        int *tempBase = (int *)base;
+        ESMC_I4 *tempResult = (ESMC_I4 *)localResult;
+        ESMC_I4 *tempBase = (ESMC_I4 *)base;
         switch (op){
         case ESMF_SUM:
           if (primeFlag)
@@ -5416,7 +5416,7 @@ void *ESMC_newArrayScalarReduceThread(
   int size;
   switch (dtk){
   case ESMC_TYPEKIND_I4:
-    localResult = new int[deCount];
+    localResult = new ESMC_I4[deCount];
     size = 4;
     break;
   case ESMC_TYPEKIND_R4:
@@ -5453,8 +5453,8 @@ void *ESMC_newArrayScalarReduceThread(
   switch (dtk){
   case ESMC_TYPEKIND_I4:
     {
-      int *tempResult = (int *)result;
-      int *tempBase = (int *)localResult;
+      ESMC_I4 *tempResult = (ESMC_I4 *)result;
+      ESMC_I4 *tempBase = (ESMC_I4 *)localResult;
       switch (op){
       case ESMF_SUM:
         *tempResult = 0;  // prime the result variable
