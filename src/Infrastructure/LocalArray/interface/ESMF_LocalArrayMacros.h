@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.27 2007/02/22 04:58:15 theurich Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.28 2007/03/01 18:56:42 wsawyer Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -663,6 +663,109 @@
         if (rcpresent) rc = ESMF_SUCCESS @\
  @\
         end subroutine ESMF_LocalArrayGetData##mrank##D##mtypekind @\
+ @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------ @\
+
+
+#if 0
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+! Copy the contents of the array.
+!------------------------------------------------------------------------------
+#endif
+
+#define LocalArrayCopyDoc() \
+!------------------------------------------------------------------------------ @\
+! <Created by macro - do not edit directly >  @\
+!BOPI @\
+! !INTERFACE: @\
+!     subroutine ESMF_LocalArrayCopy<rank><type><kind>(arrayIn, array, rc) @\
+! @\
+! !ARGUMENTS: @\
+!     type(ESMF_LocalArray), intent(in) :: array @\
+!     type(ESMF_LocalArray), intent(inout) :: arrayOut @\
+!     type(ESMF_CopyFlag), intent(in), optional :: docopy @\
+!     integer, intent(out), optional :: rc @\
+! @\
+! !DESCRIPTION: @\
+! Return a Fortran pointer to the data buffer, or return a Fortran pointer @\
+! to a new copy of the data. @\
+! Valid type/kind/rank combinations supported by the @\
+! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
+! and type integer of kind *1, *2, *4, or *8. @\
+! @\
+! The arguments are: @\
+!  \begin{description} @\
+!  \item[array] @\
+!   The {\tt ESMF\_LocalArray} to get the value from. @\
+!  \item[fptr] @\
+!   An unassociated Fortran pointer. @\
+!  \item[{[docopy]}] @\
+!   An optional copy flag which can be specified. @\
+!   Can either make a new copy of the data or reference existing data. @\
+!  \item[{[rc]}] @\
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!  \end{description} @\
+! @\
+!EOPI @\
+ @\
+
+#define LocalArrayCopyMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!------------------------------------------------------------------------------ @\
+! <Created by macro - do not edit directly >  @\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD "ESMF_LocalArrayCopy##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_LocalArrayCopy" @\
+      subroutine ESMF_LocalArrayCopy##mrank##D##mtypekind(arrayIn, arrayOut, rc) @\
+ @\
+      type(ESMF_LocalArray) :: arrayIn @\
+      type(ESMF_LocalArray) :: arrayOut @\
+      integer, intent(out), optional :: rc @\
+ @\
+        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
+        integer :: status                   ! local error status @\
+        logical :: rcpresent                ! did user specify rc? @\
+ @\
+        type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap     ! for passing f90 ptr to C++ @\
+        integer :: lb(mrank), ub(mrank)  ! size info for the array @\
+        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: lp ! local copy @\
+ @\
+        ! initialize return code; assume failure until success is certain @\
+        status = ESMF_FAILURE @\
+        rcpresent = .FALSE. @\
+        if (present(rc)) then @\
+          rcpresent = .TRUE. @\
+          rc = ESMF_FAILURE @\
+        endif @\
+ @\
+        call c_ESMC_LocalArrayGetF90Ptr(arrayIn, wrap, status) @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
+ @\
+        ! Allocate a new buffer and return a copy @\
+        call c_ESMC_IArrayGetLbounds(arrayIn, mrank, lb, status) @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
+        call c_ESMC_IArrayGetUbounds(arrayIn, mrank, ub, status) @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
+        allocate(lp(mrng), stat=status) @\
+        if (ESMF_LogMsgFoundAllocError(status, & @\
+                                     "local data space", & @\
+                                      ESMF_CONTEXT, rc)) return @\
+        ! this must do a contents assignment @\
+        lp = wrap%ptr##mrank##D##mtypekind @\
+        ! now simply associate the allocated array to the new array wrapper @\
+        call c_ESMC_LocalArrayGetF90Ptr(arrayOut, wrap, status) @\
+        wrap%ptr##mrank##D##mtypekind => lp  @\
+ @\
+        if (rcpresent) rc = ESMF_SUCCESS @\
+ @\
+        end subroutine ESMF_LocalArrayCopy##mrank##D##mtypekind @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
