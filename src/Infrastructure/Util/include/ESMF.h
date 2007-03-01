@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF.h,v 1.4 2006/11/16 05:21:21 cdeluca Exp $
+$Id: ESMF.h,v 1.5 2007/03/01 18:20:47 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,6 @@ uniform error messages and exit codes.
 #define _FROM_FORTRAN 1
 #include "ESMC_Conf.h"
 #include "ESMF_Conf.inc"
-#include "ESMF_Version.inc"
 #include "ESMF_LogConstants.inc"
 #include "ESMF_LogMacros.inc"
 #include "ESMF_ErrReturnCodes.inc"

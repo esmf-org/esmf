@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2007/02/27 22:51:52 theurich Exp $ 
+# $Id: makefile,v 1.11 2007/03/01 18:20:47 theurich Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
@@ -15,7 +15,7 @@ SOURCEF	  = ESMF_UtilTypes.F90 \
             $(AUTOGEN) \
             ESMF_InitMacros.F90
             
-STOREH    = ESMF_Macros.inc ESMF_Version.inc ESMF.h ESMC_Macros.h \
+STOREH    = ESMF_Macros.inc ESMF.h ESMC_Macros.h \
             ESMC_Util.h ESMF_StdCppMacros.h ESMC_Start.h \
             ESMC_F90Interface.h ESMF_ErrReturnCodes.inc ESMF_LogMacros.inc \
 	    ESMF_LogConstants.inc ESMC_Fraction.h ESMF_TypeKindTemplate.h \
