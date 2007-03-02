@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.12 2007/02/22 23:42:17 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.13 2007/03/02 21:53:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.12 2007/02/22 23:42:17 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.13 2007/03/02 21:53:12 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -49,7 +49,8 @@ program ESMF_ArrayScatterUTest
   character(ESMF_MAXSTR) :: name
 
   !LOCAL VARIABLES:
-  real(ESMF_KIND_R8), parameter :: double_min = 1e-10_ESMF_KIND_R8
+  real(ESMF_KIND_R8), parameter :: min_R8 = 1e-10_ESMF_KIND_R8
+  real(ESMF_KIND_R4), parameter :: min_R4 = 1e-10_ESMF_KIND_R4
   type(ESMF_VM):: vm
   integer:: petCount, localPet, i, j
   type(ESMF_ArraySpec)  :: arrayspec
@@ -58,6 +59,9 @@ program ESMF_ArrayScatterUTest
   real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)     ! matching F90 array pointer
   real(ESMF_KIND_R8), allocatable :: srcfarray(:,:)
   real(ESMF_KIND_R8):: value
+  real(ESMF_KIND_R4), pointer :: farrayPtr_R4(:,:)     ! matching F90 array pointer
+  real(ESMF_KIND_R4), allocatable :: srcfarray_R4(:,:)
+  real(ESMF_KIND_R4):: value_R4
 #ifdef ESMF_EXHAUSTIVE
   integer:: k, kk
   real(ESMF_KIND_R8), pointer :: farrayPtr3d(:,:,:) ! matching F90 array pointer
@@ -91,8 +95,8 @@ program ESMF_ArrayScatterUTest
   
   !------------------------------------------------------------------------
   ! preparations
-  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_TYPEKIND_R8, rank=2, &
-    rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, &
+    kind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
     regDecomp=(/2,2/), rc=rc)
@@ -114,26 +118,41 @@ program ESMF_ArrayScatterUTest
     enddo
   enddo
 !print *, "srcfarray:", srcfarray
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "2D ESMF_TYPEKIND_R8 ArrayScatter() w/ incompatible Fortran Array (typekind) Test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_ArrayScatter(array, srcfarray_R4, rootPet=0, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "2D ESMF_TYPEKIND_R8 ArrayScatter() w/ incompatible Fortran Array (rank) Test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_ArrayScatter(array, srcfarray3d, rootPet=0, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "2D ESMF_TYPEKIND_R8 ArrayScatter() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "2D ArrayScatter() Test"
   call ESMF_ArrayScatter(array, srcfarray, rootPet=0, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Verify srcfarray data after scatter
+  write(name, *) "Verifying srcfarray data after 2D ESMF_TYPEKIND_R8 ArrayScatter() Test"
   write(failMsg, *) "Source data was modified."
-  write(name, *) "Verifying srcfarray data after 2D ArrayScatter() Test"
   rc = ESMF_SUCCESS
   do j=1, 23
     do i=1, 15
       value = 123._ESMF_KIND_R8*sin(real(i,ESMF_KIND_R8)) +  &
                321._ESMF_KIND_R8*cos(real(j,ESMF_KIND_R8))
-      value = srcfarray(i,j) / value - 1.d0
+      value = value - srcfarray(i,j)
 !print *, value
-      if (abs(value) > double_min) then
+      if (abs(value) > min_R8) then
 !print *, "Found large value"
         rc = ESMF_FAILURE
       endif
@@ -144,12 +163,13 @@ program ESMF_ArrayScatterUTest
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Verify Array data after scatter
+  write(name, *) "Verifying destination Array data after 2D ESMF_TYPEKIND_R8 ArrayScatter() Test"
   write(failMsg, *) "Array data wrong."
-  write(name, *) "Verifying Array data after 2D ArrayScatter() Test"
   rc = ESMF_SUCCESS
   do j=lbound(farrayPtr,2), ubound(farrayPtr,2)
     do i=lbound(farrayPtr,1), ubound(farrayPtr,1)
-      if (abs(farrayPtr(i,j) - srcfarray(i,j)) > double_min) rc = ESMF_FAILURE
+      print *, i, j, farrayPtr(i,j), srcfarray(i,j)
+      if (abs(farrayPtr(i,j) - srcfarray(i,j)) > min_R8) rc = ESMF_FAILURE
     enddo
   enddo
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -162,7 +182,86 @@ program ESMF_ArrayScatterUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   deallocate(srcfarray)
   
+  !------------------------------------------------------------------------
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  ! preparations for same test as above but with ESMF_TYPEKIND_R4
+  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, &
+    kind=ESMF_TYPEKIND_R4, rank=2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
+    regDecomp=(/2,2/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!call ESMF_ArrayPrint(array)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr_R4, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  farrayPtr_R4 = real(localPet,ESMF_KIND_R4)  ! initialize each DE-local data chunk of Array
+!print *, "farrayPtr_R4:", farrayPtr_R4
+  ! prepare srcfarray_R4 on all PETs -> serves as ref. in comparison after scatter
+  allocate(srcfarray_R4(1:15, 1:23))
+  do j=1, 23
+    do i=1, 15
+      srcfarray_R4(i,j) = 123._ESMF_KIND_R4*sin(real(i,ESMF_KIND_R4)) +  &
+                       321._ESMF_KIND_R4*cos(real(j,ESMF_KIND_R4))
+    enddo
+  enddo
+!print *, "srcfarray_R4:", srcfarray_R4
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "2D ESMF_TYPEKIND_R4 ArrayScatter() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayScatter(array, srcfarray_R4, rootPet=0, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Verify srcfarray_R4 data after scatter
+  write(name, *) "Verifying srcfarray_R4 data after 2D ESMF_TYPEKIND_R4 ArrayScatter() Test"
+  write(failMsg, *) "Source data was modified."
+  rc = ESMF_SUCCESS
+  do j=1, 23
+    do i=1, 15
+      value_R4 = 123._ESMF_KIND_R4*sin(real(i,ESMF_KIND_R4)) +  &
+               321._ESMF_KIND_R4*cos(real(j,ESMF_KIND_R4))
+      value_R4 = value_R4 - srcfarray_R4(i,j)
+!print *, value
+      if (abs(value_R4) > min_R4) then
+!print *, "Found large value"
+        rc = ESMF_FAILURE
+      endif
+   enddo
+  enddo
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Verify Array data after scatter
+  write(name, *) "Verifying destination Array data after 2D ESMF_TYPEKIND_R4 ArrayScatter() Test"
+  write(failMsg, *) "Array data wrong."
+  rc = ESMF_SUCCESS
+  do j=lbound(farrayPtr_R4,2), ubound(farrayPtr_R4,2)
+    do i=lbound(farrayPtr_R4,1), ubound(farrayPtr_R4,1)
+      print *, i, j, farrayPtr_R4(i,j), srcfarray_R4(i,j)
+      if (abs(farrayPtr_R4(i,j) - srcfarray_R4(i,j)) > min_R4) rc = ESMF_FAILURE
+    enddo
+  enddo
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  ! cleanup  
+  call ESMF_ArrayDestroy(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  deallocate(srcfarray_R4)
+  
+  !------------------------------------------------------------------------
+  !------------------------------------------------------------------------
+
   !------------------------------------------------------------------------
   ! preparations for same test as above but with a DistGrid that has less
   ! cells in the first dimension than DEs requested in the regDecomp argument.
@@ -185,15 +284,15 @@ program ESMF_ArrayScatterUTest
   allocate(srcfarray(1:1, 1:23))
   do j=1, 23
     do i=1, 1
-      srcfarray(i,j) = 123.d0*sin(real(i,ESMF_KIND_R8)) +  &
-                       321.d0*cos(real(j,ESMF_KIND_R8))
+      srcfarray(i,j) = 123._ESMF_KIND_R8*sin(real(i,ESMF_KIND_R8)) +  &
+                       321._ESMF_KIND_R8*cos(real(j,ESMF_KIND_R8))
     enddo
   enddo
 !print *, "srcfarray:", srcfarray
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "2D ESMF_TYPEKIND_R8 ArrayScatter() with unassociated DEs Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "2D ArrayScatter() with unassociated DEs Test"
   call ESMF_ArrayScatter(array, srcfarray, rootPet=0, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -205,11 +304,11 @@ program ESMF_ArrayScatterUTest
   rc = ESMF_SUCCESS
   do j=1, 23
     do i=1, 1
-      value = 123.d0*sin(real(i,ESMF_KIND_R8)) +  &
-              321.d0*cos(real(j,ESMF_KIND_R8))
-      value = srcfarray(i,j) / value - 1.d0
+      value = 123._ESMF_KIND_R8*sin(real(i,ESMF_KIND_R8)) +  &
+              321._ESMF_KIND_R8*cos(real(j,ESMF_KIND_R8))
+      value = value - srcfarray(i,j)
 !print *, value
-      if (abs(value) > double_min) then
+      if (abs(value) > min_R8) then
 !print *, "Found large value"
         rc = ESMF_FAILURE
       endif
@@ -221,11 +320,11 @@ program ESMF_ArrayScatterUTest
   !NEX_UTest_Multi_Proc_Only
   ! Verify Array data after scatter
   write(failMsg, *) "Array data wrong."
-  write(name, *) "Verifying Array data after 2D ArrayScatter() with unassociated DEs Test"
+  write(name, *) "Verifying destination Array data after 2D ArrayScatter() with unassociated DEs Test"
   rc = ESMF_SUCCESS
   do j=lbound(farrayPtr,2), ubound(farrayPtr,2)
     do i=lbound(farrayPtr,1), ubound(farrayPtr,1)
-      if (abs(farrayPtr(i,j) - srcfarray(i,j)) > double_min) rc = ESMF_FAILURE
+      if (abs(farrayPtr(i,j) - srcfarray(i,j)) > min_R8) rc = ESMF_FAILURE
     enddo
   enddo
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -262,9 +361,9 @@ program ESMF_ArrayScatterUTest
   do k=lbound(srcfarray3d,3), ubound(srcfarray3d,3)
     do j=lbound(srcfarray3d,2), ubound(srcfarray3d,2)
       do i=lbound(srcfarray3d,1), ubound(srcfarray3d,1)
-        srcfarray3d(i,j,k) = 123.d0*sin(real(i,ESMF_KIND_R8)) +  &
-                             321.d0*cos(real(j,ESMF_KIND_R8)) +  &
-                             20.d0*real(k,ESMF_KIND_R8)
+        srcfarray3d(i,j,k) = 123._ESMF_KIND_R8*sin(real(i,ESMF_KIND_R8)) +  &
+                             321._ESMF_KIND_R8*cos(real(j,ESMF_KIND_R8)) +  &
+                             20._ESMF_KIND_R8*real(k,ESMF_KIND_R8)
       enddo
     enddo
   enddo
@@ -286,11 +385,11 @@ program ESMF_ArrayScatterUTest
   do k=lbound(srcfarray3d,3), ubound(srcfarray3d,3)
     do j=lbound(srcfarray3d,2), ubound(srcfarray3d,2)
       do i=lbound(srcfarray3d,1), ubound(srcfarray3d,1)
-        value = 123.d0*sin(real(i,ESMF_KIND_R8)) +   &
-                321.d0*cos(real(j,ESMF_KIND_R8)) +   &
-                20.d0*real(k,ESMF_KIND_R8)
-        value = srcfarray3d(i,j,k) / value - 1.d0
-        if (abs(value) > double_min) rc = ESMF_FAILURE
+        value = 123._ESMF_KIND_R8*sin(real(i,ESMF_KIND_R8)) +   &
+                321._ESMF_KIND_R8*cos(real(j,ESMF_KIND_R8)) +   &
+                20._ESMF_KIND_R8*real(k,ESMF_KIND_R8)
+        value = value - srcfarray3d(i,j,k)
+        if (abs(value) > min_R8) rc = ESMF_FAILURE
       enddo
     enddo
   enddo
@@ -300,13 +399,13 @@ program ESMF_ArrayScatterUTest
   !EX_UTest_Multi_Proc_Only
   ! Verify Array data after scatter
   write(failMsg, *) "Array data wrong."
-  write(name, *) "Verifying Array data after 2D+1 ArrayScatter() Test"
+  write(name, *) "Verifying destination Array data after 2D+1 ArrayScatter() Test"
   rc = ESMF_SUCCESS
   do k=lbound(farrayPtr3d,3), ubound(farrayPtr3d,3)
     kk = k - lbound(farrayPtr3d,3) + lbound(srcfarray3d,3)
     do j=lbound(farrayPtr3d,2), ubound(farrayPtr3d,2)
       do i=lbound(farrayPtr3d,1), ubound(farrayPtr3d,1)
-        if (abs(farrayPtr3d(i,j,k) - srcfarray3d(i,j,kk)) > double_min) then
+        if (abs(farrayPtr3d(i,j,k) - srcfarray3d(i,j,kk)) > min_R8) then
           rc = ESMF_FAILURE
         endif
       enddo
@@ -340,9 +439,9 @@ program ESMF_ArrayScatterUTest
   do k=lbound(srcfarray3d,3), ubound(srcfarray3d,3)
     do j=lbound(srcfarray3d,2), ubound(srcfarray3d,2)
       do i=lbound(srcfarray3d,1), ubound(srcfarray3d,1)
-        srcfarray3d(i,j,k) = 123.d0*sin(real(i,ESMF_KIND_R8)) + &
-                             321.d0*cos(real(j,ESMF_KIND_R8)) + &
-                             20.d0*real(k,ESMF_KIND_R8)
+        srcfarray3d(i,j,k) = 123._ESMF_KIND_R8*sin(real(i,ESMF_KIND_R8)) + &
+                             321._ESMF_KIND_R8*cos(real(j,ESMF_KIND_R8)) + &
+                             20._ESMF_KIND_R8*real(k,ESMF_KIND_R8)
       enddo
     enddo
   enddo
@@ -374,11 +473,11 @@ program ESMF_ArrayScatterUTest
   do k=lbound(srcfarray3d,3), ubound(srcfarray3d,3)
     do j=lbound(srcfarray3d,2), ubound(srcfarray3d,2)
       do i=lbound(srcfarray3d,1), ubound(srcfarray3d,1)
-        value = 123.d0*sin(real(i,ESMF_KIND_R8)) +  &
-                321.d0*cos(real(j,ESMF_KIND_R8)) +  &
-                 20.d0*real(k,ESMF_KIND_R8)
-        value = srcfarray3d(i,j,k) / value - 1.d0
-        if (abs(value) > double_min) rc = ESMF_FAILURE
+        value = 123._ESMF_KIND_R8*sin(real(i,ESMF_KIND_R8)) +  &
+                321._ESMF_KIND_R8*cos(real(j,ESMF_KIND_R8)) +  &
+                 20._ESMF_KIND_R8*real(k,ESMF_KIND_R8)
+        value = value - srcfarray3d(i,j,k)
+        if (abs(value) > min_R8) rc = ESMF_FAILURE
       enddo
     enddo
   enddo
@@ -388,13 +487,13 @@ program ESMF_ArrayScatterUTest
   !EX_UTest_Multi_Proc_Only
   ! Verify Array data after scatter
   write(failMsg, *) "Array data wrong."
-  write(name, *) "Verifying Array data after 2D+1 non-contiguous exclusive region ArrayScatter() Test"
+  write(name, *) "Verifying destination Array data after 2D+1 non-contiguous exclusive region ArrayScatter() Test"
   rc = ESMF_SUCCESS
   do k=lbound(farrayPtr3d,3), ubound(farrayPtr3d,3)
     kk = k - lbound(farrayPtr3d,3) + lbound(srcfarray3d,3)
     do j=exclusiveLBound(2,1), exclusiveUBound(2,1)
       do i=exclusiveLBound(1,1), exclusiveUBound(1,1)
-        if (abs(farrayPtr3d(i,j,k) - srcfarray3d(i,j,kk)) > double_min) then
+        if (abs(farrayPtr3d(i,j,k) - srcfarray3d(i,j,kk)) > min_R8) then
           rc = ESMF_FAILURE
         endif
       enddo
