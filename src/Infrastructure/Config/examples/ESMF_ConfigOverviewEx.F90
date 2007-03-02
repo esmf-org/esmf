@@ -107,7 +107,7 @@
       endif
 
 !BOE
-! Two constants, radius and i_n, can be retrieved with the following code
+! Two constants, radius and i\_n, can be retrieved with the following code
 ! fragment:
 !EOE
 
