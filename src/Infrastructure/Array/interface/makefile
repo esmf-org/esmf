@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2006/04/24 21:39:21 theurich Exp $
+# $Id: makefile,v 1.17 2007/03/02 21:46:09 theurich Exp $
 
 # leave alone.
 ALL: build_here
@@ -9,10 +9,12 @@ ALL: build_here
 CFLAGS    =
 FFLAGS    =
 
+# If you have auto-generated files in this directory, list them all here.
+AUTOGEN   = ESMF_ArrayCreate.F90 ESMF_ArrayGet.F90 ESMF_ArrayScatter.F90
 # If you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMC_Array_F.C
 # If you have F90 files in this directory, list them all on the line below.
-SOURCEF	  = ESMF_Array.F90
+SOURCEF	  = $(AUTOGEN) ESMF_Array.F90
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # List all .h files which should be copied to common include dir
@@ -30,15 +32,13 @@ LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/Array/interface
 
 CLEANDIRS   =
-CLEANFILES  = 
+CLEANFILES  = $(AUTOGEN)
 CLOBBERDIRS =
 
 include ${ESMF_DIR}/makefile
 
 # Leave the following line blank.
 DIRS	  = 
-
-
 
 # If you have class files which need to be compiled in a particular
 # order, list the dependencies below, with no rules following.
@@ -49,7 +49,3 @@ DIRS	  =
 #
 # ESMF_Bundle.o:  ESMF_Field.o
 #
-
-
-
-

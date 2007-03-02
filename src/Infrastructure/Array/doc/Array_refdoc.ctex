@@ -1,4 +1,4 @@
-% $Id: Array_refdoc.ctex,v 1.10 2006/11/16 05:20:54 cdeluca Exp $ 
+% $Id: Array_refdoc.ctex,v 1.11 2007/03/02 21:49:51 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -93,11 +93,23 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
+\input{ESMF_ArrayCreate_fapi}
+\mbox{}\hrulefill\
+\input{ESMF_ArrayGet_fapi}
+\mbox{}\hrulefill\ 
+\input{ESMF_ArrayScatter_fapi}
+\mbox{}\hrulefill\ 
 \input{ESMF_Array_fapi}
 #elif defined(CONSTITUENT)
+\input{../Infrastructure/Array/doc/ESMF_ArrayCreate_fapi}
+\mbox{}\hrulefill\ 
+\input{../Infrastructure/Array/doc/ESMF_ArrayGet_fapi}
+\mbox{}\hrulefill\
+\input{../Infrastructure/Array/doc/ESMF_ArrayScatter_fapi}
+\mbox{}\hrulefill\ 
 \input{../Infrastructure/Array/doc/ESMF_Array_fapi}
-\input{../Infrastructure/LocalArray/doc/ESMF_LocalArrayCreate_fapi}
-\input{../Infrastructure/LocalArray/doc/ESMF_LocalArrayGet_fapi}
+\mbox{}\hrulefill\ \input{../Infrastructure/LocalArray/doc/ESMF_LocalArrayCreate_fapi}
+\mbox{}\hrulefill\ \input{../Infrastructure/LocalArray/doc/ESMF_LocalArrayGet_fapi}
 #endif
 
 %#ifdef STANDALONE

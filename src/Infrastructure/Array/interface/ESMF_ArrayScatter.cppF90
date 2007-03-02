@@ -1,0 +1,458 @@
+! $Id: ESMF_ArrayScatter.cppF90,v 1.1 2007/03/02 21:46:09 theurich Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+^define ESMF_FILENAME "ESMF_ArrayScatter.F90"
+!==============================================================================
+!
+! ESMF LocalArrayScatter module
+module ESMF_ArrayScatterMod
+!
+!==============================================================================
+!
+! This file contains the LocalArray class definition and all LocalArray
+! class methods.
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+! < ignore blank lines below.  they are created by the files which
+!   define various macros. >
+^include "ESMF.h"
+#include "ESMF_StdCppMacros.h"
+
+!------------------------------------------------------------------------------
+!BOPI
+! !MODULE: ESMF_ArrayScatterMod - Provide TKR overloading for ESMF_ArrayScatter()
+!
+! !DESCRIPTION:
+!
+! The code in this file is part of the {\tt ESMF\_Array} class F90 API.
+!
+!
+!------------------------------------------------------------------------------
+! !USES:
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_LocalArrayMod
+  use ESMF_ArraySpecMod
+  use ESMF_VMMod
+  use ESMF_DELayoutMod
+  use ESMF_DistGridMod
+  use ESMF_RHandleMod
+  use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
+
+  ! class sub modules
+  use ESMF_ArrayCreateMod   ! contains the ESMF_Array derived type definition
+  use ESMF_ArrayGetMod
+
+  implicit none
+
+!------------------------------------------------------------------------------
+!
+! !PUBLIC MEMBER FUNCTIONS:
+
+! - ESMF-public methods:
+  public ESMF_ArrayScatter
+
+
+!EOPI
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_ArrayScatter.cppF90,v 1.1 2007/03/02 21:46:09 theurich Exp $'
+
+!==============================================================================
+! 
+! INTERFACE BLOCKS
+!
+!==============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayScatter -- Generic interface
+
+! !INTERFACE:
+  interface ESMF_ArrayScatter
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    InterfaceMacro(ArrayScatter)
+
+    module procedure ESMF_ArrayScatterB        !1st prototype
+    module procedure ESMF_ArrayScatterNBRoot   !1st prototype
+    module procedure ESMF_ArrayScatterNB       !1st prototype
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_ArrayScatter} functions.   
+!EOPI 
+  end interface
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!===============================================================================
+! ArrayScatter() interfaces
+!===============================================================================
+
+
+#define ArrayScatterDoc() \
+! -------------------------- ESMF-public method ----------------------------- @\
+!BOP @\
+! @\
+! !IROUTINE: ESMF_ArrayScatter - Scatter a Fortran90 array across the ESMF_Array @\
+@\
+! !INTERFACE: @\
+! subroutine ESMF_ArrayScatter<rank><type><kind>(array, farray, patch, & @\
+!   rootPet, vm, rc) @\
+! @\
+! !ARGUMENTS: @\
+!   type(ESMF_Array),           intent(inout)           :: array @\
+!   mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
+!   integer,                    intent(in),   optional  :: patch @\
+!   integer,                    intent(in)              :: rootPet @\
+!   type(ESMF_VM),              intent(in),   optional  :: vm @\
+!   integer,                    intent(out),  optional  :: rc @\
+! @\
+! @\
+! !DESCRIPTION: @\
+!   Scatter the data of {\tt farray} located on {\tt rootPET} @\
+!   across an {ESMF\_Array} object. A single {\tt farray} must be @\
+!   scattered across a single DistGrid patch in Array. The optional {\tt patch} @\
+!   argument allows selection of the patch. For Arrays defined on a single @\
+!   patch DistGrid the default selection (patch 1) will be correct. The @\
+!   shape of {\tt farray} must match the shape of the patch in Array. @\
+! @\
+!   This version of the interface implements the PET-based blocking paradigm: @\
+!   Each PET of the VM must issue this call exactly once for {\em all} of its @\
+!   DEs. The call will block until all PET-local data objects are accessible. @\
+! @\
+!   The arguments are: @\
+!   \begin{description} @\
+!   \item[array] @\
+!     The {\tt ESMF\_Array} object across which data will be scattered. @\
+!   \item[{[farray]}] @\
+!     The Fortran90 array that is to be scattered. Only root @\
+!     must provide a valid {\tt farray}. @\
+!   \item[{[patch]}] @\
+!     The DistGrid patch in {\tt array} into which to scatter {\tt farray}. @\
+!     By default {\tt farray} will be scattered into patch 1. @\
+!   \item[rootPet] @\
+!     PET that holds the valid data in {\tt farray}. @\
+!   \item[{[vm]}] @\
+!     Optional {\tt ESMF\_VM} object of the current context. Providing the @\
+!     VM of the current context will lower the method|s overhead. @\
+!   \item[{[rc]}] @\
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!   \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define ArrayScatterMacro(mtype, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+! -------------------------- ESMF-public method ----------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_ArrayScatter" @\
+  subroutine ESMF_ArrayScatter##mrank##D##mtypekind(array, farray, patch, & @\
+    rootPet, vm, rc) @\
+@\
+    type(ESMF_Array),           intent(inout)           :: array @\
+    mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
+    integer,                    intent(in),   optional  :: patch @\
+    integer,                    intent(in)              :: rootPet @\
+    type(ESMF_VM),              intent(in),   optional  :: vm @\
+    integer,                    intent(out),  optional  :: rc @\
+@\
+    ! Local variables @\
+    integer                       :: status         ! local error status @\
+    integer                       :: counts(mrank)  ! counts vector @\
+    integer                       :: lb(mrank)      ! lb vector @\
+    integer                       :: i, rank @\
+    type(ESMF_TypeKind)           :: typekind @\
+@\
+    ! Initialize return code; assume failure until success is certain @\
+    status = ESMF_FAILURE @\
+    if (present(rc)) rc = ESMF_FAILURE @\
+@\
+    ! Check init status of arguments @\
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc) @\
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc) @\
+@\
+    ! Check consistency @\
+    call ESMF_ArrayGet(array, typekind=typekind, rank=rank, rc=status) @\
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+    ! Require farray typekind to match Array typekind @\
+    if (typekind /= ESMF_TYPEKIND_##mtypekind) then @\
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+        "- farrayPtr typekind does not match Array typekind", & @\
+        ESMF_CONTEXT, rc) @\
+      return @\
+    endif @\
+    ! Require farray rank to match Array rank @\
+    if (rank /= mrank) then @\
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+        "- farrayPtr rank does not match Array rank", & @\
+        ESMF_CONTEXT, rc) @\
+      return @\
+    endif @\
+@\
+    ! Prepare counts vector @\
+    do i=1, mrank @\
+      counts(i) = size(farray, i) @\
+    enddo @\
+@\
+    ! Prepare counts vector @\
+    ! Since farray is an assumed shape dummy array the lower bounds in all @\
+    ! dimensions will start at 1 following the Fortran 90 standard. @\
+    lb = 1 ! @\
+@\
+    ! Call into the C++ interface, which will sort out optional arguments @\
+    call c_ESMC_ArrayScatter(array, farray(mloc), & @\
+      ESMF_TYPEKIND_##mtypekind, mrank, counts, patch, rootPet, vm, status) @\
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    ! Return successfully @\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+@\
+  end subroutine ESMF_ArrayScatter##mrank##D##mtypekind @\
+!---------------------------------------------------------------------------- @\
+
+DeclarationMacro(ArrayScatter)
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!! old-style newArray calls of 1st prototype calls !!!!!!!!!!!!!!!!!
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayScatterB()"
+!BOPI
+! !IROUTINE: ESMF_ArrayScatter - Scatter a LocalArray across Array
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayScatter()
+  subroutine ESMF_ArrayScatterB(array, larray, rootPET, vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),    intent(inout)           :: array
+    type(ESMF_LocalArray),  intent(in)  :: larray
+    integer,                intent(in)              :: rootPET
+    type(ESMF_VM),          intent(in),   optional  :: vm
+    integer,                intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Scatter the data of an {\tt ESMF\_LocalArray} located on {\tt rootPET} 
+!     across an {ESMF\_Array} object. This version of the interface 
+!     implements the PET-based blocking paradigm: Each PET of the VM must issue
+!     this call exactly once for {\em all} of its DEs. The call is 
+!     PET-collective, meaning that all PETs must issue the call regardless 
+!     whether {\tt array}|s DELayout associates DEs with a PET or not. The
+!     call will block until all PET-local data objects are accessible.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!        The {\tt ESMF\_Array} object across which data will be scattered.
+!     \item[{[larray]}]
+!        The {\tt ESMF\_LocalArray} object that is to be scattered. Only root
+!        must provide a valid larray.
+!     \item[rootPET]
+!          PET that holds the valid data in {\tt larray}.
+!     \item[{[vm]}]
+!        Optional {\tt ESMF\_VM} object of the current context. Providing the
+!        VM of the current context will lower the method|s overhead.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_ArrayScatterB(array, larray, rootPET, vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_ArrayScatterB
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayScatterNBRoot()"
+!BOPI
+! !IROUTINE: ESMF_ArrayScatter - Scatter a LocalArray across Array
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayScatter()
+  subroutine ESMF_ArrayScatterNBRoot(array, larray, rootPET, commhandle, &
+    vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),    intent(inout)           :: array
+    type(ESMF_LocalArray),  intent(in),   optional  :: larray
+    integer,                intent(in)              :: rootPET
+    type(ESMF_CommHandle),  intent(inout)           :: commhandle
+    type(ESMF_VM),          intent(in),   optional  :: vm
+    integer,                intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Scatter the data of an {\tt ESMF\_LocalArray} located on {\tt rootPET} 
+!     across an {ESMF\_Array} object. This version of the interface 
+!     implements the DE-based non-blocking paradigm.
+!     Although only {\tt rootPET} {\em must} issue this call, it is no error
+!     for other PETs to also call this routine. However, only {\tt rootPET}
+!     will receive a valid {\tt commhandle} which can be used in
+!     {\tt ESMF\_ArrayWait} to ensure that access to {\tt larray} is
+!     safe again.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!        The {\tt ESMF\_Array} object across which data will be scattered.
+!     \item[{[larray]}]
+!        The {\tt ESMF\_LocalArray} object that is to be scattered. Only root
+!        must provide a valid larray.
+!     \item[rootPET]
+!          PET that holds the valid data in {\tt larray}.
+!     \item[commhandle]
+!          Upon return {\tt commhandle} on {\tt rootPET} holds the 
+!          {\tt ESMF\_CommHandle} associated with the non-blocking scatter 
+!          operation.
+!     \item[{[vm]}]
+!        Optional {\tt ESMF\_VM} object of the current context. Providing the
+!        VM of the current context will lower the method|s overhead.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_ArrayScatterNBRoot(array, larray, rootPET, commhandle, vm,&
+!      localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_ArrayScatterNBRoot
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayScatterNB()"
+!BOPI
+! !IROUTINE: ESMF_ArrayScatter - Scatter a LocalArray across Array
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayScatter()
+  subroutine ESMF_ArrayScatterNB(array, larray, rootPET, de, vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),    intent(inout)           :: array
+    type(ESMF_LocalArray),  intent(in)  :: larray
+    integer,                intent(in)              :: rootPET
+    integer,                intent(in)              :: de
+    type(ESMF_VM),          intent(in),   optional  :: vm
+    integer,                intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Scatter the data of an {\tt ESMF\_LocalArray} located on {\tt rootPET} 
+!     across an {ESMF\_Array} object. This version of the interface 
+!     implements the DE-based non-blocking paradigm.
+!     Each PET must issue this call once for {\em each} of its DEs. The call
+!     is non-blocking and will return immediatly. Use {\tt ESMF\_ArrayWait}
+!     to wait for the completion on a specific DE. No {\tt ESMF\_CommHandle} is
+!     necessary for the per DE-synchronization because the {\tt array} variable
+!     holds all required information and it is not allowed to have more than 
+!     one pending communication call per DE per Array.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!        The {\tt ESMF\_Array} object across which data will be scattered.
+!     \item[{[larray]}]
+!        The {\tt ESMF\_LocalArray} object that is to be scattered. Only root
+!        must provide a valid larray.
+!     \item[rootPET]
+!          PET that holds the valid data in {\tt larray}.
+!     \item[de]
+!          DE for which this call is issued.
+!     \item[{[vm]}]
+!        Optional {\tt ESMF\_VM} object of the current context. Providing the
+!        VM of the current context will lower the method|s overhead.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_ArrayScatterNB(array, larray, rootPET, de, vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_ArrayScatterNB
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+end module ESMF_ArrayScatterMod
+
