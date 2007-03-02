@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatter.cppF90,v 1.1 2007/03/02 21:46:09 theurich Exp $
+! $Id: ESMF_ArrayScatter.cppF90,v 1.2 2007/03/02 22:37:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@ module ESMF_ArrayScatterMod
 ! < ignore blank lines below.  they are created by the files which
 !   define various macros. >
 ^include "ESMF.h"
-#include "ESMF_StdCppMacros.h"
+#include "ESMF_TypeKindRankMacros.hcppF90"
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -70,7 +70,7 @@ module ESMF_ArrayScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayScatter.cppF90,v 1.1 2007/03/02 21:46:09 theurich Exp $'
+    '$Id: ESMF_ArrayScatter.cppF90,v 1.2 2007/03/02 22:37:20 theurich Exp $'
 
 !==============================================================================
 ! 

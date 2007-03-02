@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayGet.cpp,v 1.5 2007/02/16 05:27:45 rosalind Exp $
+! $Id: ESMF_InternArrayGet.cpp,v 1.6 2007/03/02 22:37:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@ module ESMF_InternArrayGetMod
 ! < ignore blank lines below.  they are created by the files which
 !   define various macros. >
 ^include "ESMF.h"
-#include "ESMF_StdCppMacros.h"
+#include "ESMF_TypeKindRankMacros.hcppF90"
 #include "ESMF_InternArrayGetMacros.h"
 
 !------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayGet.cpp,v 1.5 2007/02/16 05:27:45 rosalind Exp $'
+    '$Id: ESMF_InternArrayGet.cpp,v 1.6 2007/03/02 22:37:20 theurich Exp $'
 
 !==============================================================================
 ! 

@@ -1,4 +1,4 @@
-! $Id: ESMF_TypeKindGet.cpp,v 1.2 2007/02/27 23:36:12 theurich Exp $
+! $Id: ESMF_TypeKindGet.cpp,v 1.3 2007/03/02 22:37:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
 ! INCLUDES
 ! < ignore blank lines below.  they are created by the files which
 ! define various macros. >
-#include "ESMF_TypeKindTemplate.h"
+#include "ESMF_TypeKindMacros.hcppF90"
 #include "ESMF_TypeKindGetMacros.h"
 ^include "ESMF.h"
 !------------------------------------------------------------------------------

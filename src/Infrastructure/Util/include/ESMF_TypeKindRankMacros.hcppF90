@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StdCppMacros.h,v 1.4 2006/11/16 05:21:21 cdeluca Exp $
+! $Id: ESMF_TypeKindRankMacros.hcppF90,v 1.1 2007/03/02 22:37:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,

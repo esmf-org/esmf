@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cpp,v 1.9 2007/03/01 18:56:42 wsawyer Exp $
+! $Id: ESMF_LocalArrayCreate.cpp,v 1.10 2007/03/02 22:37:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@ module ESMF_LocalArrayCreateMod
 ! < ignore blank lines below.  they are created by the files which
 !   define various macros. >
 ^include "ESMF.h"
-#include "ESMF_StdCppMacros.h"
+#include "ESMF_TypeKindRankMacros.hcppF90"
 #include "ESMF_LocalArrayMacros.h"
 #include "ESMF_LocalAllocMacros.h"
 
@@ -161,7 +161,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cpp,v 1.9 2007/03/01 18:56:42 wsawyer Exp $'
+    '$Id: ESMF_LocalArrayCreate.cpp,v 1.10 2007/03/02 22:37:20 theurich Exp $'
 
 !==============================================================================
 ! 

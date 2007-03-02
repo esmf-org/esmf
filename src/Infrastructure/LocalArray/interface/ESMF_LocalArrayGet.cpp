@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cpp,v 1.3 2006/11/16 05:21:07 cdeluca Exp $
+! $Id: ESMF_LocalArrayGet.cpp,v 1.4 2007/03/02 22:37:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 ! < ignore blank lines below.  they are created by the files which
 !   define various macros. >
 ^include "ESMF.h"
-#include "ESMF_StdCppMacros.h"
+#include "ESMF_TypeKindRankMacros.hcppF90"
 #include "ESMF_LocalArrayMacros.h"
 #include "ESMF_LocalAllocMacros.h"
 
@@ -61,7 +61,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArrayGet.cpp,v 1.3 2006/11/16 05:21:07 cdeluca Exp $'
+      '$Id: ESMF_LocalArrayGet.cpp,v 1.4 2007/03/02 22:37:20 theurich Exp $'
 
 !------------------------------------------------------------------------------
 !     ! Internal wrapper structures for passing f90 pointers to C++ and
