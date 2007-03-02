@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayGet.cpp,v 1.6 2007/03/02 22:37:20 theurich Exp $
+! $Id: ESMF_InternArrayGet.cpp,v 1.7 2007/03/02 22:58:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayGet.cpp,v 1.6 2007/03/02 22:37:20 theurich Exp $'
+    '$Id: ESMF_InternArrayGet.cpp,v 1.7 2007/03/02 22:58:21 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -84,7 +84,7 @@ AllTypesMacro(ArrayType)
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       ! < declarations of interfaces for each T/K/R >
-InterfaceMacro(ArrayGetData)
+TypeKindRankInterfaceMacro(ArrayGetData)
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -135,7 +135,7 @@ InterfaceMacro(ArrayGetData)
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
-DeclarationMacro(ArrayGetData)
+TypeKindRankDeclarationMacro(ArrayGetData)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------

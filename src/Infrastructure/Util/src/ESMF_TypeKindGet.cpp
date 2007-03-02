@@ -1,4 +1,4 @@
-! $Id: ESMF_TypeKindGet.cpp,v 1.3 2007/03/02 22:37:21 theurich Exp $
+! $Id: ESMF_TypeKindGet.cpp,v 1.4 2007/03/02 22:58:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -56,7 +56,7 @@
 !EOP
 
       ! < interfaces for each TK >
-TypeKindTemplateInterfaceMacro(ESMF_TypeKindGet)
+TypeKindInterfaceMacro(ESMF_TypeKindGet)
 
     end interface ESMF_TypeKindGet
 
@@ -65,7 +65,7 @@ TypeKindTemplateInterfaceMacro(ESMF_TypeKindGet)
 !==============================================================================
 !------------------------------------------------------------------------------
 
-TypeKindTemplateDeclarationMacro(ESMF_TypeKindGet)
+TypeKindDeclarationMacro(ESMF_TypeKindGet)
 
 !! < end of automatically generated functions >
 !------------------------------------------------------------------------------

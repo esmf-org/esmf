@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.21 2007/03/02 22:37:20 theurich Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.22 2007/03/02 22:58:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.21 2007/03/02 22:37:20 theurich Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.22 2007/03/02 22:58:21 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -84,9 +84,9 @@
         module procedure ESMF_FieldCreateRemap
 
       ! < declarations of interfaces for each T/K/R >
-InterfaceMacro(FieldCreateDPtr)
+TypeKindRankInterfaceMacro(FieldCreateDPtr)
 
-InterfaceMacro(FieldCreateEPtr)
+TypeKindRankInterfaceMacro(FieldCreateEPtr)
 
 ! !DESCRIPTION:
 !   This interface provides an entry point for methods that create a complete
@@ -416,9 +416,9 @@ InterfaceMacro(FieldCreateEPtr)
 !------------------------------------------------------------------------------
 
       ! < declarations of subroutines for each T/K/R >
-DeclarationMacro(FieldCreateDPtr)
+TypeKindRankDeclarationMacro(FieldCreateDPtr)
 
-DeclarationMacro(FieldCreateEPtr)
+TypeKindRankDeclarationMacro(FieldCreateEPtr)
 
 !------------------------------------------------------------------------------
 

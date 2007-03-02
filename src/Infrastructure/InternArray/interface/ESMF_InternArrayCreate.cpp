@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayCreate.cpp,v 1.8 2007/03/02 22:37:20 theurich Exp $
+! $Id: ESMF_InternArrayCreate.cpp,v 1.9 2007/03/02 22:58:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayCreate.cpp,v 1.8 2007/03/02 22:37:20 theurich Exp $'
+    '$Id: ESMF_InternArrayCreate.cpp,v 1.9 2007/03/02 22:58:21 theurich Exp $'
       
 !==============================================================================
 ! 
@@ -112,10 +112,10 @@ AllTypesMacro(ArrayType)
 !EOP
         
        ! < interfaces for each T/K/R >
-InterfaceMacro(ArrayCreateByMTPtr)
+TypeKindRankInterfaceMacro(ArrayCreateByMTPtr)
 
        ! < interfaces for each T/K/R >
-InterfaceMacro(ArrayCreateByFullPtr)
+TypeKindRankInterfaceMacro(ArrayCreateByFullPtr)
 
 
 !BOP
@@ -173,7 +173,7 @@ InterfaceMacro(ArrayCreateByFullPtr)
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
-DeclarationMacro(ArrayCreateByFullPtr)
+TypeKindRankDeclarationMacro(ArrayCreateByFullPtr)
 
 !! < end of automatically generated functions >
 !------------------------------------------------------------------------------
@@ -294,7 +294,7 @@ DeclarationMacro(ArrayCreateByFullPtr)
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
-DeclarationMacro(ArrayCreateByMTPtr)
+TypeKindRankDeclarationMacro(ArrayCreateByMTPtr)
 
 !! < end of automatically generated functions >
 !------------------------------------------------------------------------------
@@ -386,7 +386,7 @@ DeclarationMacro(ArrayCreateByMTPtr)
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
-DeclarationMacro(ArrayDeallocate)
+TypeKindRankDeclarationMacro(ArrayDeallocate)
 
 !! < end of automatically generated functions >
 
@@ -862,7 +862,7 @@ DeclarationMacro(ArrayDeallocate)
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
-DeclarationMacro(ArrayConstructF90Ptr)
+TypeKindRankDeclarationMacro(ArrayConstructF90Ptr)
 
 !! < end of automatically generated functions >
 !------------------------------------------------------------------------------

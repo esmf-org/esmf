@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cpp,v 1.4 2007/03/02 22:37:20 theurich Exp $
+! $Id: ESMF_LocalArrayGet.cpp,v 1.5 2007/03/02 22:58:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArrayGet.cpp,v 1.4 2007/03/02 22:37:20 theurich Exp $'
+      '$Id: ESMF_LocalArrayGet.cpp,v 1.5 2007/03/02 22:58:21 theurich Exp $'
 
 !------------------------------------------------------------------------------
 !     ! Internal wrapper structures for passing f90 pointers to C++ and
@@ -94,7 +94,7 @@ AllTypesMacro(LocalArrayType)
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       ! < declarations of interfaces for each T/K/R >
-InterfaceMacro(LocalArrayGetData)
+TypeKindRankInterfaceMacro(LocalArrayGetData)
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -111,7 +111,7 @@ end interface
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
-DeclarationMacro(LocalArrayGetData)
+TypeKindRankDeclarationMacro(LocalArrayGetData)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsize.cpp,v 1.3 2007/03/02 22:37:21 theurich Exp $
+! $Id: ESMF_FortranWordsize.cpp,v 1.4 2007/03/02 22:58:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@
 !EOP
 
       ! < interfaces for each TK >
-TypeKindTemplateInterfaceMacro(ESMF_FortranWordsize)
+TypeKindInterfaceMacro(ESMF_FortranWordsize)
 
     end interface
 
@@ -64,7 +64,7 @@ TypeKindTemplateInterfaceMacro(ESMF_FortranWordsize)
 !==============================================================================
 !------------------------------------------------------------------------------
 
-TypeKindTemplateDeclarationMacro(ESMF_FortranWordsize)
+TypeKindDeclarationMacro(ESMF_FortranWordsize)
 
 !! < end of automatically generated functions >
 !------------------------------------------------------------------------------

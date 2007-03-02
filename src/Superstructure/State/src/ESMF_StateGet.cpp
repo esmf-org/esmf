@@ -1,4 +1,4 @@
-! $Id: ESMF_StateGet.cpp,v 1.11 2007/03/02 22:37:21 theurich Exp $
+! $Id: ESMF_StateGet.cpp,v 1.12 2007/03/02 22:58:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateGet.cpp,v 1.11 2007/03/02 22:37:21 theurich Exp $'
+      '$Id: ESMF_StateGet.cpp,v 1.12 2007/03/02 22:58:21 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -75,7 +75,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       ! < declarations of interfaces for each T/K/R >
-InterfaceMacro(StateGetDataPointer)
+TypeKindRankInterfaceMacro(StateGetDataPointer)
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -94,7 +94,7 @@ end interface
 !------------------------------------------------------------------------------
 
       ! < declarations of subroutines for each T/K/R >
-DeclarationMacro(StateGetDataPointer)
+TypeKindRankDeclarationMacro(StateGetDataPointer)
 
 
         end module ESMF_StateGetMod

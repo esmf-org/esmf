@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_TypeKindRankMacros.hcppF90,v 1.1 2007/03/02 22:37:21 theurich Exp $
+! $Id: ESMF_TypeKindRankMacros.hcppF90,v 1.2 2007/03/02 22:58:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -95,14 +95,14 @@
 ! Expected use:
 !
 ! interface fred
-!  InterfaceMacro(fred)
+!  TypeKindRankInterfaceMacro(fred)
 !  module procedure other_explicit_non_TKR_interfaces_to_overload
 ! end interface
 !
 !------------------------------------------------------------------------------
 #endif
 
-#define InterfaceMacro(funcname) \
+#define TypeKindRankInterfaceMacro(funcname) \
 !------------------------------------------------------------------------------ @\
 ! <This section created by macro - do not edit directly> @\
 ^ifndef ESMF_NO_INTEGER_1_BYTE @\
@@ -166,7 +166,7 @@
 ! which contains only the general protex documentation, and the rest do NOT
 ! contain protex.  Expected use:
 !
-!  DeclarationMacro(fred)
+!  TypeKindRankDeclarationMacro(fred)
 !
 ! where the following other macros are defined elsewhere by the user:
 !  #define fredDoc() ...
@@ -176,7 +176,7 @@
 !------------------------------------------------------------------------------
 #endif
 
-#define DeclarationMacro(funcname) \
+#define TypeKindRankDeclarationMacro(funcname) \
 !------------------------------------------------------------------------------ @\
 ! <This section created by macro - do not edit directly> @\
  @\

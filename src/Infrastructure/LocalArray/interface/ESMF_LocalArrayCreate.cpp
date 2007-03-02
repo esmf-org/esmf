@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cpp,v 1.10 2007/03/02 22:37:20 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cpp,v 1.11 2007/03/02 22:58:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -161,7 +161,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cpp,v 1.10 2007/03/02 22:37:20 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cpp,v 1.11 2007/03/02 22:58:21 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -186,10 +186,10 @@ AllTypesMacro(LocalArrayType)
 !EOP
         
        ! < interfaces for each T/K/R >
-InterfaceMacro(LocalArrCreateByMTPtr)
+TypeKindRankInterfaceMacro(LocalArrCreateByMTPtr)
 
        ! < interfaces for each T/K/R >
-InterfaceMacro(LocalArrCreateByFlPtr)
+TypeKindRankInterfaceMacro(LocalArrCreateByFlPtr)
 
 
 !BOP
@@ -1269,37 +1269,37 @@ end function
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
-DeclarationMacro(LocalArrayCreateByMTPtr)
+TypeKindRankDeclarationMacro(LocalArrayCreateByMTPtr)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
-DeclarationMacro(LocalArrayCreateByFlPtr)
+TypeKindRankDeclarationMacro(LocalArrayCreateByFlPtr)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
-DeclarationMacro(LocalArrConstrF90Ptr)
+TypeKindRankDeclarationMacro(LocalArrConstrF90Ptr)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
-DeclarationMacro(LocalArrayAdjust)
+TypeKindRankDeclarationMacro(LocalArrayAdjust)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
-DeclarationMacro(LocalArrayCopy)
+TypeKindRankDeclarationMacro(LocalArrayCopy)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
-DeclarationMacro(LocalArrayDeallocate)
+TypeKindRankDeclarationMacro(LocalArrayDeallocate)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------

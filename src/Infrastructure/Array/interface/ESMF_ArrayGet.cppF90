@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.2 2007/03/02 22:37:20 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.3 2007/03/02 22:58:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.2 2007/03/02 22:37:20 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.3 2007/03/02 22:58:21 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -87,7 +87,7 @@ module ESMF_ArrayGetMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     module procedure ESMF_ArrayGet
-    InterfaceMacro(ArrayGetFPtr)
+    TypeKindRankInterfaceMacro(ArrayGetFPtr)
     module procedure ESMF_ArrayGetLarray
     module procedure ESMF_ArrayGetTotalCellMask1D
     module procedure ESMF_ArrayGetTotalCellMask2D
@@ -492,7 +492,7 @@ contains
   end subroutine ESMF_ArrayGetFPtr##mrank##D##mtypekind @\
 !---------------------------------------------------------------------------- @\
 
-DeclarationMacro(ArrayGetFPtr)
+TypeKindRankDeclarationMacro(ArrayGetFPtr)
 
 
 ! -------------------------- ESMF-public method -------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatter.cppF90,v 1.2 2007/03/02 22:37:20 theurich Exp $
+! $Id: ESMF_ArrayScatter.cppF90,v 1.3 2007/03/02 22:58:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_ArrayScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayScatter.cppF90,v 1.2 2007/03/02 22:37:20 theurich Exp $'
+    '$Id: ESMF_ArrayScatter.cppF90,v 1.3 2007/03/02 22:58:21 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -87,7 +87,7 @@ module ESMF_ArrayScatterMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    InterfaceMacro(ArrayScatter)
+    TypeKindRankInterfaceMacro(ArrayScatter)
 
     module procedure ESMF_ArrayScatterB        !1st prototype
     module procedure ESMF_ArrayScatterNBRoot   !1st prototype
@@ -237,7 +237,7 @@ contains
   end subroutine ESMF_ArrayScatter##mrank##D##mtypekind @\
 !---------------------------------------------------------------------------- @\
 
-DeclarationMacro(ArrayScatter)
+TypeKindRankDeclarationMacro(ArrayScatter)
 
 
 
