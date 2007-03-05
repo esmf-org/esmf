@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.3 2007/03/02 22:58:21 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.4 2007/03/05 21:40:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayCreate.cppF90,v 1.3 2007/03/02 22:58:21 theurich Exp $'
+      '$Id: ESMF_ArrayCreate.cppF90,v 1.4 2007/03/05 21:40:57 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -299,7 +299,7 @@ contains
     if (present(rc)) rc = ESMF_FAILURE @\
 @\
     ! Check init status of arguments @\
-    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc) @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
 @\
     ! Mark this DistGrid as invalid @\
     array%this = ESMF_NULL_POINTER @\
@@ -465,9 +465,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     larrayCount = size(larrayList)
     
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
     do i=1, larrayCount
-      ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, larrayList(i), rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocalArrayGetInit, larrayList(i), rc)
     enddo
     
     ! Copy C++ pointers of deep objects into a simple ESMF_Pointer array
@@ -660,7 +660,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
-    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
 
     ! Deal with (optional) array arguments
     dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=status)
@@ -769,7 +769,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit, array, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_ArrayDestroy(array, status)
@@ -945,7 +945,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, larray, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocalArrayGetInit, larray, rc)
     
     ! Initialize the pointer to NULL
     array%this = ESMF_NULL_POINTER
