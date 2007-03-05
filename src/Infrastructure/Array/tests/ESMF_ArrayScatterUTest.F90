@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.13 2007/03/02 21:53:12 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.14 2007/03/05 21:58:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.13 2007/03/02 21:53:12 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.14 2007/03/05 21:58:58 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -50,7 +50,7 @@ program ESMF_ArrayScatterUTest
 
   !LOCAL VARIABLES:
   real(ESMF_KIND_R8), parameter :: min_R8 = 1e-10_ESMF_KIND_R8
-  real(ESMF_KIND_R4), parameter :: min_R4 = 1e-10_ESMF_KIND_R4
+  real(ESMF_KIND_R4), parameter :: min_R4 = 1e-4_ESMF_KIND_R4
   type(ESMF_VM):: vm
   integer:: petCount, localPet, i, j
   type(ESMF_ArraySpec)  :: arrayspec
@@ -92,6 +92,8 @@ program ESMF_ArrayScatterUTest
   !------------------------------------------------------------------------
   ! this unit test requires to be run on exactly 4 PETs
   if (petCount /= 4) goto 10
+  
+print *, min_R4, min_R8
   
   !------------------------------------------------------------------------
   ! preparations
@@ -168,7 +170,7 @@ program ESMF_ArrayScatterUTest
   rc = ESMF_SUCCESS
   do j=lbound(farrayPtr,2), ubound(farrayPtr,2)
     do i=lbound(farrayPtr,1), ubound(farrayPtr,1)
-      print *, i, j, farrayPtr(i,j), srcfarray(i,j)
+      !print *, i, j, farrayPtr(i,j), srcfarray(i,j)
       if (abs(farrayPtr(i,j) - srcfarray(i,j)) > min_R8) rc = ESMF_FAILURE
     enddo
   enddo
@@ -228,9 +230,9 @@ program ESMF_ArrayScatterUTest
       value_R4 = 123._ESMF_KIND_R4*sin(real(i,ESMF_KIND_R4)) +  &
                321._ESMF_KIND_R4*cos(real(j,ESMF_KIND_R4))
       value_R4 = value_R4 - srcfarray_R4(i,j)
-!print *, value
+!print *, value_R4
       if (abs(value_R4) > min_R4) then
-!print *, "Found large value"
+!print *, "Found large value", i, j, value_R4
         rc = ESMF_FAILURE
       endif
    enddo
@@ -245,7 +247,7 @@ program ESMF_ArrayScatterUTest
   rc = ESMF_SUCCESS
   do j=lbound(farrayPtr_R4,2), ubound(farrayPtr_R4,2)
     do i=lbound(farrayPtr_R4,1), ubound(farrayPtr_R4,1)
-      print *, i, j, farrayPtr_R4(i,j), srcfarray_R4(i,j)
+      !print *, i, j, farrayPtr_R4(i,j), srcfarray_R4(i,j)
       if (abs(farrayPtr_R4(i,j) - srcfarray_R4(i,j)) > min_R4) rc = ESMF_FAILURE
     enddo
   enddo
