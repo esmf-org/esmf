@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2006/10/02 18:11:50 theurich Exp $
+# $Id: makefile,v 1.13 2007/03/06 00:10:59 theurich Exp $
 
 # leave alone.
 ALL: build_here 
@@ -9,7 +9,6 @@ SOURCEC	  = ESMC_LocalArray_F.C
 SOURCEF	  = $(AUTOGEN) ESMF_LocalArray.F90 ESMF_LocalAlloc_C.F90
 SOURCEH	  = 
 STOREH	  = 
-CPPFILES  = $(AUTOGEN)
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

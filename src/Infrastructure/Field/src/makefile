@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2006/09/22 23:58:58 theurich Exp $ 
+# $Id: makefile,v 1.19 2007/03/06 00:10:58 theurich Exp $ 
 
 #
 ALL: build_here 
@@ -9,7 +9,6 @@ FFLAGS    =
 SOURCEC	  = 
 SOURCEF	  = ESMF_Field.F90 $(AUTOGEN)
 SOURCEH	  = 
-CPPFILES  = $(AUTOGEN)
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

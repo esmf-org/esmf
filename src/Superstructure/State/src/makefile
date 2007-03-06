@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2004/11/15 18:33:38 nscollins Exp $
+# $Id: makefile,v 1.10 2007/03/06 00:10:59 theurich Exp $
 
 # Leave alone.
 ALL: build_here 
@@ -15,7 +15,6 @@ SOURCEC	  =
 SOURCEF	  = ESMF_StateTypes.F90 ESMF_State.F90 ESMF_StateReconcile.F90  $(AUTOGEN)
 SOURCEH	  = 
 STOREH    = ESMC_State.h
-CPPFILES  = $(AUTOGEN)
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
 
 # Leave these alone.

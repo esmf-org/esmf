@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.37 2005/10/12 19:06:16 nscollins Exp $ 
+# $Id: makefile,v 1.38 2007/03/06 00:10:59 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -7,7 +7,7 @@ CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
 SOURCEF	  =
-CPPFILES  = ESMF_FRoute8UTest.F90
+CPFILES   = ESMF_FRoute8UTest.F90
 
 SOURCEH	  = 
 OBJSC	  =  
@@ -31,7 +31,7 @@ TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI \
 include ${ESMF_DIR}/makefile
 
 CLEANDIRS   = 
-CLEANFILES  = $(TESTS_BUILD) $(CPPFILES)
+CLEANFILES  = $(TESTS_BUILD) $(CPFILES)
 CLOBBERDIRS =
 
 ESMF_FRoute8UTest.F90:  ESMF_FRoute4UTest.F90

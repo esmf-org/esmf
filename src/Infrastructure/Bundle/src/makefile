@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2004/08/03 19:33:43 nscollins Exp $ 
+# $Id: makefile,v 1.10 2007/03/06 00:10:58 theurich Exp $ 
 
 
 ALL: build_here 
@@ -8,7 +8,6 @@ AUTOGEN   = ESMF_BundleGet.F90
 SOURCEC	  = 
 SOURCEF	  = ESMF_Bundle.F90  $(AUTOGEN)
 SOURCEH	  = 
-CPPFILES  = $(AUTOGEN)
 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2006/01/09 21:53:11 nscollins Exp $ 
+# $Id: makefile,v 1.17 2007/03/06 00:10:58 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -7,7 +7,7 @@ CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
 SOURCEF	  =
-CPPFILES  = ESMF_BundleCommHelpers.F90 ESMF_BundleRedistUseHelpers.F90
+CPFILES   = ESMF_BundleCommHelpers.F90 ESMF_BundleRedistUseHelpers.F90
 
 SOURCEH	  = 
 OBJSC	  =  
@@ -37,7 +37,7 @@ include ${ESMF_DIR}/makefile
 DIRS      =
 
 CLEANDIRS   = 
-CLEANFILES  = $(TESTS_BUILD) $(CPPFILES)
+CLEANFILES  = $(TESTS_BUILD) $(CPFILES)
 CLOBBERDIRS =
 
 
