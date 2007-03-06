@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.14 2007/03/05 21:58:58 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.15 2007/03/06 00:55:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.14 2007/03/05 21:58:58 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.15 2007/03/06 00:55:43 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -128,13 +128,15 @@ print *, min_R4, min_R8
   call ESMF_ArrayScatter(array, srcfarray_R4, rootPet=0, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+#ifdef ESMF_EXHAUSTIVE
   !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "2D ESMF_TYPEKIND_R8 ArrayScatter() w/ incompatible Fortran Array (rank) Test"
   write(failMsg, *) "Did return ESMF_SUCCESS"
   call ESMF_ArrayScatter(array, srcfarray3d, rootPet=0, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+#endif
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "2D ESMF_TYPEKIND_R8 ArrayScatter() Test"
