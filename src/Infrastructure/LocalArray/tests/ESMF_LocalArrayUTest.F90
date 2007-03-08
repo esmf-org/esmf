@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.37 2007/03/08 19:43:07 samsoncheung Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.38 2007/03/08 21:40:58 samsoncheung Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -691,6 +691,9 @@
     write(name, *) "Get Spec kind and verify Test"
     call ESMF_ArraySpecGet(arrayspec, kind=akind, rc=rc)
     call ESMF_Test((akind.eq.ESMF_TYPEKIND_R4), name, failMsg, result, ESMF_SRCLINE)
+
+    ! Finish for arank = 2
+    call ESMF_LocalArrayDestroy(array2, rc)
 
     !--------------------------------------------------------------------------
     !EX_UTest
