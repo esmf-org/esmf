@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.36 2007/02/19 23:44:44 rosalind Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.37 2007/03/08 19:43:07 samsoncheung Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -498,6 +498,7 @@
        enddo
      enddo
     enddo
+    deallocate (real3d2ptr)
 
     !--------------------------------------------------------------------------
    !EX_UTest
@@ -527,6 +528,7 @@
        enddo
      enddo
     enddo
+    deallocate (real3d2ptr)
 
     !--------------------------------------------------------------------------
    !EX_UTest
