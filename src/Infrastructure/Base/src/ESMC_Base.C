@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.72 2007/02/20 02:36:45 rosalind Exp $
+// $Id: ESMC_Base.C,v 1.73 2007/03/08 04:31:03 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.72 2007/02/20 02:36:45 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.73 2007/03/08 04:31:03 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -1407,11 +1407,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dt != ESMF_DATA_INTEGER) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type integer", &rc);
-       return rc;
-  }
   if (attr->dk != ESMC_TYPEKIND_I4) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind I4", &rc);
@@ -1466,11 +1461,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dt != ESMF_DATA_INTEGER) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type integer", &rc);
-       return rc;
-  }
   if (attr->dk != ESMC_TYPEKIND_I4) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind I4", &rc);
@@ -1528,11 +1518,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dt != ESMF_DATA_INTEGER) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type integer", &rc);
-       return rc;
-  }
   if (attr->dk != ESMC_TYPEKIND_I8) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind I8", &rc);
@@ -1587,11 +1572,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dt != ESMF_DATA_INTEGER) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type integer", &rc);
-       return rc;
-  }
   if (attr->dk != ESMC_TYPEKIND_I8) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind I8", &rc);
@@ -1649,11 +1629,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dt != ESMF_DATA_REAL) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type real", &rc);
-       return rc;
-  }
   if (attr->dk != ESMC_TYPEKIND_R4) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind R4", &rc);
@@ -1708,11 +1683,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dt != ESMF_DATA_REAL) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type real", &rc);
-       return rc;
-  }
   if (attr->dk != ESMC_TYPEKIND_R4) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind R4", &rc);
@@ -1770,11 +1740,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dt != ESMF_DATA_REAL) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type real", &rc);
-       return rc;
-  }
   if (attr->dk != ESMC_TYPEKIND_R8) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind R8", &rc);
@@ -1829,11 +1794,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dt != ESMF_DATA_REAL) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type real", &rc);
-       return rc;
-  }
   if (attr->dk != ESMC_TYPEKIND_R8) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not kind R8", &rc);
@@ -1891,11 +1851,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dt != ESMF_DATA_LOGICAL) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type logical", &rc);
-       return rc;
-  }
   if (attr->items != 1) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not single value", &rc);
@@ -1943,12 +1898,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (!attr) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not found", &rc);
-       return rc;
-  }
-
-  if (attr->dt != ESMF_DATA_LOGICAL) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type logical", &rc);
        return rc;
   }
 
@@ -2008,11 +1957,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dt != ESMF_DATA_CHARACTER) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "attribute not type character", &rc);
-       return rc;
-  }
   if (attr->items != 1) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not single value", &rc);
@@ -2045,7 +1989,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // 
 // !DESCRIPTION:
 //
-//EOP
+//
 
   int rc, i;
   ESMC_Attribute *attr;
@@ -2064,80 +2008,49 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (dt) 
-      *dt = attr->dt;
-
   if (dk) 
       *dk = attr->dk;
 
-  if (count) {
-      if (attr->dt == ESMF_DATA_CHARACTER)
-          *count = attr->slen;
-      else
-          *count = attr->items;
-  }
 
   if (value) {
       if (attr->items == 1) {
-          switch(attr->dt) {
-            case ESMF_DATA_INTEGER: 
               if (attr->dk == ESMC_TYPEKIND_I4)
                   *(ESMC_I4 *)value = attr->vi; 
-              else
+              else if (attr->dk == ESMC_TYPEKIND_I8)
                   *(ESMC_I8 *)value = attr->vtl; 
-              break;
-            case ESMF_DATA_REAL: 
-              if (attr->dk == ESMC_TYPEKIND_R4)
+              else if (attr->dk == ESMC_TYPEKIND_R4)
                   *(ESMC_R4 *)value = attr->vf; 
-              else
+              else if (attr->dk == ESMC_TYPEKIND_R8)
                   *(ESMC_R8 *)value = attr->vd; 
-              break;
-            case ESMF_DATA_LOGICAL: 
-              *(ESMC_Logical *)value = attr->vb; 
-              break;
-            case ESMF_DATA_CHARACTER:
-              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                                       "cannot return character string here", 
+              else{
+                   ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                                       "unknown typekind",
                                        &rc);
-              return rc;
-            default:  
-              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                                       "unknown data type", &rc);
-              return rc;
-          }
+                   return rc;
+               }
+
  
-      } else {
-          switch(attr->dt) {
-            case ESMF_DATA_INTEGER:
+      } else {  //atr
               if (attr->dk == ESMC_TYPEKIND_I4) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_I4 *)value)[i] = attr->vip[i];
-              } else {
+              } else if (attr->dk == ESMC_TYPEKIND_I8) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_I8 *)value)[i] = attr->vlp[i];
-              }
-              break;
-            case ESMF_DATA_REAL:
-              if (attr->dk == ESMC_TYPEKIND_R4) {
+              } else if (attr->dk == ESMC_TYPEKIND_R4) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_R4 *)value)[i] = attr->vfp[i];
-              } else {
+              } else if (attr->dk == ESMC_TYPEKIND_R8) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_R8 *)value)[i] = attr->vdp[i];
-              }
-              break;
-            case ESMF_DATA_LOGICAL:
-              for (i=0; i<attr->items; i++)
-                  ((ESMC_Logical *)value)[i] = attr->vbp[i];
-              break;
-            default:  
+              } else{
               ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                                       "unknown data type", 
+                                       "unknown typekind", 
                                        &rc);
               return rc;
-          }
-      }
-  }
+              }
+       }     //atr
+  }          //value
 
   return ESMF_SUCCESS;
 
@@ -2180,79 +2093,47 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (name)
        strcpy(name, attr->attrName);
 
-  if (dt) 
-      *dt = attr->dt;
-
   if (dk) 
       *dk = attr->dk;
 
-  if (count) {
-      if (attr->dt == ESMF_DATA_CHARACTER)
-          *count = attr->slen;
-      else
-          *count = attr->items;
-  }
+      *count = attr->items;
 
   if (value) {
       if (attr->items == 1) {
-          switch(attr->dt) {
-            case ESMF_DATA_INTEGER: 
               if (attr->dk == ESMC_TYPEKIND_I4)
                   *(ESMC_I4 *)value = attr->vi; 
-              else
+              else if (attr->dk == ESMC_TYPEKIND_I8)
                   *(ESMC_I8 *)value = attr->vtl; 
-              break;
-            case ESMF_DATA_REAL: 
-              if (attr->dk == ESMC_TYPEKIND_R4)
+              else if (attr->dk == ESMC_TYPEKIND_R4)
                   *(ESMC_R4 *)value = attr->vf; 
-              else
+              else if (attr->dk == ESMC_TYPEKIND_R8)
                   *(ESMC_R8 *)value = attr->vd; 
-              break;
-            case ESMF_DATA_LOGICAL: 
-              *(ESMC_Logical *)value = attr->vb; 
-              break;
-            case ESMF_DATA_CHARACTER:
-              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                                       "cannot return character string here", 
+              else{
+                  ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                       "unknown typekind", 
                                        &rc);
-              return rc;
-            default:  
-              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                                       "unknown data type", 
-                                       &rc);
-              return rc;
-          }
+                  return rc;
+              }
  
       } else {
-          switch(attr->dt) {
-            case ESMF_DATA_INTEGER:
               if (attr->dk == ESMC_TYPEKIND_I4) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_I4 *)value)[i] = attr->vip[i];
-              } else {
+              } else if (attr->dk == ESMC_TYPEKIND_I8) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_I8 *)value)[i] = attr->vlp[i];
-              }
-              break;
-            case ESMF_DATA_REAL:
-              if (attr->dk == ESMC_TYPEKIND_R4) {
+              } else if (attr->dk == ESMC_TYPEKIND_R4) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_R4 *)value)[i] = attr->vfp[i];
-              } else {
+              } else if (attr->dk == ESMC_TYPEKIND_R8) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_R8 *)value)[i] = attr->vdp[i];
-              }
-              break;
-            case ESMF_DATA_LOGICAL:
-              for (i=0; i<attr->items; i++)
-                  ((ESMC_Logical *)value)[i] = attr->vbp[i];
-              break;
-            default:  
-              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                                       "unknown data type", 
+              } else {
+                  ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                       "unknown typekind", 
                                        &rc);
-              return rc;
-          }
+                  return rc;
+              }
       }
   }
 
@@ -2566,10 +2447,10 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   char msgbuf[ESMF_MAXSTR];
 
   if (dk != ESMF_NOKIND) 
-      sprintf(msgbuf, "name '%s', type %s, kind %s", 
-              attrName, ESMC_DataTypeString(dt), ESMC_TypeKindString(dk));
+      sprintf(msgbuf, "name '%s',  kind %s", 
+              attrName,  ESMC_TypeKindString(dk));
   else
-      sprintf(msgbuf, "name '%s', type %s", attrName, ESMC_DataTypeString(dt));
+      sprintf(msgbuf, "name '%s'",  attrName);
  
   printf(msgbuf);
   //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
@@ -2582,30 +2463,19 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (items == 1) {
       printf(", value: ");
       //ESMC_LogDefault.ESMC_LogWrite(", value: ", ESMC_LOG_INFO);
-      switch (dt) {
-        case ESMF_DATA_INTEGER:   
              if (dk == ESMC_TYPEKIND_I4)
                  sprintf(msgbuf, "%d\n", vi); 
-             else
+             else if (dk == ESMC_TYPEKIND_I8)
                  sprintf(msgbuf, "%ld\n", vtl); 
-             break;
-        case ESMF_DATA_REAL:      
-             if (dk == ESMC_TYPEKIND_R4)
+             else if (dk == ESMC_TYPEKIND_R4)
                  sprintf(msgbuf, "%f\n", vf); 
-             else
+             else if (dk == ESMC_TYPEKIND_R8)
                  sprintf(msgbuf, "%g\n", vd); 
-             break; 
-        case ESMF_DATA_LOGICAL:   
-             sprintf(msgbuf, "%s\n", ESMC_LogicalString(vb)); 
-             break;
-        case ESMF_DATA_CHARACTER: 
-             sprintf(msgbuf, "%s\n", vcp); 
-             break;
-        default:  
-             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+             else{ 
+                 ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
                              "unknown value", &rc);
-             return rc;
-      }
+                 return rc;
+             }
       printf(msgbuf);
       //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   }
@@ -2615,31 +2485,19 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       printf(msgbuf);
       //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       for (int i=0; i<items; i++) {
-          switch (dt) {
-            case ESMF_DATA_INTEGER: 
                 if (dk == ESMC_TYPEKIND_I4) {
                     sprintf(msgbuf, " item %d: %d\n", i, vip[i]); 
-                    break; 
-                } else {
+                } else if (dk == ESMC_TYPEKIND_I8) {
                     sprintf(msgbuf, " item %d: %ld\n", i, vlp[i]); 
-                    break; 
-                }
-            case ESMF_DATA_REAL:    
-                if (dk == ESMC_TYPEKIND_R4) {
+                } else if (dk == ESMC_TYPEKIND_R4) {
                     sprintf(msgbuf, " item %d: %f\n", i, vfp[i]); 
-                    break; 
-                } else {
+                } else if (dk == ESMC_TYPEKIND_R8) {
                     sprintf(msgbuf, " item %d: %g\n", i, vdp[i]); 
-                    break; 
-                }
-            case ESMF_DATA_LOGICAL: 
-                sprintf(msgbuf, " item %d: %s\n", i, ESMC_LogicalString(vbp[i])); 
-                break;
-            default: 
-             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                } else{
+                    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
                              "unknown value", &rc);
-             return rc;
-          }
+                    return rc;
+                }
       }
       printf(msgbuf);
       //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
@@ -2731,7 +2589,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   memcpy(attrName, source.attrName, ESMF_MAXSTR);
 
-  dt = source.dt;
   dk = source.dk;
   items = source.items;
   slen = source.slen;
@@ -2740,68 +2597,43 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     voidp = NULL;
  
   else if (items == 1) {
-    switch (dt) {
-      case ESMF_DATA_INTEGER:   
         if (dk == ESMC_TYPEKIND_I4)
             vi = source.vi;  
-        else
+        else if (dk == ESMC_TYPEKIND_I8)
             vtl = source.vtl;  
-        break;
-      case ESMF_DATA_REAL:      
-        if (dk == ESMC_TYPEKIND_R4)
+        else if (dk == ESMC_TYPEKIND_R4)
             vf = source.vf;  
-        else
+        else if (dk == ESMC_TYPEKIND_R8)
             vd = source.vd;  
-        break;
-      case ESMF_DATA_LOGICAL:   
-        vb = source.vb;  
-        break;
-      case ESMF_DATA_CHARACTER: 
-        vcp = new char[slen];   // includes trailing null
-        memcpy(vcp, (char *)source.vcp, slen);
-        break;
-
-      default:
-        voidp = NULL;
-        break;
-    }
-
+   //   else if (dk == ESMC_TYPEKIND_L)     //  logical "typekind" not available yet
+   //       vb = source.vb;
+        else
+            voidp = NULL;
   } else {
     // items > 1, alloc space for a list and do the copy
-      switch (dt) {
-        case ESMF_DATA_INTEGER:   
           if (dk == ESMC_TYPEKIND_I4) {
               vip = new ESMC_I4[items];      
               for (i=0; i<items; i++)
                   vip[i] = source.vip[i];  
-          } else {
+          } else if (dk == ESMC_TYPEKIND_I8) {
               vlp = new ESMC_I8[items];      
               for (i=0; i<items; i++)
                   vlp[i] = source.vlp[i];  
-          }
-          break;
-        case ESMF_DATA_REAL:      
-          if (dk == ESMC_TYPEKIND_R4) {
+          } else if (dk == ESMC_TYPEKIND_R4) {
               vfp = new ESMC_R4[items];      
               for (i=0; i<items; i++)
                   vfp[i] = source.vfp[i];  
-          } else {
+          } else if (dk == ESMC_TYPEKIND_R8) {
               vdp = new ESMC_R8[items];      
               for (i=0; i<items; i++)
                   vdp[i] = source.vdp[i];  
-          }
-          break;
-        case ESMF_DATA_LOGICAL:   
-          vbp = new ESMC_Logical[items];      
-          for (i=0; i<items; i++)
-              vbp[i] = source.vbp[i];  
-          break;
-        case ESMF_DATA_CHARACTER: 
-        default:
+    //    } else if (dk == ESMC_TYPEKIND_L) {    // logical "typekind" not available yet
+    //    vbp = new ESMC_Logical[items];      
+    //    for (i=0; i<items; i++)
+    //        vbp[i] = source.vbp[i];  
+          }else
           // error - arrays of char strings not allowed
-          voidp = NULL;
-          break;
-      }
+             voidp = NULL;
   }
 
   return (*this);
@@ -2874,7 +2706,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       memcpy(attrName, name, len);
   }
 
-  dt = datatype;
   dk = datakind;
   items = numitems;
   slen = 0;          // only used for string values
@@ -2886,80 +2717,61 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       if (!datap) 
           voidp = NULL;
       else  {
-        switch (dt) {
-          case ESMF_DATA_INTEGER:   
             if (dk == ESMC_TYPEKIND_I4)
                 vi = *(ESMC_I4 *)datap;  
-            else
+            else if (dk == ESMC_TYPEKIND_I8)
                 vtl = *(ESMC_I8 *)datap;  
-            break;
-          case ESMF_DATA_REAL:      
-            if (dk == ESMC_TYPEKIND_R4)
+            else if (dk == ESMC_TYPEKIND_R4)
                 vf = *(ESMC_R4 *)datap;  
-            else
+            else if (dk == ESMC_TYPEKIND_R8)
                 vd = *(ESMC_R8 *)datap;  
-            break;
-          case ESMF_DATA_LOGICAL:   
-            vb = *(ESMC_Logical *)datap;  
-            break;
-          case ESMF_DATA_CHARACTER: 
-            slen = strlen((char *)datap) + 1;
-            vcp = new char[slen];
-            strncpy(vcp, (char *)datap, slen);
-            break;
-    
-          default:
-            voidp = NULL;
-            break;
-        }
+
+       //   else if (dk == ESMC_TYPEKIND_L)   // Logical typekind not available yet
+       //       vb = *(ESMC_Logical *)datap;  
+       //   else if (dk == ESMC_TYPEKIND_CHAR) { //Character typekind not available yet
+       //       slen = strlen((char *)datap) + 1;
+       //       vcp = new char[slen];
+       //       strncpy(vcp, (char *)datap, slen);
+       //   } 
+
+            else
+                voidp = NULL;
     }
 
   } else {
     // items > 1, alloc space for a list and do the copy
-    switch (dt) {
-      case ESMF_DATA_INTEGER:   
         if (dk == ESMC_TYPEKIND_I4) {
             vip = new ESMC_I4[items];      
-            if (!datap) 
-                break;
+            if (datap) 
             for (i=0; i<items; i++)
                 vip[i] = ((ESMC_I4 *)datap)[i];  
-        } else {
+        } else if (dk == ESMC_TYPEKIND_I8) {
             vlp = new ESMC_I8[items];      
-            if (!datap) 
-                break;
+            if (datap) 
             for (i=0; i<items; i++)
                 vlp[i] = ((ESMC_I8 *)datap)[i];  
-        }
-        break;
-      case ESMF_DATA_REAL:      
-        if (dk == ESMC_TYPEKIND_R4) {
+        } else if (dk == ESMC_TYPEKIND_R4) {
             vfp = new ESMC_R4[items];      
-            if (!datap) 
-                break;
+            if (datap) 
             for (i=0; i<items; i++)
                 vfp[i] = ((ESMC_R4 *)datap)[i];  
-        } else {
+        } else if (dk == ESMC_TYPEKIND_R8) {
             vdp = new ESMC_R8[items];      
-            if (!datap) 
-                break;
+            if (datap) 
             for (i=0; i<items; i++)
                 vdp[i] = ((ESMC_R8 *)datap)[i];  
-        }
-        break;
-      case ESMF_DATA_LOGICAL:   
-        vbp = new ESMC_Logical[items];      
-        if (!datap) 
-            break;
-        for (i=0; i<items; i++)
-            vbp[i] = ((ESMC_Logical *)datap)[i];  
-        break;
-      case ESMF_DATA_CHARACTER: 
-      default:
-        // error - arrays of char strings not allowed
-        voidp = NULL;
-        break;
-    }
+
+   // Logical typekind not yet implemented
+   //   } else if (dk == ESMC_TYPEKIND_L) {  // logical typekind not available yet
+   //           vbp = new ESMC_Logical[items];      
+   //           if (!datap) 
+   //               break;
+   //           for (i=0; i<items; i++)
+   //               vbp[i] = ((ESMC_Logical *)datap)[i];  
+
+        } else
+           // error - arrays of char strings not allowed
+                voidp = NULL;
   }
 
  } // end ESMC_Attribute
@@ -2983,22 +2795,17 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOP
 
-  if (dt == ESMF_DATA_CHARACTER) delete [] vcp;
+  // Character typekind not yet implemented
+  // if (dk == ESMC_TYPEKIND_CHAR) delete [] vcp;
 
   if (items > 1) {
-    switch (dt) {
-      case ESMF_DATA_INTEGER:   
         if (dk == ESMC_TYPEKIND_I4) delete [] vip;
-        else delete [] vlp;
-        break;
-      case ESMF_DATA_REAL:      
-        if (dk == ESMC_TYPEKIND_R8) delete [] vfp;
-        else delete [] vdp;  
-        break;
-      case ESMF_DATA_LOGICAL:   
-        delete [] vbp;  
-        break;
-    }
+        else if (dk == ESMC_TYPEKIND_I8) delete [] vlp;
+        else if (dk == ESMC_TYPEKIND_R4) delete [] vfp;
+        else if (dk == ESMC_TYPEKIND_R8) delete [] vdp;  
+
+     // Logical typekind not yet implemented
+     // else if (dk == ESMC_TYPEKIND_L ) delete [] vbp;  
   }
 
  } // end ~ESMC_Attribute
