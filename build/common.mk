@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.175 2007/03/06 00:10:58 theurich Exp $
+#  $Id: common.mk,v 1.176 2007/03/12 21:28:58 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1703,30 +1703,34 @@ check_unit_tests:
 # the cat step.)
 #
 ftest:
-	-@cd $(ESMF_TESTDIR) ; \
-	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
+	@$(ESMF_RM) $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)ESMF_$(TNAME)UTest ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)ESMF_$(TNAME)UTest ; \
 	else \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1\> ./ESMF_$(TNAME)UTest.stdout 2\>\&1 ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
-	fi ; \
-	cat ./PET*$(TNAME)UTest.Log > ./ESMF_$(TNAME)UTest.Log ; \
-	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest 1\> $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest 1> $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout 2>&1 ; \
+	fi
+	@if [ -f $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log ] ; then \
+	  cat $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log > $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.Log ; \
+	  $(ESMF_RM) $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log ; \
+	fi
+
 
 ctest:
-	-@cd $(ESMF_TESTDIR) ; \
-	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
+	@$(ESMF_RM) $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest ; \
+	  $(ESMF_MPIRUN) -np $(NP) /ESMC_$(TNAME)UTest ; \
 	else \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest 1\> ./ESMC_$(TNAME)UTest.stdout 2\>\&1 ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest 1> ./ESMC_$(TNAME)UTest.stdout 2>&1 ; \
-	fi ; \
-	cat ./PET*$(TNAME)UTest.Log > ./ESMC_$(TNAME)UTest.Log ; \
-	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest 1\> $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)./ESMC_$(TNAME)UTest 1> $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.stdout 2>&1 ; \
+	fi
+	@if [ -f $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log ] ; then \
+	  cat $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log > $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.Log ; \
+	  $(ESMF_RM) $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log ; \
+	fi
+
 
 
 #-------------------------------------------------------------------------------
