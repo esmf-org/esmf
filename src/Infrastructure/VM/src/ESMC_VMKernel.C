@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.82 2007/02/26 23:39:51 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.83 2007/03/12 18:26:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -2264,7 +2264,7 @@ void ESMC_VMKPlan::vmkplan_print(void){
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// ~~~ Communication Calls
+// ~~~ Communication Handle and Communication Handle Queue
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2290,47 +2290,140 @@ void ESMC_VMK::vmk_commqueueitem_link(vmk_commhandle *commhandle){
 
 int ESMC_VMK::vmk_commqueueitem_unlink(vmk_commhandle *commhandle){
   vmk_commhandle *handle;
+  int found = 0; // reset
   pthread_mutex_lock(pth_mutex2);
-  if (nhandles==0){
-    pthread_mutex_unlock(pth_mutex2);
-    return 0;
-  }else if(nhandles==1){
-    nhandles=0;
-    firsthandle=NULL;
-    pthread_mutex_unlock(pth_mutex2);
-    return 1;
-  }else{
+  if(nhandles >= 1){
     handle=firsthandle;
     while (handle->next_handle!=NULL){
-//fprintf(stderr, "gjt in vmk_commqueueitem_unlink commhandle: %p handle: %p handle->next_handle=%p\n", commhandle, handle, handle->next_handle);
-      
       if (handle==commhandle) break;
       handle=handle->next_handle;
     }
     if (handle==commhandle){
-//fprintf(stderr, "gjt in vmk_commqueueitem_unlink found commhandle in queue\n");
-      --nhandles;
       // found commhandle in queue
+      found = 1;
+      --nhandles;
       if (handle->prev_handle==NULL){
-//fprintf(stderr, "gjt in vmk_commqueueitem_unlink commhandle was firsthandle: %p\n",
-//         firsthandle);
-        
+        // commhandle was firsthandle in queue -> special treatment
         firsthandle=handle->next_handle;
-        firsthandle->prev_handle=NULL;
-        
-//fprintf(stderr, "gjt in vmk_commqueueitem_unlink now firsthandle: %p\n",
-//         firsthandle);
-        
-        
+        if (firsthandle != NULL)
+          firsthandle->prev_handle=NULL;
       }else
+        // regular unlink if commhandle was any other element in queue
         handle->prev_handle->next_handle=handle->next_handle;
       if (handle->next_handle!=NULL)
+        // finish unlink by back linking next element to previous element
         handle->next_handle->prev_handle=handle->prev_handle;
     }
   }
   pthread_mutex_unlock(pth_mutex2);
-  return 1;
+  return found;
 }
+
+
+void ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, int nanopause){
+  // wait for all of the communications pointed to by *commhandle to complete
+  // and delete all of the inside contents of *commhandle (even if it is a tree)
+  // finally unlink the *commhandle container from the commqueue and delete the
+  // container (only) if the *commhandle was part of the commqueue!
+//fprintf(stderr, "vmk_commwait: nhandles=%d\n", nhandles);
+//fprintf(stderr, "vmk_commwait: *commhandle=%p\n", *commhandle);
+  if ((commhandle!=NULL) && ((*commhandle)!=NULL)){
+    // wait for all non-blocking requests in commhandle to complete
+    if ((*commhandle)->type==0){
+      // this is a commhandle container
+      for (int i=0; i<(*commhandle)->nelements; i++){
+        vmk_commwait(&((*commhandle)->handles[i]));  // recursive call
+        delete (*commhandle)->handles[i];
+      }
+      delete [] (*commhandle)->handles;
+    }else if ((*commhandle)->type==1){
+      // this commhandle contains MPI_Requests
+      MPI_Status mpi_s;
+      for (int i=0; i<(*commhandle)->nelements; i++){
+//fprintf(stderr, "MPI_Wait: commhandle=%p\n", &((*commhandle)->mpireq[i]));
+        if (nanopause){
+          // use nanosleep to pause between tests to lower impact on CPU load
+          struct timespec dt = {0, nanopause};
+          int completeFlag = 0;
+          for(;;){
+            if (mpi_mutex_flag)
+              pthread_mutex_lock(pth_mutex);
+            MPI_Test(&((*commhandle)->mpireq[i]), &completeFlag, &mpi_s);
+            if (mpi_mutex_flag)
+              pthread_mutex_unlock(pth_mutex);
+            if (completeFlag) break;
+#ifdef ESMF_NO_NANOSLEEP
+#else
+            nanosleep(&dt, NULL);
+#endif
+          }
+        }else{
+          if (mpi_mutex_flag)
+            pthread_mutex_lock(pth_mutex);
+          MPI_Wait(&((*commhandle)->mpireq[i]), &mpi_s);
+          if (mpi_mutex_flag)
+            pthread_mutex_unlock(pth_mutex);
+        }
+      }
+      delete [] (*commhandle)->mpireq;
+    }else if ((*commhandle)->type==-1){
+      // this is a dummy commhandle and there is nothing to wait for...
+    }else{
+      printf("ESMC_VMK: only MPI non-blocking implemented\n");
+    }
+    // if this *commhandle is in the request queue x-> unlink and delete
+    if (vmk_commqueueitem_unlink(*commhandle)){ 
+      delete *commhandle; // delete the container commhandle that was linked
+      *commhandle = NULL; // ensure this container will not point to anything
+    }
+  }
+}
+
+
+void ESMC_VMK::vmk_commqueuewait(void){
+  int n=nhandles;
+  vmk_commhandle *fh;
+  for (int i=0; i<n; i++){
+//    printf("vmk_commqueuewait: %d\n", nhandles);
+    fh = firsthandle;
+    vmk_commwait(&fh);
+  }
+//  printf("vmk_commqueuewait: %d\n", nhandles);
+}
+
+
+void ESMC_VMK::vmk_commcancel(vmk_commhandle **commhandle){
+//fprintf(stderr, "vmk_commcancel: nhandles=%d\n", nhandles);
+//fprintf(stderr, "vmk_commcancel: commhandle=%p\n", (*commhandle));
+  if ((*commhandle)!=NULL){
+    // cancel all non-blocking requests in commhandle to complete
+    if ((*commhandle)->type==0){
+      // this is a commhandle container
+      for (int i=0; i<(*commhandle)->nelements; i++){
+        vmk_commcancel(&((*commhandle)->handles[i]));  // recursive call
+      }
+    }else if ((*commhandle)->type==1){
+      // this commhandle contains MPI_Requests
+      for (int i=0; i<(*commhandle)->nelements; i++){
+//fprintf(stderr, "MPI_Cancel: commhandle=%p\n", &((*commhandle)->mpireq[i]));
+        if (mpi_mutex_flag)
+          pthread_mutex_lock(pth_mutex);
+        MPI_Cancel(&((*commhandle)->mpireq[i]));
+        if (mpi_mutex_flag)
+          pthread_mutex_unlock(pth_mutex);
+      }
+    }else{
+      printf("ESMC_VMK: only MPI non-blocking implemented\n");
+    }
+  }
+}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~ Communication Calls
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 void ESMC_VMK::vmk_send(void *message, int size, int dest, int tag){
@@ -2982,9 +3075,6 @@ void ESMC_VMK::vmk_barrier(void){
   }
 }
 
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// newly written communication calls
 
 void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
   void *recvData, int recvSize, int src){
@@ -3967,103 +4057,11 @@ void ESMC_VMK::vmk_broadcast(void *data, int len, int root,
 }
 
 
-void ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, int nanopause){
-  // wait for all of the communications pointed to by *commhandle to complete
-  // and delete all of the inside contents of *commhandle (even if it is a tree)
-  // finally unlink the *commhandle container from the commqueue and delete the
-  // container (only) if the *commhandle was part of the commqueue!
-//fprintf(stderr, "vmk_commwait: nhandles=%d\n", nhandles);
-//fprintf(stderr, "vmk_commwait: *commhandle=%p\n", *commhandle);
-  if ((commhandle!=NULL) && ((*commhandle)!=NULL)){
-    // wait for all non-blocking requests in commhandle to complete
-    if ((*commhandle)->type==0){
-      // this is a commhandle container
-      for (int i=0; i<(*commhandle)->nelements; i++){
-        vmk_commwait(&((*commhandle)->handles[i]));  // recursive call
-        delete (*commhandle)->handles[i];
-      }
-      delete [] (*commhandle)->handles;
-    }else if ((*commhandle)->type==1){
-      // this commhandle contains MPI_Requests
-      MPI_Status mpi_s;
-      for (int i=0; i<(*commhandle)->nelements; i++){
-//fprintf(stderr, "MPI_Wait: commhandle=%p\n", &((*commhandle)->mpireq[i]));
-        if (nanopause){
-          // use nanosleep to pause between tests to lower impact on CPU load
-          struct timespec dt = {0, nanopause};
-          int completeFlag = 0;
-          for(;;){
-            if (mpi_mutex_flag)
-              pthread_mutex_lock(pth_mutex);
-            MPI_Test(&((*commhandle)->mpireq[i]), &completeFlag, &mpi_s);
-            if (mpi_mutex_flag)
-              pthread_mutex_unlock(pth_mutex);
-            if (completeFlag) break;
-#ifdef ESMF_NO_NANOSLEEP
-#else
-            nanosleep(&dt, NULL);
-#endif
-          }
-        }else{
-          if (mpi_mutex_flag)
-            pthread_mutex_lock(pth_mutex);
-          MPI_Wait(&((*commhandle)->mpireq[i]), &mpi_s);
-          if (mpi_mutex_flag)
-            pthread_mutex_unlock(pth_mutex);
-        }
-      }
-      delete [] (*commhandle)->mpireq;
-    }else if ((*commhandle)->type==-1){
-      // this is a dummy commhandle and there is nothing to wait for...
-    }else{
-      printf("ESMC_VMK: only MPI non-blocking implemented\n");
-    }
-    // if this *commhandle is in the request queue x-> unlink and delete
-    if (vmk_commqueueitem_unlink(*commhandle)){ 
-      delete *commhandle; // delete the container commhandle that was linked
-      *commhandle = NULL; // ensure this container will not point to anything
-    }
-  }
-}
-
-
-void ESMC_VMK::vmk_commqueuewait(void){
-  int n=nhandles;
-  vmk_commhandle *fh;
-  for (int i=0; i<n; i++){
-//    printf("vmk_commqueuewait: %d\n", nhandles);
-    fh = firsthandle;
-    vmk_commwait(&fh);
-  }
-//  printf("vmk_commqueuewait: %d\n", nhandles);
-}
-
-
-void ESMC_VMK::vmk_commcancel(vmk_commhandle **commhandle){
-//fprintf(stderr, "vmk_commcancel: nhandles=%d\n", nhandles);
-//fprintf(stderr, "vmk_commcancel: commhandle=%p\n", (*commhandle));
-  if ((*commhandle)!=NULL){
-    // cancel all non-blocking requests in commhandle to complete
-    if ((*commhandle)->type==0){
-      // this is a commhandle container
-      for (int i=0; i<(*commhandle)->nelements; i++){
-        vmk_commcancel(&((*commhandle)->handles[i]));  // recursive call
-      }
-    }else if ((*commhandle)->type==1){
-      // this commhandle contains MPI_Requests
-      for (int i=0; i<(*commhandle)->nelements; i++){
-//fprintf(stderr, "MPI_Cancel: commhandle=%p\n", &((*commhandle)->mpireq[i]));
-        if (mpi_mutex_flag)
-          pthread_mutex_lock(pth_mutex);
-        MPI_Cancel(&((*commhandle)->mpireq[i]));
-        if (mpi_mutex_flag)
-          pthread_mutex_unlock(pth_mutex);
-      }
-    }else{
-      printf("ESMC_VMK: only MPI non-blocking implemented\n");
-    }
-  }
-}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~ Timing Calls
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 void vmk_wtime(double *time){
@@ -4101,40 +4099,40 @@ void vmk_wtimedelay(double delay){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     
-    void *ESMC_VMK::vmk_ipshmallocate(int bytes, int *firstFlag){
-      if (firstFlag != NULL) *firstFlag = 0; // reset
-      ++ipshmAllocCount;  // increment the local count
-      if (ipshmAllocCount >= IPSHM_TABLE_SIZE) return NULL;
-      pthread_mutex_lock(ipshmMutex);
-      if (ipshmAllocCount > *ipshmCount){
-        // this is the first thread for this new request to allocate
-        if (firstFlag != NULL) *firstFlag = 1; // set
-        ipshmTable[*ipshmCount] = (void *)malloc(bytes);
-        ipshmDeallocTable[*ipshmCount] = vmk_nthreads(vmk_mypet()); //reset
-        ++(*ipshmCount);  // increment the count of allocated segments in table
-      }
-      void *result = ipshmTable[ipshmAllocCount-1];// pull out the correct alloc
-      pthread_mutex_unlock(ipshmMutex);
-      return result;
+void *ESMC_VMK::vmk_ipshmallocate(int bytes, int *firstFlag){
+  if (firstFlag != NULL) *firstFlag = 0; // reset
+  ++ipshmAllocCount;  // increment the local count
+  if (ipshmAllocCount >= IPSHM_TABLE_SIZE) return NULL;
+  pthread_mutex_lock(ipshmMutex);
+  if (ipshmAllocCount > *ipshmCount){
+    // this is the first thread for this new request to allocate
+    if (firstFlag != NULL) *firstFlag = 1; // set
+    ipshmTable[*ipshmCount] = (void *)malloc(bytes);
+    ipshmDeallocTable[*ipshmCount] = vmk_nthreads(vmk_mypet()); //reset
+    ++(*ipshmCount);  // increment the count of allocated segments in table
+  }
+  void *result = ipshmTable[ipshmAllocCount-1];// pull out the correct alloc
+  pthread_mutex_unlock(ipshmMutex);
+  return result;
+}
+
+
+void ESMC_VMK::vmk_ipshmdeallocate(void *pointer){
+  int i;
+  pthread_mutex_lock(ipshmMutex);
+  for (i=0; i<*ipshmCount; i++)
+    if (ipshmTable[i] == pointer) break;
+  if (i<*ipshmCount){
+    // found the allocation
+    --ipshmDeallocTable[i]; // indicate that this thread called deallocate
+    if (ipshmDeallocTable[i] == 0){
+      //printf("freeing %p\n", pointer);
+      free(pointer);
+      ipshmTable[i] = NULL;
     }
-    
-    
-    void ESMC_VMK::vmk_ipshmdeallocate(void *pointer){
-      int i;
-      pthread_mutex_lock(ipshmMutex);
-      for (i=0; i<*ipshmCount; i++)
-        if (ipshmTable[i] == pointer) break;
-      if (i<*ipshmCount){
-        // found the allocation
-        --ipshmDeallocTable[i]; // indicate that this thread called deallocate
-        if (ipshmDeallocTable[i] == 0){
-          //printf("freeing %p\n", pointer);
-          free(pointer);
-          ipshmTable[i] = NULL;
-        }
-      }
-      pthread_mutex_unlock(ipshmMutex);
-    }
+  }
+  pthread_mutex_unlock(ipshmMutex);
+}
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4143,32 +4141,32 @@ void vmk_wtimedelay(double delay){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    vmk_ipmutex *ESMC_VMK::vmk_ipmutexallocate(void){
-      int firstFlag;
-      pthread_mutex_lock(ipSetupMutex);
-      vmk_ipmutex *ipmutex = (vmk_ipmutex *)
-        vmk_ipshmallocate(sizeof(vmk_ipmutex), &firstFlag);
-      if (firstFlag) pthread_mutex_init(&(ipmutex->pth_mutex), NULL);
-      ipmutex->lastFlag = vmk_nthreads(vmk_mypet()); //reset
-      pthread_mutex_unlock(ipSetupMutex);
-      return ipmutex;
-    }
+vmk_ipmutex *ESMC_VMK::vmk_ipmutexallocate(void){
+  int firstFlag;
+  pthread_mutex_lock(ipSetupMutex);
+  vmk_ipmutex *ipmutex = (vmk_ipmutex *)
+    vmk_ipshmallocate(sizeof(vmk_ipmutex), &firstFlag);
+  if (firstFlag) pthread_mutex_init(&(ipmutex->pth_mutex), NULL);
+  ipmutex->lastFlag = vmk_nthreads(vmk_mypet()); //reset
+  pthread_mutex_unlock(ipSetupMutex);
+  return ipmutex;
+}
 
-    void ESMC_VMK::vmk_ipmutexdeallocate(vmk_ipmutex *ipmutex){
-      pthread_mutex_lock(ipSetupMutex);
-      --(ipmutex->lastFlag);  // register this thread
-      if (ipmutex->lastFlag == 0) pthread_mutex_destroy(&(ipmutex->pth_mutex));
-      vmk_ipshmdeallocate(ipmutex);
-      pthread_mutex_unlock(ipSetupMutex);
-    }
+void ESMC_VMK::vmk_ipmutexdeallocate(vmk_ipmutex *ipmutex){
+  pthread_mutex_lock(ipSetupMutex);
+  --(ipmutex->lastFlag);  // register this thread
+  if (ipmutex->lastFlag == 0) pthread_mutex_destroy(&(ipmutex->pth_mutex));
+  vmk_ipshmdeallocate(ipmutex);
+  pthread_mutex_unlock(ipSetupMutex);
+}
 
-    int ESMC_VMK::vmk_ipmutexlock(vmk_ipmutex *ipmutex){
-      return pthread_mutex_lock(&(ipmutex->pth_mutex));
-    }
-    
-    int ESMC_VMK::vmk_ipmutexunlock(vmk_ipmutex *ipmutex){
-      return pthread_mutex_unlock(&(ipmutex->pth_mutex));
-    }
+int ESMC_VMK::vmk_ipmutexlock(vmk_ipmutex *ipmutex){
+  return pthread_mutex_lock(&(ipmutex->pth_mutex));
+}
+
+int ESMC_VMK::vmk_ipmutexunlock(vmk_ipmutex *ipmutex){
+  return pthread_mutex_unlock(&(ipmutex->pth_mutex));
+}
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
