@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayUTest.F90,v 1.8 2007/02/19 23:44:44 rosalind Exp $
+! $Id: ESMF_InternArrayUTest.F90,v 1.9 2007/03/12 17:20:56 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayUTest.F90,v 1.8 2007/02/19 23:44:44 rosalind Exp $'
+      '$Id: ESMF_InternArrayUTest.F90,v 1.9 2007/03/12 17:20:56 rosalind Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -412,14 +412,6 @@
                                     datakind=att_datakind, &
                                     count=att_count, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-!-------------------------------------------------------------------------------
-!  !  Verify datatype of Attribute
-
-    !EX_UTest
-    write(failMsg, *) "Attribute datatype is wrong" 
-    write(name, *) "Verify Attribute datatype from an Array Test"
-    call ESMF_Test((att_datatype.eq.ESMF_DATA_INTEGER), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
 !  !  Verify datakind of Attribute

@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.73 2007/03/08 04:31:03 rosalind Exp $
+// $Id: ESMC_Base.C,v 1.74 2007/03/12 17:20:56 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.73 2007/03/08 04:31:03 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.74 2007/03/12 17:20:56 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -2011,6 +2011,13 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (dk) 
       *dk = attr->dk;
 
+   if (count) {
+//     if (attr->dk == ESMC_TYPEKIND_CHAR)  // ESMC_TYPEKIND_CHAR not yet implemented
+//         *count = attr->slen;
+//     else
+           *count = attr->items;
+   }
+
 
   if (value) {
       if (attr->items == 1) {
@@ -2096,7 +2103,13 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (dk) 
       *dk = attr->dk;
 
-      *count = attr->items;
+if (count) {
+//     if (attr->dk == ESMC_TYPEKIND_CHAR)   // ESMC_TYPEKIND_CHAR not yet implemented
+//         *count = attr->slen;
+//     else
+           *count = attr->items;
+   }
+
 
   if (value) {
       if (attr->items == 1) {
