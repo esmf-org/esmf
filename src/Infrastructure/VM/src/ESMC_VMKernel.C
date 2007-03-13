@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.84 2007/03/13 21:05:40 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.85 2007/03/13 21:21:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -409,16 +409,16 @@ void ESMC_VMK::vmk_init(MPI_Comm mpiCommunicator){
 
 void ESMC_VMK::vmk_finalize(int finalizeMpi){
   // finalize default (all MPI) virtual machine
-  // todo: delete all allocations of default ESMC_VMK
-  //  - free MPI Group and Comm
-//gjt - don't use yet:  MPI_Comm_free(&mpi_c);
-//gjt - don't use yet:  MPI_Group_free(&mpi_g);
   for (int k=0; k<100; k++)
     delete [] argv[k];
   int finalized;
   MPI_Finalized(&finalized);
-  if (!finalized && finalizeMpi)
-    MPI_Finalize();
+  if (!finalized){
+    MPI_Comm_free(&mpi_c);
+    MPI_Group_free(&mpi_g);
+    if (finalizeMpi)
+      MPI_Finalize();
+   }
 }
 
 
