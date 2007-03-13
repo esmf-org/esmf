@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.178 2007/03/13 06:10:59 theurich Exp $
+#  $Id: common.mk,v 1.179 2007/03/13 06:34:07 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1710,8 +1710,8 @@ ftest:
 	else \
 	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest 1\> $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout 2\>\&1 ; \
 	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest 1> $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout 2>&1 ; \
-	fi
-	@cat ./PET*$(TNAME)UTest.Log > $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.Log ;\
+	fi ; \
+	cat ./PET*$(TNAME)UTest.Log > $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.Log ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
 
 
@@ -1723,8 +1723,8 @@ ctest:
 	else \
 	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest 1\> $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.stdout 2\>\&1 ; \
 	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest 1> $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.stdout 2>&1 ; \
-	fi
-	@cat ./PET*$(TNAME)UTest.Log > $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.Log ;\
+	fi ; \
+	cat ./PET*$(TNAME)UTest.Log > $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.Log ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
 
 
