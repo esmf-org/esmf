@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.unicos.batch,v 1.1 2007/03/12 21:10:17 svasquez Exp $
+# $Id: mpirun.unicos.batch,v 1.2 2007/03/13 17:33:49 svasquez Exp $
 # This script provides an interface such that the simple command
 # mpirun -np #
 # runs # copies of the program in parallel.
@@ -20,12 +20,14 @@ else
 	export mppe=$num_procs
 fi
 
+export working_dir=`pwd`
+
 # Extract batch run script
 cat > $ESMF_DIR/scripts/esmf_script << THE_END_OF_BATCH_SCRIPT
-#PBS -A CLI017
+#PBS $ESMF_BATCHOPTIONS
 #PBS -j oe
-#PBS -q debug
-#PBS -l walltime=1:00:00,mppe=$mppe
+#PBS -l mppe=$mppe
+cd $working_dir
 chmod a+x $ESMF_DIR/scripts/esmf_script
 aprun -n $num_procs $prog
 
@@ -46,13 +48,6 @@ while qstat | grep $proc_id
 do
         sleep 30
 done
-
-
-# if a unit test create *.Log file.
-if grep "UTest" $prog  > NULL
-then
-	cat *$proc_id*  > $prog.Log
-fi
 
 # move job output file to stdout.
 mv -f *$proc_id*  $prog.stdout
