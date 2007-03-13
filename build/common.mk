@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.177 2007/03/12 22:26:38 svasquez Exp $
+#  $Id: common.mk,v 1.178 2007/03/13 06:10:59 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1705,32 +1705,27 @@ check_unit_tests:
 ftest:
 	@$(ESMF_RM) $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)ESMF_$(TNAME)UTest ; \
-	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)ESMF_$(TNAME)UTest ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest ; \
 	else \
 	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest 1\> $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout 2\>\&1 ; \
 	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest 1> $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout 2>&1 ; \
 	fi
-	@if [ -f ./PET*$(TNAME)UTest.Log ] ; then \
-	  cat ./PET*$(TNAME)UTest.Log > $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.Log ; \
-	  $(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
-	fi
+	@cat ./PET*$(TNAME)UTest.Log > $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.Log ;\
+	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
 
 
 ctest:
 	@$(ESMF_RM) $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest ; \
-	  $(ESMF_MPIRUN) -np $(NP) /ESMC_$(TNAME)UTest ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest ; \
 	else \
 	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest 1\> $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.stdout 2\>\&1 ; \
-	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)./ESMC_$(TNAME)UTest 1> $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.stdout 2>&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest 1> $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.stdout 2>&1 ; \
 	fi
-	@if [ -f ./PET*$(TNAME)UTest.Log ] ; then \
-	  cat ./PET*$(TNAME)UTest.Log > $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.Log ; \
-	  $(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
-	fi
-
+	@cat ./PET*$(TNAME)UTest.Log > $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.Log ;\
+	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
 
 
 #-------------------------------------------------------------------------------
