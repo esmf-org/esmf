@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.41 2007/02/23 17:46:41 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.42 2007/03/13 21:05:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -168,14 +168,33 @@ class ESMC_VMK{
     static int *cpuid; // cpuid associated with certain core (multi-core cpus)
     static int *ssiid; // single system inmage id to which this core belongs
   public:
+    // Declaration of static data members - Definitions are in the header of
+    // source file ESMF_VMKernel.C
     // static MPI info, Group and Comm of the default ESMC_VMK
     // and the thread level that the MPI implementation supports.
     static MPI_Group default_mpi_g;
     static MPI_Comm default_mpi_c;
     static int mpi_thread_level;
-    // static variables that hold command line arguments
+    // Static data members that hold command line arguments
+    // There are two sets of these variables. The first set of variables is
+    // used to obtain the command line arguments in the vmk_obtain_args() method
+    // and can be used throughout execution to access the command line args.
+    // The second set with the "_mpich" part in the name is necessary to support
+    // MPICH1.2. MPICH1.2 requires command line args to be passed into its
+    // MPI_Init() routine, however, MPICH1.2 modifies the content of the passed
+    // in variables and hence a second, dedicated set of argc and argv variables
+    // is needed. MPICH1.2 is furthermore the reason why the statically
+    // allocated _store variables and the extra indirection via 
+    // argv = &(argv_store[0])
+    // is needed. For some reason with MPICH1.2 a memory leak will be reported
+    // if argv (and argv_mpich) were allocated dynamially via "new char*[100]"!
     static int argc;
+    static char *argv_store[100];
     static char **argv;
+    // Second set of variables to support MPICH1.2
+    static int argc_mpich;
+    static char *argv_mpich_store[100];
+    static char **argv_mpich;
 
   // methods
   private:

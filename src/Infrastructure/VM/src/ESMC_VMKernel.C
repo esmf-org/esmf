@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.83 2007/03/12 18:26:51 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.84 2007/03/13 21:05:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -88,15 +88,21 @@
 #define VM_COMM_TYPE_POSIXIPC (3)
 
 
-// initialization of class static variables
+// Definition of class static data members
 MPI_Group ESMC_VMK::default_mpi_g;
 MPI_Comm ESMC_VMK::default_mpi_c;
 int ESMC_VMK::mpi_thread_level;
 int ESMC_VMK::ncores;
 int *ESMC_VMK::cpuid;
 int *ESMC_VMK::ssiid;
+// Static data members to support command line arguments
 int ESMC_VMK::argc;
-char **ESMC_VMK::argv;
+char *ESMC_VMK::argv_store[100];
+char **ESMC_VMK::argv = &(argv_store[0]);
+// Second set of command line argument variables to support MPICH1.2
+int ESMC_VMK::argc_mpich;
+char *ESMC_VMK::argv_mpich_store[100];
+char **ESMC_VMK::argv_mpich = &(argv_mpich_store[0]);
 
 
 // -----------------------------------------------------------------------------
@@ -186,7 +192,6 @@ void ESMC_VMK::vmk_obtain_args(void){
   if (!strncmp(uname, "IRIX64", 6)) skip_obtain_args=1; 
   if (skip_obtain_args){
     argc = 0;
-    argv = NULL;
     return; // bail out
   }
   // determine whether this is a SUS3=sysV or BSD derived OS
@@ -215,11 +220,7 @@ void ESMC_VMK::vmk_obtain_args(void){
   sprintf(command, "rm -f .args.%d .uname.%d", mypid, mypid);
   system(command);
   // now the string 'args' holds the complete command line with arguments
-  // next prepare the argc and argv variables
   argc=0;
-  argv = new char*[100];
-  for (int k=0; k<100; k++)
-    argv[k] = new char[160];
   int i=0;
   int j=0;
   // chop up args and thus set up argc and argv
@@ -263,7 +264,11 @@ void ESMC_VMK::vmk_init(MPI_Comm mpiCommunicator){
   sigaddset(&sigs_to_block, VM_SIG1);
   sigprocmask(SIG_BLOCK, &sigs_to_block, NULL); // block VM_SIG1
   // obtain command line arguments and store in the VM class
+  argc = 0; // reset
+  for (int k=0; k<100; k++)
+    argv[k] = new char[160];
 #ifdef ESMF_MPICH
+  // currently only obtain arguments for MPICH because it needs it!!!
   vmk_obtain_args();
 #endif
   // next check is whether MPI has been initialized yet
@@ -274,12 +279,20 @@ void ESMC_VMK::vmk_init(MPI_Comm mpiCommunicator){
   if (!initialized){
 #ifdef ESMF_MPICH   
     // MPICH1.2 is not standard compliant and needs valid args
-    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &mpi_thread_level);
+    // make copy of argc and argv for MPICH because it modifies them and
+    // the original values are needed to delete the memory during vmk_finalize
+    argc_mpich = argc;
+    for (int k=0; k<100; k++)
+      argv_mpich[k] = argv[k];
+    MPI_Init_thread(&argc_mpich, (char ***)&argv_mpich, MPI_THREAD_MULTIPLE,
+      &mpi_thread_level);
 #else
     MPI_Init_thread(NULL, NULL, MPI_THREAD_MULTIPLE, &mpi_thread_level);
 #endif
-  } 
+  }
   // so now MPI is for sure initialized...
+  // TODO: now it should be safe to call vmk_obtain_args() for all MPI impl.
+  // Obtain MPI variables
   int rank, size;
   MPI_Comm_rank(mpiCommunicator, &rank);
   MPI_Comm_size(mpiCommunicator, &size);
@@ -400,6 +413,8 @@ void ESMC_VMK::vmk_finalize(int finalizeMpi){
   //  - free MPI Group and Comm
 //gjt - don't use yet:  MPI_Comm_free(&mpi_c);
 //gjt - don't use yet:  MPI_Group_free(&mpi_g);
+  for (int k=0; k<100; k++)
+    delete [] argv[k];
   int finalized;
   MPI_Finalized(&finalized);
   if (!finalized && finalizeMpi)
