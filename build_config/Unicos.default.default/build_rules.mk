@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.10 2007/03/12 21:19:43 svasquez Exp $
+# $Id: build_rules.mk,v 1.11 2007/03/13 22:16:06 theurich Exp $
 # 
 # Unicos.default.default
 #
@@ -112,4 +112,6 @@ ESMF_CPPDEFAULT       = cpp
 # amend bad cpp ".TRUE.", ". NOT." , "=>' output
 # fix leading space that seems to show up on some lines
 %.F90 : %.cpp
-	${ESMF_CPP} -E -I${ESMF_INCDIR} $< | tr "@^" "\n#" | sed -e 's/^ //' -e '/^#line/d' -e 's/ \. /./g' -e 's/\. not\./.not./g' -e 's/= >/=>/g' > $(dir$<)$(notdir $@)
+	${ESMF_CPP} -E -I${ESMF_INCDIR} $< | tr "@^" "\n#" | $(ESMF_SED) -e 's/^ //' -e '/^#line/d' -e 's/ \. /./g' -e 's/\. not\./.not./g' -e 's/= >/=>/g' > $(dir$<)$(notdir $@)
+%.F90 : %.cppF90
+	cp $< $<.cpp; ${ESMF_CPP} -E -I${ESMF_INCDIR} $(FPPDEFS) $<.cpp  | tr "@^|" "\n#'" | $(ESMF_SED) -e 's/^ //' -e '/^#line/d' -e 's/ \. /./g' -e 's/\. not\./.not./g' -e 's/= >/=>/g' > $(dir$<)$(notdir $@); rm -f $<.cpp
