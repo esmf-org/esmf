@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.4 2007/03/05 21:40:57 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.5 2007/03/14 03:50:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -105,8 +105,8 @@ module ESMF_ArrayCreateMod
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayCreate.cppF90,v 1.4 2007/03/05 21:40:57 theurich Exp $'
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.5 2007/03/14 03:50:52 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -119,21 +119,21 @@ module ESMF_ArrayCreateMod
 ! !IROUTINE: ESMF_ArrayCreate -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_ArrayCreate
+  interface ESMF_ArrayCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      TypeKindRankInterfaceMacro(ArrayCreateAssmdShape)
-      module procedure ESMF_ArrayCreateLocalArray
-      module procedure ESMF_ArrayCreateAllocate
+    TypeKindRankInterfaceMacro(ArrayCreateAssmdShape)
+    module procedure ESMF_ArrayCreateLocalArray
+    module procedure ESMF_ArrayCreateAllocate
 
-      module procedure ESMF_ArrayCreateFromLA         !1st prototype
+    module procedure ESMF_ArrayCreateFromLA         !1st prototype
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 ! types of {\tt ESMF\_ArrayCreate} functions.   
 !EOPI 
-      end interface
+  end interface
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
