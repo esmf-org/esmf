@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.unicos.batch,v 1.3 2007/03/14 17:11:35 theurich Exp $
+# $Id: mpirun.unicos.batch,v 1.4 2007/03/14 18:30:58 svasquez Exp $
 # This script provides an interface such that the simple command
 # mpirun -np #
 # runs # copies of the program in parallel.
@@ -28,11 +28,11 @@ cat > $ESMF_DIR/scripts/esmf_script << THE_END_OF_BATCH_SCRIPT
 #PBS -j oe
 #PBS -l mppe=$mppe
 cd $working_dir
-chmod a+x $ESMF_DIR/scripts/esmf_script
 aprun -n $num_procs $prog
 
 THE_END_OF_BATCH_SCRIPT
 
+chmod a+x $ESMF_DIR/scripts/esmf_script
 
 echo " qsub -V $ESMF_DIR/scripts/esmf_script"
 
@@ -54,4 +54,4 @@ mv -f *$proc_id*  $prog.stdout
 
 
 # Clean up
-rm -f $ESMF_DIR/scripts/esmf_script
+#rm -f $ESMF_DIR/scripts/esmf_script
