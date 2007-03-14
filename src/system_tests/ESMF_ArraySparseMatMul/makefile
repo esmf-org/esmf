@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2006/09/22 23:55:46 theurich Exp $ 
+# $Id: makefile,v 1.3 2007/03/14 17:11:35 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -42,7 +42,7 @@ CLOBBERDIRS =
 
 
 RUN_ArraySparseMatMul:
-	$(MAKE) TNAME=ArraySparseMatMul NP=6 stest
+	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=ArraySparseMatMul NP=6 stest
 
 RUN_ArraySparseMatMulUNI:
 	$(MAKE) TNAME=ArraySparseMatMul NP=1 stest

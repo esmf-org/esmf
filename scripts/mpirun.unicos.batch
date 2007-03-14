@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.unicos.batch,v 1.2 2007/03/13 17:33:49 svasquez Exp $
+# $Id: mpirun.unicos.batch,v 1.3 2007/03/14 17:11:35 theurich Exp $
 # This script provides an interface such that the simple command
 # mpirun -np #
 # runs # copies of the program in parallel.
@@ -34,9 +34,9 @@ aprun -n $num_procs $prog
 THE_END_OF_BATCH_SCRIPT
 
 
-echo " qsub $ESMF_DIR/scripts/esmf_script"
+echo " qsub -V $ESMF_DIR/scripts/esmf_script"
 
-proc_id=`qsub $ESMF_DIR/scripts/esmf_script `
+proc_id=`qsub -V $ESMF_DIR/scripts/esmf_script `
 
 # Since this is not an interactive shell, we must grep for the proc_id until 
 # it is gone, indicating the job is done or the walltime has expired.
