@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.unicos.batch,v 1.4 2007/03/14 18:30:58 svasquez Exp $
+# $Id: mpirun.unicos.batch,v 1.5 2007/03/16 22:15:12 svasquez Exp $
 # This script provides an interface such that the simple command
 # mpirun -np #
 # runs # copies of the program in parallel.
@@ -13,11 +13,13 @@ fi
 export num_procs=$2
 shift 2
 export prog=$*
-if [ $num_procs = 6 ]
+# Make the mppe value a  multiple of 4.
+remainder=`expr $num_procs % 4`
+if [[ $remainder != 0 ]]
 then
-	export mppe=8
+        export mppe=`expr $num_procs + 4 - $remainder`
 else
-	export mppe=$num_procs
+        export mppe=$num_procs
 fi
 
 export working_dir=`pwd`
