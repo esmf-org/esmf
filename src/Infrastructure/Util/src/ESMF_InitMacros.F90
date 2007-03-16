@@ -1,4 +1,4 @@
-! $Id: ESMF_InitMacros.F90,v 1.9 2007/01/09 23:06:43 oehmke Exp $
+! $Id: ESMF_InitMacros.F90,v 1.10 2007/03/16 20:58:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@ contains
 
 
 !--------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_InitCheckDeep - Translate isInit value to return code
 
 ! !INTERFACE: 
@@ -62,7 +62,7 @@ contains
 !            Initialization macro defined type component. 
 !      \end{description}
 ! 
-!EOP
+!EOPI
 	
     ! base return code on isInit value
     if (isInit .eq. ESMF_INIT_CREATED) then
@@ -78,7 +78,7 @@ contains
 end function ESMF_InitCheckDeep
 
 !--------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IMErr - Init Macros Error Handling
 
 ! !INTERFACE: 
@@ -124,7 +124,7 @@ end function ESMF_InitCheckDeep
 !      
 !      \end{description}
 ! 
-!EOP
+!EOPI
 	
 
     ESMF_IMErr=ESMF_LogMsgFoundError(ESMF_InitCheckDeep(isInit), &

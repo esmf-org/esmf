@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.5 2007/03/14 03:50:52 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.6 2007/03/16 20:58:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.5 2007/03/14 03:50:52 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.6 2007/03/16 20:58:23 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -153,7 +153,7 @@ contains
 #define ArrayCreateAssmdShapeDoc() \
 ! -------------------------- ESMF-public method ----------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayCreateAssmdShape - Create Array from Fortran90 array @\
+! !IROUTINE: ESMF_ArrayCreate - Create Array object from Fortran90 array @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayCreate() @\
@@ -343,7 +343,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayCreateLocalArray()"
 !BOP
-! !IROUTINE: ESMF_ArrayCreateLocalArray - Create from a list of LocalArray elements
+! !IROUTINE: ESMF_ArrayCreate - Create Array object from a list of LocalArray objects
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
@@ -557,7 +557,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayCreateAllocate()"
 !BOP
-! !IROUTINE: ESMF_ArrayCreateAllocate - Create Array and allocate memory
+! !IROUTINE: ESMF_ArrayCreate - Create Array object from specification and allocate memory
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()

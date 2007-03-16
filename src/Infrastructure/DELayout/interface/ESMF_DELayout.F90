@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.61 2006/12/07 23:23:17 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.62 2007/03/16 20:58:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -131,8 +131,8 @@ module ESMF_DELayoutMod
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.61 2006/12/07 23:23:17 theurich Exp $'
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_DELayout.F90,v 1.62 2007/03/16 20:58:23 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -145,64 +145,67 @@ module ESMF_DELayoutMod
 ! !IROUTINE: ESMF_DELayoutCreate -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_DELayoutCreate
+  interface ESMF_DELayoutCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_DELayoutCreateDefault
-      module procedure ESMF_DELayoutCreateFromPetMap
-      module procedure ESMF_DELayoutCreateHintWeights
+    module procedure ESMF_DELayoutCreateDefault
+    module procedure ESMF_DELayoutCreateFromPetMap
+    module procedure ESMF_DELayoutCreateHintWeights
       
-      module procedure ESMF_DELayoutCreateDeprecated
+    module procedure ESMF_DELayoutCreateDeprecated
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_DELayoutCreate} functions.   
 !EOPI 
-      end interface
+  end interface
 
 
 ! overload .eq. & .ne. for derived types
 
-interface operator (.eq.)
- module procedure ESMF_sreq
-end interface
+  interface operator (.eq.)
+    module procedure ESMF_sreq
+  end interface
 
-interface operator (.ne.)
- module procedure ESMF_srne
-end interface
+  interface operator (.ne.)
+    module procedure ESMF_srne
+  end interface
 
-!==============================================================================
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_DELayoutServiceReply to see if they're the same 
 
-function ESMF_sreq(sr1, sr2)
- logical ESMF_sreq
- type(ESMF_DELayoutServiceReply), intent(in) :: sr1, sr2
+  function ESMF_sreq(sr1, sr2)
+    logical ESMF_sreq
+    type(ESMF_DELayoutServiceReply), intent(in) :: sr1, sr2
 
- ESMF_sreq = (sr1%value .eq. sr2%value)    
-end function
+    ESMF_sreq = (sr1%value .eq. sr2%value)    
+  end function
 
-function ESMF_srne(sr1, sr2)
- logical ESMF_srne
- type(ESMF_DELayoutServiceReply), intent(in) :: sr1, sr2
+  function ESMF_srne(sr1, sr2)
+    logical ESMF_srne
+    type(ESMF_DELayoutServiceReply), intent(in) :: sr1, sr2
 
- ESMF_srne = (sr1%value .ne. sr2%value)
-end function
-
-
-
-
+    ESMF_srne = (sr1%value .ne. sr2%value)
+  end function
+!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutCreateDefault()"
 !BOP
-! !IROUTINE: ESMF_DELayoutCreateDefault - Create DELayout (default)
+! !IROUTINE: ESMF_DELayoutCreate - Create DELayout object
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
@@ -224,8 +227,8 @@ end function
 !     Create an {\tt ESMF\_DELayout} object on the basis of optionally provided
 !     restrictions. By default a DELayout with deCount equal to petCount will
 !     be created, each DE mapped to a single PET. However, the number of DEs
-!     as well grouping of DEs and PETs to map to can be specified via the
-!     optional arguments.
+!     as well grouping of DEs and PETs can be specified via the optional
+!     arguments.
 !
 !     The arguments are:
 !     \begin{description}
@@ -320,7 +323,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutCreateFromPetMap()"
 !BOP
-! !IROUTINE: ESMF_DELayoutCreateFromPetMap - Create DELayout from petMap
+! !IROUTINE: ESMF_DELayoutCreate - Create DELayout from petMap
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
@@ -408,7 +411,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutCreateHintWeights()"
 !BOP
-! !IROUTINE: ESMF_DELayoutCreateHintWeights - Create DELayout with weight hints
+! !IROUTINE: ESMF_DELayoutCreate - Create DELayout with weight hints
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()

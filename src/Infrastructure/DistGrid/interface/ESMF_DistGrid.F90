@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.10 2006/12/07 23:23:18 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.11 2007/03/16 20:58:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -109,8 +109,8 @@ module ESMF_DistGridMod
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.10 2006/12/07 23:23:18 theurich Exp $'
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_DistGrid.F90,v 1.11 2007/03/16 20:58:23 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -120,64 +120,66 @@ module ESMF_DistGridMod
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
-! !IROUTINE: ESMF_DELayoutCreate -- Generic interface
+! !IROUTINE: ESMF_DistGridCreate -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_DistGridCreate
+  interface ESMF_DistGridCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_DistGridCreateRD
-      module procedure ESMF_DistGridCreateDB
-      module procedure ESMF_DistGridCreateRDFA
-      module procedure ESMF_DistGridCreateDBFA      
-      module procedure ESMF_DistGridCreateRDP
-      module procedure ESMF_DistGridCreateDBP
-      module procedure ESMF_DistGridCreateRDPFA
-      module procedure ESMF_DistGridCreateDBPFA
-!      module procedure ESMF_DistGridCreateDecount
-!      module procedure ESMF_DistGridCreateDecountPatch
-!      module procedure ESMF_DistGridCreateDelayout
-!      module procedure ESMF_DistGridCreatePatch
+    module procedure ESMF_DistGridCreateRD
+    module procedure ESMF_DistGridCreateDB
+    module procedure ESMF_DistGridCreateRDFA
+    module procedure ESMF_DistGridCreateDBFA      
+    module procedure ESMF_DistGridCreateRDP
+    module procedure ESMF_DistGridCreateDBP
+    module procedure ESMF_DistGridCreateRDPFA
+    module procedure ESMF_DistGridCreateDBPFA
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_DistGridCreate} functions.   
 !EOPI 
-      end interface
+  end interface
 !==============================================================================
       
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
-! !IROUTINE: ESMF_DELayoutGet -- Generic interface
+! !IROUTINE: ESMF_DistGridGet -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_DistGridGet
+  interface ESMF_DistGridGet
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_DistGridGet
-      module procedure ESMF_DistGridGetPDe
-      module procedure ESMF_DistGridGetPDePDim
-      module procedure ESMF_DistGridGetLinksPDe
+    module procedure ESMF_DistGridGet
+    module procedure ESMF_DistGridGetPDe
+    module procedure ESMF_DistGridGetPDePDim
+    module procedure ESMF_DistGridGetLinksPDe
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_DistGridGet} functions.   
 !EOPI 
-      end interface
+  end interface
 !==============================================================================
       
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateRD()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreateRD - Create DistGrid with regular decomposition
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with regular decomposition
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -393,7 +395,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDB()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreateDB - Create DistGrid with DE blocks
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with DE blocks
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -602,7 +604,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateRDFA()"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreateRDFA - Create DistGrid with regular decomposition and fast axis
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with regular decomposition and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -815,7 +817,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBFA()"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreateDBFA - Create DistGrid with DE blocks and fast axis
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with DE blocks and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -976,7 +978,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateRDP()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreateRDP - Create DistGrid from patch work with regular decomposition
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patch work with regular decomposition
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1204,7 +1206,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBP()"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreateDBP - Create DistGrid from patch work with regular decomposition
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patch work with regular decomposition
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1378,7 +1380,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateRDPFA()"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreateRDPFA - Create DistGrid from patch work with regular decomposition and fast axis
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patch work with regular decomposition and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1545,7 +1547,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBPFA()"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreateDBPFA - Create DistGrid from patch work with DE blocks and fast axis
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patch work with DE blocks and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1705,425 +1707,6 @@ contains
   end function ESMF_DistGridCreateDBPFA
 !------------------------------------------------------------------------------
 
-#if 0
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateDecount()"
-!BOPI
-! !IROUTINE: ESMF_DistGridCreateDecount - Create DistGrid with deCount
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDecount(minCorner, maxCorner, decount, &
-    deLabelList, connectionList, fastAxis, vm, rc)
-!
-! !ARGUMENTS:
-    integer,                      intent(in)            :: minCorner(:)
-    integer,                      intent(in)            :: maxCorner(:)
-    integer,                      intent(in)            :: deCount
-    integer,                      intent(in), optional  :: deLabelList(:)
-    integer,                      intent(in), optional  :: connectionList(:,:)
-    integer,                      intent(in), optional  :: fastAxis
-    type(ESMF_VM),                intent(in), optional  :: vm
-    integer,                      intent(out),optional  :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDecount
-!
-! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
-!     domain with a specified number of DEs.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[minCorner]
-!          Global coordinate tuple of the lower corner of the global domain.
-!     \item[maxCorner]
-!          Global coordinate tuple of the upper corner of the global domain.
-!     \item[deCount]
-!          Number of requested DEs.
-!     \item[{[deLabelList]}]
-!          List assigning DE labels to the default sequence of DEs. The default
-!          sequence is given by the internally used algorithm to decompose the
-!          global domain (todo: describe the sequence once implemented).
-!     \item[{[connectionList]}]
-!          List of connection interfaces expressed in global index space 
-!          coordinates. This argument allows to augment the naturally 
-!          defined interfaces in global index space by those not derivable
-!          from global index space relations. The second
-!          dimension of {\tt connectionList} steps through the connection interface
-!          elements. The first index must be twice the size of the number of 
-!          dimensions of the global domain. Each {\tt connectionList} element
-!          specifies the connection interface in the format (/minCornerInterface\_A,
-!          maxCornerInterface\_A, minCornerInterface\_B, maxCornerInterface\_B/).
-!          Only edges of the global domain may serve as connection interfaces.
-!     \item[{[fastAxis]}]
-!          Optional integer value indicating along which axis fast 
-!          communication is requested. This hint will be used during DELayout 
-!          creation.
-!     \item[{[vm]}]
-!          Optional {\tt ESMF\_VM} object of the current context. Providing the
-!          VM of the current context will lower the method's overhead.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
-
-    ! Print current subroutine name
-    print *, ">>ESMF_DistGridCreateDecount<<"
-
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
-    
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
-    
-    ! Initialize the pointer to NULL
-    distgrid%this = ESMF_NULL_POINTER
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
-!      virtualdepinflag, vm, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! Set return value
-    ESMF_DistGridCreateDecount = distgrid 
- 
-    ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDecount)
- 
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
- 
-  end function ESMF_DistGridCreateDecount
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateDecountPatch()"
-!BOPI
-! !IROUTINE: ESMF_DistGridCreateDecountPatch - Create DistGrid with deCount
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDecountPatch(minCorner, maxCorner, decount, &
-    deLabelList, connectionList, fastAxis, vm, rc)
-!
-! !ARGUMENTS:
-    integer,                      intent(in)            :: minCorner(:,:)
-    integer,                      intent(in)            :: maxCorner(:,:)
-    integer,                      intent(in)            :: deCount
-    integer,                      intent(in), optional  :: deLabelList(:)
-    integer,                      intent(in), optional  :: connectionList(:,:)
-    integer,                      intent(in), optional  :: fastAxis
-    type(ESMF_VM),                intent(in), optional  :: vm
-    integer,                      intent(out),optional  :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDecountPatch
-!
-! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
-!     rectangular (LR) domains with a specified number of DEs. If the number of
-!     DEs specified by the {\tt deCount} argument equals the number of domain
-!     patches provided the domain patches will be associated one by one with the
-!     DEs, defining the default DE sequence for this case. It is erroneous to 
-!     provide more domain patches than there are DEs.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[minCorner]
-!          The first index provides the global coordinate tuple of the lower 
-!          corner of a global domain patch. The second index indicates the 
-!          patch number.
-!     \item[maxCorner]
-!          The first index provides the global coordinate tuple of the upper
-!          corner of a global domain patch. The second index indicates the 
-!          patch number.
-!     \item[deCount]
-!          Number of requested DEs.
-!     \item[{[deLabelList]}]
-!          List assigning DE labels to the default sequence of DEs. The default
-!          sequence is given by the internally used algorithm to decompose the
-!          global domain (todo: describe the sequence once implemented).
-!     \item[{[connectionList]}]
-!          List of connection interfaces expressed in global index space 
-!          coordinates. This argument allows to augment the naturally 
-!          defined interfaces in global index space by those not derivable
-!          from global index space relations. The second
-!          dimension of {\tt connectionList} steps through the connection interface
-!          elements. The first index must be twice the size of the number of 
-!          dimensions of the global domain. Each {\tt connectionList} element
-!          specifies the connection interface in the format (/minCornerInterface\_A,
-!          maxCornerInterface\_A, minCornerInterface\_B, maxCornerInterface\_B/).
-!          Only edges of the global domain may serve as connection interfaces.
-!     \item[{[fastAxis]}]
-!          Optional integer value indicating along which axis fast 
-!          communication is requested. This hint will be used during DELayout 
-!          creation.
-!     \item[{[vm]}]
-!          Optional {\tt ESMF\_VM} object of the current context. Providing the
-!          VM of the current context will lower the method's overhead.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
-
-    ! Print current subroutine name
-    print *, ">>ESMF_DistGridCreateDecountPatch<<"
-
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
-    
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
-    
-    ! Initialize the pointer to NULL
-    distgrid%this = ESMF_NULL_POINTER
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
-!      virtualdepinflag, vm, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! Set return value
-    ESMF_DistGridCreateDecountPatch = distgrid 
- 
-    ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDecountPatch)
- 
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
- 
-  end function ESMF_DistGridCreateDecountPatch
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateDelayout()"
-!BOPI
-! !IROUTINE: ESMF_DistGridCreateDelayout - Create DistGrid with specified Delayout
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDelayout(minCorner, maxCorner, &
-    deLabelList, connectionList, delayout, vm, rc)
-!
-! !ARGUMENTS:
-    integer,                      intent(in)            :: minCorner(:)
-    integer,                      intent(in)            :: maxCorner(:)
-    integer,                      intent(in), optional  :: deLabelList(:)
-    integer,                      intent(in), optional  :: connectionList(:,:)
-    type(ESMF_DELayout),          intent(in)            :: delayout
-    type(ESMF_VM),                intent(in), optional  :: vm
-    integer,                      intent(out),optional  :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDelayout
-!
-! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
-!     domain with a specified DELayout.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[minCorner]
-!          Global coordinate tuple of the lower corner of the global domain.
-!     \item[maxCorner]
-!          Global coordinate tuple of the upper corner of the global domain.
-!     \item[{[deLabelList]}]
-!          List assigning DE labels to the default sequence of DEs. The default
-!          sequence is given by the internally used algorithm to decompose the
-!          global domain (todo: describe the sequence once implemented).
-!     \item[{[connectionList]}]
-!          List of connection interfaces expressed in global index space 
-!          coordinates. This argument allows to augment the naturally 
-!          defined interfaces in global index space by those not derivable
-!          from global index space relations. The second
-!          dimension of {\tt connectionList} steps through the connection interface
-!          elements. The first index must be twice the size of the number of 
-!          dimensions of the global domain. Each {\tt connectionList} element
-!          specifies the connection interface in the format (/minCornerInterface\_A,
-!          maxCornerInterface\_A, minCornerInterface\_B, maxCornerInterface\_B/).
-!          Only edges of the global domain may serve as connection interfaces.
-!     \item[delayout]
-!          The {\tt ESMF\_DELayout} object to be used.
-!     \item[{[vm]}]
-!          Optional {\tt ESMF\_VM} object of the current context. Providing the
-!          VM of the current context will lower the method's overhead.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
-
-    ! Print current subroutine name
-    print *, ">>ESMF_DistGridCreateDelayout<<"
-
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
-    
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
-    
-    ! Initialize the pointer to NULL
-    distgrid%this = ESMF_NULL_POINTER
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
-!      virtualdepinflag, vm, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! Set return value
-    ESMF_DistGridCreateDelayout = distgrid 
- 
-    ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDelayout)
- 
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
- 
-  end function ESMF_DistGridCreateDelayout
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreatePatch()"
-!BOPI
-! !IROUTINE: ESMF_DistGridCreatePatch - Create DistGrid from patch work
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreatePatch(minCorner, maxCorner, &
-    deLabelList, connectionList, delayout, vm, rc)
-!
-! !ARGUMENTS:
-    integer,                      intent(in)            :: minCorner(:,:)
-    integer,                      intent(in)            :: maxCorner(:,:)
-    integer,                      intent(in), optional  :: deLabelList(:)
-    integer,                      intent(in), optional  :: connectionList(:,:)
-    type(ESMF_DELayout),          intent(in), optional  :: delayout
-    type(ESMF_VM),                intent(in), optional  :: vm
-    integer,                      intent(out),optional  :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreatePatch
-!
-! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
-!     rectangular (LR) domains. A DELayout may be specified optionally. In this
-!     case the number of DEs is specified by the DELayout. If the number of DEs
-!     is equal to the number of provided domain patches or if no DELayout 
-!     argument was specified, the domain patches will be associated one by one 
-!     with the DEs, defining the default DE sequence for this case. It is 
-!     erroneous to provide more domain patches than there are DEs.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[minCorner]
-!          The first index provides the global coordinate tuple of the lower 
-!          corner of a global domain patch. The second index indicates the 
-!          patch number.
-!     \item[maxCorner]
-!          The first index provides the global coordinate tuple of the upper
-!          corner of a global domain patch. The second index indicates the 
-!          patch number.
-!     \item[{[deLabelList]}]
-!          List assigning DE labels to the default sequence of DEs. The default
-!          sequence is given by the internally used algorithm to decompose the
-!          global domain (todo: describe the sequence once implemented).
-!     \item[{[connectionList]}]
-!          List of connection interfaces expressed in global index space 
-!          coordinates. This argument allows to augment the naturally 
-!          defined interfaces in global index space by those not derivable
-!          from global index space relations. The second
-!          dimension of {\tt connectionList} steps through the connection interface
-!          elements. The first index must be twice the size of the number of 
-!          dimensions of the global domain. Each {\tt connectionList} element
-!          specifies the connection interface in the format (/minCornerInterface\_A,
-!          maxCornerInterface\_A, minCornerInterface\_B, maxCornerInterface\_B/).
-!          Only edges of the global domain may serve as connection interfaces.
-!     \item[{[delayout]}]
-!          Optional {\tt ESMF\_DELayout} object to be used. By default a new
-!          DELayout object will be created with as many DEs as there are
-!          patches.
-!     \item[{[vm]}]
-!          Optional {\tt ESMF\_VM} object of the current context. Providing the
-!          VM of the current context will lower the method's overhead.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
-
-    ! Print current subroutine name
-    print *, ">>ESMF_DistGridCreatePatch<<"
-
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
-    
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
-    
-    ! Initialize the pointer to NULL
-    distgrid%this = ESMF_NULL_POINTER
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
-!      virtualdepinflag, vm, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! Set return value
-    ESMF_DistGridCreatePatch = distgrid 
- 
-    ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_DistGridCreatePatch)
- 
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
- 
-  end function ESMF_DistGridCreatePatch
-!------------------------------------------------------------------------------
-#endif
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
@@ -2284,7 +1867,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridGetPDe()"
 !BOPI
-! !IROUTINE: ESMF_DistGridGetPDe - Get DE local information about DistGrid
+! !IROUTINE: ESMF_DistGridGet - Get DE local information about DistGrid
 
 ! !INTERFACE:
   subroutine ESMF_DistGridGetPDe(distgrid, de, dimExtent, regDecompDeCoord, &
@@ -2346,7 +1929,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridGetPDePDim()"
 !BOP
-! !IROUTINE: ESMF_DistGridGetPDePDim - Get DE local information for dimension about DistGrid
+! !IROUTINE: ESMF_DistGridGet - Get DE local information for dimension about DistGrid
 
 ! !INTERFACE:
   subroutine ESMF_DistGridGetPDePDim(distgrid, de, dim, indexList, rc)
@@ -2417,7 +2000,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridGetLinksPDe()"
 !BOPI
-! !IROUTINE: ESMF_DistGridGetLinksPDe - Get DE local information about links
+! !IROUTINE: ESMF_DistGridGet - Get DE local information about links
 
 ! !INTERFACE:
   subroutine ESMF_DistGridGetLinksPDe(distgrid, de, staggerLoc, lVecInner, &

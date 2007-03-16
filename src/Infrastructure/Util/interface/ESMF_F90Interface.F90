@@ -1,4 +1,4 @@
-! $Id: ESMF_F90Interface.F90,v 1.3 2006/11/16 05:21:21 cdeluca Exp $
+! $Id: ESMF_F90Interface.F90,v 1.4 2007/03/16 20:58:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InterfaceIntCreate()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_InterfaceIntCreate - Create InterfaceInt
 
 ! !INTERFACE:
@@ -90,7 +90,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                 :: status     ! local error status
@@ -143,7 +143,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InterfaceIntDestroy()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_InterfaceIntDestroy - Destroy InterfaceInt
 
 ! !INTERFACE:
@@ -165,7 +165,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                 :: status       ! local error status

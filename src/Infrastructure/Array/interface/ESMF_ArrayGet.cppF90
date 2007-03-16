@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.5 2007/03/14 04:00:21 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.6 2007/03/16 20:58:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.5 2007/03/14 04:00:21 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.6 2007/03/16 20:58:23 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -119,7 +119,7 @@ contains
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayGetDefault()"
 !BOP
-! !IROUTINE: ESMF_ArrayGetDefault - Get Array internals
+! !IROUTINE: ESMF_ArrayGet - Get Array internals
 
 ! !INTERFACE:
   ! Private name; call using ESMF_Get()
@@ -391,7 +391,7 @@ contains
 #define ArrayGetFPtrDoc() \
 ! -------------------------- ESMF-public method ----------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayGetFPtr - Get Fortran90 array pointer @\
+! !IROUTINE: ESMF_ArrayGet - Get access to PET-local Array patch via Fortran90 array pointer @\
 @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_Get() @\
@@ -500,7 +500,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayGetLarray()"
 !BOP
-! !IROUTINE: ESMF_ArrayGetLarray - Get Array internals
+! !IROUTINE: ESMF_ArrayGet - Get access to PET-local Array patch via LocalArray object.
 
 ! !INTERFACE:
   ! Private name; call using ESMF_Get()
@@ -575,7 +575,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayGetTotalCellMask1D()"
 !BOPI
-! !IROUTINE: ESMF_ArrayGetTotalCellMask1D - Get Array internals for local DE
+! !IROUTINE: ESMF_ArrayGet - Get Array internals for local DE
 
 ! !INTERFACE:
   ! Private name; call using ESMF_Get()
@@ -610,7 +610,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayGetTotalCellMask2D()"
 !BOPI
-! !IROUTINE: ESMF_ArrayGetTotalCellMask2D - Get Array internals for local DE
+! !IROUTINE: ESMF_ArrayGet - Get Array internals for local DE
 
 ! !INTERFACE:
   ! Private name; call using ESMF_Get()
@@ -645,7 +645,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayGetTotalCellMask3D()"
 !BOPI
-! !IROUTINE: ESMF_ArrayGetTotalCellMask3D - Get Array internals for local DE
+! !IROUTINE: ESMF_ArrayGet - Get Array internals for local DE
 
 ! !INTERFACE:
   ! Private name; call using ESMF_Get()
@@ -680,7 +680,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayGetHalo()"
 !BOPI
-! !IROUTINE: ESMF_ArrayGetHalo - Get information about a stored halo operation
+! !IROUTINE: ESMF_ArrayGet - Get information about a stored halo operation
 
 ! !INTERFACE:
   ! Private name; call using ESMF_Get()
