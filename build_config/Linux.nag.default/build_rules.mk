@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.28 2006/09/22 23:55:39 theurich Exp $
+# $Id: build_rules.mk,v 1.29 2007/03/16 18:02:45 theurich Exp $
 #
 # Linux.nag.default
 #
@@ -71,6 +71,11 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v -V -dryrun
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
+
+############################################################
+# Some ESMF tests fail for NAG with -O -> turn optimization off by default
+#
+ESMF_OPTLEVELDEFAULT  = 0
 
 ############################################################
 # Set kind numbering system to "byte"
