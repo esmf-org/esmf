@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.30 2007/02/16 05:27:51 rosalind Exp $
+! $Id: FlowSolverMod.F90,v 1.31 2007/03/20 21:21:03 theurich Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -166,7 +166,7 @@
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_min_coord
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_max_coord
-      real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max, dx, dy
+      real :: x_min, x_max, y_min, y_max
       integer, dimension(ESMF_MAXGRIDDIM) :: global_nmax
       integer :: counts(2)
       namelist /input/ uin, rhoin, siein, &
