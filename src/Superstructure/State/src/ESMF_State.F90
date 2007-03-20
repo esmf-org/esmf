@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.101 2007/02/19 23:44:46 rosalind Exp $
+! $Id: ESMF_State.F90,v 1.102 2007/03/20 06:38:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.101 2007/02/19 23:44:46 rosalind Exp $'
+      '$Id: ESMF_State.F90,v 1.102 2007/03/20 06:38:29 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2175,8 +2175,7 @@ end interface
                                   ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
-                                    value, localrc)
+        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2246,8 +2245,7 @@ end interface
       endif
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, count, &
-                                    valueList, localrc)
+        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -3887,8 +3885,7 @@ end interface
                                   ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
-                                    value, localrc)
+        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -3961,8 +3958,7 @@ end interface
       endif
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, count, &
-                                    valueList, localrc)
+        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.50 2007/02/19 23:44:43 rosalind Exp $
+! $Id: ESMF_GridUTest.F90,v 1.51 2007/03/20 06:38:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,14 +37,13 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.50 2007/02/19 23:44:43 rosalind Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.51 2007/03/20 06:38:29 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
       integer :: attribute, att_count
-      type(ESMF_DataType) :: att_datatype
-      type(ESMF_TypeKind) :: att_datakind
+      type(ESMF_TypeKind) :: att_typekind
       ! individual test result code
       integer :: rc
 
@@ -411,23 +410,23 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Get Attribute Info from a Grid Test"
       call ESMF_GridGetAttributeInfo(grid1, "test_attribute", &
-                                datatype=att_datatype, datakind=att_datakind, &
+                                datakind=att_typekind, &
                                 count=att_count, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Verify datatype of Attribute
-      write(failMsg, *) "Attribute datatype is wrong"
-      write(name, *) "Verify Attribute datatype from a Grid Test"
-      call ESMF_Test((att_datatype.eq.ESMF_DATA_INTEGER), name, failMsg, result, ESMF_SRCLINE)
+      !  Verify typekind of Attribute
+      write(failMsg, *) "Attribute typekind is wrong"
+      write(name, *) "Verify Attribute typekind from a Grid Test"
+      call ESMF_Test((att_typekind.eq.ESMF_TYPEKIND_I4), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
       !  Verify datakind of Attribute
       write(failMsg, *) "Attribute datakind is wrong"
       write(name, *) "Verify Attribute datakind from a Grid Test"
-      call ESMF_Test((att_datakind.eq.ESMF_TYPEKIND_I4), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((att_typekind.eq.ESMF_TYPEKIND_I4), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest
       !  Verify count of Attribute

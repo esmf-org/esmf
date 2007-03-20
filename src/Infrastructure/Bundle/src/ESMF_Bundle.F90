@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.99 2007/02/19 23:44:40 rosalind Exp $
+! $Id: ESMF_Bundle.F90,v 1.100 2007/03/20 06:38:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -2167,8 +2167,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
-                                    value, status)
+        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -2240,8 +2239,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, count, &
-                                    valueList, status)
+        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4146,8 +4144,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
-                                    value, status)
+        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4219,8 +4216,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, count, &
-                                    valueList, status)
+        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return

@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.237 2007/02/19 23:44:41 rosalind Exp $
+! $Id: ESMF_Field.F90,v 1.238 2007/03/20 06:38:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -248,7 +248,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.237 2007/02/19 23:44:41 rosalind Exp $'
+      '$Id: ESMF_Field.F90,v 1.238 2007/03/20 06:38:28 theurich Exp $'
 
 !==============================================================================
 !
@@ -1932,8 +1932,7 @@
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
-                                    value, status)
+        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1999,8 +1998,7 @@
       endif
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, count, &
-                                    valueList, status)
+        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3441,8 +3439,7 @@
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
-                                    value, status)
+        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3510,8 +3507,7 @@
       endif
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, &
-                                    count, valueList, status)
+        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return

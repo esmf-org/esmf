@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArray.F90,v 1.10 2007/02/19 23:44:43 rosalind Exp $
+! $Id: ESMF_InternArray.F90,v 1.11 2007/03/20 06:38:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -142,7 +142,7 @@ module ESMF_InternArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArray.F90,v 1.10 2007/02/19 23:44:43 rosalind Exp $'
+    '$Id: ESMF_InternArray.F90,v 1.11 2007/03/20 06:38:29 theurich Exp $'
 !
 !==============================================================================
 !
@@ -921,8 +921,7 @@ end subroutine
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       call c_ESMC_AttributeGetValue(array%this, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
-                                    value, status)
+        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -985,8 +984,7 @@ end subroutine
       endif
 
       call c_ESMC_AttributeGetValue(array%this, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, count, &
-                                    valueList, status)
+        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -2102,7 +2100,7 @@ end subroutine
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       call c_ESMC_AttributeSetValue(array%this, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
+                                    ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, 1, &
                                     value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2168,7 +2166,7 @@ end subroutine
       endif
 
       call c_ESMC_AttributeSetValue(array%this, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, &
+                                    ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, &
                                     count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
