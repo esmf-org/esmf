@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.42 2007/02/23 23:58:46 rosalind Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.43 2007/03/20 06:27:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -173,8 +173,10 @@
                    ESMF_TYPEKIND_R8 = ESMF_TypeKind(6), &
                    ESMF_C8 = ESMF_TypeKind(7), &
                    ESMF_C16 = ESMF_TypeKind(8), &
-                   ESMF_TYPEKIND_I  = ESMF_TypeKind(9), &
-                   ESMF_TYPEKIND_R  = ESMF_TypeKind(10), &
+                   ESMF_TYPEKIND_LOGICAL = ESMF_TypeKind(9), &
+                   ESMF_TYPEKIND_CHARACTER = ESMF_TypeKind(10), &
+                   ESMF_TYPEKIND_I  = ESMF_TypeKind(90), &
+                   ESMF_TYPEKIND_R  = ESMF_TypeKind(91), &
                    ESMF_NOKIND = ESMF_TypeKind(99)
 
       ! these are the only Fortran kind parameters supported
@@ -509,8 +511,11 @@
 #endif
 
       public ESMF_TYPEKIND_I4, ESMF_TYPEKIND_I8, & 
-             ESMF_TYPEKIND_R4, ESMF_TYPEKIND_R8, ESMF_C8, &
-             ESMF_C16, ESMF_KIND_I, ESMF_KIND_R, ESMF_NOKIND
+             ESMF_TYPEKIND_R4, ESMF_TYPEKIND_R8, &
+             ESMF_C8, ESMF_C16, &
+             ESMF_TYPEKIND_LOGICAL, ESMF_TYPEKIND_CHARACTER, &
+             ESMF_KIND_I, ESMF_KIND_R, &
+             ESMF_NOKIND
 
 #ifndef ESMF_NO_INTEGER_1_BYTE 
       public ESMF_KIND_I1
