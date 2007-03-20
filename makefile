@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.75 2007/02/01 22:38:18 theurich Exp $
+# $Id: makefile,v 1.76 2007/03/20 17:59:48 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -59,6 +59,11 @@ script_info:
 	-@if [ -f $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h ] ; then \
 	  fgrep ESMF_VERSION_STRING $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) "s/^#define //" ; fi
 	-@echo "--------------------------------------------------------------"
+	-@echo " "
+	-@echo "--------------------------------------------------------------"
+	-@echo " * User set ESMF environment variables *"
+	$(shell $(ESMF_DIR)/scripts/envecho)
+	-@cat envecho.out; rm -f envecho.out
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * ESMF environment variables *"

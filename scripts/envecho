@@ -1,0 +1,3 @@
+#!/bin/sh
+# this script echoes the ESMF_ environment variables in user's environment
+env | grep ESMF_ > envecho.out
