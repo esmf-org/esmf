@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArray.F90,v 1.11 2007/03/20 06:38:29 theurich Exp $
+! $Id: ESMF_InternArray.F90,v 1.12 2007/03/20 17:10:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -142,7 +142,7 @@ module ESMF_InternArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArray.F90,v 1.11 2007/03/20 06:38:29 theurich Exp $'
+    '$Id: ESMF_InternArray.F90,v 1.12 2007/03/20 17:10:23 theurich Exp $'
 !
 !==============================================================================
 !
@@ -456,8 +456,7 @@ end subroutine
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       call c_ESMC_AttributeGetValue(array%this, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I4, 1, &
-                                    value, status)
+        ESMF_TYPEKIND_I4, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -523,8 +522,7 @@ end subroutine
       endif
 
       call c_ESMC_AttributeGetValue(array%this, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I4, count, &
-                                    valueList, status)
+        ESMF_TYPEKIND_I4, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -575,8 +573,7 @@ end subroutine
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       call c_ESMC_AttributeGetValue(array%this, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I8, 1, &
-                                    value, status)
+        ESMF_TYPEKIND_I8, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -639,8 +636,7 @@ end subroutine
       endif
 
       call c_ESMC_AttributeGetValue(array%this, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I8, count, &
-                                    valueList, status)
+        ESMF_TYPEKIND_I8, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -691,7 +687,7 @@ end subroutine
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       call c_ESMC_AttributeGetValue(array%this, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R4, 1, value, status)
+        ESMF_TYPEKIND_R4, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -754,8 +750,7 @@ end subroutine
       endif
 
       call c_ESMC_AttributeGetValue(array%this, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R4, count, &
-                                    valueList, status)
+        ESMF_TYPEKIND_R4, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -806,7 +801,7 @@ end subroutine
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       call c_ESMC_AttributeGetValue(array%this, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R8, 1, value, status)
+        ESMF_TYPEKIND_R8, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -869,8 +864,7 @@ end subroutine
       endif
 
       call c_ESMC_AttributeGetValue(array%this, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R8, count, &
-                                    valueList, status)
+        ESMF_TYPEKIND_R8, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -921,7 +915,7 @@ end subroutine
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       call c_ESMC_AttributeGetValue(array%this, name, &
-        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, 1, value, status)
+        ESMF_TYPEKIND_LOGICAL, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -984,7 +978,7 @@ end subroutine
       endif
 
       call c_ESMC_AttributeGetValue(array%this, name, &
-        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, count, valueList, status)
+        ESMF_TYPEKIND_LOGICAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1143,21 +1137,19 @@ end subroutine
 !EOP
 
       integer :: status                           ! Error status
-      type(ESMF_DataType) :: localDt
-      type(ESMF_TypeKind) :: localDk
+      type(ESMF_TypeKind) :: localTk
       integer :: localCount
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       call c_ESMC_AttributeGetAttrInfoName(array%this, name, &
-                                           localDt, localDk, localCount, status)
+        localTk, localCount, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      if (present(datatype)) datatype = localDt
-      if (present(datakind)) datakind = localDk
+      if (present(datakind)) datakind = localTk
       if (present(count)) count = localCount
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1221,23 +1213,20 @@ end subroutine
 
       integer :: status                           ! Error status
       character(len=ESMF_MAXSTR) :: localName
-      type(ESMF_DataType) :: localDt
-      type(ESMF_TypeKind) :: localDk
+      type(ESMF_TypeKind) :: localTk
       integer :: localCount
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       call c_ESMC_AttributeGetAttrInfoNum(array%this, attributeIndex, &
-                                         localName, localDt, localDk, &
-                                         localCount, status)
+        localName, localTk, localCount, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       if (present(name)) name = localName
-      if (present(datatype)) datatype = localDt
-      if (present(datakind)) datakind = localDk
+      if (present(datakind)) datakind = localTk
       if (present(count)) count = localCount
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1626,8 +1615,7 @@ end subroutine
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       call c_ESMC_AttributeSetValue(array%this, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I4, 1, &
-                                    value, status)
+        ESMF_TYPEKIND_I4, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1692,8 +1680,7 @@ end subroutine
       endif
 
       call c_ESMC_AttributeSetValue(array%this, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I4, count, &
-                                    valueList, status)
+        ESMF_TYPEKIND_I4, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1745,8 +1732,7 @@ end subroutine
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
      call c_ESMC_AttributeSetValue(array%this, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I8, 1, &
-                                    value, status)
+       ESMF_TYPEKIND_I8, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1811,8 +1797,7 @@ end subroutine
       endif
 
       call c_ESMC_AttributeSetValue(array%this, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I8, count, &
-                                    valueList, status)
+        ESMF_TYPEKIND_I8, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1864,7 +1849,7 @@ end subroutine
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       call c_ESMC_AttributeSetValue(array%this, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R4, 1, value, status)
+        ESMF_TYPEKIND_R4, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1929,8 +1914,7 @@ end subroutine
       endif
 
       call c_ESMC_AttributeSetValue(array%this, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R4, count, &
-                                    valueList, status)
+        ESMF_TYPEKIND_R4, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1982,7 +1966,7 @@ end subroutine
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       call c_ESMC_AttributeSetValue(array%this, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R8, 1, value, status)
+        ESMF_TYPEKIND_R8, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -2047,8 +2031,7 @@ end subroutine
       endif
 
       call c_ESMC_AttributeSetValue(array%this, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R8, count, &
-                                    valueList, status)
+        ESMF_TYPEKIND_R8, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -2100,8 +2083,7 @@ end subroutine
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
       call c_ESMC_AttributeSetValue(array%this, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, 1, &
-                                    value, status)
+        ESMF_TYPEKIND_LOGICAL, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -2166,8 +2148,7 @@ end subroutine
       endif
 
       call c_ESMC_AttributeSetValue(array%this, name, &
-                                    ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, &
-                                    count, valueList, status)
+        ESMF_TYPEKIND_LOGICAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return

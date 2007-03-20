@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.71 2007/03/20 06:36:05 theurich Exp $
+// $Id: ESMC_Base.h,v 1.72 2007/03/20 17:10:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -54,8 +54,7 @@ class ESMC_Attribute
 {
  private:
     char attrName[ESMF_MAXSTR]; // inline to reduce memory thrashing
-    ESMC_DataType dt;           // type for selecting the right pointer below
-    ESMC_TypeKind dk;           // item size for pointers below
+    ESMC_TypeKind tk;           // typekind indicator
     int items;                  // number of items (NOT byte count) for lists
     int slen;                   // for string, length, inc trailing NULL. 
     union {                     // overload pointers to conserve space 
@@ -81,8 +80,7 @@ class ESMC_Attribute
     int ESMC_Deserialize(char *buffer, int *offset);
     ESMC_Attribute& operator=(const ESMC_Attribute &);
     ESMC_Attribute(void);
-    ESMC_Attribute(char *name, ESMC_DataType datatype, ESMC_TypeKind datakind,
-                   int numitems, void *datap);
+    ESMC_Attribute(char *name, ESMC_TypeKind tk, int numitems, void *datap);
     ~ESMC_Attribute(void);
 
 
@@ -173,8 +171,7 @@ class ESMC_Base
     int ESMC_AttributeSet(char *name, ESMC_Logical value);
     int ESMC_AttributeSet(char *name, int count, ESMC_Logical *value);
     int ESMC_AttributeSet(char *name, char *value);
-    int ESMC_AttributeSet(char *name, ESMC_DataType dt, ESMC_TypeKind dk, 
-                          int count, void *value);
+    int ESMC_AttributeSet(char *name, ESMC_TypeKind tk, int count, void *value);
 
     // attribute methods - get
     int ESMC_AttributeGet(char *name, ESMC_I4 *value) const;
@@ -188,10 +185,10 @@ class ESMC_Base
     int ESMC_AttributeGet(char *name, ESMC_Logical *value) const;
     int ESMC_AttributeGet(char *name, int *count, ESMC_Logical *value) const;
     int ESMC_AttributeGet(char *name, char *value) const;
-    int ESMC_AttributeGet(char *name, ESMC_TypeKind *dk, 
-                          int *count, void *value) const;
-    int ESMC_AttributeGet(int num, char *name,
-                          ESMC_TypeKind *dk, int *count, void *value) const;
+    int ESMC_AttributeGet(char *name, ESMC_TypeKind *tk, int *count, 
+      void *value) const;
+    int ESMC_AttributeGet(int num, char *name, ESMC_TypeKind *tk, int *count,
+      void *value) const;
 
     // count of attributes on an object
     int ESMC_AttributeGetCount(void) const;
@@ -240,22 +237,22 @@ extern "C" {
                            int *rc, int clen, int olen);
 
   void FTN(c_esmc_attributesetvalue)(ESMC_Base **base, char *name, 
-                                    ESMC_DataType *dt, ESMC_TypeKind *dk, 
+                                    ESMC_TypeKind *tk,
                                     int *count, void *value, int *rc, int nlen);
   void FTN(c_esmc_attributesetchar)(ESMC_Base **base, char *name, char *value, 
                                     int *rc, int nlen, int vlen);
 
   void FTN(c_esmc_attributegetvalue)(ESMC_Base **base, char *name, 
-                                    ESMC_DataType *dt, ESMC_TypeKind *dk,
+                                    ESMC_TypeKind *tk,
                                     int *count, void *value, int *rc, int nlen);
   void FTN(c_esmc_attributegetchar)(ESMC_Base **base, char *name, char *value, 
                                     int *rc, int nlen, int vlen);
   void FTN(c_esmc_attributegetattrinfoname)(ESMC_Base **base, char *name, 
-                                           ESMC_DataType *dt, ESMC_TypeKind *dk,
+                                           ESMC_TypeKind *tk,
                                            int *count, int *rc, int nlen);
   void FTN(c_esmc_attributegetattrinfonum)(ESMC_Base **base, int *num, 
-                                           char *name, ESMC_DataType *dt, 
-                                           ESMC_TypeKind *dk, int *count, 
+                                           char *name,
+                                           ESMC_TypeKind *tk, int *count, 
                                            int *rc, int nlen);
   void FTN(c_esmc_attributegetcount)(ESMC_Base **base, int *count, int *rc);
 

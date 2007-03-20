@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.44 2007/03/20 06:36:05 theurich Exp $
+// $Id: ESMC_Base_F.C,v 1.45 2007/03/20 17:10:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.44 2007/03/20 06:36:05 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.45 2007/03/20 17:10:19 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -589,8 +589,7 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      ESMC_DataType *dt,        // in - data type, any but character 
-      ESMC_TypeKind *dk,        // in - data kind for int/real
+      ESMC_TypeKind *tk,        // in - typekind
       int *count,               // in - number of value(s)
       void *value,              // in - any value or list of values
       int *rc,                  // in - return code
@@ -629,7 +628,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_AttributeSet(cname, *dt, *dk, *count, value);
+  *rc = (*base)->ESMC_AttributeSet(cname, *tk, *count, value);
 
   delete [] cname;
   return;
@@ -724,8 +723,7 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      ESMC_DataType *dt,        // in - data type expected to be returned
-      ESMC_TypeKind *dk,        // in - expected data kind for int/real 
+      ESMC_TypeKind *tk,        // in - typekind
       int *count,               // in - must match actual length
       void *value,              // out - value
       int *rc,                  // in - return code
@@ -737,7 +735,7 @@ extern "C" {
 //EOP
 
   int status, attrCount;
-  ESMC_TypeKind attrDk;
+  ESMC_TypeKind attrTk;
   char *cname;
 
   if (!base) {
@@ -761,7 +759,7 @@ extern "C" {
       return;
   }
 
-  status = (*base)->ESMC_AttributeGet(cname, &attrDk, &attrCount, NULL);
+  status = (*base)->ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute type and count", &status)) {
     //printf("ESMF_AttributeGetValue: failed getting attribute info\n");
@@ -770,11 +768,11 @@ extern "C" {
     return;
   }
 
-  if (attrDk != *dk) {
+  if (attrTk != *tk) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_INCOMP,
                          "attribute value not expected kind", &status);
     //printf("attribute %s not expected kind %s, actually kind %d\n", 
-    //       name, ESMC_TypeKindString(*dk), ESMC_TypeKindString(attrDk));
+    //       name, ESMC_TypeKindString(*tk), ESMC_TypeKindString(attrTk));
     delete [] cname;
     if (rc) *rc = status;
     return;
@@ -904,14 +902,13 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      ESMC_DataType *dt,        // out - data type (int, float, etc)
-      ESMC_TypeKind *dk,        // out - data kind (*4, *8)
+      ESMC_TypeKind *tk,        // out - typekind
       int *count,               // out - item count
       int *rc,                  // in - return code
       int nlen) {               // hidden/in - strlen count for name
 // 
 // !DESCRIPTION:
-//   Return the type, count of items in the (name,value) pair from any 
+//   Return the typekind, count of items in the (name,value) pair from any 
 //   object type in the system.
 //
 //EOP
@@ -929,14 +926,9 @@ extern "C" {
       *rc = ESMF_FAILURE;
       return;
   }
-  if (!dt) {
-      printf("ESMF_AttributeGetValue: bad attribute datatype argument\n");
-      *rc = ESMF_FAILURE;
-      return;
-  }
 
-  if (!dk) {
-      printf("ESMF_AttributeGetValue: bad attribute datakind argument\n");
+  if (!tk) {
+      printf("ESMF_AttributeGetValue: bad attribute typekind argument\n");
       *rc = ESMF_FAILURE;
       return;
   }
@@ -954,7 +946,7 @@ extern "C" {
       return;
   }
 
-  *rc = (*base)->ESMC_AttributeGet(cname, dk, count, NULL);
+  *rc = (*base)->ESMC_AttributeGet(cname, tk, count, NULL);
 
   delete [] cname;
   return;
@@ -975,8 +967,7 @@ extern "C" {
       ESMC_Base **base,         // in/out - base object
       int *num,                 // in - attr number
       char *name,               // out - F90, non-null terminated string
-      ESMC_DataType *dt,        // out - data type (int, float)
-      ESMC_TypeKind *dk,        // out - data kind (*4, *8)
+      ESMC_TypeKind *tk,        // out - typekind
       int *count,               // out - item count
       int *rc,                  // in - return code
       int nlen) {               // hidden/in - strlen count for name
@@ -1000,14 +991,8 @@ extern "C" {
       return;
   }
 
-  if (!dt) {
-      printf("ESMF_AttributeGetValue: bad attribute datatype argument\n");
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  if (!dk) {
-      printf("ESMF_AttributeGetValue: bad attribute datakind argument\n");
+  if (!tk) {
+      printf("ESMF_AttributeGetValue: bad attribute typekind argument\n");
       *rc = ESMF_FAILURE;
       return;
   }
@@ -1020,7 +1005,7 @@ extern "C" {
 
   cname = new char[ESMF_MAXSTR];
 
-  *rc = (*base)->ESMC_AttributeGet((*num)-1, cname, dk, count, NULL);
+  *rc = (*base)->ESMC_AttributeGet((*num)-1, cname, tk, count, NULL);
   if (*rc != ESMF_SUCCESS) {
       delete [] cname;
       return;

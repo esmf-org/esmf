@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.245 2007/03/20 06:38:28 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.246 2007/03/20 17:10:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.245 2007/03/20 06:38:28 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.246 2007/03/20 17:10:21 theurich Exp $'
 
 !==============================================================================
 !
@@ -2005,8 +2005,7 @@
       endif
 
       call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I4, 1, &
-                                    value, localrc)
+        ESMF_TYPEKIND_I4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2087,8 +2086,7 @@
       endif
 
       call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I4, count, &
-                                    valueList, localrc)
+        ESMF_TYPEKIND_I4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2158,8 +2156,7 @@
       endif
 
       call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I8, 1, &
-                                    value, localrc)
+        ESMF_TYPEKIND_I8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2241,8 +2238,7 @@
       endif
 
       call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I8, count, &
-                                    valueList, localrc)
+        ESMF_TYPEKIND_I8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2311,7 +2307,7 @@
       endif
 
       call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R4, 1, value, localrc)
+        ESMF_TYPEKIND_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2392,8 +2388,7 @@
       endif
 
       call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R4, count, &
-                                    valueList, localrc)
+        ESMF_TYPEKIND_R4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2462,7 +2457,7 @@
       endif
 
       call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R8, 1, value, localrc)
+        ESMF_TYPEKIND_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2544,8 +2539,7 @@
       endif
 
       call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R8, count, &
-                                    valueList, localrc)
+        ESMF_TYPEKIND_R8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2614,7 +2608,7 @@
       endif
 
       call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
-        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2695,7 +2689,7 @@
       endif
 
       call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
-        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2890,8 +2884,7 @@
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
-      type(ESMF_DataType) :: localDt
-      type(ESMF_TypeKind) :: localDk
+      type(ESMF_TypeKind) :: localTk
       integer :: localCount
       
       ! Initialize return code; assume failure until success is certain
@@ -2917,13 +2910,12 @@
       endif
 
       call c_ESMC_AttributeGetAttrInfoName(grid%ptr%base, name, &
-                                           localDt, localDk, localCount, localrc)
+        localTk, localCount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      if (present(datatype)) datatype = localDt
-      if (present(datakind)) datakind = localDk
+      if (present(datakind)) datakind = localTk
       if (present(count)) count = localCount
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -2987,8 +2979,7 @@
 
       integer :: localrc                          ! local error status
       character(len=ESMF_MAXSTR) :: localName
-      type(ESMF_DataType) :: localDt
-      type(ESMF_TypeKind) :: localDk
+      type(ESMF_TypeKind) :: localTk
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
@@ -3014,15 +3005,13 @@
       endif
 
       call c_ESMC_AttributeGetAttrInfoNum(grid%ptr%base, attributeIndex, &
-                                          localName, localDt, localDk, &
-                                          localCount, localrc)
+        localName, localTk, localCount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       if (present(name)) name = localName
-      if (present(datatype)) datatype = localDt
-      if (present(datakind)) datakind = localDk
+      if (present(datakind)) datakind = localTk
       if (present(count)) count = localCount
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -4302,8 +4291,7 @@
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I4, 1, &
-                                    value, localrc)
+        ESMF_TYPEKIND_I4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -4370,8 +4358,7 @@
       endif
 
       call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I4, count, &
-                                    valueList, localrc)
+        ESMF_TYPEKIND_I4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -4425,8 +4412,7 @@
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I8, 1, &
-                                    value, localrc)
+        ESMF_TYPEKIND_I8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -4493,8 +4479,7 @@
       endif
 
       call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_INTEGER, ESMF_TYPEKIND_I8, count, &
-                                    valueList, localrc)
+        ESMF_TYPEKIND_I8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -4548,7 +4533,7 @@
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R4, 1, value, localrc)
+        ESMF_TYPEKIND_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -4615,8 +4600,7 @@
       endif
 
       call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R4, count, &
-                                    valueList, localrc)
+        ESMF_TYPEKIND_R4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -4670,7 +4654,7 @@
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R8, 1, value, localrc)
+        ESMF_TYPEKIND_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -4737,8 +4721,7 @@
       endif
 
       call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
-                                    ESMF_DATA_REAL, ESMF_TYPEKIND_R8, count, &
-                                    valueList, localrc)
+        ESMF_TYPEKIND_R8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -4792,7 +4775,7 @@
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
-        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -4859,7 +4842,7 @@
       endif
 
       call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
-        ESMF_DATA_LOGICAL, ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return

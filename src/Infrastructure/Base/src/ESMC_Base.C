@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.75 2007/03/20 06:36:05 theurich Exp $
+// $Id: ESMC_Base.C,v 1.76 2007/03/20 17:10:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.75 2007/03/20 06:36:05 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.76 2007/03/20 17:10:20 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -934,7 +934,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMC_TYPEKIND_I4, 1, &value);  
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I4, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -969,7 +969,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMC_TYPEKIND_I4, count, value);  
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I4, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1003,7 +1003,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMC_TYPEKIND_I8, 1, &value);  
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I8, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1038,7 +1038,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, ESMC_TYPEKIND_I8, count, value);  
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I8, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1072,7 +1072,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMC_TYPEKIND_R4, 1, &value);  
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R4, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1107,7 +1107,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMC_TYPEKIND_R4, count, value);  
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R4, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1141,7 +1141,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMC_TYPEKIND_R8, 1, &value);  
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R8, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1176,7 +1176,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, ESMC_TYPEKIND_R8, count, value);  
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R8, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1210,8 +1210,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_LOGICAL, ESMC_TYPEKIND_LOGICAL, 1,
-    &value);  
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_LOGICAL, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1246,8 +1245,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_LOGICAL, ESMC_TYPEKIND_LOGICAL,
-    count, value);  
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_LOGICAL, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1281,8 +1279,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, ESMF_DATA_CHARACTER, ESMC_TYPEKIND_CHARACTER,
-    1, value);  
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_CHARACTER, 1, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1297,7 +1294,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeSet"
 //BOP
-// !IROUTINE:  ESMC_AttributeSet(dt,dk,count,value) - set attribute on an ESMF type
+// !IROUTINE:  ESMC_AttributeSet - set attribute on an ESMF type
 //
 // !INTERFACE:
       int ESMC_Base::ESMC_AttributeSet(
@@ -1307,8 +1304,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // 
 // !ARGUMENTS:
       char *name,       // in - attribute name
-      ESMC_DataType dt, // in - data type
-      ESMC_TypeKind dk, // in - data kind
+      ESMC_TypeKind tk, // in - typekind
       int count,        // in - number of values
       void *value) {    // in - attribute value
 // 
@@ -1320,7 +1316,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
-  attr = new ESMC_Attribute(name, dt, dk, count, value);  
+  attr = new ESMC_Attribute(name, tk, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1328,7 +1324,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   return rc;
 
-}  // end ESMC_AttributeSet(dt,dk,count,value)
+}  // end ESMC_AttributeSet
 
 
 //-----------------------------------------------------------------------------
@@ -1410,7 +1406,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dk != ESMC_TYPEKIND_I4) {
+  if (attr->tk != ESMC_TYPEKIND_I4) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not typekind I4", &rc);
        return rc;
@@ -1464,7 +1460,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dk != ESMC_TYPEKIND_I4) {
+  if (attr->tk != ESMC_TYPEKIND_I4) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not typekind I4", &rc);
        return rc;
@@ -1521,7 +1517,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dk != ESMC_TYPEKIND_I8) {
+  if (attr->tk != ESMC_TYPEKIND_I8) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not typekind I8", &rc);
        return rc;
@@ -1575,7 +1571,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dk != ESMC_TYPEKIND_I8) {
+  if (attr->tk != ESMC_TYPEKIND_I8) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not typekind I8", &rc);
        return rc;
@@ -1632,7 +1628,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dk != ESMC_TYPEKIND_R4) {
+  if (attr->tk != ESMC_TYPEKIND_R4) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not typekind R4", &rc);
        return rc;
@@ -1686,7 +1682,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dk != ESMC_TYPEKIND_R4) {
+  if (attr->tk != ESMC_TYPEKIND_R4) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not typekind R4", &rc);
        return rc;
@@ -1743,7 +1739,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dk != ESMC_TYPEKIND_R8) {
+  if (attr->tk != ESMC_TYPEKIND_R8) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not typekind R8", &rc);
        return rc;
@@ -1797,7 +1793,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dk != ESMC_TYPEKIND_R8) {
+  if (attr->tk != ESMC_TYPEKIND_R8) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not typekind R8", &rc);
        return rc;
@@ -1854,7 +1850,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dk != ESMC_TYPEKIND_LOGICAL) {
+  if (attr->tk != ESMC_TYPEKIND_LOGICAL) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not typekind LOGICAL", &rc);
        return rc;
@@ -1910,7 +1906,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dk != ESMC_TYPEKIND_LOGICAL) {
+  if (attr->tk != ESMC_TYPEKIND_LOGICAL) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not typekind LOGICAL", &rc);
        return rc;
@@ -1972,7 +1968,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (attr->dk != ESMC_TYPEKIND_CHARACTER) {
+  if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not typekind CHARACTER", &rc);
        return rc;
@@ -2003,7 +1999,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // 
 // !ARGUMENTS:
       char *name,                    // in - name of attribute to retrieve
-      ESMC_TypeKind *dk,             // out - typekind
+      ESMC_TypeKind *tk,             // out - typekind
       int *count,                    // out - number of values in list
       void *value) const {           // out - attribute value(s)
 // 
@@ -2028,11 +2024,11 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  if (dk) 
-      *dk = attr->dk;
+  if (tk) 
+      *tk = attr->tk;
 
    if (count) {
-     if (attr->dk == ESMC_TYPEKIND_CHARACTER)
+     if (attr->tk == ESMC_TYPEKIND_CHARACTER)
          *count = attr->slen;
      else
          *count = attr->items;
@@ -2041,15 +2037,15 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   if (value) {
       if (attr->items == 1) {
-              if (attr->dk == ESMC_TYPEKIND_I4)
+              if (attr->tk == ESMC_TYPEKIND_I4)
                   *(ESMC_I4 *)value = attr->vi; 
-              else if (attr->dk == ESMC_TYPEKIND_I8)
+              else if (attr->tk == ESMC_TYPEKIND_I8)
                   *(ESMC_I8 *)value = attr->vtl; 
-              else if (attr->dk == ESMC_TYPEKIND_R4)
+              else if (attr->tk == ESMC_TYPEKIND_R4)
                   *(ESMC_R4 *)value = attr->vf; 
-              else if (attr->dk == ESMC_TYPEKIND_R8)
+              else if (attr->tk == ESMC_TYPEKIND_R8)
                   *(ESMC_R8 *)value = attr->vd; 
-              else if (attr->dk == ESMC_TYPEKIND_LOGICAL)
+              else if (attr->tk == ESMC_TYPEKIND_LOGICAL)
                   *(ESMC_Logical *)value = attr->vb;
               else{
                    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2060,19 +2056,19 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
  
       } else {
-              if (attr->dk == ESMC_TYPEKIND_I4) {
+              if (attr->tk == ESMC_TYPEKIND_I4) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_I4 *)value)[i] = attr->vip[i];
-              } else if (attr->dk == ESMC_TYPEKIND_I8) {
+              } else if (attr->tk == ESMC_TYPEKIND_I8) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_I8 *)value)[i] = attr->vlp[i];
-              } else if (attr->dk == ESMC_TYPEKIND_R4) {
+              } else if (attr->tk == ESMC_TYPEKIND_R4) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_R4 *)value)[i] = attr->vfp[i];
-              } else if (attr->dk == ESMC_TYPEKIND_R8) {
+              } else if (attr->tk == ESMC_TYPEKIND_R8) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_R8 *)value)[i] = attr->vdp[i];
-              } else if (attr->dk == ESMC_TYPEKIND_LOGICAL) {
+              } else if (attr->tk == ESMC_TYPEKIND_LOGICAL) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_Logical *)value)[i] = attr->vbp[i];
               } else{
@@ -2103,7 +2099,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !ARGUMENTS:
       int num,                       // in - number of attribute to retrieve
       char *name,                    // out - attribute name
-      ESMC_TypeKind *dk,             // out - typekind
+      ESMC_TypeKind *tk,             // out - typekind
       int *count,                    // out - number of values in list
       void *value) const {           // out - attribute value(s)
 // 
@@ -2124,11 +2120,11 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (name)
        strcpy(name, attr->attrName);
 
-  if (dk) 
-      *dk = attr->dk;
+  if (tk) 
+      *tk = attr->tk;
 
 if (count) {
-     if (attr->dk == ESMC_TYPEKIND_CHARACTER)
+     if (attr->tk == ESMC_TYPEKIND_CHARACTER)
          *count = attr->slen;
      else
          *count = attr->items;
@@ -2137,15 +2133,15 @@ if (count) {
 
   if (value) {
       if (attr->items == 1) {
-              if (attr->dk == ESMC_TYPEKIND_I4)
+              if (attr->tk == ESMC_TYPEKIND_I4)
                   *(ESMC_I4 *)value = attr->vi; 
-              else if (attr->dk == ESMC_TYPEKIND_I8)
+              else if (attr->tk == ESMC_TYPEKIND_I8)
                   *(ESMC_I8 *)value = attr->vtl; 
-              else if (attr->dk == ESMC_TYPEKIND_R4)
+              else if (attr->tk == ESMC_TYPEKIND_R4)
                   *(ESMC_R4 *)value = attr->vf; 
-              else if (attr->dk == ESMC_TYPEKIND_R8)
+              else if (attr->tk == ESMC_TYPEKIND_R8)
                   *(ESMC_R8 *)value = attr->vd; 
-              else if (attr->dk == ESMC_TYPEKIND_LOGICAL)
+              else if (attr->tk == ESMC_TYPEKIND_LOGICAL)
                   *(ESMC_Logical *)value = attr->vb;
               else{
                   ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
@@ -2155,19 +2151,19 @@ if (count) {
               }
  
       } else {
-              if (attr->dk == ESMC_TYPEKIND_I4) {
+              if (attr->tk == ESMC_TYPEKIND_I4) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_I4 *)value)[i] = attr->vip[i];
-              } else if (attr->dk == ESMC_TYPEKIND_I8) {
+              } else if (attr->tk == ESMC_TYPEKIND_I8) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_I8 *)value)[i] = attr->vlp[i];
-              } else if (attr->dk == ESMC_TYPEKIND_R4) {
+              } else if (attr->tk == ESMC_TYPEKIND_R4) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_R4 *)value)[i] = attr->vfp[i];
-              } else if (attr->dk == ESMC_TYPEKIND_R8) {
+              } else if (attr->tk == ESMC_TYPEKIND_R8) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_R8 *)value)[i] = attr->vdp[i];
-              } else if (attr->dk == ESMC_TYPEKIND_LOGICAL) {
+              } else if (attr->tk == ESMC_TYPEKIND_LOGICAL) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_Logical *)value)[i] = attr->vbp[i];
               } else {
@@ -2399,7 +2395,7 @@ if (count) {
 
     nbytes = sizeof(ESMC_Attribute);
     if (items > 1) 
-        nbytes += items * ESMC_TypeKindSize(dk);
+        nbytes += items * ESMC_TypeKindSize(tk);
     
     if ((*length - *offset) < nbytes) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
@@ -2414,7 +2410,7 @@ if (count) {
     cp += sizeof(ESMC_Attribute);
 
     if (items > 1) {
-        nbytes = items * ESMC_TypeKindSize(dk);
+        nbytes = items * ESMC_TypeKindSize(tk);
         memcpy(cp, voidp, nbytes);
         cp += nbytes;
     }
@@ -2455,7 +2451,7 @@ if (count) {
     cp += sizeof(ESMC_Attribute);
 
     if (items > 1) {
-        nbytes = items * ESMC_TypeKindSize(dk);
+        nbytes = items * ESMC_TypeKindSize(tk);
         memcpy(voidp, cp, nbytes);
         cp += nbytes;
     }
@@ -2488,9 +2484,9 @@ if (count) {
   int rc;
   char msgbuf[ESMF_MAXSTR];
 
-  if (dk != ESMF_NOKIND) 
+  if (tk != ESMF_NOKIND) 
       sprintf(msgbuf, "name '%s',  typekind %s", 
-              attrName,  ESMC_TypeKindString(dk));
+              attrName,  ESMC_TypeKindString(tk));
   else
       sprintf(msgbuf, "name '%s'",  attrName);
  
@@ -2505,17 +2501,17 @@ if (count) {
   if (items == 1) {
       printf(", value: ");
       //ESMC_LogDefault.ESMC_LogWrite(", value: ", ESMC_LOG_INFO);
-             if (dk == ESMC_TYPEKIND_I4)
+             if (tk == ESMC_TYPEKIND_I4)
                  sprintf(msgbuf, "%d\n", vi); 
-             else if (dk == ESMC_TYPEKIND_I8)
+             else if (tk == ESMC_TYPEKIND_I8)
                  sprintf(msgbuf, "%ld\n", vtl); 
-             else if (dk == ESMC_TYPEKIND_R4)
+             else if (tk == ESMC_TYPEKIND_R4)
                  sprintf(msgbuf, "%f\n", vf); 
-             else if (dk == ESMC_TYPEKIND_R8)
+             else if (tk == ESMC_TYPEKIND_R8)
                  sprintf(msgbuf, "%g\n", vd); 
-             else if (dk == ESMC_TYPEKIND_LOGICAL)
+             else if (tk == ESMC_TYPEKIND_LOGICAL)
                  sprintf(msgbuf, "%s\n", ESMC_LogicalString(vb)); 
-             else if (dk == ESMC_TYPEKIND_CHARACTER)
+             else if (tk == ESMC_TYPEKIND_CHARACTER)
                  sprintf(msgbuf, "%s\n", vcp);
              else{ 
                  ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
@@ -2531,15 +2527,15 @@ if (count) {
       printf(msgbuf);
       //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       for (int i=0; i<items; i++) {
-                if (dk == ESMC_TYPEKIND_I4) {
+                if (tk == ESMC_TYPEKIND_I4) {
                     sprintf(msgbuf, " item %d: %d\n", i, vip[i]); 
-                } else if (dk == ESMC_TYPEKIND_I8) {
+                } else if (tk == ESMC_TYPEKIND_I8) {
                     sprintf(msgbuf, " item %d: %ld\n", i, vlp[i]); 
-                } else if (dk == ESMC_TYPEKIND_R4) {
+                } else if (tk == ESMC_TYPEKIND_R4) {
                     sprintf(msgbuf, " item %d: %f\n", i, vfp[i]); 
-                } else if (dk == ESMC_TYPEKIND_R8) {
+                } else if (tk == ESMC_TYPEKIND_R8) {
                     sprintf(msgbuf, " item %d: %g\n", i, vdp[i]); 
-                } else if (dk == ESMC_TYPEKIND_LOGICAL) {
+                } else if (tk == ESMC_TYPEKIND_LOGICAL) {
                     sprintf(msgbuf, " item %d: %s\n", i,
                       ESMC_LogicalString(vbp[i]));
                 } else{
@@ -2638,7 +2634,7 @@ if (count) {
 
   memcpy(attrName, source.attrName, ESMF_MAXSTR);
 
-  dk = source.dk;
+  tk = source.tk;
   items = source.items;
   slen = source.slen;
   
@@ -2646,40 +2642,40 @@ if (count) {
     voidp = NULL;
  
   else if (items == 1) {
-        if (dk == ESMC_TYPEKIND_I4)
+        if (tk == ESMC_TYPEKIND_I4)
             vi = source.vi;  
-        else if (dk == ESMC_TYPEKIND_I8)
+        else if (tk == ESMC_TYPEKIND_I8)
             vtl = source.vtl;  
-        else if (dk == ESMC_TYPEKIND_R4)
+        else if (tk == ESMC_TYPEKIND_R4)
             vf = source.vf;  
-        else if (dk == ESMC_TYPEKIND_R8)
+        else if (tk == ESMC_TYPEKIND_R8)
             vd = source.vd;  
-        else if (dk == ESMC_TYPEKIND_LOGICAL)
+        else if (tk == ESMC_TYPEKIND_LOGICAL)
             vb = source.vb;
-        else if (dk == ESMC_TYPEKIND_CHARACTER){
+        else if (tk == ESMC_TYPEKIND_CHARACTER){
             vcp = new char[slen];   // includes trailing null
             memcpy(vcp, (char *)source.vcp, slen);
         }else
             voidp = NULL;
   } else {
     // items > 1, alloc space for a list and do the copy
-          if (dk == ESMC_TYPEKIND_I4) {
+          if (tk == ESMC_TYPEKIND_I4) {
               vip = new ESMC_I4[items];      
               for (i=0; i<items; i++)
                   vip[i] = source.vip[i];  
-          } else if (dk == ESMC_TYPEKIND_I8) {
+          } else if (tk == ESMC_TYPEKIND_I8) {
               vlp = new ESMC_I8[items];      
               for (i=0; i<items; i++)
                   vlp[i] = source.vlp[i];  
-          } else if (dk == ESMC_TYPEKIND_R4) {
+          } else if (tk == ESMC_TYPEKIND_R4) {
               vfp = new ESMC_R4[items];      
               for (i=0; i<items; i++)
                   vfp[i] = source.vfp[i];  
-          } else if (dk == ESMC_TYPEKIND_R8) {
+          } else if (tk == ESMC_TYPEKIND_R8) {
               vdp = new ESMC_R8[items];      
               for (i=0; i<items; i++)
                   vdp[i] = source.vdp[i];  
-          } else if (dk == ESMC_TYPEKIND_LOGICAL){
+          } else if (tk == ESMC_TYPEKIND_LOGICAL){
               vbp = new ESMC_Logical[items];      
               for (i=0; i<items; i++)
                 vbp[i] = source.vbp[i];  
@@ -2734,8 +2730,7 @@ if (count) {
 //
 // !ARGUMENTS:
         char *name,                // attribute name
-        ESMC_DataType datatype,    // data type
-        ESMC_TypeKind datakind,    // data kind
+        ESMC_TypeKind typekind,    // typekind
         int numitems,              // single or list
         void *datap) {             // generic pointer to values
 //
@@ -2758,7 +2753,7 @@ if (count) {
       memcpy(attrName, name, len);
   }
 
-  dk = datakind;
+  tk = typekind;
   items = numitems;
   slen = 0;          // only used for string values
   
@@ -2769,17 +2764,17 @@ if (count) {
       if (!datap) 
           voidp = NULL;
       else  {
-            if (dk == ESMC_TYPEKIND_I4)
+            if (tk == ESMC_TYPEKIND_I4)
                 vi = *(ESMC_I4 *)datap;  
-            else if (dk == ESMC_TYPEKIND_I8)
+            else if (tk == ESMC_TYPEKIND_I8)
                 vtl = *(ESMC_I8 *)datap;  
-            else if (dk == ESMC_TYPEKIND_R4)
+            else if (tk == ESMC_TYPEKIND_R4)
                 vf = *(ESMC_R4 *)datap;  
-            else if (dk == ESMC_TYPEKIND_R8)
+            else if (tk == ESMC_TYPEKIND_R8)
                 vd = *(ESMC_R8 *)datap;  
-            else if (dk == ESMC_TYPEKIND_LOGICAL)
+            else if (tk == ESMC_TYPEKIND_LOGICAL)
                 vb = *(ESMC_Logical *)datap;  
-            else if (dk == ESMC_TYPEKIND_CHARACTER){
+            else if (tk == ESMC_TYPEKIND_CHARACTER){
                 slen = strlen((char *)datap) + 1;
                 vcp = new char[slen];
                 strncpy(vcp, (char *)datap, slen);
@@ -2789,27 +2784,27 @@ if (count) {
 
   } else {
     // items > 1, alloc space for a list and do the copy
-        if (dk == ESMC_TYPEKIND_I4) {
+        if (tk == ESMC_TYPEKIND_I4) {
             vip = new ESMC_I4[items];      
             if (datap) 
               for (i=0; i<items; i++)
                 vip[i] = ((ESMC_I4 *)datap)[i];  
-        } else if (dk == ESMC_TYPEKIND_I8) {
+        } else if (tk == ESMC_TYPEKIND_I8) {
             vlp = new ESMC_I8[items];      
             if (datap) 
               for (i=0; i<items; i++)
                 vlp[i] = ((ESMC_I8 *)datap)[i];  
-        } else if (dk == ESMC_TYPEKIND_R4) {
+        } else if (tk == ESMC_TYPEKIND_R4) {
             vfp = new ESMC_R4[items];      
             if (datap) 
               for (i=0; i<items; i++)
                 vfp[i] = ((ESMC_R4 *)datap)[i];  
-        } else if (dk == ESMC_TYPEKIND_R8) {
+        } else if (tk == ESMC_TYPEKIND_R8) {
             vdp = new ESMC_R8[items];      
             if (datap) 
               for (i=0; i<items; i++)
                 vdp[i] = ((ESMC_R8 *)datap)[i];  
-        } else if (dk == ESMC_TYPEKIND_LOGICAL) {
+        } else if (tk == ESMC_TYPEKIND_LOGICAL) {
             vbp = new ESMC_Logical[items];      
             if (datap) 
               for (i=0; i<items; i++)
@@ -2841,14 +2836,14 @@ if (count) {
 //
 //EOP
 
-  if (dk == ESMC_TYPEKIND_CHARACTER) delete [] vcp;
+  if (tk == ESMC_TYPEKIND_CHARACTER) delete [] vcp;
 
   if (items > 1) {
-        if (dk == ESMC_TYPEKIND_I4) delete [] vip;
-        else if (dk == ESMC_TYPEKIND_I8) delete [] vlp;
-        else if (dk == ESMC_TYPEKIND_R4) delete [] vfp;
-        else if (dk == ESMC_TYPEKIND_R8) delete [] vdp;  
-        else if (dk == ESMC_TYPEKIND_LOGICAL) delete [] vbp;
+        if (tk == ESMC_TYPEKIND_I4) delete [] vip;
+        else if (tk == ESMC_TYPEKIND_I8) delete [] vlp;
+        else if (tk == ESMC_TYPEKIND_R4) delete [] vfp;
+        else if (tk == ESMC_TYPEKIND_R8) delete [] vdp;  
+        else if (tk == ESMC_TYPEKIND_LOGICAL) delete [] vbp;
   }
 
  } // end ~ESMC_Attribute
