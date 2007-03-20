@@ -1,4 +1,4 @@
-! $Id: ESMF_TypeKindGet.cpp,v 1.4 2007/03/02 22:58:21 theurich Exp $
+! $Id: ESMF_TypeKindGet.cpp,v 1.5 2007/03/20 22:02:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -23,9 +23,9 @@
 ! INCLUDES
 ! < ignore blank lines below.  they are created by the files which
 ! define various macros. >
+^include "ESMF.h"
 #include "ESMF_TypeKindMacros.hcppF90"
 #include "ESMF_TypeKindGetMacros.h"
-^include "ESMF.h"
 !------------------------------------------------------------------------------
 ! !USES:
      use ESMF_UtilTypesMod
@@ -51,14 +51,12 @@
 !
 ! !INTERFACE:
 
-
     interface ESMF_TypeKindGet
-!EOP
 
-      ! < interfaces for each TK >
 TypeKindInterfaceMacro(ESMF_TypeKindGet)
 
-    end interface ESMF_TypeKindGet
+!EOP
+    end interface
 
     contains
 
@@ -66,11 +64,5 @@ TypeKindInterfaceMacro(ESMF_TypeKindGet)
 !------------------------------------------------------------------------------
 
 TypeKindDeclarationMacro(ESMF_TypeKindGet)
-
-!! < end of automatically generated functions >
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!^undef  ESMF_METHOD
 
     end module ESMF_TypeKindGetMod
