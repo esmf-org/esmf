@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.43 2007/02/16 05:27:42 rosalind Exp $
+// $Id: ESMC_Base_F.C,v 1.44 2007/03/20 06:36:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.43 2007/02/16 05:27:42 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.44 2007/03/20 06:36:05 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -737,7 +737,6 @@ extern "C" {
 //EOP
 
   int status, attrCount;
-  ESMC_DataType attrDt;
   ESMC_TypeKind attrDk;
   char *cname;
 
@@ -762,7 +761,7 @@ extern "C" {
       return;
   }
 
-  status = (*base)->ESMC_AttributeGet(cname, &attrDt, &attrDk, &attrCount, NULL);
+  status = (*base)->ESMC_AttributeGet(cname, &attrDk, &attrCount, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute type and count", &status)) {
     //printf("ESMF_AttributeGetValue: failed getting attribute info\n");
@@ -771,15 +770,6 @@ extern "C" {
     return;
   }
 
-  if (attrDt != *dt) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_INCOMP,
-                         "attribute value not expected type", &status);
-    //printf("attribute %s not expected type %s, actually type %d\n", 
-    //       name, ESMC_DataTypeString(*dt), ESMC_DataTypeString(attrDt));
-    delete [] cname;
-    if (rc) *rc = status;
-    return;
-  }
   if (attrDk != *dk) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_INCOMP,
                          "attribute value not expected kind", &status);
@@ -799,7 +789,7 @@ extern "C" {
     return;
   }
 
-  status = (*base)->ESMC_AttributeGet(cname, NULL, NULL, NULL, value);
+  status = (*base)->ESMC_AttributeGet(cname, NULL, NULL, value);
   ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute value", &status);
   delete [] cname;
@@ -834,7 +824,7 @@ extern "C" {
 //EOP
 
   int i;
-  ESMC_DataType attrDt;
+  ESMC_TypeKind attrTypeKind;
   char *cname, *cvalue;
   int slen;              // actual attribute string length
 
@@ -857,27 +847,30 @@ extern "C" {
       return;
   }
 
-  *rc = (*base)->ESMC_AttributeGet(cname, &attrDt, NULL, &slen, NULL);
+  *rc = (*base)->ESMC_AttributeGet(cname, &attrTypeKind, &slen, NULL);
   if (*rc != ESMF_SUCCESS) {
     delete [] cname;
     return;
   }
 
-  if (attrDt != ESMF_DATA_CHARACTER) {
+// TODO: re-enable the following error checking when ESMF_TYPEKIND_CHARACTER
+// becomes available
+  
+//  if (attrTypeKind != ESMF_TYPEKIND_CHARACTER) {
       // TODO: this needs to sprintf into a buffer to format up the error msg
-      printf("ESMF_AttributeGet: attribute %s not type character\n", name);
-      delete [] cname;
-      *rc = ESMF_FAILURE;
-      return; 
-  }
+//      printf("ESMF_AttributeGet: attribute %s not type character\n", name);
+//      delete [] cname;
+//      *rc = ESMF_FAILURE;
+//      return; 
+//  }
 
   // make sure destination will be long enough
   if (slen > vlen) {
-      printf("ESMF_AttributeGet: attribute %s is %d bytes long, buffer length %s is too short", 
-                                  name, slen, vlen);
-      delete [] cname;
-      *rc = ESMF_FAILURE;
-      return; 
+    printf("ESMF_AttributeGet: attribute %s is %d bytes long, buffer length "
+      "%d is too short", name, slen, vlen);
+    delete [] cname;
+    *rc = ESMF_FAILURE;
+    return; 
   }
 
   cvalue = new char[slen+1];
@@ -961,7 +954,7 @@ extern "C" {
       return;
   }
 
-  *rc = (*base)->ESMC_AttributeGet(cname, dt, dk, count, NULL);
+  *rc = (*base)->ESMC_AttributeGet(cname, dk, count, NULL);
 
   delete [] cname;
   return;
@@ -1027,7 +1020,7 @@ extern "C" {
 
   cname = new char[ESMF_MAXSTR];
 
-  *rc = (*base)->ESMC_AttributeGet((*num)-1, cname, dt, dk, count, NULL);
+  *rc = (*base)->ESMC_AttributeGet((*num)-1, cname, dk, count, NULL);
   if (*rc != ESMF_SUCCESS) {
       delete [] cname;
       return;
