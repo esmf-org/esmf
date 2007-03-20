@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayUTest.F90,v 1.10 2007/03/20 06:38:29 theurich Exp $
+! $Id: ESMF_InternArrayUTest.F90,v 1.11 2007/03/20 20:43:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayUTest.F90,v 1.10 2007/03/20 06:38:29 theurich Exp $'
+      '$Id: ESMF_InternArrayUTest.F90,v 1.11 2007/03/20 20:43:35 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -208,8 +208,7 @@
     write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED" 
     write(name, *) "Get Attribute Info from a deleted Array Test"
     call ESMF_IArrayGetAttributeInfo(array1, "test_attribute", &
-                                    datakind=att_typekind, &
-                                    count=att_count, rc=rc)
+      typekind=att_typekind, count=att_count, rc=rc)
     call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -219,8 +218,7 @@
     write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED" 
     write(name, *) "Get Attribute Info from a non-created Array Test"
     call ESMF_IArrayGetAttributeInfo(array2, "test_attribute", &
-                                    datakind=att_typekind, &
-                                    count=att_count, rc=rc)
+      typekind=att_typekind, count=att_count, rc=rc)
     call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -405,8 +403,7 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get Attribute Info from an Array Test"
     call ESMF_IArrayGetAttributeInfo(array1, "test_attribute", &
-                                    datakind=att_typekind, &
-                                    count=att_count, rc=rc)
+      typekind=att_typekind, count=att_count, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -459,8 +456,7 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get Attribute Info from an Array Test"
     call ESMF_IArrayGetAttributeInfo(array1, "test_attribute4", &
-                                    datakind=att_typekind, &
-                                    count=att_count, rc=rc)
+      typekind=att_typekind, count=att_count, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------

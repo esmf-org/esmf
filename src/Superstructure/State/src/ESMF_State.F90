@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.103 2007/03/20 17:10:23 theurich Exp $
+! $Id: ESMF_State.F90,v 1.104 2007/03/20 20:43:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.103 2007/03/20 17:10:23 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.104 2007/03/20 20:43:35 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2368,22 +2368,19 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttributeInfo()
-      subroutine ESMF_StateGetAttrInfoByName(state, name, datatype, &
-                                             datakind, count, rc)
+      subroutine ESMF_StateGetAttrInfoByName(state, name, typekind, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       character(len=*), intent(in) :: name
-      type(ESMF_DataType), intent(out), optional :: datatype
-      type(ESMF_TypeKind), intent(out), optional :: datakind
+      type(ESMF_TypeKind), intent(out), optional :: typekind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !      Returns information associated with the named attribute,
-!      including {\tt datatype}, {\tt datakind} (if applicable),
-!      and item {\tt count}.
+!      including {\tt typekind} and item {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2391,16 +2388,8 @@ end interface
 !           An {\tt ESMF\_State} object.
 !     \item [name]
 !           The name of the attribute to query.
-!     \item [{[datatype]}]
-!           The data type of the attribute. One of the values
-!           {\tt ESMF\_DATA\_INTEGER}, {\tt ESMF\_DATA\_REAL},
-!           {\tt ESMF\_DATA\_LOGICAL}, or {\tt ESMF\_DATA\_CHARACTER}.
-!     \item [{[datakind]}]
-!           The datakind of the attribute, if attribute is type
-!           {\tt ESMF\_DATA\_INTEGER} or {\tt ESMF\_DATA\_REAL}.
-!           One of the values {\tt ESMF\_I4}, {\tt ESMF\_I8}, {\tt ESMF\_R4},
-!           or {\tt ESMF\_R8}.
-!           For all other types the value {\tt ESMF\_NOKIND} is returned.
+!     \item [{[typekind]}]
+!           The typekind of the attribute.
 !     \item [{[count]}]
 !           The number of items in this attribute.  For character types,
 !           the length of the character string.
@@ -2432,7 +2421,7 @@ end interface
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      if (present(datakind)) datakind = localTk
+      if (present(typekind)) typekind = localTk
       if (present(count)) count = localCount
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -2448,22 +2437,20 @@ end interface
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttributeInfo()
       subroutine ESMF_StateGetAttrInfoByNum(state, attributeIndex, name, &
-                                            datatype, datakind, count, rc)
+        typekind, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out), optional :: name
-      type(ESMF_DataType), intent(out), optional :: datatype
-      type(ESMF_TypeKind), intent(out), optional :: datakind
+      type(ESMF_TypeKind), intent(out), optional :: typekind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !      Returns information associated with the indexed attribute,
-!      including {\tt datatype}, {\tt datakind} (if applicable),
-!      and item {\tt count}.
+!      including {\tt typekind} and item {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2473,16 +2460,8 @@ end interface
 !           The index number of the attribute to query.
 !     \item [name]
 !           Returns the name of the attribute.
-!     \item [{[datatype]}]
-!           The data type of the attribute. One of the values
-!           {\tt ESMF\_DATA\_INTEGER}, {\tt ESMF\_DATA\_REAL},
-!           {\tt ESMF\_DATA\_LOGICAL}, or {\tt ESMF\_DATA\_CHARACTER}.
-!     \item [{[datakind]}]
-!           The datakind of the attribute, if attribute is type
-!           {\tt ESMF\_DATA\_INTEGER} or {\tt ESMF\_DATA\_REAL}.
-!           One of the values {\tt ESMF\_I4}, {\tt ESMF\_I8}, {\tt ESMF\_R4},
-!           or {\tt ESMF\_R8}.
-!           For all other types the value {\tt ESMF\_NOKIND} is returned.
+!     \item [{[typekind]}]
+!           The typekind of the attribute.
 !     \item [{[count]}]
 !           Returns the number of items in this attribute.  For character types,
 !           this is the length of the character string.
@@ -2516,7 +2495,7 @@ end interface
                                 ESMF_CONTEXT, rc)) return
 
       if (present(name)) name = localName
-      if (present(datakind)) datakind = localTk
+      if (present(typekind)) typekind = localTk
       if (present(count)) count = localCount
 
       if (present(rc)) rc = ESMF_SUCCESS
