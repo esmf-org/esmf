@@ -1034,7 +1034,7 @@ subroutine MultPar_SingleLine_Vf
       ! Config Get Dim Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Get Dim Test"
-      call ESMF_ConfigGetDim(cf,'ObsErr*vCor_HH-7::', nlines, col, rc)
+      call ESMF_ConfigGetDim(cf, nlines, col, label='ObsErr*vCor_HH-7::', rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
       counter_total =counter_total + 1
@@ -1275,7 +1275,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.24 2007/02/16 05:27:43 rosalind Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.25 2007/03/26 17:47:04 tjcnrl Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0

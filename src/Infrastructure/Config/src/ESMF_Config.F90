@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.34 2007/01/24 22:30:07 oehmke Exp $
+! $Id: ESMF_Config.F90,v 1.35 2007/03/26 17:47:04 tjcnrl Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -1720,19 +1720,19 @@
 !
 ! !INTERFACE:
 
-    subroutine ESMF_ConfigGetDim( config, label, lineCount, columnCount, rc )
+    subroutine ESMF_ConfigGetDim( config, lineCount, columnCount, label, rc )
 
       implicit none
 
-     type(ESMF_Config), intent(inout)     :: config    ! ESMF Configuration
-     integer, intent(out)                    :: lineCount
-     integer, intent(out)                    :: columnCount
+      type(ESMF_Config), intent(inout)       :: config    ! ESMF Configuration
+      integer, intent(out)                   :: lineCount
+      integer, intent(out)                   :: columnCount
 
       character(len=*), intent(in), optional :: label ! label (if present)
                                                       ! otherwise, current
                                                       ! line
 
-      integer, intent(out), optional        :: rc     ! Error code
+      integer, intent(out), optional         :: rc     ! Error code
 !
 ! !DESCRIPTION: 
 !  Returns the number of lines in the table in {\tt lineCount} and 
