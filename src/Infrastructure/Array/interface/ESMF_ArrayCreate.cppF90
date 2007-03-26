@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.6 2007/03/16 20:58:23 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.7 2007/03/26 21:04:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.6 2007/03/16 20:58:23 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.7 2007/03/26 21:04:57 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -301,7 +301,7 @@ contains
     ! Check init status of arguments @\
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
 @\
-    ! Mark this DistGrid as invalid @\
+    ! Mark this Array object as invalid @\
     array%this = ESMF_NULL_POINTER @\
 @\
     ! Prepare the LocalArray list to be used in the ArrayCreate() call @\
@@ -311,7 +311,7 @@ contains
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-    ! Create the Array object @\
+    ! Create the Array object by calling into overloaded ArrayCreate() interf. @\
     array = ESMF_ArrayCreate(larrayList, distgrid, dimmap, & @\
       computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, & @\
       indexflag, staggerLoc, vectorDim, lbounds, ubounds, status) @\
@@ -505,7 +505,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Mark this DistGrid as invalid
+    ! Mark this Array object as invalid
     array%this = ESMF_NULL_POINTER
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -566,7 +566,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     indexflag, staggerLoc, vectorDim, lbounds, ubounds, rc)
 !
 ! !ARGUMENTS:
-       type(ESMF_ArraySpec),  intent(inout)              :: arrayspec
+       type(ESMF_ArraySpec),  intent(inout)           :: arrayspec
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        integer,               intent(in),   optional  :: dimmap(:)
        integer,               intent(in),   optional  :: computationalLWidth(:)
@@ -687,7 +687,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Mark this DistGrid as invalid
+    ! Mark this Array object as invalid
     array%this = ESMF_NULL_POINTER
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -776,7 +776,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    ! Mark this Array as invalid
+    ! Mark this Array object as invalid
     array%this = ESMF_NULL_POINTER
 
     ! Set init code
