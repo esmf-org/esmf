@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.47 2007/03/02 21:46:09 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.48 2007/03/26 20:19:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -49,6 +49,7 @@ module ESMF_ArrayMod
   ! class sub modules
   use ESMF_ArrayCreateMod   ! contains the ESMF_Array derived type definition
   use ESMF_ArrayGetMod
+  use ESMF_ArrayGatherMod
   use ESMF_ArrayScatterMod
   
   implicit none
@@ -87,7 +88,7 @@ module ESMF_ArrayMod
   public ESMF_ArrayDestroy          ! implemented in ESMF_ArrayCreateMod 
   public ESMF_ArrayGet              ! implemented in ESMF_ArrayGetMod 
   public ESMF_ArraySet
-  public ESMF_ArrayGather
+  public ESMF_ArrayGather           ! implemented in ESMF_ArrayGatherMod 
   public ESMF_ArrayReduce
   public ESMF_ArrayScatter          ! implemented in ESMF_ArrayScatterMod 
   public ESMF_ArrayHalo
@@ -127,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.47 2007/03/02 21:46:09 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.48 2007/03/26 20:19:48 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -165,20 +166,7 @@ module ESMF_ArrayMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     module procedure ESMF_ArrayHalo
-
-  end interface
-
-      
-! -------------------------- ESMF-public method -------------------------------
-!BOPI
-! !IROUTINE: ESMF_ArrayGather -- Generic interface
-
-! !INTERFACE:
-  interface ESMF_ArrayGather
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-    module procedure ESMF_ArrayGather
+!EOPI
 
   end interface
 
@@ -411,78 +399,6 @@ contains
 
 !==================== communication calls ===========================
 
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayGather()"
-!BOPI
-! !IROUTINE: ESMF_ArrayGather - Gather a Array into a Fortran90 array
-
-! !INTERFACE:
-  subroutine ESMF_ArrayGather(array, farray, patch, rootPET, vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),           intent(inout)           :: array
-    real(ESMF_KIND_R8), target, intent(out),  optional  :: farray(:,:)
-    integer,                    intent(in),   optional  :: patch
-    integer,                    intent(in)              :: rootPET
-    type(ESMF_VM),              intent(in),   optional  :: vm
-    integer,                    intent(out),  optional  :: rc  
-!         
-!
-! !DESCRIPTION:
-!     Gather the data of {\tt array} into {\tt farray} located on 
-!     {\tt rootPET}. A single DistGrid patch in Array must be gathered into 
-!     {\tt farray}. The optional {\tt patch}
-!     argument allows selection of the patch. For Arrays defined on a single 
-!     patch DistGrid the default selection (patch 1) will be correct. The 
-!     shape of {\tt farray} must match the shape of the patch in Array.
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!        The {\tt ESMF\_Array} object from which data will be gathered.
-!     \item[{[farray]}]
-!        The Fortran90 array into which to gather data. Only root
-!        must provide a valid {\tt farray}.
-!     \item[{[patch]}]
-!        The DistGrid patch in {\tt array} from which to gather {\tt farray}.
-!        By default {\tt farray} will be gathered from patch 1.
-!     \item[rootPET]
-!          root.
-!     \item[{[vm]}]
-!        Optional {\tt ESMF\_VM} object of the current context. Providing the
-!        VM of the current context will lower the method's overhead.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
-    
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayScatterB(array, larray, rootPET, vm, localrc)
-
-    ! Use LogErr to handle return code
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  end subroutine ESMF_ArrayGather
-!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------

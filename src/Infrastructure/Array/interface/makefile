@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2007/03/02 21:46:09 theurich Exp $
+# $Id: makefile,v 1.18 2007/03/26 20:19:49 theurich Exp $
 
 # leave alone.
 ALL: build_here
@@ -10,7 +10,7 @@ CFLAGS    =
 FFLAGS    =
 
 # If you have auto-generated files in this directory, list them all here.
-AUTOGEN   = ESMF_ArrayCreate.F90 ESMF_ArrayGet.F90 ESMF_ArrayScatter.F90
+AUTOGEN   = ESMF_ArrayCreate.F90 ESMF_ArrayGet.F90 ESMF_ArrayGather.F90 ESMF_ArrayScatter.F90
 # If you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMC_Array_F.C
 # If you have F90 files in this directory, list them all on the line below.

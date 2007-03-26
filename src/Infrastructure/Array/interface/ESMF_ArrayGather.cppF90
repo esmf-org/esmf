@@ -1,0 +1,278 @@
+! $Id: ESMF_ArrayGather.cppF90,v 1.1 2007/03/26 20:19:48 theurich Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+^define ESMF_FILENAME "ESMF_ArrayGather.F90"
+!==============================================================================
+!
+! ESMF LocalArrayGather module
+module ESMF_ArrayGatherMod
+!
+!==============================================================================
+!
+! This file contains the LocalArray class definition and all LocalArray
+! class methods.
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+! < ignore blank lines below.  they are created by the files which
+!   define various macros. >
+^include "ESMF.h"
+#include "ESMF_TypeKindRankMacros.hcppF90"
+
+!------------------------------------------------------------------------------
+!BOPI
+! !MODULE: ESMF_ArrayGatherMod - Provide TKR overloading for ESMF_ArrayGather()
+!
+! !DESCRIPTION:
+!
+! The code in this file is part of the {\tt ESMF\_Array} class F90 API.
+!
+!
+!------------------------------------------------------------------------------
+! !USES:
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_LocalArrayMod
+  use ESMF_ArraySpecMod
+  use ESMF_VMMod
+  use ESMF_DELayoutMod
+  use ESMF_DistGridMod
+  use ESMF_RHandleMod
+  use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
+
+  ! class sub modules
+  use ESMF_ArrayCreateMod   ! contains the ESMF_Array derived type definition
+  use ESMF_ArrayGetMod
+
+  implicit none
+
+!------------------------------------------------------------------------------
+!
+! !PUBLIC MEMBER FUNCTIONS:
+
+! - ESMF-public methods:
+  public ESMF_ArrayGather
+
+
+!EOPI
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_ArrayGather.cppF90,v 1.1 2007/03/26 20:19:48 theurich Exp $'
+
+!==============================================================================
+! 
+! INTERFACE BLOCKS
+!
+!==============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayGather -- Generic interface
+
+! !INTERFACE:
+  interface ESMF_ArrayGather
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    TypeKindRankInterfaceMacro(ArrayGather)
+    module procedure ESMF_ArrayGatherNotRoot
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_ArrayGather} functions.
+!EOPI 
+  end interface
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!===============================================================================
+! ArrayGather() interfaces
+!===============================================================================
+
+
+#define ArrayGatherDoc() \
+! -------------------------- ESMF-public method ----------------------------- @\
+!BOPI @\
+! @\
+! !IROUTINE: ESMF_ArrayGather - Gather a Fortran90 array from an ESMF_Array @\
+@\
+! !INTERFACE: @\
+! subroutine ESMF_ArrayGather<rank><type><kind>(array, farray, patch, & @\
+!   rootPet, vm, rc) @\
+! @\
+! !ARGUMENTS: @\
+!   type(ESMF_Array),           intent(inout)           :: array @\
+!   mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
+!   integer,                    intent(in),   optional  :: patch @\
+!   integer,                    intent(in)              :: rootPet @\
+!   type(ESMF_VM),              intent(in),   optional  :: vm @\
+!   integer,                    intent(out),  optional  :: rc @\
+! @\
+! @\
+! !DESCRIPTION: @\
+!   Gather the data of an {ESMF\_Array} object into the {\tt farray} located on
+!   {\tt rootPET}. A single DistGrid patch of {\tt array} must be @\
+!   gathered into {\tt farray}. The optional {\tt patch} @\
+!   argument allows selection of the patch. For Arrays defined on a single @\
+!   patch DistGrid the default selection (patch 1) will be correct. The @\
+!   shape of {\tt farray} must match the shape of the patch in Array. @\
+! @\
+!   This version of the interface implements the PET-based blocking paradigm: @\
+!   Each PET of the VM must issue this call exactly once for {\em all} of its @\
+!   DEs. The call will block until all PET-local data objects are accessible. @\
+! @\
+!   The arguments are: @\
+!   \begin{description} @\
+!   \item[array] @\
+!     The {\tt ESMF\_Array} object from which data will be gathered.
+!   \item[{[farray]}] @\
+!     The Fortran90 array into which to gather data. Only root
+!     must provide a valid {\tt farray}.
+!   \item[{[patch]}] @\
+!     The DistGrid patch in {\tt array} from which to gather {\tt farray}.
+!     By default {\tt farray} will be gathered from patch 1.
+!   \item[rootPet] @\
+!     PET that holds the valid destination array, i.e. {\tt farray}. @\
+!   \item[{[vm]}] @\
+!     Optional {\tt ESMF\_VM} object of the current context. Providing the @\
+!     VM of the current context will lower the method|s overhead. @\
+!   \item[{[rc]}] @\
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!   \end{description} @\
+! @\
+!EOPI @\
+!---------------------------------------------------------------------------- @\
+
+#define ArrayGatherMacro(mtype, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+! -------------------------- ESMF-public method ----------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_ArrayGather" @\
+  subroutine ESMF_ArrayGather##mrank##D##mtypekind(array, farray, patch, & @\
+    rootPet, vm, rc) @\
+@\
+    type(ESMF_Array),           intent(inout)           :: array @\
+    mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
+    integer,                    intent(in),   optional  :: patch @\
+    integer,                    intent(in)              :: rootPet @\
+    type(ESMF_VM),              intent(in),   optional  :: vm @\
+    integer,                    intent(out),  optional  :: rc @\
+@\
+    ! Local variables @\
+    integer                       :: status         ! local error status @\
+    integer                       :: counts(mrank)  ! counts vector @\
+    integer                       :: lb(mrank)      ! lb vector @\
+    integer                       :: i, rank @\
+    type(ESMF_TypeKind)           :: typekind @\
+@\
+    ! Initialize return code; assume failure until success is certain @\
+    status = ESMF_FAILURE @\
+    if (present(rc)) rc = ESMF_FAILURE @\
+@\
+    ! Check init status of arguments @\
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc) @\
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc) @\
+@\
+    ! Check consistency @\
+    call ESMF_ArrayGet(array, typekind=typekind, rank=rank, rc=status) @\
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+    ! Require farray typekind to match Array typekind @\
+    if (typekind /= ESMF_TYPEKIND_##mtypekind) then @\
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+        "- farrayPtr typekind does not match Array typekind", & @\
+        ESMF_CONTEXT, rc) @\
+      return @\
+    endif @\
+    ! Require farray rank to match Array rank @\
+    if (rank /= mrank) then @\
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+        "- farrayPtr rank does not match Array rank", & @\
+        ESMF_CONTEXT, rc) @\
+      return @\
+    endif @\
+@\
+    ! Prepare counts vector @\
+    do i=1, mrank @\
+      counts(i) = size(farray, i) @\
+    enddo @\
+@\
+    ! Prepare counts vector @\
+    ! Since farray is an assumed shape dummy array the lower bounds in all @\
+    ! dimensions will start at 1 following the Fortran 90 standard. @\
+    lb = 1 ! @\
+@\
+    ! Call into the C++ interface, which will sort out optional arguments @\
+!    call c_ESMC_ArrayGather(array, farray(mloc), & @\
+!      ESMF_TYPEKIND_##mtypekind, mrank, counts, patch, rootPet, vm, status) @\
+!    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
+!      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    ! Return successfully @\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+@\
+  end subroutine ESMF_ArrayGather##mrank##D##mtypekind @\
+!---------------------------------------------------------------------------- @\
+
+TypeKindRankDeclarationMacro(ArrayGather)
+
+
+! -------------------------- ESMF-public method -----------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayGather"
+  subroutine ESMF_ArrayGatherNotRoot(array, patch, rootPet, vm, rc)
+
+    type(ESMF_Array),           intent(inout)           :: array
+    integer,                    intent(in),   optional  :: patch
+    integer,                    intent(in)              :: rootPet
+    type(ESMF_VM),              intent(in),   optional  :: vm
+    integer,                    intent(out),  optional  :: rc
+
+    ! Local variables
+    integer                       :: status         ! local error status
+    integer                       :: i, rank
+    type(ESMF_TypeKind)           :: typekind
+
+    ! Initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments
+!    call c_ESMC_ArrayGatherNotRoot(array, patch, rootPet, vm, status)
+!    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+!      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayGatherNotRoot
+!----------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+end module ESMF_ArrayGatherMod
+
