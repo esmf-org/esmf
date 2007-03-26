@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatter.cppF90,v 1.3 2007/03/02 22:58:21 theurich Exp $
+! $Id: ESMF_ArrayScatter.cppF90,v 1.4 2007/03/26 20:18:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_ArrayScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayScatter.cppF90,v 1.3 2007/03/02 22:58:21 theurich Exp $'
+    '$Id: ESMF_ArrayScatter.cppF90,v 1.4 2007/03/26 20:18:07 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -88,6 +88,7 @@ module ESMF_ArrayScatterMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     TypeKindRankInterfaceMacro(ArrayScatter)
+    module procedure ESMF_ArrayScatterNotRoot
 
     module procedure ESMF_ArrayScatterB        !1st prototype
     module procedure ESMF_ArrayScatterNBRoot   !1st prototype
@@ -239,6 +240,41 @@ contains
 
 TypeKindRankDeclarationMacro(ArrayScatter)
 
+
+! -------------------------- ESMF-public method -----------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayScatter"
+  subroutine ESMF_ArrayScatterNotRoot(array, patch, rootPet, vm, rc)
+
+    type(ESMF_Array),           intent(inout)           :: array
+    integer,                    intent(in),   optional  :: patch
+    integer,                    intent(in)              :: rootPet
+    type(ESMF_VM),              intent(in),   optional  :: vm
+    integer,                    intent(out),  optional  :: rc
+
+    ! Local variables
+    integer                       :: status         ! local error status
+    integer                       :: i, rank
+    type(ESMF_TypeKind)           :: typekind
+
+    ! Initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayScatterNotRoot(array, patch, rootPet, vm, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayScatterNotRoot
+!----------------------------------------------------------------------------
 
 
 
