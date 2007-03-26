@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.15 2007/03/06 00:55:43 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.16 2007/03/26 20:14:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.15 2007/03/06 00:55:43 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.16 2007/03/26 20:14:42 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -142,6 +142,88 @@ print *, min_R4, min_R8
   write(name, *) "2D ESMF_TYPEKIND_R8 ArrayScatter() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayScatter(array, srcfarray, rootPet=0, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Verify srcfarray data after scatter
+  write(name, *) "Verifying srcfarray data after 2D ESMF_TYPEKIND_R8 ArrayScatter() Test"
+  write(failMsg, *) "Source data was modified."
+  rc = ESMF_SUCCESS
+  do j=1, 23
+    do i=1, 15
+      value = 123._ESMF_KIND_R8*sin(real(i,ESMF_KIND_R8)) +  &
+               321._ESMF_KIND_R8*cos(real(j,ESMF_KIND_R8))
+      value = value - srcfarray(i,j)
+!print *, value
+      if (abs(value) > min_R8) then
+!print *, "Found large value"
+        rc = ESMF_FAILURE
+      endif
+   enddo
+  enddo
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Verify Array data after scatter
+  write(name, *) "Verifying destination Array data after 2D ESMF_TYPEKIND_R8 ArrayScatter() Test"
+  write(failMsg, *) "Array data wrong."
+  rc = ESMF_SUCCESS
+  do j=lbound(farrayPtr,2), ubound(farrayPtr,2)
+    do i=lbound(farrayPtr,1), ubound(farrayPtr,1)
+      !print *, i, j, farrayPtr(i,j), srcfarray(i,j)
+      if (abs(farrayPtr(i,j) - srcfarray(i,j)) > min_R8) rc = ESMF_FAILURE
+    enddo
+  enddo
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  ! cleanup  
+  call ESMF_ArrayDestroy(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  deallocate(srcfarray)
+  
+  !------------------------------------------------------------------------
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  ! preparations for same test as above but omit farray on PETs not root
+  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, &
+    kind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
+    regDecomp=(/2,2/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!call ESMF_ArrayPrint(array)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  farrayPtr = real(localPet,ESMF_KIND_R8)  ! initialize each DE-local data chunk of Array
+!print *, "farrayPtr:", farrayPtr
+  ! prepare srcfarray on all PETs -> serves as ref. in comparison after scatter
+  allocate(srcfarray(1:15, 1:23))
+  do j=1, 23
+    do i=1, 15
+      srcfarray(i,j) = 123._ESMF_KIND_R8*sin(real(i,ESMF_KIND_R8)) +  &
+                       321._ESMF_KIND_R8*cos(real(j,ESMF_KIND_R8))
+    enddo
+  enddo
+!print *, "srcfarray:", srcfarray
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "2D ESMF_TYPEKIND_R8 ArrayScatter() with omitted srcfarray Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  if (localPet==0) then
+    call ESMF_ArrayScatter(array, farray=srcfarray, rootPet=0, rc=rc)
+  else
+    call ESMF_ArrayScatter(array, rootPet=0, rc=rc)
+  endif
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
