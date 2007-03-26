@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.46 2007/02/23 00:25:00 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.47 2007/03/26 20:16:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -180,6 +180,23 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->ESMC_ArrayScatter(
       farray, *typekind, *rank, counts, ESMC_NOT_PRESENT_FILTER(patch),
+      *rootPet, opt_vm),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  
+  void FTN(c_esmc_arrayscatternotroot)(ESMC_Array **array,
+    int *patch, int *rootPet, ESMC_VM **vm, int *rc){
+    ESMC_VM *opt_vm;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayscatternotroot()"
+    // deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
+    else opt_vm = *vm;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->ESMC_ArrayScatter(
+      NULL, ESMF_NOKIND, 0, NULL, ESMC_NOT_PRESENT_FILTER(patch),
       *rootPet, opt_vm),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
