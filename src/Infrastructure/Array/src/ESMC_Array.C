@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.66 2007/03/01 14:46:34 rosalind Exp $
+// $Id: ESMC_Array.C,v 1.67 2007/03/27 20:03:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,16 +38,14 @@
 #include "ESMC_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 //-----------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.66 2007/03/01 14:46:34 rosalind Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+  static const char *const version = "$Id: ESMC_Array.C,v 1.67 2007/03/27 20:03:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
 
 //-----------------------------------------------------------------------------
-
-
 
 
 //-----------------------------------------------------------------------------
@@ -88,7 +86,7 @@ ESMC_Array *ESMC_ArrayCreate(
   ){
 //
 // !DESCRIPTION:
-//
+//    Create an {\tt ESMC\_Array} object from list if LocalArrays and DistGrid.
 //EOP
 //-----------------------------------------------------------------------------
   // local vars
@@ -662,7 +660,7 @@ ESMC_Array *ESMC_ArrayCreate(
   ){
 //
 // !DESCRIPTION:
-//
+//    Create an {\tt ESMC\_Array} object from ArraySpec and DistGrid.
 //EOP
 //-----------------------------------------------------------------------------
   // local vars
@@ -1083,6 +1081,7 @@ ESMC_Array *ESMC_ArrayCreate(
     // allocate LocalArray object with specific lbounds and ubounds
     larrayList[i] = ESMC_LocalArrayCreate(rank, type, typekind, temp_counts,
       temp_lbounds, temp_ubounds);
+    // TODO: need error handling for the above call
   }
   delete [] temp_counts;
   delete [] temp_lbounds;
@@ -1182,7 +1181,7 @@ int ESMC_ArrayDestroy(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArrayConstruct()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_ArrayConstruct
 //
 // !INTERFACE:
@@ -1215,8 +1214,11 @@ int ESMC_Array::ESMC_ArrayConstruct(
 //
 // !DESCRIPTION:
 //    Construct the internal information structure of an ESMC\_Array object.
+//    No error checking wrt consistency of input arguments is needed because
+//    ArraytConstruct() is only to be called by ArrayCreate() interfaces which
+//    are responsible for providing consistent arguments to this layer.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // automatic variable for local return code
@@ -1363,7 +1365,7 @@ int ESMC_Array::ESMC_ArrayConstruct(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArrayDestruct()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_ArrayDestruct
 //
 // !INTERFACE:
@@ -1376,7 +1378,7 @@ int ESMC_Array::ESMC_ArrayDestruct(void){
 // !DESCRIPTION:
 //    Destruct the internal information structure of an ESMC\_Array object.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // automatic variable for local return code
