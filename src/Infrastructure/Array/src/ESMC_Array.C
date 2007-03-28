@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.67 2007/03/27 20:03:53 theurich Exp $
+// $Id: ESMC_Array.C,v 1.68 2007/03/28 05:05:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMC_Array.C,v 1.67 2007/03/27 20:03:53 theurich Exp $";
+  static const char *const version = "$Id: ESMC_Array.C,v 1.68 2007/03/28 05:05:04 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2173,6 +2173,7 @@ int ESMC_Array::ESMC_ArrayScatter(
   int localPet, petCount;
   vm->ESMC_VMGet(&localPet, &petCount, NULL, NULL, NULL);
   
+//printf("gjt in ArrayScatter: localPet: %d \n", localPet);
 //printf("gjt in ArrayScatter: typekind/rank: %s / %d \n",
 //ESMC_TypeKindString(typekindArg), rankArg);
 //printf("gjt in ArrayScatter: counts: %d, %d, %d\n", counts[0], counts[1],
@@ -2238,7 +2239,7 @@ int ESMC_Array::ESMC_ArrayScatter(
   }
 
   // size in bytes of each piece of data  
-  int dataSize = ESMC_TypeKindSize(typekindArg);
+  int dataSize = ESMC_TypeKindSize(typekind);
 
   // prepare for comms
   vmk_commhandle **commh = new vmk_commhandle*; // used by all comm calls
