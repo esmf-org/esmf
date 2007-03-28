@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.16 2007/03/26 20:14:42 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.17 2007/03/28 05:02:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.16 2007/03/26 20:14:42 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.17 2007/03/28 05:02:40 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -229,7 +229,7 @@ print *, min_R4, min_R8
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Verify srcfarray data after scatter
-  write(name, *) "Verifying srcfarray data after 2D ESMF_TYPEKIND_R8 ArrayScatter() Test"
+  write(name, *) "Verifying srcfarray data after 2D ESMF_TYPEKIND_R8 ArrayScatter() with omitted srcfarray Test"
   write(failMsg, *) "Source data was modified."
   rc = ESMF_SUCCESS
   do j=1, 23
@@ -249,7 +249,7 @@ print *, min_R4, min_R8
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Verify Array data after scatter
-  write(name, *) "Verifying destination Array data after 2D ESMF_TYPEKIND_R8 ArrayScatter() Test"
+  write(name, *) "Verifying destination Array data after 2D ESMF_TYPEKIND_R8 ArrayScatter() with omitted srcfarray Test"
   write(failMsg, *) "Array data wrong."
   rc = ESMF_SUCCESS
   do j=lbound(farrayPtr,2), ubound(farrayPtr,2)
