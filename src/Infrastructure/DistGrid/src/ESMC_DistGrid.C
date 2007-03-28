@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.8 2006/11/16 05:20:58 cdeluca Exp $
+// $Id: ESMC_DistGrid.C,v 1.9 2007/03/28 21:55:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DistGrid.C,v 1.8 2006/11/16 05:20:58 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DistGrid.C,v 1.9 2007/03/28 21:55:50 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -347,7 +347,8 @@ ESMC_DistGrid *ESMC_DistGridCreate(
           // fill the indexList for this dimension and DE
           int indexStart = minCorner->array[i] + decompChunk;
           for (int k=0; k<dimExtent[extentIndex]; k++){
-            indexList[extentIndex][k] = indexStart + k * chunkLength; // cyclic
+            // cyclic
+            indexList[extentIndex][k] = indexStart + k * regDecomp->array[i];
           }
         }
         break;
@@ -1030,7 +1031,8 @@ ESMC_DistGrid *ESMC_DistGridCreate(
             // fill the indexList for this dimension and DE
             int indexStart = minCorner->array[i] + decompChunk;
             for (int k=0; k<dimExtent[extentIndex]; k++){
-              indexList[extentIndex][k] = indexStart + k * chunkLength; //cyclic
+              // cyclic
+              indexList[extentIndex][k] = indexStart + k * regDecomp->array[i];
             }
           }
           break;
