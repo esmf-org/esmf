@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.26 2007/03/27 01:32:18 samsoncheung Exp $
+! $Id: ESMF_LogErr.F90,v 1.27 2007/03/28 01:49:20 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@ end type ESMF_LOGENTRY
 type ESMF_Log
     private
     sequence
-    integer                                         ::  kount
+    integer                                         ::  kount=0
 end type ESMF_Log
 
 type ESMF_LogIntnl
@@ -133,7 +133,7 @@ type ESMF_LogIntnl
     type(ESMF_Log)				    ::  lognum
 #ifndef ESMF_NO_INITIALIZERS
     type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY=>Null()
-    type(ESMF_Logical)                              ::  FileIsOpen=ESMF_False
+    type(ESMF_Logical)                              ::  FileIsOpen=ESMF_FALSE
     integer, dimension(:), pointer                  ::  errorMask(:)=>Null()
     integer                                         ::  errorMaskCount=0
 #else
@@ -207,9 +207,13 @@ type(ESMF_Log),SAVE,target::ESMF_LogDefault
 integer, parameter :: ESMF_LogTableMax=1000            ! Max # of files allowed to open
 type(ESMF_LogIntnl),SAVE,target :: ESMF_LogTable(ESMF_LogTableMax) ! Users files
 integer,SAVE :: ESMF_LogTableCount=0                   ! count users' number of files
+type(ESMF_LogIntnl),SAVE,target :: ESMF_LogIniTable    ! Initialized LogTable
+
+
 !----------------------------------------------------------------------------
 
 contains
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -469,9 +473,12 @@ end function
       rc=ESMF_FAILURE
     endif
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    if(log%kount.eq.0) then
+      alog => ESMF_LogIniTable                  ! Initialize alog
+    else
+      alog => ESMF_LogTable(log%kount)
+    endif
 
-    alog => ESMF_LogTable(log%kount)
     if (alog%logtype .ne. ESMF_LOG_NONE) then
 	if (alog%FileIsOpen .eq. ESMF_TRUE) then
 	    call ESMF_LogFlush(log,rc=rc2)		
@@ -555,15 +562,19 @@ end subroutine ESMF_LogFinalize
     integer 			    :: j
     type(ESMF_LogIntnl),pointer     :: alog
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
-    if (present(log)) then
-      alog => ESMF_LogTable(log%kount)
-    else
-      alog => ESMF_LogTable(1)
-    endif
     
     if (present(rc)) then
       rc=ESMF_FAILURE 
+    endif
+
+    if (present(log)) then
+      if(log%kount.eq.0) then              ! Initialization
+         alog => ESMF_LogIniTable
+      else                                 ! Copy to LogTable file
+         alog => ESMF_LogTable(log%kount)
+      endif
+    else
+      alog => ESMF_LogTable(1)
     endif
 
     if (alog%FileIsOpen .ne. ESMF_TRUE) then
@@ -694,7 +705,6 @@ end subroutine ESMF_LogFlush
     character(len=ESMF_MAXSTR)::allocmsg
 	integer::msglen=0
 	
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogFoundAllocError=.FALSE.
     if (statusToCheck .NE. 0) then
         if (present(rcToReturn)) then
@@ -766,9 +776,12 @@ end function ESMF_LogFoundAllocError
     logical:: masked = .false.
     type(ESMF_LogIntnl), pointer          :: alog
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     if (present(log)) then
-      alog => ESMF_LogTable(log%kount)
+      if(log%kount.eq.0) then
+         alog => ESMF_LogIniTable                ! Initialization
+      else
+         alog => ESMF_LogTable(log%kount)
+      endif
     else
       alog => ESMF_LogTable(1)
     endif
@@ -853,9 +866,12 @@ end function ESMF_LogFoundError
 
         type(ESMF_LogIntnl),pointer          :: alog
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
         if (present(log)) then
-          alog => ESMF_LogTable(log%kount)
+          if(log%kount.eq.0) then
+            alog => ESMF_LogIniTable                ! Initialization
+          else
+            alog => ESMF_LogTable(log%kount)
+          endif
         else
           alog => ESMF_LogTable(1)
         endif
@@ -925,6 +941,7 @@ end subroutine ESMF_LogGet
 ! 
 !EOPI
 	
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,ESMF_LogIniTable)
     call ESMF_LogOpen(ESMF_LogDefault, filename, logtype, rc)
 
 end subroutine ESMF_LogInitialize
@@ -988,7 +1005,6 @@ end subroutine ESMF_LogInitialize
     character(len=ESMF_MAXSTR)::allocmsg
     integer::msglen=0
     
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogMsgFoundAllocError=.FALSE.
     if (statusToCheck .NE. 0) then
         call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
@@ -1065,9 +1081,13 @@ end function ESMF_LogMsgFoundAllocError
     logical:: masked = .false.
     type(ESMF_LogIntnl), pointer          :: alog
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,ESMF_LogTable(log%kount))
     if (present(log)) then
-      alog => ESMF_LogTable(log%kount)
+      if(log%kount.eq.0) then
+         alog => ESMF_LogIniTable                ! Initialization
+      else
+         alog => ESMF_LogTable(log%kount)
+      endif
     else
       alog => ESMF_LogTable(1)
     endif
@@ -1147,9 +1167,13 @@ end function ESMF_LogMsgFoundError
     logical:: masked = .false.
     type(ESMF_LogIntnl), pointer          :: alog
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,ESMF_LogTable(log%kount))
     if (present(log)) then
-      alog => ESMF_LogTable(log%kount)
+      if(log%kount.eq.0) then
+         alog => ESMF_LogIniTable                ! Initialization
+      else
+         alog => ESMF_LogTable(log%kount)
+      endif
     else
       alog => ESMF_LogTable(1)
     endif
@@ -1223,17 +1247,18 @@ end subroutine ESMF_LogMsgSetError
 
     type(ESMF_LogIntnl),pointer     :: alog
 
-    alog => ESMF_LogTable(log%kount)
-
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,alog)
     if (present(rc)) then
         rc=ESMF_FAILURE
     endif
 
-    if (alog%FileIsOpen .eq. ESMF_TRUE) then 
+    !  Test if ESMF_Log is already exist.
+    if(log%kount .GT. 0) then
+      ! Test if it is open or closed
+      if (ESMF_LogTable(log%kount)%FileIsOpen .eq. ESMF_TRUE) then
         print *, "This ESMF_Log is already open with file '", &
                  trim(alog%nameLogErrFile), "'"
         return
+      endif
     endif
 
     ESMF_LogTableCount = ESMF_LogTableCount + 1   ! counting number of files
@@ -1420,9 +1445,12 @@ end subroutine ESMF_LogOpen
     type(ESMF_LogIntnl), pointer          :: alog
     type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     if (present(log)) then
-      alog => ESMF_LogTable(log%kount)
+      if(log%kount.eq.0) then
+         alog => ESMF_LogIniTable                ! Initialization
+      else
+         alog => ESMF_LogTable(log%kount)
+      endif
     else
       alog => ESMF_LogTable(1)
       isDefault = .true.
@@ -1558,11 +1586,14 @@ end subroutine ESMF_LogSet
     integer			    ::tline
     integer                         ::h,m,s,ms,y,mn,dy
     integer			    ::rc2,index
-    type(ESMF_LogIntnl),pointer     :: alog
+    type(ESMF_LogIntnl), pointer    :: alog
     
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     if (present(log)) then
-      alog => ESMF_LogTable(log%kount)
+      if(log%kount.eq.0) then
+         alog => ESMF_LogIniTable                ! Initialization
+      else
+         alog => ESMF_LogTable(log%kount)
+      endif
     else
       alog => ESMF_LogTable(1)
     endif
