@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.27 2007/03/28 01:49:20 samsoncheung Exp $
+! $Id: ESMF_LogErr.F90,v 1.28 2007/03/29 00:01:33 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -93,7 +93,7 @@ type(ESMF_LogType), parameter		:: &
     ESMF_LOG_NONE = ESMF_LogType(3)
     
 !     ! Log Entry                            
-type ESMF_LOGENTRY
+type ESMF_LogEntry
     private
     sequence  					
     integer		::  h,m,s,ms
@@ -104,15 +104,16 @@ type ESMF_LOGENTRY
     character(len=8) 	::  d
     character(len=8)	::  lt  			
     ESMF_INIT_DECLARE    
-end type ESMF_LOGENTRY
+end type ESMF_LogEntry
 
 type ESMF_Log
     private
     sequence
-    integer                                         ::  kount=0
+    integer                                         ::  Lindex
+    ESMF_INIT_DECLARE
 end type ESMF_Log
 
-type ESMF_LogIntnl
+type ESMF_LogPrivate
     private
     sequence        
      
@@ -130,14 +131,13 @@ type ESMF_LogIntnl
     type(ESMF_Logical)			            ::  dirty
     type(ESMF_HaltType)                             ::  halt
     type(ESMF_LogType)			            ::  logtype      
-    type(ESMF_Log)				    ::  lognum
 #ifndef ESMF_NO_INITIALIZERS
-    type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY=>Null()
+    type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY=>Null()
     type(ESMF_Logical)                              ::  FileIsOpen=ESMF_FALSE
     integer, dimension(:), pointer                  ::  errorMask(:)=>Null()
     integer                                         ::  errorMaskCount=0
 #else
-    type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY
+    type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY
     type(ESMF_Logical)                              ::  FileIsOpen
     integer, dimension(:), pointer                  ::  errorMask(:)
     integer                                         ::  errorMaskCount
@@ -145,7 +145,7 @@ type ESMF_LogIntnl
     character(len=32)                               ::  nameLogErrFile
     character(len=ESMF_MAXSTR)                      ::  petNumLabel
     ESMF_INIT_DECLARE    
-end type ESMF_LogIntnl
+end type ESMF_LogPrivate
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -205,9 +205,9 @@ end interface
 
 type(ESMF_Log),SAVE,target::ESMF_LogDefault
 integer, parameter :: ESMF_LogTableMax=1000            ! Max # of files allowed to open
-type(ESMF_LogIntnl),SAVE,target :: ESMF_LogTable(ESMF_LogTableMax) ! Users files
+type(ESMF_LogPrivate),SAVE,target :: ESMF_LogTable(ESMF_LogTableMax) ! Users files
 integer,SAVE :: ESMF_LogTableCount=0                   ! count users' number of files
-type(ESMF_LogIntnl),SAVE,target :: ESMF_LogIniTable    ! Initialized LogTable
+type(ESMF_LogPrivate),SAVE,target :: ESMF_LogIniTable    ! Initialized LogTable
 
 
 !----------------------------------------------------------------------------
@@ -225,7 +225,7 @@ contains
     function ESMF_LogGetInit(s)
 !
 ! !ARGUMENTS:
-       type(ESMF_LogIntnl), intent(in), optional :: s
+       type(ESMF_Log), intent(in), optional :: s
        ESMF_INIT_TYPE :: ESMF_LogGetInit
 !
 ! !DESCRIPTION:
@@ -257,7 +257,7 @@ contains
     subroutine ESMF_LogInit(s)
 !
 ! !ARGUMENTS:
-       type(ESMF_LogIntnl) :: s
+       type(ESMF_Log) :: s
 !
 ! !DESCRIPTION:
 !      Initialize the shallow class {\tt log}.
@@ -269,11 +269,6 @@ contains
 !     \end{description}
 !
 !EOPI
-       nullify(s%LOG_ENTRY)
-       s%FileIsOpen=ESMF_False
-!       s%errorMask(:)=>Null()
-       nullify(s%errorMask)
-       s%errorMaskCount=0
        ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_LogInit
 
@@ -287,7 +282,7 @@ contains
     subroutine ESMF_LogValidate(s,rc)
 !
 ! !ARGUMENTS:
-       type(ESMF_LogIntnl), intent(inout) :: s
+       type(ESMF_Log), intent(inout) :: s
        integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -313,47 +308,144 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LOGENTRYGetInit"
+#define ESMF_METHOD "ESMF_LogPrivateGetInit"
 !BOPI
-! !IROUTINE:  ESMF_LOGENTRYGetInit - Get initialization status.
+! !IROUTINE:  ESMF_LogPrivateGetInit - Get initialization status.
 
 ! !INTERFACE:
-    function ESMF_LOGENTRYGetInit(s)
+    function ESMF_LogPrivateGetInit(s)
 !
 ! !ARGUMENTS:
-       type(ESMF_LOGENTRY), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_LOGENTRYGetInit
+       type(ESMF_LogPrivate), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_LogPrivateGetInit
 !
 ! !DESCRIPTION:
-!      Get the initialization status of the shallow class {\tt LOGENTRY}.
+!      Get the initialization status of the shallow class {\tt logprivate}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_LOGENTRY} from which to retreive status.
+!           {\tt ESMF\_LogPrivate} from which to retreive status.
 !     \end{description}
 !
 !EOPI
 
        if (present(s)) then
-         ESMF_LOGENTRYGetInit = ESMF_INIT_GET(s)
+         ESMF_LogPrivateGetInit = ESMF_INIT_GET(s)
        else
-         ESMF_LOGENTRYGetInit = ESMF_INIT_DEFINED
+         ESMF_LogPrivateGetInit = ESMF_INIT_DEFINED
        endif
 
-    end function ESMF_LOGENTRYGetInit
+    end function ESMF_LogPrivateGetInit
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LOGENTRYInit"
+#define ESMF_METHOD "ESMF_LogPrivateInit"
 !BOPI
-! !IROUTINE:  ESMF_LOGENTRYInit - Initialize LOGENTRY
+! !IROUTINE:  ESMF_LogPrivateInit - Initialize Log
 
 ! !INTERFACE:
-    subroutine ESMF_LOGENTRYInit(s)
+    subroutine ESMF_LogPrivateInit(s)
 !
 ! !ARGUMENTS:
-       type(ESMF_LOGENTRY) :: s
+       type(ESMF_LogPrivate) :: s
+!
+! !DESCRIPTION:
+!      Initialize the shallow class {\tt LogPrivate}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_LogPrivate} of which being initialized.
+!     \end{description}
+!
+!EOPI
+       nullify(s%LOG_ENTRY)
+       s%FileIsOpen=ESMF_False
+!       s%errorMask(:)=>Null()
+       nullify(s%errorMask)
+       s%errorMaskCount=0
+       ESMF_INIT_SET_DEFINED(s)
+    end subroutine ESMF_LogPrivateInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogPrivateValidate"
+!BOPI
+! !IROUTINE:  ESMF_LogPrivateValidate - Check validity of a LogPrivate
+
+! !INTERFACE:
+    subroutine ESMF_LogPrivateValidate(s,rc)
+!
+! !ARGUMENTS:
+       type(ESMF_LogPrivate), intent(inout) :: s
+       integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Validates that the {\tt LogPrivate} is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_LogPrivate} to validate.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt localfield}
+!           is valid.
+!     \end{description}
+!
+!EOPI
+     ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,s)
+
+     ! return success
+     if(present(rc)) then
+       rc = ESMF_SUCCESS
+     endif
+    end subroutine ESMF_LogPrivateValidate
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogEntryGetInit"
+!BOPI
+! !IROUTINE:  ESMF_LogEntryGetInit - Get initialization status.
+
+! !INTERFACE:
+    function ESMF_LogEntryGetInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_LogEntry), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_LogEntryGetInit
+!
+! !DESCRIPTION:
+!      Get the initialization status of the shallow class {\tt LogEntry}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [s]
+!           {\tt ESMF\_LogEntry} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+
+       if (present(s)) then
+         ESMF_LogEntryGetInit = ESMF_INIT_GET(s)
+       else
+         ESMF_LogEntryGetInit = ESMF_INIT_DEFINED
+       endif
+
+    end function ESMF_LogEntryGetInit
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogEntryInit"
+!BOPI
+! !IROUTINE:  ESMF_LogEntryInit - Initialize LogEntry
+
+! !INTERFACE:
+    subroutine ESMF_LogEntryInit(s)
+!
+! !ARGUMENTS:
+       type(ESMF_LogEntry) :: s
 !
 ! !DESCRIPTION:
 !      Initialize the shallow class {\tt logentry}.
@@ -361,46 +453,46 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_LOGENTRY} of which being initialized.
+!           {\tt ESMF\_LogEntry} of which being initialized.
 !     \end{description}
 !
 !EOPI
        ESMF_INIT_SET_DEFINED(s)
-    end subroutine ESMF_LOGENTRYInit
+    end subroutine ESMF_LogEntryInit
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LOGENTRYValidate"
+#define ESMF_METHOD "ESMF_LogEntryValidate"
 !BOPI
-! !IROUTINE:  ESMF_LOGENTRYValidate - Check validity of a LOGENTRY
+! !IROUTINE:  ESMF_LogEntryValidate - Check validity of a LogEntry
 
 ! !INTERFACE:
-    subroutine ESMF_LOGENTRYValidate(s,rc)
+    subroutine ESMF_LogEntryValidate(s,rc)
 !
 ! !ARGUMENTS:
-       type(ESMF_LOGENTRY), intent(inout) :: s
+       type(ESMF_LogEntry), intent(inout) :: s
        integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Validates that the {\tt LOGENTRY} is internally consistent.
+!      Validates that the {\tt LogEntry} is internally consistent.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_LOGENTRY} to validate.
+!           {\tt ESMF\_LogEntry} to validate.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt logentry}
 !           is valid.
 !     \end{description}
 !
 !EOPI
-     ESMF_INIT_CHECK_SHALLOW(ESMF_LOGENTRYGetInit,ESMF_LOGENTRYInit,s)
+     ESMF_INIT_CHECK_SHALLOW(ESMF_LogEntryGetInit,ESMF_LogEntryInit,s)
 
      ! return success
      if(present(rc)) then
        rc = ESMF_SUCCESS
      endif
-    end subroutine ESMF_LOGENTRYValidate
+    end subroutine ESMF_LogEntryValidate
 
 !------------------------------------------------------------------------------
 ! functions to compare two ESMF_DataTypes to see if they're the same or not
@@ -467,16 +559,18 @@ end function
 !EOP
 	
     integer::rc2,status
-    type(ESMF_LogIntnl),pointer     :: alog
+    type(ESMF_LogPrivate),pointer     :: alog
 	
     if (present(rc)) then
       rc=ESMF_FAILURE
     endif
 
-    if(log%kount.eq.0) then
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+
+    if(log%Lindex.eq.0) then
       alog => ESMF_LogIniTable                  ! Initialize alog
     else
-      alog => ESMF_LogTable(log%kount)
+      alog => ESMF_LogTable(log%Lindex)
     endif
 
     if (alog%logtype .ne. ESMF_LOG_NONE) then
@@ -522,10 +616,12 @@ end subroutine ESMF_LogClose
 !EOPI
 
         integer :: rc2,k
+        type(ESMF_Log)                                    :: log
 
         ! Loop through all ESMF_LogTable(*) and close the files
         do k = 1,ESMF_LogTableCount
-          call ESMF_LogClose(ESMF_LogTable(k)%lognum, rc)
+          log%Lindex = k
+          call ESMF_LogClose(log, rc)
         enddo
 
         call c_ESMC_LogFinalize(rc2)
@@ -560,21 +656,22 @@ end subroutine ESMF_LogFinalize
 ! 
 !EOP
     integer 			    :: j
-    type(ESMF_LogIntnl),pointer     :: alog
+    type(ESMF_LogPrivate),pointer     :: alog
 
     
-    if (present(rc)) then
-      rc=ESMF_FAILURE 
-    endif
-
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     if (present(log)) then
-      if(log%kount.eq.0) then              ! Initialization
+      if(log%Lindex.eq.0) then              ! Initialization
          alog => ESMF_LogIniTable
       else                                 ! Copy to LogTable file
-         alog => ESMF_LogTable(log%kount)
+         alog => ESMF_LogTable(log%Lindex)
       endif
     else
       alog => ESMF_LogTable(1)
+    endif
+
+    if (present(rc)) then
+      rc=ESMF_FAILURE 
     endif
 
     if (alog%FileIsOpen .ne. ESMF_TRUE) then
@@ -668,7 +765,7 @@ end subroutine ESMF_LogFlush
 	character(len=*), intent(in), optional      :: file
 	character(len=*), intent(in), optional      :: method
 	integer, intent(out),optional               :: rcToReturn
-	type(ESMF_LOG),intent(inout),optional	    :: log
+	type(ESMF_Log),intent(inout),optional	    :: log
 
 ! !DESCRIPTION:
 !      This function returns a logical true when a Fortran status code
@@ -705,6 +802,7 @@ end subroutine ESMF_LogFlush
     character(len=ESMF_MAXSTR)::allocmsg
 	integer::msglen=0
 	
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogFoundAllocError=.FALSE.
     if (statusToCheck .NE. 0) then
         if (present(rcToReturn)) then
@@ -739,7 +837,7 @@ end function ESMF_LogFoundAllocError
 	character(len=*), intent(in), optional          :: file
 	character(len=*), intent(in), optional	        :: method
 	integer, intent(out), optional                  :: rcToReturn
-	type(ESMF_LOG),intent(inout), target, optional  :: log
+	type(ESMF_Log),intent(inout), target, optional  :: log
 	
 ! !DESCRIPTION:
 !      This function returns a logical true for ESMF return codes that indicate 
@@ -774,13 +872,14 @@ end function ESMF_LogFoundAllocError
 	
     integer:: i
     logical:: masked = .false.
-    type(ESMF_LogIntnl), pointer          :: alog
+    type(ESMF_LogPrivate), pointer          :: alog
 
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     if (present(log)) then
-      if(log%kount.eq.0) then
+      if(log%Lindex.eq.0) then
          alog => ESMF_LogIniTable                ! Initialization
       else
-         alog => ESMF_LogTable(log%kount)
+         alog => ESMF_LogTable(log%Lindex)
       endif
     else
       alog => ESMF_LogTable(1)
@@ -815,7 +914,7 @@ end function ESMF_LogFoundError
 !
 ! !ARGUMENTS:
 !	
-        type(ESMF_LOG), target,optional			        :: log
+        type(ESMF_Log), target,optional			        :: log
 	type(ESMF_Logical), intent(out),optional		:: verbose
 	type(ESMF_Logical), intent(out),optional		:: flush
 	type(ESMF_Logical), intent(out),optional		:: rootOnly
@@ -864,13 +963,14 @@ end function ESMF_LogFoundError
 ! 
 !EOPI
 
-        type(ESMF_LogIntnl),pointer          :: alog
+        type(ESMF_LogPrivate),pointer          :: alog
 
+        ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
         if (present(log)) then
-          if(log%kount.eq.0) then
+          if(log%Lindex.eq.0) then
             alog => ESMF_LogIniTable                ! Initialization
           else
-            alog => ESMF_LogTable(log%kount)
+            alog => ESMF_LogTable(log%Lindex)
           endif
         else
           alog => ESMF_LogTable(1)
@@ -940,8 +1040,9 @@ end subroutine ESMF_LogGet
 !      \end{description}
 ! 
 !EOPI
-	
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,ESMF_LogIniTable)
+
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,ESMF_LogIniTable)
+
     call ESMF_LogOpen(ESMF_LogDefault, filename, logtype, rc)
 
 end subroutine ESMF_LogInitialize
@@ -965,7 +1066,7 @@ end subroutine ESMF_LogInitialize
 	character(len=*), intent(in), optional      :: file
 	character(len=*), intent(in), optional	    :: method
         integer, intent(out),optional               :: rcToReturn	
-        type(ESMF_LOG), intent(inout), optional	    :: log
+        type(ESMF_Log), intent(inout), optional	    :: log
 
 ! !DESCRIPTION:
 !      This function returns a logical true when a Fortran status code
@@ -1005,6 +1106,7 @@ end subroutine ESMF_LogInitialize
     character(len=ESMF_MAXSTR)::allocmsg
     integer::msglen=0
     
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogMsgFoundAllocError=.FALSE.
     if (statusToCheck .NE. 0) then
         call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
@@ -1040,7 +1142,7 @@ end function ESMF_LogMsgFoundAllocError
 	character(len=*), intent(in), optional          :: file
 	character(len=*), intent(in), optional	        :: method
 	integer, intent(out),optional                   :: rcToReturn
-	type(ESMF_LOG), intent(inout), target, optional    :: log
+	type(ESMF_Log), intent(inout), target, optional    :: log
 	
 
 ! !DESCRIPTION:
@@ -1079,14 +1181,14 @@ end function ESMF_LogMsgFoundAllocError
 	
     integer:: i
     logical:: masked = .false.
-    type(ESMF_LogIntnl), pointer          :: alog
+    type(ESMF_LogPrivate), pointer          :: alog
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,ESMF_LogTable(log%kount))
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     if (present(log)) then
-      if(log%kount.eq.0) then
+      if(log%Lindex.eq.0) then
          alog => ESMF_LogIniTable                ! Initialization
       else
-         alog => ESMF_LogTable(log%kount)
+         alog => ESMF_LogTable(log%Lindex)
       endif
     else
       alog => ESMF_LogTable(1)
@@ -1126,7 +1228,7 @@ end function ESMF_LogMsgFoundError
 	character(len=*), intent(in), optional          :: file
 	character(len=*), intent(in), optional	        :: method
 	integer, intent(out),optional                   :: rcToReturn
-	type(ESMF_LOG), intent(inout), target, optional    :: log
+	type(ESMF_Log), intent(inout), target, optional    :: log
 	
 
 ! !DESCRIPTION:
@@ -1165,14 +1267,14 @@ end function ESMF_LogMsgFoundError
 
     integer:: i
     logical:: masked = .false.
-    type(ESMF_LogIntnl), pointer          :: alog
+    type(ESMF_LogPrivate), pointer          :: alog
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,ESMF_LogTable(log%kount))
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     if (present(log)) then
-      if(log%kount.eq.0) then
+      if(log%Lindex.eq.0) then
          alog => ESMF_LogIniTable                ! Initialization
       else
-         alog => ESMF_LogTable(log%kount)
+         alog => ESMF_LogTable(log%Lindex)
       endif
     else
       alog => ESMF_LogTable(1)
@@ -1239,31 +1341,32 @@ end subroutine ESMF_LogMsgSetError
     end interface
 
     integer 				                   :: status, i, j, rc2
-    type(ESMF_LOGENTRY), dimension(:), pointer             :: localbuf
+    type(ESMF_LogEntry), dimension(:), pointer             :: localbuf
     character(len=32)                                      :: fname
     character(len=4)                                       :: fnum
     character(ESMF_MAXSTR)                                 :: petNumChar
     logical                                                :: inuse
 
-    type(ESMF_LogIntnl),pointer     :: alog
+    type(ESMF_LogPrivate),pointer     :: alog
 
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     if (present(rc)) then
         rc=ESMF_FAILURE
     endif
 
     !  Test if ESMF_Log is already exist.
-    if(log%kount .GT. 0) then
+    if(log%Lindex .GT. 0) then
       ! Test if it is open or closed
-      if (ESMF_LogTable(log%kount)%FileIsOpen .eq. ESMF_TRUE) then
+      if (ESMF_LogTable(log%Lindex)%FileIsOpen .eq. ESMF_TRUE) then
         print *, "This ESMF_Log is already open with file '", &
-                 trim(alog%nameLogErrFile), "'"
+                 trim(ESMF_LogTable(log%Lindex)%nameLogErrFile), "'"
         return
       endif
     endif
 
     ESMF_LogTableCount = ESMF_LogTableCount + 1   ! counting number of files
-    log%kount = ESMF_LogTableCount                ! Assign log
-    alog => ESMF_LogTable(log%kount)
+    log%Lindex = ESMF_LogTableCount                ! Assign log
+    alog => ESMF_LogTable(log%Lindex)
 
     alog%maxElements = 10
     alog%stream = 0
@@ -1274,7 +1377,6 @@ end subroutine ESMF_LogMsgSetError
     write(petNumChar, *) alog%petNumber
     alog%petNumLabel = "PET" // trim(adjustl(petNumChar))
 
-    alog%lognum = log
     alog%stopprogram = .false.
     alog%flushImmediately = ESMF_FALSE
     alog%rootOnly = ESMF_FALSE
@@ -1395,7 +1497,7 @@ end subroutine ESMF_LogOpen
 !
 ! !ARGUMENTS:
 !	
-	type(ESMF_LOG), target,optional                         :: log
+	type(ESMF_Log), target,optional                         :: log
 	type(ESMF_Logical), intent(in),optional			:: verbose
 	type(ESMF_Logical), intent(in),optional			:: flush
 	type(ESMF_Logical), intent(in),optional			:: rootOnly
@@ -1442,14 +1544,15 @@ end subroutine ESMF_LogOpen
 !EOP
     integer :: i, status, status2
     logical :: isDefault=.false.
-    type(ESMF_LogIntnl), pointer          :: alog
-    type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
+    type(ESMF_LogPrivate), pointer          :: alog
+    type(ESMF_LogEntry), dimension(:), pointer :: localbuf
 
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     if (present(log)) then
-      if(log%kount.eq.0) then
+      if(log%Lindex.eq.0) then
          alog => ESMF_LogIniTable                ! Initialization
       else
-         alog => ESMF_LogTable(log%kount)
+         alog => ESMF_LogTable(log%Lindex)
       endif
     else
       alog => ESMF_LogTable(1)
@@ -1539,7 +1642,7 @@ end subroutine ESMF_LogSet
 	integer, intent(in), optional               :: line
 	character(len=*), intent(in), optional      :: file
 	character(len=*), intent(in), optional	    :: method
-	type(ESMF_LOG),target,optional   	    :: log
+	type(ESMF_Log),target,optional   	    :: log
 	integer, intent(out),optional		    :: rc
 
 ! !DESCRIPTION:
@@ -1586,13 +1689,14 @@ end subroutine ESMF_LogSet
     integer			    ::tline
     integer                         ::h,m,s,ms,y,mn,dy
     integer			    ::rc2,index
-    type(ESMF_LogIntnl), pointer    :: alog
+    type(ESMF_LogPrivate), pointer    :: alog
     
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     if (present(log)) then
-      if(log%kount.eq.0) then
+      if(log%Lindex.eq.0) then
          alog => ESMF_LogIniTable                ! Initialization
       else
-         alog => ESMF_LogTable(log%kount)
+         alog => ESMF_LogTable(log%Lindex)
       endif
     else
       alog => ESMF_LogTable(1)
@@ -1679,8 +1783,8 @@ end subroutine ESMF_LogWrite
 	subroutine ESMF_LogEntryCopy(logEntryIn, logEntryOut, rc)
 !
 ! !ARGUMENTS:
-        type(ESMF_LOGENTRY), intent(inout)  :: logEntryIn
-        type(ESMF_LOGENTRY), intent(out) :: logEntryOut
+        type(ESMF_LogEntry), intent(inout)  :: logEntryIn
+        type(ESMF_LogEntry), intent(out) :: logEntryOut
         integer, intent(out), optional   :: rc
 
 ! !DESCRIPTION:
@@ -1699,7 +1803,7 @@ end subroutine ESMF_LogWrite
 ! 
 !EOPI
     
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LOGENTRYGetInit,ESMF_LOGENTRYInit,logEntryIn)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogEntryGetInit,ESMF_LogEntryInit,logEntryIn)
 
     logEntryOut%h    = logEntryIn%h
     logEntryOut%m    = logEntryIn%m
