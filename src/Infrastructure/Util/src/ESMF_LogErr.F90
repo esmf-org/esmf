@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.28 2007/03/29 00:01:33 samsoncheung Exp $
+! $Id: ESMF_LogErr.F90,v 1.29 2007/03/29 15:48:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -109,7 +109,11 @@ end type ESMF_LogEntry
 type ESMF_Log
     private
     sequence
-    integer                                         ::  Lindex
+#ifndef ESMF_NO_INITIALIZERS
+    integer                                         ::  logTableIndex = 0
+#else
+    integer                                         ::  logTableIndex
+#endif
     ESMF_INIT_DECLARE
 end type ESMF_Log
 
@@ -207,7 +211,6 @@ type(ESMF_Log),SAVE,target::ESMF_LogDefault
 integer, parameter :: ESMF_LogTableMax=1000            ! Max # of files allowed to open
 type(ESMF_LogPrivate),SAVE,target :: ESMF_LogTable(ESMF_LogTableMax) ! Users files
 integer,SAVE :: ESMF_LogTableCount=0                   ! count users' number of files
-type(ESMF_LogPrivate),SAVE,target :: ESMF_LogIniTable    ! Initialized LogTable
 
 
 !----------------------------------------------------------------------------
@@ -269,6 +272,7 @@ contains
 !     \end{description}
 !
 !EOPI
+       s%logTableIndex = 0
        ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_LogInit
 
@@ -567,24 +571,24 @@ end function
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
-    if(log%Lindex.eq.0) then
-      alog => ESMF_LogIniTable                  ! Initialize alog
-    else
-      alog => ESMF_LogTable(log%Lindex)
-    endif
+    if(log%logTableIndex.gt.0) then
+      alog => ESMF_LogTable(log%logTableIndex)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
-    if (alog%logtype .ne. ESMF_LOG_NONE) then
+      if (alog%logtype .ne. ESMF_LOG_NONE) then
 	if (alog%FileIsOpen .eq. ESMF_TRUE) then
 	    call ESMF_LogFlush(log,rc=rc2)		
     	    CLOSE(UNIT=alog%unitNumber)
 	    alog%FileIsOpen=ESMF_FALSE
 	    deallocate(alog%LOG_ENTRY,stat=status)	
 	endif
-    endif
+      endif
     
-    if (alog%errorMaskCount .gt. 0) then
-      deallocate(alog%errorMask)
-    endif
+      if (alog%errorMaskCount .gt. 0) then
+        deallocate(alog%errorMask)
+      endif
+      
+    endif 
 
     if (present(rc)) then
       rc=ESMF_SUCCESS
@@ -618,9 +622,11 @@ end subroutine ESMF_LogClose
         integer :: rc2,k
         type(ESMF_Log)                                    :: log
 
+        ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+
         ! Loop through all ESMF_LogTable(*) and close the files
         do k = 1,ESMF_LogTableCount
-          log%Lindex = k
+          log%logTableIndex = k
           call ESMF_LogClose(log, rc)
         enddo
 
@@ -657,29 +663,33 @@ end subroutine ESMF_LogFinalize
 !EOP
     integer 			    :: j
     type(ESMF_LogPrivate),pointer     :: alog
-
-    
+   
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    
+    nullify(alog) ! ensure that the association status is well defined
+    
     if (present(log)) then
-      if(log%Lindex.eq.0) then              ! Initialization
-         alog => ESMF_LogIniTable
-      else                                 ! Copy to LogTable file
-         alog => ESMF_LogTable(log%Lindex)
+      if(log%logTableIndex.gt.0) then
+         alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
-      alog => ESMF_LogTable(1)
+      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
     endif
 
     if (present(rc)) then
       rc=ESMF_FAILURE 
     endif
 
-    if (alog%FileIsOpen .ne. ESMF_TRUE) then
-      print *, "ESMF_Log not open -- cannot ESMF_LogFlush()."
-      return
-    endif
+    if (associated(alog)) then
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
+
+      if (alog%FileIsOpen .ne. ESMF_TRUE) then
+        print *, "ESMF_Log not open -- cannot ESMF_LogFlush()."
+        return
+      endif
       
-    if ((alog%FileIsOpen .eq. ESMF_TRUE) .AND. &
+      if ((alog%FileIsOpen .eq. ESMF_TRUE) .AND. &
         (alog%flushed .eq. ESMF_FALSE) .AND. &
 	(alog%dirty .eq. ESMF_TRUE))  then	
 	    do j=1, alog%fIndex-1
@@ -735,18 +745,21 @@ end subroutine ESMF_LogFinalize
     		    endif
     	        endif
 	    enddo
-   endif
+      endif
    
-   alog%fIndex = 1 
-   122  FORMAT(a8,a,3i2.2,a,i6.6,7a,i0,4a)
-   123  FORMAT(a8,a,3i2.2,a,i6.6,7a,i0,2a)
-   132  FORMAT(a8,a,3i2.2,a,i6.6,8a)
-   133  FORMAT(a8,a,3i2.2,a,i6.6,6a)
+      alog%fIndex = 1 
+      122  FORMAT(a8,a,3i2.2,a,i6.6,7a,i0,4a)
+      123  FORMAT(a8,a,3i2.2,a,i6.6,7a,i0,2a)
+      132  FORMAT(a8,a,3i2.2,a,i6.6,8a)
+      133  FORMAT(a8,a,3i2.2,a,i6.6,6a)
    
-   alog%flushed = ESMF_TRUE
-   alog%dirty = ESMF_FALSE
-   rc=ESMF_SUCCESS	
+      alog%flushed = ESMF_TRUE
+      alog%dirty = ESMF_FALSE
+          
+      rc=ESMF_SUCCESS	
       
+    endif
+
 end subroutine ESMF_LogFlush
 !--------------------------------------------------------------------------
 !BOP
@@ -875,32 +888,41 @@ end function ESMF_LogFoundAllocError
     type(ESMF_LogPrivate), pointer          :: alog
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+
+    nullify(alog) ! ensure that the association status is well defined
+    
     if (present(log)) then
-      if(log%Lindex.eq.0) then
-         alog => ESMF_LogIniTable                ! Initialization
-      else
-         alog => ESMF_LogTable(log%Lindex)
+      if(log%logTableIndex.gt.0) then
+         alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
-      alog => ESMF_LogTable(1)
+      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
     endif
     
-    ! set default returns
-    ESMF_LogFoundError = .FALSE.
-    if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
+    if (associated(alog)) then
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
+
+      ! set default returns
+      ESMF_LogFoundError = .FALSE.
+      if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
     
-    ! check the error code
-    if (rcToCheck .NE. ESMF_SUCCESS) then
-      do i=1, alog%errorMaskCount
-        if (alog%errorMask(i) .eq. rcToCheck) masked = .true.
-      enddo
-      if (.not.masked) then
-        call ESMF_LogWrite("StandardError",ESMF_LOG_ERROR,line,file,method,&
-	log)
-        ESMF_LogFoundError = .TRUE.
-        if (present(rcToReturn)) rcToReturn = rcToCheck
+      ! check the error code
+      if (rcToCheck .NE. ESMF_SUCCESS) then
+        do i=1, alog%errorMaskCount
+          if (alog%errorMask(i) .eq. rcToCheck) masked = .true.
+        enddo
+        if (.not.masked) then
+          call ESMF_LogWrite("StandardError",ESMF_LOG_ERROR,line,file,method,&
+	  log)
+          ESMF_LogFoundError = .TRUE.
+          if (present(rcToReturn)) rcToReturn = rcToCheck
+        endif
       endif
-    endif	
+    
+    else    
+      if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
+    endif
        
 end function ESMF_LogFoundError
 
@@ -965,20 +987,25 @@ end function ESMF_LogFoundError
 
         type(ESMF_LogPrivate),pointer          :: alog
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
-        if (present(log)) then
-          if(log%Lindex.eq.0) then
-            alog => ESMF_LogIniTable                ! Initialization
-          else
-            alog => ESMF_LogTable(log%Lindex)
-          endif
-        else
-          alog => ESMF_LogTable(1)
-        endif
-
 	if (present(rc)) then
           rc=ESMF_FAILURE
         endif
+
+        ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+
+    nullify(alog) ! ensure that the association status is well defined
+    
+    if (present(log)) then
+      if(log%logTableIndex.gt.0) then
+         alog => ESMF_LogTable(log%logTableIndex)
+      endif
+    else
+      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+    endif
+    
+    if (associated(alog)) then
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
 	if (present(verbose)) then
           verbose=alog%verbose
@@ -1005,6 +1032,7 @@ end function ESMF_LogFoundError
 	if (present(rc)) then
           rc=ESMF_SUCCESS
         endif
+    endif
 
 end subroutine ESMF_LogGet
 
@@ -1040,9 +1068,6 @@ end subroutine ESMF_LogGet
 !      \end{description}
 ! 
 !EOPI
-
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,ESMF_LogIniTable)
-
     call ESMF_LogOpen(ESMF_LogDefault, filename, logtype, rc)
 
 end subroutine ESMF_LogInitialize
@@ -1184,31 +1209,39 @@ end function ESMF_LogMsgFoundAllocError
     type(ESMF_LogPrivate), pointer          :: alog
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+
+    nullify(alog) ! ensure that the association status is well defined
+    
     if (present(log)) then
-      if(log%Lindex.eq.0) then
-         alog => ESMF_LogIniTable                ! Initialization
-      else
-         alog => ESMF_LogTable(log%Lindex)
+      if(log%logTableIndex.gt.0) then
+         alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
-      alog => ESMF_LogTable(1)
+      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
     endif
     
-    ! set default returns
-    ESMF_LogMsgFoundError = .FALSE.
-    if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
+    if (associated(alog)) then
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
+
+      ! set default returns
+      ESMF_LogMsgFoundError = .FALSE.
+      if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
     
-    ! check the error code
-    if (rcToCheck .NE. ESMF_SUCCESS) then
-      do i=1, alog%errorMaskCount
-        if (alog%errorMask(i) .eq. rcToCheck) masked = .true.
-      enddo
-      if (.not.masked) then
-        call ESMF_LogWrite(msg,ESMF_LOG_ERROR,line,file,method,log)
-        ESMF_LogMsgFoundError=.TRUE.
-        if (present(rcToReturn)) rcToReturn = rcToCheck
-      endif
-    endif	
+      ! check the error code
+      if (rcToCheck .NE. ESMF_SUCCESS) then
+        do i=1, alog%errorMaskCount
+          if (alog%errorMask(i) .eq. rcToCheck) masked = .true.
+        enddo
+        if (.not.masked) then
+          call ESMF_LogWrite(msg,ESMF_LOG_ERROR,line,file,method,log)
+          ESMF_LogMsgFoundError=.TRUE.
+          if (present(rcToReturn)) rcToReturn = rcToCheck
+        endif
+      endif	
+    else    
+      if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
+    endif
        
 end function ESMF_LogMsgFoundError
 
@@ -1270,29 +1303,37 @@ end function ESMF_LogMsgFoundError
     type(ESMF_LogPrivate), pointer          :: alog
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+
+    nullify(alog) ! ensure that the association status is well defined
+    
     if (present(log)) then
-      if(log%Lindex.eq.0) then
-         alog => ESMF_LogIniTable                ! Initialization
-      else
-         alog => ESMF_LogTable(log%Lindex)
+      if(log%logTableIndex.gt.0) then
+         alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
-      alog => ESMF_LogTable(1)
+      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
     endif
+    
+    if (associated(alog)) then
 
-    ! set default returns
-    if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
+      ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
+
+      ! set default returns
+      if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
 	
-    ! check the error code
-    if (rcValue .NE. ESMF_SUCCESS) then
-      do i=1, alog%errorMaskCount
-        if (alog%errorMask(i) .eq. rcValue) masked = .true.
-      enddo
-      if (.not.masked) then
-        call ESMF_LogWrite(msg,ESMF_LOG_ERROR,line,file,method,log)
-        if (present(rcToReturn)) rcToReturn = rcValue
-      endif
-    endif	
+      ! check the error code
+      if (rcValue .NE. ESMF_SUCCESS) then
+        do i=1, alog%errorMaskCount
+          if (alog%errorMask(i) .eq. rcValue) masked = .true.
+        enddo
+        if (.not.masked) then
+          call ESMF_LogWrite(msg,ESMF_LOG_ERROR,line,file,method,log)
+          if (present(rcToReturn)) rcToReturn = rcValue
+        endif
+      endif	
+    else    
+      if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
+    endif
        
 end subroutine ESMF_LogMsgSetError
 
@@ -1350,23 +1391,27 @@ end subroutine ESMF_LogMsgSetError
     type(ESMF_LogPrivate),pointer     :: alog
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+
     if (present(rc)) then
         rc=ESMF_FAILURE
     endif
 
-    !  Test if ESMF_Log is already exist.
-    if(log%Lindex .GT. 0) then
-      ! Test if it is open or closed
-      if (ESMF_LogTable(log%Lindex)%FileIsOpen .eq. ESMF_TRUE) then
-        print *, "This ESMF_Log is already open with file '", &
-                 trim(ESMF_LogTable(log%Lindex)%nameLogErrFile), "'"
-        return
-      endif
+    if(log%logTableIndex.gt.0) then
+      alog => ESMF_LogTable(log%logTableIndex)
+    else
+      ESMF_LogTableCount = ESMF_LogTableCount + 1   ! counting number of files
+      log%logTableIndex = ESMF_LogTableCount                ! Assign log
+      alog => ESMF_LogTable(log%logTableIndex)
     endif
+        
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
-    ESMF_LogTableCount = ESMF_LogTableCount + 1   ! counting number of files
-    log%Lindex = ESMF_LogTableCount                ! Assign log
-    alog => ESMF_LogTable(log%Lindex)
+    ! Test if it is open or closed
+    if (alog%FileIsOpen .eq. ESMF_TRUE) then
+        print *, "This ESMF_Log is already open with file '", &
+                 trim(ESMF_LogTable(log%logTableIndex)%nameLogErrFile), "'"
+        return
+    endif
 
     alog%maxElements = 10
     alog%stream = 0
@@ -1548,81 +1593,87 @@ end subroutine ESMF_LogOpen
     type(ESMF_LogEntry), dimension(:), pointer :: localbuf
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    
+    nullify(alog) ! ensure that the association status is well defined
+    
     if (present(log)) then
-      if(log%Lindex.eq.0) then
-         alog => ESMF_LogIniTable                ! Initialization
-      else
-         alog => ESMF_LogTable(log%Lindex)
+      if(log%logTableIndex.gt.0) then
+         alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
-      alog => ESMF_LogTable(1)
+      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
       isDefault = .true.
     endif
-
+    
     if (present(rc)) then
         rc=ESMF_FAILURE
     endif
 
-    if (alog%FileIsOpen .ne. ESMF_TRUE) then
-      print *, "ESMF_Log not open -- cannot ESMF_LogSet()."
-      return
-    endif
+    if (associated(alog)) then
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
+
+      if (alog%FileIsOpen .ne. ESMF_TRUE) then
+        print *, "ESMF_Log not open -- cannot ESMF_LogSet()."
+        return
+      endif
     
-    if (present(verbose)) then
+      if (present(verbose)) then
         alog%verbose=verbose
-    endif
-    if (present(flush)) then
+      endif
+      if (present(flush)) then
         alog%flushImmediately=flush
-    endif
-    if (present(rootOnly)) then
+      endif
+      if (present(rootOnly)) then
         alog%rootOnly=rootOnly
-    endif
-    if (present(halt)) then
+      endif
+      if (present(halt)) then
         alog%halt=halt
-    endif
-    if (present(stream)) then
+      endif
+      if (present(stream)) then
         alog%stream=stream
-    endif
-    if (present(maxElements)) then
-      if (maxElements.gt.0 .AND. alog%maxElements.ne.maxElements) then
-        allocate(localbuf(maxElements), stat=status)
+      endif
+      if (present(maxElements)) then
+        if (maxElements.gt.0 .AND. alog%maxElements.ne.maxElements) then
+          allocate(localbuf(maxElements), stat=status)
 
-        ! if the current number of log entries is greater than the new
-        ! maxElements, then call flush.  Otherwise copy old contents over.
-        if (alog%fIndex.ge.maxElements) then
-          call ESMF_LogFlush(log,rc=status)
-        else
-          do i = 1,alog%fIndex
-            call ESMF_LogEntryCopy(alog%LOG_ENTRY(i), localbuf(i), rc=status)
-          enddo
+          ! if the current number of log entries is greater than the new
+          ! maxElements, then call flush.  Otherwise copy old contents over.
+          if (alog%fIndex.ge.maxElements) then
+            call ESMF_LogFlush(log,rc=status)
+          else
+            do i = 1,alog%fIndex
+              call ESMF_LogEntryCopy(alog%LOG_ENTRY(i), localbuf(i), rc=status)
+            enddo
+          endif
+          deallocate(alog%LOG_ENTRY,stat=status)
+          alog%LOG_ENTRY => localbuf
+          alog%maxElements=maxElements
         endif
-        deallocate(alog%LOG_ENTRY,stat=status)
-        alog%LOG_ENTRY => localbuf
-        alog%maxElements=maxElements
-      endif
-    endif    
-    if (present(errorMask)) then
-      if (alog%errorMaskCount .gt. 0) then
-        deallocate(alog%errorMask)
-      endif
-      alog%errorMaskCount = size(errorMask)
-      allocate(alog%errorMask(alog%errorMaskCount))
-      alog%errorMask = errorMask  ! copy the content of the errorMask argument
-    endif
-    
-    ! currently the connection between F90 and C++ side of LogErr is only well
-    ! defined for the default Log, so only then call the C++ side LogSet().
-    if (isDefault) then
-      !TODO: I am only implementing this to get the errorMask into the C++ side
-      !TODO: LogErr needs major help anyway, so someday this may get sorted out
-      !TODO: to work for more general cases. *gjt*
+      endif    
       if (present(errorMask)) then
-        call c_ESMC_LogSet(alog%errorMask(1),alog%errorMaskCount,status2)
+        if (alog%errorMaskCount .gt. 0) then
+          deallocate(alog%errorMask)
+        endif
+        alog%errorMaskCount = size(errorMask)
+        allocate(alog%errorMask(alog%errorMaskCount))
+        alog%errorMask = errorMask  ! copy the content of the errorMask argument
       endif
-    endif
+    
+      ! currently the connection between F90 and C++ side of LogErr is only well
+      ! defined for the default Log, so only then call the C++ side LogSet().
+      if (isDefault) then
+        !TODO: I am only implementing this to get the errorMask into the C++ side
+        !TODO: LogErr needs major help anyway, so someday this may get sorted out
+        !TODO: to work for more general cases. *gjt*
+        if (present(errorMask)) then
+          call c_ESMC_LogSet(alog%errorMask(1),alog%errorMaskCount,status2)
+        endif
+      endif
 
-    if (present(rc)) then
+      if (present(rc)) then
         rc=ESMF_SUCCESS 
+      endif
     endif
 
 end subroutine ESMF_LogSet
@@ -1692,17 +1743,24 @@ end subroutine ESMF_LogSet
     type(ESMF_LogPrivate), pointer    :: alog
     
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    
+    nullify(alog) ! ensure that the association status is well defined
+    
     if (present(log)) then
-      if(log%Lindex.eq.0) then
-         alog => ESMF_LogIniTable                ! Initialization
-      else
-         alog => ESMF_LogTable(log%Lindex)
+      if(log%logTableIndex.gt.0) then
+         alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
-      alog => ESMF_LogTable(1)
+      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+    endif
+    
+    if (present(rc)) then
+      rc=ESMF_FAILURE
     endif
 
-    if (alog%logtype .ne. ESMF_LOG_NONE) then
+    if (associated(alog)) then
+
+      if (alog%logtype .ne. ESMF_LOG_NONE) then
 
         if (alog%FileIsOpen .ne. ESMF_TRUE) then
           print *, "ESMF_Log not open -- cannot ESMF_LogWrite()."
@@ -1715,9 +1773,6 @@ end subroutine ESMF_LogSet
     	alog%dirty = ESMF_TRUE    
     	call c_esmc_timestamp(y,mn,dy,h,m,s,ms)
     	call DATE_AND_TIME(d,t)	
-    	if (present(rc)) then
-            rc=ESMF_FAILURE
-        endif
     	alog%LOG_ENTRY(index)%methodflag = .FALSE.
     	alog%LOG_ENTRY(index)%lineflag = .FALSE.
     	alog%LOG_ENTRY(index)%fileflag = .FALSE.
@@ -1767,11 +1822,12 @@ end subroutine ESMF_LogSet
     	else
         	alog%fIndex = alog%fIndex + 1	
     	endif	
-    endif
-    ! if requested, halt the program right now.
-    if (alog%stopprogram) call f_ESMF_VMAbort()
-    if (present(rc)) then
+      endif
+      ! if requested, halt the program right now.
+      if (alog%stopprogram) call f_ESMF_VMAbort()
+      if (present(rc)) then
         rc=ESMF_SUCCESS
+      endif
     endif
 end subroutine ESMF_LogWrite
 
