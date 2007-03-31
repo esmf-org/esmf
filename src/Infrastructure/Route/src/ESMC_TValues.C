@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.C,v 1.14 2007/02/20 02:36:46 rosalind Exp $
+// $Id: ESMC_TValues.C,v 1.15 2007/03/31 02:24:37 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TValues.C,v 1.14 2007/02/20 02:36:46 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_TValues.C,v 1.15 2007/03/31 02:24:37 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -188,15 +188,15 @@
 
     numlist = 0;
     if (count > 0) {
-        srcindex = ESMC_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMC_TYPEKIND_I4, 
+        srcindex = ESMC_LocalArrayCreate(1, ESMC_TYPEKIND_I4, 
                                          &count, NULL, ESMC_DATA_COPY, 
                                          NULL, &rc);
 
-        dstindex = ESMC_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMC_TYPEKIND_I4, 
+        dstindex = ESMC_LocalArrayCreate(1, ESMC_TYPEKIND_I4, 
                                          &count2, NULL, ESMC_DATA_COPY,
                                          NULL, &rc);
 
-        weights = ESMC_LocalArrayCreate(1, ESMF_DATA_REAL, ESMC_TYPEKIND_R8, 
+        weights = ESMC_LocalArrayCreate(1, ESMC_TYPEKIND_R8, 
                                         &count, NULL, ESMC_DATA_COPY,
                                         NULL, &rc);
     } else {

@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.64 2007/02/20 02:36:49 rosalind Exp $
+// $Id: ESMC_XPacket.C,v 1.65 2007/03/31 02:24:37 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.64 2007/02/20 02:36:49 rosalind Exp $";
+              "$Id: ESMC_XPacket.C,v 1.65 2007/03/31 02:24:37 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -870,7 +870,7 @@
 
        default:
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                                     "Unknown DataType", NULL);
+                                     "Unknown TypeKind", NULL);
         return NULL;
         }
 
@@ -943,7 +943,7 @@
 
        default:
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                                     "Unknown DataType", NULL);
+                                     "Unknown TypeKind", NULL);
         return NULL;
         }
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.19 2007/02/20 02:36:46 rosalind Exp $
+// $Id: ESMC_LocalArray.C,v 1.20 2007/03/31 02:24:33 cdeluca Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -40,7 +40,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.19 2007/02/20 02:36:46 rosalind Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.20 2007/03/31 02:24:33 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -61,7 +61,6 @@
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
-    ESMC_DataType dt,          // int, ESMC_R4, etc
     ESMC_TypeKind dk,          // short/long, etc
     int *icounts,              // number of items in each dim
     void *base,                // if non-null, this is already allocated memory
@@ -79,7 +78,6 @@
 //      dimension, and allow whole-array or subsectional operations.
 //
 //EOP
-// !REQUIREMENTS:  AAAn.n.n
 
 //   This code needs to make space for the private class data and store the
 //   arguments given.
@@ -102,7 +100,7 @@
      int status;
 
 
-     status = a->ESMC_LocalArrayConstruct(rank, dt, dk, icounts, base, 
+     status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
                                           ESMC_FROM_CPLUSPLUS,
                                           NULL, ESMC_ARRAY_DO_ALLOCATE, 
                                           docopy, ESMF_TRUE, name,
@@ -129,7 +127,6 @@
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
-    ESMC_DataType dt,          // int, ESMC_R4, etc
     ESMC_TypeKind dk,          // short/long, etc
     int *icounts,              // number of items in each dim
     int *lbounds,              // lower index number per dim
@@ -149,7 +146,6 @@
 //      dimension, and allow whole-array or subsectional operations.
 //
 //EOP
-// !REQUIREMENTS:  AAAn.n.n
 
 //   This code needs to make space for the private class data and store the
 //   arguments given.
@@ -172,7 +168,7 @@
      int status;
 
 
-     status = a->ESMC_LocalArrayConstruct(rank, dt, dk, icounts, base, 
+     status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
                                           ESMC_FROM_CPLUSPLUS,
                                           NULL, ESMC_ARRAY_DO_ALLOCATE, 
                                           docopy, ESMF_TRUE, name,
@@ -206,7 +202,6 @@
 //      only.
 //
 //EOP
-// !REQUIREMENTS:  
 
     array->ESMC_LocalArrayDestruct();
 
@@ -230,7 +225,6 @@
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
-    ESMC_DataType dt,          // int, ESMC_R4, etc
     ESMC_TypeKind dk,          // short/long, etc
     ESMC_ArrayOrigin oflag,    // caller is fortran or C++?
     char *name,                // array name
@@ -250,7 +244,7 @@
      ESMC_LocalArray *a = new ESMC_LocalArray;
      int status;
 
-     status = a->ESMC_LocalArrayConstruct(rank, dt, dk, NULL, NULL, oflag,
+     status = a->ESMC_LocalArrayConstruct(rank, dk, NULL, NULL, oflag,
                             NULL, ESMC_ARRAY_NO_ALLOCATE, 
                             ESMC_DATA_NONE, ESMF_FALSE, name,
                             NULL, NULL, NULL);
@@ -276,7 +270,6 @@
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
-    ESMC_DataType dt,          // int, ESMC_R4, etc
     ESMC_TypeKind dk,          // short/long, etc
     int *icounts,              // counts along each dimension
     struct c_F90ptr *f90ptr,   // opaque type which fortran uses (dope v)
@@ -302,7 +295,6 @@
 //      we used.
 //
 //EOP
-// !REQUIREMENTS:  AAAn.n.n
 
 // TODO: Add code here which does:
 //
@@ -326,13 +318,13 @@
      int status;
 
      if (base == NULL) 
-         status = a->ESMC_LocalArrayConstruct(rank, dt, dk, icounts, base, 
+         status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
                                               ESMC_FROM_FORTRAN, f90ptr, 
                                               ESMC_ARRAY_DO_ALLOCATE,
                                               ESMC_DATA_NONE, ESMF_TRUE, name,
                                               lbounds, ubounds, offsets); 
      else
-         status = a->ESMC_LocalArrayConstruct(rank, dt, dk, icounts, base, 
+         status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
                                               ESMC_FROM_FORTRAN, f90ptr, 
                                               ESMC_ARRAY_NO_ALLOCATE, 
                                               docopy, ESMF_FALSE, name,
@@ -359,7 +351,6 @@
 //
 // !ARGUMENTS:
     int irank,                 // dimensionality
-    ESMC_DataType dt,          // int, ESMC_R4, etc
     ESMC_TypeKind dk,          // short/long, etc  (*2, *4, *8)
     int *icounts,              // number of items in each dim
     void *base,                // base memory address of data block
@@ -382,13 +373,12 @@
 //      {\tt ESMC\_LocalArrayConstruct}.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  
+
     int i, status;
     int totalcount;
     ESMC_LocalArray *aptr;
 
     rank = irank;
-    type = dt;
     kind = dk;
 
     base_addr = base;
@@ -418,7 +408,7 @@
  
     if (aflag == ESMC_ARRAY_DO_ALLOCATE) {
             aptr = this;
-            FTN(f_esmf_localarrayf90allocate)(&aptr, &rank, &type, &kind, 
+            FTN(f_esmf_localarrayf90allocate)(&aptr, &rank, &kind, 
                                               counts, lbound, ubound, &status);
     } 
 
@@ -457,7 +447,6 @@
 //      {\tt ESMC\_LocalArrayDestruct}.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  
 
     int rc = ESMF_FAILURE;
     ESMC_LocalArray *aptr = this;
@@ -471,7 +460,7 @@
     // then this code needs to be calling malloc/free or new/delete and
     // needs conditional code to pick the fortran or C++ mem mgt system.
 
-    FTN(f_esmf_localarrayf90deallocate)(&aptr, &rank, &type, &kind, &rc);
+    FTN(f_esmf_localarrayf90deallocate)(&aptr, &rank, &kind, &rc);
 
     return rc;
 
@@ -503,7 +492,7 @@
 //      {\tt ESMF\_LocalArray} object.
 //
 //EOP
-// !REQUIREMENTS:  
+
   // local vars
   int status;                 // local error status
   
@@ -528,7 +517,7 @@
   }
 
   // adjust the F90 dope vector to reflect the new bounds
-  FTN(f_esmf_localarrayadjust)(&larray, &rank, &type, &kind, counts, lbound,  
+  FTN(f_esmf_localarrayadjust)(&larray, &rank, &kind, counts, lbound,  
     ubound, &status);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
     return NULL;
@@ -580,7 +569,6 @@
 //     F90 side.  Other combinations will probably be useful.
 //
 //EOP
-// !REQUIREMENTS:  
 
     int i, rank = this->rank;
     int totalcount;
@@ -655,7 +643,6 @@
 //     F90 side.  Other combinations will probably be useful.
 //
 //EOP
-// !REQUIREMENTS:  
 
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
@@ -708,7 +695,6 @@
 //     Return a stored F90 pointer block.  The size may vary with rank.
 //
 //EOP
-// !REQUIREMENTS:  
 
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
@@ -746,7 +732,6 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  
 
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
@@ -880,7 +865,6 @@
     // now the stuff specific to LocalArray
     ip = (int *)(buffer + *boffset);
     *ip++ = rank;
-    *ip++ = (int)type;
     *ip++ = (int)kind;
     *ip++ = (int)origin;
     *ip++ = (int)needs_dealloc;
@@ -942,7 +926,6 @@
     // now the stuff specific to LocalArray
     ip = (int *)(buffer + *boffset);
     rank = *ip++;
-    type = (ESMC_DataType)*ip++;
     kind = (ESMC_TypeKind)*ip++;
     origin = (ESMC_ArrayOrigin)*ip++;
     needs_dealloc = (ESMC_Logical)*ip++;
@@ -961,7 +944,7 @@
     // from F90, so a dope vector is constructed which we can access
     // later from fortran.
     aptr = this;
-    FTN(f_esmf_localarrayf90allocate)(&aptr, &rank, &type, &kind,
+    FTN(f_esmf_localarrayf90allocate)(&aptr, &rank, &kind,
                                       counts, lbound, ubound, &rc);
 
 
@@ -1017,7 +1000,6 @@
     // now the stuff specific to LocalArray
     ip = (int *)(buffer + *boffset);
     *ip++ = rank;
-    *ip++ = (int)type;
     *ip++ = (int)kind;
     *ip++ = (int)origin;
     *ip++ = (int)needs_dealloc;
@@ -1065,7 +1047,6 @@
     // now the stuff specific to LocalArray
     ip = (int *)(buffer + *boffset);
     rank = *ip++;
-    type = (ESMC_DataType)*ip++;
     kind = (ESMC_TypeKind)*ip++;
     origin = (ESMC_ArrayOrigin)*ip++;
     needs_dealloc = (ESMC_Logical)*ip++;
@@ -1121,7 +1102,6 @@
 //      method. 
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 
 //
 //  code goes here
@@ -1152,8 +1132,8 @@
     printf(msgbuf);
     //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   
-    sprintf(msgbuf,"            rank = %d, type = %d, kind = %d, ", 
-                             this->rank, this->type, this->kind);
+    sprintf(msgbuf,"            rank = %d, kind = %d, ", 
+                             this->rank, this->kind);
     printf(msgbuf);
     //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     sprintf(msgbuf,"base_addr = 0x%08lx\n", (ESMC_POINTER)this->base_addr);
@@ -1182,8 +1162,7 @@
     
     // TODO: make this look at one of the option letters to see if user
     //   wants data printed.
-    switch (this->type) {
-      case ESMF_DATA_REAL:
+
         switch (this->kind) {
           case ESMC_TYPEKIND_R4:
             switch (this->rank) {
@@ -1433,10 +1412,6 @@
                 break;    
             }
             break;
-        }
-        break;
-      case ESMF_DATA_INTEGER:
-        switch (this->kind) {
           case ESMC_TYPEKIND_I4:
             switch (this->rank) {
               case 1:
@@ -1690,14 +1665,6 @@
             }
             break;
         }
-        break;
-      default:
-            sprintf(msgbuf,"no code to handle data type %d yet\n", this->type);
-            printf(msgbuf);
-            //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-
-      break;
-    }
 
     rc = ESMF_SUCCESS;
     return rc;
@@ -1754,7 +1721,6 @@
 //      Write the contents of an {\tt ESMC\_LocalArray} to disk.
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 
 //
 //  code goes here
@@ -1781,15 +1747,14 @@
     fprintf(ffile, "ArrayWrite: Array at address 0x%08lx:  ", 
                            (ESMC_POINTER)this);
     fprintf(ffile, "rank = %d, type = %d, kind = %d\n", 
-                             this->rank, this->type, this->kind);
+                             this->rank, this->kind);
     for (i=0; i<this->rank; i++) 
         fprintf(ffile, " dim[%d] = %d  ", i, this->counts[i]);
     fprintf(ffile, "\n");
     
     // TODO: make this look at one of the option letters to see how user
     //   wants data written (ascii, binary, multifile, singlefile).
-    switch (this->type) {
-      case ESMF_DATA_REAL:
+
         switch (this->kind) {
          case ESMC_TYPEKIND_R4:
             switch (this->rank) {
@@ -1877,10 +1842,6 @@
                 break;    
             }
             break;
-        }
-        break;
-      case ESMF_DATA_INTEGER:
-        switch (this->kind) {
           case ESMC_TYPEKIND_I4:
             switch (this->rank) {
               case 1:
@@ -1968,12 +1929,6 @@
             }
             break;
         }
-        break;
-      default:
-            fprintf(ffile, "no code to handle data type %d yet\n", this->type);
-
-      break;
-    }
 
     fclose(ffile);
 
@@ -2008,7 +1963,6 @@
 //      with default or passed-in values
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 
 //
 //  code goes here
@@ -2035,7 +1989,6 @@
 //      Calls standard ESMF deep or shallow methods for destruction
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 
 //
 //  code goes here

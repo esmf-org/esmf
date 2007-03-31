@@ -1,4 +1,4 @@
-! $Id: ESMF_RedistHelpers.F90,v 1.5 2007/02/19 23:44:45 rosalind Exp $
+! $Id: ESMF_RedistHelpers.F90,v 1.6 2007/03/31 02:24:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@ subroutine CreateFields(field1, field2, rc)
 
 
     ! Real*8, 2D data
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_TYPEKIND_R8, rc)
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
     if (rc.NE.ESMF_SUCCESS) return
     
     ! allow for a halo width of 3, let the field allocate the proper space

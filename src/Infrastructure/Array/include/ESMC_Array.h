@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.49 2007/02/23 00:25:00 theurich Exp $
+// $Id: ESMC_Array.h,v 1.50 2007/03/31 02:24:29 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -190,7 +190,6 @@ typedef struct{
 class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
   private:
     int rank;                 // rank of newArray
-    ESMC_DataType type;       // type of newArray (for F90)
     ESMC_TypeKind kind;       // kind of newArray (for F90)
     int **globalDataLBound;   // dataBox for this DE [de][dim]
     int **globalDataUBound;   // dataBox for this DE [de][dim]

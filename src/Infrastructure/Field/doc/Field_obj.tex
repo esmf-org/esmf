@@ -1,4 +1,4 @@
-% $Id: Field_obj.tex,v 1.5 2007/02/16 05:27:43 rosalind Exp $
+% $Id: Field_obj.tex,v 1.6 2007/03/31 02:24:30 cdeluca Exp $
 
 %\section{Object Model}
 
@@ -119,15 +119,6 @@ a single element (e.g. a 3-vector) are organized;
 interleaved (x1,y1,z1), (x2,y2,z2) or 
 block (x1,x2,x3...) (y1,y2,y3,...) ...
 DataMap objects use this.
-
-\subsubsection{DataType}
-
-The datatype is 
-a derived type in fortran and an enum in C++.
-It defines the type of the data items, e.g. integer,
-real, logical.  Array and ArraySpec objects use this.
-Data TypeKind may either be part of the Type or may be 
-a separate derived type.
 
 %\subsection{Objects with direct relationships}
 

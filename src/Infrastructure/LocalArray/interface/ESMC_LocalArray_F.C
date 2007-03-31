@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.19 2007/02/16 05:27:46 rosalind Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.20 2007/03/31 02:24:33 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,10 +44,10 @@ extern "C" {
 char *name = NULL;
 
      void FTN(c_esmc_localarraycreateall)(ESMC_LocalArray **ptr, int *rank, 
-                                     ESMC_DataType *dt, ESMC_TypeKind *dk,
+                                     ESMC_TypeKind *dk,
                                      int *counts, int *lbounds, int *ubounds,
                                      int *status)  {
-         (*ptr) = ESMC_LocalArrayCreate_F(*rank, *dt, *dk, counts, 
+         (*ptr) = ESMC_LocalArrayCreate_F(*rank, *dk, counts, 
                                     NULL, NULL, ESMC_DATA_NONE, name,
                                     lbounds, ubounds, NULL, status);
 
@@ -55,10 +55,10 @@ char *name = NULL;
      }
 
      void FTN(c_esmc_localarraycreatenodata)(ESMC_LocalArray **ptr, int *rank, 
-                                        ESMC_DataType *dt, ESMC_TypeKind *dk, 
+                                        ESMC_TypeKind *dk, 
                                         ESMC_ArrayOrigin *oflag, int *status) {
              
-             (*ptr) = ESMC_LocalArrayCreateNoData(*rank, *dt, *dk, *oflag, 
+             (*ptr) = ESMC_LocalArrayCreateNoData(*rank, *dk, *oflag, 
                                                   name, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
@@ -149,16 +149,6 @@ char *name = NULL;
               return;
           }
          *rank = (*ptr)->ESMC_LocalArrayGetRank();
-         *status = ESMF_SUCCESS;
-     }
-
-     void FTN(c_esmc_localarraygettype)(ESMC_LocalArray **ptr, int *type, int *status) {
-      
-          if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
-              return;
-          }
-         *type = (*ptr)->ESMC_LocalArrayGetType();
          *status = ESMF_SUCCESS;
      }
 

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_InternArrayCreateMacros.h,v 1.6 2007/02/19 23:44:44 rosalind Exp $
+! $Id: ESMF_InternArrayCreateMacros.h,v 1.7 2007/03/31 02:24:33 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@
         endif @\
  @\
         ! Call create routine @\
-        call c_ESMC_IArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_TYPEKIND_##mtypekind, & @\
+        call c_ESMC_IArrayCreateNoData(array, mrank, ESMF_TYPEKIND_##mtypekind, & @\
                                           ESMF_FROM_FORTRAN, status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
@@ -276,7 +276,7 @@
         endif @\
  @\
         ! Call create routine @\
-        call c_ESMC_IArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_TYPEKIND_##mtypekind, & @\
+        call c_ESMC_IArrayCreateNoData(array, mrank, ESMF_TYPEKIND_##mtypekind, & @\
                                       ESMF_FROM_FORTRAN, status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\

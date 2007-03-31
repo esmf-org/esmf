@@ -22,9 +22,9 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LocalAlloc_C.F90,v 1.9 2007/02/16 05:27:46 rosalind Exp $'
+!      '$Id: ESMF_LocalAlloc_C.F90,v 1.10 2007/03/31 02:24:33 cdeluca Exp $'
 !==============================================================================
-subroutine f_esmf_localarrayf90allocate(array, rank, type, kind, counts, &
+subroutine f_esmf_localarrayf90allocate(array, rank, kind, counts, &
   lbounds, ubounds, rc)
   use ESMF_UtilTypesMod     ! ESMF base class
   use ESMF_BaseMod          ! ESMF base class
@@ -32,7 +32,6 @@ subroutine f_esmf_localarrayf90allocate(array, rank, type, kind, counts, &
 
   type(ESMF_LocalArray) :: array
   integer :: rank
-  type(ESMF_DataType) :: type
   type(ESMF_TypeKind) :: kind
   integer :: counts(rank)
   integer :: lbounds(rank)
@@ -40,27 +39,26 @@ subroutine f_esmf_localarrayf90allocate(array, rank, type, kind, counts, &
   integer, intent(out), optional :: rc     
 
   ! Beware - these args are not in the same order
-  call ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, &
+  call ESMF_LocalArrConstrF90Ptr(array, counts, rank, kind, &
     lbounds, ubounds, rc=rc)
 end subroutine f_esmf_localarrayf90allocate
 
 
-subroutine f_esmf_localarrayf90deallocate(array, rank, type, kind, rc)
+subroutine f_esmf_localarrayf90deallocate(array, rank, kind, rc)
   use ESMF_UtilTypesMod     ! ESMF base class
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LocalArrayMod
 
   type(ESMF_LocalArray) :: array
   integer :: rank
-  type(ESMF_DataType) :: type
   type(ESMF_TypeKind) :: kind
   integer, intent(out), optional :: rc     
 
-  call ESMF_LocalArrayF90Deallocate(array, rank, type, kind, rc=rc)
+  call ESMF_LocalArrayF90Deallocate(array, rank, kind, rc=rc)
 end subroutine f_esmf_localarrayf90deallocate
 
 
-subroutine f_esmf_localarrayadjust(array, rank, type, kind, counts, &
+subroutine f_esmf_localarrayadjust(array, rank, kind, counts, &
   lbounds, ubounds, rc)
   use ESMF_UtilTypesMod    ! ESMF base class
   use ESMF_BaseMod    ! ESMF base class
@@ -68,13 +66,12 @@ subroutine f_esmf_localarrayadjust(array, rank, type, kind, counts, &
   
   type(ESMF_LocalArray) :: array
   integer :: rank
-  type(ESMF_DataType) :: type
   type(ESMF_TypeKind) :: kind
   integer :: counts(rank)
   integer :: lbounds(rank)
   integer :: ubounds(rank)
   integer, intent(out) :: rc     
 
-  call ESMF_LocalArrayAdjust(array, counts, rank, type, kind, &
+  call ESMF_LocalArrayAdjust(array, counts, rank, kind, &
     lbounds, ubounds,rc=rc)
 end subroutine f_esmf_localarrayadjust

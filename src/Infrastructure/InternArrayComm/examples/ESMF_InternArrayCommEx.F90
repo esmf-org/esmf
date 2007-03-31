@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayCommEx.F90,v 1.3 2007/02/19 23:44:44 rosalind Exp $
+! $Id: ESMF_InternArrayCommEx.F90,v 1.4 2007/03/31 02:24:33 cdeluca Exp $
 !
 ! Example code which shows how to use Array Communication routines
 
@@ -116,7 +116,7 @@
 
     !------------------------------------------------------------------------
     ! Array spec
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_TYPEKIND_R8, rc) 
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc) 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! Array data
@@ -257,7 +257,7 @@
 !   !  Create based on an array specification.
 
     arank = 2
-!   !   arrayspec = ESMF_ArraySpecCreate(arank, ESMF_DATA_REAL, ESMF_TYPEKIND_R4, &
+!   !   arrayspec = ESMF_ArraySpecCreate(arank, ESMF_TYPEKIND_R4, &
     !                                         nx, ny, rc)
 
 !   !   array2 = ESMF_ArrayCreate(arrayspec, ESMF_NO_DATA, rc)

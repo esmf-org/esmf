@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray_F.C,v 1.4 2007/02/16 05:27:45 rosalind Exp $
+// $Id: ESMC_InternArray_F.C,v 1.5 2007/03/31 02:24:32 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -46,10 +46,10 @@
 extern "C" {
 
      void FTN(c_esmc_iarraycreateall)(ESMC_InternArray **ptr, int *rank, 
-                                     ESMC_DataType *dt, ESMC_TypeKind *dk,
+                                     ESMC_TypeKind *dk,
                                      int *counts, int *lbounds, int *ubounds,
                                      int *status)  {
-         (*ptr) = ESMC_InternArrayCreate_F(*rank, *dt, *dk, counts, 
+         (*ptr) = ESMC_InternArrayCreate_F(*rank, *dk, counts, 
                                     NULL, NULL, ESMC_DATA_NONE, 
                                     lbounds, ubounds, status);
 
@@ -57,10 +57,10 @@ extern "C" {
      }
 
      void FTN(c_esmc_iarraycreatenodata)(ESMC_InternArray **ptr, int *rank, 
-                                        ESMC_DataType *dt, ESMC_TypeKind *dk, 
+                                        ESMC_TypeKind *dk, 
                                         ESMC_ArrayOrigin *oflag, int *status) {
              
-             (*ptr) = ESMC_InternArrayCreateNoData(*rank, *dt, *dk, *oflag, status);
+             (*ptr) = ESMC_InternArrayCreateNoData(*rank, *dk, *oflag, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
@@ -149,17 +149,6 @@ extern "C" {
           }
 
          *rank = (*ptr)->ESMC_ArrayGetRank();
-         *status = ESMF_SUCCESS;
-     }
-
-     void FTN(c_esmc_iarraygettype)(ESMC_InternArray **ptr, int *type, int *status) {
-      
-          if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
-              return;
-          }
-
-         *type = (*ptr)->ESMC_ArrayGetType();
          *status = ESMF_SUCCESS;
      }
 

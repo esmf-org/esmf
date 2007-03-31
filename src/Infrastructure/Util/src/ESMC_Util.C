@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.18 2007/02/20 02:36:49 rosalind Exp $
+// $Id: ESMC_Util.C,v 1.19 2007/03/31 02:24:37 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.18 2007/02/20 02:36:49 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.19 2007/03/31 02:24:37 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -470,7 +470,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_TypeKindSize"
 //BOPI
-// !IROUTINE:  ESMC_TypeKindSize - Return number of bytes in a DataTypeKind
+// !IROUTINE:  ESMC_TypeKindSize - Return number of bytes in a TypeKind
 //
 // !INTERFACE:
     int ESMC_TypeKindSize(
@@ -493,7 +493,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
       case ESMF_C16: return 16;
       default:
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                                "Unknown DataTypeKind", NULL);
+                                "Unknown TypeKind", NULL);
        return -1;
     }
 
@@ -534,36 +534,6 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DataTypeString"
-//BOPI
-// !IROUTINE:  ESMC_DataTypeString - Return fixed char string for printing
-//
-// !INTERFACE:
-    const char *ESMC_DataTypeString(
-//
-// !RETURN VALUE:
-//  const char * to string name of value
-// 
-// !ARGUMENTS:
-    ESMC_DataType dt) {       // in - a datatype value
-//EOPI
-
-    switch (dt) {
-      case ESMF_DATA_INTEGER:      return  "Integer";
-      case ESMF_DATA_REAL:         return  "Real";
-      case ESMF_DATA_LOGICAL:      return  "Logical";
-      case ESMF_DATA_CHARACTER:    return  "Character";
-      default:
-         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                                     "Unknown DataType", NULL);
-         return NULL;
-    }
-
-    /* not reached */
-}
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_TypeKindString"
 //BOPI
 // !IROUTINE:  ESMC_TypeKindString - Return fixed char string for printing
@@ -589,7 +559,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
       case ESMF_C16:     return  "Complex*16";
       default:
          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                                     "Unknown DataTypeKind", NULL);
+                                     "Unknown TypeKind", NULL);
          return NULL;
     }
 
@@ -617,7 +587,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
       case ESMF_FALSE:     return  "False";
       default:
          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                                     "Unknown DataTypeKind", NULL);
+                                     "Unknown TypeKind", NULL);
          return NULL;
     }
 

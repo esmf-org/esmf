@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.23 2007/03/20 06:27:24 theurich Exp $
+// $Id: ESMC_Util.h,v 1.24 2007/03/31 02:24:37 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -79,19 +79,6 @@ enum ESMC_Direction { ESMF_MODE_FORWARD=1,
 // indexflag type
 enum ESMC_IndexFlag { ESMF_INDEX_DELOCAL=0,
                       ESMF_INDEX_GLOBAL};
-
-// ESMF data types and kinds.
-// this is demented, frankly.  There should be a "TypeKind" single
-// type, which is I4, I8, R4, R8, etc.  there is no advantage to 
-// having types and kinds separate - in C++ it makes no sense at all.
-// an int is different from a long is different from a float is 
-// different from a double.  even in fortran it isn't quite so clean
-// at the language level.  maybe someday we will get time to redesign
-// and fix this.
-enum ESMC_DataType { ESMF_DATA_INTEGER=1,
-                     ESMF_DATA_REAL,
-                     ESMF_DATA_LOGICAL,
-                     ESMF_DATA_CHARACTER };
 
 enum ESMC_TypeKind { ESMC_TYPEKIND_I1=1,
                      ESMC_TYPEKIND_I2,
@@ -243,11 +230,10 @@ void  FTN(esmf_ctof90string)(char *src, char *dst, int *rc,
                              /* hidden */ int *slen, int *dlen);
 }
 
-// return byte counts for DataTypeKinds
+// return byte counts for TypeKinds
 int ESMC_TypeKindSize(ESMC_TypeKind dk);
 // return a static string name for various enums
 const char *ESMC_StatusString(ESMC_Status stat);
-const char *ESMC_DataTypeString(ESMC_DataType dt);
 const char *ESMC_TypeKindString(ESMC_TypeKind dk);
 const char *ESMC_LogicalString(ESMC_Logical tf);
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayGatherUTest.F90,v 1.4 2007/02/19 23:44:44 rosalind Exp $
+! $Id: ESMF_InternArrayGatherUTest.F90,v 1.5 2007/03/31 02:24:33 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayGatherUTest.F90,v 1.4 2007/02/19 23:44:44 rosalind Exp $'
+      '$Id: ESMF_InternArrayGatherUTest.F90,v 1.5 2007/03/31 02:24:33 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -112,8 +112,8 @@
    !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Array Spec Set Field Test"
-    call ESMF_ArraySpecSet(arrayspec, rank=1, type=ESMF_DATA_INTEGER, &
-				kind=ESMF_TYPEKIND_I4, rc=rc)
+    call ESMF_ArraySpecSet(arrayspec, rank=1, &
+                             kind=ESMF_TYPEKIND_I4, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 

@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.9 2007/02/19 23:44:48 rosalind Exp $
+! $Id: FlowArraysMod.F90,v 1.10 2007/03/31 02:26:03 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -110,7 +110,7 @@
 !     ArraySpec with rank 2 for a two-dimensional array, type ESMF\_DATA\_REAL,
 !     and kind ESMF\_KIND\_R4:
 !\begin{verbatim}
-      call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
+      call ESMF_ArraySpecSet(arrayspec, rank=2, &
                               kind=ESMF_TYPEKIND_R4)
 !\end{verbatim}
 !     Next, create a Field named "SIE" using the ArraySpec with a relative

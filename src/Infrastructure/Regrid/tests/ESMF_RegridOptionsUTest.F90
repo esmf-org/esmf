@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridOptionsUTest.F90,v 1.13 2007/02/19 23:44:44 rosalind Exp $
+! $Id: ESMF_RegridOptionsUTest.F90,v 1.14 2007/03/31 02:24:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_RegridOptionsUTest.F90,v 1.13 2007/02/19 23:44:44 rosalind Exp $'
+      '$Id: ESMF_RegridOptionsUTest.F90,v 1.14 2007/03/31 02:24:37 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -395,7 +395,7 @@ contains
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Set up a 3D real array
-      call ESMF_ArraySpecSet(arrayspec, rank=3, type=ESMF_DATA_REAL, &
+      call ESMF_ArraySpecSet(arrayspec, rank=3, &
                              kind=ESMF_TYPEKIND_R8)
       if (status .ne. ESMF_SUCCESS) goto 10
 
@@ -515,7 +515,7 @@ contains
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Set up a 3D real array
-      call ESMF_ArraySpecSet(arrayspec, rank=3, type=ESMF_DATA_REAL, &
+      call ESMF_ArraySpecSet(arrayspec, rank=3, &
                               kind=ESMF_TYPEKIND_R8)
 
       ! Create a datamap

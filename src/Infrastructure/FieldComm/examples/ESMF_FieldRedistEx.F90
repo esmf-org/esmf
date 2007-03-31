@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.10 2007/02/19 23:44:42 rosalind Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.11 2007/03/31 02:24:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -153,10 +153,10 @@
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
      ! Set up a 1D (for the vector Field) and a 2D real array
-     call ESMF_ArraySpecSet(arrayspec2D, rank=2, type=ESMF_DATA_REAL, &
+     call ESMF_ArraySpecSet(arrayspec2D, rank=2, &
                             kind=ESMF_TYPEKIND_R8, rc=rc)
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-     call ESMF_ArraySpecSet(arrayspec1D, rank=1, type=ESMF_DATA_REAL, &
+     call ESMF_ArraySpecSet(arrayspec1D, rank=1, &
                             kind=ESMF_TYPEKIND_R8, rc=rc)
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

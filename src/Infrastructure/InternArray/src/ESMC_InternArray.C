@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray.C,v 1.5 2007/02/20 02:36:46 rosalind Exp $
+// $Id: ESMC_InternArray.C,v 1.6 2007/03/31 02:24:33 cdeluca Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArray.C,v 1.5 2007/02/20 02:36:46 rosalind Exp $";
+            "$Id: ESMC_InternArray.C,v 1.6 2007/03/31 02:24:33 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -64,7 +64,6 @@
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
-    ESMC_DataType dt,          // int, ESMC_R4, etc
     ESMC_TypeKind dk,          // short/long, etc
     int *icounts,              // number of items in each dim
     void *base,                // if non-null, this is already allocated memory
@@ -104,7 +103,7 @@
      int status;
 
 
-     status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
+     status = a->ESMC_ArrayConstruct(rank, dk, icounts, base, 
                                      ESMC_FROM_CPLUSPLUS,
                                      NULL, ESMC_ARRAY_DO_ALLOCATE, 
                                      docopy, ESMF_TRUE, 
@@ -131,7 +130,6 @@
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
-    ESMC_DataType dt,          // int, ESMC_R4, etc
     ESMC_TypeKind dk,          // short/long, etc
     int *icounts,              // number of items in each dim
     void *base,                // if non-null, this is already allocated memory
@@ -149,7 +147,7 @@
      int status;
 
 
-     status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
+     status = a->ESMC_ArrayConstruct(rank, dk, icounts, base, 
                                      ESMC_FROM_CPLUSPLUS,
                                      NULL, ESMC_ARRAY_DO_ALLOCATE, 
                                      docopy, ESMF_TRUE, 
@@ -206,7 +204,6 @@
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
-    ESMC_DataType dt,          // int, ESMC_R4, etc
     ESMC_TypeKind dk,          // short/long, etc
     ESMC_ArrayOrigin oflag,    // caller is fortran or C++?
     int *rc) {                 // return code
@@ -224,7 +221,7 @@
      ESMC_InternArray *a = new ESMC_InternArray;
      int status;
 
-     status = a->ESMC_ArrayConstruct(rank, dt, dk, NULL, NULL, oflag,
+     status = a->ESMC_ArrayConstruct(rank, dk, NULL, NULL, oflag,
                             NULL, ESMC_ARRAY_NO_ALLOCATE, 
                             ESMC_DATA_NONE, ESMF_FALSE, 
                             NULL, NULL, NULL, 0);
@@ -250,7 +247,6 @@
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
-    ESMC_DataType dt,          // int, ESMC_R4, etc
     ESMC_TypeKind dk,          // short/long, etc
     int *icounts,              // counts along each dimension
     struct c_F90ptr *f90ptr,   // opaque type which fortran uses (dope v)
@@ -276,7 +272,6 @@
 //      we used.
 //
 //EOP
-// !REQUIREMENTS:  AAAn.n.n
 
 // TODO: Add code here which does:
 //
@@ -300,14 +295,14 @@
      int status;
 
      if (base == NULL) 
-         status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
+         status = a->ESMC_ArrayConstruct(rank, dk, icounts, base, 
                                      ESMC_FROM_FORTRAN, f90ptr, 
                                      ESMC_ARRAY_DO_ALLOCATE,
                                      ESMC_DATA_NONE, ESMF_TRUE, 
                                      lbounds, ubounds,  
                                      offsets, halo_widths); 
      else
-         status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
+         status = a->ESMC_ArrayConstruct(rank, dk, icounts, base, 
                                      ESMC_FROM_FORTRAN, f90ptr, 
                                      ESMC_ARRAY_NO_ALLOCATE, 
                                      docopy, ESMF_FALSE, 
@@ -335,7 +330,6 @@
 //
 // !ARGUMENTS:
     int irank,                 // dimensionality
-    ESMC_DataType dt,          // int, ESMC_R4, etc
     ESMC_TypeKind dk,          // short/long, etc  (*2, *4, *8)
     int *icounts,              // number of items in each dim
     void *base,                // base memory address of data block
@@ -365,7 +359,6 @@
     int C, twidth;
 
     rank = irank;
-    type = dt;
     kind = dk;
 
     base_addr = base;
@@ -461,7 +454,7 @@
  
     if (aflag == ESMC_ARRAY_DO_ALLOCATE) {
             aptr = this;
-            FTN(f_esmf_arrayf90allocate)(&aptr, &rank, &type, &kind, 
+            FTN(f_esmf_arrayf90allocate)(&aptr, &rank, &kind, 
                                          counts, lbound, ubound,   
                                          &halo_width, &status);
     } 
@@ -516,7 +509,7 @@
     // then this code needs to be calling malloc/free or new/delete and
     // needs conditional code to pick the fortran or C++ mem mgt system.
 
-    FTN(f_esmf_arrayf90deallocate)(&aptr, &rank, &type, &kind, &rc);
+    FTN(f_esmf_arrayf90deallocate)(&aptr, &rank, &kind, &rc);
 
     return rc;
 
@@ -1059,7 +1052,6 @@
 //      type of information and level of detail.  {\tt ESMC\_Base} class method.
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 
 //
 //  code goes here
@@ -1090,8 +1082,8 @@
     printf(msgbuf);
       // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
 
-    sprintf(msgbuf,"            rank = %d, type = %d, kind = %d, ", 
-                             this->rank, this->type, this->kind);
+    sprintf(msgbuf,"            rank = %d, kind = %d, ", 
+                             this->rank, this->kind);
     printf(msgbuf);
       // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     sprintf(msgbuf,"base_addr = 0x%08lx\n", (ESMC_POINTER)this->base_addr);
@@ -1110,8 +1102,7 @@
     
     // TODO: make this look at one of the option letters to see if user
     //   wants data printed.
-    switch (this->type) {
-      case ESMF_DATA_REAL:
+
         switch (this->kind) {
           case ESMC_TYPEKIND_R4:
             switch (this->rank) {
@@ -1361,10 +1352,6 @@
                 break;    
             }
             break;
-        }
-        break;
-      case ESMF_DATA_INTEGER:
-        switch (this->kind) {
           case ESMC_TYPEKIND_I4:
             switch (this->rank) {
               case 1:
@@ -1618,14 +1605,6 @@
             }
             break;
         }
-        break;
-      default:
-        sprintf(msgbuf,"no code to handle data type %d yet\n", this->type);
-        printf(msgbuf);
-          // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-
-        break;
-    }
 
     rc = ESMF_SUCCESS;
     return rc;
@@ -1678,16 +1657,15 @@
 
     fprintf(ffile, "ArrayWrite: InternArray at address 0x%08lx:  ", 
                            (ESMC_POINTER)this);
-    fprintf(ffile, "rank = %d, type = %d, kind = %d\n", 
-                             this->rank, this->type, this->kind);
+    fprintf(ffile, "rank = %d, kind = %d\n", 
+                             this->rank, this->kind);
     for (i=0; i<this->rank; i++) 
         fprintf(ffile, " dim[%d] = %d  ", i, this->counts[i]);
     fprintf(ffile, "\n");
     
     // TODO: make this look at one of the option letters to see how user
     //   wants data written (ascii, binary, multifile, singlefile).
-    switch (this->type) {
-      case ESMF_DATA_REAL:
+
         switch (this->kind) {
           case ESMC_TYPEKIND_R4:
             switch (this->rank) {
@@ -1815,10 +1793,6 @@
                 break;    
             }
             break;
-          }
-          break;
-      case ESMF_DATA_INTEGER:
-        switch (this->kind) {
           case ESMC_TYPEKIND_I4:
             switch (this->rank) {
               case 1:
@@ -1946,12 +1920,6 @@
             }
             break;
         }
-        break;
-      default:
-            fprintf(ffile, "no code to handle data type %d yet\n", this->type);
-
-      break;
-    }
 
     fclose(ffile);
 

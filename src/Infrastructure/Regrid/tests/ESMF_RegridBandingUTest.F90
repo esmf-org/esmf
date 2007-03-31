@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBandingUTest.F90,v 1.5 2007/02/19 23:44:44 rosalind Exp $
+! $Id: ESMF_RegridBandingUTest.F90,v 1.6 2007/03/31 02:24:36 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridBandingUTest.F90,v 1.5 2007/02/19 23:44:44 rosalind Exp $'
+      '$Id: ESMF_RegridBandingUTest.F90,v 1.6 2007/03/31 02:24:36 cdeluca Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -136,7 +136,7 @@
     !Test specifications setting for the field array
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Setting array specifications"
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_TYPEKIND_R8, rc)
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    !===========================

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.27 2007/02/19 23:44:47 rosalind Exp $
+! $Id: user_model1.F90,v 1.28 2007/03/31 02:26:02 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -146,7 +146,7 @@
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set up a 3D real array
-        call ESMF_ArraySpecSet(arrayspec, rank=3, type=ESMF_DATA_REAL, &
+        call ESMF_ArraySpecSet(arrayspec, rank=3, &
                                 kind=ESMF_TYPEKIND_R8)
         if (status .ne. ESMF_SUCCESS) goto 10
 

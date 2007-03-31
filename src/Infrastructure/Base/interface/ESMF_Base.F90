@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.127 2007/02/13 20:43:45 theurich Exp $
+! $Id: ESMF_Base.F90,v 1.128 2007/03/31 02:24:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -148,7 +148,7 @@ module ESMF_BaseMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.127 2007/02/13 20:43:45 theurich Exp $'
+               '$Id: ESMF_Base.F90,v 1.128 2007/03/31 02:24:30 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -423,13 +423,12 @@ module ESMF_BaseMod
 ! !IROUTINE:  ESMF_AttributeGetbyNumber - get an object attribute by number
 !
 ! !INTERFACE:
-  subroutine ESMF_AttributeGetbyNumber(anytype, number, name, type, value, rc)
+  subroutine ESMF_AttributeGetbyNumber(anytype, number, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype
       integer, intent(in) :: number
       character (len = *), intent(in) :: name
-      type(ESMF_DataType), intent(out) :: type
       type(ESMF_DataValue), intent(out) :: value
       integer, intent(out), optional :: rc
 
@@ -447,9 +446,7 @@ module ESMF_BaseMod
 !       The attribute number.
 !     \item[name]
 !       The attribute name.
-!     \item[type]
-!       The attribute datatype.
-!     \item[type]
+!     \item[value]
 !       The attribute value.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -464,7 +461,7 @@ module ESMF_BaseMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, anytype, rc)
     
-    !call c_ESMC_AttributeGetbyNumber(base , number, name, value, status) 
+    !call c_ESMC_AttributeGetbyNumber(base, number, name, value, status) 
     if (present(rc)) rc = status
 
   end subroutine ESMF_AttributeGetbyNumber
@@ -554,12 +551,11 @@ module ESMF_BaseMod
 ! !IROUTINE:  ESMF_AttributeGetList - get an objects attributes
 !
 ! !INTERFACE:
-  subroutine ESMF_AttributeGetList(anytype, namelist, typelist, valuelist, rc)
+  subroutine ESMF_AttributeGetList(anytype, namelist, valuelist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype
       character (len = *), dimension (:), intent(in) :: namelist
-      type(ESMF_DataType), dimension (:), intent(out) :: typelist
       type(ESMF_DataValue), dimension (:), intent(out) :: valuelist
       integer, intent(out), optional :: rc
 
@@ -574,8 +570,6 @@ module ESMF_BaseMod
 !       Any ESMF type.
 !     \item[namelist]
 !       The list of attribute names.
-!     \item[typelist]
-!       The list of attribute types.
 !     \item[valuelist]
 !       The list of attribute values.
 !     \item[{[rc]}]
@@ -612,7 +606,7 @@ module ESMF_BaseMod
 !       A list of any ESMF types.
 !     \item[name]
 !       The attribute name.
-!     \item[typelist]
+!     \item[value]
 !       The attribute value.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -630,12 +624,11 @@ module ESMF_BaseMod
 ! !IROUTINE:  ESMF_AttributeGetObjectList - get an attribute from multiple ESMF objects 
 !
 ! !INTERFACE:
-  subroutine ESMF_AttributeGetObjectList(anytypelist, name, typelist, valuelist, rc)
+  subroutine ESMF_AttributeGetObjectList(anytypelist, name, valuelist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), dimension (:), intent(in) :: anytypelist
       character (len = *), intent(in) :: name
-      type(ESMF_DataType), dimension (:), intent(out) :: typelist
       type(ESMF_DataValue), dimension (:), intent(out) :: valuelist
       integer, intent(out), optional :: rc
 
@@ -649,8 +642,6 @@ module ESMF_BaseMod
 !       The list of any ESMF types.
 !     \item[name]
 !       The attribute name.
-!     \item[typelist]
-!       The list of all possible data types.
 !     \item[valuelist]
 !       The list of attribute values.
 !     \item[{[rc]}] 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.68 2007/03/28 05:05:04 theurich Exp $
+// $Id: ESMC_Array.C,v 1.69 2007/03/31 02:24:29 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMC_Array.C,v 1.68 2007/03/28 05:05:04 theurich Exp $";
+  static const char *const version = "$Id: ESMC_Array.C,v 1.69 2007/03/31 02:24:29 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -690,7 +690,6 @@ ESMC_Array *ESMC_ArrayCreate(
     array = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  ESMC_DataType type = arrayspec->ESMC_ArraySpecGetType();
   ESMC_TypeKind typekind = arrayspec->ESMC_ArraySpecGetTypeKind();
   int rank = arrayspec->ESMC_ArraySpecGetRank();
   // distgrid -> delayout, dimCount
@@ -1079,7 +1078,7 @@ ESMC_Array *ESMC_ArrayCreate(
       }
     }
     // allocate LocalArray object with specific lbounds and ubounds
-    larrayList[i] = ESMC_LocalArrayCreate(rank, type, typekind, temp_counts,
+    larrayList[i] = ESMC_LocalArrayCreate(rank, typekind, temp_counts,
       temp_lbounds, temp_ubounds);
     // TODO: need error handling for the above call
   }
@@ -3392,12 +3391,9 @@ int ESMC_newArray::ESMC_newArrayConstruct(
   
   // now the LocalArrays for all the DEs on this PET must be created
   if (localPET == rootPET){
-    type = larray->ESMC_LocalArrayGetType();
-    vm->vmk_broadcast(&type, sizeof(ESMC_DataType), rootPET);
     kind = larray->ESMC_LocalArrayGetTypeKind();
     vm->vmk_broadcast(&kind, sizeof(ESMC_TypeKind), rootPET);
   }else{
-    vm->vmk_broadcast(&type, sizeof(ESMC_DataType), rootPET);
     vm->vmk_broadcast(&kind, sizeof(ESMC_TypeKind), rootPET);
   }
   if (localTid == 0){
@@ -3437,7 +3433,7 @@ int ESMC_newArray::ESMC_newArrayConstruct(
       == ESMC_DELAYOUT_SERVICE_ACCEPT){
       for (int j=0; j<rank; j++)
         temp_counts[j] = localFullUBound[de][j] - localFullLBound[de][j] + 1;
-      localArrays[i] = ESMC_LocalArrayCreate(rank, type, kind, temp_counts);
+      localArrays[i] = ESMC_LocalArrayCreate(rank, kind, temp_counts);
       commhArray[i].commhandleCount = 0;  // reset
       commhArray[i].pthidCount = 0;       // reset
       commhArray[i].buffer = NULL;        // reset
@@ -3540,12 +3536,6 @@ int ESMC_newArray::ESMC_newArrayScatter(
     if (laRank != rank){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
         "- ranks don't match", &localrc);
-      return localrc;
-    }
-    ESMC_DataType laType = larray->ESMC_LocalArrayGetType();
-    if (laType != type){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
-        "- types don't match", &localrc);
       return localrc;
     }
     ESMC_TypeKind laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
@@ -3832,12 +3822,6 @@ int ESMC_newArray::ESMC_newArrayScatter(
       "- ranks don't match", &localrc);
     return localrc;
   }
-  ESMC_DataType laType = larray->ESMC_LocalArrayGetType();
-  if (laType != type){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
-      "- types don't match", &localrc);
-    return localrc;
-  }
   ESMC_TypeKind laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
   if (laTypeKind != kind){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
@@ -4007,12 +3991,6 @@ int ESMC_newArray::ESMC_newArrayScatter(
     if (laRank != rank){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
         "- ranks don't match", &localrc);
-      return localrc;
-    }
-    ESMC_DataType laType = larray->ESMC_LocalArrayGetType();
-    if (laType != type){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
-        "- types don't match", &localrc);
       return localrc;
     }
     ESMC_TypeKind laTypeKind = larray->ESMC_LocalArrayGetTypeKind();

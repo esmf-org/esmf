@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArrayComm.C,v 1.4 2007/02/16 05:27:46 rosalind Exp $
+// $Id: ESMC_InternArrayComm.C,v 1.5 2007/03/31 02:24:33 cdeluca Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArrayComm.C,v 1.4 2007/02/16 05:27:46 rosalind Exp $";
+            "$Id: ESMC_InternArrayComm.C,v 1.5 2007/03/31 02:24:33 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -382,7 +382,7 @@ static int ESMC_newDELayoutGatherArray(
     //printf("arraygather: %d, %d\n", thisde, deid);
     if (thisde == deid) {
       //printf("arraygather: I am root\n");
-        gathered = ESMC_InternArrayCreate(this->rank, this->type, this->kind, counts);
+        gathered = ESMC_InternArrayCreate(this->rank, this->kind, counts);
 
         // call something which will do a receive
         ESMC_newDELayoutGatherArray(delayout, deid, this->base_addr,
@@ -466,11 +466,11 @@ static int ESMC_newDELayoutGatherArray(
                                   NULL, NULL, NULL, 0);
 
     // switch based on datatype  TODO: this might be a good place to use templates
-    switch (this->type) {
-      case ESMF_DATA_REAL:
+    switch (this->kind) {
+       case ESMF_TYPEKIND_R4:
         // create array with global data buffer
         if (thisde == deid) {
-          scattered = ESMC_InternArrayCreate(this->rank, this->type, this->kind, counts);
+          scattered = ESMC_InternArrayCreate(this->rank, this->kind, counts);
           // allocate global array from this size
           fp = (ESMC_R4 *)(scattered->base_addr);
 
@@ -486,12 +486,10 @@ static int ESMC_newDELayoutGatherArray(
                                                   ai_comp, ai_total, fp);
         } 
 
-      break;
-
-      case ESMF_DATA_INTEGER:
+      case ESMF_TYPEKIND_I4:
         // create array with global data
         if (thisde == deid) {
-          scattered = ESMC_InternArrayCreate(this->rank, this->type, this->kind, counts);
+          scattered = ESMC_InternArrayCreate(this->rank, this->kind, counts);
           // allocate global array from this size
           ip = (int *)(scattered->base_addr);
 
@@ -510,7 +508,7 @@ static int ESMC_newDELayoutGatherArray(
       default:
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
                                           "unsupported data type", &rc);
-        //printf("no code to handle data type %d yet\n", this->type);
+        //printf("no code to handle TypeKind %d yet\n", this->kind);
         return (rc);
     }
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.43 2007/03/20 06:27:42 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.44 2007/03/31 02:24:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -124,27 +124,6 @@
 
 !------------------------------------------------------------------------------
 !
-!    ! Data type - does not specify size (*4, *8, short, long) since KIND
-!    ! takes care of that.
-
-!     ! WARNING: 
-!     !  constants MUST match corresponding values in ../include/ESMC_Util.h
-
-      type ESMF_DataType
-      sequence
-      ! TODO: can this be made private now?
-      !!private
-          integer :: dtype
-      end type
-
-      type(ESMF_DataType), parameter :: ESMF_DATA_INTEGER = ESMF_DataType(1), &
-                                        ESMF_DATA_REAL = ESMF_DataType(2), &
-                                        ESMF_DATA_LOGICAL = ESMF_DataType(3), &
-                                        ESMF_DATA_CHARACTER = ESMF_DataType(4), &
-                                        ESMF_DATA_COMPLEX = ESMF_DataType(5)
-
-!------------------------------------------------------------------------------
-!
 !    ! Where we can use a derived type, the compiler will help do 
 !    ! typechecking.  For those places where the compiler refuses to allow
 !    ! anything but an Integer data type, use the second set of constants.
@@ -214,9 +193,6 @@
       type ESMF_DataValue
       sequence
       private
-          type(ESMF_DataType) :: dt
-          integer :: items
-          type(ESMF_Pointer) :: value
           integer :: pad
       end type
 
@@ -500,9 +476,6 @@
              ESMF_STATUS_UNALLOCATED, ESMF_STATUS_ALLOCATED, &
              ESMF_STATUS_BUSY, ESMF_STATUS_INVALID
 
-      public ESMF_DATA_INTEGER, ESMF_DATA_REAL, &
-             ESMF_DATA_LOGICAL, ESMF_DATA_CHARACTER, ESMF_DATA_COMPLEX
-
 #ifndef ESMF_NO_INTEGER_1_BYTE 
       public ESMF_TYPEKIND_I1
 #endif
@@ -575,7 +548,7 @@
       public ESMF_DOMAIN_OLDEXCLUSIVE, ESMF_DOMAIN_OLDCOMPUTATIONAL
       public ESMF_DOMAIN_OLDTOTAL
 
-      public ESMF_Status, ESMF_Pointer, ESMF_DataType, ESMF_TypeKind
+      public ESMF_Status, ESMF_Pointer, ESMF_TypeKind
       public ESMF_DataValue
       public ESMF_Domain, ESMF_DomainGetInit, ESMF_DomainInit, &
              ESMF_DomainValidate
@@ -599,7 +572,6 @@
 
 interface operator (.eq.)
   module procedure ESMF_sfeq
-  module procedure ESMF_dteq
   module procedure ESMF_dkeq
   module procedure ESMF_pteq
   module procedure ESMF_tfeq
@@ -615,7 +587,6 @@ end interface
 
 interface operator (.ne.)
   module procedure ESMF_sfne
-  module procedure ESMF_dtne
   module procedure ESMF_dkne
   module procedure ESMF_ptne
   module procedure ESMF_tfne
@@ -630,7 +601,6 @@ end interface
 
 interface assignment (=)
   module procedure ESMF_bfas
-  module procedure ESMF_dtas
   module procedure ESMF_dkas
   module procedure ESMF_tfas
   module procedure ESMF_ptas
@@ -1027,30 +997,6 @@ function ESMF_sfne(sf1, sf2)
 
  ESMF_sfne = (sf1%status .ne. sf2%status)
 end function
-
-!------------------------------------------------------------------------------
-! function to compare two ESMF_DataTypes to see if they're the same or not
-
-function ESMF_dteq(dt1, dt2)
- logical ESMF_dteq
- type(ESMF_DataType), intent(in) :: dt1, dt2
-
- ESMF_dteq = (dt1%dtype .eq. dt2%dtype)
-end function
-
-function ESMF_dtne(dt1, dt2)
- logical ESMF_dtne
- type(ESMF_DataType), intent(in) :: dt1, dt2
-
- ESMF_dtne = (dt1%dtype .ne. dt2%dtype)
-end function
-
-subroutine ESMF_dtas(intval, dtval)
- integer, intent(out) :: intval
- type(ESMF_DataType), intent(in) :: dtval
-
- intval = dtval%dtype
-end subroutine
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_TypeKinds to see if they're the same or not

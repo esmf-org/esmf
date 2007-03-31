@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArray.F90,v 1.13 2007/03/20 20:43:35 theurich Exp $
+! $Id: ESMF_InternArray.F90,v 1.14 2007/03/31 02:24:32 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -142,7 +142,7 @@ module ESMF_InternArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArray.F90,v 1.13 2007/03/20 20:43:35 theurich Exp $'
+    '$Id: ESMF_InternArray.F90,v 1.14 2007/03/31 02:24:32 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -270,14 +270,13 @@ end subroutine
 ! !IROUTINE: ESMF_InternArrayGet
 !
 ! !INTERFACE:
-      subroutine ESMF_InternArrayGet(array, rank, type, kind, counts, &
+      subroutine ESMF_InternArrayGet(array, rank, kind, counts, &
                                lbounds, ubounds, strides, haloWidth, &
                                base, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(in) :: array
       integer, intent(out), optional :: rank
-      type(ESMF_DataType), intent(out), optional :: type
       type(ESMF_TypeKind), intent(out), optional :: kind
       integer, dimension(:), intent(out), optional :: counts
       integer, dimension(:), intent(out), optional :: lbounds
@@ -301,13 +300,8 @@ end subroutine
 !           An {\tt ESMF\_Array}.
 !     \item [{[rank]}]
 !           The number of dimensions in the {\tt array}.
-!     \item [{[type]}]
-!	    {\tt ESMF\_DataType}.  Will be one of: 
-!           {\tt ESMF\_DATA\_INTEGER}, {\tt ESMF\_DATA\_REAL},
-!           {\tt ESMF\_DATA\_LOGICAL}, {\tt ESMF\_DATA\_CHARACTER}, or
-!           {\tt ESMF\_DATA\_COMPLEX}.
 !     \item [{[kind]}]
-!           {\tt ESMF\_DataTypeKind} variable which indicates 
+!           {\tt ESMF\_TypeKind} variable which indicates 
 !           the item size in bytes.  Will be one of:
 !           {\tt ESMF\_I1}, {\tt ESMF\_I2}, {\tt ESMF\_I4},
 !           {\tt ESMF\_I8}, {\tt ESMF\_R4}, {\tt ESMF\_R8},
@@ -351,11 +345,6 @@ end subroutine
 
       if (present(rank)) then
          call c_ESMC_IArrayGetRank(array, rank, status)
-         if (status .ne. ESMF_SUCCESS) return
-      endif
-
-      if (present(type)) then
-         call c_ESMC_IArrayGetType(array, type, status)
          if (status .ne. ESMF_SUCCESS) return
       endif
 

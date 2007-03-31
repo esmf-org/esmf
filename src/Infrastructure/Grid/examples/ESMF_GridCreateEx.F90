@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateEx.F90,v 1.34 2007/02/19 23:44:42 rosalind Exp $
+! $Id: ESMF_GridCreateEx.F90,v 1.35 2007/03/31 02:24:32 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -292,7 +292,7 @@
       ! The Field for an arbitrary Grid has to be one dimension less, i.e., 2D
       ! for a 3D Grid.
       ! Set up 2D Array for the Field
-      call ESMF_ArraySpecSet(arrayspec1, rank=2, type=ESMF_DATA_REAL,&
+      call ESMF_ArraySpecSet(arrayspec1, rank=2, &
            kind=ESMF_TYPEKIND_R8)
 
       ! Create the Field 

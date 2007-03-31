@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.11 2007/02/16 05:27:52 rosalind Exp $
+! $Id: user_coupler.F90,v 1.12 2007/03/31 02:26:03 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -82,7 +82,6 @@
         type(ESMF_ArraySpec) :: arrayspec1
         integer :: rank1
         type(ESMF_TypeKind) :: dk1
-        type(ESMF_DataType) :: dt1
         integer :: status
      
         print *, "User Coupler Init starting"
@@ -123,9 +122,9 @@
         call ESMF_FieldGet(humidity1, grid=grid1, datamap=datamap1, &
                            array=array1, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_ArrayGet(array1, rank=rank1, type=dt1, kind=dk1, rc=rc)
+        call ESMF_ArrayGet(array1, rank=rank1, kind=dk1, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_ArraySpecSet(arrayspec1, rank1, dt1, dk1, rc)
+        call ESMF_ArraySpecSet(arrayspec1, rank1, dk1, rc)
         if (status .ne. ESMF_SUCCESS) goto 10
  
         h1a = ESMF_FieldCreate(grid=grid1, arrayspec=arrayspec1, &

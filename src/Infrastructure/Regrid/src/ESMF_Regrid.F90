@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.112 2007/02/19 23:44:44 rosalind Exp $
+! $Id: ESMF_Regrid.F90,v 1.113 2007/03/31 02:24:34 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.112 2007/02/19 23:44:44 rosalind Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.113 2007/03/31 02:24:34 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -543,7 +543,6 @@
       real(ESMF_KIND_R4), dimension(:,:), pointer :: dstData2D
       real(ESMF_KIND_R4), dimension(:,:,:), pointer :: dstData3D
       !real(ESMF_KIND_R4), dimension(:,:,:,:), pointer :: dstData4D
-      type(ESMF_DataType) :: type
       type(ESMF_TypeKind) :: kind
       type(ESMF_Route) :: rh
       type(ESMF_LocalArray) :: srcindexarr, dstindexarr, weightsarr
@@ -610,7 +609,7 @@
 
       ! to get into this code we have already verified the types match in all
       ! the arrays, so just check the first one.
-      call ESMF_InternArrayGet(srcArrayList(1), rank=rank, type=type, kind=kind, &
+      call ESMF_InternArrayGet(srcArrayList(1), rank=rank, kind=kind, &
                            counts=counts, rc=localrc)
   
       allocate(gatheredArrayList(narrays), stat=localrc)
@@ -622,7 +621,7 @@
 
       do na = 1, narrays
 
-        gatheredArrayList(na) = ESMF_LocalArrayCreate(1, type, kind, asize, &
+        gatheredArrayList(na) = ESMF_LocalArrayCreate(1, kind, asize, &
                                                       rc=localrc)
         srcLocalArrayList(na) = srcArrayList(na)
       enddo 
@@ -890,7 +889,6 @@
       real(ESMF_KIND_R8), dimension(:,:), pointer :: dstData2D
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: dstData3D
       !real(ESMF_KIND_R8), dimension(:,:,:,:), pointer :: dstData4D
-      type(ESMF_DataType) :: type
       type(ESMF_TypeKind) :: kind
       type(ESMF_Route) :: rh
       type(ESMF_LocalArray) :: srcindexarr, dstindexarr, weightsarr
@@ -958,10 +956,10 @@
       ! to get into this code we have already verified the types match in all
       ! the arrays, so just check the first one.
       if (hasSrcData) then
-        call ESMF_InternArrayGet(srcArrayList(1), rank=rank, type=type, kind=kind, &
+        call ESMF_InternArrayGet(srcArrayList(1), rank=rank, kind=kind, &
                            counts=counts, rc=localrc)
       else
-        call ESMF_InternArrayGet(dstArrayList(1), rank=rank, type=type, kind=kind, &
+        call ESMF_InternArrayGet(dstArrayList(1), rank=rank, kind=kind, &
                            counts=counts, rc=localrc)
       endif
   
@@ -974,7 +972,7 @@
 
       do na = 1, narrays
 
-        gatheredArrayList(na) = ESMF_LocalArrayCreate(1, type, kind, asize, &
+        gatheredArrayList(na) = ESMF_LocalArrayCreate(1, kind, asize, &
                                                       rc=localrc)
         srcLocalArrayList(na) = srcArrayList(na)
       enddo 

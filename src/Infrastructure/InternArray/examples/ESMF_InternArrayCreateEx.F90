@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayCreateEx.F90,v 1.5 2007/02/19 23:44:43 rosalind Exp $
+! $Id: ESMF_InternArrayCreateEx.F90,v 1.6 2007/03/31 02:24:32 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,7 +32,6 @@
     integer :: i, j, ni, nj
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_TypeKind) :: akind
-    type(ESMF_DataType) :: atype
     type(ESMF_Array) :: array1, array2
     real(selected_real_kind(6,45)), dimension(:,:), pointer :: realptr, realptr2
     integer(selected_int_kind(5)), dimension(:), pointer :: intptr, intptr2
@@ -176,10 +175,9 @@
 
 !BOC
     arank = 2
-    atype = ESMF_DATA_REAL
     akind = ESMF_TYPEKIND_R8
 
-    call ESMF_ArraySpecSet(arrayspec, arank, atype, akind)
+    call ESMF_ArraySpecSet(arrayspec, arank, akind)
     array2 = ESMF_ArrayCreate(arrayspec, (/10, 20 /), rc=rc)
 !EOC
 

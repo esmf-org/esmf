@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.29 2007/03/13 16:45:52 theurich Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.30 2007/03/31 02:24:33 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@
     endif @\
  @\
     ! Call create routine @\
-    call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_TYPEKIND_##mtypekind, & @\
+    call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_TYPEKIND_##mtypekind, & @\
       ESMF_FROM_FORTRAN, localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
@@ -246,7 +246,7 @@
     ubounds = ubound(fptr) @\
  @\
     ! Call create routine @\
-    call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_TYPEKIND_##mtypekind, & @\
+    call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_TYPEKIND_##mtypekind, & @\
       ESMF_FROM_FORTRAN, localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\

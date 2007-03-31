@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.102 2007/03/20 20:43:33 theurich Exp $
+! $Id: ESMF_Bundle.F90,v 1.103 2007/03/31 02:24:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -112,7 +112,6 @@
       private
         ! for starters:
         integer :: datarank
-        type(ESMF_DataType) :: datatype
         type(ESMF_TypeKind) :: datakind
         integer :: indexorders(ESMF_MAXDIM)
         integer :: nonindexcounts(ESMF_MAXDIM) 
@@ -2581,7 +2580,7 @@ end function
         ! if you get here, this field has an array.  check it for 
         ! data types, etc.
         call ESMF_InternArrayGet(array, rank=pattern%datarank, &
-                           type=pattern%datatype, kind=pattern%datakind, &
+                           kind=pattern%datakind, &
                            rc=status)
         if (status .ne. ESMF_SUCCESS) cycle
 
@@ -2617,7 +2616,7 @@ end function
         ! if you get here, this field has an array.  check it for 
         ! data types, etc.
         call ESMF_InternArrayGet(array, rank=candidate%datarank, &
-                           type=candidate%datatype, kind=candidate%datakind, &
+                           kind=candidate%datakind, &
                            rc=status)
         if (status .ne. ESMF_SUCCESS) return
 
@@ -2628,7 +2627,6 @@ end function
 
         ! now we have all the info; compare and bail on first mismatch
         if (pattern%datarank .ne. candidate%datarank ) return
-        if (pattern%datatype .ne. candidate%datatype ) return
         if (pattern%datakind .ne. candidate%datakind ) return
         if (pattern%haloWidth .ne. candidate%haloWidth) return
         if (pattern%datahorzrelloc .ne. candidate%datahorzrelloc) return

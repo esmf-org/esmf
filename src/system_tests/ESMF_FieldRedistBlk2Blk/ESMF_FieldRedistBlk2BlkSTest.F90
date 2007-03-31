@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.4 2007/02/19 23:44:47 rosalind Exp $
+! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.5 2007/03/31 02:26:02 cdeluca Exp $
 !
 ! System test FieldRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -137,10 +137,10 @@
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Set up a 2D (distributed Field) and a 2D real array
-     call ESMF_ArraySpecSet(arrayspec1, rank=2, type=ESMF_DATA_REAL, &
+     call ESMF_ArraySpecSet(arrayspec1, rank=2, &
                             kind=ESMF_TYPEKIND_R8)
      if (status .ne. ESMF_SUCCESS) goto 20
-     call ESMF_ArraySpecSet(arrayspec2, rank=2, type=ESMF_DATA_REAL, &
+     call ESMF_ArraySpecSet(arrayspec2, rank=2, &
                             kind=ESMF_TYPEKIND_R8)
      if (status .ne. ESMF_SUCCESS) goto 20
 

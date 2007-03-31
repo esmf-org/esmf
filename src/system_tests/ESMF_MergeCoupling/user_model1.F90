@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.14 2007/02/19 23:44:48 rosalind Exp $
+! $Id: user_model1.F90,v 1.15 2007/03/31 02:26:03 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -147,7 +147,7 @@
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set up a 2D integer array
-        call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
+        call ESMF_ArraySpecSet(arrayspec, rank=2, &
                                kind=ESMF_TYPEKIND_I4)
 
         ! Create the field and have it create the array internally

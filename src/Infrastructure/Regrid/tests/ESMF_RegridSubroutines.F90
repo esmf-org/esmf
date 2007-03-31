@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.23 2007/02/19 23:44:44 rosalind Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.24 2007/03/31 02:24:37 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -508,7 +508,7 @@ contains
 
    !Specify settings for the fields' arrays
    !=======================================
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_TYPEKIND_R8, rc)
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
     if (rc.ne.ESMF_SUCCESS) then
         ier=ESMF_FAILURE
         print *, "ESMF_ArraySpecSet failed"

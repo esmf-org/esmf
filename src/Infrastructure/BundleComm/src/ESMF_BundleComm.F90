@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.63 2007/02/16 05:27:43 rosalind Exp $
+! $Id: ESMF_BundleComm.F90,v 1.64 2007/03/31 02:24:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.63 2007/02/16 05:27:43 rosalind Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.64 2007/03/31 02:24:30 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1988,7 +1988,6 @@
       type(ESMF_BundleType), pointer :: stypep, dtypep
       type(ESMF_GridStorage) :: sgridStorage, dgridStorage
       integer :: srank, drank
-      type(ESMF_DataType) :: stype, dtype
       type(ESMF_TypeKind) :: skind, dkind
    
       ! Initialize return code   
@@ -2038,12 +2037,12 @@
       ! Make sure the data types are consistent. 
       do i=1, stypep%field_count
           call ESMF_InternArrayGet(stypep%flist(1)%ftypep%localfield%localdata, &
-                             rank=srank, type=stype, kind=skind, rc=status)
+                             rank=srank, kind=skind, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           call ESMF_InternArrayGet(dtypep%flist(1)%ftypep%localfield%localdata, &
-                             rank=drank, type=dtype, kind=dkind, rc=status)
+                             rank=drank, kind=dkind, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2069,13 +2068,6 @@
               return
             endif
 	  endif
-
-          if (stype .ne. dtype) then
-              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                  "Corresponding Fields in Bundles must have same data type", &
-                                       ESMF_CONTEXT, rc)
-              return
-          endif
 
           if (skind .ne. dkind) then
               call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.29 2007/03/29 15:48:28 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.30 2007/03/31 02:24:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -499,7 +499,7 @@ contains
     end subroutine ESMF_LogEntryValidate
 
 !------------------------------------------------------------------------------
-! functions to compare two ESMF_DataTypes to see if they're the same or not
+! functions to compare two types to see if they're the same or not
 
 function ESMF_lhteq(ht1, ht2)
 logical ESMF_lhteq

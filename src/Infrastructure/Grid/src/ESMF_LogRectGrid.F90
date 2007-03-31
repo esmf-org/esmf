@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.166 2007/02/19 23:44:43 rosalind Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.167 2007/03/31 02:24:32 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.166 2007/02/19 23:44:43 rosalind Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.167 2007/03/31 02:24:32 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -6681,7 +6681,6 @@
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: corner1, corner2
       type(ESMF_InternArray), dimension(:), pointer :: centerArray, cornerArray
       type(ESMF_TypeKind) :: kind
-      type(ESMF_DataType) :: type
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -6711,11 +6710,10 @@
 
       ! create ESMF_Arrays
       kind = ESMF_TYPEKIND_R8
-      type = ESMF_DATA_REAL
       do i = 1,dimCount
-        centerArray(i) = ESMF_InternArrayCreate(dimCount, type, kind, counts, &
+        centerArray(i) = ESMF_InternArrayCreate(dimCount, kind, counts, &
                                           haloWidth=hWidth, rc=localrc)
-        cornerArray(i) = ESMF_InternArrayCreate(dimCount+1, type, kind, cornerCounts, &
+        cornerArray(i) = ESMF_InternArrayCreate(dimCount+1, kind, cornerCounts, &
                                           haloWidth=hWidth, rc=localrc)
       enddo
 
@@ -7155,7 +7153,6 @@
       real(ESMF_KIND_R8), dimension(:,:), pointer :: corner, corner1, corner2
       type(ESMF_InternArray), dimension(:), pointer :: centerArray, cornerArray
       type(ESMF_TypeKind) :: kind
-      type(ESMF_DataType) :: type
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -7178,11 +7175,10 @@
 
       ! set up ESMF arrays
       kind = ESMF_TYPEKIND_R8
-      type = ESMF_DATA_REAL
       do i = 1,dimCount
-        centerArray(i) = ESMF_InternArrayCreate(1, type, kind, counts, &
+        centerArray(i) = ESMF_InternArrayCreate(1, kind, counts, &
                                           haloWidth=0, rc=localrc)
-        cornerArray(i) = ESMF_InternArrayCreate(2, type, kind, cornerCounts, &
+        cornerArray(i) = ESMF_InternArrayCreate(2, kind, cornerCounts, &
                                           haloWidth=0, rc=localrc)
       enddo
 
@@ -8111,7 +8107,6 @@
       integer, dimension(:,:), pointer :: temp
       type(ESMF_InternArray) :: arrayTemp
       type(ESMF_TypeKind) :: kind
-      type(ESMF_DataType) :: type
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -8123,8 +8118,7 @@
 
       ! create ESMF_Array
       kind = ESMF_TYPEKIND_I4
-      type = ESMF_DATA_INTEGER
-      arrayTemp = ESMF_InternArrayCreate(dimCount, type, kind, counts, &
+      arrayTemp = ESMF_InternArrayCreate(dimCount, kind, counts, &
                                    haloWidth=gridBoundWidth, rc=localrc)
       call ESMF_InternArrayGetData(arrayTemp, temp, ESMF_DATA_REF, localrc)
 
@@ -8218,7 +8212,6 @@
       integer, dimension(:), pointer :: temp
       type(ESMF_InternArray) :: arrayTemp
       type(ESMF_TypeKind) :: kind
-      type(ESMF_DataType) :: type
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -8228,9 +8221,8 @@
 
       ! create ESMF_Array
       kind = ESMF_TYPEKIND_I4
-      type = ESMF_DATA_INTEGER
       counts(1) = myCount
-      arrayTemp = ESMF_InternArrayCreate(1, type, kind, counts, &
+      arrayTemp = ESMF_InternArrayCreate(1, kind, counts, &
                                    haloWidth=0, rc=localrc)
       call ESMF_InternArrayGetData(arrayTemp, temp, ESMF_DATA_REF, localrc)
 

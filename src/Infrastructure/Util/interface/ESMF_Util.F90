@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.10 2007/02/19 23:44:45 rosalind Exp $
+! $Id: ESMF_Util.F90,v 1.11 2007/03/31 02:24:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -79,7 +79,6 @@
 
 !  Misc type-to-string methods
       public ESMF_StatusString
-      public ESMF_DataTypeString
       public ESMF_TypeKindString
       public ESMF_LogicalString
 
@@ -131,7 +130,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.10 2007/02/19 23:44:45 rosalind Exp $'
+               '$Id: ESMF_Util.F90,v 1.11 2007/03/31 02:24:37 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -858,48 +857,9 @@
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DataTypeString"
-!BOPI 
-!  !IROUTINE:  ESMF_DataTypeString - Return DataType as a string
-!  
-! !INTERFACE: 
-      subroutine ESMF_DataTypeString(datatype, string, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_DataType), intent(in) :: datatype
-      character(len=*), intent(out) :: string
-      integer, intent(out), optional :: rc  
-
-!
-! !DESCRIPTION:
-!   Return an {\tt ESMF\_DataType} as a string.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[datatype]
-!       The {\tt ESMF\_DataType}.
-!     \item[string]
-!       A string describing the value.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-
-      if (datatype .eq. ESMF_DATA_INTEGER) string = "Integer"
-      if (datatype .eq. ESMF_DATA_REAL) string = "Real"
-      if (datatype .eq. ESMF_DATA_LOGICAL) string = "Logical"
-      if (datatype .eq. ESMF_DATA_CHARACTER) string = "Character"
- 
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_DataTypeString
-
-!------------------------------------------------------------------------- 
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TypeKindString"
 !BOPI 
-!  !IROUTINE:  ESMF_TypeKindString - Return DataTypeKind as a string
+!  !IROUTINE:  ESMF_TypeKindString - Return TypeKind as a string
 !  
 ! !INTERFACE: 
       subroutine ESMF_TypeKindString(datakind, string, rc)
@@ -911,12 +871,12 @@
 
 !
 ! !DESCRIPTION:
-!   Return an {\tt ESMF\_DataTypeKind} variable as a string.
+!   Return an {\tt ESMF\_TypeKind} variable as a string.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[datakind]
-!       The {\tt ESMF\_DataTypeKind}.
+!       The {\tt ESMF\_TypeKind}.
 !     \item[string]
 !       The value as a string.
 !     \item[{[rc]}]

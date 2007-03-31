@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.240 2007/03/20 20:43:33 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.241 2007/03/31 02:24:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -248,7 +248,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.240 2007/03/20 20:43:33 theurich Exp $'
+      '$Id: ESMF_Field.F90,v 1.241 2007/03/31 02:24:31 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -738,8 +738,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
-
 
       type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
       integer :: status                           ! Error status
@@ -829,8 +827,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
-
  
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
       integer :: status                       ! Error status
@@ -1005,7 +1001,7 @@
 !
 ! !INTERFACE:
       subroutine ESMF_FieldGet(field, grid, array, datamap, horzRelloc, &
-                               vertRelloc, haloWidth, iospec, type, kind, &
+                               vertRelloc, haloWidth, iospec, kind, &
                                rank, lbounds, ubounds, name, rc)
 !
 ! !ARGUMENTS:
@@ -1017,7 +1013,6 @@
       type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
       integer, intent(out), optional :: haloWidth
       type(ESMF_IOSpec), intent(out), optional :: iospec 
-      type(ESMF_DataType), intent(out), optional :: type
       type(ESMF_TypeKind), intent(out), optional :: kind
       integer, intent(out), optional :: rank
       integer, dimension(:), intent(out), optional :: lbounds
@@ -1052,8 +1047,6 @@
 !           {\tt ESMF\_Array} object.
 !     \item [{[iospec]}]
 !           {\tt ESMF\_IOSpec} object which contains settings for options
-!     \item [{[type]}]
-!           Type of Field.
 !     \item [{[kind]}]
 !           TypeKind specifyer for type of Field.
 !     \item [{[rank]}]
@@ -1142,19 +1135,6 @@
             endif
             call ESMF_InternArrayGet(ftype%localfield%localdata, &
                                haloWidth=haloWidth, rc=rc)
-            if (ESMF_LogMsgFoundError(rc, &
-                                      ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) return
-        endif
-
-        if (present(type)) then
-            if (ftype%datastatus .ne. ESMF_STATUS_READY) then
-                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                 "Cannot return haloWidth because no data attached to Field", &
-                                 ESMF_CONTEXT, rc)) return
-            endif
-            call ESMF_InternArrayGet(ftype%localfield%localdata, &
-                               type=type, rc=rc)
             if (ESMF_LogMsgFoundError(rc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
@@ -2357,13 +2337,12 @@
 !
 ! !INTERFACE:
       subroutine ESMF_FieldGetGlobalDataInfo(field, size, &
-        indexorder, datatype, interleave, rc)
+        indexorder, interleave, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field            
       integer, intent(out), optional :: size(:)        
       integer, dimension(ESMF_MAXDIM), intent(out) :: indexorder 
-      type(ESMF_DataType), intent(out) :: datatype
       type(ESMF_InterleaveFlag), intent(out) :: interleave   
       integer, intent(out), optional :: rc           
 
@@ -2379,8 +2358,6 @@
 !           Field size.
 !     \item [indexorder]
 !           Field index order.
-!     \item [datatype]
-!           Field data type.
 !     \item [interleave]
 !           Data may be ESMF\_IL\_BLOCK or ESMF\_IL\_ITEM.
 !     \item [{[rc]}]
@@ -2409,13 +2386,12 @@
 !
 ! !INTERFACE:
       subroutine ESMF_FieldGetLocalDataInfo(field, size, &
-        indexorder, datatype, interleave, rc)
+        indexorder, interleave, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field            
       integer, intent(out), optional :: size(:)        
       integer, dimension(ESMF_MAXDIM), intent(out) :: indexorder 
-      type(ESMF_DataType), intent(out) :: datatype
       type(ESMF_InterleaveFlag), intent(out) :: interleave   
       integer, intent(out), optional :: rc           
 
@@ -2432,8 +2408,6 @@
 !           Field size.
 !     \item [indexorder]
 !           Data index order.
-!     \item [datatype]
-!           Field data type.
 !     \item [interleave]
 !           Data may be ESMF\_IL\_BLOCK or ESMF\_IL\_ITEM.
 !     \item [{[rc]}]
@@ -3995,11 +3969,9 @@
         ! Local variables
         integer :: status, de_id
         type(ESMF_InternArray) :: out_array
-        type(ESMF_DataType) arr_type
         type(ESMF_TypeKind) arr_kind
         integer out_rank
         integer out_kind
-        integer out_type
         integer, dimension(:), pointer :: out_counts
         integer, dimension(:), pointer :: out_lbounds
         integer, dimension(:), pointer :: out_ubounds
@@ -4088,7 +4060,7 @@
 
 
         if (de_id .eq. 0) then       
-        call ESMF_InternArrayGet(out_array, out_rank, arr_type, arr_kind, rc=rc)
+        call ESMF_InternArrayGet(out_array, out_rank, arr_kind, rc=rc)
         allocate(out_counts (out_rank), &
                  out_lbounds(out_rank), &
                  out_ubounds(out_rank), &
@@ -4096,7 +4068,6 @@
         call ESMF_InternArrayGet(out_array, counts=out_counts, lbounds=out_lbounds, &
                            ubounds=out_ubounds, strides=out_strides, rc=rc)
 
-        out_type = arr_type%dtype
         out_kind = arr_kind%dkind
 
         endif ! (de_id .eq. 0) then  
