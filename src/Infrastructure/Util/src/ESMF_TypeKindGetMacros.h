@@ -1,8 +1,8 @@
 #if 0
-! $Id: ESMF_TypeKindGetMacros.h,v 1.4 2007/02/28 20:36:28 rosalind Exp $
+! $Id: ESMF_TypeKindGetMacros.h,v 1.5 2007/03/31 05:51:27 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2008, University Corporation for Atmospheric Research,
+! Copyright 2002-2007, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

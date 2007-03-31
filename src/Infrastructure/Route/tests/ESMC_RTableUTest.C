@@ -1,7 +1,7 @@
-// $Id: ESMC_RTableUTest.C,v 1.3 2006/11/16 05:21:18 cdeluca Exp $
+// $Id: ESMC_RTableUTest.C,v 1.4 2007/03/31 05:51:24 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2008, University Corporation for Atmospheric Research, 
+// Copyright 2002-2007, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RTableUTest.C,v 1.3 2006/11/16 05:21:18 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_RTableUTest.C,v 1.4 2007/03/31 05:51:24 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])

@@ -1,7 +1,7 @@
-// $Id: trim.h,v 1.2 2006/11/16 05:21:24 cdeluca Exp $
+// $Id: trim.h,v 1.3 2007/03/31 05:51:31 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2008, University Corporation for Atmospheric Research, 
+// Copyright 2002-2007, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
