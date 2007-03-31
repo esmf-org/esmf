@@ -1,4 +1,4 @@
-! $Id: ESMF_StateHelpers.F90,v 1.7 2007/02/19 23:44:46 rosalind Exp $
+! $Id: ESMF_StateHelpers.F90,v 1.8 2007/03/31 02:25:13 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -189,7 +189,6 @@ subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
     ! Local variables
     integer :: halof1, halof2, halof3, halof4, halof5
     integer :: dimf1, dimf2, dimf3, dimf4, dimf5
-    type(ESMF_DataType) :: dtypef1, dtypef2, dtypef3, dtypef4, dtypef5
     type(ESMF_TypeKind) :: dkindf1, dkindf2, dkindf3, dkindf4, dkindf5
     type(ESMF_RelLoc) :: rellocf1, rellocf2, rellocf3, rellocf4, rellocf5
     type(ESMF_RelLoc) :: vrellocf1, vrellocf2, vrellocf3, vrellocf4, vrellocf5
@@ -254,11 +253,6 @@ subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
     dkindf3 = ESMF_TYPEKIND_R8
     dkindf4 = ESMF_TYPEKIND_R8
     dkindf5 = ESMF_TYPEKIND_R8
-    dtypef1 = ESMF_DATA_REAL
-    dtypef2 = ESMF_DATA_REAL
-    dtypef3 = ESMF_DATA_REAL
-    dtypef4 = ESMF_DATA_REAL
-    dtypef5 = ESMF_DATA_REAL
     ! todo: sort out type/kind intermingling
     if (present(dkind1)) dkindf1 = dkind1
     if (present(dkind2)) dkindf2 = dkind2
@@ -268,15 +262,15 @@ subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
    
 
     ! set the arrayspec as requested
-    call ESMF_ArraySpecSet(arrayspecf1, dimf1, dtypef1, dkindf1, rc)
+    call ESMF_ArraySpecSet(arrayspecf1, dimf1, dkindf1, rc)
     if (rc.NE.ESMF_SUCCESS) return
-    call ESMF_ArraySpecSet(arrayspecf2, dimf2, dtypef2, dkindf2, rc)
+    call ESMF_ArraySpecSet(arrayspecf2, dimf2, dkindf2, rc)
     if (rc.NE.ESMF_SUCCESS) return
-    call ESMF_ArraySpecSet(arrayspecf3, dimf3, dtypef3, dkindf3, rc)
+    call ESMF_ArraySpecSet(arrayspecf3, dimf3, dkindf3, rc)
     if (rc.NE.ESMF_SUCCESS) return
-    call ESMF_ArraySpecSet(arrayspecf4, dimf4, dtypef4, dkindf4, rc)
+    call ESMF_ArraySpecSet(arrayspecf4, dimf4, dkindf4, rc)
     if (rc.NE.ESMF_SUCCESS) return
-    call ESMF_ArraySpecSet(arrayspecf5, dimf5, dtypef5, dkindf5, rc)
+    call ESMF_ArraySpecSet(arrayspecf5, dimf5, dkindf5, rc)
     if (rc.NE.ESMF_SUCCESS) return
     
 
@@ -2048,10 +2042,10 @@ function CreateDataField(name, grid, layout, relloc, r4value, r8value, rc)
 
   ! fixed items:  2d array, data type real, halo width of 2.
   if (use_r8) then
-      call ESMF_ArraySpecSet(as, rank=2, type=ESMF_DATA_REAL, &
+      call ESMF_ArraySpecSet(as, rank=2, &
                              kind=ESMF_TYPEKIND_R8, rc=status)
   else
-      call ESMF_ArraySpecSet(as, rank=2, type=ESMF_DATA_REAL, &
+      call ESMF_ArraySpecSet(as, rank=2, &
                              kind=ESMF_TYPEKIND_R4, rc=status)
   endif
   if (ESMF_LogMsgFoundError(status, &
