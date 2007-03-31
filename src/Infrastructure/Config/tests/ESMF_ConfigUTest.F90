@@ -1213,6 +1213,127 @@ subroutine MultPar_SingleLine_Vf
       return
     end subroutine Table
 
+!--------------------------------------------------------------------
+    subroutine SingleParSet()
+!--------------------------------------------------------------------
+      integer :: memberNum, numMembers, numConstituents, numDelegates
+      character(ESMF_MAXSTR) :: failMsg
+      character(ESMF_MAXSTR) :: name
+      integer :: result = 0
+
+      rc = 0
+
+!''''''''''''''''''''''''''''
+
+     !-----------------------------------------------------------------------
+     !NEX_UTest
+     ! Config Set Attribute Int Test 1: Append to end of config object
+     write(failMsg, *) "Did not return Member_Number 20 and ESMF_SUCCESS"
+     write(name, *) "Config Set Attribute IntI4 Test 1"
+     call ESMF_ConfigSetAttribute(cf, 20, label = 'Member_Number:', rc = rc)
+     call ESMF_ConfigGetAttribute(cf, memberNum, &
+                                  label = 'Member_Number:', rc = rc)
+     call ESMF_Test((memberNum.eq.20 .and. rc.eq.ESMF_SUCCESS), &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+!''''''''''''''''''''''''''''
+      
+      counter_total =counter_total + 1
+      if ( rc /= 0 ) then      
+         print *,'ESMF_ConfigSetAttribute(intI4) got Member_Num =', memberNum, &
+                 ' rc =', rc
+      else
+        if (memberNum == 20) then
+          counter_success =counter_success + 1
+        else
+          print *,'ESMF_ConfigSetAttribute(intI4) ERROR: got Member_Number =', &
+                    memberNum, ' should be 20'
+        endif
+      endif
+
+     !-----------------------------------------------------------------------
+     !EX_UTest
+     ! Config Set Attribute Int Test 2:  Overwrite; same number of characters
+     write(failMsg, *) "Did not return Number_of_Members 40 and ESMF_SUCCESS"
+     write(name, *) "Config Set Attribute IntI4 Test 2"
+     call ESMF_ConfigSetAttribute(cf, 40, label = 'Number_of_Members:', rc = rc)
+     call ESMF_ConfigGetAttribute(cf, numMembers, &
+                                  label = 'Number_of_Members:', rc = rc)
+     call ESMF_Test((numMembers.eq.40 .and. rc.eq.ESMF_SUCCESS), &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+!''''''''''''''''''''''''''''
+      
+      counter_total =counter_total + 1
+      if ( rc /= 0 ) then      
+         print *,'ESMF_ConfigSetAttribute(intI4) got numMembers=', numMembers, &
+                 ' rc =', rc
+      else
+        if (numMembers == 40) then
+          counter_success =counter_success + 1
+        else
+          print *,'ESMF_ConfigSetAttribute(intI4) ERROR: got numMembers= ', &
+                    numMembers, ' should be 40'
+        endif
+      endif
+
+     !-----------------------------------------------------------------------
+     !NEX_UTest
+     ! Config Set Attribute Int Test 3: Overwrite; insert 1 extra character
+     write(failMsg, *) &
+           "Did not return Number_of_Constituents 123 and ESMF_SUCCESS"
+     write(name, *) "Config Set Attribute IntI4 Test 3"
+     call ESMF_ConfigSetAttribute(cf, 123, label = 'Number_of_Constituents:', &
+                                  rc = rc)
+     call ESMF_ConfigGetAttribute(cf, numConstituents, &
+                                  label = 'Number_of_Constituents:', rc = rc)
+     call ESMF_Test((numConstituents.eq.123 .and. rc.eq.ESMF_SUCCESS), &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+!''''''''''''''''''''''''''''
+      
+      counter_total =counter_total + 1
+      if ( rc /= 0 ) then      
+         print *,'ESMF_ConfigSetAttribute(intI4) got numConstituents=', &
+                  numConstituents, ' rc =', rc
+      else
+        if (numConstituents == 123) then
+          counter_success =counter_success + 1
+        else
+          print *, &
+              'ESMF_ConfigSetAttribute(intI4) ERROR: got numConstituents= ', &
+                    numConstituents, ' should be 123'
+        endif
+      endif
+
+     !-----------------------------------------------------------------------
+     !NEX_UTest
+     ! Config Set Attribute Int Test 4:  Overwrite; delete 1 extra character
+     write(failMsg, *) "Did not return Number_of_Delegates 5 and ESMF_SUCCESS"
+     write(name, *) "Config Set Attribute IntI4 Test 4"
+     call ESMF_ConfigSetAttribute(cf, 5, label = 'Number_of_Delegates:', &
+                                  rc = rc)
+     call ESMF_ConfigGetAttribute(cf, numDelegates, &
+                                  label = 'Number_of_Delegates:', rc = rc)
+     call ESMF_Test((numDelegates.eq.5 .and. rc.eq.ESMF_SUCCESS), &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+!''''''''''''''''''''''''''''
+      
+      counter_total =counter_total + 1
+      if ( rc /= 0 ) then      
+         print *, 'ESMF_ConfigSetAttribute(intI4) got numDelegates=', &
+                   numDelegates, ' rc =', rc
+      else
+        if (numDelegates == 5) then
+          counter_success =counter_success + 1
+        else
+          print *,'ESMF_ConfigSetAttribute(intI4) ERROR: got numDelegates= ', &
+                    numDelegates, ' should be 5'
+        endif
+      endif
+
+    end subroutine SingleParSet
 
 !--------------------------------------------------------------------
     subroutine Finalization()
@@ -1275,7 +1396,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.25 2007/03/26 17:47:04 tjcnrl Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.26 2007/03/31 03:57:57 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
@@ -1378,6 +1499,11 @@ end module config_subrs
 ! ---------------------------------------
 
       call Table()
+
+!
+! Setting of single parameters
+! ------------------------------
+      call SingleParSet()
 
 
 ! Finalization
