@@ -2,11 +2,8 @@
 #--------------------------------------------
 
 Number_of_DEs: 32
-Number_of_Members: 30
 Relaxation_time_scale_in_days: 14
-Number_of_Constituents: 50
 Do_you_want_quality_control: yes
-Number_of_Delegates: 70
 restart_file_name: RestartFile123
 Optimization: off
 Optimization: off
