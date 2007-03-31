@@ -1,17 +1,13 @@
-% $Id: ArraySpec_desc.tex,v 1.3 2007/02/16 05:27:41 rosalind Exp $
+% $Id: ArraySpec_desc.tex,v 1.4 2007/03/31 05:18:30 cdeluca Exp $
 
-An ArraySpec is a very simple class that contains 
-type, kind, and rank information about an array.  For those 
-unfamiliar with Fortran:
-\begin{itemize}
-\item {\bf Type} describes the data type of the elements in the array, 
-such as integer, real, logical, etc.;
-\item {\bf TypeKind} describes their precision; and
-\item {\bf Rank} refers to their dimensionality.
-\end{itemize}
+An ArraySpec is a very simple class that contains type, kind, and
+rank information about an array.  This information is stored in two
+parameters.  {\bf TypeKind} describes the data type of the elements
+in the array and their precision.  {\bf Rank} is the number of dimensions
+in the array.
 
 The only methods that are associated with the ArraySpec class are those 
-that allow you to set and retrieve this type, kind, and rank information.
+that allow you to set and retrieve this information.
 
 
 

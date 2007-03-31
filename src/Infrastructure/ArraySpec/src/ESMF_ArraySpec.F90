@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.19 2007/03/31 02:24:30 cdeluca Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.20 2007/03/31 05:18:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -89,7 +89,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.19 2007/03/31 02:24:30 cdeluca Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.20 2007/03/31 05:18:30 cdeluca Exp $'
 
 !==============================================================================
 
@@ -122,9 +122,7 @@ module ESMF_ArraySpecMod
 !   {\tt ESMF\_Array} rank (dimensionality -- 1D, 2D, etc). Maximum
 !    possible is 7D.
 ! \item[kind]
-!  {\tt ESMF\_Array} kind. Valid kinds include {\tt ESMF\_I4},
-!  {\tt ESMF\_I8}, {\tt ESMF\_R4}, {\tt ESMF\_R8},
-!  {\tt ESMF\_C8}, {\tt ESMF\_C16}.
+!   {\tt ESMF\_Array} kind.  See section \ref{opt:typekind} for valid values.
 ! \item[[rc]]
 !  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -183,9 +181,7 @@ module ESMF_ArraySpecMod
 ! \item[rank]
 !   Array rank (dimensionality -- 1D, 2D, etc). Maximum allowed is 7D.
 ! \item[kind]
-!  {\tt ESMF\_Array} kind. Valid kinds include 
-!  {\tt ESMF\_I1}, {\tt ESMF\_I2}, {\tt ESMF\_I4}, {\tt ESMF\_I8}, 
-!  {\tt ESMF\_R4}, {\tt ESMF\_R8}, {\tt ESMF\_C8}, {\tt ESMF\_C16}.
+!   {\tt ESMF\_Array} kind.  See section \ref{opt:typekind} for valid values.
 ! \item[{[rc]}]
 !  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}

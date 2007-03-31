@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.20 2007/03/31 02:30:22 cdeluca Exp $
+% $Id: ESMF_options.tex,v 1.21 2007/03/31 05:18:30 cdeluca Exp $
 
 \section{Global Options and Parameters}
 
@@ -199,33 +199,30 @@ Valid values are:
 
 \subsection{Parameters}
 
-\subsubsection{ESMF\_DataKind}
+\subsubsection{ESMF\_TypeKind}
+\label{opt:typekind}
 
 {\sf DESCRIPTION:\\}
-Supported ESMF data kinds.   
-These are an ESMF derived type used for arguments to subroutines 
-and functions which want to specify or query a data precision and type.
-They cannot be used when declaring variables; see the
-section below for more details.
+Supported ESMF type and kind combinations.   
+This is an ESMF derived type used for arguments to subroutines 
+and functions that specify or query a data precision and type.
+These values cannot be used when declaring variables; see the next 
+section on Fortran 90 Kinds for that.
 
 Valid values are:
 \begin{description}
-\item [ESMF\_I1]
+\item [ESMF\_TYPEKIND\_I1]
       1 byte integer.
-\item [ESMF\_I2]
+\item [ESMF\_TYPEKIND\_I2]
       2 byte integer.
-\item [ESMF\_I4]
+\item [ESMF\_TYPEKIND\_I4]
       4 byte integer.
-\item [ESMF\_I8]
+\item [ESMF\_TYPEKIND\_I8]
       8 byte integer.
-\item [ESMF\_R4]
+\item [ESMF\_TYPEKIND\_R4]
       4 byte real.
-\item [ESMF\_R8]
+\item [ESMF\_TYPEKIND\_R8]
       8 byte real.
-\item [ESMF\_C8]
-      8 byte character.
-\item [ESMF\_C16]
-      16 byte character.
 \end{description}
 
 \subsubsection{Fortran 90 Kinds}
