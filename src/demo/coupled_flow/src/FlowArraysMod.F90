@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.13 2007/02/19 23:44:46 rosalind Exp $
+! $Id: FlowArraysMod.F90,v 1.14 2007/03/31 04:05:33 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -108,11 +108,10 @@
 !     The following piece of code provides an example of Field creation used in
 !     the demo.  In this example we create a Field from an ArraySpec, which
 !     designates the rank, type, and kind of the data.  First initialize the
-!     ArraySpec with rank 2 for a two-dimensional array, type ESMF\_DATA\_REAL,
+!     ArraySpec with rank 2 for a two-dimensional array
 !     and kind ESMF\_KIND\_R4:
 !\begin{verbatim}
-      call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
-                              kind=ESMF_TYPEKIND_R4)
+      call ESMF_ArraySpecSet(arrayspec, rank=2, kind=ESMF_TYPEKIND_R4)
 !\end{verbatim}
 !     Next, create a Field named "SIE" using the ArraySpec with a relative
 !     location (relloc) at the cell centers:

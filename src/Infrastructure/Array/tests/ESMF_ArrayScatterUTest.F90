@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.18 2007/03/31 02:24:29 cdeluca Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.19 2007/03/31 04:08:35 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.18 2007/03/31 02:24:29 cdeluca Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.19 2007/03/31 04:08:35 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -190,7 +190,7 @@ print *, min_R4, min_R8
 
   !------------------------------------------------------------------------
   ! preparations for same test as above but omit farray on PETs not root
-  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, &
+  call ESMF_ArraySpecSet(arrayspec, &
     kind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
