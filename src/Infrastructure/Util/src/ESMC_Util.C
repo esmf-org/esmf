@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.20 2007/03/31 05:51:27 cdeluca Exp $
+// $Id: ESMC_Util.C,v 1.21 2007/04/02 20:33:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.20 2007/03/31 05:51:27 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.21 2007/04/02 20:33:48 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -557,10 +557,12 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
       case ESMC_TYPEKIND_R8:      return  "Real*8";
       case ESMF_C8:      return  "Complex*8";
       case ESMF_C16:     return  "Complex*16";
+      case ESMC_TYPEKIND_LOGICAL: return  "Logical";
+      case ESMC_TYPEKIND_CHARACTER: return "Character";
       default:
          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
                                      "Unknown TypeKind", NULL);
-         return NULL;
+         return "";
     }
 
     /* not reached */
