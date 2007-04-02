@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.8 2007/03/31 05:51:00 cdeluca Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.9 2007/04/02 23:00:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -45,15 +45,70 @@ program ESMF_DistGridEx
   if (petCount /= 4) goto 10 ! TODO: use EXAMPLES_MULTI_ONLY once available
 
 !BOE
-! \subsubsection{2D DistGrid with simple LR domain and regular
-!    decomposition}
+! \subsubsection{Single patch DistGrid with regular decomposition}
 ! 
 ! The minimum information required to create an {\tt ESMF\_DistGrid} object
-! for a simple LR domain with regular decomposition are the corners of
-! the domain and the decomposition descriptor {\tt regDecomp}. The
-! following line creates a DistGrid for a 5x5 global LR domain that is to be
-! decomposed into 2 x 3 = 6 DEs.
+! for a single patch with default decomposition are the corners of the patch
+! in index space. The following call will create a 1D DistGrid for a 
+! 1D index space patch with cells from 1 through 1000.
 !EOE
+
+!BOC
+  distgrid = ESMF_DistGridCreate(minCorner=(/1/), maxCorner=(/1000/), rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  call ESMF_DistGridPrint(distgrid, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! A default DELayout with 1 DE per PET will be created during 
+! {\tt ESMF\_DistGridCreate()}. The 1000 cells of the specified 1D patch will
+! then be block decomposed across the availbale DEs, i.e. across all PETs. 
+! Hence, for 4 PETs the (min) $\sim$ (max) corners of the DE-local LR regions
+! will be:
+! \begin{verbatim}
+!   DE 0 - (1) ~ (250)
+!   DE 1 - (251) ~ (500)
+!   DE 2 - (501) ~ (750)
+!   DE 3 - (751) ~ (1000)
+! \end{verbatim}
+!
+! DistGrids with rank > 1 can also be created with default decompositions,
+! specifying only the corners of the patch. The following will create a
+! 2D DistGrid for a 5x5 patch with default decomposition.
+!EOE
+
+!BOC
+  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  call ESMF_DistGridPrint(distgrid, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! The default decomposition for a DistGrid of rank $N$ will be $ (nDEs \times 1
+! \times ... \times 1) $, where $nDEs$ is the number of DEs in the DELayout
+! and there are $N-1$ factors of $1$. For the 2D example above this means
+! a $4 \times 1$ regular decomposition if executed on 4 PETs and will result
+! in the following DE-local LR regions:
+! \begin{verbatim}
+!   DE 0 - (1,1) ~ (2,5)
+!   DE 1 - (3,1) ~ (3,5)
+!   DE 2 - (4,1) ~ (4,5)
+!   DE 3 - (5,1) ~ (5,5)
+! \end{verbatim}
+!
+! In many cases the default decomposition will not suffice for higher rank
+! DistGrids (rank > 1). For this reason a decomposition descriptor 
+! {\tt regDecomp} argument is available during {\tt ESMF\_DistGridCreate()}. The
+! following call creates a DistGrid on the same 2D patch as before, but now with
+! a user specified regular decomposition of $2 \times 3 = 6 $ DEs.
+!EOE
+
 !BOC
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
     regDecomp=(/2,3/), rc=rc)
@@ -64,7 +119,6 @@ program ESMF_DistGridEx
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  
 !BOE
 ! The default DE labeling sequence follows column major order for the
 ! {\tt regDecomp} argument:
@@ -89,13 +143,14 @@ program ESMF_DistGridEx
 !   DE 5 - (4,5) ~ (5,5)
 ! \end{verbatim}
 ! 
-! The decomposition of the global LR domain into DE-local LR domains can be
+! The specifics of the patch decomposition into DE-local LR domains can be
 ! modified by the optional {\tt decompflag} argument. The following line shows
 ! how this argument is used to keep ESMF's default decomposition in the first
 ! dimension but move extra grid points of the second dimension to the last DEs
 ! in that direction. Extra cells occur if the number of DEs for a certain
 ! dimension does not evenly divide its extent. In this example there are
-! 2 extra grid points for the second dimension.
+! 2 extra grid points for the second dimension because its extent is 5 but there
+! are 3 DEs along this index space axis.
 !EOE
 !BOC
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
@@ -106,9 +161,8 @@ program ESMF_DistGridEx
 !  call ESMF_DistGridPrint(distgrid, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-
 !BOE
-! This will result in a modified decomposition:
+! Now DE 4 and DE 5 will hold the extra cells along the 2nd dimension.
 ! \begin{verbatim}
 !   DE 0 - (1,1) ~ (3,1)
 !   DE 1 - (4,1) ~ (5,1)
@@ -118,9 +172,10 @@ program ESMF_DistGridEx
 !   DE 5 - (4,3) ~ (5,5)
 ! \end{verbatim}
 !
-! An alternative way of indicating the DE-local LR boxes is to list the global
-! indices for each dimension. For this 2D example there are two lists (dim 1) / 
-! (dim 2) for each DE:
+! An alternative way of indicating the DE-local LR regions is to list the 
+! index space coordinate as given by the associated DistGrid patch for each
+! dimension. For this 2D example there are two lists (dim 1) / (dim 2) for each
+! DE:
 ! \begin{verbatim}
 !   DE 0 - (1,2,3) / (1)
 !   DE 1 - (4,5)   / (1)
@@ -130,8 +185,8 @@ program ESMF_DistGridEx
 !   DE 5 - (4,5)   / (3,4,5)
 ! \end{verbatim}
 !
-! Information about DE-local LR domains in the latter format can be obtained 
-! from a DistGrid object by use of {\tt ESMF\_DistGridGet()} methods:
+! Information about DE-local LR regions in the latter format can be obtained 
+! from the DistGrid object by use of {\tt ESMF\_DistGridGet()} methods:
 !
 !BOC
   allocate(dimExtent(2, 6)) ! (dimCount, deCount)
@@ -154,11 +209,13 @@ program ESMF_DistGridEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
-! The advantage of the {\tt indexList} format is that it can be used directly
-! as a look-up table for DE-local to patch index dereferencing. Furthermore it
-! allows to express very general decompositions such as the cyclic decompositions
-! in the first dimension generated by the following create call:
+! The advantage of the {\tt indexList} format over the min-/max-corner format is
+! that it can be used directly for DE-local to patch index dereferencing. 
+! Furthermore the {\tt indexList} allows to express very general decompositions
+! such as the cyclic decompositions in the first dimension generated by the
+! following call:
 !EOE
+
 !BOC
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
     regDecomp=(/2,3/), decompflag=(/ESMF_DECOMP_CYCLIC,ESMF_DECOMP_RESTLAST/),&
@@ -167,6 +224,7 @@ program ESMF_DistGridEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !  call ESMF_DistGridPrint(distgrid, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
 !BOE
 ! with decomposition:
 ! \begin{verbatim}
@@ -178,7 +236,7 @@ program ESMF_DistGridEx
 !   DE 5 - (2,4)   / (3,4,5)
 ! \end{verbatim}
 !
-! Finally, a DistGrid object can be destroyed by calling
+! Finally, a DistGrid object is destroyed by calling
 !EOE
 !BOC
   call ESMF_DistGridDestroy(distgrid, rc=rc)
@@ -662,8 +720,8 @@ program ESMF_DistGridEx
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_DistGridPrint(distgrid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  call ESMF_DistGridPrint(distgrid, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
