@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cpp,v 1.13 2007/03/31 05:51:16 cdeluca Exp $
+! $Id: ESMF_LocalArrayCreate.cpp,v 1.14 2007/04/02 17:29:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -161,7 +161,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cpp,v 1.13 2007/03/31 05:51:16 cdeluca Exp $'
+    '$Id: ESMF_LocalArrayCreate.cpp,v 1.14 2007/04/02 17:29:31 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -592,9 +592,9 @@ end function
         !! calling routines generated from macros by the preprocessor
 
         select case (localkind)
+^ifndef ESMF_NO_INTEGER_1_BYTE
           case (ESMF_TYPEKIND_I1%dkind)
             select case (rank)
-^ifndef ESMF_NO_INTEGER_1_BYTE
 	      case (1)
                 call ESMF_LocalArrayCopy1DI1(arrayIn, arrayOut, rc=status)
 	      case (2)
@@ -611,15 +611,15 @@ end function
               case (7)
                 call ESMF_LocalArrayCopy7DI1(arrayIn, arrayOut, rc=status)
 ^endif
-^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
+^endif
+^ifndef ESMF_NO_INTEGER_2_BYTE
           case (ESMF_TYPEKIND_I2%dkind) 
 	    select case(rank)
-^ifndef ESMF_NO_INTEGER_2_BYTE
 	      case (1) 
                 call ESMF_LocalArrayCopy1DI2(arrayIn, arrayOut, rc=status)
 	      case (2)
@@ -636,12 +636,12 @@ end function
               case (7)
                 call ESMF_LocalArrayCopy7DI2(arrayIn, arrayOut, rc=status)
 ^endif
-^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
+^endif
           case (ESMF_TYPEKIND_I4%dkind) 
 	    select case(rank)
 	      case (1)
@@ -828,9 +828,9 @@ end function
 
 
         select case (localkind)
+^ifndef ESMF_NO_INTEGER_1_BYTE
           case (ESMF_TYPEKIND_I1%dkind)
             select case (rank)
-^ifndef ESMF_NO_INTEGER_1_BYTE
 	      case (1)
                 call ESMF_LocalArrConstrF90Ptr1DI1(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
@@ -854,15 +854,15 @@ end function
                 call ESMF_LocalArrConstrF90Ptr7DI1(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
 ^endif
-^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
+^endif
+^ifndef ESMF_NO_INTEGER_2_BYTE
           case (ESMF_TYPEKIND_I2%dkind) 
 	    select case(rank)
-^ifndef ESMF_NO_INTEGER_2_BYTE
 	      case (1) 
                 call ESMF_LocalArrConstrF90Ptr1DI2(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
@@ -886,12 +886,12 @@ end function
                 call ESMF_LocalArrConstrF90Ptr7DI2(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
 ^endif
-^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
+^endif
           case (ESMF_TYPEKIND_I4%dkind) 
 	    select case(rank)
 	      case (1)
@@ -1504,9 +1504,9 @@ AllTypesMacro(ArrayLocalVar)
 
 
         select case (localkind)
+^ifndef ESMF_NO_INTEGER_1_BYTE
           case (ESMF_TYPEKIND_I1%dkind)
             select case (rank)
-^ifndef ESMF_NO_INTEGER_1_BYTE
 	      case (1)
 AllocAllocateMacro(integer, I1, 1, COL1, LEN1, RNG1, LOC1)
 	      case (2)
@@ -1523,15 +1523,15 @@ AllocAllocateMacro(integer, I1, 6, COL6, LEN6, RNG6, LOC6)
               case (7)
 AllocAllocateMacro(integer, I1, 7, COL7, LEN7, RNG7, LOC7)       
 ^endif
-^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
+^endif
+^ifndef ESMF_NO_INTEGER_2_BYTE
           case (ESMF_TYPEKIND_I2%dkind) 
 	    select case(rank)
-^ifndef ESMF_NO_INTEGER_2_BYTE
 	      case (1) 
 AllocAllocateMacro(integer, I2, 1, COL1, LEN1, RNG1, LOC1)
 	      case (2)
@@ -1549,12 +1549,12 @@ AllocAllocateMacro(integer, I2, 6, COL6, LEN6, RNG6, LOC6)
 AllocAllocateMacro(integer, I2, 7, COL7, LEN7, RNG7, LOC7)
 
 ^endif
-^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
+^endif
           case (ESMF_TYPEKIND_I4%dkind) 
 	    select case(rank)
 	      case (1)
@@ -1704,9 +1704,9 @@ AllTypesMacro(ArrayLocalVar)
     !! calling routines generated from macros by the preprocessor
 
         select case (localkind)
+^ifndef ESMF_NO_INTEGER_1_BYTE
           case (ESMF_TYPEKIND_I1%dkind)
             select case (rank)
-^ifndef ESMF_NO_INTEGER_1_BYTE
 	      case (1)
 AllocDeallocateMacro(integer, I1, 1, COL1, LEN1, RNG1, LOC1)
 	      case (2)
@@ -1723,15 +1723,15 @@ AllocDeallocateMacro(integer, I1, 6, COL6, LEN6, RNG6, LOC6)
               case (7)
 AllocDeallocateMacro(integer, I1, 7, COL7, LEN7, RNG7, LOC7)       
 ^endif
-^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
+^endif
+^ifndef ESMF_NO_INTEGER_2_BYTE
           case (ESMF_TYPEKIND_I2%dkind) 
 	    select case(rank)
-^ifndef ESMF_NO_INTEGER_2_BYTE
 	      case (1) 
 AllocDeallocateMacro(integer, I2, 1, COL1, LEN1, RNG1, LOC1)
 	      case (2)
@@ -1749,12 +1749,12 @@ AllocDeallocateMacro(integer, I2, 6, COL6, LEN6, RNG6, LOC6)
 AllocDeallocateMacro(integer, I2, 7, COL7, LEN7, RNG7, LOC7)
 
 ^endif
-^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
+^endif
           case (ESMF_TYPEKIND_I4%dkind) 
 	    select case(rank)
 	      case (1)
@@ -2306,9 +2306,9 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         ! Call a T/K/R specific interface
 
         select case (localkind)
+^ifndef ESMF_NO_INTEGER_1_BYTE
           case (ESMF_TYPEKIND_I1%dkind)
             select case (rank)
-^ifndef ESMF_NO_INTEGER_1_BYTE
 	      case (1)
                 call ESMF_LocalArrayAdjust1DI1(array, counts, &
                                     lb=lbounds, ub=ubounds, rc=status)
@@ -2332,15 +2332,15 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
                 call ESMF_LocalArrayAdjust7DI1(array, counts, &
                                     lb=lbounds, ub=ubounds, rc=status)
 ^endif
-^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
+^endif
+^ifndef ESMF_NO_INTEGER_2_BYTE
           case (ESMF_TYPEKIND_I2%dkind) 
 	    select case(rank)
-^ifndef ESMF_NO_INTEGER_2_BYTE
 	      case (1) 
                 call ESMF_LocalArrayAdjust1DI2(array, counts, &
                                     lb=lbounds, ub=ubounds, rc=status)
@@ -2364,12 +2364,12 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
                 call ESMF_LocalArrayAdjust7DI2(array, counts, &
                                     lb=lbounds, ub=ubounds, rc=status)
 ^endif
-^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
+^endif
           case (ESMF_TYPEKIND_I4%dkind) 
 	    select case(rank)
 	      case (1)
