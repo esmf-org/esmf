@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.7 2007/03/31 05:50:47 cdeluca Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.8 2007/04/02 23:04:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.7 2007/03/31 05:50:47 cdeluca Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.8 2007/04/02 23:04:03 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -87,6 +87,7 @@ module ESMF_ArrayGetMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     module procedure ESMF_ArrayGetDefault
+    module procedure ESMF_ArrayGetPDimPDe
     TypeKindRankInterfaceMacro(ArrayGetFPtr)
     module procedure ESMF_ArrayGetLarray
     module procedure ESMF_ArrayGetTotalCellMask1D
@@ -123,19 +124,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_Get()
-  subroutine ESMF_ArrayGetDefault(array, typekind, rank, larrayList, distgrid, &
-    delayout, indexflag, dimmap, inverseDimmap, exclusiveLBound, exclusiveUBound,&
+  subroutine ESMF_ArrayGetDefault(array, typekind, rank, larrayList, &
+    indexflag, dimmap, inverseDimmap, exclusiveLBound, exclusiveUBound,&
     computationalLBound, computationalUBound, totalLBound, totalUBound, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
-    name, rc)
+    name, distgrid, dimCount, dimExtent, delayout, deCount, localDeCount, &
+    localDeList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
     type(ESMF_TypeKind),           intent(out), optional :: typekind
     integer,                       intent(out), optional :: rank
     type(ESMF_LocalArray), target, intent(out), optional :: larrayList(:)
-    type(ESMF_DistGrid),           intent(out), optional :: distgrid
-    type(ESMF_DELayout),           intent(out), optional :: delayout
     type(ESMF_IndexFlag),          intent(out), optional :: indexflag
     integer,                       intent(out), optional :: dimmap(:)
     integer,                       intent(out), optional :: inverseDimmap(:)
@@ -150,6 +150,13 @@ contains
     integer,                       intent(out), optional :: totalLWidth(:,:)
     integer,                       intent(out), optional :: totalUWidth(:,:)
     character(len=ESMF_MAXSTR),    intent(out), optional :: name
+    type(ESMF_DistGrid),           intent(out), optional :: distgrid
+    integer,                       intent(out), optional :: dimCount
+    integer,                       intent(out), optional :: dimExtent(:,:)
+    type(ESMF_DELayout),           intent(out), optional :: delayout
+    integer,                       intent(out), optional :: deCount
+    integer,                       intent(out), optional :: localDeCount
+    integer,                       intent(out), optional :: localDeList(:)
     integer,                       intent(out), optional :: rc  
 !         
 !
@@ -171,10 +178,6 @@ contains
 !        objects. {\tt larrayList} must be allocated to be at least of size
 !        {\tt localDeCount}, i.e. the number of DEs associated with the calling
 !        PET.`
-!     \item[{[distgrid]}]
-!        Upon return this holds the associated {\tt ESMF\_DistGrid} object.
-!     \item[{[delayout]}]
-!        Upon return this holds the associated {\tt ESMF\_DELayout} object.
 !     \item[{[indexflag]}]
 !       Upon return this flag indicates how the DE-local indices are defined.
 !     \item[{[exclusiveLBound]}]
@@ -219,7 +222,29 @@ contains
 !        of size (dimCount, localDeCount).
 !     \item [{[name]}]
 !        Name of the Array object.
-!     \item[{[rc]}] 
+!     \item[{[distgrid]}]
+!        Upon return this holds the associated {\tt ESMF\_DistGrid} object.
+!     \item[{[dimCount]}]
+!        Upon return this holds the number dimensions (or rank) of the
+!        DistGrid associated with the Array object.
+!     \item[{[dimExtent]}]
+!        Upon return this array holds the extents for all dimensions of the
+!        DE-local LR boxes for all DEs in the DistGrid associated with the Array
+!        object. The supplied variable must be at least of size 
+!        {\tt (/dimCount, deCount/)}.
+!     \item[{[delayout]}]
+!        Upon return this holds the associated {\tt ESMF\_DELayout} object.
+!     \item[{[deCount]}]
+!        Upon return this holds the total number of DEs defined in the DELayout
+!        associated with the Array object.
+!     \item[{[localDeCount]}]
+!        Upon return this holds the number of PET-local DEs defined in the
+!        DELayout associated with the Array object.
+!     \item[{[localDeList]}]
+!        Upon return this holds the list of DE ids for the PET-local
+!        DEs defined in the DELayout associated with the Array object.
+!        The provided argument must at least be of size {\tt localDeCount}.
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -241,6 +266,8 @@ contains
     type(ESMF_InterfaceInt)       :: computationalUWidthArg ! helper variable
     type(ESMF_InterfaceInt)       :: totalLWidthArg         ! helper variable
     type(ESMF_InterfaceInt)       :: totalUWidthArg         ! helper variable
+    type(ESMF_DistGrid)           :: opt_distgrid           ! helper variable
+    type(ESMF_DELayout)           :: opt_delayout           ! helper variable
 
     ! Initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
@@ -302,7 +329,7 @@ contains
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayGet(array, typekind, rank, opt_larrayPtrList, &
-      len_larrayPtrList, distgrid, delayout, indexflag, dimmapArg, &
+      len_larrayPtrList, opt_distgrid, opt_delayout, indexflag, dimmapArg, &
       inverseDimmapArg, exclusiveLBoundArg, exclusiveUBoundArg, &
       computationalLBoundArg, computationalUBoundArg, &
       totalLBoundArg, totalUBoundArg, &
@@ -312,15 +339,17 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Set init code for deep C++ objects
+    call ESMF_DELayoutSetInitCreated(opt_delayout, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     if (present(delayout)) then
-      call ESMF_DELayoutSetInitCreated(delayout, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      delayout = opt_delayout ! copy deep C++ pointer
     endif
+    call ESMF_DistGridSetInitCreated(opt_distgrid, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     if (present(distgrid)) then
-      call ESMF_DistGridSetInitCreated(distgrid, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      distgrid = opt_distgrid ! copy deep C++ pointer
     endif
     if (present(larrayList)) then
       do i=1, len_larrayPtrList
@@ -373,9 +402,127 @@ contains
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
-    ! special call to get name out of Base class
+    ! Special call to get name out of Base class
     if (present(name)) then
       call c_ESMC_GetName(array, name, status)
+      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    ! Obtain DistGrid information
+    call ESMF_DistGridGet(opt_distgrid, dimCount=dimCount, dimExtent=dimExtent,&
+      rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Obtain DELayout information
+    call ESMF_DELayoutGet(opt_delayout, deCount=deCount, &
+      localDeCount=localDeCount, localDeList=localDeList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayGetDefault
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayGetPDimPDe()"
+!BOP
+! !IROUTINE: ESMF_ArrayGet - Get Array internals per dim per local DE
+
+! !INTERFACE:
+  ! Private name; call using ESMF_Get()
+  subroutine ESMF_ArrayGetPDimPDe(array, dim, localDe, dimExtent, indexList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),              intent(in)            :: array
+    integer,                       intent(in)            :: dim
+    integer,                       intent(in)            :: localDe
+    integer,                       intent(out), optional :: dimExtent
+    integer,                       intent(out), optional :: indexList(:)
+    integer,                       intent(out), optional :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Get internal information per dim per DE.
+!
+! This interface works for any number of DEs per PET.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!        Queried {\tt ESMF\_Array} object.
+!     \item[dim]
+!        Dimension for which information is requested.
+!     \item[localDe]
+!        Local DE for which information is requested.
+!     \item[{[dimExtent]}]
+!        Upon return this holds the DistGrid dimExtent for (dim, localDe).
+!     \item[{[indexList]}]
+!        Upon return this holds the list of DistGrid patch-local indices
+!        associated with (dim, localDe).
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer             :: status         ! local error status
+    integer             :: len_indexList  ! helper variable
+    type(ESMF_DistGrid) :: distgrid       ! helper variable
+    integer             :: dimCount       ! helper variable
+    integer, allocatable:: dimExtentInternal(:,:)  ! helper variable
+    integer             :: extent         ! helper variable
+    type(ESMF_DELayout) :: delayout       ! helper variable
+    integer             :: deCount        ! helper variable
+    integer             :: localDeCount   ! helper variable
+    integer, allocatable:: localDeList(:) ! helper variable
+    integer             :: de             ! helper variable
+
+    ! Initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
+    
+    ! Obtain auxiliary information
+    call ESMF_ArrayGet(array, distgrid=distgrid, dimCount=dimCount, &
+      delayout=delayout, deCount=deCount, localDeCount=localDeCount, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    allocate(dimExtentInternal(dimCount,deCount))
+    call ESMF_DistGridGet(distgrid, dimExtent=dimExtentInternal, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    allocate(localDeList(localDeCount))
+    call ESMF_DELayoutGet(delayout, localDeList=localDeList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    de=localDeList(localDe)
+    deallocate(localDeList)
+    extent = dimExtentInternal(dim, de+1)
+    deallocate(dimExtentInternal)
+      
+    ! Obtain requested information
+    if (present(dimExtent)) then
+      dimExtent = extent
+    endif
+
+    if (present(indexList)) then
+      if (size(indexList) < extent) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
+          "indexList argument dimensioned too small", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+      call ESMF_DistGridGet(distgrid, de=de, dim=dim, indexList=indexList, &
+        rc=status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -383,7 +530,7 @@ contains
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayGetDefault
+  end subroutine ESMF_ArrayGetPDimPDe
 !------------------------------------------------------------------------------
 
 
