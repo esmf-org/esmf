@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.20 2007/03/31 05:50:48 cdeluca Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.21 2007/04/02 23:06:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.20 2007/03/31 05:50:48 cdeluca Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.21 2007/04/02 23:06:31 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -63,7 +63,8 @@ program ESMF_ArrayScatterUTest
   real(ESMF_KIND_R4), allocatable :: srcfarray_R4(:,:)
   real(ESMF_KIND_R4):: value_R4
 #ifdef ESMF_EXHAUSTIVE
-  integer:: k, kk
+  integer:: k, kk, ii, jj, dimExtent1, dimExtent2
+  integer, allocatable:: indexList1(:), indexList2(:)
   real(ESMF_KIND_R8), pointer :: farrayPtr3d(:,:,:) ! matching F90 array pointer
   real(ESMF_KIND_R8), allocatable :: srcfarray3d(:,:,:)
   integer:: exclusiveLBound(2,1), exclusiveUBound(2,1)
@@ -190,8 +191,7 @@ print *, min_R4, min_R8
 
   !------------------------------------------------------------------------
   ! preparations for same test as above but omit farray on PETs not root
-  call ESMF_ArraySpecSet(arrayspec, &
-    kind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
     regDecomp=(/2,2/), rc=rc)
@@ -350,8 +350,7 @@ print *, min_R4, min_R8
   ! preparations for same test as above but with a DistGrid that has less
   ! cells in the first dimension than DEs requested in the regDecomp argument.
   ! -> there will be DEs not associated with DistGrid cells, namely DE 1 and 3.
-  call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R8, rank=2, &
-    rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/1,23/), &
     regDecomp=(/2,2/), rc=rc)
@@ -426,8 +425,7 @@ print *, min_R4, min_R8
   !------------------------------------------------------------------------
   ! preparations for testing ArrayScatter() for a 
   ! 2D+1 Array, i.e. an Array with 3D data rank but 2D decomposition
-  call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R8, rank=3, &
-    rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
     regDecomp=(/2,2/), rc=rc)
@@ -504,10 +502,12 @@ print *, min_R4, min_R8
   deallocate(srcfarray3d)
   
   !------------------------------------------------------------------------
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
   ! preparations for testing ArrayScatter() for a 2D+1 Array with 
   ! non-contiguous exclusive region 
-  call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R8, rank=3, &
-    rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/2,3/), totalUWidth=(/3,4/), &
@@ -592,6 +592,133 @@ print *, min_R4, min_R8
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   deallocate(srcfarray3d)  
+
+  !------------------------------------------------------------------------
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  ! preparations for testing ArrayScatter() for a 2D+1 Array with 
+  ! non-contiguous exclusive region and cyclic decomposition
+  call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  distgrid = ESMF_DistGridCreate(minCorner=(/0,1/), maxCorner=(/14,23/), &
+    regDecomp=(/2,2/), decompflag=(/ESMF_DECOMP_DEFAULT,ESMF_DECOMP_CYCLIC/),&
+    rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    totalLWidth=(/2,3/), totalUWidth=(/3,4/), &
+    lbounds=(/-5/), ubounds=(/4/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!call ESMF_ArrayPrint(array)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3d, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  farrayPtr3d = real(localPet,ESMF_KIND_R8)  ! initialize each DE-local data chunk of Array
+!print *, "farrayPtr3d:", farrayPtr3d
+  ! prepare srcfarray on all PETs -> serves as ref. in comparison after scatter
+  allocate(srcfarray3d(15, 23, 10))
+  do k=lbound(srcfarray3d,3), ubound(srcfarray3d,3)
+    do j=lbound(srcfarray3d,2), ubound(srcfarray3d,2)
+      do i=lbound(srcfarray3d,1), ubound(srcfarray3d,1)
+        srcfarray3d(i,j,k) = 123._ESMF_KIND_R8*sin(real(i,ESMF_KIND_R8)) + &
+                             321._ESMF_KIND_R8*cos(real(j,ESMF_KIND_R8)) + &
+                             20._ESMF_KIND_R8*real(k,ESMF_KIND_R8)
+      enddo
+    enddo
+  enddo
+!print *, "srcfarray3d:", srcfarray3d
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "2D+1 non-contiguous exclusive region and cyclic decomposition ArrayScatter() Test"
+  call ESMF_ArrayScatter(array, srcfarray3d, rootPet=0, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!call ESMF_ArrayPrint(array)  
+  
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "ArrayGet() Test"
+  call ESMF_ArrayGet(array, dim=1, localDe=1, dimExtent=dimExtent1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  allocate(indexList1(dimExtent1))
+  
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "ArrayGet() Test"
+  call ESMF_ArrayGet(array, dim=1, localDe=1, indexList=indexList1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "ArrayGet() Test"
+  call ESMF_ArrayGet(array, dim=2, localDe=1, dimExtent=dimExtent2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  allocate(indexList2(dimExtent2))
+  
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "ArrayGet() Test"
+  call ESMF_ArrayGet(array, dim=2, localDe=1, indexList=indexList2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  ! Verify srcfarray3d data after scatter
+  write(failMsg, *) "Source data was modified."
+  write(name, *) "Verifying srcfarray3d data after 2D+1 non-contiguous exclusive region and cyclic decomposition ArrayScatter() Test"
+  rc = ESMF_SUCCESS
+  do k=lbound(srcfarray3d,3), ubound(srcfarray3d,3)
+    do j=lbound(srcfarray3d,2), ubound(srcfarray3d,2)
+      do i=lbound(srcfarray3d,1), ubound(srcfarray3d,1)
+        value = 123._ESMF_KIND_R8*sin(real(i,ESMF_KIND_R8)) +  &
+                321._ESMF_KIND_R8*cos(real(j,ESMF_KIND_R8)) +  &
+                 20._ESMF_KIND_R8*real(k,ESMF_KIND_R8)
+        value = value - srcfarray3d(i,j,k)
+        if (abs(value) > min_R8) rc = ESMF_FAILURE
+      enddo
+    enddo
+  enddo
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  ! Verify Array data after scatter
+  write(failMsg, *) "Array data wrong."
+  write(name, *) "Verifying destination Array data after 2D+1 non-contiguous exclusive region and cyclic decomposition ArrayScatter() Test"
+  rc = ESMF_SUCCESS
+  do k=lbound(farrayPtr3d,3), ubound(farrayPtr3d,3)
+    ! correct wrt lbound
+    kk = k - lbound(farrayPtr3d,3) + lbound(srcfarray3d,3)
+    do j=1, dimExtent2
+      ! dereference via indexList and correct wrt lbound 
+      jj = indexList2(j) - 1 + lbound(srcfarray3d,2)
+      do i=1, dimExtent1
+        ! dereference via indexList and correct wrt lbound 
+        ii = indexList1(i) - 0 + lbound(srcfarray3d,1)
+        if (abs(farrayPtr3d(i,j,k) - srcfarray3d(ii,jj,kk)) > min_R8) then
+          rc = ESMF_FAILURE
+        endif
+      enddo
+    enddo
+  enddo
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  ! cleanup  
+  call ESMF_ArrayDestroy(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  deallocate(srcfarray3d)  
+  deallocate(indexList1)
+  deallocate(indexList2)
   
 #endif
   
