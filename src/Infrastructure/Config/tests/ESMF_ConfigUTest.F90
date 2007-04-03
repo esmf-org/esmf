@@ -1226,7 +1226,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
 
      !-----------------------------------------------------------------------
-     !NEX_UTest
+     !EX_UTest
      ! Config Set Attribute Int Test 1: Append to end of config object
      write(failMsg, *) "Did not return Member_Number 20 and ESMF_SUCCESS"
      write(name, *) "Config Set Attribute IntI4 Test 1"
@@ -1278,7 +1278,7 @@ subroutine MultPar_SingleLine_Vf
       endif
 
      !-----------------------------------------------------------------------
-     !NEX_UTest
+     !EX_UTest
      ! Config Set Attribute Int Test 3: Overwrite; insert 1 extra character
      write(failMsg, *) &
            "Did not return Number_of_Constituents 123 and ESMF_SUCCESS"
@@ -1307,7 +1307,7 @@ subroutine MultPar_SingleLine_Vf
       endif
 
      !-----------------------------------------------------------------------
-     !NEX_UTest
+     !EX_UTest
      ! Config Set Attribute Int Test 4:  Overwrite; delete 1 extra character
      write(failMsg, *) "Did not return Number_of_Delegates 5 and ESMF_SUCCESS"
      write(name, *) "Config Set Attribute IntI4 Test 4"
@@ -1396,7 +1396,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.29 2007/04/03 03:59:14 theurich Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.30 2007/04/03 22:17:42 theurich Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
