@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather1DUTest.F90,v 1.12 2007/03/31 05:51:07 cdeluca Exp $
+! $Id: ESMF_FieldGather1DUTest.F90,v 1.13 2007/04/03 16:36:24 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldGather1DUTest.F90,v 1.12 2007/03/31 05:51:07 cdeluca Exp $'
+      '$Id: ESMF_FieldGather1DUTest.F90,v 1.13 2007/04/03 16:36:24 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -110,7 +110,7 @@
       max(2)          = 53.0
       horzStagger     = ESMF_GRID_HORZ_STAGGER_A
       call ESMF_ArraySpecSet(arrayspec, rank=2, &
-                             kind=ESMF_TYPEKIND_R8, rc=rc)
+                             typekind=ESMF_TYPEKIND_R8, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-----------------------------------------------------------------------------

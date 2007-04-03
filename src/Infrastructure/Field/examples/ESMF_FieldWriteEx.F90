@@ -126,7 +126,7 @@
   endif
 
   call ESMF_ArraySpecSet(arrayspec, rank=2, &
-       kind=ESMF_TYPEKIND_R4, rc=status)
+       typekind=ESMF_TYPEKIND_R4, rc=status)
   if (status.NE.ESMF_SUCCESS) then
      print*, "' call ESMF_ArraySpecSet' failed"
      finalrc = ESMF_FAILURE

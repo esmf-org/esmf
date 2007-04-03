@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.22 2007/03/31 02:26:01 cdeluca Exp $
+! $Id: user_model1.F90,v 1.23 2007/04/03 16:36:25 cdeluca Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -125,7 +125,7 @@
 
         ! Set up a 2D real array
         call ESMF_ArraySpecSet(arrayspec, rank=2, &
-                                kind=ESMF_TYPEKIND_R8)
+                               typekind=ESMF_TYPEKIND_R8)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Create three fields and have it create the arrays internally

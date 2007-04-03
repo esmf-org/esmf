@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistArb2ArbSTest.F90,v 1.6 2007/03/31 02:26:01 cdeluca Exp $
+! $Id: ESMF_BundleRedistArb2ArbSTest.F90,v 1.7 2007/04/03 16:36:25 cdeluca Exp $
 !
 ! System test BundleRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -186,10 +186,10 @@
 
      ! Set up a 1D (for the arbitrarily distributed Bundle) and a 1D real array
      call ESMF_ArraySpecSet(arrayspec1, rank=1, &
-                            kind=ESMF_TYPEKIND_R8)
+                            typekind=ESMF_TYPEKIND_R8)
      if (status .ne. ESMF_SUCCESS) goto 20
      call ESMF_ArraySpecSet(arrayspec2, rank=1, &
-                            kind=ESMF_TYPEKIND_R8)
+                            typekind=ESMF_TYPEKIND_R8)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Create bundles

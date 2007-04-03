@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.32 2007/03/31 02:26:02 cdeluca Exp $
+! $Id: user_model2.F90,v 1.33 2007/04/03 16:36:26 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -151,7 +151,7 @@
 
       ! Set up a 3D real array
       call ESMF_ArraySpecSet(arrayspec, rank=3, &
-                              kind=ESMF_TYPEKIND_R8)
+                             typekind=ESMF_TYPEKIND_R8)
 
       ! Create a datamap
       order(1) = 0

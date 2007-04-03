@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.20 2007/03/31 05:50:54 cdeluca Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.21 2007/04/03 16:36:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -523,7 +523,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
-    call ESMF_FieldGet(field, rank=rank, kind=dk, rc=rc)
+    call ESMF_FieldGet(field, rank=rank, typekind=dk, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
     ! force to integer so they can be used below in select cases.
@@ -1031,7 +1031,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
 
-    call ESMF_FieldGet(field, haloWidth=halo, rank=rank, kind=dk, rc=rc)
+    call ESMF_FieldGet(field, haloWidth=halo, rank=rank, typekind=dk, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
     ! force to integer so they can be used below in select cases.
@@ -2042,9 +2042,9 @@ function CreateDataField(name, grid, layout, relloc, r4value, r8value, rc)
 
   ! fixed items:  2d array, data type real, halo width of 2.
   if (use_r8) then
-      call ESMF_ArraySpecSet(as, rank=2, kind=ESMF_TYPEKIND_R8, rc=status)
+      call ESMF_ArraySpecSet(as, rank=2, typekind=ESMF_TYPEKIND_R8, rc=status)
   else
-      call ESMF_ArraySpecSet(as, rank=2, kind=ESMF_TYPEKIND_R4, rc=status)
+      call ESMF_ArraySpecSet(as, rank=2, typekind=ESMF_TYPEKIND_R4, rc=status)
   endif
   if (ESMF_LogMsgFoundError(status, &
                             ESMF_ERR_PASSTHRU, &

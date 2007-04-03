@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.114 2007/03/31 05:51:19 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.115 2007/04/03 16:36:24 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.114 2007/03/31 05:51:19 cdeluca Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.115 2007/04/03 16:36:24 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -543,7 +543,7 @@
       real(ESMF_KIND_R4), dimension(:,:), pointer :: dstData2D
       real(ESMF_KIND_R4), dimension(:,:,:), pointer :: dstData3D
       !real(ESMF_KIND_R4), dimension(:,:,:,:), pointer :: dstData4D
-      type(ESMF_TypeKind) :: kind
+      type(ESMF_TypeKind) :: typekind
       type(ESMF_Route) :: rh
       type(ESMF_LocalArray) :: srcindexarr, dstindexarr, weightsarr
       integer :: numlinks
@@ -609,7 +609,7 @@
 
       ! to get into this code we have already verified the types match in all
       ! the arrays, so just check the first one.
-      call ESMF_InternArrayGet(srcArrayList(1), rank=rank, kind=kind, &
+      call ESMF_InternArrayGet(srcArrayList(1), rank=rank, typekind=typekind, &
                            counts=counts, rc=localrc)
   
       allocate(gatheredArrayList(narrays), stat=localrc)
@@ -621,7 +621,7 @@
 
       do na = 1, narrays
 
-        gatheredArrayList(na) = ESMF_LocalArrayCreate(1, kind, asize, &
+        gatheredArrayList(na) = ESMF_LocalArrayCreate(1, typekind, asize, &
                                                       rc=localrc)
         srcLocalArrayList(na) = srcArrayList(na)
       enddo 
@@ -889,7 +889,7 @@
       real(ESMF_KIND_R8), dimension(:,:), pointer :: dstData2D
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: dstData3D
       !real(ESMF_KIND_R8), dimension(:,:,:,:), pointer :: dstData4D
-      type(ESMF_TypeKind) :: kind
+      type(ESMF_TypeKind) :: typekind
       type(ESMF_Route) :: rh
       type(ESMF_LocalArray) :: srcindexarr, dstindexarr, weightsarr
       integer :: numlinks
@@ -956,10 +956,10 @@
       ! to get into this code we have already verified the types match in all
       ! the arrays, so just check the first one.
       if (hasSrcData) then
-        call ESMF_InternArrayGet(srcArrayList(1), rank=rank, kind=kind, &
+        call ESMF_InternArrayGet(srcArrayList(1), rank=rank, typekind=typekind, &
                            counts=counts, rc=localrc)
       else
-        call ESMF_InternArrayGet(dstArrayList(1), rank=rank, kind=kind, &
+        call ESMF_InternArrayGet(dstArrayList(1), rank=rank, typekind=typekind, &
                            counts=counts, rc=localrc)
       endif
   
@@ -972,7 +972,7 @@
 
       do na = 1, narrays
 
-        gatheredArrayList(na) = ESMF_LocalArrayCreate(1, kind, asize, &
+        gatheredArrayList(na) = ESMF_LocalArrayCreate(1, typekind, asize, &
                                                       rc=localrc)
         srcLocalArrayList(na) = srcArrayList(na)
       enddo 
@@ -1737,14 +1737,14 @@
 
       ! get datakinds from the two arrays
       if (hasSrcData) then
-        call ESMF_InternArrayGet(srcArray, kind=srcTypeKind, rc=localrc)
+        call ESMF_InternArrayGet(srcArray, typekind=srcTypeKind, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
         dataTypeKind = srcTypeKind
       endif
       if (hasDstData) then
-        call ESMF_InternArrayGet(dstArray, kind=dstTypeKind, rc=localrc)
+        call ESMF_InternArrayGet(dstArray, typekind=dstTypeKind, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1908,11 +1908,11 @@
       endif
 
       ! get datakinds from the two arrays
-      call ESMF_InternArrayGet(srcArrayList(1), kind=srcTypeKind, rc=localrc)
+      call ESMF_InternArrayGet(srcArrayList(1), typekind=srcTypeKind, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_InternArrayGet(dstArrayList(1), kind=dstTypeKind, rc=localrc)
+      call ESMF_InternArrayGet(dstArrayList(1), typekind=dstTypeKind, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return

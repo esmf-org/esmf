@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.242 2007/03/31 05:51:03 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.243 2007/04/03 16:36:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -248,7 +248,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.242 2007/03/31 05:51:03 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.243 2007/04/03 16:36:23 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1001,7 +1001,7 @@
 !
 ! !INTERFACE:
       subroutine ESMF_FieldGet(field, grid, array, datamap, horzRelloc, &
-                               vertRelloc, haloWidth, iospec, kind, &
+                               vertRelloc, haloWidth, iospec, typekind, &
                                rank, lbounds, ubounds, name, rc)
 !
 ! !ARGUMENTS:
@@ -1013,7 +1013,7 @@
       type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
       integer, intent(out), optional :: haloWidth
       type(ESMF_IOSpec), intent(out), optional :: iospec 
-      type(ESMF_TypeKind), intent(out), optional :: kind
+      type(ESMF_TypeKind), intent(out), optional :: typekind
       integer, intent(out), optional :: rank
       integer, dimension(:), intent(out), optional :: lbounds
       integer, dimension(:), intent(out), optional :: ubounds
@@ -1047,8 +1047,8 @@
 !           {\tt ESMF\_Array} object.
 !     \item [{[iospec]}]
 !           {\tt ESMF\_IOSpec} object which contains settings for options
-!     \item [{[kind]}]
-!           TypeKind specifyer for type of Field.
+!     \item [{[typekind]}]
+!           TypeKind specifier for Field.
 !     \item [{[rank]}]
 !           Rank of Field data.
 !     \item [{[name]}]
@@ -1140,14 +1140,14 @@
                                       ESMF_CONTEXT, rc)) return
         endif
 
-        if (present(kind)) then
+        if (present(typekind)) then
             if (ftype%datastatus .ne. ESMF_STATUS_READY) then
                 if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                  "Cannot return haloWidth because no data attached to Field", &
                                  ESMF_CONTEXT, rc)) return
             endif
             call ESMF_InternArrayGet(ftype%localfield%localdata, &
-                               kind=kind, rc=rc)
+                               typekind=typekind, rc=rc)
             if (ESMF_LogMsgFoundError(rc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return

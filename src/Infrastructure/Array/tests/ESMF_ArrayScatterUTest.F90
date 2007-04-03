@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.22 2007/04/03 03:24:05 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.23 2007/04/03 16:36:22 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.22 2007/04/03 03:24:05 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.23 2007/04/03 16:36:22 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -98,7 +98,8 @@ print *, min_R4, min_R8
   
   !------------------------------------------------------------------------
   ! preparations
-  call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, &
+    rank=2, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
     regDecomp=(/2,2/), rc=rc)
@@ -191,7 +192,8 @@ print *, min_R4, min_R8
 
   !------------------------------------------------------------------------
   ! preparations for same test as above but omit farray on PETs not root
-  call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, &
+    rank=2, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
     regDecomp=(/2,2/), rc=rc)
@@ -274,7 +276,8 @@ print *, min_R4, min_R8
 
   !------------------------------------------------------------------------
   ! preparations for same test as above but with ESMF_TYPEKIND_R4
-  call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R4, rank=2, rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R4, &
+    rank=2, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
     regDecomp=(/2,2/), rc=rc)
@@ -352,7 +355,8 @@ print *, min_R4, min_R8
   ! preparations for same test as above but with a DistGrid that has less
   ! cells in the first dimension than DEs requested in the regDecomp argument.
   ! -> there will be DEs not associated with DistGrid cells, namely DE 1 and 3.
-  call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, &
+    rank=2, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/1,23/), &
     regDecomp=(/2,2/), rc=rc)
@@ -427,7 +431,8 @@ print *, min_R4, min_R8
   !------------------------------------------------------------------------
   ! preparations for testing ArrayScatter() for a 
   ! 2D+1 Array, i.e. an Array with 3D data rank but 2D decomposition
-  call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, &
+    rank=3, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
     regDecomp=(/2,2/), rc=rc)
@@ -509,7 +514,8 @@ print *, min_R4, min_R8
   !------------------------------------------------------------------------
   ! preparations for testing ArrayScatter() for a 2D+1 Array with 
   ! non-contiguous exclusive region 
-  call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, &
+    rank=3, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/2,3/), totalUWidth=(/3,4/), &
@@ -603,7 +609,7 @@ print *, min_R4, min_R8
   !------------------------------------------------------------------------
   ! preparations for testing ArrayScatter() for a 2D+1 Array with 
   ! non-contiguous exclusive region and cyclic decomposition
-  call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   distgrid = ESMF_DistGridCreate(minCorner=(/0,1/), maxCorner=(/14,23/), &
     regDecomp=(/2,2/), decompflag=(/ESMF_DECOMP_DEFAULT,ESMF_DECOMP_CYCLIC/),&

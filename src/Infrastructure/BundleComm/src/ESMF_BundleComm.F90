@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.65 2007/03/31 05:50:53 cdeluca Exp $
+! $Id: ESMF_BundleComm.F90,v 1.66 2007/04/03 16:36:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.65 2007/03/31 05:50:53 cdeluca Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.66 2007/04/03 16:36:23 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -2037,12 +2037,12 @@
       ! Make sure the data types are consistent. 
       do i=1, stypep%field_count
           call ESMF_InternArrayGet(stypep%flist(1)%ftypep%localfield%localdata, &
-                             rank=srank, kind=skind, rc=status)
+                             rank=srank, typekind=skind, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           call ESMF_InternArrayGet(dtypep%flist(1)%ftypep%localfield%localdata, &
-                             rank=drank, kind=dkind, rc=status)
+                             rank=drank, typekind=dkind, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2071,7 +2071,7 @@
 
           if (skind .ne. dkind) then
               call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                  "Corresponding Fields in Bundles must have same data kind", &
+                  "Corresponding Fields in Bundles must have same typekind", &
                                        ESMF_CONTEXT, rc)
               return
           endif

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.5 2007/03/31 02:26:01 cdeluca Exp $
+! $Id: user_model1.F90,v 1.6 2007/04/03 16:36:25 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -83,7 +83,7 @@ module user_model1
     if (status .ne. ESMF_SUCCESS) goto 10
     
     ! Create the source Array and add it to the export State
-    call ESMF_ArraySpecSet(arrayspec, kind=ESMF_TYPEKIND_R8, &
+    call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, &
       rank=2, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 10
     distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/100,150/), &

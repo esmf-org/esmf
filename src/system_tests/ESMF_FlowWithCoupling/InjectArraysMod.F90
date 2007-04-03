@@ -1,4 +1,4 @@
-! $Id: InjectArraysMod.F90,v 1.10 2007/03/31 02:26:03 cdeluca Exp $
+! $Id: InjectArraysMod.F90,v 1.11 2007/04/03 16:36:27 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -102,7 +102,7 @@
 !
       haloWidth = 1
       call ESMF_ArraySpecSet(arrayspec, rank=2, &
-                              kind=ESMF_TYPEKIND_R4)
+                             typekind=ESMF_TYPEKIND_R4)
 
       field_sie  = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="SIE", rc=status)

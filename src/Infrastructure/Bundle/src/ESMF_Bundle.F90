@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.104 2007/03/31 05:50:52 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.105 2007/04/03 16:36:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@
       private
         ! for starters:
         integer :: datarank
-        type(ESMF_TypeKind) :: datakind
+        type(ESMF_TypeKind) :: typekind
         integer :: indexorders(ESMF_MAXDIM)
         integer :: nonindexcounts(ESMF_MAXDIM) 
         type(ESMF_Relloc) :: datahorzrelloc, datavertrelloc
@@ -2580,7 +2580,7 @@ end function
         ! if you get here, this field has an array.  check it for 
         ! data types, etc.
         call ESMF_InternArrayGet(array, rank=pattern%datarank, &
-                           kind=pattern%datakind, &
+                           typekind=pattern%typekind, &
                            rc=status)
         if (status .ne. ESMF_SUCCESS) cycle
 
@@ -2616,7 +2616,7 @@ end function
         ! if you get here, this field has an array.  check it for 
         ! data types, etc.
         call ESMF_InternArrayGet(array, rank=candidate%datarank, &
-                           kind=candidate%datakind, &
+                           typekind=candidate%typekind, &
                            rc=status)
         if (status .ne. ESMF_SUCCESS) return
 
@@ -2627,7 +2627,7 @@ end function
 
         ! now we have all the info; compare and bail on first mismatch
         if (pattern%datarank .ne. candidate%datarank ) return
-        if (pattern%datakind .ne. candidate%datakind ) return
+        if (pattern%typekind .ne. candidate%typekind ) return
         if (pattern%haloWidth .ne. candidate%haloWidth) return
         if (pattern%datahorzrelloc .ne. candidate%datahorzrelloc) return
         ! TODO: if grid is 2d, then this is not set.  can it still be tested?

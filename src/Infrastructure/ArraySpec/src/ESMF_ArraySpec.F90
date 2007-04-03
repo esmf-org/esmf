@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.21 2007/03/31 05:50:49 cdeluca Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.22 2007/04/03 16:36:22 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -61,8 +61,8 @@ module ESMF_ArraySpecMod
   type ESMF_ArraySpec
   sequence
   private
-    integer             :: rank   ! number of dimensions
-    type(ESMF_TypeKind) :: kind   ! fortran "kind" enum/integer
+    integer             :: rank       ! number of dimensions
+    type(ESMF_TypeKind) :: typekind   ! fortran type and kind enum/integer
     ESMF_INIT_DECLARE
   end type
 
@@ -89,7 +89,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.21 2007/03/31 05:50:49 cdeluca Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.22 2007/04/03 16:36:22 cdeluca Exp $'
 
 !==============================================================================
 
@@ -103,12 +103,12 @@ module ESMF_ArraySpecMod
 ! !IROUTINE: ESMF_ArraySpecGet - Get values from an ArraySpec
 !
 ! !INTERFACE:
-  subroutine ESMF_ArraySpecGet(arrayspec, rank, kind, rc)
+  subroutine ESMF_ArraySpecGet(arrayspec, rank, typekind, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArraySpec), intent(inout)            :: arrayspec
+    type(ESMF_ArraySpec), intent(inout)         :: arrayspec
     integer,              intent(out), optional :: rank
-    type(ESMF_TypeKind),  intent(out), optional :: kind
+    type(ESMF_TypeKind),  intent(out), optional :: typekind
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -121,8 +121,8 @@ module ESMF_ArraySpecMod
 ! \item[rank]
 !   {\tt ESMF\_Array} rank (dimensionality -- 1D, 2D, etc). Maximum
 !    possible is 7D.
-! \item[kind]
-!   {\tt ESMF\_Array} kind.  See section \ref{opt:typekind} for valid values.
+! \item[typekind]
+!   {\tt ESMF\_Array} typekind.  See section \ref{opt:typekind} for valid values.
 ! \item[[rc]]
 !  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -146,7 +146,7 @@ module ESMF_ArraySpecMod
 
     ! Get arrayspec contents
     if(present(rank)) rank = arrayspec%rank
-    if(present(kind)) kind = arrayspec%kind
+    if(present(typekind)) typekind = arrayspec%typekind
 
     ! Return successfully
     if (rcpresent) rc = ESMF_SUCCESS
@@ -157,22 +157,20 @@ module ESMF_ArraySpecMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySpecSet"
 !BOP
-! !IROUTINE: ESMF_ArraySpecSet - Set values for an ArraySpec using type and kind
+! !IROUTINE: ESMF_ArraySpecSet - Set values for an ArraySpec
 !
 ! !INTERFACE:
-  subroutine ESMF_ArraySpecSet(arrayspec, rank, kind, rc)
+  subroutine ESMF_ArraySpecSet(arrayspec, rank, typekind, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArraySpec), intent(inout)         :: arrayspec
     integer,              intent(in)            :: rank
-    type(ESMF_TypeKind),  intent(in)            :: kind
+    type(ESMF_TypeKind),  intent(in)            :: typekind
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Creates a description of the data -- the type, the dimensionality, etc.
-! This internal version allows the type and kind to be specified as a single
-! argument, which eases the depth of the nesting of case statements in
-! handling all possible combination of arguments.
+! Creates a description of the data -- the typekind, the rank,
+! and the dimensionality.
 !
 ! The arguments are:
 ! \begin{description}
@@ -180,8 +178,8 @@ module ESMF_ArraySpecMod
 !   The {\tt ESMF\_ArraySpec} to set.
 ! \item[rank]
 !   Array rank (dimensionality -- 1D, 2D, etc). Maximum allowed is 7D.
-! \item[kind]
-!   {\tt ESMF\_Array} kind.  See section \ref{opt:typekind} for valid values.
+! \item[typekind]
+!   {\tt ESMF\_Array} typekind.  See section \ref{opt:typekind} for valid values.
 ! \item[{[rc]}]
 !  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -216,9 +214,9 @@ module ESMF_ArraySpecMod
                              ESMF_CONTEXT, rc)) return
     endif
 
-    ! Since type and kind are derived types, you cannot set them to
-    ! illegal values, so no additional validity tests are needed.
-    arrayspec%kind = kind
+    ! Since typekind is a derived type, you cannot set it to
+    ! illegal values, and no additional validity tests are needed.
+    arrayspec%typekind = typekind
 
     if (rcpresent) rc = ESMF_SUCCESS
 

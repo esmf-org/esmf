@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.5 2007/03/31 02:26:02 cdeluca Exp $
+! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.6 2007/04/03 16:36:26 cdeluca Exp $
 !
 ! System test FieldRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -177,10 +177,10 @@
 
      ! Set up a 1D (for the arbitrarily distributed Field) and a 2D real array
      call ESMF_ArraySpecSet(arrayspec1, rank=1, &
-                            kind=ESMF_TYPEKIND_R8)
+                            typekind=ESMF_TYPEKIND_R8)
      if (status .ne. ESMF_SUCCESS) goto 20
      call ESMF_ArraySpecSet(arrayspec2, rank=1, &
-                            kind=ESMF_TYPEKIND_R8)
+                            typekind=ESMF_TYPEKIND_R8)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Create the field and have it create the array internally for each grid

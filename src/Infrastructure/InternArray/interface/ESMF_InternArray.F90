@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArray.F90,v 1.15 2007/03/31 05:51:12 cdeluca Exp $
+! $Id: ESMF_InternArray.F90,v 1.16 2007/04/03 16:36:24 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -142,7 +142,7 @@ module ESMF_InternArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArray.F90,v 1.15 2007/03/31 05:51:12 cdeluca Exp $'
+    '$Id: ESMF_InternArray.F90,v 1.16 2007/04/03 16:36:24 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -270,14 +270,14 @@ end subroutine
 ! !IROUTINE: ESMF_InternArrayGet
 !
 ! !INTERFACE:
-      subroutine ESMF_InternArrayGet(array, rank, kind, counts, &
+      subroutine ESMF_InternArrayGet(array, rank, typekind, counts, &
                                lbounds, ubounds, strides, haloWidth, &
                                base, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(in) :: array
       integer, intent(out), optional :: rank
-      type(ESMF_TypeKind), intent(out), optional :: kind
+      type(ESMF_TypeKind), intent(out), optional :: typekind
       integer, dimension(:), intent(out), optional :: counts
       integer, dimension(:), intent(out), optional :: lbounds
       integer, dimension(:), intent(out), optional :: ubounds
@@ -300,12 +300,10 @@ end subroutine
 !           An {\tt ESMF\_Array}.
 !     \item [{[rank]}]
 !           The number of dimensions in the {\tt array}.
-!     \item [{[kind]}]
+!     \item [{[typekind]}]
 !           {\tt ESMF\_TypeKind} variable which indicates 
-!           the item size in bytes.  Will be one of:
-!           {\tt ESMF\_I1}, {\tt ESMF\_I2}, {\tt ESMF\_I4},
-!           {\tt ESMF\_I8}, {\tt ESMF\_R4}, {\tt ESMF\_R8},
-!           {\tt ESMF\_C8}, or {\tt ESMF\_C16}.
+!           the item size in bytes.  See section \ref{opt:typekind}
+!           for valid values.
 !     \item [{[counts]}]
 !           The number of items in each dimension of the {\tt array}.
 !     \item [{[lbounds]}]
@@ -348,8 +346,8 @@ end subroutine
          if (status .ne. ESMF_SUCCESS) return
       endif
 
-      if (present(kind)) then
-         call c_ESMC_IArrayGetTypeKind(array, kind, status)
+      if (present(typekind)) then
+         call c_ESMC_IArrayGetTypeKind(array, typekind, status)
          if (status .ne. ESMF_SUCCESS) return
       endif
 
@@ -1505,44 +1503,6 @@ end subroutine
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_IArrayReorder"
-!BOPI
-! !IROUTINE: ESMF_IArrayReorder
-!
-! !INTERFACE:
-      subroutine ESMF_IArrayReorder(array, newarrayspec, newarray, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_InternArray) :: array 
-      type(ESMF_ArraySpec), intent(in) :: newarrayspec
-      type(ESMF_InternArray):: newarray   
-      integer, intent(out), optional :: rc       
-!
-! !DESCRIPTION:
-!      Used to alter the local memory ordering (layout) of this Array.
-!
-!  !TODO: remove this note before generating user documentation
-!
-!      (i am not sure this makes sense now, or that the routine should be
-!      in this class.  but i am leaving this here as a reminder that we
-!      might need some low level reorder functions.  maybe the argument
-!      should be another array or an arrayspec which describes what you
-!      want, and the input array is what exists, and this routine can then
-!      make one into the other.   is this a type of create?  or is this
-!      a copy?)
-!
-!EOPI
-
-!
-! TODO: code goes here
-!	Changed BOP/EOP to BOPI/EOPI until code is written.
-!
-        if (present(rc)) rc = ESMF_FAILURE
-
-        end subroutine ESMF_IArrayReorder
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArraySetInt4Attr"
 
 !BOP
@@ -2504,7 +2464,6 @@ end subroutine
 
        end subroutine ESMF_InternArrayWrite
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InternArrayWriteRestart"
@@ -2545,9 +2504,6 @@ end subroutine
         if (present(rc)) rc = ESMF_FAILURE
 
         end subroutine ESMF_InternArrayWriteRestart
-
-
-!------------------------------------------------------------------------------
 
 
 

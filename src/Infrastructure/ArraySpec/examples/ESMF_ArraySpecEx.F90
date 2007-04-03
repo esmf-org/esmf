@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpecEx.F90,v 1.7 2007/03/31 05:50:48 cdeluca Exp $
+! $Id: ESMF_ArraySpecEx.F90,v 1.8 2007/04/03 16:36:22 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
       ! local variables 
       type(ESMF_ArraySpec) :: arrayDS
       integer :: myrank
-      type(ESMF_TypeKind) :: mykind
+      type(ESMF_TypeKind) :: mytypekind
 
 
       ! return code
@@ -56,7 +56,7 @@
 
 !BOC
       call ESMF_ArraySpecSet(arrayDS, rank=2, &
-                             kind=ESMF_TYPEKIND_R8, rc=rc)
+                             typekind=ESMF_TYPEKIND_R8, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -68,7 +68,7 @@
 !EOP
 
 !BOC
-      call ESMF_ArraySpecGet(arrayDS, myrank, mykind, rc)
+      call ESMF_ArraySpecGet(arrayDS, myrank, mytypekind, rc)
       print *, "Returned values from ArraySpec:"
       print *, "rank =", myrank
 !EOC

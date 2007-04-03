@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.11 2007/03/31 05:50:54 cdeluca Exp $
+! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.12 2007/04/03 16:36:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.11 2007/03/31 05:50:54 cdeluca Exp $'
+      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.12 2007/04/03 16:36:23 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -453,9 +453,9 @@ contains
 
       ! Set up either a 2D or 3D real array
       if (do2d) then
-          call ESMF_ArraySpecSet(arrayspec, rank=2, kind=ESMF_TYPEKIND_R8)
+          call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R8)
       else
-          call ESMF_ArraySpecSet(arrayspec, rank=3, kind=ESMF_TYPEKIND_R8)
+          call ESMF_ArraySpecSet(arrayspec, rank=3, typekind=ESMF_TYPEKIND_R8)
       endif
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
@@ -579,9 +579,9 @@ contains
 
       ! Set up a 2d or 3D real array
       if (do2d) then
-          call ESMF_ArraySpecSet(arrayspec, rank=2, kind=ESMF_TYPEKIND_R8)
+          call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R8)
       else
-          call ESMF_ArraySpecSet(arrayspec, rank=3, kind=ESMF_TYPEKIND_R8)
+          call ESMF_ArraySpecSet(arrayspec, rank=3, typekind=ESMF_TYPEKIND_R8)
       endif
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
@@ -714,7 +714,7 @@ contains
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! Set up a 3D real array
-      call ESMF_ArraySpecSet(arrayspec, rank=3, kind=ESMF_TYPEKIND_R8)
+      call ESMF_ArraySpecSet(arrayspec, rank=3, typekind=ESMF_TYPEKIND_R8)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.37 2007/03/31 02:26:02 cdeluca Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.38 2007/04/03 16:36:26 cdeluca Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -111,7 +111,7 @@
     max(2)          = 50.0
     horzStagger     = ESMF_GRID_HORZ_STAGGER_A
     call ESMF_ArraySpecSet(arrayspec, rank=2, &
-                            kind=ESMF_TYPEKIND_R8)
+                           typekind=ESMF_TYPEKIND_R8)
 
     decompids1(1) = 1
     decompids1(2) = 2
