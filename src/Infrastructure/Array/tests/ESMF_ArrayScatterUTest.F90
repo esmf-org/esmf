@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.21 2007/04/02 23:06:31 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.22 2007/04/03 03:24:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.21 2007/04/02 23:06:31 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.22 2007/04/03 03:24:05 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -228,7 +228,8 @@ print *, min_R4, min_R8
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Verify srcfarray data after scatter
-  write(name, *) "Verifying srcfarray data after 2D ESMF_TYPEKIND_R8 ArrayScatter() with omitted srcfarray Test"
+  write(name, *) "Verifying srcfarray data after 2D ESMF_TYPEKIND_R8 ArrayScatter() ",&
+    "with omitted srcfarray Test"
   write(failMsg, *) "Source data was modified."
   rc = ESMF_SUCCESS
   do j=1, 23
@@ -248,7 +249,8 @@ print *, min_R4, min_R8
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Verify Array data after scatter
-  write(name, *) "Verifying destination Array data after 2D ESMF_TYPEKIND_R8 ArrayScatter() with omitted srcfarray Test"
+  write(name, *) "Verifying destination Array data after 2D ESMF_TYPEKIND_R8 ",&
+    "ArrayScatter() with omitted srcfarray Test"
   write(failMsg, *) "Array data wrong."
   rc = ESMF_SUCCESS
   do j=lbound(farrayPtr,2), ubound(farrayPtr,2)
@@ -552,7 +554,8 @@ print *, min_R4, min_R8
   !EX_UTest_Multi_Proc_Only
   ! Verify srcfarray3d data after scatter
   write(failMsg, *) "Source data was modified."
-  write(name, *) "Verifying srcfarray3d data after 2D+1 non-contiguous exclusive region ArrayScatter() Test"
+  write(name, *) "Verifying srcfarray3d data after 2D+1 non-contiguous exclusive ",&
+    "region ArrayScatter() Test"
   rc = ESMF_SUCCESS
   do k=lbound(srcfarray3d,3), ubound(srcfarray3d,3)
     do j=lbound(srcfarray3d,2), ubound(srcfarray3d,2)
@@ -570,8 +573,9 @@ print *, min_R4, min_R8
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   ! Verify Array data after scatter
+  write(name, *) "Verifying destination Array data after 2D+1 non-contiguous ",&
+    "exclusive region ArrayScatter() Test"
   write(failMsg, *) "Array data wrong."
-  write(name, *) "Verifying destination Array data after 2D+1 non-contiguous exclusive region ArrayScatter() Test"
   rc = ESMF_SUCCESS
   do k=lbound(farrayPtr3d,3), ubound(farrayPtr3d,3)
     kk = k - lbound(farrayPtr3d,3) + lbound(srcfarray3d,3)
@@ -629,8 +633,9 @@ print *, min_R4, min_R8
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
+  write(name, *) "2D+1 non-contiguous exclusive region and cyclic decomposition ",&
+    "ArrayScatter() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "2D+1 non-contiguous exclusive region and cyclic decomposition ArrayScatter() Test"
   call ESMF_ArrayScatter(array, srcfarray3d, rootPet=0, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -671,8 +676,9 @@ print *, min_R4, min_R8
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   ! Verify srcfarray3d data after scatter
+  write(name, *) "Verifying srcfarray3d data after 2D+1 non-contiguous ",&
+    "exclusive region and cyclic decomposition ArrayScatter() Test"
   write(failMsg, *) "Source data was modified."
-  write(name, *) "Verifying srcfarray3d data after 2D+1 non-contiguous exclusive region and cyclic decomposition ArrayScatter() Test"
   rc = ESMF_SUCCESS
   do k=lbound(srcfarray3d,3), ubound(srcfarray3d,3)
     do j=lbound(srcfarray3d,2), ubound(srcfarray3d,2)
@@ -690,8 +696,9 @@ print *, min_R4, min_R8
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   ! Verify Array data after scatter
+  write(name, *) "Verifying destination Array data after 2D+1 non-contiguous ",&
+    "exclusive region and cyclic decomposition ArrayScatter() Test"
   write(failMsg, *) "Array data wrong."
-  write(name, *) "Verifying destination Array data after 2D+1 non-contiguous exclusive region and cyclic decomposition ArrayScatter() Test"
   rc = ESMF_SUCCESS
   do k=lbound(farrayPtr3d,3), ubound(farrayPtr3d,3)
     ! correct wrt lbound
