@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.33 2007/04/04 20:41:19 cdeluca Exp $
+! $Id: ESMF_LogErr.F90,v 1.34 2007/04/04 22:45:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -29,6 +29,7 @@
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrReturnCodes.inc"
 
+#define ESMF_SUCCESS_DEFAULT_ON
 
 !BOPI
 !============================================================================
@@ -1141,12 +1142,12 @@ end subroutine ESMF_LogInitialize
         allocmsg=tempmsg(1:msglen)
 	call ESMF_LogWrite(trim(allocmsg)//msg,ESMF_LOG_ERROR,line,file,method,log)	
 	ESMF_LogMsgFoundAllocError=.TRUE.
-! #ifdef ESMF_SUCCESS_DEFAULT_ON
+#ifdef ESMF_SUCCESS_DEFAULT_ON
     else
         if (present(rcToReturn)) then
             rcToReturn=ESMF_SUCCESS
         endif
-! #endif
+#endif
     endif	
        
 end function ESMF_LogMsgFoundAllocError
@@ -1228,9 +1229,9 @@ end function ESMF_LogMsgFoundAllocError
 
       ! set default returns
       ESMF_LogMsgFoundError = .FALSE.
-! #ifdef ESMF_SUCCESS_DEFAULT_ON	
+#ifdef ESMF_SUCCESS_DEFAULT_ON	
       if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
-! #endif
+#endif
     
       ! check the error code
       if (rcToCheck .NE. ESMF_SUCCESS) then
@@ -1243,10 +1244,10 @@ end function ESMF_LogMsgFoundAllocError
           if (present(rcToReturn)) rcToReturn = rcToCheck
         endif
       endif
-! #ifdef ESMF_SUCCESS_DEFAULT_ON	
+#ifdef ESMF_SUCCESS_DEFAULT_ON	
     else    
       if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
-! #endif
+#endif
     endif
        
 end function ESMF_LogMsgFoundError
