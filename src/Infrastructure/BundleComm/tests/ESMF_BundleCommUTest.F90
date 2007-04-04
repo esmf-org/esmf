@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommUTest.F90,v 1.18 2007/03/31 05:50:54 cdeluca Exp $
+! $Id: ESMF_BundleCommUTest.F90,v 1.19 2007/04/04 23:10:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommUTest.F90,v 1.18 2007/03/31 05:50:54 cdeluca Exp $'
+      '$Id: ESMF_BundleCommUTest.F90,v 1.19 2007/04/04 23:10:16 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -55,7 +55,7 @@
       ! try to avoid "unused variable" warnings from some of our compilers.
       type(ESMF_Bundle) :: nobundle
       type(ESMF_Field) :: nofield
-      type(ESMF_RouteHandle) :: rh1, rh2
+      type(ESMF_RouteHandle) :: rh1, rh2, rh3
 #endif
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -234,6 +234,24 @@
       !------------------------------------------------------------------------
 
 #ifdef ESMF_EXHAUSTIVE
+
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Bundle Halo Release of non-initialized routehandle
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      call ESMF_BundleHaloRelease(rh3,rc)
+      write(name, *) "Bundle Halo Release of non-initialized routehandle"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Bundle Halo Store of non-initialized routehandle
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      call ESMF_BundleHaloStore(bundle1, rh3, rc=rc)
+      write(name, *) "Bundle Halo Store of deleted Bundle"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
@@ -539,10 +557,19 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
+      ! Bundle Halo Release of routehandle
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_BundleHaloRelease(rh1, rc)
+      write(name, *) "Bundle Halo Release of routehandle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
       !  Release the routehandles
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       call ESMF_BundleRedistRelease(rh1, rc=rc)
       write(name, *) "Release RouteHandle 1"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
@@ -551,6 +578,13 @@
       write(name, *) "Release RouteHandle 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Bundle Halo Release of routehandle
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      call ESMF_BundleHaloRelease(rh1,rc)
+      write(name, *) "Bundle Halo Release of routehandle"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       ! clean up the data used by the previous tests.
       !------------------------------------------------------------------------
