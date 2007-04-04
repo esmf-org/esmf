@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.31 2007/03/31 05:51:27 cdeluca Exp $
+! $Id: ESMF_LogErr.F90,v 1.32 2007/04/04 16:42:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1143,7 +1143,7 @@ end subroutine ESMF_LogInitialize
 	ESMF_LogMsgFoundAllocError=.TRUE.
     else
         if (present(rcToReturn)) then
-            rcToReturn=ESMF_SUCCESS
+            rcToReturn=statusToCheck
         endif
     endif	
        
@@ -1175,7 +1175,7 @@ end function ESMF_LogMsgFoundAllocError
 !      an error.  A predefined error message will added to the {\tt ESMF\_Log} 
 !      along with
 !      a user added {\tt msg}, {\tt line}, {\tt file} and {\tt method}.  
-!      Additionally, {\tt rcToReturn} will be set to {\tt rcToCheck}.
+!      Additionally, {\tt rcToReturn} is set to {\tt rcToCheck}.
 !
 !      The arguments are:
 !      \begin{description}
@@ -1226,7 +1226,7 @@ end function ESMF_LogMsgFoundAllocError
 
       ! set default returns
       ESMF_LogMsgFoundError = .FALSE.
-      if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
+      if (present(rcToReturn)) rcToReturn = rcToCheck
     
       ! check the error code
       if (rcToCheck .NE. ESMF_SUCCESS) then
@@ -1240,7 +1240,7 @@ end function ESMF_LogMsgFoundAllocError
         endif
       endif	
     else    
-      if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
+      if (present(rcToReturn)) rcToReturn = rcToCheck
     endif
        
 end function ESMF_LogMsgFoundError
