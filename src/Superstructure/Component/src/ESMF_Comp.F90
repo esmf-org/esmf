@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.149 2007/03/31 05:51:31 cdeluca Exp $
+! $Id: ESMF_Comp.F90,v 1.150 2007/04/04 20:54:55 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.149 2007/03/31 05:51:31 cdeluca Exp $'
+      '$Id: ESMF_Comp.F90,v 1.150 2007/04/04 20:54:55 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -866,6 +866,13 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
         
+        ! Release attributes on config
+        if(compp%configFile .ne. "uninitialized" ) then
+        call ESMF_ConfigDestroy(compp%config, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        endif
 
         ! Set init code
         ESMF_INIT_SET_DELETED(compp)
