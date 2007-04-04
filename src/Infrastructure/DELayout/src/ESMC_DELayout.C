@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.50 2007/03/31 05:50:59 cdeluca Exp $
+// $Id: ESMC_DELayout.C,v 1.51 2007/04/04 21:48:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.50 2007/03/31 05:50:59 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.51 2007/04/04 21:48:55 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1493,10 +1493,6 @@ int ESMC_DELayout::ESMC_DELayoutPrint(){
         }
     }
   
-    *ip++ = localDeCount;
-    for (i=0; i<localDeCount; i++) 
-        *ip++ = localDeList[i];
-
     // this has to come before dims, since they are not allocated unless
     // logRectFlag is true.
     lp = (ESMC_Logical *)ip;
@@ -1596,10 +1592,10 @@ int ESMC_DELayout::ESMC_DELayoutPrint(){
         }
     }
   
-    a->localDeCount = *ip++;
+    a->localDeCount = 0;  // proxy objects don't have local DEs
     a->localDeList = new int[a->localDeCount];
-    for (i=0; i<a->localDeCount; i++) 
-        a->localDeList[i] = *ip++;
+    a->vasLocalDeCount = 0;  // proxy objects don't have local DEs
+    a->vasLocalDeList = new int[a->vasLocalDeCount];
   
     // decode flags first, because dims is not sent unless logRectFlag is true.
     lp = (ESMC_Logical *)ip;
