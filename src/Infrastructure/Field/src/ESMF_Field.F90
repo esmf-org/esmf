@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.244 2007/04/04 16:44:54 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.245 2007/04/04 20:41:18 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -248,7 +248,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.244 2007/04/04 16:44:54 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.245 2007/04/04 20:41:18 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -471,7 +471,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_LocalField} from which to retreive status.
+!           {\tt ESMF\_LocalField} from which to retrieve status.
 !     \end{description}
 !
 !EOPI
@@ -565,7 +565,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_FieldType} from which to retreive status.
+!           {\tt ESMF\_FieldType} from which to retrieve status.
 !     \end{description}
 !
 !EOPI
@@ -664,7 +664,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_Field} from which to retreive status.
+!           {\tt ESMF\_Field} from which to retrieve status.
 !     \end{description}
 !
 !EOPI
@@ -1104,7 +1104,7 @@
             !                    "No data attached to Field", &
             !                     ESMF_CONTEXT, rc)) return
             !endif
-            call ESMF_FieldDataMapGet(ftype%mapping, horzRelloc=horzRelloc, rc=status)
+            call ESMF_FieldDataMapGet(ftype%mapping, horzRelloc=horzRelloc, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1116,8 +1116,8 @@
             !  print *, "ERROR: No data attached to Field"
             !  return
             !endif
-            call ESMF_FieldDataMapGet(ftype%mapping, vertRelloc=vertRelloc, rc=status)
-            if (ESMF_LogMsgFoundError(status, &
+            call ESMF_FieldDataMapGet(ftype%mapping, vertRelloc=vertRelloc, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
         endif
@@ -2326,8 +2326,8 @@
 !
 !EOPI
 
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -2376,8 +2376,8 @@
 !EOPI
 
 
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -2427,7 +2427,7 @@
 
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
