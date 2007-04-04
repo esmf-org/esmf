@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.13 2007/04/03 16:36:22 cdeluca Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.14 2007/04/04 03:03:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -86,8 +86,7 @@ program ESMF_ArrayEx
 ! a 2D Array of double precision real numbers is to be created:
 !EOE
 !BOC
-  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, &
-    rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
@@ -1598,8 +1597,7 @@ program ESMF_ArrayEx
 ! hence requires the following {\tt arrayspec}.
 !EOE  
 !BOC
-  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=1, &
-    rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=1, rc=rc)
 !EOC
 !BOE
 ! The index space covered by the Array and the decomposition description is
@@ -1623,8 +1621,7 @@ program ESMF_ArrayEx
 ! {\tt arrayspec} must be changed to 3
 !EOE
 !BOC
-  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=3, &
-    rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
 !EOC
 !BOE
 ! and an appropriate 3D DistGrid object must be created
@@ -1687,8 +1684,7 @@ program ESMF_ArrayEx
   call ESMF_DistGridGet(distgrid3D, delayout=delayout, rc=rc) ! get DELayout
   distgrid2D = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/16,16/), &
     regDecomp=(/4,4/), delayout=delayout, rc=rc)
-  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, &
-    rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
   array2D = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid2D, rc=rc)
 !EOC
 !BOE
@@ -1760,8 +1756,7 @@ program ESMF_ArrayEx
 ! extra Array dimension. 
 !EOE
 !BOC
-  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=3, &
-    rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
 !EOC
 !BOE
 ! During Array creation with extra dimension(s) it is necessary to specify the
@@ -1986,8 +1981,7 @@ program ESMF_ArrayEx
 ! real data the ArraySpec variable must be set correctly.
 !EOEI
 !BOCI
-  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R4, rank=2, &
-    rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R4, rank=2, rc=rc)
 !EOCI
 !BOEI
 ! Finally the Array objects can be created for this {\tt arrayspec} and {\tt 
