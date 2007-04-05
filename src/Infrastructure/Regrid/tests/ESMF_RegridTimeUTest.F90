@@ -29,12 +29,13 @@
     ! USES:Framework module
     use ESMF_TestMod  ! test methods
     use ESMF_Mod      ! Framework module
+    use ESMF_UtilTypesMod     ! ESMF utility types
     implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridTimeUTest.F90,v 1.6 2007/03/31 05:51:20 cdeluca Exp $'
+      '$Id: ESMF_RegridTimeUTest.F90,v 1.7 2007/04/05 06:17:34 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
     integer :: lrc,iFunction
