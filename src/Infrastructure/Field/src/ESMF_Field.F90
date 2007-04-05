@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.245 2007/04/04 20:41:18 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.246 2007/04/05 17:34:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -248,7 +248,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.245 2007/04/04 20:41:18 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.246 2007/04/05 17:34:25 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -2468,11 +2468,12 @@
 
         character(len=ESMF_MAXSTR) :: name, str
         type(ESMF_FieldType), pointer :: fp 
-        integer :: status
+        integer :: localrc
         !character(len=ESMF_MAXSTR) :: msgbuf
 
-
-        if (present(rc)) rc = ESMF_FAILURE
+!	Initialize
+	localrc = ESMF_RC_NOT_IMPL
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check variables
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -2487,12 +2488,12 @@
         endif
 
         fp => field%ftypep
-        call ESMF_BasePrint(fp%base, str, status)
-        if (ESMF_LogMsgFoundError(status, &
+        call ESMF_BasePrint(fp%base, str, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        call ESMF_StatusString(fp%fieldstatus, str, status)
+        call ESMF_StatusString(fp%fieldstatus, str, localrc)
       !jw  write(msgbuf, *)  "Field status = ", trim(str)
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "Field status = ", trim(str)
@@ -2502,38 +2503,38 @@
           return
         endif
 
-        call c_ESMC_GetName(fp%base, name, status)
-        if (ESMF_LogMsgFoundError(status, &
+        call c_ESMC_GetName(fp%base, name, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       !jw  write(msgbuf, *)  "  Name = '",  trim(name), "'"
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "  Name = '",  trim(name), "'"
 
-        call ESMF_StatusString(fp%gridstatus, str, status)
+        call ESMF_StatusString(fp%gridstatus, str, localrc)
       !jw  write(msgbuf, *)  "Grid status = ", trim(str)
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "Grid status = ", trim(str)
         if (fp%gridstatus .eq. ESMF_STATUS_READY) then 
-           call ESMF_GridPrint(fp%grid, "", status)
+           call ESMF_GridPrint(fp%grid, "", localrc)
         endif
 
-        call ESMF_StatusString(fp%datastatus, str, status)
+        call ESMF_StatusString(fp%datastatus, str, localrc)
       !jw  write(msgbuf, *)  "Data status = ", trim(str)
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "Data status = ", trim(str)
         !TODO: add code here to print more info
         if (fp%datastatus .eq. ESMF_STATUS_READY) then 
-           call ESMF_InternArrayPrint(fp%localfield%localdata, "", status)
+           call ESMF_InternArrayPrint(fp%localfield%localdata, "", localrc)
         endif
 
-        call ESMF_StatusString(fp%datamapstatus, str, status)
+        call ESMF_StatusString(fp%datamapstatus, str, localrc)
       !jw  write(msgbuf, *)  "FieldDataMap status = ", trim(str)
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "FieldDataMap status = ", trim(str)
         !TODO: add code here to print more info
         if (fp%datamapstatus .eq. ESMF_STATUS_READY) then 
-           call ESMF_FieldDataMapPrint(fp%mapping, "", status)
+           call ESMF_FieldDataMapPrint(fp%mapping, "", localrc)
         endif
 
 
@@ -2562,11 +2563,11 @@
       type(ESMF_Field) :: ESMF_FieldRead
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: fname            ! field name to read
+      character (len = *), intent(in) :: fname             ! field name to read
       character (len = *), intent(in), optional :: gname   ! grid name
       character (len = *), intent(in), optional :: dnames  ! data name
-      type(ESMF_IOSpec), intent(in), optional :: iospec   ! file specs
-      integer, intent(out), optional :: rc                ! return code
+      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
+      integer, intent(out), optional :: rc                 ! return code
 !
 ! !DESCRIPTION:
 !      Used to read data from persistent storage in a variety of formats.
@@ -2589,18 +2590,16 @@
 !
 !EOPI
 
+      type (ESMF_Field) :: a
+
+      ! Initialize
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ESMF_FieldRead = a
 !
-! TODO: code goes here.  this is filler to keep the compiler from complaining.
+!     TODO: code goes here
 !
-        type (ESMF_Field) :: a
-     
-        nullify(a%ftypep)
-
-        ESMF_FieldRead = a
-!       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
-
-
-        end function ESMF_FieldRead
+      end function ESMF_FieldRead
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2644,7 +2643,9 @@
 ! TODO: code goes here; this is just filler to make the compiler not complain
 !
         type (ESMF_Field) :: a
-     
+
+        ! Initialize
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL     
         nullify(a%ftypep)
 
         ESMF_FieldReadRestart = a
@@ -2686,21 +2687,22 @@
 !EOP
 
 
-      integer :: status                           ! Error status
+      integer :: localrc
       !character(len=ESMF_MAXSTR) :: str
       type(ESMF_FieldType), pointer :: ftypep
 
-      ! Initialize return code   
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       ! validate before using
-      call ESMF_FieldValidate(field, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      call ESMF_FieldValidate(field, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rc)) return
  
       ftypep => field%ftypep
 
@@ -2716,8 +2718,8 @@
    
       ! Now revalidate to be sure the grid and datamap, if they exist, are
       ! consistent with the new array.
-      call ESMF_FieldValidate(field, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      call ESMF_FieldValidate(field, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
  
@@ -2760,19 +2762,20 @@
 !EOP
 
 
-      integer :: status                           ! Error status
+      integer :: localrc 
       !character(len=ESMF_MAXSTR) :: str
       type(ESMF_FieldType), pointer :: ftypep
 
-      ! Initialize return code   
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize return code
+      localrc = ESMF_RC_NOT_IMPL   
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       ! validate before using
-      call ESMF_FieldValidate(field, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      call ESMF_FieldValidate(field, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
  
@@ -2790,8 +2793,8 @@
    
       ! Now revalidate to be sure the grid and datamap, if they exist, are
       ! consistent with the new array.
-      call ESMF_FieldValidate(field, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      call ESMF_FieldValidate(field, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
  
@@ -2884,17 +2887,18 @@
 !
 !EOPI
 
-      integer :: status                           ! Error status
+      integer :: localrc 
 
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_I4, 1, value, status)
-      if (ESMF_LogMsgFoundError(status, &
+        ESMF_TYPEKIND_I4, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -2944,11 +2948,12 @@
 !
 !EOPI
 
-      integer :: status                           ! Error status
+      integer :: localrc
       integer :: limit
 
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -2961,8 +2966,8 @@
       endif
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_I4, count, valueList, status)
-      if (ESMF_LogMsgFoundError(status, &
+        ESMF_TYPEKIND_I4, count, valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -3007,17 +3012,18 @@
 !
 !EOPI
 
-      integer :: status                           ! Error status
+      integer :: localrc
 
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_I8, 1, value, status)
-      if (ESMF_LogMsgFoundError(status, &
+        ESMF_TYPEKIND_I8, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -3067,11 +3073,12 @@
 !
 !EOPI
 
-      integer :: status                           ! Error status
+      integer :: localrc
       integer :: limit
 
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -3084,8 +3091,8 @@
       endif
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_I8, count, valueList, status)
-      if (ESMF_LogMsgFoundError(status, &
+        ESMF_TYPEKIND_I8, count, valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -3130,17 +3137,18 @@
 !
 !EOPI
 
-      integer :: status                           ! Error status
+      integer :: localrc
 
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_R4, 1, value, status)
-      if (ESMF_LogMsgFoundError(status, &
+        ESMF_TYPEKIND_R4, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -3190,11 +3198,12 @@
 !
 !EOPI
 
-      integer :: status                           ! Error status
+      integer :: localrc
       integer :: limit
 
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -3207,8 +3216,8 @@
       endif
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_R4, count, valueList, status)
-      if (ESMF_LogMsgFoundError(status, &
+        ESMF_TYPEKIND_R4, count, valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -3253,17 +3262,18 @@
 !
 !EOPI
 
-      integer :: status                           ! Error status
+      integer :: localrc
 
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_R8, 1, value, status)
-      if (ESMF_LogMsgFoundError(status, &
+        ESMF_TYPEKIND_R8, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -3313,11 +3323,12 @@
 !
 !EOPI
 
-      integer :: status                           ! Error status
+      integer :: localrc
       integer :: limit
 
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -3330,8 +3341,8 @@
       endif
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_R8, count, valueList, status)
-      if (ESMF_LogMsgFoundError(status, &
+        ESMF_TYPEKIND_R8, count, valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -3376,17 +3387,18 @@
 !
 !EOPI
 
-      integer :: status                           ! Error status
+      integer :: localrc
 
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, status)
-      if (ESMF_LogMsgFoundError(status, &
+        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -3436,11 +3448,12 @@
 !
 !EOPI
 
-      integer :: status                           ! Error status
+      integer :: localrc
       integer :: limit
 
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -3453,8 +3466,8 @@
       endif
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, status)
-      if (ESMF_LogMsgFoundError(status, &
+        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -3499,16 +3512,17 @@
 !
 !EOPI
 
-      integer :: status                           ! Error status
+      integer :: localrc
 
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeSetChar(field%ftypep%base, name, value, status)
-      if (ESMF_LogMsgFoundError(status, &
+      call c_ESMC_AttributeSetChar(field%ftypep%base, name, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -3552,8 +3566,9 @@
         logical :: had_grid
         integer :: localrc
 
-        ! assume failure
-        if (present(rc)) rc = ESMF_FAILURE
+        ! Initialize
+        localrc = ESMF_RC_NOT_IMPL
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check variables
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -3628,19 +3643,20 @@
 !     \end{description}
 !
 !EOP
-        integer :: status
+        integer :: localrc
         logical :: had_data
 
-        ! assume failure
-        if (present(rc)) rc = ESMF_FAILURE
+        ! Initialize
+        localrc = ESMF_RC_NOT_IMPL
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check variables
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
         ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,datamap)
 
         ! Validate first
-        call ESMF_FieldValidate(field, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+        call ESMF_FieldValidate(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
  
@@ -3665,8 +3681,8 @@
         endif
 
         ! and now revalidate to ensure a consistent datamap
-        call ESMF_FieldValidate(field, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+        call ESMF_FieldValidate(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
  
@@ -3711,8 +3727,8 @@
 !
 !EOPI
 
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -3759,7 +3775,7 @@
 !
 !EOP
 
-      integer :: status                           ! Error status
+      integer :: localrc
 
       type(ESMF_FieldType), pointer :: ftypep
       type(ESMF_Relloc) :: horzRelloc, vertRelloc
@@ -3773,9 +3789,9 @@
       logical :: hasgrid, hasarray, hasmap     ! decide what we can validate
       integer :: i, j
     
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -3811,8 +3827,8 @@
           call ESMF_FieldDataMapGet(ftypep%mapping, horzRelloc=horzRelloc, &
                                     vertRelloc=vertRelloc, &
                                     dataRank=maprank, dataIndexList=maplist, &
-                                    counts=otheraxes, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
+                                    counts=otheraxes, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           hasmap = .TRUE.
@@ -3828,13 +3844,13 @@
       if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
 
           ! get grid dim and extents for the local piece
-          call ESMF_GridGet(ftypep%grid, distDimCount=gridrank, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
+          call ESMF_GridGet(ftypep%grid, distDimCount=gridrank, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           call ESMF_GridGetDELocalInfo(ftypep%grid, horzRelloc, vertRelloc, &
-                                    localCellCountPerDim=gridcounts, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
+                                    localCellCountPerDim=gridcounts, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           hasgrid = .TRUE.
@@ -3853,9 +3869,9 @@
         
           ! get array counts and other info
           call ESMF_InternArrayGet(ftypep%localfield%localdata, counts=arraycounts, &
-                             haloWidth=halo, rank=arrayrank, rc=status)
+                             haloWidth=halo, rank=arrayrank, rc=localrc)
 
-          if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           hasarray = .TRUE.
@@ -3976,7 +3992,7 @@
 !EOP
 
         ! Local variables
-        integer :: status, de_id
+        integer :: localrc, de_id
         type(ESMF_InternArray) :: out_array
         type(ESMF_TypeKind) arr_kind
         integer out_rank
@@ -3993,11 +4009,9 @@
       
         ! call ESMF_Log(?, 'entry into ESMF_FieldWrite');
 
-        ! Set initial values
-        status = ESMF_FAILURE 
-
-        ! Initialize return code
-        if (present(rc)) rc = ESMF_FAILURE      
+        ! Initialize
+        localrc = ESMF_RC_NOT_IMPL
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -4005,13 +4019,13 @@
         ! Get filename out of IOSpec, if specified.  Otherwise use the
         ! name of the Field.
         if (present(IOSpec)) then
-           call ESMF_IOSpecGet(IOSpec, iofileformat=fileformat, rc=status)
+           call ESMF_IOSpecGet(IOSpec, iofileformat=fileformat, rc=localrc)
            if (fileformat == ESMF_IO_FILEFORMAT_HDF) then
               print*, "HDF output is not currently supported."
               return
            else if (fileformat == ESMF_IO_FILEFORMAT_UNSPECIFIED) then
-              call ESMF_FieldWriteFileASCII(field, iospec, rc=status)
-              if (ESMF_LogMsgFoundError(status, &
+              call ESMF_FieldWriteFileASCII(field, iospec, rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) return
               if (present(rc)) rc = ESMF_SUCCESS
@@ -4024,13 +4038,13 @@
               return
            endif
         else ! No IOSpec passed in, so check in the Field
-           call ESMF_IOSpecGet(field%ftypep%iospec, iofileformat=fileformat, rc=status)
+           call ESMF_IOSpecGet(field%ftypep%iospec, iofileformat=fileformat, rc=localrc)
            if (fileformat == ESMF_IO_FILEFORMAT_HDF) then
               print*, "HDF output is not currently supported."
               return
            else if (fileformat == ESMF_IO_FILEFORMAT_UNSPECIFIED) then
-           call ESMF_FieldWriteFileASCII(field, iospec, rc=status)
-              if (ESMF_LogMsgFoundError(status, &
+           call ESMF_FieldWriteFileASCII(field, iospec, rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) return
               if (present(rc)) rc = ESMF_SUCCESS
@@ -4049,23 +4063,23 @@
            ts = timestamp
         else
            ! as a default, set the date/time as the current real time.
-           call ESMF_TimeSyncToRealTime(ts, status)
+           call ESMF_TimeSyncToRealTime(ts, localrc)
         endif
         ! get the date from the timestamp.
-        call ESMF_TimeGet(ts, timeString=Date, rc=status)
+        call ESMF_TimeGet(ts, timeString=Date, rc=localrc)
         Date = Date(1:10)//'_'//Date(12:19)
 
         ! Collect results on DE 0 and output to a file
-        call ESMF_FieldGet(field, grid=grid, rc=status)
-!!$        call ESMF_FieldGet( field, name=fieldname, rc=status)
-        call ESMF_GridGet(grid, delayout=delayout, rc=status)
-        call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=status)
+        call ESMF_FieldGet(field, grid=grid, rc=localrc)
+!!$        call ESMF_FieldGet( field, name=fieldname, rc=localrc)
+        call ESMF_GridGet(grid, delayout=delayout, rc=localrc)
+        call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=localrc)
 
         ! Output to file, from de_id 0 only
-!!$        call ESMF_FieldAllGather(field, out_array, rc=status)
+!!$        call ESMF_FieldAllGather(field, out_array, rc=localrc)
         call ESMF_IArrayGather(field%ftypep%localfield%localdata, &
                               field%ftypep%grid, field%ftypep%mapping, &
-                              0, out_array, rc=status)
+                              0, out_array, rc=localrc)
 
 
         if (de_id .eq. 0) then       
@@ -4081,7 +4095,7 @@
 
         endif ! (de_id .eq. 0) then  
 
-        call ESMF_InternArrayDestroy(out_array, rc=status)
+        call ESMF_InternArrayDestroy(out_array, rc=localrc)
         if  (present(rc)) rc = ESMF_SUCCESS
         
         end subroutine ESMF_FieldWrite
@@ -4122,7 +4136,7 @@
 !EOPI
 
         ! Local variables
-        integer :: status, de_id
+        integer :: localrc, de_id
         type(ESMF_InternArray) :: outarray
         type(ESMF_Grid) :: grid
         type(ESMF_DELayout) :: delayout
@@ -4134,11 +4148,9 @@
 
         ! call ESMF_Log(?, 'entry into ESMF_FieldWrite');
 
-        ! Set initial values
-        status = ESMF_FAILURE 
-
-        ! Initialize return code
-        if (present(rc)) rc = ESMF_FAILURE      
+        ! Initialize
+        localrc = ESMF_RC_NOT_IMPL 
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check variables
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -4146,47 +4158,47 @@
         ! Get filename out of IOSpec, if specified.  Otherwise use the
         ! name of the Field.
         if (present(IOSpec)) then
-            call ESMF_IOSpecGet(IOSpec, filename=filename, rc=status)
+            call ESMF_IOSpecGet(IOSpec, filename=filename, rc=localrc)
         else
-            call ESMF_FieldGet(field, name=filename, rc=status)
+            call ESMF_FieldGet(field, name=filename, rc=localrc)
         endif
-        if (ESMF_LogMsgFoundError(status, &
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
         ! Collect results on DE 0 and output to a file
-        call ESMF_FieldGet(field, grid=grid, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+        call ESMF_FieldGet(field, grid=grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_GridGet(grid, delayout=delayout, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+        call ESMF_GridGet(grid, delayout=delayout, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+        call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
         write(name,'(i1)') de_id
         call ESMF_InternArrayWrite(field%ftypep%localfield%localdata,&
-                             filename=trim(name), rc=status)
+                             filename=trim(name), rc=localrc)
 
         ! Output to file, from de_id 0 only
         call ESMF_IArrayGather(field%ftypep%localfield%localdata, &
                               field%ftypep%grid, field%ftypep%mapping, &
-                              0, outarray, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+                              0, outarray, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        !call ESMF_FieldAllGather(field, outarray, rc=status)
+        !call ESMF_FieldAllGather(field, outarray, rc=localrc)
         if (de_id .eq. 0) then       
-            call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
-            if (ESMF_LogMsgFoundError(status, &
+            call ESMF_InternArrayWrite(outarray, filename=filename, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
-            call ESMF_InternArrayDestroy(outarray, rc=status)
-            if (ESMF_LogMsgFoundError(status, &
+            call ESMF_InternArrayDestroy(outarray, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
         endif
@@ -4230,8 +4242,8 @@
 !
 !EOPI
 
-        ! Initialize return code
-        if (present(rc)) rc = ESMF_FAILURE
+        ! Initialize
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check variables
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -4318,7 +4330,7 @@
 !EOPI
 
 
-      integer :: status                           ! Error status
+      integer :: localrc
       type(ESMF_InternArray) :: array                   ! New array
       type(ESMF_RelLoc) :: hRelLoc, vRelLoc
       type(ESMF_FieldDataMap) :: dmap
@@ -4328,8 +4340,8 @@
       integer :: i, j, arrayRank, gridRank, baseGridRank
 
       ! Initialize return code   
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,datamap)
@@ -4342,14 +4354,14 @@
       endif
 
       ! construct a reasonable datamap first before calling field construct
-      call ESMF_ArraySpecGet(arrayspec, rank=arrayRank, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      call ESMF_ArraySpecGet(arrayspec, rank=arrayRank, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       call ESMF_GridGet(grid, distDimCount=gridRank, dimCount=baseGridRank, &
-                        rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+                        rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -4357,8 +4369,8 @@
       if (present(datamap)) then
           dmap = datamap
       else
-          call ESMF_FieldDataMapSetDefault(dmap, minRank, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
+          call ESMF_FieldDataMapSetDefault(dmap, minRank, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
       endif
@@ -4366,8 +4378,8 @@
       ! this sets the grid status, and the datamap status
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
                                       dmap, name, &
-                                      iospec, status)
-      if (ESMF_LogMsgFoundError(status, &
+                                      iospec, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -4376,7 +4388,7 @@
           hRelLoc = horzRelloc
       else
           if (present(datamap)) then
-              call ESMF_FieldDataMapGet(datamap, horzRelLoc=hRelLoc, rc=status)
+              call ESMF_FieldDataMapGet(datamap, horzRelLoc=hRelLoc, rc=localrc)
           else
                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                        "no valid RelLoc in either argument list or datamap", &
@@ -4387,7 +4399,7 @@
           vRelLoc = vertRelloc
       else
           if (present(datamap)) then
-              call ESMF_FieldDataMapGet(datamap, vertRelLoc=vRelLoc, rc=status)
+              call ESMF_FieldDataMapGet(datamap, vertRelLoc=vRelLoc, rc=localrc)
           else
               if (baseGridRank .le. 2) then
                   vRelLoc = ESMF_CELL_UNDEFINED
@@ -4401,14 +4413,14 @@
       call ESMF_GridGetDELocalInfo(ftype%grid, horzRelLoc=hRelLoc, &
                                    vertRelLoc=vRelLoc, &
                                    localCellCountPerDim=gridcounts(1:gridRank), &
-                                   rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+                                   rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       ! get information back from datamap
       call ESMF_FieldDataMapGet(ftype%mapping, dataIndexList=dimorder, &
-                                counts=counts, rc=status)
+                                counts=counts, rc=localrc)
 
       arraycounts(:) = 1
       j = 1
@@ -4425,8 +4437,8 @@
          endif
       enddo
 
-      array = ESMF_InternArrayCreate(arrayspec, arraycounts, hwidth, rc=status) 
-      if (ESMF_LogMsgFoundError(status, &
+      array = ESMF_InternArrayCreate(arrayspec, arraycounts, hwidth, rc=localrc) 
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -4495,11 +4507,12 @@
 !EOPI
 
 
-      integer :: status                           ! Error status
+      integer :: localrc 
       type(ESMF_Field) :: tfield                  ! temp field for error check
 
-      ! Initialize return code   
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
@@ -4507,14 +4520,14 @@
       ! this validates the grid already, no need to validate it first.
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
                                       datamap=datamap, name=name, &
-                                      iospec=iospec, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+                                      iospec=iospec, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       ! make sure the array is a valid object first.
-      call ESMF_InternArrayValidate(array, "", status)
-      if (ESMF_LogMsgFoundError(status, &
+      call ESMF_InternArrayValidate(array, "", localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -4528,8 +4541,8 @@
       ! call the user level validate
       tfield%ftypep => ftype
       ESMF_INIT_SET_CREATED(tfield)
-      call ESMF_FieldValidate(tfield, "", status)
-      if (ESMF_LogMsgFoundError(status, &
+      call ESMF_FieldValidate(tfield, "", localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
           ! rc is already set, we just need to mark that the array
@@ -4603,11 +4616,12 @@
 !EOPI
 
 
-      integer :: status                           ! Error status
+      integer :: localrc
       integer :: gridRank, arrayRank
 
-      ! Initialize return code   
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
@@ -4616,31 +4630,31 @@
       ftype%localfield%localFlag=.true.
 
       ! Construct a default name if one is not given
-      call ESMF_BaseCreate(ftype%base, "Field", name, 0, status)
-      if (ESMF_LogMsgFoundError(status, &
+      call ESMF_BaseCreate(ftype%base, "Field", name, 0, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       ! Check to see grid is valid first.
-      call ESMF_GridValidate(grid, "", status)
-      if (ESMF_LogMsgFoundError(status, &
+      call ESMF_GridValidate(grid, "", localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       ftype%grid = grid
       ftype%gridstatus = ESMF_STATUS_READY
 
-      call ESMF_GridGet(grid, distDimCount=gridRank, rc=status)
+      call ESMF_GridGet(grid, distDimCount=gridRank, rc=localrc)
       if (present(datamap)) then
         ftype%mapping = datamap   ! copy, datamap can be reused by user now
         ! if specified as explicit args to create, they override anything
         ! in the existing datamap
         call ESMF_FieldDataMapSet(ftype%mapping, horzRelloc=horzRelloc, &
-                             vertRelloc=vertRelloc, rc=status)
+                             vertRelloc=vertRelloc, rc=localrc)
       else
-          call ESMF_ArraySpecGet(arrayspec, rank=arrayRank, rc=status)
+          call ESMF_ArraySpecGet(arrayspec, rank=arrayRank, rc=localrc)
           call ESMF_FieldDataMapSetDefault(ftype%mapping, arrayRank, &
                                 horzRelloc=horzRelloc, &
-                                vertRelloc=vertRelloc, rc=status)
+                                vertRelloc=vertRelloc, rc=localrc)
       endif
       ftype%datamapstatus = ESMF_STATUS_READY
 
@@ -4654,13 +4668,13 @@
       ! If I/O spec is present, copy it into the field object; otherwise just 
       ! initialize the I/O spec in the field object.
       if(present(iospec)) then
-        !ESMF_IOSpecCopyInit(ftype%iospec, iospec, status)
-        !if (ESMF_LogMsgFoundError(status, &
+        !ESMF_IOSpecCopyInit(ftype%iospec, iospec, localrc)
+        !if (ESMF_LogMsgFoundError(localrc, &
         !                          ESMF_ERR_PASSTHRU, &
         !                          ESMF_CONTEXT, rc)) return
       else 
-        !ESMF_IOSpecInit(ftype%iospec, status)
-        !if (ESMF_LogMsgFoundError(status, &
+        !ESMF_IOSpecInit(ftype%iospec, localrc)
+        !if (ESMF_LogMsgFoundError(localrc, &
         !                          ESMF_ERR_PASSTHRU, &
         !                          ESMF_CONTEXT, rc)) return
       endif
@@ -4725,11 +4739,12 @@
 !EOPI
 
 
-      integer :: status                           ! Error status
+      integer :: localrc
       integer :: gridRank
 
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
@@ -4738,20 +4753,20 @@
       ftype%localfield%localFlag=.true.
 
       ! Construct a default name if one is not given
-      call ESMF_BaseCreate(ftype%base, "Field", name, 0, status)
-      if (ESMF_LogMsgFoundError(status, &
+      call ESMF_BaseCreate(ftype%base, "Field", name, 0, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       ! Attach grid
-      call ESMF_GridValidate(grid, "", status)
-      if (ESMF_LogMsgFoundError(status, &
+      call ESMF_GridValidate(grid, "", localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       ftype%grid = grid
       ftype%gridstatus = ESMF_STATUS_READY
 
-      call ESMF_GridGet(ftype%grid, distDimCount=gridRank, rc=status)
+      call ESMF_GridGet(ftype%grid, distDimCount=gridRank, rc=localrc)
       if (present(datamap)) then
         ! this does a copy, datamap ok for user to delete now
         ftype%mapping = datamap   
@@ -4759,21 +4774,21 @@
         ! take care of override horz and vert rellocs.  if specified both in
         ! the datamap and as explicit args, the arguments take priority.
         call ESMF_FieldDataMapSet(ftype%mapping, horzRelloc=horzRelloc, &
-                             vertRelloc=vertRelloc, rc=status)
+                             vertRelloc=vertRelloc, rc=localrc)
       else
         ! create default datamap with 1-for-1 correspondence to grid
         if (gridRank .eq. 1) then
           call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_I, &
                                 horzRelloc=horzRelloc, &
-                                vertRelloc=vertRelloc, rc=status)
+                                vertRelloc=vertRelloc, rc=localrc)
         else if (gridRank .eq. 2) then
           call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJ, &
                                 horzRelloc=horzRelloc, &
-                                vertRelloc=vertRelloc, rc=status)
+                                vertRelloc=vertRelloc, rc=localrc)
         else if (gridRank .eq. 3) then
           call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJK, &
                                 horzRelloc=horzRelloc, &
-                                vertRelloc=vertRelloc, rc=status)
+                                vertRelloc=vertRelloc, rc=localrc)
         endif
       endif
       ftype%datamapstatus = ESMF_STATUS_READY
@@ -4827,14 +4842,15 @@
 
 
       ! Local variables
-      integer :: status                           ! Error status
+      integer :: localrc
 
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Construct a default name if one is not given
-      call ESMF_BaseCreate(ftypep%base, "Field", name, 0, status)
-      if (ESMF_LogMsgFoundError(status, &
+      call ESMF_BaseCreate(ftypep%base, "Field", name, 0, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -4847,7 +4863,7 @@
       ftypep%localfield%localFlag=.true.
 
       ! Set the mapping as unknown/invalid
-      call ESMF_FieldDataMapSetInvalid(ftypep%mapping, status)
+      call ESMF_FieldDataMapSetInvalid(ftypep%mapping, localrc)
 
       ftypep%fieldstatus = ESMF_STATUS_READY
 
@@ -4886,15 +4902,16 @@
 !
 !EOPI
 
-      integer :: status
+      integer :: localrc
 
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
       ! release the base class resources
-      call ESMF_BaseDestroy(ftype%base, status)
-      if (ESMF_LogMsgFoundError(status, &
+      call ESMF_BaseDestroy(ftype%base, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -4947,7 +4964,7 @@
 !
 !EOPI
 
-      integer :: status                           ! Error status
+      integer :: localrc
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
       type(ESMF_DELayout) :: gridDELayout
@@ -4958,15 +4975,16 @@
       type(ESMF_VM) :: vm
 
       ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,dstField,rc)
 
       ! TODO: replace this with a better way to get the current VM
-      call ESMF_GridGet(srcField%ftypep%grid, delayout=gridDELayout, rc=status)
-      call ESMF_DELayoutGet(gridDELayout, vm=vm, rc=status)
+      call ESMF_GridGet(srcField%ftypep%grid, delayout=gridDELayout, rc=localrc)
+      call ESMF_DELayoutGet(gridDELayout, vm=vm, rc=localrc)
 
       ! This routine is called on every processor in the parent layout.
       !  It is quite possible that the source and destination fields do
@@ -4979,8 +4997,8 @@
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
         call ESMF_FieldGet(srcField, horzRelloc=srcHorzRelLoc, &
-                           vertRelloc=srcVertRelLoc, grid=srcGrid, rc=rc)
-        if (ESMF_LogMsgFoundError(status, &
+                           vertRelloc=srcVertRelLoc, grid=srcGrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       endif
@@ -4989,8 +5007,8 @@
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
         call ESMF_FieldGet(dstField, horzRelloc=dstHorzRelLoc, &
-                           vertRelloc=dstVertRelLoc, grid=dstGrid, rc=rc)
-        if (ESMF_LogMsgFoundError(status, &
+                           vertRelloc=dstVertRelLoc, grid=dstGrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       endif
@@ -5006,14 +5024,14 @@
       if (hassrcdata) then
         ! From the grid get the bounding box on this DE
         call ESMF_GridBoxIntersectSend(srcGrid, dstGrid, sendDomainList, &
-                                       total=.false., layer=.false., rc=status)
+                                       total=.false., layer=.false., rc=localrc)
       endif
 
       ! if dst field exists on this DE, query it for information
       if (hasdstdata) then
         call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, vm, recvDomainList, &
                                        hasdstdata, hassrcdata, &
-                                       total=.false., layer=.false., rc=status)
+                                       total=.false., layer=.false., rc=localrc)
       endif
 
       if  (present(rc)) rc = ESMF_SUCCESS
@@ -5063,11 +5081,12 @@
 !
 !EOPI
 
-      integer :: localrc                     ! Error status
+      integer :: localrc
       type(ESMF_FieldType), pointer :: fp    ! field type
 
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -5176,15 +5195,19 @@
 !
 !EOPI
 
-      integer :: localrc, status             ! Error status, allocation status
+      integer :: localrc
       type(ESMF_FieldType), pointer :: fp    ! field type
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if  (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! in case of error, make sure this is invalid.
       nullify(ESMF_FieldDeserialize%ftypep)
 
       ! shortcut to internals
-      allocate(fp, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, &
+      allocate(fp, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, &
                                      "space for new Field object", &
                                      ESMF_CONTEXT, rc)) return
 
