@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.105 2007/03/31 05:51:33 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.106 2007/04/05 19:19:59 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.105 2007/03/31 05:51:33 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.106 2007/04/05 19:19:59 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -2941,6 +2941,9 @@ end interface
       endif
 
       nestedState%statep => dataitem%datap%spp
+
+      ! validate created state
+       ESMF_INIT_SET_CREATED(nestedState)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
