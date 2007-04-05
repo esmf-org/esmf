@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.150 2007/04/04 20:54:55 samsoncheung Exp $
+! $Id: ESMF_Comp.F90,v 1.151 2007/04/05 20:07:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.150 2007/04/04 20:54:55 samsoncheung Exp $'
+      '$Id: ESMF_Comp.F90,v 1.151 2007/04/05 20:07:08 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1588,6 +1588,9 @@ end function
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
+        ! Initialize output in case of error
+        ESMF_CompIsPetLocal = .false.
 
 
         if (.not.associated(compp)) then

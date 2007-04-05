@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.86 2007/03/31 05:51:31 cdeluca Exp $
+! $Id: ESMF_GridComp.F90,v 1.87 2007/04/05 20:07:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.86 2007/03/31 05:51:31 cdeluca Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.87 2007/04/05 20:07:08 oehmke Exp $'
 
 !==============================================================================
 !
@@ -1200,6 +1200,9 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_FAILURE
+
+    ! Initialize output value in case of error
+    ESMF_GridCompIsPetLocal = .false.
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
