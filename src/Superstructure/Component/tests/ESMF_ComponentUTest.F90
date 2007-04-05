@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.5 2007/04/05 21:46:08 svasquez Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.6 2007/04/05 22:28:37 theurich Exp $
 !
 ! Test code which creates a new Component.
 
@@ -24,9 +24,9 @@
     implicit none
     
 !   ! Local variables
-    integer :: rc
+    integer :: rc, localPet
     integer :: result = 0
-    logical :: bool 
+    logical :: bool
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -35,6 +35,7 @@
     ! other local variables
     character(ESMF_MAXSTR) :: cname
     type(ESMF_GridComp) :: comp1, comp2
+    type(ESMF_VM) :: vm
         
 !-------------------------------------------------------------------------
 !   !
@@ -98,7 +99,6 @@
     !------------------------------------------------------------------------
     !EX_UTest
     ! Query the run status of a Gridded Component 
-    cname = "Atmosphere - child in parent VM context"
     bool = ESMF_GridCompIsPetLocal(comp1, rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Query run status of a Gridded Component"
@@ -113,9 +113,10 @@
 
     !------------------------------------------------------------------------
     !EX_UTest
-    ! Create a Gridded Component setting the petlist to 100
-    ! to force run status to be set to false.
-    comp2 = ESMF_GridCompCreate(name=cname, petList=(/100/), rc=rc)  
+    ! Create a Gridded Component setting the petlist to 1
+    ! to force run status to be set to false for all other PETs
+    cname = "GridComp with PetList"
+    comp2 = ESMF_GridCompCreate(name=cname, petList=(/1/), rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component with petList"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -130,10 +131,38 @@
 
     !------------------------------------------------------------------------
     !EX_UTest
-    ! Verify that the run status is false
-    write(failMsg, *) "Did not return false"
-    write(name, *) "Query run status of a Gridded Component"
-    call ESMF_Test((.not.bool), name, failMsg, result, ESMF_SRCLINE)
+    ! Get global VM
+    call ESMF_VMGetGlobal(vm, rc=rc)  
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Get global VM"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Get localPet from VM
+    call ESMF_VMGet(vm, localPet=localPet, rc=rc)  
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Get localPet from VM"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verify that the run status is correct
+    write(failMsg, *) "Did not return true on PET 1, false otherwise"
+    write(name, *) "Verify run status of a Gridded Component"
+    if (localPet==1) then
+      call ESMF_Test((bool), name, failMsg, result, ESMF_SRCLINE)
+    else
+      call ESMF_Test((.not.bool), name, failMsg, result, ESMF_SRCLINE)
+    endif
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verifing that a Gridded Component can be destroyed
+    call ESMF_GridCompDestroy(comp2, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Gridded Component"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest
