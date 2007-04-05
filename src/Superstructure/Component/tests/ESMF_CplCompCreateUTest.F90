@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.14 2007/03/31 05:51:31 cdeluca Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.15 2007/04/05 19:59:27 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -14,6 +14,7 @@
 
 !------------------------------------------------------------------------------
 
+#include <ESMF.h>
 #include <ESMF_Macros.inc>
 
 !==============================================================================
@@ -39,6 +40,7 @@
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
     integer :: result = 0
+    logical :: bool
     
     ! Internal State Variables
     type testData
@@ -90,8 +92,25 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
-
 !-------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Query the run status of a deleted Coupler Component
+    bool = ESMF_CplCompIsPetLocal(cpl, rc=rc)
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+    write(name, *) "Query run status of a deleted Coupler Component"
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verify that the run status is false
+    write(failMsg, *) "Did not return false"
+    write(name, *) "Query run status of a deleted Coupler Component"
+    call ESMF_Test((.not.bool), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+
 !   !
     !EX_UTest
 !   !  Test creation of a Component
@@ -100,6 +119,21 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Coupler Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Query the run status of a Coupler Component
+    bool = ESMF_CplCompIsPetLocal(cpl, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Query run status of a Coupler Component"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verify that the run status is true
+    write(failMsg, *) "Did not return true"
+    write(name, *) "Query run status of a Coupler Component"
+    call ESMF_Test((bool), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
