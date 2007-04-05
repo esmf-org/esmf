@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.4 2007/04/05 19:09:06 svasquez Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.5 2007/04/05 21:46:08 svasquez Exp $
 !
 ! Test code which creates a new Component.
 
@@ -34,7 +34,7 @@
 
     ! other local variables
     character(ESMF_MAXSTR) :: cname
-    type(ESMF_GridComp) :: comp1
+    type(ESMF_GridComp) :: comp1, comp2
         
 !-------------------------------------------------------------------------
 !   !
@@ -110,6 +110,30 @@
     write(failMsg, *) "Did not return true"
     write(name, *) "Query run status of a deleted Gridded Component"
     call ESMF_Test((bool), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Create a Gridded Component setting the petlist to 100
+    ! to force run status to be set to false.
+    comp2 = ESMF_GridCompCreate(name=cname, petList=(/100/), rc=rc)  
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Gridded Component with petList"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Query the run status of a Gridded Component 
+    bool = ESMF_GridCompIsPetLocal(comp2, rc=rc)  
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Query run status of a Gridded Component"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verify that the run status is false
+    write(failMsg, *) "Did not return false"
+    write(name, *) "Query run status of a Gridded Component"
+    call ESMF_Test((.not.bool), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest
