@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.21 2007/03/31 05:51:16 cdeluca Exp $
+// $Id: ESMC_LocalArray.C,v 1.22 2007/04/05 18:24:29 theurich Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -40,7 +40,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.21 2007/03/31 05:51:16 cdeluca Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.22 2007/04/05 18:24:29 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -517,8 +517,8 @@
   }
 
   // adjust the F90 dope vector to reflect the new bounds
-  FTN(f_esmf_localarrayadjust)(&larray, &rank, &kind, counts, lbound,  
-    ubound, &status);
+  FTN(f_esmf_localarrayadjust)(&larray, &rank, &kind, counts, larray->lbound,  
+    larray->ubound, &status);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
     return NULL;
 
