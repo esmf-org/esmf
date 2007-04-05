@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.3 2006/10/20 03:49:26 theurich Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.4 2007/04/05 19:09:06 svasquez Exp $
 !
 ! Test code which creates a new Component.
 
@@ -26,6 +26,7 @@
 !   ! Local variables
     integer :: rc
     integer :: result = 0
+    logical :: bool 
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -71,6 +72,21 @@
 
     !------------------------------------------------------------------------
     !EX_UTest
+    ! Query the run status of a deleted Gridded Component 
+    bool = ESMF_GridCompIsPetLocal(comp1, rc=rc)  
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+    write(name, *) "Query run status of a deleted Gridded Component"
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verify that the run status is false
+    write(failMsg, *) "Did not return false"
+    write(name, *) "Query run status of a deleted Gridded Component"
+    call ESMF_Test((.not.bool), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
     ! Verifing that a Gridded Component can be created in parent VM context
     cname = "Atmosphere - child in parent VM context"
     comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
@@ -78,6 +94,22 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Query the run status of a Gridded Component 
+    cname = "Atmosphere - child in parent VM context"
+    bool = ESMF_GridCompIsPetLocal(comp1, rc=rc)  
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Query run status of a Gridded Component"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verify that the run status is true
+    write(failMsg, *) "Did not return true"
+    write(name, *) "Query run status of a deleted Gridded Component"
+    call ESMF_Test((bool), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest
