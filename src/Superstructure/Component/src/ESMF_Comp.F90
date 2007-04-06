@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.151 2007/04/05 20:07:08 oehmke Exp $
+! $Id: ESMF_Comp.F90,v 1.152 2007/04/06 22:08:53 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.151 2007/04/05 20:07:08 oehmke Exp $'
+      '$Id: ESMF_Comp.F90,v 1.152 2007/04/06 22:08:53 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1592,7 +1592,6 @@ end function
         ! Initialize output in case of error
         ESMF_CompIsPetLocal = .false.
 
-
         if (.not.associated(compp)) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                                      "Uninitialized or destroyed component", &
@@ -1606,7 +1605,7 @@ end function
 
         if (compp%compstatus .ne. ESMF_STATUS_READY) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "uninitialized or destroyed component", &
+                                     "Unini/destroyed comp", &
                                      ESMF_CONTEXT, rc)
             return
         endif
@@ -1747,7 +1746,7 @@ end function
 
        if (compp%compstatus .ne. ESMF_STATUS_READY) then
            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                    "uninitialized or destroyed component", &
+                                    "Unini/destroyed comp", &
                                     ESMF_CONTEXT, rc)
             return
        endif
