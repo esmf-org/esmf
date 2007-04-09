@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayDataUTest.F90,v 1.1 2007/04/09 18:20:26 theurich Exp $
+! $Id: ESMF_LocalArrayDataUTest.F90,v 1.2 2007/04/09 22:48:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_LocalArrayDataUTest
+program ESMF_LocalArrayDataUTest
 
 !------------------------------------------------------------------------------
 
@@ -18,7 +18,7 @@
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_LocalArrayDataTest - Check basic data methods in LocalArray
+! !PROGRAM: ESMF_LocalArrayDataTest - Check LocalArray data storage integrity
 !
 ! !DESCRIPTION:
 !
@@ -28,101 +28,192 @@
 !
 !-----------------------------------------------------------------------------
 ! !USES:
-      use ESMF_TestMod     ! test methods
-      use ESMF_Mod
+  use ESMF_TestMod     ! test methods
+  use ESMF_Mod
 
-      implicit none
+  implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter :: version = &
-      '$Id: ESMF_LocalArrayDataUTest.F90,v 1.1 2007/04/09 18:20:26 theurich Exp $'
+  character(*), parameter :: version = &
+    '$Id: ESMF_LocalArrayDataUTest.F90,v 1.2 2007/04/09 22:48:04 theurich Exp $'
 !------------------------------------------------------------------------------
     
-    ! cumulative result: count failures; no failures equals "all pass"
-    integer :: result = 0
+  ! cumulative result: count failures; no failures equals "all pass"
+  integer :: result = 0
 
-    ! individual test result code
-    integer :: rc = 1
+  ! individual test result code
+  integer :: rc
 
-    ! individual test failure message
-    character(ESMF_MAXSTR) :: failMsg
-    character(ESMF_MAXSTR) :: name
+  ! individual test failure message
+  character(ESMF_MAXSTR) :: failMsg
+  character(ESMF_MAXSTR) :: name
 
-    integer :: i
-    type(ESMF_LocalArray) :: la
+  integer :: i
+  logical :: looptest
+  type(ESMF_LocalArray) :: la
 
+  ! F90 array pointer of 4-byte integers
+  integer (ESMF_KIND_I4),dimension(:), pointer :: data
+  integer (ESMF_KIND_I4),dimension(:), pointer :: fptr, fptr2
 
-    ! Array of data type Integer * 4 
-    type PtrIWrap1  
-    sequence
-      integer (ESMF_KIND_I4),dimension(:), pointer :: data
-    end type 
-    
-#ifdef ESMF_EXHAUSTIVE
-    ! Array of data type Real * 4 
-    type PtrRWrap2  
-    sequence
-      real (ESMF_KIND_R4),dimension(:,:), pointer :: data
-    end type 
+  ! F90 derived type with F90 array pointer member of 4-byte integers
+  type PtrIWrap1
+  sequence
+    integer (ESMF_KIND_I4),dimension(:), pointer :: data
+  end type
 
-    ! Array of data type Real * 8 
-    type PtrR8Wrap3  
-    sequence
-      real (ESMF_KIND_R8),dimension(:,:,:), pointer :: data
-    end type 
-    
-    ! used below
-    type mytype
-    sequence
-       integer :: myint
-       real :: myreal
-    end type
-
-    ! Arrays of a derived data type
-    type PtrSWrap1  
-    sequence
-      type(mytype),dimension(:), pointer :: data
-    end type 
-#endif
-    
+  type(PtrIWrap1) :: sizetest1I
 
     
-    type(PtrIWrap1) :: sizetest1I
-    
-#if 0
-#ifdef ESMF_EXHAUSTIVE
-    type(PtrRWrap2) :: sizetest2R
-    type(PtrR8Wrap3) :: sizetest3R8
-    type(PtrSWrap1) :: sizetest1S
-#endif
-#endif
-    
 
-    call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
-    
+  !-----------------------------------------------------------------------------
+  call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+  !-----------------------------------------------------------------------------
 
-!------------------------------------------------------------------------------
-    !NEX_UTest
-    allocate(sizetest1I%data(-12:-6), stat=rc)
-    do i = -12, -6
-      sizetest1I%data(i) = i*1000
-    enddo
 
-    la = ESMF_LocalArrayCreate(sizetest1I%data, ESMF_DATA_REF, rc=rc)
-    write(failMsg, *) "cannot create LocalArray"
-    write(name, *) "Creating a LocalArray from an allocated F90 Pointer"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!------------------------------------------------------------------------------
+  ! prepare for F90 allocatable array "data"
+  allocate(data(-12:-6), stat=rc)
+  do i = -12, -6
+    data(i) = i*1000
+  enddo
 
-    call ESMF_LocalArrayPrint(la, rc=rc)
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Creating a LocalArray from an allocated F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  la = ESMF_LocalArrayCreate(data, ESMF_DATA_COPY, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
-#ifdef ESMF_EXHAUSTIVE
-    
-#endif
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Printing LocalArray created from alocated F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_LocalArrayPrint(la, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
-    call ESMF_TestEnd(result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_LocalArrayGetData(la, fptr, ESMF_DATA_REF, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
-    end program ESMF_LocalArrayDataUTest
-    
-    
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verifying data in LocalArray via F90 array pointer access"
+  write(failMsg, *) "Incorrect data detected"
+  looptest = .true.
+  do i = -12, -6
+    if (fptr(i) /= data(i)) looptest = .false.
+  enddo
+  call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  ! Fill in different values via fptr
+  do i = -12, -6
+    fptr(i) = fptr(i) + 57
+  enddo
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_LocalArrayGetData(la, fptr2, ESMF_DATA_REF, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verifying data in LocalArray via F90 array pointer access"
+  write(failMsg, *) "Incorrect data detected"
+  looptest = .true.
+  do i = -12, -6
+    if (fptr2(i) /= fptr(i)) looptest = .false.
+  enddo
+  call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroying LocalArray created from an allocated F90 ",&
+    "array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_LocalArrayDestroy(la, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  ! garbage collection
+  deallocate(data, stat=rc)
+
+
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+
+
+  ! prepare for F90 array pointer member "data" in F90 derived type
+  allocate(sizetest1I%data(-12:-6), stat=rc)
+  do i = -12, -6
+    sizetest1I%data(i) = i*1000 - 11
+  enddo
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Creating a LocalArray from an allocated F90 Pointer within ",&
+    "derived type"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  la = ESMF_LocalArrayCreate(sizetest1I%data, ESMF_DATA_REF, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Printing LocalArray created from an allocated F90 Pointer ",&
+    "within derived type"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_LocalArrayPrint(la, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_LocalArrayGetData(la, fptr, ESMF_DATA_REF, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verifying data in LocalArray via F90 array pointer access"
+  write(failMsg, *) "Incorrect data detected"
+  looptest = .true.
+  do i = -12, -6
+    if (fptr(i) /= sizetest1I%data(i)) looptest = .false.
+  enddo
+  call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroying LocalArray created from an allocated F90 ",&
+    "Pointer within derived type"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_LocalArrayDestroy(la, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  ! garbage collection
+  deallocate(sizetest1I%data, stat=rc)
+
+
+  !-----------------------------------------------------------------------------
+  call ESMF_TestEnd(result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+end program ESMF_LocalArrayDataUTest
