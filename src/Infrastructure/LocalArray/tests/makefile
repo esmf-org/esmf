@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2005/10/12 19:06:16 nscollins Exp $ 
+# $Id: makefile,v 1.13 2007/04/09 18:20:26 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -16,13 +16,13 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/LocalArray/tests
 
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayDataUTest \
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_LocalArrayDataUTest \
 		$(ESMF_TESTDIR)/ESMF_LocalArrayUTest 
 
-TESTS_RUN     = RUN_ESMF_ArrayDataUTest \
+TESTS_RUN     = RUN_ESMF_LocalArrayDataUTest \
 		RUN_ESMF_LocalArrayUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_ArrayDataUTestUNI \
+TESTS_RUN_UNI = RUN_ESMF_LocalArrayDataUTestUNI \
 		RUN_ESMF_LocalArrayUTestUNI
 
 
@@ -38,13 +38,13 @@ CLOBBERDIRS =
 
 
 #
-#  ESMF_ArrayDataUTest
+#  ESMF_LocalArrayDataUTest
 #
-RUN_ESMF_ArrayDataUTest:
-	$(MAKE) TNAME=ArrayData NP=4 ftest
+RUN_ESMF_LocalArrayDataUTest:
+	$(MAKE) TNAME=LocalArrayData NP=4 ftest
 
-RUN_ESMF_ArrayDataUTestUNI:
-	$(MAKE) TNAME=ArrayData NP=1 ftest
+RUN_ESMF_LocalArrayDataUTestUNI:
+	$(MAKE) TNAME=LocalArrayData NP=1 ftest
 
 
 #

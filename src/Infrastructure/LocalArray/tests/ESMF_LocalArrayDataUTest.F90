@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataUTest.F90,v 1.5 2007/03/31 05:51:16 cdeluca Exp $
+! $Id: ESMF_LocalArrayDataUTest.F90,v 1.1 2007/04/09 18:20:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_ArrayDataUTest
+      program ESMF_LocalArrayDataUTest
 
 !------------------------------------------------------------------------------
 
@@ -18,13 +18,13 @@
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_ArrayDataTest - One line general statement about this test
+! !PROGRAM: ESMF_LocalArrayDataTest - Check basic data methods in LocalArray
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 ArrayData unit tests.
-! The companion file ESMF\_Array.F90 contains the definitions for the
-! Array methods.
+! The code in this file drives F90 LocalArrayData unit tests.
+! The companion file ESMF\_LocalArray.F90 contains the definitions for the
+! LocalArray methods.
 !
 !-----------------------------------------------------------------------------
 ! !USES:
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayDataUTest.F90,v 1.5 2007/03/31 05:51:16 cdeluca Exp $'
+      '$Id: ESMF_LocalArrayDataUTest.F90,v 1.1 2007/04/09 18:20:26 theurich Exp $'
 !------------------------------------------------------------------------------
     
     ! cumulative result: count failures; no failures equals "all pass"
@@ -123,6 +123,6 @@
 
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
-    end program ESMF_ArrayDataUTest
+    end program ESMF_LocalArrayDataUTest
     
     
