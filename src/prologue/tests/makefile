@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2006/09/28 05:05:06 theurich Exp $ 
+# $Id: makefile,v 1.7 2007/04/09 18:09:25 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -18,15 +18,15 @@ LOCDIR	  = src/prologue/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_StringUTest \
                 $(ESMF_TESTDIR)/ESMF_WordsizeUTest \
-                $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest
+                $(ESMF_TESTDIR)/ESMF_F90ArrayPtrUTest
 
 TESTS_RUN     = RUN_ESMF_StringUTest \
                 RUN_ESMF_WordsizeUTest \
-                RUN_ESMF_ArrayF90PtrUTest
+                RUN_ESMF_F90ArrayPtrUTest
 
 TESTS_RUN_UNI = RUN_ESMF_StringUTestUNI \
                 RUN_ESMF_WordsizeUTestUNI \
-                RUN_ESMF_ArrayF90PtrUTestUNI
+                RUN_ESMF_F90ArrayPtrUTestUNI
 
 include ${ESMF_DIR}/makefile
 
@@ -52,18 +52,18 @@ RUN_ESMF_StringUTestUNI:
 
 
 #
-#  Fortran 90 pointer size test.  This must pass before any of the
-#  ESMF Array tests will give valid results.  If this test does not pass
+#  Fortran 90 array pointer size test.  This must pass before any of the
+#  ESMF LocalArray code can be assumed to be correct. If this test does not pass
 #  adjust the #define values in $ESMF_DIR/build_config/your_arch/ESMC_Conf.h
 #  The values ESMF_F90_PTR_BASE_SIZE and ESMF_F90_PTR_PLUS_RANK are the
 #  ones to change.
 #
 
-RUN_ESMF_ArrayF90PtrUTest:
-	$(MAKE) TNAME=ArrayF90Ptr NP=4 ftest
+RUN_ESMF_F90ArrayPtrUTest:
+	$(MAKE) TNAME=F90ArrayPtr NP=4 ftest
 
-RUN_ESMF_ArrayF90PtrUTestUNI:
-	$(MAKE) TNAME=ArrayF90Ptr NP=1 ftest
+RUN_ESMF_F90ArrayPtrUTestUNI:
+	$(MAKE) TNAME=F90ArrayPtr NP=1 ftest
 
 
 
