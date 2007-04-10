@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataUTest.F90,v 1.1 2007/04/10 03:08:40 theurich Exp $
+! $Id: ESMF_ArrayDataUTest.F90,v 1.2 2007/04/10 03:35:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayDataUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayDataUTest.F90,v 1.1 2007/04/10 03:08:40 theurich Exp $'
+    '$Id: ESMF_ArrayDataUTest.F90,v 1.2 2007/04/10 03:35:53 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -49,7 +49,7 @@ program ESMF_ArrayDataUTest
   character(ESMF_MAXSTR) :: failMsg
   character(ESMF_MAXSTR) :: name
 
-  integer :: i, petCount
+  integer :: i, j, petCount
   logical :: looptest
 
   ! F90 array pointer of 4-byte integers
@@ -111,7 +111,9 @@ program ESMF_ArrayDataUTest
   write(failMsg, *) "Incorrect data detected"
   looptest = .true.
   do i = -12, -6
-    if (fptr(i+13) /= fdata(i)) looptest = .false.
+    j = i + 12 + lbound(fptr, 1)
+    print *, fptr(j), fdata(i)
+    if (fptr(j) /= fdata(i)) looptest = .false.
   enddo
   call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
@@ -137,7 +139,9 @@ program ESMF_ArrayDataUTest
   write(failMsg, *) "Incorrect data detected"
   looptest = .true.
   do i = -12, -6
-    if (fptr(i+13) /= fdata(i)) looptest = .false.
+    j = i + 12 + lbound(fptr, 1)
+    print *, fptr(j), fdata(i)
+    if (fptr(j) /= fdata(i)) looptest = .false.
   enddo
   call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
