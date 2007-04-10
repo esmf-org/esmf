@@ -1,7 +1,8 @@
-# $Id: makefile,v 1.13 2007/03/02 21:53:12 theurich Exp $ 
+# $Id: makefile,v 1.14 2007/04/10 03:08:40 theurich Exp $ 
 
-ALL:  build_unit_tests
-run:  run_unit_tests
+ALL:      build_unit_tests
+run:      run_unit_tests
+run_uni:  run_unit_tests_uni
 
 CFLAGS    =
 FFLAGS    =
@@ -17,13 +18,16 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/Array/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayCreateGetUTest \
+                $(ESMF_TESTDIR)/ESMF_ArrayDataUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayScatterUTest
 
 
 TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
+                RUN_ESMF_ArrayDataUTest \
                 RUN_ESMF_ArrayScatterUTest
 
 TESTS_RUN_UNI = RUN_ESMF_ArrayCreateGetUTestUNI \
+                RUN_ESMF_ArrayDataUTestUNI \
                 RUN_ESMF_ArrayScatterUTestUNI
 
 
@@ -44,6 +48,13 @@ RUN_ESMF_ArrayCreateGetUTest:
 RUN_ESMF_ArrayCreateGetUTestUNI:
 	$(MAKE) TNAME=ArrayCreateGet NP=1 ftest
 
+# ---
+
+RUN_ESMF_ArrayDataUTest:
+	$(MAKE) TNAME=ArrayData NP=4 ftest
+
+RUN_ESMF_ArrayDataUTestUNI:
+	$(MAKE) TNAME=ArrayData NP=1 ftest
 # ---
 
 RUN_ESMF_ArrayScatterUTest:
