@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.15 2007/04/05 19:59:27 svasquez Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.16 2007/04/11 22:31:02 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,13 +34,14 @@
 !   ! Local variables
     integer :: rc
     character(ESMF_MAXSTR) :: cname, bname, cplname
-    type(ESMF_CplComp) :: cpl
+    type(ESMF_CplComp) :: cpl, cpl2
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
-    integer :: result = 0
+    integer :: localPet, result = 0
     logical :: bool
+    type(ESMF_VM) :: vm
     
     ! Internal State Variables
     type testData
@@ -108,6 +109,52 @@
     write(failMsg, *) "Did not return false"
     write(name, *) "Query run status of a deleted Coupler Component"
     call ESMF_Test((.not.bool), name, failMsg, result, ESMF_SRCLINE)
+
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Create a Coupler Component setting the petlist to 1
+    ! to force run status to be set to false for all other PETs
+    cname = "CplComp with PetList"
+    cpl2 = ESMF_CplCompCreate(name=cname, petList=(/1/), rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Coupler Component with petList"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+   !------------------------------------------------------------------------
+    !EX_UTest
+    ! Query the run status of a Gridded Component
+    bool = ESMF_CplCompIsPetLocal(cpl2, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Query run status of a Gridded Component"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Get global VM
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Get global VM"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Get localPet from VM
+    call ESMF_VMGet(vm, localPet=localPet, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Get localPet from VM"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verify that the run status is correct
+    write(failMsg, *) "Did not return true on PET 1, false otherwise"
+    write(name, *) "Verify run status of a Coupler Component"
+    if (localPet==1) then
+      call ESMF_Test((bool), name, failMsg, result, ESMF_SRCLINE)
+    else
+      call ESMF_Test((.not.bool), name, failMsg, result, ESMF_SRCLINE)
+    endif
 
     !------------------------------------------------------------------------
 
