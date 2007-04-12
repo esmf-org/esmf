@@ -19,27 +19,44 @@ include $(ESMF_INSTALL_LIBDIR_ABSPATH)/esmf.mk
 ################################################################################
 ################################################################################
 
-.SUFFIXES: .f90
+.SUFFIXES: .f90 .F90 .c .C
 
-.f90.o:
+.f90:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILECPPFLAGS) $<
+	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $*.o $(ESMF_F90ESMFLINKLIBS)        
+
+.F90:
+	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREECPP) $(ESMF_F90COMPILECPPFLAGS) $<
+	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $*.o $(ESMF_F90ESMFLINKLIBS)        
         
-.o:
-	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $^ $(ESMF_F90ESMFLINKLIBS)        
+.c:
+	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
+	$(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) -o $@ $*.o $(ESMF_CXXESMFLINKLIBS)
+
+.C:
+	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
+	$(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) -o $@ $*.o $(ESMF_CXXESMFLINKLIBS)
+
 
 
 # -----------------------------------------------------------------------------
-esmf_application: esmf_application.o
+all: esmf_application esmc_application
+
+esmf_application:
+
+esmc_application:
 
 # -----------------------------------------------------------------------------
 .PHONY: check
 check:
 	@if [ -f esmf_application ]; then \
-           echo "PASS: check"; \
+          if [ -f esmc_application ]; then \
+            echo "PASS: check"; \
+          fi; \
         fi
 
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 .PHONY: clean
 clean:
-	rm -f esmf_application *.o *.mod
+	rm -f esmf_application esmc_application *.o *.mod
