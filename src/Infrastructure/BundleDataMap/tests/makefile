@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2005/10/12 19:06:16 nscollins Exp $
+# $Id: makefile,v 1.13 2007/04/12 20:16:52 theurich Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -16,16 +16,10 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/BundleDataMap/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_BundleDataMapUTest 
-#	        $(ESMF_TESTDIR)/ESMC_BundleDataMapUTest 
-# Comment out temporarily
 
 TESTS_RUN     = RUN_ESMF_BundleDataMapUTest \
-#		RUN_ESMC_BundleDataMapUTest 
-# Comment out temporarily
 
 TESTS_RUN_UNI = RUN_ESMF_BundleDataMapUTestUNI \
-#		RUN_ESMC_BundleDataMapUTestUNI 
-# Comment out temporarily
 
 
 
@@ -45,16 +39,3 @@ RUN_ESMF_BundleDataMapUTest:
 
 RUN_ESMF_BundleDataMapUTestUNI:
 	$(MAKE) TNAME=BundleDataMap NP=1 ftest
-
-
-#
-# C++ Unit tests
-#
-RUN_ESMC_BundleDataMapUTest:
-	$(MAKE) TNAME=BundleDataMap NP=4 ctest
-
-RUN_ESMC_BundleDataMapUTestUNI:
-	$(MAKE) TNAME=BundleDataMap NP=1 ctest
-
-
-
