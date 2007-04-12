@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2007/01/11 17:06:01 oehmke Exp $ 
+# $Id: makefile,v 1.21 2007/04/12 21:09:30 theurich Exp $ 
 
 ALL: build_here 
 
@@ -32,19 +32,19 @@ CLEANFILES  =
 CLOBBERDIRS =
 
 
-ESMC_Fraction_F.o:	ESMC.h ESMC_Base.h ESMC_Fraction.h makefile
+ESMC_Fraction_F.o:	ESMC_Base.h ESMC_Fraction.h makefile
 
-ESMC_BaseTime_F.o:	ESMC.h ESMC_Base.h ESMC_BaseTime.h makefile
+ESMC_BaseTime_F.o:	ESMC_Base.h ESMC_BaseTime.h makefile
 
-ESMC_Calendar_F.o:	ESMC.h ESMC_Base.h ESMC_Calendar.h makefile
+ESMC_Calendar_F.o:	ESMC_Base.h ESMC_Calendar.h makefile
 
-ESMC_TimeInterval_F.o:	ESMC.h ESMC_Base.h ESMC_TimeInterval.h makefile
+ESMC_TimeInterval_F.o:	ESMC_Base.h ESMC_TimeInterval.h makefile
 
-ESMC_Time_F.o:	ESMC.h ESMC_Base.h ESMC_Time.h makefile
+ESMC_Time_F.o:	ESMC_Base.h ESMC_Time.h makefile
 
-ESMC_Alarm_F.o:	ESMC.h ESMC_Base.h ESMC_Alarm.h makefile
+ESMC_Alarm_F.o:	ESMC_Base.h ESMC_Alarm.h makefile
 
-ESMC_Clock_F.o:	ESMC.h ESMC_Base.h ESMC_Clock.h makefile
+ESMC_Clock_F.o:	ESMC_Base.h ESMC_Clock.h makefile
 
 ESMF_Fraction.o:	makefile
 
