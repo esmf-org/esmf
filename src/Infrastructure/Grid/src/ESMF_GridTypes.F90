@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.56 2007/03/31 05:51:10 cdeluca Exp $
+! $Id: ESMF_GridTypes.F90,v 1.57 2007/04/12 17:01:26 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -566,7 +566,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.56 2007/03/31 05:51:10 cdeluca Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.57 2007/04/12 17:01:26 oehmke Exp $'
 
 !==============================================================================
 !
@@ -2232,7 +2232,7 @@
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSpecificValidate()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSpecificValidate - Validate DataHolder internals
 
 ! !INTERFACE:
@@ -2255,7 +2255,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -2342,7 +2342,7 @@
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridClassValidate()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridClassValidate - Validate DataHolder internals
 
 ! !INTERFACE:
@@ -2365,7 +2365,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
