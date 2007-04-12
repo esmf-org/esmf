@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2005/10/12 19:06:16 nscollins Exp $
+# $Id: makefile,v 1.13 2007/04/12 20:37:25 theurich Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -15,14 +15,11 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/FieldDataMap/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldDataMapUTest \
-#	        $(ESMF_TESTDIR)/ESMC_FieldDataMapUTest 
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldDataMapUTest
 
-TESTS_RUN     = RUN_ESMF_FieldDataMapUTest \
-#		RUN_ESMC_FieldDataMapUTest 
+TESTS_RUN     = RUN_ESMF_FieldDataMapUTest
 
-TESTS_RUN_UNI = RUN_ESMF_FieldDataMapUTestUNI \
-#		RUN_ESMC_FieldDataMapUTestUNI 
+TESTS_RUN_UNI = RUN_ESMF_FieldDataMapUTestUNI
 
 
 include ${ESMF_DIR}/makefile
@@ -41,16 +38,4 @@ RUN_ESMF_FieldDataMapUTest:
 
 RUN_ESMF_FieldDataMapUTestUNI:
 	$(MAKE) TNAME=FieldDataMap NP=1 ftest
-
-
-#
-# C++ Unit tests
-#
-RUN_ESMC_FieldDataMapUTest:
-	$(MAKE) TNAME=FieldDataMap NP=4 ctest
-
-RUN_ESMC_FieldDataMapUTestUNI:
-	$(MAKE) TNAME=FieldDataMap NP=1 ctest
-
-
 
