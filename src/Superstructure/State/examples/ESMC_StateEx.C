@@ -1,4 +1,4 @@
-// $Id: ESMC_StateEx.C,v 1.7 2004/06/15 13:34:24 nscollins Exp $
+// $Id: ESMC_StateEx.C,v 1.8 2007/04/12 21:24:45 theurich Exp $
 //
 // Example/test code which creates a new State.
 
@@ -19,10 +19,10 @@
 //   // See the more specific example programs for details of how
 //   // the interfaces are used under various conditions.
 
-#include "ESMC.h"
-
-
 #include <stdio.h>
+#include "ESMCI.h"
+
+
     
 main(int argc, char **argv) {
 //   // Local variables
