@@ -1,4 +1,4 @@
-// $Id: ESMC_GCompEx.C,v 1.14 2006/04/04 22:04:15 theurich Exp $
+// $Id: ESMC_GCompEx.C,v 1.15 2007/04/12 23:09:56 theurich Exp $
 //
 // Example/test code which creates a new comp.
 
@@ -25,10 +25,8 @@
 //   // See the more specific example programs for details of how
 //   // the interfaces are used under various conditions.
 
-#include "ESMC.h"
-
-
 #include <stdio.h>
+#include "ESMCI.h"
     
 main(int argc, char **argv) {
 //   // Local variables
@@ -40,7 +38,7 @@ main(int argc, char **argv) {
 //-------------------------------------------------------------------------
 //   // Setup:
      finalrc = ESMF_SUCCESS;
-     rc = ESMC_Initialize();
+     rc = ESMCI_Initialize();
      if (rc != ESMF_SUCCESS) finalrc = rc;
      // create clock, layout here.
 
@@ -94,7 +92,7 @@ main(int argc, char **argv) {
 
      //printf("Comp example 5 returned\n");
 
-     ESMC_Finalize();
+     ESMCI_Finalize();
      if (rc != ESMF_SUCCESS) finalrc = rc;
 
      if (finalrc == ESMF_SUCCESS)

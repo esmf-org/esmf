@@ -1,4 +1,4 @@
-// $Id: ESMC_AppMainEx.C,v 1.17 2006/04/04 22:04:15 theurich Exp $
+// $Id: ESMC_AppMainEx.C,v 1.18 2007/04/12 23:09:56 theurich Exp $
 //
 // Example code which creates a main Application program.
 // This is the cap component which creates other components below it.
@@ -25,7 +25,7 @@
 //   // the interfaces are used under various conditions.
 
 #include <stdio.h>
-#include "ESMC.h"
+#include "ESMCI.h"
 
 void ATM_SetServices(ESMC_GridComp *gc, int *rc);
     
@@ -43,7 +43,7 @@ main(int argc, char **argv) {
 //   // Setup:
      finalrc = ESMF_SUCCESS;
 
-     rc = ESMC_Initialize();
+     rc = ESMCI_Initialize();
      if (rc != ESMF_SUCCESS) finalrc = rc;
 
 //-------------------------------------------------------------------------
@@ -98,7 +98,7 @@ main(int argc, char **argv) {
 
      //printf("Comp example 5 returned\n");
 
-     rc = ESMC_Finalize();
+     rc = ESMCI_Finalize();
      if (rc != ESMF_SUCCESS) finalrc = rc;
 
      if (finalrc == ESMF_SUCCESS) 

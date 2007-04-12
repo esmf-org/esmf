@@ -1,4 +1,4 @@
-// $Id: ESMC_Test.C,v 1.3 2007/03/31 05:51:34 cdeluca Exp $
+// $Id: ESMC_Test.C,v 1.4 2007/04/12 23:09:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,    
@@ -20,7 +20,7 @@
 //-----------------------------------------------------------------------------
 //
  // insert any higher level, 3rd party or system includes here
- #include <ESMC.h>
+ #include <ESMCI.h>
  #include <stdio.h>
 
 // remove define which automatically appends the "CONTEXT" to all
@@ -30,12 +30,12 @@
  #undef ESMC_LogWrite
 
  // associated class definition file
- #include <ESMC_Test.h>
+ #include <ESMCI_Test.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Test.C,v 1.3 2007/03/31 05:51:34 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Test.C,v 1.4 2007/04/12 23:09:57 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
