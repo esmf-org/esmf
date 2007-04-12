@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.49 2007/03/31 05:50:47 cdeluca Exp $
+! $Id: ESMF_Array.F90,v 1.50 2007/04/12 16:58:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.49 2007/03/31 05:50:47 cdeluca Exp $'
+    '$Id: ESMF_Array.F90,v 1.50 2007/04/12 16:58:10 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -2047,7 +2047,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleValidate()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayBundleValidate - Validate ArrayBundle internals
 
 ! !INTERFACE:
@@ -2070,7 +2070,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
