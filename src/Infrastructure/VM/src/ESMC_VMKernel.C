@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.86 2007/03/31 05:51:28 cdeluca Exp $
+// $Id: ESMC_VMKernel.C,v 1.87 2007/04/12 18:14:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -3150,33 +3150,37 @@ void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
 }
   
 void ESMC_VMK::vmk_threadbarrier(void){
-  // collective barrier over all PETs in thread group with mypet 
-  int myp = pid[mypet];
-  int myt = tid[mypet];
-  if (myt==0){
-    // mypet is the zero thread for this PID
-    for (int i=0; i<npets; i++)
-      if (i!=mypet && pid[i]==myp){
-        // pet "i" is another thread under same PID
-        shared_mp *shmp = commarray[mypet][i].shmp;
-        sync_a_flip(&shmp->shms);
-      }
-    for (int i=0; i<npets; i++)
-      if (i!=mypet && pid[i]==myp){
-        // pet "i" is another thread under same PID
-        shared_mp *shmp = commarray[mypet][i].shmp;
-        sync_a_flop(&shmp->shms);
-      }
-  }else{
-    // mypet is not the master thread for this PID -> find master
-    int i;
-    for (i=0; i<npets; i++)
-      if (pid[i]==myp && tid[i]==0) break;
-    // now PET "i" is the master thread for this PID
-    shared_mp *shmp = commarray[i][mypet].shmp;
-    sync_b_flip(&shmp->shms);
-    // now all threads are "flip"-synced under their master thread
-    sync_b_flop(&shmp->shms);
+  if (!mpionly && !nothreadsflag){
+    // collective barrier over all PETs in thread group with mypet
+    int myp = pid[mypet];
+    int myt = tid[mypet];
+    if (myt==0){
+      // mypet is the zero thread for this PID
+      // todo: optimize by storing PETs of thread group within VM as list
+      for (int i=0; i<npets; i++)
+        if (i!=mypet && pid[i]==myp){
+          // pet "i" is another thread under same PID
+          shared_mp *shmp = commarray[mypet][i].shmp;
+          sync_a_flip(&shmp->shms);
+        }
+      for (int i=0; i<npets; i++)
+        if (i!=mypet && pid[i]==myp){
+          // pet "i" is another thread under same PID
+          shared_mp *shmp = commarray[mypet][i].shmp;
+          sync_a_flop(&shmp->shms);
+        }
+    }else{
+      // mypet is not the master thread for this PID -> find master
+      int i;
+      // todo: optimize by storing root PET of thread group within VM
+      for (i=0; i<npets; i++)
+        if (pid[i]==myp && tid[i]==0) break;
+      // now PET "i" is the master thread for this PID
+      shared_mp *shmp = commarray[i][mypet].shmp;
+      sync_b_flip(&shmp->shms);
+      // now all threads are "flip"-synced under their master thread
+      sync_b_flop(&shmp->shms);
+    }
   }
 }
 
