@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.152 2007/04/06 22:08:53 samsoncheung Exp $
+! $Id: ESMF_Comp.F90,v 1.153 2007/04/12 16:59:29 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.152 2007/04/06 22:08:53 samsoncheung Exp $'
+      '$Id: ESMF_Comp.F90,v 1.153 2007/04/12 16:59:29 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -296,7 +296,7 @@ end interface
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CompClassValidate()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CompClassValidate - Validate CompClass internals
 
 ! !INTERFACE:
@@ -319,7 +319,7 @@ end interface
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
