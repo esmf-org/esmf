@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2006/01/30 20:10:08 nscollins Exp $ 
+# $Id: makefile,v 1.24 2007/04/12 20:50:21 theurich Exp $ 
 
 ALL:  build_examples
 
@@ -17,20 +17,17 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/Field/examples
 
 
-EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_FieldCreateEx \
-                 $(ESMF_EXDIR)/ESMF_FieldCreateEx \
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
                  $(ESMF_EXDIR)/ESMF_FieldFromUserEx \
                  $(ESMF_EXDIR)/ESMF_FieldGlobalEx \
                  $(ESMF_EXDIR)/ESMF_FieldWriteEx
 
-EXAMPLES_RUN = run_ESMC_FieldCreateEx \
-               run_ESMF_FieldCreateEx \
+EXAMPLES_RUN = run_ESMF_FieldCreateEx \
                run_ESMF_FieldFromUserEx \
                run_ESMF_FieldGlobalEx \
                run_ESMF_FieldWriteEx 
 
-EXAMPLES_RUN_UNI = run_ESMC_FieldCreateEx_uni \
-                   run_ESMF_FieldCreateEx_uni \
+EXAMPLES_RUN_UNI = run_ESMF_FieldCreateEx_uni \
                    run_ESMF_FieldFromUserEx_uni \
                    run_ESMF_FieldGlobalEx_uni \
                    run_ESMF_FieldWriteEx_uni
@@ -43,15 +40,6 @@ CLEANDIRS   =
 CLEANFILES  = foo.nc $(EXAMPLES_BUILD) 0 1 2 3
 CLOBBERDIRS =
 
-
-#
-# ESMC_FieldCreateEx
-#
-run_ESMC_FieldCreateEx:
-	$(MAKE) EXNAME=FieldCreate NP=4 excrun
-
-run_ESMC_FieldCreateEx_uni:
-	$(MAKE) EXNAME=FieldCreate NP=1 excrun
 
 #
 # ESMF_FieldCreateEx
