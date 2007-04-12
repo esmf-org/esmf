@@ -1,4 +1,4 @@
-// $Id: ESMC_CompRun.C,v 1.10 2004/05/26 14:24:12 nscollins Exp $
+// $Id: ESMC_CompRun.C,v 1.11 2007/04/12 21:19:05 theurich Exp $
 //
 // Test code which creates a new Component in C++.  The called
 // component is still in F90.
@@ -16,7 +16,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "ESMC.h"
+#include "ESMCI.h"
 
 extern "C" void FTN(externaluser_setservices)(ESMC_GridComp *, int *rc);
 
@@ -36,7 +36,7 @@ main(int argc, char **argv)
 //   //
 //   //  Quick Test - Create, Init, Run, Finalize, Destroy a Component.
 
-    rc = ESMC_Initialize(argc, argv);
+    rc = ESMCI_Initialize(argc, argv);
  
     printf("Component Test 1:\n");
 
@@ -78,7 +78,7 @@ main(int argc, char **argv)
 
     printf("Component Test 1 finished\n");
 
-    rc = ESMC_Finalize();
+    rc = ESMCI_Finalize();
 
     exit (0);
 }

@@ -1,4 +1,4 @@
-// $Id: ESMC_CompCreate.C,v 1.9 2004/05/26 14:23:56 nscollins Exp $
+// $Id: ESMC_CompCreate.C,v 1.10 2007/04/12 21:19:05 theurich Exp $
 //
 // Test code which creates a new Component.
 
@@ -15,7 +15,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "ESMC.h"
+#include "ESMCI.h"
 
 
 int main(int argc, char **argv)
@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 //   
 //   Quick Test - Create, Init, Run, Finalize, Destroy a Component.
 
-    rc = ESMC_Initialize(argc, argv);
+    rc = ESMCI_Initialize(argc, argv);
  
     printf("Component Test 1:\n");
 
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 
     printf("Component Test 1 finished\n");
 
-    rc = ESMC_Finalize();
+    rc = ESMCI_Finalize();
 
     exit (0);
 }
