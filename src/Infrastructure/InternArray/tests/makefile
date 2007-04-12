@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2006/03/24 16:33:28 theurich Exp $ 
+# $Id: makefile,v 1.2 2007/04/12 20:39:31 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -47,19 +47,6 @@ RUN_ESMF_InternArrayDataMapUTest:
 
 RUN_ESMF_InternArrayDataMapUTestUNI:
 	$(MAKE) TNAME=InternArrayDataMap NP=1 ftest
-
-
-
-#
-# C++ InternArrayDataMap Unit tests
-#
-
-RUN_ESMC_InternArrayDataMapUTest:
-	$(MAKE) TNAME=InternArrayDataMap NP=4 ctest
-
-RUN_ESMC_InternArrayDataMapUTestUNI:
-	$(MAKE) TNAME=InternArrayDataMap NP=1 ctest
-
 
 
 #
