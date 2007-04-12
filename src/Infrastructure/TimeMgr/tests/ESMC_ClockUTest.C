@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockUTest.C,v 1.6 2007/03/31 05:51:26 cdeluca Exp $
+// $Id: ESMC_ClockUTest.C,v 1.7 2007/04/12 21:11:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,20 +23,20 @@
 //EOP
 //-----------------------------------------------------------------------------
 //
- // insert any higher level, 3rd party or system includes here
- #include <stdio.h>
- #include <ESMC.h>
+// insert any higher level, 3rd party or system includes here
+#include <stdio.h>
+#include "ESMCI.h"
 
- // associated class definition file
- #include <ESMC_Clock.h>
+// associated class definition file
+#include "ESMC_Clock.h"
 
- // ESMC_Test function
- #include <ESMC_Test.h>
+// ESMC_Test function
+#include "ESMCI_Test.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockUTest.C,v 1.6 2007/03/31 05:51:26 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_ClockUTest.C,v 1.7 2007/04/12 21:11:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
