@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.15 2007/03/31 05:51:33 cdeluca Exp $
+! $Id: ESMF_StateTypes.F90,v 1.16 2007/04/12 17:00:31 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -282,7 +282,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.15 2007/03/31 05:51:33 cdeluca Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.16 2007/04/12 17:00:31 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -394,7 +394,7 @@ end function
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DataHolderValidate()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DataHolderValidate - Validate DataHolder internals
 
 ! !INTERFACE:
@@ -417,7 +417,7 @@ end function
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
