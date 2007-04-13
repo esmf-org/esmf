@@ -5,7 +5,8 @@
 
 int main(void){
 
-  ESMC_Initialize();
+  ESMC_Initialize(NULL, ESMC_InitArgDefaultConfigFilename("dummy.config"),
+    ESMC_ArgLast);
   
   printf("hi from program esmc_application\n");
   printf("======================= finished ================================\n");

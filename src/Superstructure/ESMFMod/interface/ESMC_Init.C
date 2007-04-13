@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.C,v 1.9 2007/04/12 23:09:57 theurich Exp $
+// $Id: ESMC_Init.C,v 1.10 2007/04/13 05:16:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -28,7 +28,8 @@
 #include <stdio.h>
 
 // include ESMF headers
-#include "ESMCI.h"      // todo: remove this C++ interf. dependency
+#include "ESMC.h"
+#include "ESMCI.h"
 
 // include associated header file
 #include "ESMC_Init.h"
@@ -44,18 +45,35 @@ extern "C" {
   int ESMC_Initialize(
 //
 // !RETURN VALUE:
-//  int error return code
+//  int return code
 //
 // !ARGUMENTS:
-    void){
+    int *rc,        // return code
+    ...){           // optional arguments
 //  
 // !DESCRIPTION:
 //
 //EOP
 
     int localrc;
+    ESMCI_ArgList   argPtr;
+    ESMCI_ArgID     argID;
+    char *defaultConfigFilename;
+    
+    // parse the optional argument list
+    ESMCI_ArgStart(argPtr, rc);
+    while((argID=ESMCI_ArgGetID(argPtr)) != ESMC_ArgLast){
+      switch(argID){
+        case ESMC_InitArgDefaultConfigFilenameID:{
+          defaultConfigFilename = ESMCI_ArgGetPtr(argPtr, char *);
+//printf("defaultConfigFilename: %s\n", defaultConfigFilename);
+          break;
+        }
+      }
+    }
     
     // todo: it may be better to go directly into F90 instead of using C++
+    // todo: if this was implemented right it were to use the defaultConfigFile.
     localrc = ESMCI_Initialize();
     
     // todo: use LogErr to do error handling for localrc
@@ -73,7 +91,7 @@ extern "C" {
   int ESMC_Finalize(
 //
 // !RETURN VALUE:
-//  int error return code
+//  int return code
 //
 // !ARGUMENTS:
     void){
