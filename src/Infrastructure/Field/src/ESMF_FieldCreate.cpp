@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.23 2007/03/31 05:51:05 cdeluca Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.24 2007/04/16 21:30:28 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.23 2007/03/31 05:51:05 cdeluca Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.24 2007/04/16 21:30:28 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -173,11 +173,11 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 
 
       type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
-      integer :: status                           ! Error status
+      integer :: localrc                           !  Local error code
       logical :: rcpresent                        ! Return code present
 
       ! Initialize pointers
-      status = ESMF_FAILURE
+      localrc = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       nullify(ftype)
       nullify(ESMF_FieldCreateNew%ftypep)
@@ -185,24 +185,24 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
       ! Initialize return code   
       if(present(rc)) then
         rcpresent=.TRUE.
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
 
-      allocate(ftype, stat=status)
+      allocate(ftype, stat=localrc)
       ! If error write message and return.
       ! Formal error handling will be added asap.
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize field internals.
       call ESMF_FieldConstructIA(ftype, grid, arrayspec, allocflag, &
                                   horzRelloc, vertRelloc, haloWidth, &
-                                  datamap, name, iospec, status)
-      if (ESMF_LogMsgFoundError(status, &
+                                  datamap, name, iospec, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
    
@@ -282,11 +282,11 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 
 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
-      integer :: status                       ! Error status
+      integer :: localrc                       !  Local error code
       logical :: rcpresent                    ! Return code present
       
       ! Initialize pointers
-      status = ESMF_FAILURE
+      localrc = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       nullify(ftype)
       nullify(ESMF_FieldCreateFromArray%ftypep)
@@ -294,21 +294,21 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
       ! Initialize return code   
       if(present(rc)) then
         rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif     
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
 
-      allocate(ftype, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
+      allocate(ftype, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
                                        ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize field internals.
       call ESMF_FieldConstructIA(ftype, grid, array, horzRelloc, &
                                        vertRelloc, datamap, name, &
-                                       iospec, status)
-      if (ESMF_LogMsgFoundError(status, &
+                                       iospec, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
    
@@ -382,11 +382,11 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 
 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
-      integer :: status                       ! Error status
+      integer :: localrc                       !  Local error code
       logical :: rcpresent                    ! Return code present
       
       ! Initialize pointers
-      status = ESMF_FAILURE
+      localrc = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       nullify(ftype)
       nullify(ESMF_FieldCreateRemap%ftypep)
@@ -394,14 +394,14 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
       ! Initialize return code   
       if(present(rc)) then
         rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif     
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
 
-      allocate(ftype, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
+      allocate(ftype, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
                                        ESMF_CONTEXT, rc)) return
 
       ! TODO: Insert field construction method

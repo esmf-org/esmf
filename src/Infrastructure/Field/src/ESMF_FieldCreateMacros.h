@@ -1,5 +1,5 @@
-#if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.16 2007/03/31 05:51:05 cdeluca Exp $
+f 0
+! $Id: ESMF_FieldCreateMacros.h,v 1.17 2007/04/16 21:30:28 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -115,17 +115,17 @@
         ! Local variables @\
         type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field @\
         type(ESMF_InternArray) :: array          ! array object @\
-        integer :: status                   ! local error status @\
+        integer :: localrc                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
  @\
         ! Initialize return code; assume failure until success is certain @\
-        status = ESMF_FAILURE @\
+        localrc = ESMF_RC_NOT_IMPL @\
         rcpresent = .FALSE. @\
         array%this = ESMF_NULL_POINTER @\
  @\
         if (present(rc)) then @\
           rcpresent = .TRUE. @\
-          rc = ESMF_FAILURE @\
+          rc = ESMF_RC_NOT_IMPL @\
         endif @\
  @\
         ! check variables @\
@@ -138,21 +138,21 @@
                                 ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
-        array = ESMF_InternArrayCreate(fptr, copyflag, haloWidth, rc=status) @\
-        if (ESMF_LogMsgFoundError(status, & @\
+        array = ESMF_InternArrayCreate(fptr, copyflag, haloWidth, rc=localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
-        allocate(ftype, stat=status) @\
-        if (ESMF_LogMsgFoundAllocError(status, & @\
+        allocate(ftype, stat=localrc) @\
+        if (ESMF_LogMsgFoundAllocError(localrc, & @\
                                        "Allocating Field information", & @\
                                        ESMF_CONTEXT, rc)) return @\
  @\
         ! Construction method allocates and initializes field internals. @\
         call ESMF_FieldConstructIA(ftype, grid, array, & @\
                                     horzRelloc, vertRelloc, & @\
-                                    datamap, name, iospec, status) @\
-        if (ESMF_LogMsgFoundError(status, & @\
+                                    datamap, name, iospec, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
@@ -160,7 +160,7 @@
  @\
         ESMF_INIT_SET_CREATED(ESMF_FieldCreateDPtr##mrank##D##mtypekind) @\
  @\
-        if (rcpresent) rc = status @\
+        if (rcpresent) rc = localrc @\
  @\
         end function ESMF_FieldCreateDPtr##mrank##D##mtypekind  @\
  @\
@@ -280,16 +280,16 @@
         ! Local variables @\
         type (ESMF_FieldType), pointer :: ftype  ! Pointer to new field @\
         type (ESMF_ArraySpec) :: arrayspec  ! arrayspec object @\
-        integer :: status                   ! local error status @\
+        integer :: localrc                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
  @\
         ! Initialize return code; assume failure until success is certain @\
-        status = ESMF_FAILURE @\
+        localrc = ESMF_RC_NOT_IMPL @\
         rcpresent = .FALSE. @\
  @\
         if (present(rc)) then @\
           rcpresent = .TRUE. @\
-          rc = ESMF_FAILURE @\
+          rc = ESMF_RC_NOT_IMPL @\
         endif @\
  @\
         ! check variables @\
@@ -303,28 +303,28 @@
         endif @\
  @\
         ! Get rank, type, kind from ptr and initialize arrayspec @\
-        call ESMF_ArraySpecSet(arrayspec, mrank, ESMF_TYPEKIND_##mtypekind, status) @\
+        call ESMF_ArraySpecSet(arrayspec, mrank, ESMF_TYPEKIND_##mtypekind, localrc) @\
  @\
-        allocate(ftype, stat=status) @\
-        if (ESMF_LogMsgFoundAllocError(status, & @\
+        allocate(ftype, stat=localrc) @\
+        if (ESMF_LogMsgFoundAllocError(localrc, & @\
                                        "Allocating Field information", & @\
                                        ESMF_CONTEXT, rc)) return @\
  @\
         ! Construction method allocates and initializes field internals. @\
         call ESMF_FieldConstructIA(ftype, grid, arrayspec, allocflag, & @\
                                     horzRelloc, vertRelloc, haloWidth, & @\
-                                    datamap, name, iospec, status) @\
-        if (ESMF_LogMsgFoundError(status, & @\
+                                    datamap, name, iospec, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
         ! Set return value, and then get pointer back. @\
         ESMF_FieldCreateEPtr##mrank##D##mtypekind%ftypep => ftype  @\
         call ESMF_FieldGetDataPointer(ESMF_FieldCreateEPtr##mrank##D##mtypekind, & @\
-                                      fptr, ESMF_DATA_REF, rc=status) @\
+                                      fptr, ESMF_DATA_REF, rc=localrc) @\
  @\
         ESMF_INIT_SET_CREATED(ESMF_FieldCreateEPtr##mrank##D##mtypekind) @\
-        if (rcpresent) rc = status @\
+        if (rcpresent) rc = localrc @\
  @\
         end function ESMF_FieldCreateEPtr##mrank##D##mtypekind  @\
  @\

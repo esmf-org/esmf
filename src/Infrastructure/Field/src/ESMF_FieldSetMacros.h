@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.13 2007/03/31 05:51:05 cdeluca Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.14 2007/04/16 21:30:28 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -101,17 +101,17 @@
 @\
         ! Local variables @\
         type(ESMF_InternArray) :: array          ! array object @\
-        integer :: status                   ! local error status @\
+        integer :: localrc                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
  @\
         ! Initialize return code; assume failure until success is certain @\
-        status = ESMF_FAILURE @\
+        localrc = ESMF_RC_NOT_IMPL @\
         rcpresent = .FALSE. @\
         array%this = ESMF_NULL_POINTER @\
  @\
         if (present(rc)) then @\
           rcpresent = .TRUE. @\
-          rc = ESMF_FAILURE @\
+          rc = ESMF_RC_NOT_IMPL @\
         endif @\
  @\
         ! check variables @\
@@ -125,8 +125,8 @@
         endif @\
  @\
         array = ESMF_InternArrayCreate(dataPointer, copyflag, haloWidth, & @\
-                                 rc=status) @\
-        if (ESMF_LogMsgFoundError(status, & @\
+                                 rc=localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
@@ -135,7 +135,7 @@
         field%ftypep%localfield%localdata = array @\
         field%ftypep%datastatus = ESMF_STATUS_READY @\
  @\
-        if (rcpresent) rc = status @\
+        if (rcpresent) rc = localrc @\
  @\
         end subroutine ESMF_FieldSetDataPointer##mrank##D##mtypekind  @\
  @\
