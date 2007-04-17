@@ -1,0 +1,118 @@
+// $Id: ESMC_Config.h,v 1.1 2007/04/17 21:25:50 tjcnrl Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the University of Illinois-NCSA License.
+
+// ESMC Config class public include file
+//
+// (all lines below between the !BOP and !EOP markers will be included in 
+//  the automated document processing.)
+//-----------------------------------------------------------------------------
+//
+ // these lines prevent this file from being read more than once if it
+ // ends up being included multiple times
+
+#ifndef ESMC_Config_H
+#define ESMC_Config_H
+
+//-----------------------------------------------------------------------------
+//BOP
+// !CLASS:  ESMC_Config - C++ interface to the F90 Config object
+//
+// !DESCRIPTION:
+//
+// The code in this file defines the C++ Config members and declares method 
+// signatures (prototypes).  The companion file ESMC\_Config.C contains
+// the definitions (full code bodies) for the Config methods.
+//
+//-----------------------------------------------------------------------------
+// 
+// !USES:
+#include "ESMC_Start.h"
+#include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
+#include "ESMC_Arg.h"
+
+// Optional argument identifier list for the ESMC_Config API.
+enum {
+  ESMCI_ConfigArgLabelID   = ESMCI_ArgBaseID,  // label (string)
+  ESMCI_ConfigArgDvalueID,                     // default value
+  ESMCI_ConfigArgCountID,                      // count (int)
+  ESMCI_ConfigArgUniqueID,                     // unique (int)
+  ESMCI_ConfigArgTableEndID,                   // tableEnd (int*)
+  ESMCI_ConfigArgOptionsID,                    // options (string)
+};
+
+// Argument expansion macros for the ESMC_Config API.
+#define ESMC_ConfigArgLabel(ARG)      ESMCI_Arg(ESMCI_ConfigArgLabelID) , (ARG)
+#define ESMC_ConfigArgDvalue(ARG)     ESMCI_Arg(ESMCI_ConfigArgDvalueID) , (ARG)
+#define ESMC_ConfigArgCount(ARG)      ESMCI_Arg(ESMCI_ConfigArgCountID) , (ARG)
+#define ESMC_ConfigArgUnique(ARG)     ESMCI_Arg(ESMCI_ConfigArgUniqueID) , (ARG)
+#define ESMC_ConfigArgTableEnd(ARG)   ESMCI_Arg(ESMCI_ConfigArgTableEndID) , (ARG)
+#define ESMC_ConfigArgOptions(ARG)    ESMCI_Arg(ESMCI_ConfigArgOptionsID) , (ARG)
+
+// class declaration type
+class ESMC_Config { // wrapper class so do not inherit from ESMC_Base class
+
+  private:
+    ESMC_F90ClassHolder* f90this;    // pointer to fortran derived type
+
+  // !PUBLIC MEMBER FUNCTIONS:
+  public:
+    // native C++ constructor
+    ESMC_Config(void) { f90this = ESMC_NULL_POINTER; }
+    // native C++ destructor
+    ~ESMC_Config(void) { }
+  
+  // !PRIVATE MEMBER FUNCTIONS:
+  private: 
+
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+}; // end class ESMC_Config
+
+
+//
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//
+// prototypes for the ESMC_Config API
+//
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//
+extern "C" {
+
+  ESMC_Config* ESMC_ConfigCreate(int* rc);
+
+  int ESMC_ConfigDestroy(ESMC_Config* config);
+
+  int ESMC_ConfigLoadFile(ESMC_Config* config, char* fname, ...);
+
+  int ESMC_ConfigFindLabel(ESMC_Config* config, char* label);
+
+  int ESMC_ConfigNextLine(ESMC_Config* config, ...);
+
+  int ESMC_ConfigGetChar(ESMC_Config* config, char* value, ...);
+
+  int ESMC_ConfigGetLen(ESMC_Config* config, int* wordCount, ...);
+
+  int ESMC_ConfigGetDim(ESMC_Config* config, int* lineCount, int* columnCount, ...);
+
+  int ESMC_ConfigValidate(ESMC_Config* config, ...);
+
+  int ESMC_ConfigGetAttribute(ESMC_Config* config, void* value, ESMC_TypeKind tk, ...);
+
+  int ESMC_ConfigSetAttribute(ESMC_Config* config, void* value, ESMC_TypeKind tk, ...);
+
+}; // end prototypes for ESMC_Config API
+
+
+#endif  // ESMC_Config_H
+
