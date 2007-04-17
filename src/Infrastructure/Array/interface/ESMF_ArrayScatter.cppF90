@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatter.cppF90,v 1.5 2007/03/31 05:50:48 cdeluca Exp $
+! $Id: ESMF_ArrayScatter.cppF90,v 1.6 2007/04/17 15:06:03 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_ArrayScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayScatter.cppF90,v 1.5 2007/03/31 05:50:48 cdeluca Exp $'
+    '$Id: ESMF_ArrayScatter.cppF90,v 1.6 2007/04/17 15:06:03 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -190,8 +190,8 @@ contains
     type(ESMF_TypeKind)           :: typekind @\
 @\
     ! Initialize return code; assume failure until success is certain @\
-    status = ESMF_FAILURE @\
-    if (present(rc)) rc = ESMF_FAILURE @\
+    status = ESMF_RC_NOT_IMPL @\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
 @\
     ! Check init status of arguments @\
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc) @\
@@ -258,8 +258,8 @@ TypeKindRankDeclarationMacro(ArrayScatter)
     type(ESMF_TypeKind)           :: typekind
 
     ! Initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
@@ -339,7 +339,7 @@ TypeKindRankDeclarationMacro(ArrayScatter)
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_ArrayScatterB(array, larray, rootPET, vm, localrc)
@@ -408,7 +408,7 @@ TypeKindRankDeclarationMacro(ArrayScatter)
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_ArrayScatterNBRoot(array, larray, rootPET, commhandle, vm,&
@@ -476,7 +476,7 @@ TypeKindRankDeclarationMacro(ArrayScatter)
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_ArrayScatterNB(array, larray, rootPET, de, vm, localrc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.8 2007/04/02 23:04:03 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.9 2007/04/17 15:06:03 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.8 2007/04/02 23:04:03 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.9 2007/04/17 15:06:03 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -270,8 +270,8 @@ contains
     type(ESMF_DELayout)           :: opt_delayout           ! helper variable
 
     ! Initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
@@ -485,8 +485,8 @@ contains
     integer             :: de             ! helper variable
 
     ! Initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
@@ -587,8 +587,8 @@ contains
     type(ESMF_LocalArray), allocatable  :: larrayList(:) @\
 @\
     ! Initialize return code; assume failure until success is certain @\
-    status = ESMF_FAILURE @\
-    if (present(rc)) rc = ESMF_FAILURE @\
+    status = ESMF_RC_NOT_IMPL @\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
 @\
     ! Check init status of arguments @\
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc) @\
@@ -685,8 +685,8 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
     type(ESMF_LocalArray), allocatable  :: larrayList(:)
     
     ! Initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
