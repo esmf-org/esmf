@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.31 2007/03/31 05:51:16 cdeluca Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.32 2007/04/17 02:28:51 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
     integer                :: localrc   ! local return code @\
  @\
     ! Initialize return code; assume failure until success is certain @\
-    if (present(rc)) rc = ESMF_FAILURE @\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
     array%this = ESMF_NULL_POINTER @\
  @\
@@ -223,7 +223,7 @@
     integer, dimension(mrank) :: ubounds ! per dim @\
  @\
     ! Initialize return code; assume failure until success is certain @\
-    if (present(rc)) rc = ESMF_FAILURE @\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
     ! Set default for copyflag @\
     if (present(docopy)) then @\
@@ -367,11 +367,11 @@
         integer, dimension(ESMF_MAXDIM) :: offsets @\
  @\
         ! Initialize return code; assume failure until success is certain @\
-        status = ESMF_FAILURE @\
+        status = ESMF_RC_NOT_IMPL @\
         rcpresent = .FALSE. @\
         if (present(rc)) then @\
           rcpresent = .TRUE. @\
-          rc = ESMF_FAILURE @\
+          rc = ESMF_RC_NOT_IMPL @\
         endif @\
  @\
         ! Assume defaults first, then alter if lb or ub specified, @\
@@ -525,7 +525,7 @@
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr  @\
  @\
         ! Initialize return code; assume failure until success is certain @\
-        status = ESMF_FAILURE @\
+        status = ESMF_RC_NOT_IMPL @\
  @\
         ! Recursive branch @\
         if (present(fshape)) then @\
@@ -619,11 +619,11 @@
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: lp ! local copy @\
  @\
         ! initialize return code; assume failure until success is certain @\
-        status = ESMF_FAILURE @\
+        status = ESMF_RC_NOT_IMPL @\
         rcpresent = .FALSE. @\
         if (present(rc)) then @\
           rcpresent = .TRUE. @\
-          rc = ESMF_FAILURE @\
+          rc = ESMF_RC_NOT_IMPL @\
         endif @\
  @\
         copyreq = .FALSE. @\
@@ -732,11 +732,11 @@
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: lp ! local copy @\
  @\
         ! initialize return code; assume failure until success is certain @\
-        status = ESMF_FAILURE @\
+        status = ESMF_RC_NOT_IMPL @\
         rcpresent = .FALSE. @\
         if (present(rc)) then @\
           rcpresent = .TRUE. @\
-          rc = ESMF_FAILURE @\
+          rc = ESMF_RC_NOT_IMPL @\
         endif @\
  @\
         call c_ESMC_LocalArrayGetF90Ptr(arrayIn, wrap, status) @\
@@ -821,7 +821,7 @@
  @\
         integer :: status                               ! local error status @\
  @\
-        status = ESMF_FAILURE  @\
+        status = ESMF_RC_NOT_IMPL  @\
  @\
         call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) @\
         deallocate(wrap%ptr##mrank##D##mtypekind) @\
