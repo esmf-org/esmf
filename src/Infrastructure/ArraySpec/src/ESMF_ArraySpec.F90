@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.22 2007/04/03 16:36:22 cdeluca Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.23 2007/04/17 14:06:10 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -89,7 +89,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.22 2007/04/03 16:36:22 cdeluca Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.23 2007/04/17 14:06:10 rosalind Exp $'
 
 !==============================================================================
 
@@ -134,11 +134,11 @@ module ESMF_ArraySpecMod
     logical :: rcpresent ! did user specify rc?
 
     ! Initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
     if (present(rc)) then
       rcpresent = .TRUE.
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_IMPL
     endif
     
     ! Check init status of arguments
@@ -191,13 +191,13 @@ module ESMF_ArraySpecMod
     logical :: rcpresent ! did user specify rc?
 
     ! Initialize pointer
-    status = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) then
       rcpresent = .TRUE.
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_IMPL
     endif
 
     ! Check init status of arguments
@@ -255,7 +255,7 @@ module ESMF_ArraySpecMod
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
