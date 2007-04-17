@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_BundleGetMacros.h,v 1.10 2007/03/31 05:50:53 cdeluca Exp $
+! $Id: ESMF_BundleGetMacros.h,v 1.11 2007/04/17 17:54:46 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@
         logical :: rcpresent                ! did user specify rc? @\
  @\
         ! Initialize return code; assume failure until success is certain @\
-        status = ESMF_FAILURE @\
+        status = ESMF_RC_NOT_IMPL @\
         rcpresent = .FALSE. @\
         array%this = ESMF_NULL_POINTER @\
  @\
@@ -108,7 +108,7 @@
  @\
         if (present(rc)) then @\
           rcpresent = .TRUE. @\
-          rc = ESMF_FAILURE @\
+          rc = ESMF_RC_NOT_IMPL @\
         endif @\
  @\
         ! Test to see if array already allocated, and fail if so. @\

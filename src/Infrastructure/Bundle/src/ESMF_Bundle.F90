@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.105 2007/04/03 16:36:23 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.106 2007/04/17 17:54:46 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -1000,7 +1000,7 @@ end function
 
       ! Initialize return code in case we return early.
       ! Otherwise, count on AddFieldList call to set rc
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1071,7 +1071,7 @@ end function
 
       ! Initialize return code in case we return early.
       ! Otherwise, count on AddFieldList call to set rc
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1171,7 +1171,7 @@ end function
       integer :: i      
 
       ! Initialize return code in case we return early.
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       do i=1,fieldCount
@@ -1183,8 +1183,8 @@ end function
       nullify(ESMF_BundleCreateNew%btypep)
 
       ! Initialize return code
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       allocate(btypep,  stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Bundle allocate", &
@@ -1269,12 +1269,12 @@ end function
       integer :: status                          ! Error status
 
       ! Initialize pointers
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
       nullify(btypep)
       nullify(ESMF_BundleCreateNoFields%btypep)
 
       ! Initialize return code
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check inputs 
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -1345,8 +1345,8 @@ end function
       type(ESMF_BundleType), pointer :: btype
 
       ! Initialize return code
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check inputs 
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1420,8 +1420,8 @@ end function
       type(ESMF_BundleType), pointer :: btype     ! internal data
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
      ! Set initialize fieldCount to 0
@@ -1508,8 +1508,8 @@ end function
       integer :: nitems                           ! items in return array
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1629,7 +1629,7 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1693,7 +1693,7 @@ end function
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1759,7 +1759,7 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1823,7 +1823,7 @@ end function
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1888,7 +1888,7 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1952,7 +1952,7 @@ end function
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2017,7 +2017,7 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2081,7 +2081,7 @@ end function
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2147,8 +2147,8 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2212,8 +2212,8 @@ end function
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2279,8 +2279,8 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2335,8 +2335,8 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2400,7 +2400,7 @@ end function
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2474,7 +2474,7 @@ end function
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2548,7 +2548,7 @@ end function
       type(ESMF_FieldDataMap) :: datamap
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2694,8 +2694,8 @@ end function
     type(ESMF_BundleType), pointer :: btype
 
     ! Initialize return code.  Assume failure until success assured.
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! check variables
     ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2761,8 +2761,8 @@ end function
       type(ESMF_BundleType), pointer :: btype
 
       ! Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2851,8 +2851,8 @@ end function
       type(ESMF_BundleType), pointer :: btype
 
       ! Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -3187,8 +3187,8 @@ end function
       type(ESMF_BundleType), pointer :: btype     ! internal data
 
       ! Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -3562,7 +3562,7 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -3627,7 +3627,7 @@ end function
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -3694,7 +3694,7 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -3759,7 +3759,7 @@ end function
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -3826,7 +3826,7 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -3886,7 +3886,7 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -3951,7 +3951,7 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -4023,7 +4023,7 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -4090,7 +4090,7 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -4155,7 +4155,7 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -4222,7 +4222,7 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -4330,8 +4330,8 @@ end function
       type(ESMF_BundleType), pointer :: btype     ! internal data
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -4404,8 +4404,8 @@ end function
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -4564,8 +4564,8 @@ end function
       logical :: wasempty
 
       ! Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE
-      if(present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if(present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleTypeGetInit,btype,rc)
@@ -4780,8 +4780,8 @@ end function
       !type(ESMF_InternArray) :: pkarray                 ! Array for packed data
 
       ! Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleTypeGetInit,btype,rc)
@@ -4870,8 +4870,8 @@ end function
       integer :: i
 
       ! Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       do i=1,fieldCount
@@ -4938,8 +4938,8 @@ end function
       !character (len = ESMF_MAXSTR) :: defaultname ! Bundle name if not given
 
       ! Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
        ! Initialize the base object
       btype%base%this = ESMF_NULL_POINTER
@@ -5004,8 +5004,8 @@ end function
       integer :: status
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleTypeGetInit,btype,rc)
