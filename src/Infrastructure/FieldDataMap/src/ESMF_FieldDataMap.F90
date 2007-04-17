@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.32 2007/03/31 05:51:07 cdeluca Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.33 2007/04/17 03:21:45 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.32 2007/03/31 05:51:07 cdeluca Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.33 2007/04/17 03:21:45 rosalind Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -278,11 +278,11 @@
         logical :: rcpresent                  ! did user specify rc?
 
         ! initialize return code
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ! check variables
@@ -430,11 +430,11 @@
         logical :: rcpresent                  ! did user specify rc?
 
         ! initialize return code
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ! check variables
@@ -523,10 +523,10 @@
         logical :: rcpresent                  ! did user specify rc?
 
         ! init return code
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         if (present(rc)) then
             rcpresent=.TRUE.
-            rc = ESMF_FAILURE    
+            rc = ESMF_RC_NOT_IMPL    
         else
           rcpresent = .FALSE.
         endif
@@ -617,10 +617,10 @@
         logical :: rcpresent                  ! did user specify rc?
 
         ! init return code
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         if (present(rc)) then
             rcpresent=.TRUE.
-            rc = ESMF_FAILURE    
+            rc = ESMF_RC_NOT_IMPL    
         else
             rcpresent = .FALSE.
         endif
@@ -731,11 +731,11 @@
         logical :: rcpresent                  ! did user specify rc?
 
         ! initialize return code
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ! check variables
@@ -789,7 +789,7 @@
 !
 ! TODO: code goes here
 !
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
         ! check variables
         ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,fielddatamap)
 
@@ -838,7 +838,7 @@
 !
  
         ESMF_FieldDataMapReadRestart%status = ESMF_STATUS_UNINIT
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         end function ESMF_FieldDataMapReadRestart
 
@@ -881,7 +881,7 @@
 !	Changed BOP/EOP to BOPI/EOPI until code is added.
 ! TODO: code goes here
 !
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check variables
         ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,fielddatamap)
