@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.21 2007/04/03 16:36:23 cdeluca Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.22 2007/04/17 19:24:10 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@ subroutine Create2DGrids(grid1, grid2, rc)
     real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
 
  
-    rc = ESMF_FAILURE
+    rc = ESMF_RC_NOT_IMPL
         
     call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
@@ -118,7 +118,7 @@ subroutine Create3DGrids(grid1, grid2, rc)
     real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
 
  
-    rc = ESMF_FAILURE
+    rc = ESMF_RC_NOT_IMPL
         
     call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
@@ -196,7 +196,7 @@ subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
     type(ESMF_ArraySpec) :: arrayspecf3, arrayspecf4, arrayspecf5
 
  
-    rc = ESMF_FAILURE
+    rc = ESMF_RC_NOT_IMPL
 
 
     ! set default halowidths
@@ -330,7 +330,7 @@ subroutine CreateBundle(bundle, field1, field2, field3, field4, field5, rc)
     
     integer :: localrc
 
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
         
     ! make a bundle and add fields to it
     bundle = ESMF_BundleCreate(rc=localrc)
@@ -382,7 +382,7 @@ subroutine AddBundle(bundle, field1, field2, field3, field4, field5, rc)
     
     integer :: localrc
 
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
         
     if (present(field1)) then
       call ESMF_BundleAddField(bundle, field1, rc=localrc)
@@ -519,7 +519,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
     real (ESMF_KIND_I4), dimension(:,:,:,:,:), pointer :: ptr5di4
 #endif
 
-    rc = ESMF_FAILURE
+    rc = ESMF_RC_NOT_IMPL
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
@@ -767,7 +767,7 @@ subroutine FillConstantR8Halo(field, val, rc)
     integer :: lb(2), ub(2), halo
     real (ESMF_KIND_R8), dimension(:,:), pointer :: ptr
 
-    rc = ESMF_FAILURE
+    rc = ESMF_RC_NOT_IMPL
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
@@ -819,7 +819,7 @@ subroutine FillConstantR4Halo(field, val, rc)
     integer :: lb(2), ub(2), halo
     real (ESMF_KIND_R4), dimension(:,:), pointer :: ptr
 
-    rc = ESMF_FAILURE
+    rc = ESMF_RC_NOT_IMPL
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
@@ -875,7 +875,7 @@ subroutine FillIndexField(field, rc)
     !type(ESMF_Array) :: array
     !integer :: rank
 
-    rc = ESMF_FAILURE
+    rc = ESMF_RC_NOT_IMPL
           
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
@@ -1026,7 +1026,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
     real (ESMF_KIND_I4), dimension(:,:,:,:,:), pointer :: ptr5di4
 
 
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
@@ -1559,7 +1559,7 @@ subroutine ValidateConstantHalo(field, val, rc)
     integer :: lb(2), ub(2), halo
     real (ESMF_KIND_R8), dimension(:,:), pointer :: ptr
 
-    rc = ESMF_FAILURE
+    rc = ESMF_RC_NOT_IMPL
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
@@ -1651,7 +1651,7 @@ subroutine ValidateConstantR4Halo(field, val, rc)
     integer :: lb(2), ub(2), halo
     real (ESMF_KIND_R4), dimension(:,:), pointer :: ptr
 
-    rc = ESMF_FAILURE
+    rc = ESMF_RC_NOT_IMPL
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
@@ -1744,7 +1744,7 @@ subroutine ValidateIndexField(field, rc)
     real (ESMF_KIND_R8), dimension(:,:), pointer :: ptr
     type(ESMF_Grid) :: grid
 
-    rc = ESMF_FAILURE
+    rc = ESMF_RC_NOT_IMPL
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
@@ -1809,7 +1809,7 @@ subroutine FieldCleanup(field1, field2, field3, field4, field5, dogrid, rc)
     ! Local variables
     type(ESMF_Grid) :: grid
 
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! query for grid and data.  field1 is required; all other fields test
     ! first to be sure it is present
@@ -1874,7 +1874,7 @@ subroutine BundleCleanup(bundle1, bundle2, bundle3, bundle4, bundle5, rc)
     !type(ESMF_Grid) :: grid
     !type(ESMF_Field) :: allfields(:)
 
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! query for grid.  bundle1 is required; all other bundles optional.
     !call ESMF_BundleGet(bundle1, field=allfields, grid=grid, rc=rc)
@@ -1974,7 +1974,7 @@ function CreateDataField(name, grid, layout, relloc, r4value, r8value, rc)
   real(ESMF_KIND_R8), pointer :: r8data(:,:)
 
   ! TODO: what about making sure the function return is null?
-  if (present(rc)) rc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
   ! Set defaults here based on whether the arguments are present or not.
 
@@ -2096,7 +2096,7 @@ function CreateLayout(which, rc)
   integer :: npets, status, thiswhich
 
 
-  if (present(rc)) rc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
   call ESMF_VMGetGlobal(vm, rc=status)
   if (ESMF_LogMsgFoundError(status, &
@@ -2189,7 +2189,7 @@ function CreateGrid(which, layout, rc)
   integer :: npets, status, thiswhich
 
 
-  if (present(rc)) rc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
   if (present(layout)) then
       thislayout = layout
@@ -2318,7 +2318,7 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
   integer, allocatable :: xdecounts(:), ydecounts(:)
 
 
-  if (present(rc)) rc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
   call ESMF_VMGetGlobal(vm, rc=status)
   if (ESMF_LogMsgFoundError(status, &
@@ -2466,7 +2466,7 @@ function CreateEmptyDataField(name, rc)
 
   integer :: status
 
-  rc = ESMF_FAILURE
+  rc = ESMF_RC_NOT_IMPL
   CreateEmptyDataField = ESMF_FieldCreateNoData(name=name, rc=status)
   if (ESMF_LogMsgFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
