@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.89 2007/03/31 05:51:06 cdeluca Exp $
+! $Id: ESMF_FieldComm.F90,v 1.90 2007/04/17 02:45:13 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.89 2007/03/31 05:51:06 cdeluca Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.90 2007/04/17 02:45:13 rosalind Exp $'
 
 !==============================================================================
 !
@@ -239,11 +239,11 @@
       type(ESMF_FieldType), pointer :: ftypep     ! field type info
    
       ! Initialize return code   
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif     
 
       ! check variable
@@ -337,11 +337,11 @@
       type(ESMF_FieldType), pointer :: ftypep     ! field type info
    
       ! Initialize return code   
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif     
  
       ! check variable
@@ -436,11 +436,11 @@
       type(ESMF_FieldType), pointer :: ftypep     ! field type info
    
       ! Initialize return code   
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif     
 
       ! check variable
@@ -585,11 +585,11 @@
       type(ESMF_FieldType), pointer :: ftypep     ! field type info
    
       ! Initialize return code   
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif     
 
       ! check variable
@@ -680,11 +680,11 @@
       integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
    
       ! Initialize return code   
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif     
 
       ! check variable
@@ -828,7 +828,7 @@
       type(ESMF_RouteHandle) :: routehandle
    
       ! Initialize return code   
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
@@ -940,7 +940,7 @@
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
    
       ! Initialize return code   
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
@@ -1075,8 +1075,8 @@
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
    
       ! Initialize return code   
-      localrc = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
@@ -1204,11 +1204,11 @@
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
    
       ! Initialize return code   
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif     
 
       ! check variable
@@ -1305,7 +1305,7 @@
       integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
    
       ! Initialize return code   
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
@@ -1425,11 +1425,11 @@
       logical :: rcpresent                        ! Return code present
    
 !     Initialize return code   
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif     
 
 !     Call Grid method to perform actual work
@@ -1535,7 +1535,7 @@
       type(ESMF_RouteHandle) :: routehandle
    
       ! Initialize return code   
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
@@ -1655,7 +1655,7 @@
       integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
    
       ! Initialize return code   
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
@@ -1865,7 +1865,7 @@
       type(ESMF_Grid) :: srcGrid, dstGrid
    
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
@@ -1979,7 +1979,7 @@
       integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
    
       ! Initialize return code   
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
@@ -2138,11 +2138,11 @@
       integer :: decomps(ESMF_MAXGRIDDIM), decompids(ESMF_MAXDIM)
    
       ! Initialize return code   
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif     
 
       ! check variable
@@ -2270,11 +2270,11 @@
 
    
       ! Initialize return code   
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif     
 
       ! check variable
