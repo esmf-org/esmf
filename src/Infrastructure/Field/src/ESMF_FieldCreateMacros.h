@@ -1,5 +1,5 @@
-f 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.17 2007/04/16 21:30:28 rosalind Exp $
+#if 0
+! $Id: ESMF_FieldCreateMacros.h,v 1.18 2007/04/17 01:56:10 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
