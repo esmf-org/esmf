@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.26 2007/03/31 05:51:30 cdeluca Exp $
+// $Id: ESMC_Comp.h,v 1.27 2007/04/17 21:29:16 tjcnrl Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -65,13 +65,11 @@ extern const char *ESMC_SetReadRestart;
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
 #include "ESMC_Calendar.h"
 #include "ESMC_State.h"
+#include "ESMC_Config.h"
 #include "ESMC_FTable.h"  // function & data pointer table 
 
 // !PUBLIC TYPES:
  class ESMC_Comp;
-
-// TODO: need C++ interface to config objects.  REMOVE THIS WHEN READY.
-#define ESMC_Config char
 
 // !PRIVATE TYPES:
 
