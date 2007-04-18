@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.63 2007/03/31 05:50:59 cdeluca Exp $
+! $Id: ESMF_DELayout.F90,v 1.64 2007/04/18 17:34:39 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -132,7 +132,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.63 2007/03/31 05:50:59 cdeluca Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.64 2007/04/18 17:34:39 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -275,8 +275,8 @@ contains
     type(ESMF_InterfaceInt) :: petListArg
 
     ! Initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
@@ -376,8 +376,8 @@ contains
     integer                 :: len_petMap   ! number of elements in petMap
 
     ! Initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
@@ -500,8 +500,8 @@ contains
     type(ESMF_InterfaceInt) :: petListArg
 
     ! Initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
@@ -645,7 +645,7 @@ contains
     integer, target :: dummy(1)     ! used to satisfy the C interface...
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vmObject, rc)
@@ -721,8 +721,8 @@ contains
     integer                 :: status       ! local error status
 
     ! Initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -838,8 +838,8 @@ contains
     integer                 :: len_vasLocalDeList   ! number of elem. in opt. arg
 
     ! Initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -981,7 +981,7 @@ contains
     integer, target :: dummy(1)     ! used to satisfy the C interface...
     
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1073,7 +1073,7 @@ contains
     integer, pointer:: opt_DEcoord(:), opt_DEcde(:), opt_DEcw(:)
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1174,7 +1174,7 @@ contains
     integer, pointer:: opt_deMatchList(:)
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1256,7 +1256,7 @@ contains
     integer, pointer:: opt_petMatchList(:)
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1318,7 +1318,7 @@ contains
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1375,7 +1375,7 @@ contains
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1426,8 +1426,8 @@ contains
     integer                 :: status       ! local error status
 
     ! Initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1493,8 +1493,8 @@ contains
     type(ESMF_DELayoutServiceReply) :: reply
 
     ! Initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1545,7 +1545,7 @@ contains
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1618,7 +1618,7 @@ contains
     integer, pointer:: opt_petMatchList(:)
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1825,7 +1825,7 @@ contains
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Set init code
     ESMF_INIT_SET_CREATED(delayout)

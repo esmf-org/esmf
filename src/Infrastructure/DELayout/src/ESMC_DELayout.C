@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.51 2007/04/04 21:48:55 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.52 2007/04/18 17:34:39 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.51 2007/04/04 21:48:55 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.52 2007/04/18 17:34:39 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -89,9 +89,9 @@ ESMC_DELayout *ESMC_DELayoutCreate(
   int status;                 // local error status
    
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  status = ESMF_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMF_RC_NOT_IMPL;
   
   // allocate the new DELayout object and construct the inside
   ESMC_DELayout *delayout;
@@ -130,7 +130,7 @@ ESMC_DELayout *ESMC_DELayoutCreate(
 //
 // !ARGUMENTS:
 //
-  int *deCountArg,          // (in) number of DEs
+  int*deCountArg,          // (in) number of DEs
   ESMC_InterfaceInt *deGrouping,// (in) deGrouping vector
   ESMC_DePinFlag *dePinFlag,// (in) type of resources DEs are pinned to
   ESMC_InterfaceInt *petListArg,// (in) list of PETs to be used in delayout
@@ -145,9 +145,9 @@ ESMC_DELayout *ESMC_DELayoutCreate(
   int status;                 // local error status
   
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  status = ESMF_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMF_RC_NOT_IMPL;
   
   // There is only one DELayoutConstruct() method - it requires a petMap
   // in order to construct the inside of a DELayout object. The task of 
@@ -406,9 +406,9 @@ int ESMC_DELayoutDestroy(
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  status = ESMF_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMF_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (delayout == ESMC_NULL_POINTER || *delayout == ESMC_NULL_POINTER){
@@ -467,9 +467,9 @@ int ESMC_DELayout::ESMC_DELayoutConstruct(
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  status = ESMF_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMF_RC_NOT_IMPL;
 
   // by default use the currentVM for vm
   if (vmArg == ESMC_NULL_POINTER){
@@ -858,9 +858,9 @@ int ESMC_DELayout::ESMC_DELayoutDestruct(void){
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  status = ESMF_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMF_RC_NOT_IMPL;
 
   if (oldstyle){
     // oldstyle DELayout has several more allocations that need to be deleted
@@ -937,9 +937,9 @@ int ESMC_DELayout::ESMC_DELayoutGet(
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  status = ESMF_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMF_RC_NOT_IMPL;
 
   if (vmArg != NULL)
     *vmArg = vm;
@@ -1056,9 +1056,9 @@ int ESMC_DELayout::ESMC_DELayoutGetDeprecated(
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  status = ESMF_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMF_RC_NOT_IMPL;
 
   if (deCountArg != ESMC_NULL_POINTER)
     *deCountArg = deCount;
@@ -1705,9 +1705,9 @@ ESMC_DELayoutServiceReply ESMC_DELayout::ESMC_DELayoutServiceOffer(
 //-----------------------------------------------------------------------------
   // initialize return code; assume failure until success is certain
   int status;                 // local error status
-  status = ESMF_FAILURE;
+  status = ESMF_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMF_RC_NOT_IMPL;
   
   // initialize the reply
   ESMC_DELayoutServiceReply reply = ESMC_DELAYOUT_SERVICE_DENY; // reset
@@ -1798,9 +1798,9 @@ int ESMC_DELayout::ESMC_DELayoutServiceComplete(
   int localrc;                // automatic variable for local return code
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
-  status = ESMF_FAILURE;
+  status = ESMF_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMF_RC_NOT_IMPL;
 
   int localPet, localVas;
   vm->ESMC_VMGet(&localPet, NULL, NULL, NULL, NULL);
