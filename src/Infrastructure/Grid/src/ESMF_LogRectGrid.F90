@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.168 2007/03/31 05:51:10 cdeluca Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.169 2007/04/18 17:20:01 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.168 2007/03/31 05:51:10 cdeluca Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.169 2007/04/18 17:20:01 rosalind Exp $'
 
 !==============================================================================
 !
@@ -365,7 +365,7 @@
       type(ESMF_CoordSystem)        :: horzCoordSystem
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize pointers
       nullify(grid)
@@ -493,7 +493,7 @@
       type(ESMF_CoordSystem)        :: horzCoordSystem
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize pointers
       nullify(grid)
@@ -632,7 +632,7 @@
       type(ESMF_CoordSystem)        :: horzCoordSystem
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize pointers
       nullify(grid)
@@ -755,7 +755,7 @@
       type(ESMF_CoordSystem)        :: horzCoordSystem
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize pointers
       nullify(grid)
@@ -884,7 +884,7 @@
       type(ESMF_CoordSystem)        :: horzCoordSystem
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize pointers
       nullify(grid)
@@ -1023,7 +1023,7 @@
       type(ESMF_CoordSystem)        :: horzCoordSystem
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize pointers
       nullify(grid)
@@ -1141,7 +1141,7 @@
       type(ESMF_LocalArray), dimension(:), pointer :: coords
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -1266,7 +1266,7 @@
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize pointers
       nullify(grid)
@@ -1334,7 +1334,7 @@
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
@@ -1411,7 +1411,7 @@
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
@@ -1492,7 +1492,7 @@
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
@@ -1566,7 +1566,7 @@
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn1,rc)
@@ -1634,7 +1634,7 @@
       integer :: i
 
       ! Initialize return code; assume failure until success is certain
-      rc     = ESMF_FAILURE
+      rc     = ESMF_RC_NOT_IMPL
 
       ! check and set input variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_LogRectGridGetInit, ESMF_LogRectGridInit,lrgrid)
@@ -1737,7 +1737,7 @@
       character(len=ESMF_MAXSTR) :: msgbuf
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize the derived type contents, including setting name
       call ESMF_GridConstructNew(grid, name, localrc)
@@ -1991,7 +1991,7 @@
       type(ESMF_LogRectGrid), pointer :: lrgrid
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize the derived type contents, including setting name
       call ESMF_GridConstructNew(grid, name, localrc)
@@ -2270,7 +2270,7 @@
       type(ESMF_RelLoc) :: relloc
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -3033,7 +3033,7 @@
       type(ESMF_RelLoc) :: relloc
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -3629,7 +3629,7 @@
       integer :: n
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -3770,7 +3770,7 @@
       type(ESMF_InternDG) :: internDG
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -3856,7 +3856,7 @@
       type(ESMF_InternDG) :: internDG
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -3962,7 +3962,7 @@
       type(ESMF_PhysCoord) :: tempCoord
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -4318,7 +4318,7 @@
       type(ESMF_PhysCoord) :: tempCoord
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -4588,7 +4588,7 @@
       type(ESMF_CoordSystem) :: coordSystem
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -4826,7 +4826,7 @@
       type(ESMF_InternArray), dimension(:), pointer :: coord, coord2
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -5105,7 +5105,7 @@
       type(ESMF_DELayout) :: delayout
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -5402,7 +5402,7 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: horzAI, vertAI
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -5575,7 +5575,7 @@
       type(ESMF_DELayout) :: delayout
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -5788,7 +5788,7 @@
       type(ESMF_InternDGType), pointer :: hdgtype, vdgtype
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -6002,7 +6002,7 @@
       type(ESMF_InternDGType), pointer :: hdgtype, vdgtype
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -6197,7 +6197,7 @@
       integer :: j
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -6421,7 +6421,7 @@
       type(ESMF_InternDGType), pointer :: hdgtype, vdgtype
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -6683,7 +6683,7 @@
       type(ESMF_TypeKind) :: kind
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -7155,7 +7155,7 @@
       type(ESMF_TypeKind) :: kind
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -7605,7 +7605,7 @@
       type(ESMF_GridClass), pointer :: gridp
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -7922,7 +7922,7 @@
       integer :: i                                ! loop index
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -8003,7 +8003,7 @@
       integer :: physIdUse
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -8109,7 +8109,7 @@
       type(ESMF_TypeKind) :: kind
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -8214,7 +8214,7 @@
       type(ESMF_TypeKind) :: kind
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -8637,7 +8637,7 @@
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -8783,7 +8783,7 @@
       type(ESMF_Grid) :: gridp
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -8873,7 +8873,7 @@
       type(ESMF_GridClass), pointer :: gp
       integer :: localrc                          ! Error status
 
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -8995,7 +8995,7 @@
       type(ESMF_DELayout) :: srcDELayout
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
@@ -9367,7 +9367,7 @@
       type(ESMF_RelLoc) :: srcRellocUse, dstRellocUse
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
@@ -9639,7 +9639,7 @@
       real(ESMF_KIND_R8), dimension(:,:), pointer :: temp1, temp2
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,array1,rc)
@@ -9792,7 +9792,7 @@
       integer :: total, i
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Determine the decomposition 
       total = 0

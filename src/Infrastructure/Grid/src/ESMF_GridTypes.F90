@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.57 2007/04/12 17:01:26 oehmke Exp $
+! $Id: ESMF_GridTypes.F90,v 1.58 2007/04/18 17:20:01 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -566,7 +566,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.57 2007/04/12 17:01:26 oehmke Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.58 2007/04/18 17:20:01 rosalind Exp $'
 
 !==============================================================================
 !
@@ -666,7 +666,7 @@
       !character (len = ESMF_MAXSTR) :: defaultname ! default grid name
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Set the Grid name if present, otherwise construct a default one
       call ESMF_BaseCreate(grid%base, "Grid", name, 0, localrc)
@@ -738,7 +738,7 @@
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -790,7 +790,7 @@
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -954,7 +954,7 @@
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -1149,7 +1149,7 @@
       type(ESMF_RelLoc) :: rellocTmp
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -1249,7 +1249,7 @@
       integer :: i
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -1321,7 +1321,7 @@
       character (len=ESMF_MAXSTR) :: nameTmp    ! temporary name variable
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -1384,7 +1384,7 @@
       !integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,grid,rc)
@@ -2152,7 +2152,7 @@
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogRectGridGetInit, ESMF_LogRectGridInit,lrg)
@@ -2261,7 +2261,7 @@
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_SHALLOW(ESMF_GridSpecificGetInit, ESMF_GridSpecificInit,gs)
@@ -2371,7 +2371,7 @@
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,gc,rc)
@@ -2449,7 +2449,7 @@
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Set init code
     ESMF_INIT_SET_CREATED(grid)
