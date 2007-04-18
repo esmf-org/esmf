@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.76 2007/03/20 17:59:48 theurich Exp $
+# $Id: makefile,v 1.77 2007/04/18 20:50:27 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -293,8 +293,10 @@ installcheck:
 	-@echo "Checking ESMF installation:"
 	-@echo " "
 	cd $(ESMF_DIR)/application ;\
-	$(MAKE) clean;\
-	$(MAKE);\
+	$(MAKE) clean
+	cd $(ESMF_DIR)/application ;\
+	$(MAKE)
+	cd $(ESMF_DIR)/application ;\
         $(MAKE) check
 	-@echo " "
 	-@echo "ESMF installation check complete."
