@@ -1,4 +1,4 @@
-! $Id: ESMF_InternDG.F90,v 1.7 2007/03/31 05:51:15 cdeluca Exp $
+! $Id: ESMF_InternDG.F90,v 1.8 2007/04/18 19:03:25 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -216,7 +216,7 @@ module ESMF_InternDGMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternDG.F90,v 1.7 2007/03/31 05:51:15 cdeluca Exp $'
+    '$Id: ESMF_InternDG.F90,v 1.8 2007/04/18 19:03:25 rosalind Exp $'
 
 !==============================================================================
 !
@@ -353,7 +353,7 @@ module ESMF_InternDGMod
       nullify(ESMF_InternDGCreateEmpty%ptr)
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       allocate(dgtype, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "InternDG type", &
@@ -446,7 +446,7 @@ module ESMF_InternDGMod
       nullify(ESMF_InternDGCreateBlock%ptr)
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       allocate(dgtype, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "InternDG type", &
@@ -535,7 +535,7 @@ module ESMF_InternDGMod
       nullify(ESMF_InternDGCreateArb%ptr)
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       allocate(dgtype, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "InternDG type", &
@@ -589,7 +589,7 @@ module ESMF_InternDGMod
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 !      ! If already destroyed or never created, return ok
 !      if (.not. associated(InternDG%ptr)) then
@@ -660,7 +660,7 @@ module ESMF_InternDGMod
       type(ESMF_InternDGGlobal), pointer :: glob
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(dgtype%base, "InternDG", name, 0, localrc)
@@ -799,7 +799,7 @@ module ESMF_InternDGMod
       type(ESMF_Logical):: otoFlag, lrFlag
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 !     Error checking for required input   TODO: complete
 !     call ESMF_DELayoutValidate(delayout, rc=localrc)
@@ -1019,7 +1019,7 @@ module ESMF_InternDGMod
       type(ESMF_Logical):: otoFlag, lrFlag
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 !     Error checking for required input   TODO: complete
 !     call ESMF_DELayoutValidate(delayout, rc=localrc)
@@ -1138,7 +1138,7 @@ module ESMF_InternDGMod
       type(ESMF_InternDGGlobal), pointer :: glob
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       dgtype => InternDG%ptr
 
@@ -1410,7 +1410,7 @@ module ESMF_InternDGMod
       type(ESMF_InternDGType), pointer :: dgtype
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternDGGetInit, InternDG, rc)
@@ -1534,7 +1534,7 @@ module ESMF_InternDGMod
       integer :: i
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! If total is true, set info for the total cells including
       ! boundary areas; otherwise set only computational areas.
@@ -1638,7 +1638,7 @@ module ESMF_InternDGMod
       type(ESMF_InternDGGlobal), pointer :: glob
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! If total is true, set info for the total cells including
       ! boundary areas; otherwise set only computational areas.
@@ -1870,7 +1870,7 @@ module ESMF_InternDGMod
       integer, dimension(:), allocatable :: allCounts
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! pointer to data
       glob => dgtype%globalComp
@@ -1978,7 +1978,7 @@ module ESMF_InternDGMod
       type(ESMF_InternDGLocal), pointer :: me
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! If total is true, return info for the total cells including
       ! boundary areas; otherwise return computational areas.
@@ -2067,7 +2067,7 @@ module ESMF_InternDGMod
       type(ESMF_InternDGLocal),  pointer :: localC, localT
 
       ! Initialize return code; assume failure until success is certain
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_IMPL
 
       call ESMF_DELayoutGetDeprecated(dgtype%delayout, localDe=localDE, &
                             deCountPerDim=deCountPerDim, rc=localrc)
@@ -2160,7 +2160,7 @@ module ESMF_InternDGMod
       type(ESMF_InternDGLocal),  pointer :: local
 
       ! Initialize return code; assume failure until success is certain
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_IMPL
 
       call ESMF_DELayoutGetDeprecated(dgtype%delayout, localDe=myDE, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -2228,7 +2228,7 @@ module ESMF_InternDGMod
       type(ESMF_InternDGGlobal), pointer :: glob
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! For now, assume the return AIs are from the computational domain
       ! TODO: add a flag for toal?
@@ -2311,7 +2311,7 @@ module ESMF_InternDGMod
       type(ESMF_InternDGGlobal), pointer :: glob
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! If total is true, return info for the AIs including
       ! boundary areas; otherwise return computational AIs.
@@ -2381,7 +2381,7 @@ module ESMF_InternDGMod
       type(ESMF_VM) :: vm
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! set pointers to data
       glob => dgtype%globalComp
@@ -2532,7 +2532,7 @@ module ESMF_InternDGMod
       integer :: i, j, nndes
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! If total is true, return info for the total cells including
       ! boundary areas; otherwise return computational areas.
@@ -2588,7 +2588,7 @@ module ESMF_InternDGMod
       !integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Get information from InternDG derived type
       !  Note this needs to use = and not => to return the actual layout
@@ -2672,7 +2672,7 @@ module ESMF_InternDGMod
       type(ESMF_InternDGGlobal), pointer :: glob
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! If total is true, return info for the total cells including
       ! boundary areas; otherwise return computational areas.
@@ -2931,7 +2931,7 @@ module ESMF_InternDGMod
       type(ESMF_InternDGGlobal), pointer :: glob
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! If total is true, return info for the total cells including
       ! boundary areas; otherwise return computational areas.
@@ -3098,7 +3098,7 @@ module ESMF_InternDGMod
       type(ESMF_InternDGGlobal), pointer :: glob
 
       ! Initialize return code; assume failure until success is certain
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_IMPL
 
       ! InternDGType contents here:
       allocate(dgtype%decompIDs   (dimCount), &
@@ -3185,7 +3185,7 @@ module ESMF_InternDGMod
       type(ESMF_InternDGGlobal), pointer :: glob
 
       ! Initialize return code; assume failure until success is certain
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_IMPL
 
       ! InternDGType contents here:
       allocate(dgtype%decompIDs   (dimCount), &
