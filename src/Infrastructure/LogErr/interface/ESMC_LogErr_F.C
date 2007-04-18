@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr_F.C,v 1.20 2007/03/31 05:51:17 cdeluca Exp $
+// $Id: ESMC_LogErr_F.C,v 1.21 2007/04/18 20:40:20 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.20 2007/03/31 05:51:17 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.21 2007/04/18 20:40:20 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -127,12 +127,13 @@ extern "C" {
 
   char *fname = NULL;
 
-  *rc = ESMF_FAILURE;
+  *rc = ESMF_RC_NOT_IMPL;
   // copy and convert F90 strings to null terminated ones
   if (filename && (nlen > 0) && (filename[0] != '\0')) {
       fname = ESMC_F90toCstring(filename, nlen);
       if (!fname) {
           delete [] fname;
+          *rc = ESMF_FAILURE;
           return;
       }
   } 
@@ -169,7 +170,7 @@ extern "C" {
 //EOP
 // !REQUIREMENTS: 
 
-  *rc = ESMF_FAILURE;
+  *rc = ESMF_RC_NOT_IMPL;
   if (ESMC_LogDefault.errorMaskCount > 0)
     delete [] ESMC_LogDefault.errorMask;
   ESMC_LogDefault.errorMaskCount = *errorMaskCount;
@@ -182,8 +183,7 @@ extern "C" {
 }  // end c_ESMC_LogSet
 
 
-//-----------------------------------------------------------------------------
-//BOP
+//----------------------------------------------------------------------------- //BOP
 // !IROUTINE:  c_ESMC_LogTimeStamp - Get Time Stamp
 //
 // !INTERFACE:
