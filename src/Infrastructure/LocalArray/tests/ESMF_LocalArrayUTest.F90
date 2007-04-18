@@ -1,8 +1,9 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.40 2007/04/03 16:36:24 cdeluca Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.41 2007/04/18 22:32:38 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
 !-------------------------------------------------------------------------------
+#include <ESMF.h>
 #include <ESMF_Macros.inc>
 !-------------------------------------------------------------------------------
 
@@ -30,7 +31,7 @@
     ! Local variables
     integer :: arank, brank, rc 
     integer :: i, j, k, ni, nj, nk
-    type(ESMF_ArraySpec) :: arrayspec
+    type(ESMF_ArraySpec) :: arrayspec, arrayspec1
     type(ESMF_TypeKind) :: akind
     integer :: counts(ESMF_MAXDIM), lb(1), ub(1), rlb(1), rub(1)
     type(ESMF_LocalArray) :: array1, array2, array4
@@ -78,6 +79,30 @@
     print *, "array 1a destroy returned"
 
 #ifdef ESMF_EXHAUSTIVE
+
+
+    !--------------------------------------------------------------------------
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Validate a non-set ArraySpec"
+    call ESMF_ArraySpecValidate(arrayspec1, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !--------------------------------------------------------------------------
+    !EX_UTest
+    arank = 3
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Initializing an Array Spec of rank 3 Test"
+    call ESMF_ArraySpecSet(arrayspec1, arank, ESMF_TYPEKIND_R4, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+    !--------------------------------------------------------------------------
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Validate an ArraySpec"
+    call ESMF_ArraySpecValidate(arrayspec1, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !EX_UTest
