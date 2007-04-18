@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayCreate.cpp,v 1.12 2007/04/02 17:37:49 theurich Exp $
+! $Id: ESMF_InternArrayCreate.cpp,v 1.13 2007/04/18 18:43:47 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayCreate.cpp,v 1.12 2007/04/02 17:37:49 theurich Exp $'
+    '$Id: ESMF_InternArrayCreate.cpp,v 1.13 2007/04/18 18:43:47 rosalind Exp $'
       
 !==============================================================================
 ! 
@@ -237,14 +237,14 @@ TypeKindRankDeclarationMacro(ArrayCreateByFullPtr)
         integer :: status                   ! local error status
         logical :: rcpresent                ! did user specify rc?
 
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         array%this = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ! Always supply a halo value, setting it to 0 if not specified. 
@@ -349,14 +349,14 @@ TypeKindRankDeclarationMacro(ArrayCreateByMTPtr)
         integer :: rank
         type(ESMF_TypeKind) :: kind
 
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         array%this = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
     ! Check init status of arguments
@@ -426,11 +426,11 @@ TypeKindRankDeclarationMacro(ArrayDeallocate)
         type(ESMF_TypeKind) :: kind
 
         ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
     ! Check init status of arguments
@@ -539,7 +539,7 @@ TypeKindRankDeclarationMacro(ArrayDeallocate)
         ! Note from this point down in the calling stack rc is not optional.
         ! This is all internal code, heavily macroized - no reason to add
         ! unnecessary code to check for non-present error return variables.
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
 
         localkind = kind%dkind
 
@@ -813,8 +813,8 @@ TypeKindRankDeclarationMacro(ArrayConstructF90Ptr)
     !! local variables, expanded by macro
 AllTypesMacro(ArrayLocalVar)
  
-    status = ESMF_FAILURE  
-    if (present(rc)) rc = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL  
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
     lb(1:size(lbounds)) = lbounds
     ub(1:size(ubounds)) = ubounds
@@ -1016,7 +1016,7 @@ AllocAllocateMacro(R8, 7, RNG7, LOC7)
 AllTypesMacro(ArrayLocalVar)
 
 
-    if (present(rc)) rc = ESMF_FAILURE 
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL 
     localkind = kind
 
     !! macros which are expanded by the preprocessor

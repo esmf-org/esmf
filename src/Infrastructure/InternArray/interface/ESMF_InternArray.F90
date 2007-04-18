@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArray.F90,v 1.16 2007/04/03 16:36:24 cdeluca Exp $
+! $Id: ESMF_InternArray.F90,v 1.17 2007/04/18 18:43:47 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -142,7 +142,7 @@ module ESMF_InternArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArray.F90,v 1.16 2007/04/03 16:36:24 cdeluca Exp $'
+    '$Id: ESMF_InternArray.F90,v 1.17 2007/04/18 18:43:47 rosalind Exp $'
 !
 !==============================================================================
 !
@@ -331,11 +331,11 @@ end subroutine
       integer :: lrank       ! Local use to get rank
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
       endif
 
       ! Check init status of arguments
@@ -437,7 +437,7 @@ end subroutine
       integer :: status                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -496,7 +496,7 @@ end subroutine
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -1370,11 +1370,11 @@ end subroutine
        logical :: rcpresent        
 
        ! Initialize return code; assume failure until success is certain
-       status = ESMF_FAILURE
+       status = ESMF_RC_NOT_IMPL
        rcpresent = .FALSE.
        if (present(rc)) then
          rcpresent = .TRUE.
-         rc = ESMF_FAILURE
+         rc = ESMF_RC_NOT_IMPL
        endif
 
         ! Check init status of arguments
@@ -1445,7 +1445,7 @@ end subroutine
 
         ESMF_InternArrayRead = a 
 
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         end function ESMF_InternArrayRead
 
@@ -1497,7 +1497,7 @@ end subroutine
 
         ESMF_InternArrayReadRestart = a 
  
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         end function ESMF_InternArrayReadRestart
 
@@ -2318,11 +2318,11 @@ end subroutine
       logical :: rcpresent                        ! Return code present
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
       endif
 
       ! Check init status of arguments
@@ -2378,7 +2378,7 @@ end subroutine
     integer           :: status           ! local error status
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -2437,11 +2437,11 @@ end subroutine
        logical :: rcpresent        
 
        ! Initialize return code; assume failure until success is certain
-       status = ESMF_FAILURE
+       status = ESMF_RC_NOT_IMPL
        rcpresent = .FALSE.
        if (present(rc)) then
          rcpresent = .TRUE.
-         rc = ESMF_FAILURE
+         rc = ESMF_RC_NOT_IMPL
        endif
 
       ! Check init status of arguments
@@ -2501,7 +2501,7 @@ end subroutine
 !
 ! TODO: code goes here
 !
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         end subroutine ESMF_InternArrayWriteRestart
 
@@ -2538,7 +2538,7 @@ end subroutine
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Set init code
     ESMF_INIT_SET_CREATED(array)

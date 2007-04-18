@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayDataMap.F90,v 1.6 2007/03/31 05:51:12 cdeluca Exp $
+! $Id: ESMF_InternArrayDataMap.F90,v 1.7 2007/04/18 18:43:47 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@ module ESMF_InternArrayDataMapMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version =  &
-    '$Id: ESMF_InternArrayDataMap.F90,v 1.6 2007/03/31 05:51:12 cdeluca Exp $'
+    '$Id: ESMF_InternArrayDataMap.F90,v 1.7 2007/04/18 18:43:47 rosalind Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -371,11 +371,11 @@ end function
         integer :: i, dimlength
 
         ! initialize return code
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
     ! Check init status of arguments
@@ -540,11 +540,11 @@ end function
         integer :: i, dimlength
 
         ! initialize return code
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
     ! Check init status of arguments
@@ -648,10 +648,10 @@ end function
         integer :: i, dimlength
 
         ! init return code
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         if (present(rc)) then
             rcpresent=.TRUE.
-            rc = ESMF_FAILURE    
+            rc = ESMF_RC_NOT_IMPL
         else
           rcpresent = .FALSE.
         endif
@@ -749,10 +749,10 @@ end function
         logical :: rcpresent                  ! did user specify rc?
 
         ! init return code
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         if (present(rc)) then
             rcpresent=.TRUE.
-            rc = ESMF_FAILURE    
+            rc = ESMF_RC_NOT_IMPL
         else
           rcpresent = .FALSE.
         endif
@@ -909,7 +909,7 @@ end function
 !EOP
 
         ! initialize return code
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, arraydatamap)
@@ -960,7 +960,7 @@ end function
     ! Check init status of arguments
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
 
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         end subroutine ESMF_ArrayDataMapWriteRestart
 
@@ -1006,7 +1006,7 @@ end function
 !
  
         ESMF_ArrayDataMapReadRestart%status = ESMF_STATUS_UNINIT
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         end function ESMF_ArrayDataMapReadRestart
 
@@ -1051,7 +1051,7 @@ end function
     ! Check init status of arguments
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
 
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         end subroutine ESMF_ArrayDataMapWrite
 

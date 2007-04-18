@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayGet.cpp,v 1.8 2007/03/31 05:51:12 cdeluca Exp $
+! $Id: ESMF_InternArrayGet.cpp,v 1.9 2007/04/18 18:43:47 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayGet.cpp,v 1.8 2007/03/31 05:51:12 cdeluca Exp $'
+    '$Id: ESMF_InternArrayGet.cpp,v 1.9 2007/04/18 18:43:47 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -127,7 +127,7 @@ TypeKindRankInterfaceMacro(ArrayGetData)
 !       Changed BOP/EOP to BOPI/EOPI until code is added.
 ! TODO: code goes here
 !
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
   end subroutine ESMF_InternArraySetData
 

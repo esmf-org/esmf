@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_InternArrayCreateMacros.h,v 1.8 2007/03/31 05:51:12 cdeluca Exp $
+! $Id: ESMF_InternArrayCreateMacros.h,v 1.9 2007/04/18 18:43:47 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -117,8 +117,8 @@
         integer :: hwidth                   ! local copy of halo width @\
  @\
         ! Initialize return code; assume failure until success is certain @\
-        status = ESMF_FAILURE @\
-        if (present(rc)) rc = ESMF_FAILURE @\
+        status = ESMF_RC_NOT_IMPL @\
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
         array%this = ESMF_NULL_POINTER @\
  @\
         ! Test to see if array already allocated, and fail if so. @\
@@ -243,8 +243,8 @@
         integer, dimension(mrank) :: ubounds ! per dim @\
  @\
         ! Initialize return code; assume failure until success is certain @\
-        status = ESMF_FAILURE @\
-        if (present(rc)) rc = ESMF_FAILURE @\
+        status = ESMF_RC_NOT_IMPL @\
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
         array%this = ESMF_NULL_POINTER @\
  @\
         ! Set default for copyflag @\
@@ -390,8 +390,8 @@
         integer, dimension(ESMF_MAXDIM) :: offsets @\
  @\
         ! Initialize return code; assume failure until success is certain @\
-        status = ESMF_FAILURE @\
-        if (present(rc)) rc = ESMF_FAILURE @\
+        status = ESMF_RC_NOT_IMPL @\
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
         zerosize = .FALSE. @\
  @\
         ! Assume defaults first, then alter if lb or ub specified, @\
@@ -552,7 +552,7 @@
  @\
         integer :: status                               ! local error status @\
  @\
-        status = ESMF_FAILURE  @\
+        status = ESMF_RC_NOT_IMPL  @\
  @\
         call c_ESMC_IArrayGetF90Ptr(array, wrap, status) @\
         deallocate(wrap % ptr##mrank##D##mtypekind) @\
