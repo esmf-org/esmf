@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.102 2007/03/31 05:51:19 cdeluca Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.103 2007/04/19 20:31:12 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.102 2007/03/31 05:51:19 cdeluca Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.103 2007/04/19 20:31:12 rosalind Exp $'
 
 !==============================================================================
 
@@ -161,7 +161,7 @@
       type(ESMF_TransformValues) :: tv
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
@@ -650,7 +650,7 @@
       real (ESMF_KIND_R8), parameter :: converge = 1.e-10  ! convergence criterion
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
 

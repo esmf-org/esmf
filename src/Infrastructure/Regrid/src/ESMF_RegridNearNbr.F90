@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridNearNbr.F90,v 1.22 2007/03/31 05:51:19 cdeluca Exp $
+! $Id: ESMF_RegridNearNbr.F90,v 1.23 2007/04/19 20:31:12 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridNearNbr.F90,v 1.22 2007/03/31 05:51:19 cdeluca Exp $'
+      '$Id: ESMF_RegridNearNbr.F90,v 1.23 2007/04/19 20:31:12 rosalind Exp $'
 
 !==============================================================================
 !
@@ -179,7 +179,7 @@
 !     Construct an empty regrid structure
 !
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       call ESMF_RegridConstructEmpty(ESMF_RegridConsByFieldNearNbr, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -398,7 +398,7 @@
 
       character (len = *), intent(in) :: name
 
-      integer, intent(out) :: rc
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Given a source field bundle and destination field bundle (and their attached
@@ -424,6 +424,9 @@
 
       !TODO: Insert code here
       type (ESMF_RegridType) :: temp
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! prevent compiler errors on some architectures which
       ! insist functions have a return value

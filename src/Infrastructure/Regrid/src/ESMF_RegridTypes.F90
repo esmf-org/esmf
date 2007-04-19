@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.90 2007/03/31 05:51:19 cdeluca Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.91 2007/04/19 20:31:12 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -266,7 +266,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.90 2007/03/31 05:51:19 cdeluca Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.91 2007/04/19 20:31:12 rosalind Exp $'
 
 !==============================================================================
 !
@@ -482,7 +482,7 @@ end subroutine ESMF_RegridIndexTypeValidate
       !   srcAddTmp, dstAddTmp, weightsTmp
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
 
@@ -577,7 +577,7 @@ end subroutine ESMF_RegridIndexTypeValidate
       type(ESMF_LocalArray) :: srcIndex, dstIndex, weights
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_DEEP(ESMF_RegridIndexGetInit,index,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
@@ -718,7 +718,7 @@ end subroutine ESMF_RegridIndexTypeValidate
       type(ESMF_Route) :: route
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
@@ -879,7 +879,7 @@ end subroutine ESMF_RegridIndexTypeValidate
       type(ESMF_RegridType), pointer :: rtype
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
@@ -986,7 +986,7 @@ end subroutine ESMF_RegridIndexTypeValidate
       type(ESMF_RegridType), pointer :: rtype
 
       ! Initalize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
@@ -1056,7 +1056,7 @@ end subroutine ESMF_RegridIndexTypeValidate
       type(ESMF_RegridType), pointer :: rgtype    ! Pointer to new regrid
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 !     Initialize pointers
       nullify(rgtype)
@@ -1112,7 +1112,7 @@ end subroutine ESMF_RegridIndexTypeValidate
       integer :: localrc
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! initialize the base object
       call ESMF_BaseCreate(regrid%base, "Regrid", rc=localrc)
@@ -1163,7 +1163,7 @@ end subroutine ESMF_RegridIndexTypeValidate
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       regrid%ptr%method    = ESMF_REGRID_METHOD_NONE
       regrid%ptr%distrbOpt = ESMF_REGRID_DISTRB_NONE
@@ -1237,7 +1237,7 @@ end subroutine ESMF_RegridIndexTypeValidate
       type(ESMF_DELayout) :: layout
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dataMap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,domainList)
@@ -1374,7 +1374,7 @@ end subroutine ESMF_RegridIndexTypeValidate
       type(ESMF_RegridIndexType), pointer :: ritype    ! Pointer to new regrid index
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 !     Initialize pointers
       nullify(ritype)
@@ -1434,7 +1434,7 @@ end subroutine ESMF_RegridIndexTypeValidate
       integer :: localrc                             ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_DEEP(ESMF_RegridIndexGetInit,index,rc)
 
@@ -1571,7 +1571,7 @@ end subroutine ESMF_RegridIndexTypeValidate
       real(ESMF_KIND_R8) :: minX, maxX, minY, maxY, deltaBin(2)
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       if (rank.eq.1) then
         localMinX = minval(cornerX1D)
@@ -1693,7 +1693,7 @@ end subroutine ESMF_RegridIndexTypeValidate
       integer :: localrc
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       deallocate(binAddrMin, &
                  binAddrMax, &

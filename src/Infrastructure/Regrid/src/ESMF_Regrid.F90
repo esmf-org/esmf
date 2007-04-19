@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.115 2007/04/03 16:36:24 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.116 2007/04/19 20:31:12 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.115 2007/04/03 16:36:24 cdeluca Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.116 2007/04/19 20:31:12 rosalind Exp $'
 
 !==============================================================================
 !
@@ -302,7 +302,7 @@
       logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
@@ -351,7 +351,7 @@
       !-------------
       ! ESMF_REGRID_METHOD_BICUBIC
       case(2)
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                    "Bicubic not yet supported", &
                    ESMF_CONTEXT, rc)
         return
@@ -368,7 +368,7 @@
       !-------------
       ! ESMF_REGRID_METHOD_CONSERV2
       case(4)
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                    "Second-order conservative method not yet supported", &
                    ESMF_CONTEXT, rc)
         return
@@ -381,7 +381,7 @@
       !-------------
       ! ESMF_REGRID_METHOD_RASTER
       case(5)
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                    "Raster method not yet supported", &
                    ESMF_CONTEXT, rc)
         return
@@ -389,7 +389,7 @@
       !-------------
       ! ESMF_REGRID_METHOD_NEAR_NBR
       case(6)
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                    "Nearest neighbor method not yet supported", &
                    ESMF_CONTEXT, rc)
         return
@@ -402,7 +402,7 @@
       !-------------
       ! ESMF_REGRID_METHOD_FOURIER
       case(7)
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                    "Fourier transforms not yet supported", &
                    ESMF_CONTEXT, rc)
         return
@@ -410,7 +410,7 @@
       !-------------
       ! ESMF_REGRID_METHOD_LEGENDRE
       case(8)
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                    "Legendre transforms not yet supported", &
                    ESMF_CONTEXT, rc)
         return
@@ -418,7 +418,7 @@
       !-------------
       ! ESMF_REGRID_METHOD_INDEX
       case(9)
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                    "Index-space methods not yet supported", &
                    ESMF_CONTEXT, rc)
         return
@@ -434,7 +434,7 @@
       !-------------
       ! ESMF_REGRID_METHOD_SPLINE
       case(11)
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                    "1-d cubic splines not yet supported", &
                    ESMF_CONTEXT, rc)
         return
@@ -442,7 +442,7 @@
       !-------------
       ! ESMF_REGRID_METHOD_REGRIDCOPY
       case(51)
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                    "Regrid copied from another regrid not yet supported", &
                    ESMF_CONTEXT, rc)
         return
@@ -450,7 +450,7 @@
       !-------------
       ! ESMF_REGRID_METHOD_SHIFT
       case(52)
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                    "Regrid shifted from another regrid not yet supported", &
                    ESMF_CONTEXT, rc)
         return
@@ -458,7 +458,7 @@
       !-------------
       ! ESMF_REGRID_METHOD_ADJOINT
       case(53)
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                    "Adjoint from existing regrid not yet supported", &
                    ESMF_CONTEXT, rc)
         return
@@ -466,7 +466,7 @@
       !-------------
       ! ESMF_REGRID_METHOD_FILE
       case(89)
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                    "Regrid read from file not yet supported", &
                    ESMF_CONTEXT, rc)
         return
@@ -474,14 +474,14 @@
       !-------------
       ! ESMF_REGRID_METHOD_USER
       case(90)
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                    "User-defined regridding not yet supported", &
                    ESMF_CONTEXT, rc)
         return
 
       !-------------
       case default
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                     "Invalid method", &
                                     ESMF_CONTEXT, rc)
         return
@@ -552,7 +552,7 @@
       type(ESMF_TransformValues) :: tv
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
@@ -898,7 +898,7 @@
       type(ESMF_TransformValues) :: tv
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
@@ -1226,7 +1226,7 @@
 !      type(ESMF_TransformValues) :: tv
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
@@ -1549,7 +1549,7 @@
     logical :: hasDstData           ! does this DE contain localdata from dst?
 
     ! assume failure until success certain
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
@@ -1721,7 +1721,7 @@
       integer :: routenum
 
       ! initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
@@ -1893,7 +1893,7 @@
       integer :: routenum
 
       ! initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
@@ -1997,7 +1997,7 @@
       integer :: localrc        ! local error status
 
       ! initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
@@ -2047,7 +2047,7 @@
       integer :: itemcount
 
       ! initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)

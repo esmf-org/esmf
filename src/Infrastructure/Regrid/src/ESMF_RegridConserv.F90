@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.67 2007/03/31 05:51:19 cdeluca Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.68 2007/04/19 20:31:12 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.67 2007/03/31 05:51:19 cdeluca Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.68 2007/04/19 20:31:12 rosalind Exp $'
 
 !==============================================================================
 
@@ -250,7 +250,7 @@
 
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
@@ -865,7 +865,7 @@
       type(ESMF_RegridIndex) :: index
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check variables
       ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
@@ -1608,7 +1608,7 @@
            weightsarr              !
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
 
@@ -1844,7 +1844,7 @@
         lon1, lon2         ! longitude differences
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! determine order of scheme from size of weight array
       iorder = size(weights)
@@ -1929,7 +1929,7 @@
 
       ! Unknown or invalid coordSystem
       case default
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                     "Unknown or invalid coordSystem", &
                                     ESMF_CONTEXT, rc)
         return
@@ -2057,7 +2057,7 @@
 
                                   
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! initialize defaults, flags, etc.
       reverse = .false.
@@ -2406,7 +2406,7 @@
 
                                   
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! initialize defaults, flags, etc.
       reverse = .false.
