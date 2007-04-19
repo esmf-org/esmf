@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.15 2007/03/31 05:50:59 cdeluca Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.16 2007/04/19 19:13:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.15 2007/03/31 05:50:59 cdeluca Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.16 2007/04/19 19:13:04 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,7 +52,7 @@
 
 !     !LOCAL VARIABLES:
       type(ESMF_VM):: vm, vm1
-      type(ESMF_DELayout):: delayout, delayout1
+      type(ESMF_DELayout):: delayout, delayout1, delayout2
       integer:: petCount, ndes, i, n, nsum, isum
       integer, allocatable:: list(:)
       integer, allocatable:: petMap(:), deGrouping(:)
@@ -84,6 +84,41 @@
       if (rc.ne.ESMF_SUCCESS) goto 10
 
 #ifdef ESMF_EXHAUSTIVE
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "DELayout validate an un-created delayout Test"
+      call ESMF_DELayoutValidate(delayout2, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "DELayout Create Test"
+      delayout2 = ESMF_DELayoutCreate(vm, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "DELayout validate a delayout Test"
+      call ESMF_DELayoutValidate(delayout2, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " DELayout Destroy Test"
+      call ESMF_DELayoutDestroy(delayout2, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "DELayout validate an destroyed delayout Test"
+      call ESMF_DELayoutValidate(delayout2, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
