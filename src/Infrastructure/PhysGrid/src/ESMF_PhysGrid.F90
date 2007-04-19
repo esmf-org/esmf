@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.104 2007/03/31 05:51:18 cdeluca Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.105 2007/04/19 17:35:40 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -343,7 +343,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.104 2007/03/31 05:51:18 cdeluca Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.105 2007/04/19 17:35:40 rosalind Exp $'
 
 !==============================================================================
 !
@@ -932,7 +932,7 @@
       nullify(ESMF_PhysGridCreateNew%ptr)
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       allocate(physgrid, stat=localrc)
       ! If error write message and return.
@@ -1025,7 +1025,7 @@
       integer :: i
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! if already destroyed, fine.
       if (.not.associated(physgrid%ptr)) then 
@@ -1219,7 +1219,7 @@
       integer :: localrc                             ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       if (present(coordSystem)) then
         physgrid%ptr%coordSystem = coordSystem
@@ -1293,7 +1293,7 @@
       integer :: localrc                             ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
@@ -1357,7 +1357,7 @@
       integer :: localrc                             ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
@@ -1440,7 +1440,7 @@
       logical :: found                               ! flag for name search
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
@@ -1535,7 +1535,7 @@
       integer :: localrc                             ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
@@ -1610,7 +1610,7 @@
       character (len=ESMF_MAXSTR) :: name_tmp        ! temp for name creation 
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
@@ -1704,7 +1704,7 @@
       character(len=ESMF_MAXSTR) :: name_tmp         ! temp for name creation 
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
@@ -1825,7 +1825,7 @@
       integer :: localrc                             ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
@@ -1945,7 +1945,7 @@
                                                      ! temporary array of masks
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
@@ -2057,7 +2057,7 @@
       logical :: found                               ! name search flag
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
@@ -2159,7 +2159,7 @@
                                                      ! temporary array of metrics
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
@@ -2268,7 +2268,7 @@
       logical :: found                               ! name search flag
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
@@ -2398,7 +2398,7 @@
       integer :: i
       
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
@@ -2634,7 +2634,7 @@
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: cornerX, cornerY
 
       ! Initialize return code - assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
@@ -2743,7 +2743,7 @@
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: cornerX, cornerY
 
       ! Initialize return code - assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysGridGetInit,physgrid,rc)
@@ -3212,7 +3212,7 @@
       real(kind=ESMF_KIND_R8) :: zero, one
       
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! set default return value
       ESMF_PhysGridPointInCell = .false.
@@ -3331,7 +3331,7 @@
       real(kind=ESMF_KIND_R8) :: tiny = 1.0d-12              ! TODO: should be in base
       
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! set constants
       pi = 3.1416d0   ! TODO really set pi, just a bug fix for now
@@ -3399,7 +3399,7 @@
       !integer :: localrc                             ! Error status
       
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! compute distance using the usual Cartesian formula
       ESMF_PhysGridCompDistCartesian = sqrt( (x2-x1)**2 + (y2-y1)**2 )

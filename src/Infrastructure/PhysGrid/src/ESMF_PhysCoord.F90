@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.22 2007/03/31 05:51:18 cdeluca Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.23 2007/04/19 17:35:40 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -240,7 +240,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.22 2007/03/31 05:51:18 cdeluca Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.23 2007/04/19 17:35:40 rosalind Exp $'
 
 !==============================================================================
 !
@@ -525,7 +525,7 @@
       type(ESMF_PhysCoordType), pointer :: physCoord ! Pointer to new PhysCoord
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize pointers
       nullify(physCoord)
@@ -623,7 +623,7 @@
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! release base object
       call ESMF_BaseDestroy(physCoord%ptr%base, localrc)
@@ -719,7 +719,7 @@
       logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
@@ -820,7 +820,7 @@
       logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
@@ -898,7 +898,7 @@
       logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
@@ -957,7 +957,7 @@
       logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
@@ -1014,7 +1014,7 @@
       logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
@@ -1070,7 +1070,7 @@
       logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
@@ -1135,7 +1135,7 @@
       type(ESMF_CoordType) :: coordType              ! kind of coord
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
@@ -1237,7 +1237,7 @@
       ! is necessary to have some information available currently.
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,physCoord,rc)
