@@ -1,4 +1,4 @@
-!  $Id: ESMF_Config_C.F90,v 1.2 2007/04/17 23:24:26 theurich Exp $
+!  $Id: ESMF_Config_C.F90,v 1.3 2007/04/19 17:08:58 tjcnrl Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Config_C.F90,v 1.2 2007/04/17 23:24:26 theurich Exp $'
+!      '$Id: ESMF_Config_C.F90,v 1.3 2007/04/19 17:08:58 tjcnrl Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -328,7 +328,7 @@
      use ESMF_ConfigMod
 
      type(ESMF_Config)                               :: config
-     integer(ESMF_KIND_I4), intent(inout)            :: valueList(:) 
+     integer(ESMF_KIND_I4), intent(inout)            :: valueList(*) 
      integer, intent(in)                             :: count   
      character(len=*), intent(in), optional          :: label
      integer(ESMF_KIND_I4), intent(in), optional     :: dvalue
@@ -347,7 +347,7 @@
      use ESMF_ConfigMod
 
      type(ESMF_Config)                               :: config
-     integer(ESMF_KIND_I8), intent(inout)            :: valueList(:) 
+     integer(ESMF_KIND_I8), intent(inout)            :: valueList(*) 
      integer, intent(in)                             :: count   
      character(len=*), intent(in), optional          :: label
      integer(ESMF_KIND_I8), intent(in), optional     :: dvalue
@@ -366,7 +366,7 @@
      use ESMF_ConfigMod
 
      type(ESMF_Config)                            :: config
-     real(ESMF_KIND_R4), intent(inout)            :: valueList(:) 
+     real(ESMF_KIND_R4), intent(inout)            :: valueList(*) 
      integer, intent(in)                          :: count   
      character(len=*), intent(in), optional       :: label
      real(ESMF_KIND_R4), intent(in), optional     :: dvalue
@@ -385,7 +385,7 @@
      use ESMF_ConfigMod
 
      type(ESMF_Config)                            :: config
-     real(ESMF_KIND_R8), intent(inout)            :: valueList(:) 
+     real(ESMF_KIND_R8), intent(inout)            :: valueList(*) 
      integer, intent(in)                          :: count   
      character(len=*), intent(in), optional       :: label
      real(ESMF_KIND_R8), intent(in), optional     :: dvalue
@@ -404,13 +404,13 @@
      use ESMF_ConfigMod
 
      type(ESMF_Config), intent(inout)             :: config
-     integer, intent(inout)                       :: valuelist(:)
+     integer, intent(inout)                       :: valueList(*)
      integer, intent(in)                          :: count
      character(len=*), intent(in), optional       :: label
      integer, intent(in), optional                :: dvalue
      integer, intent(out), optional               :: rc
 
-     logical :: lvaluelist(count), ldvalue
+     logical :: lvalueList(count), ldvalue
      integer :: i
 
      if (present(dvalue)) then
@@ -419,17 +419,17 @@
        else 
          ldvalue = .false.
        endif
-       call ESMF_ConfigGetAttribute(config, lvaluelist, count, label=label, &
+       call ESMF_ConfigGetAttribute(config, lvalueList, count, label=label, &
                                     default=ldvalue, rc=rc)
      else
-       call ESMF_ConfigGetAttribute(config, lvaluelist, count, label=label, rc=rc)
+       call ESMF_ConfigGetAttribute(config, lvalueList, count, label=label, rc=rc)
      endif
 
      do i = 1, count
-       if (lvaluelist(i)) then
-         valuelist(i) = 1
+       if (lvalueList(i)) then
+         valueList(i) = 1
        else 
-         valuelist(i) = 0
+         valueList(i) = 0
        endif
      enddo
 

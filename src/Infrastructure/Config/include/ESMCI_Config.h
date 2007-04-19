@@ -1,4 +1,4 @@
-// $Id: ESMCI_Config.h,v 1.1 2007/04/17 21:25:50 tjcnrl Exp $
+// $Id: ESMCI_Config.h,v 1.2 2007/04/19 17:08:58 tjcnrl Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -74,32 +74,32 @@ extern "C" {
   void FTN(f_esmf_configgetstring)(ESMC_Config* config, char* value, char* label,
                                    char* dvalue, int* rc, int vlen, int llen, int dlen);
 
-  void FTN(f_esmf_configgetinti4)(ESMC_Config* config, int* value, char* label,
-                                  int* dvalue, int* rc, int llen);
+  void FTN(f_esmf_configgetinti4)(ESMC_Config* config, ESMC_I4* value, char* label,
+                                  ESMC_I4* dvalue, int* rc, int llen);
 
   void FTN(f_esmf_configgetinti8)(ESMC_Config* config, ESMC_I8* value, char* label,
                                   ESMC_I8* dvalue, int* rc, int llen);
 
-  void FTN(f_esmf_configgetfloatr4)(ESMC_Config* config, float* value, char* label,
-                                    float* dvalue, int* rc, int llen);
+  void FTN(f_esmf_configgetfloatr4)(ESMC_Config* config, ESMC_R4* value, char* label,
+                                    ESMC_R4* dvalue, int* rc, int llen);
 
-  void FTN(f_esmf_configgetfloatr8)(ESMC_Config* config, double* value, char* label,
-                                    double* dvalue, int* rc, int llen);
+  void FTN(f_esmf_configgetfloatr8)(ESMC_Config* config, ESMC_R8* value, char* label,
+                                    ESMC_R8* dvalue, int* rc, int llen);
 
   void FTN(f_esmf_configgetlogical)(ESMC_Config* config, int* value, char* label,
                                     int* dvalue, int* rc, int llen);
 
-  void FTN(f_esmf_configgetintsi4)(ESMC_Config* config, int* value, int* count,
-                                   char* label, int* dvalue, int* rc, int llen);
+  void FTN(f_esmf_configgetintsi4)(ESMC_Config* config, ESMC_I4* value, int* count,
+                                   char* label, ESMC_I4* dvalue, int* rc, int llen);
 
   void FTN(f_esmf_configgetintsi8)(ESMC_Config* config, ESMC_I8* value, int* count,
                                    char* label, ESMC_I8* dvalue, int* rc, int llen);
 
-  void FTN(f_esmf_configgetfloatsr4)(ESMC_Config* config, float* value, int* count,
-                                     char* label, float* dvalue, int* rc, int llen);
+  void FTN(f_esmf_configgetfloatsr4)(ESMC_Config* config, ESMC_R4* value, int* count,
+                                     char* label, ESMC_R4* dvalue, int* rc, int llen);
 
-  void FTN(f_esmf_configgetfloatsr8)(ESMC_Config* config, double* value, int* count,
-                                     char* label, double* dvalue, int* rc, int llen);
+  void FTN(f_esmf_configgetfloatsr8)(ESMC_Config* config, ESMC_R8* value, int* count,
+                                     char* label, ESMC_R8* dvalue, int* rc, int llen);
 
   void FTN(f_esmf_configgetlogicals)(ESMC_Config* config, int* value, int* count,
                                      char* label, int* dvalue, int* rc, int llen);
