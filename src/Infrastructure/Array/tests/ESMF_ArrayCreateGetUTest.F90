@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.6 2007/04/04 03:03:38 theurich Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.7 2007/04/19 19:46:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -15,6 +15,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
  
 #include <ESMF_Macros.inc>
+#include "ESMF.h"
 
 !==============================================================================
 !BOP
@@ -36,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.6 2007/04/04 03:03:38 theurich Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.7 2007/04/19 19:46:41 svasquez Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -51,10 +52,10 @@ program ESMF_ArrayCreateGetUTest
 
   !LOCAL VARIABLES:
   type(ESMF_VM):: vm
-  integer:: petCount, localPet, i, j
+  integer:: petCount, localPet
   type(ESMF_ArraySpec):: arrayspec
   type(ESMF_Array):: array
-  type(ESMF_DistGrid):: distgrid
+  type(ESMF_DistGrid):: distgrid, distgrid2
   real(ESMF_KIND_R8)      :: farray1D(10)
   real(ESMF_KIND_R8)      :: farray2D(10,10)
   real(ESMF_KIND_R4)      :: farray3D(10,10,10)
@@ -124,6 +125,42 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
+  ! test validate code
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "DistGrid Validate of non-created DistGrid Test"
+  write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+  call ESMF_DistGridValidate(distgrid2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "DistGrid create DistGrid Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid2 = ESMF_DistGridCreate(minCorner=(/1/), maxCorner=(/40/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "DistGrid Validate of created DistGrid Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridValidate(distgrid2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "DistGrid destroy DistGrid Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "DistGrid Validate of destroyed DistGrid Test"
+  write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+  call ESMF_DistGridValidate(distgrid2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
   !------------------------------------------------------------------------
   ! preparations
   distgrid = ESMF_DistGridCreate(minCorner=(/1/), maxCorner=(/40/), rc=rc)
