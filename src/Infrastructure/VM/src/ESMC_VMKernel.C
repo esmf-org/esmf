@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.87 2007/04/12 18:14:53 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.88 2007/04/20 20:37:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -172,53 +172,43 @@ void ESMC_VMK::vmk_obtain_args(void){
   // obtain command line args for this process
 #ifndef ESMF_NO_SYSTEMCALL
   int mypid = getpid();
-  char command[160], fname[80], uname[80], args[8000];
-  sprintf(command, "uname > .uname.%d", mypid);
-  system(command);
-  sprintf(fname, ".uname.%d", mypid);
-  FILE *fp=fopen(fname, "r");
-  if (fp){
-//    fgets(uname, 80, fp); // this changes dir on Linux/MPICH
-    fscanf(fp, "%[^\n]", uname);
-    fclose(fp);
-  }else{
-    uname[0]='\0';  // empty uname string
-  }
-  // some systems may not work correctly
-  int skip_obtain_args = 0;
-  // IRIX64 with ABI -64 has problems. I take IRIX64 out (with ABI -n32 and -64)
-  // for now. I suspect the -64 problem to be Fortran/C++ runtime lib related!
-  // Somehow the system() calls and fgets() don't work correctly!
-  if (!strncmp(uname, "IRIX64", 6)) skip_obtain_args=1; 
-  if (skip_obtain_args){
-    argc = 0;
-    return; // bail out
-  }
-  // determine whether this is a SUS3=sysV or BSD derived OS
-  int bsdflag=0;
-  if (!strncmp(uname, "Darwin", 6)) bsdflag=1;    // Darwin is BSD
-  // choose the correct ps option  
-  if (bsdflag)
-    sprintf(command, "env COLUMNS=8000 ps -p %d -o command > .args.%d", mypid,
-      mypid);
-  else
-    sprintf(command, "env COLUMNS=8000 ps -p %d -o args= > .args.%d", mypid,
-      mypid);
+  char command[160], fname[80], args[8000];
+  FILE *fp;
+#ifdef ESMF_OS_Linux
+  // this is a SUS3=sysV derived OS
+  // fgets() changes dir on Linux/MPICH -> use fscanf() instead
+  sprintf(command, "env COLUMNS=8000 ps -p %d -o args= > .args.%d", mypid,
+    mypid);
   system(command);
   sprintf(fname, ".args.%d", mypid);
   fp=fopen(fname, "r");
   if (fp){
-//    fgets(args, 8000, fp);  // scan off header line of ps output
-//    fgets(args, 8000, fp);
-    // fgets() changes dir on Linux/MPICH
-//    fscanf(fp, "%[^\n]", args);
     fscanf(fp, "%[^\n]", args);
     fclose(fp);
   }else{
     args[0]='\0'; // empty args string
   }
-  sprintf(command, "rm -f .args.%d .uname.%d", mypid, mypid);
+  sprintf(command, "rm -f .args.%d", mypid);
   system(command);
+#elif defined ESMF_OS_Darwin
+  // this is a BSD derived OS
+  sprintf(command, "env COLUMNS=8000 ps -p %d -o command > .args.%d", mypid,
+    mypid);
+  system(command);
+  sprintf(fname, ".args.%d", mypid);
+  fp=fopen(fname, "r");
+  if (fp){
+    fgets(args, 8000, fp);  // scan off header line of ps output
+    fgets(args, 8000, fp);
+    fclose(fp);
+  }else{
+    args[0]='\0'; // empty args string
+  }
+  sprintf(command, "rm -f .args.%d", mypid);
+  system(command);
+#else
+  args[0]='\0'; // empty args string
+#endif
   // now the string 'args' holds the complete command line with arguments
   argc=0;
   int i=0;
