@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.1 2007/04/17 21:25:50 tjcnrl Exp $
+// $Id: ESMC_Config.h,v 1.2 2007/04/20 09:05:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,27 +55,20 @@ enum {
 #define ESMC_ConfigArgTableEnd(ARG)   ESMCI_Arg(ESMCI_ConfigArgTableEndID) , (ARG)
 #define ESMC_ConfigArgOptions(ARG)    ESMCI_Arg(ESMCI_ConfigArgOptionsID) , (ARG)
 
+extern "C" {
+
 // class declaration type
-class ESMC_Config { // wrapper class so do not inherit from ESMC_Base class
+typedef struct {
 
-  private:
-    ESMC_F90ClassHolder* f90this;    // pointer to fortran derived type
+    // pointer to fortran derived type
+    ESMC_F90ClassHolder* f90this;
 
-  // !PUBLIC MEMBER FUNCTIONS:
-  public:
-    // native C++ constructor
-    ESMC_Config(void) { f90this = ESMC_NULL_POINTER; }
-    // native C++ destructor
-    ~ESMC_Config(void) { }
-  
-  // !PRIVATE MEMBER FUNCTIONS:
-  private: 
 
 //
 //EOP
 //-----------------------------------------------------------------------------
 
-}; // end class ESMC_Config
+}ESMC_Config ; // end class ESMC_Config
 
 
 //
@@ -87,7 +80,6 @@ class ESMC_Config { // wrapper class so do not inherit from ESMC_Base class
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
-extern "C" {
 
   ESMC_Config* ESMC_ConfigCreate(int* rc);
 
