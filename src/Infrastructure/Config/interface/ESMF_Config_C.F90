@@ -1,4 +1,4 @@
-!  $Id: ESMF_Config_C.F90,v 1.3 2007/04/19 17:08:58 tjcnrl Exp $
+!  $Id: ESMF_Config_C.F90,v 1.4 2007/04/20 08:40:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Config_C.F90,v 1.3 2007/04/19 17:08:58 tjcnrl Exp $'
+!      '$Id: ESMF_Config_C.F90,v 1.4 2007/04/20 08:40:40 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -322,14 +322,14 @@
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetintsi4(config, valueList, count, label, dvalue, rc)
+   subroutine f_esmf_configgetintsi4(config, count, valueList, label, dvalue, rc)
      use ESMF_UtilTypesMod    ! ESMF base class
      use ESMF_BaseMod    ! ESMF base class
      use ESMF_ConfigMod
 
      type(ESMF_Config)                               :: config
-     integer(ESMF_KIND_I4), intent(inout)            :: valueList(*) 
      integer, intent(in)                             :: count   
+     integer(ESMF_KIND_I4), intent(inout)            :: valueList(count) 
      character(len=*), intent(in), optional          :: label
      integer(ESMF_KIND_I4), intent(in), optional     :: dvalue
      integer, intent(out), optional                  :: rc     
@@ -341,14 +341,14 @@
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetintsi8(config, valueList, count, label, dvalue, rc)
+   subroutine f_esmf_configgetintsi8(config, count, valueList, label, dvalue, rc)
      use ESMF_UtilTypesMod    ! ESMF base class
      use ESMF_BaseMod    ! ESMF base class
      use ESMF_ConfigMod
 
      type(ESMF_Config)                               :: config
-     integer(ESMF_KIND_I8), intent(inout)            :: valueList(*) 
      integer, intent(in)                             :: count   
+     integer(ESMF_KIND_I8), intent(inout)            :: valueList(count) 
      character(len=*), intent(in), optional          :: label
      integer(ESMF_KIND_I8), intent(in), optional     :: dvalue
      integer, intent(out), optional                  :: rc     
@@ -360,14 +360,14 @@
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetfloatsr4(config, valueList, count, label, dvalue, rc)
+   subroutine f_esmf_configgetfloatsr4(config, count, valueList, label, dvalue, rc)
      use ESMF_UtilTypesMod    ! ESMF base class
      use ESMF_BaseMod    ! ESMF base class
      use ESMF_ConfigMod
 
      type(ESMF_Config)                            :: config
-     real(ESMF_KIND_R4), intent(inout)            :: valueList(*) 
      integer, intent(in)                          :: count   
+     real(ESMF_KIND_R4), intent(inout)            :: valueList(count) 
      character(len=*), intent(in), optional       :: label
      real(ESMF_KIND_R4), intent(in), optional     :: dvalue
      integer, intent(out), optional               :: rc     
@@ -379,14 +379,14 @@
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetfloatsr8(config, valueList, count, label, dvalue, rc)
+   subroutine f_esmf_configgetfloatsr8(config, count, valueList, label, dvalue, rc)
      use ESMF_UtilTypesMod    ! ESMF base class
      use ESMF_BaseMod    ! ESMF base class
      use ESMF_ConfigMod
 
      type(ESMF_Config)                            :: config
-     real(ESMF_KIND_R8), intent(inout)            :: valueList(*) 
      integer, intent(in)                          :: count   
+     real(ESMF_KIND_R8), intent(inout)            :: valueList(count) 
      character(len=*), intent(in), optional       :: label
      real(ESMF_KIND_R8), intent(in), optional     :: dvalue
      integer, intent(out), optional               :: rc     
@@ -398,14 +398,14 @@
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetlogicals(config, valuelist, count, label, dvalue, rc)
+   subroutine f_esmf_configgetlogicals(config, count, valuelist, label, dvalue, rc)
      use ESMF_UtilTypesMod    ! ESMF base class
      use ESMF_BaseMod    ! ESMF base class
      use ESMF_ConfigMod
 
      type(ESMF_Config), intent(inout)             :: config
-     integer, intent(inout)                       :: valueList(*)
      integer, intent(in)                          :: count
+     integer, intent(inout)                       :: valueList(count)
      character(len=*), intent(in), optional       :: label
      integer, intent(in), optional                :: dvalue
      integer, intent(out), optional               :: rc

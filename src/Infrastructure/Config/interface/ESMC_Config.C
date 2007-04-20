@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.C,v 1.1 2007/04/17 21:25:50 tjcnrl Exp $
+// $Id: ESMC_Config.C,v 1.2 2007/04/20 08:40:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char* const version = 
-             "$Id: ESMC_Config.C,v 1.1 2007/04/17 21:25:50 tjcnrl Exp $";
+             "$Id: ESMC_Config.C,v 1.2 2007/04/20 08:40:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -985,7 +985,7 @@ int ESMC_ConfigGetAttribute(
 
       // call Fortran interface
       if (count > 1) {
-        FTN(f_esmf_configgetintsi4)(config, (ESMC_I4*)value, &count,
+        FTN(f_esmf_configgetintsi4)(config, &count, (ESMC_I4*)value,
                    fLabel, (ESMC_I4*)dvaluep, &localrc, llen);
       } else {
         FTN(f_esmf_configgetinti4)( config, (ESMC_I4*)value,
@@ -1048,7 +1048,7 @@ int ESMC_ConfigGetAttribute(
 
       // call Fortran interface
       if (count > 1) {
-        FTN(f_esmf_configgetintsi8)(config, (ESMC_I8*)value, &count,
+        FTN(f_esmf_configgetintsi8)(config,  &count, (ESMC_I8*)value,
                    fLabel, (ESMC_I8*)dvaluep, &localrc, llen);
       } else {
         FTN(f_esmf_configgetinti8)( config, (ESMC_I8*)value,
@@ -1111,7 +1111,7 @@ int ESMC_ConfigGetAttribute(
 
       // call Fortran interface
       if (count > 1) {
-        FTN(f_esmf_configgetfloatsr4)(config, (ESMC_R4*)value, &count,
+        FTN(f_esmf_configgetfloatsr4)(config, &count, (ESMC_R4*)value,
                    fLabel, (ESMC_R4*)dvaluep, &localrc, llen);
       } else {
         FTN(f_esmf_configgetfloatr4)( config, (ESMC_R4*)value,
@@ -1174,7 +1174,7 @@ int ESMC_ConfigGetAttribute(
 
       // call Fortran interface
       if (count > 1) {
-        FTN(f_esmf_configgetfloatsr8)(config, (ESMC_R8*)value, &count,
+        FTN(f_esmf_configgetfloatsr8)(config, &count, (ESMC_R8*)value,
                    fLabel, (ESMC_R8*)dvaluep, &localrc, llen);
       } else {
         FTN(f_esmf_configgetfloatr8)( config, (ESMC_R8*)value,
@@ -1237,7 +1237,7 @@ int ESMC_ConfigGetAttribute(
 
       // call Fortran interface
       if (count > 1) {
-        FTN(f_esmf_configgetlogicals)(config, (int*)value, &count,
+        FTN(f_esmf_configgetlogicals)(config, &count, (int*)value,
                    fLabel, (int*)dvaluep, &localrc, llen);
       } else {
         FTN(f_esmf_configgetlogical)( config, (int*)value,
