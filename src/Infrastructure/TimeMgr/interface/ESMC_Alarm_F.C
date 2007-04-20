@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.29 2007/03/31 05:51:25 cdeluca Exp $
+// $Id: ESMC_Alarm_F.C,v 1.30 2007/04/20 18:44:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <ESMC_F90Interface.h>
+#include <ESMCI_F90Interface.h>
 #include <ESMC_Alarm.h>
 //------------------------------------------------------------------------------
 //BOP

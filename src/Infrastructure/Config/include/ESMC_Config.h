@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.2 2007/04/20 09:05:08 theurich Exp $
+// $Id: ESMC_Config.h,v 1.3 2007/04/20 18:44:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -33,9 +33,8 @@
 //-----------------------------------------------------------------------------
 // 
 // !USES:
-#include "ESMC_Start.h"
-#include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
 #include "ESMC_Arg.h"
+#include "ESMC_F90Interface.h"
 
 // Optional argument identifier list for the ESMC_Config API.
 enum {

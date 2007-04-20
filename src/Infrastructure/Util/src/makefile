@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2007/04/13 05:16:55 theurich Exp $ 
+# $Id: makefile,v 1.14 2007/04/20 18:40:35 theurich Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
@@ -9,7 +9,7 @@ FFLAGS    =
 # files which are generated from .cpp files
 AUTOGEN   = ESMF_FortranWordsize.F90 ESMF_TypeKindGet.F90
 
-SOURCEC	  = ESMC_Util.C ESMC_Fraction.C ESMC_F90Interface.C
+SOURCEC	  = ESMC_Util.C ESMC_Fraction.C ESMCI_F90Interface.C
 SOURCEF	  = ESMF_UtilTypes.F90 \
             ESMF_LogErr.F90  \
             $(AUTOGEN) \
@@ -17,9 +17,9 @@ SOURCEF	  = ESMF_UtilTypes.F90 \
             
 STOREH    = ESMC_Arg.h ESMF_Macros.inc ESMF.h ESMC_Macros.h \
             ESMC_Util.h ESMF_TypeKindRankMacros.hcppF90 ESMC_Start.h \
-            ESMC_F90Interface.h ESMF_ErrReturnCodes.inc ESMF_LogMacros.inc \
-	    ESMF_LogConstants.inc ESMC_Fraction.h ESMF_TypeKindMacros.hcppF90 \
-            ESMF_InitMacros.inc
+            ESMC_F90Interface.h ESMCI_F90Interface.h ESMF_ErrReturnCodes.inc \
+            ESMF_LogMacros.inc ESMF_LogConstants.inc ESMC_Fraction.h \
+            ESMF_TypeKindMacros.hcppF90 ESMF_InitMacros.inc
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

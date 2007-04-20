@@ -1,4 +1,4 @@
-// $Id: ESMC_F90Interface_F.C,v 1.4 2007/03/31 05:51:27 cdeluca Exp $
+// $Id: ESMC_F90Interface_F.C,v 1.5 2007/04/20 18:44:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 #define ESMC_FILENAME "ESMC_F90Interface_F.C"
 //==============================================================================
 
-#include "ESMC_F90Interface.h"
+#include "ESMCI_F90Interface.h"
 #include "ESMC_Start.h"
 
 // the interface subroutine names MUST be in lower case by ESMF convention
