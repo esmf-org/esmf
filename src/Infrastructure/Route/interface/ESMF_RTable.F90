@@ -1,4 +1,4 @@
-! $Id: ESMF_RTable.F90,v 1.14 2007/03/31 05:51:20 cdeluca Exp $
+! $Id: ESMF_RTable.F90,v 1.15 2007/04/20 19:35:36 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RTable.F90,v 1.14 2007/03/31 05:51:20 cdeluca Exp $'
+      '$Id: ESMF_RTable.F90,v 1.15 2007/04/20 19:35:36 rosalind Exp $'
 
 !==============================================================================
 !
@@ -187,14 +187,14 @@ end function ESMF_RTableGetInit
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
         rtable%this = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ! Call C++ create code
@@ -244,13 +244,13 @@ end function ESMF_RTableGetInit
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ! Call C++ destroy code
@@ -307,13 +307,13 @@ end function ESMF_RTableGetInit
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ESMF_INIT_CHECK_DEEP(ESMF_RTableGetInit,rtable,rc)
@@ -372,11 +372,11 @@ end function ESMF_RTableGetInit
        logical :: rcpresent
 
        ! Initialize return code; assume failure until success is certain       
-       status = ESMF_FAILURE
+       status = ESMF_RC_NOT_IMPL
        rcpresent = .FALSE.
        if (present(rc)) then
          rcpresent = .TRUE.  
-         rc = ESMF_FAILURE
+         rc = ESMF_RC_NOT_IMPL
        endif
 
        ! Check initialization
@@ -437,13 +437,13 @@ end function ESMF_RTableGetInit
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ESMF_INIT_CHECK_DEEP(ESMF_RTableGetInit,rtable,rc)
@@ -501,11 +501,11 @@ end function ESMF_RTableGetInit
        logical :: rcpresent
 
        ! Initialize return code; assume failure until success is certain       
-       status = ESMF_FAILURE
+       status = ESMF_RC_NOT_IMPL
        rcpresent = .FALSE.
        if (present(rc)) then
          rcpresent = .TRUE.  
-         rc = ESMF_FAILURE
+         rc = ESMF_RC_NOT_IMPL
        endif
 
        ! Check initialization

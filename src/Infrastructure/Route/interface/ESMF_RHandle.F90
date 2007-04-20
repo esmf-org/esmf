@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.36 2007/03/31 05:51:20 cdeluca Exp $
+! $Id: ESMF_RHandle.F90,v 1.37 2007/04/20 19:35:36 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -155,7 +155,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.36 2007/03/31 05:51:20 cdeluca Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.37 2007/04/20 19:35:36 rosalind Exp $'
 
 !==============================================================================
 
@@ -241,11 +241,11 @@ end function ESMF_TransformValuesGetInit
         integer :: nitems
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         tv%this = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! Make sure you supply a default value
         if (present(count)) nitems = count
@@ -297,10 +297,10 @@ end function ESMF_TransformValuesGetInit
         integer :: status                  ! local error status
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! Call C++ destroy code
         call c_ESMC_TransformValuesDestroy(tv, status)
@@ -366,10 +366,10 @@ end function ESMF_TransformValuesGetInit
         type(ESMF_Pointer) :: curweightsPtr
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
 
@@ -451,10 +451,10 @@ end function ESMF_TransformValuesGetInit
         type(ESMF_TVWrapperR8) :: wwrap
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
 
@@ -534,10 +534,10 @@ end function ESMF_TransformValuesGetInit
         type(ESMF_Pointer) :: curweightsPtr
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,srcIndex,rc)
@@ -618,8 +618,8 @@ end function ESMF_TransformValuesGetInit
        integer :: status                     ! local error status
 
        ! Initialize return code; assume failure until success is certain       
-       status = ESMF_FAILURE
-       if (present(rc)) rc = ESMF_FAILURE
+       status = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
        ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
 
@@ -674,8 +674,8 @@ end function ESMF_TransformValuesGetInit
        integer :: status                     ! local error status
 
        ! Initialize return code; assume failure until success is certain       
-       status = ESMF_FAILURE
-       if (present(rc)) rc = ESMF_FAILURE
+       status = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
        ESMF_INIT_CHECK_DEEP(ESMF_TransformValuesGetInit,tv,rc)
 
@@ -767,7 +767,7 @@ end function ESMF_RouteHandleGetInit
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Set init code
     ESMF_INIT_SET_CREATED(rh)
@@ -814,11 +814,11 @@ end function ESMF_RouteHandleGetInit
         integer :: status                  ! local error status
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rhandle%this = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! Call C++ create code
         call c_ESMC_RouteHandleCreate(rhandle, status)
@@ -866,10 +866,10 @@ end function ESMF_RouteHandleGetInit
         integer :: status                  ! local error status
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variable
         ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
@@ -1013,10 +1013,10 @@ end function ESMF_RouteHandleGetInit
         character(len=ESMF_MAXSTR) :: mylabel
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
 
@@ -1214,10 +1214,10 @@ end function ESMF_RouteHandleGetInit
         integer :: zerobase_which
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
@@ -1328,8 +1328,8 @@ end function ESMF_RouteHandleGetInit
        integer :: status                     ! local error status
 
        ! Initialize return code; assume failure until success is certain       
-       status = ESMF_FAILURE
-       if (present(rc)) rc = ESMF_FAILURE
+       status = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
        ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
 
@@ -1337,7 +1337,7 @@ end function ESMF_RouteHandleGetInit
 
        ! See if this has been created yet or not.
        if ((rhandle%this).eq.ESMF_NULL_POINTER) then
-         if (present(rc)) rc = ESMF_FAILURE
+         if (present(rc)) rc = ESMF_RC_NOT_IMPL
          return
        endif
 
@@ -1392,8 +1392,8 @@ end function ESMF_RouteHandleGetInit
        integer :: status                     ! local error status
 
        ! Initialize return code; assume failure until success is certain       
-       status = ESMF_FAILURE
-       if (present(rc)) rc = ESMF_FAILURE
+       status = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
        ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
 

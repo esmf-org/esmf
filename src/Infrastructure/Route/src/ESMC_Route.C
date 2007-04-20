@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.159 2007/03/31 05:51:21 cdeluca Exp $
+//$Id: ESMC_Route.C,v 1.160 2007/04/20 19:35:37 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.159 2007/03/31 05:51:21 cdeluca Exp $";
+               "$Id: ESMC_Route.C,v 1.160 2007/04/20 19:35:37 rosalind Exp $";
 //-----------------------------------------------------------------------------
 class permuteLocal {
 public:
@@ -639,7 +639,7 @@ int compare2(const void *item1, const void *item2) {
 //EOP
 // !REQUIREMENTS:  
     
-    int rc = ESMF_FAILURE;
+    int rc = ESMF_RC_NOT_IMPL;
     int i, j, k, l, m, n;
     int ixs, ixr;
     int commCount;
@@ -3377,7 +3377,7 @@ int compare2(const void *item1, const void *item2) {
 //EOP
 // !REQUIREMENTS:
 
-    int rc;
+    int rc = ESMF_RC_NOT_IMPL;
     char msgbuf[ESMF_MAXSTR];
 
     sprintf(msgbuf,"Route print:\n");

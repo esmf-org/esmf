@@ -1,4 +1,4 @@
-! $Id: ESMF_XPacket.F90,v 1.20 2007/04/12 18:08:24 theurich Exp $
+! $Id: ESMF_XPacket.F90,v 1.21 2007/04/20 19:35:36 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_XPacket.F90,v 1.20 2007/04/12 18:08:24 theurich Exp $'
+      '$Id: ESMF_XPacket.F90,v 1.21 2007/04/20 19:35:36 rosalind Exp $'
 
 !==============================================================================
 
@@ -224,13 +224,13 @@ end subroutine ESMF_XPacketValidate
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ESMF_INIT_CHECK_SHALLOW(ESMF_XPacketGetInit,ESMF_XPacketInit,xpacket)
@@ -246,7 +246,7 @@ end subroutine ESMF_XPacketValidate
         ! Call C++  code
 	! This function is not implemented yet -- P.Li 11/27/06
         !call c_ESMC_XPacketGet(xpacket, value1, value2, status)
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -285,7 +285,8 @@ end subroutine ESMF_XPacketValidate
 !
 !EOPI
 
-        if (present(rc)) rc = ESMF_FAILURE
+        ! Initialize rc
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 	
         ESMF_INIT_CHECK_SHALLOW(ESMF_XPacketGetInit,ESMF_XPacketInit,xpacket)
 
@@ -338,13 +339,13 @@ end subroutine ESMF_XPacketValidate
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ESMF_INIT_CHECK_SHALLOW(ESMF_XPacketGetInit,ESMF_XPacketInit,xpacket)
@@ -360,7 +361,7 @@ end subroutine ESMF_XPacketValidate
         ! Call C++  code
 	! This function is not implemented yet - 11/27/2006
         !call c_ESMC_XPacketSet(xpacket, value1, value2, status)
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -417,13 +418,13 @@ end subroutine ESMF_XPacketValidate
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ESMF_INIT_CHECK_SHALLOW(ESMF_XPacketGetInit,ESMF_XPacketInit,xpacket)

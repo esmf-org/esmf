@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.92 2007/03/31 05:51:20 cdeluca Exp $
+! $Id: ESMF_Route.F90,v 1.93 2007/04/20 19:35:36 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.92 2007/03/31 05:51:20 cdeluca Exp $'
+      '$Id: ESMF_Route.F90,v 1.93 2007/04/20 19:35:36 rosalind Exp $'
 
 !==============================================================================
 !
@@ -191,7 +191,7 @@ end interface
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Set init code
     ESMF_INIT_SET_CREATED(r)
@@ -303,11 +303,11 @@ end subroutine rias
         integer :: status                  ! local error status
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         route%this = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
@@ -358,7 +358,7 @@ end subroutine rias
         integer :: status                  ! local error status
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
@@ -416,7 +416,7 @@ end subroutine rias
         integer :: status                  ! local error status
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         if (present(value1)) then
           ! code to be added here
@@ -431,7 +431,7 @@ end subroutine rias
         ! Call C++  code
 	! This function is not implemented yet -- P.Li 11/27/06
 !       call c_ESMC_RouteGet(route, value1, value2, status)
-        status = ESMF_FAILURE  ! not implemented yet
+        status = ESMF_RC_NOT_IMPL  ! not implemented yet
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -480,13 +480,13 @@ end subroutine rias
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
@@ -567,7 +567,7 @@ end subroutine rias
       type(ESMF_Logical) :: hasDstDataX, hasSrcDataX
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,srcDELayout,rc)
@@ -716,13 +716,13 @@ end subroutine rias
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
@@ -845,13 +845,13 @@ end subroutine rias
         integer :: dstDECount, srcDECount
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
@@ -1036,13 +1036,13 @@ end subroutine rias
         type(ESMF_Logical) :: dstESMFVector, srcESMFVector
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
@@ -1210,13 +1210,13 @@ end subroutine rias
         type(ESMF_Logical) :: dstESMFVector, srcESMFVector
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
@@ -1369,13 +1369,13 @@ end subroutine rias
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
@@ -1465,13 +1465,13 @@ end subroutine rias
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
@@ -1525,13 +1525,13 @@ end subroutine rias
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
@@ -1586,13 +1586,13 @@ end subroutine rias
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
 	! Check initialization
@@ -1650,13 +1650,13 @@ end subroutine rias
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
 	! Check initialization
@@ -1710,11 +1710,11 @@ end subroutine rias
        logical :: rcpresent
 
        ! Initialize return code; assume failure until success is certain       
-       status = ESMF_FAILURE
+       status = ESMF_RC_NOT_IMPL
        rcpresent = .FALSE.
        if (present(rc)) then
          rcpresent = .TRUE.  
-         rc = ESMF_FAILURE
+         rc = ESMF_RC_NOT_IMPL
        endif
 
        ! Check initialization
@@ -1780,14 +1780,14 @@ end subroutine rias
                               dstLocArrayPtr
   
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
         empty= ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
 	! Check initialization
@@ -1877,14 +1877,14 @@ end subroutine rias
 
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
         empty(1)= ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
 	! Check initialization
@@ -2006,14 +2006,14 @@ end subroutine rias
         type(ESMF_Pointer) :: empty
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
         empty = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
 	! Check initialization
@@ -2080,14 +2080,14 @@ end subroutine rias
         type(ESMF_Pointer) :: empty
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
         empty = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
 	! Check initialization
@@ -2154,14 +2154,14 @@ end subroutine rias
         type(ESMF_Pointer) :: empty
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
         empty = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
 	! Check initialization
@@ -2228,14 +2228,14 @@ end subroutine rias
         type(ESMF_Pointer) :: empty
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
         empty= ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
 	! Check initialization
@@ -2303,14 +2303,14 @@ end subroutine rias
         type(ESMF_Pointer) :: empty
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.   
         empty = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
 	! Check initialization
@@ -2395,7 +2395,7 @@ end subroutine rias
        integer :: status
 
        ! Initialize return code; assume failure until success is certain       
-       if (present(rc)) rc = ESMF_FAILURE
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
        ESMF_INIT_CHECK_DEEP(ESMF_RouteGetInit,route,rc)
 

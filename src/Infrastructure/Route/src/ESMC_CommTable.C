@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.29 2007/03/31 05:51:20 cdeluca Exp $
+// $Id: ESMC_CommTable.C,v 1.30 2007/04/20 19:35:36 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.29 2007/03/31 05:51:20 cdeluca Exp $";
+            "$Id: ESMC_CommTable.C,v 1.30 2007/04/20 19:35:36 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -108,7 +108,10 @@
 //EOPI
 // !REQUIREMENTS:  
 
-    return ESMF_FAILURE;
+     // Initialize return code
+     int status=ESMF_RC_NOT_IMPL;
+
+    return status;
 
  } // end ESMC_CommTableDestroy
 
@@ -139,6 +142,10 @@
 //EOPI
 // !REQUIREMENTS:  
     int i, *ip, rc;
+
+    // Initialize return code
+    rc = ESMF_RC_NOT_IMPL;
+
 
     myid = myvmid;
     decount = partnercount;
@@ -222,7 +229,8 @@
     for(i=0; i<commcount; i++) 
         commneeded[i] = 0;
 
-    return ESMF_SUCCESS;
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_CommTableConstruct
 
@@ -280,9 +288,13 @@
 //EOPI
 // !REQUIREMENTS:  
 
+    // Initialize return code
+    int rc = ESMF_RC_NOT_IMPL;
+
     *count = commcount;
     
-    return ESMF_SUCCESS;
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_CommTableGetCount
 
@@ -310,16 +322,21 @@
 //EOPI
 // !REQUIREMENTS:  
 
+    // Initialize return code
+    int rc = ESMF_RC_NOT_IMPL;
+
     if (entry < 0 || entry >= commcount) {
         *partner = -1;
         *needed = 0;
-        return ESMF_SUCCESS;
+        rc = ESMF_SUCCESS;
+        return rc;
     } 
 
     *partner = commpartner[entry];
     *needed = commneeded[entry];
     
-    return ESMF_SUCCESS;
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_CommTableGetCount
 
@@ -347,6 +364,9 @@
       int i, rc;
       char msgbuf[ESMF_MAXSTR];
 
+      // Initialize return code
+      rc = ESMF_RC_NOT_IMPL;
+
       if (partner < 0 || partner >= commcount) {
           sprintf(msgbuf, "CommTable partner value out of range, %d not >= 0 and < %d\n",
                         partner, commcount);
@@ -360,11 +380,13 @@
       for (i=0; i<commcount; i++) {
           if (commpartner[i] == partner) {
               commneeded[i]++;
-              return ESMF_SUCCESS;
+              rc = ESMF_SUCCESS;
+              return rc;
           }
       }
 
-      return ESMF_FAILURE;
+      rc = ESMF_FAILURE;
+      return rc;
 
  } // end ESMC_CommTableSetPartner
 
@@ -390,9 +412,10 @@
 //EOPI
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 //
+    // Initialize return code
+    int rc = ESMF_RC_NOT_IMPL;
 
-    return ESMF_FAILURE;
-
+    return rc;
  } // end ESMC_CommTableValidate
 
 
@@ -421,6 +444,7 @@
     int i;
     char msgbuf[ESMF_MAXSTR];
     bool brief;
+    int rc = ESMF_RC_NOT_IMPL;
 
     brief = strcmp(options, "brief") ? false : true;
 
@@ -436,7 +460,8 @@
         }
     }
 
-    return ESMF_SUCCESS;
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_CommTablePrint
 
@@ -483,6 +508,9 @@ fill(int max, int size, int xpos, int ypos, int base, int *results)
 //    a group.
 //
 //EOPI
+    // initialize return code
+    int rc = ESMF_RC_NOT_IMPL;
+
     int i, npow2;
     int *results;
 
@@ -512,7 +540,9 @@ fill(int max, int size, int xpos, int ypos, int base, int *results)
     }
 
     delete [] results;
-    return ESMF_SUCCESS;
+
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_CommTableFill
 

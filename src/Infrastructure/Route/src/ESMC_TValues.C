@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.C,v 1.16 2007/03/31 05:51:21 cdeluca Exp $
+// $Id: ESMC_TValues.C,v 1.17 2007/04/20 19:35:37 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TValues.C,v 1.16 2007/03/31 05:51:21 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_TValues.C,v 1.17 2007/04/20 19:35:37 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -368,8 +368,9 @@
 //      Returns error code if problems are found.  ESMC_Base class method.
 //
 //EOP
+    int rc = ESMF_RC_NOT_IMPL;
 
-    return ESMF_FAILURE;
+    return rc;
 
  } // end ESMC_TransformValuesValidate
 
