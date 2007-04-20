@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2007/04/17 21:25:49 tjcnrl Exp $ 
+# $Id: makefile,v 1.4 2007/04/20 08:56:10 theurich Exp $ 
 
 ALL:  build_examples
 
@@ -16,14 +16,14 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Config/examples
 
-EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_ConfigOverviewEx \
-                 $(ESMF_EXDIR)/ESMC_ConfigOverviewEx
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_ConfigOverviewEx 
+                 #$(ESMF_EXDIR)/ESMC_ConfigOverviewEx
 
-EXAMPLES_RUN = run_ESMF_ConfigOverviewEx \
-               run_ESMC_ConfigOverviewEx
+EXAMPLES_RUN = run_ESMF_ConfigOverviewEx 
+               #run_ESMC_ConfigOverviewEx
 
-EXAMPLES_RUN_UNI = run_ESMF_ConfigOverviewEx_uni \
-                   run_ESMC_ConfigOverviewEx_uni
+EXAMPLES_RUN_UNI = run_ESMF_ConfigOverviewEx_uni 
+                   #run_ESMC_ConfigOverviewEx_uni
 
 include $(ESMF_DIR)/makefile
 
