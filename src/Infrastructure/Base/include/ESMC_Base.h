@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.73 2007/03/31 05:50:51 cdeluca Exp $
+// $Id: ESMC_Base.h,v 1.74 2007/04/20 19:47:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
 
 #include "stdio.h"
 
-#include "ESMC_Util.h"
+#include "ESMCI_Util.h"
 #include "ESMC_VM.h"
 
 //-----------------------------------------------------------------------------
