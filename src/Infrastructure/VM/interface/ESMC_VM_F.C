@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.66 2007/04/20 18:44:31 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.67 2007/04/20 21:35:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -370,16 +370,16 @@ extern "C" {
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
   
-  void FTN(c_esmc_vmwait)(ESMC_VM **ptr, void **commhandle, int *rc){
+  void FTN(c_esmc_vmcommwait)(ESMC_VM **ptr, void **commhandle, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_vmwait()"
+#define ESMC_METHOD "c_esmc_vmcommwait()"
     (*ptr)->vmk_commwait((vmk_commhandle **)commhandle);
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
-  void FTN(c_esmc_vmwaitqueue)(ESMC_VM **ptr, int *rc){
+  void FTN(c_esmc_vmcommqueuewait)(ESMC_VM **ptr, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_vmwaitqueue()"
+#define ESMC_METHOD "c_esmc_vmcommqueuewait()"
     (*ptr)->vmk_commqueuewait();
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }

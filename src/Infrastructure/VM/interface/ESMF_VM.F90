@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.84 2007/03/31 05:51:28 cdeluca Exp $
+! $Id: ESMF_VM.F90,v 1.85 2007/04/20 21:35:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -126,6 +126,8 @@ module ESMF_VMMod
   public ESMF_VMAllToAllV
   public ESMF_VMBarrier
   public ESMF_VMBroadcast
+  public ESMF_VMCommWait
+  public ESMF_VMCommQueueWait
   public ESMF_VMGather
   public ESMF_VMGet
   public ESMF_VMGetGlobal
@@ -143,8 +145,6 @@ module ESMF_VMMod
   public ESMF_VMSendRecv
   public ESMF_VMThreadBarrier
   public ESMF_VMValidate
-  public ESMF_VMWait
-  public ESMF_VMWaitQueue
   public ESMF_VMWtime
   public ESMF_VMWtimeDelay
   public ESMF_VMWtimePrec
@@ -181,7 +181,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.84 2007/03/31 05:51:28 cdeluca Exp $"
+      "$Id: ESMF_VM.F90,v 1.85 2007/04/20 21:35:02 theurich Exp $"
 
 !==============================================================================
 
@@ -496,10 +496,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -599,10 +599,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -702,10 +702,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -795,10 +795,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -897,10 +897,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -999,10 +999,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1101,10 +1101,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1217,10 +1217,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1324,10 +1324,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1431,10 +1431,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1535,10 +1535,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1639,10 +1639,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1743,10 +1743,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1855,10 +1855,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1967,10 +1967,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2079,10 +2079,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2219,10 +2219,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2321,10 +2321,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2424,10 +2424,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2526,10 +2526,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2631,10 +2631,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2736,10 +2736,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2841,10 +2841,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2946,10 +2946,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3410,10 +3410,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3506,10 +3506,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3602,10 +3602,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3698,10 +3698,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3794,10 +3794,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3909,10 +3909,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4016,10 +4016,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4123,10 +4123,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4219,10 +4219,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4324,10 +4324,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4429,10 +4429,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4534,10 +4534,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4631,10 +4631,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4727,10 +4727,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4823,10 +4823,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4919,10 +4919,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -5015,10 +5015,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -5122,10 +5122,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -5232,10 +5232,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -5342,10 +5342,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -5452,10 +5452,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -5562,10 +5562,10 @@ module ESMF_VMMod
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -5718,12 +5718,12 @@ module ESMF_VMMod
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMWait()"
+#define ESMF_METHOD "ESMF_VMCommWait()"
 !BOP
-! !IROUTINE: ESMF_VMWait - Wait for non-blocking VM communication to complete
+! !IROUTINE: ESMF_VMCommWait - Wait for non-blocking VM communication to complete
 
 ! !INTERFACE:
-  subroutine ESMF_VMWait(vm, commhandle, rc)
+  subroutine ESMF_VMCommWait(vm, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),          intent(in)              :: vm
@@ -5759,24 +5759,24 @@ module ESMF_VMMod
     ESMF_INIT_CHECK_DEEP(ESMF_CommHandleGetInit, commhandle, rc)
 
     ! Call into the C++ interface
-    call c_ESMC_VMWait(vm, commhandle, localrc)
+    call c_ESMC_VMCommWait(vm, commhandle, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-  end subroutine ESMF_VMWait
+  end subroutine ESMF_VMCommWait
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMWaitQueue()"
+#define ESMF_METHOD "ESMF_VMCommQueueWait()"
 !BOP
-! !IROUTINE: ESMF_VMWaitQueue - Wait for all non-blocking VM comms to complete
+! !IROUTINE: ESMF_VMCommQueueWait - Wait for all non-blocking VM comms to complete
 
 ! !INTERFACE:
-  subroutine ESMF_VMWaitQueue(vm, rc)
+  subroutine ESMF_VMCommQueueWait(vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),          intent(in)              :: vm
@@ -5807,13 +5807,13 @@ module ESMF_VMMod
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface
-    call c_ESMC_VMWaitQueue(vm, localrc)
+    call c_ESMC_VMCommQueueWait(vm, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-  end subroutine ESMF_VMWaitQueue
+  end subroutine ESMF_VMCommQueueWait
 !------------------------------------------------------------------------------
 
 

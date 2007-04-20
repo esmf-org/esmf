@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendRecvNbUTest.F90,v 1.5 2007/03/31 05:51:29 cdeluca Exp $
+! $Id: ESMF_VMSendRecvNbUTest.F90,v 1.6 2007/04/20 21:35:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendRecvNbUTest.F90,v 1.5 2007/03/31 05:51:29 cdeluca Exp $'
+      '$Id: ESMF_VMSendRecvNbUTest.F90,v 1.6 2007/04/20 21:35:02 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -208,7 +208,7 @@
       ! Wait on integer sendrecv
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Waiting for I4 SendRecvNb"
-      call ESMF_VMWait(vm, commhandleI4, rc)
+      call ESMF_VMCommWait(vm, commhandleI4, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -229,7 +229,7 @@
       ! Wait on R4 sendrecv
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Waiting for R4 SendRecvNb"
-      call ESMF_VMWait(vm, commhandleR4, rc)
+      call ESMF_VMCommWait(vm, commhandleR4, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -251,7 +251,7 @@
       ! Wait on R8 sendrecv
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Waiting for R8 SendRecvNb"
-      call ESMF_VMWait(vm, commhandleR8, rc)
+      call ESMF_VMCommWait(vm, commhandleR8, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -273,7 +273,7 @@
       ! Wait on LOGICAL sendrecv
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Waiting for LOGICAL SendRecvNb"
-      call ESMF_VMWait(vm, commhandleLOGICAL, rc)
+      call ESMF_VMCommWait(vm, commhandleLOGICAL, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -300,7 +300,7 @@
 !===============================================================================
 ! Second round of tests don't use commhandles but rely on ESMF's internal
 ! request queue. After all of the non-blocking calls are queued and before
-! testing the received values a call to ESMF_VMWaitQueue() waits on _all_
+! testing the received values a call to ESMF_VMCommQueueWait() waits on _all_
 ! outstanding non-blocking communication calls for the current VM.
 !===============================================================================
 
@@ -374,14 +374,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
-     !Test the VMWaitQueue function to wait on all outstanding nb comms for VM
+     !Test the VMCommQueueWait function to wait on all outstanding nb comms for VM
      !===========================     
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Wait on integer sendrecv
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Waiting for all queued non-blocking comms in VM"
-      call ESMF_VMWaitQueue(vm, rc)
+      call ESMF_VMCommQueueWait(vm, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
