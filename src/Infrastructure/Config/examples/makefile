@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2007/04/20 08:56:10 theurich Exp $ 
+# $Id: makefile,v 1.5 2007/04/20 17:45:00 theurich Exp $ 
 
 ALL:  build_examples
 
@@ -38,17 +38,17 @@ CLOBBERDIRS =
 # ESMF_ConfigOverviewEx
 #
 run_ESMF_ConfigOverviewEx:
-	$(MAKE) EXNAME=ESMF_ConfigOverview NP=4 exfrun
+	$(MAKE) EXNAME=ConfigOverview NP=4 exfrun
 
 run_ESMF_ConfigOverviewEx_uni:
-	$(MAKE) EXNAME=ESMF_ConfigOverview NP=1 exfrun
+	$(MAKE) EXNAME=ConfigOverview NP=1 exfrun
 
 #
 # ESMC_ConfigOverviewEx
 #
 run_ESMC_ConfigOverviewEx:
-	$(MAKE) EXNAME=ESMC_ConfigOverview NP=4 excrun
+	$(MAKE) EXNAME=ConfigOverview NP=4 excrun
 
 run_ESMC_ConfigOverviewEx_uni:
-	$(MAKE) EXNAME=ESMC_ConfigOverview NP=1 excrun
+	$(MAKE) EXNAME=ConfigOverview NP=1 excrun
 
