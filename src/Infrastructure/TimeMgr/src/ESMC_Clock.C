@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.79 2007/03/31 05:51:26 cdeluca Exp $
+// $Id: ESMC_Clock.C,v 1.80 2007/04/23 17:30:09 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.79 2007/03/31 05:51:26 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.80 2007/04/23 17:30:09 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -84,7 +84,7 @@ int ESMC_Clock::count=0;
     ESMC_Clock *clock;
 
     // default return code
-    if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_RC_NOT_IMPL;
 
     // allocate a clock object & set defaults via constructor
     try {
@@ -192,7 +192,7 @@ int ESMC_Clock::count=0;
     ESMC_Clock *clockCopy;
 
     // default return code
-    if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_RC_NOT_IMPL;
 
     // can't copy a non-existent object
     if (clock == ESMC_NULL_POINTER) {

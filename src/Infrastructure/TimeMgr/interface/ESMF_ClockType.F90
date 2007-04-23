@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockType.F90,v 1.11 2007/03/31 05:51:26 cdeluca Exp $
+! $Id: ESMF_ClockType.F90,v 1.12 2007/04/23 17:30:08 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -73,7 +73,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ClockType.F90,v 1.11 2007/03/31 05:51:26 cdeluca Exp $'
+      '$Id: ESMF_ClockType.F90,v 1.12 2007/04/23 17:30:08 rosalind Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -143,7 +143,7 @@
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Set init code
     ESMF_INIT_SET_CREATED(clock)
@@ -186,7 +186,7 @@
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Set init code
     ESMF_INIT_SET_DELETED(clock)
