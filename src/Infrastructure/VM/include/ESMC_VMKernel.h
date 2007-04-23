@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.43 2007/03/31 05:51:28 cdeluca Exp $
+// $Id: ESMC_VMKernel.h,v 1.44 2007/04/23 18:53:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -31,7 +31,12 @@
 
 // reduction operations
 enum vmOp   { vmSUM=1, vmMIN, vmMAX};
+// typekind indicators
 enum vmType { vmI4=1, vmR4, vmR8};
+
+// VM_ANY_SOURCE and VM_ANY_TAG
+#define VM_ANY_SRC                    (-2)
+#define VM_ANY_TAG                    (-2)
 
 // define the communication preferences
 #define PREF_INTRA_PROCESS_SHMHACK    (0)       // default
@@ -41,6 +46,13 @@ enum vmType { vmI4=1, vmR4, vmR8};
 #define PREF_INTRA_SSI_MPI1           (1)       // default
 
 #define PREF_INTER_SSI_MPI1           (0)       // default
+
+// - communication identifiers
+#define VM_COMM_TYPE_MPIUNI   (-1)
+#define VM_COMM_TYPE_MPI1     (0)
+#define VM_COMM_TYPE_PTHREAD  (1)
+#define VM_COMM_TYPE_SHMHACK  (2)
+#define VM_COMM_TYPE_POSIXIPC (3)
 
 // - buffer lenghts in bytes
 #define PIPC_BUFFER                   (4096)
@@ -88,6 +100,16 @@ typedef struct vmk_ch{
   struct vmk_ch **handles;   // sub handles
   MPI_Request *mpireq; // request array
 }vmk_commhandle;
+
+
+typedef struct{
+  int srcPet;
+  int tag;
+  int error;
+  // comm_type specific parts
+  int comm_type;      // comm_type for this communication status
+  MPI_Status mpi_s;
+}vmk_status;
 
 
 typedef struct{
@@ -241,7 +263,8 @@ class ESMC_VMK{
     void vmk_send(void *message, int size, int dest, int tag=-1);
     void vmk_send(void *message, int size, int dest,
       vmk_commhandle **commhandle, int tag=-1);
-    void vmk_recv(void *message, int size, int source, int tag=-1);
+    void vmk_recv(void *message, int size, int source, int tag=-1, 
+      vmk_status *status=NULL);
     void vmk_recv(void *message, int size, int source,
       vmk_commhandle **commhandle, int tag=-1);
     
@@ -287,7 +310,8 @@ class ESMC_VMK{
       vmk_commhandle **commhandle);
     
     // non-blocking service calls
-    void vmk_commwait(vmk_commhandle **commhandle, int nanopause=0);
+    void vmk_commwait(vmk_commhandle **commhandle, vmk_status *status=NULL,
+      int nanopause=0);
     void vmk_commqueuewait(void);
     void vmk_commcancel(vmk_commhandle **commhandle);
     

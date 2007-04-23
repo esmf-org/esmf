@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.88 2007/04/20 20:37:45 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.89 2007/04/23 18:53:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -80,12 +80,6 @@
 #define VM_SIG1               (SIGUSR2)
 // Note that SIGUSR1 interferes with MPICH's CH_P4 device!
 #endif
-// - communication identifiers
-#define VM_COMM_TYPE_MPIUNI   (-1)
-#define VM_COMM_TYPE_MPI1     (0)
-#define VM_COMM_TYPE_PTHREAD  (1)
-#define VM_COMM_TYPE_SHMHACK  (2)
-#define VM_COMM_TYPE_POSIXIPC (3)
 
 
 // Definition of class static data members
@@ -2325,7 +2319,8 @@ int ESMC_VMK::vmk_commqueueitem_unlink(vmk_commhandle *commhandle){
 }
 
 
-void ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, int nanopause){
+void ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, vmk_status *status,
+  int nanopause){
   // wait for all of the communications pointed to by *commhandle to complete
   // and delete all of the inside contents of *commhandle (even if it is a tree)
   // finally unlink the *commhandle container from the commqueue and delete the
@@ -2343,17 +2338,27 @@ void ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, int nanopause){
       delete [] (*commhandle)->handles;
     }else if ((*commhandle)->type==1){
       // this commhandle contains MPI_Requests
-      MPI_Status mpi_s;
+      if (status)
+        status->comm_type = VM_COMM_TYPE_MPI1;
+      MPI_Status *mpi_s;
+      if (status)
+        mpi_s = &(status->mpi_s);
+      else
+        mpi_s = MPI_STATUS_IGNORE;
+      // TODO: status will only reflect the last communiction in the i-loop!
       for (int i=0; i<(*commhandle)->nelements; i++){
 //fprintf(stderr, "MPI_Wait: commhandle=%p\n", &((*commhandle)->mpireq[i]));
         if (nanopause){
           // use nanosleep to pause between tests to lower impact on CPU load
+#ifdef ESMF_NO_NANOSLEEP
+#else
           struct timespec dt = {0, nanopause};
+#endif
           int completeFlag = 0;
           for(;;){
             if (mpi_mutex_flag)
               pthread_mutex_lock(pth_mutex);
-            MPI_Test(&((*commhandle)->mpireq[i]), &completeFlag, &mpi_s);
+            MPI_Test(&((*commhandle)->mpireq[i]), &completeFlag, mpi_s);
             if (mpi_mutex_flag)
               pthread_mutex_unlock(pth_mutex);
             if (completeFlag) break;
@@ -2362,12 +2367,34 @@ void ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, int nanopause){
             nanosleep(&dt, NULL);
 #endif
           }
+          if (status){
+            if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
+              status->srcPet = mpi_s->MPI_SOURCE;
+            else{
+              for (int k=0; k<npets; k++)
+                if (lpid[k] == mpi_s->MPI_SOURCE)
+                  status->srcPet = mpi_s->MPI_SOURCE;
+            }
+            status->tag     = mpi_s->MPI_TAG;
+            status->error   = mpi_s->MPI_ERROR;
+          }
         }else{
           if (mpi_mutex_flag)
             pthread_mutex_lock(pth_mutex);
-          MPI_Wait(&((*commhandle)->mpireq[i]), &mpi_s);
+          MPI_Wait(&((*commhandle)->mpireq[i]), mpi_s);
           if (mpi_mutex_flag)
             pthread_mutex_unlock(pth_mutex);
+          if (status){
+            if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
+              status->srcPet = mpi_s->MPI_SOURCE;
+            else{
+              for (int k=0; k<npets; k++)
+                if (lpid[k] == mpi_s->MPI_SOURCE)
+                  status->srcPet = mpi_s->MPI_SOURCE;
+            }
+            status->tag     = mpi_s->MPI_TAG;
+            status->error   = mpi_s->MPI_ERROR;
+          }
         }
       }
       delete [] (*commhandle)->mpireq;
@@ -2561,6 +2588,7 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest, int tag){
     }
     break;
   default:
+    printf("unknown comm_type.\n");
     break;
   }
 }
@@ -2604,91 +2632,15 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest,
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
-    shmp = commarray[mypet][dest].shmp;  // shared memory mp channel
-    shmp->ptr_src = message;                        // set the source pointer
-    // synchronize with vmk_recv()
-    pthread_mutex_lock(&(shmp->mutex1));
-    shmp->tcounter++;
-    if (shmp->tcounter < 2){
-      // wait for vmk_recv()
-      pthread_cond_wait(&(shmp->cond1), &(shmp->mutex1));
-    }else{
-      // reset counter and wake up vmk_recv()
-      shmp->tcounter = 0;
-      pthread_cond_broadcast(&(shmp->cond1));
-    }
-    pthread_mutex_unlock(&(shmp->mutex1));
-    // now ptr_src and ptr_dest are valid for this message
-    scpsize = size/2;   // send takes the lower half
-    pdest = (char *)shmp->ptr_dest;
-    psrc = (char *)shmp->ptr_src;
-    // do the actual memcpy
-    memcpy(pdest, psrc, scpsize);
-    // synchronize with vmk_recv()
-    pthread_mutex_lock(&(shmp->mutex2));
-    shmp->tcounter++;
-    if (shmp->tcounter < 2){
-      // wait for vmk_recv()
-      pthread_cond_wait(&(shmp->cond2), &(shmp->mutex2));
-    }else{
-      // reset counter and wake up vmk_recv()
-      shmp->tcounter = 0;
-      pthread_cond_broadcast(&(shmp->cond2));
-    }
-    pthread_mutex_unlock(&(shmp->mutex2));
+    printf("non-blocking send not implemented for VM_COMM_TYPE_PTHREAD.\n");
     break;
   case VM_COMM_TYPE_SHMHACK:
     // Shared memory hack sync with spin-lock
-    shmp = commarray[mypet][dest].shmp;  // shared memory mp channel
-    if (size<=SHARED_BUFFER){
-      // use buffer
-      pdest = shmp->buffer;
-      // wait until buffer is ready to be used
-      sync_buffer_wait_empty(&shmp->shms, 0);
-      // do the actual memcpy
-      memcpy(pdest, message, size);
-      // set flag indicating that send's memcpy() is done and buffer is valid
-      sync_buffer_flag_fill(&shmp->shms, 0);
-    }else{
-      // don't use buffer
-      shmp->ptr_src = message;                        // set the source pointer
-      // synchronize with vmk_recv()
-      sync_a_flip(&shmp->shms);
-      // now ptr_src and ptr_dest are valid for this message
-      scpsize = size/2;   // send takes the lower half
-      pdest = (char *)shmp->ptr_dest;
-      psrc = (char *)shmp->ptr_src;
-      // do the actual memcpy
-      memcpy(pdest, psrc, scpsize);
-      // synchronize with vmk_recv()
-      sync_a_flop(&shmp->shms);
-    }
+    printf("non-blocking send not implemented for VM_COMM_TYPE_SHMHACK.\n");
     break;
   case VM_COMM_TYPE_POSIXIPC:
     // Shared memory hack sync with spin-lock
-    pipcmp = commarray[mypet][dest].pipcmp;  // shared memory mp channel
-    i=0;
-    mess = (char *)message;
-    while (size>PIPC_BUFFER){
-      pdest = pipcmp->buffer[i];
-      // wait until buffer is ready to be used
-      sync_buffer_wait_empty(&pipcmp->shms, i);
-      // do the actual memcpy
-      memcpy(pdest, mess, PIPC_BUFFER);
-      // set flag indicating that send's memcpy() is done and buffer is valid
-      sync_buffer_flag_fill(&pipcmp->shms, i);
-      size -= PIPC_BUFFER;
-      mess += PIPC_BUFFER;
-      i = i^1; // 0->1  or  1->0
-    }
-    // do the remaining parts of the message
-    pdest = pipcmp->buffer[i];
-    // wait until buffer is ready to be used
-    sync_buffer_wait_empty(&pipcmp->shms, i);
-    // do the actual memcpy
-    memcpy(pdest, mess, size);
-    // set flag indicating that send's memcpy() is done and buffer is valid
-    sync_buffer_flag_fill(&pipcmp->shms, i);
+    printf("non-blocking send not implemented for VM_COMM_TYPE_POSIXIPC.\n");
     break;
   case VM_COMM_TYPE_MPIUNI:
     // Shared memory hack for mpiuni
@@ -2714,12 +2666,14 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest,
     }
     break;
   default:
+    printf("unknown comm_type.\n");
     break;
   }
 }
 
 
-void ESMC_VMK::vmk_recv(void *message, int size, int source, int tag){
+void ESMC_VMK::vmk_recv(void *message, int size, int source, int tag,
+  vmk_status *status){
   // p2p recv
 #if (VERBOSITY > 9)
   printf("receiving from: %d, %d\n", source, lpid[source]);
@@ -2731,18 +2685,48 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source, int tag){
   char *psrc;
   int i;
   char *mess;
+  // TODO: VM_ANY_SRC will cause problems for VM's with mixed comm_types.
+  int comm_type;
+  if (source == VM_ANY_SRC)
+    // default into VM_COMM_TYPE_MPI1 comm_type for VM_ANY_SRC
+    comm_type = VM_COMM_TYPE_MPI1;
+  else
+    // use the predefined comm_type between source and destination (mypet)
+    comm_type = commarray[source][mypet].comm_type;
+  // set comm_type in status
+  if (status)
+    status->comm_type = comm_type;
   // switch into the appropriate implementation
-  switch(commarray[source][mypet].comm_type){
+  switch(comm_type){
   case VM_COMM_TYPE_MPI1:
     // MPI-1 implementation
     // use mutex to serialize mpi comm calls if mpi thread support requires it
     if (mpi_mutex_flag)
       pthread_mutex_lock(pth_mutex);
     if (tag == -1) tag = 1000*source+mypet; // default tag to simplify debugging
-    MPI_Status mpi_s;
-    MPI_Recv(message, size, MPI_BYTE, lpid[source], tag, mpi_c, &mpi_s);
+    else if (tag == VM_ANY_TAG) tag = MPI_ANY_TAG;
+    int mpiSource;
+    if (source == VM_ANY_SRC) mpiSource = MPI_ANY_SOURCE;
+    else mpiSource = lpid[source];
+    MPI_Status *mpi_s;
+    if (status)
+      mpi_s = &(status->mpi_s);
+    else
+      mpi_s = MPI_STATUS_IGNORE;
+    MPI_Recv(message, size, MPI_BYTE, mpiSource, tag, mpi_c, mpi_s);
     if (mpi_mutex_flag)
       pthread_mutex_unlock(pth_mutex);
+    if (status){
+      if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
+        status->srcPet = mpi_s->MPI_SOURCE;
+      else{
+        for (int k=0; k<npets; k++)
+          if (lpid[k] == mpi_s->MPI_SOURCE)
+            status->srcPet = mpi_s->MPI_SOURCE;
+      }
+      status->tag     = mpi_s->MPI_TAG;
+      status->error   = mpi_s->MPI_ERROR;
+    }
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
@@ -2852,6 +2836,7 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source, int tag){
     }
     break;
   default:
+    printf("unknown comm_type.\n");
     break;
   }
 }
@@ -2876,8 +2861,16 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source,
     *commhandle = new vmk_commhandle;
     vmk_commqueueitem_link(*commhandle);
   }
+  // TODO: VM_ANY_SRC will cause problems for VM's with mixed comm_types.
+  int comm_type;
+  if (source == VM_ANY_SRC)
+    // default into VM_COMM_TYPE_MPI1 comm_type for VM_ANY_SRC
+    comm_type = VM_COMM_TYPE_MPI1;
+  else
+    // use the predefined comm_type between source and destination (mypet)
+    comm_type = commarray[source][mypet].comm_type;
   // switch into the appropriate implementation
-  switch(commarray[source][mypet].comm_type){
+  switch(comm_type){
   case VM_COMM_TYPE_MPI1:
     (*commhandle)->nelements=1;
     (*commhandle)->type=1;
@@ -2888,100 +2881,26 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source,
       pthread_mutex_lock(pth_mutex);
 //fprintf(stderr, "MPI_Irecv: commhandle=%p\n", (*commhandle)->mpireq);
     if (tag == -1) tag = 1000*source+mypet; // default tag to simplify debugging
-    MPI_Irecv(message, size, MPI_BYTE, lpid[source], tag,
+    else if (tag == VM_ANY_TAG) tag = MPI_ANY_TAG;
+    int mpiSource;
+    if (source == VM_ANY_SRC) mpiSource = MPI_ANY_SOURCE;
+    else mpiSource = lpid[source];
+    MPI_Irecv(message, size, MPI_BYTE, mpiSource, tag,
       mpi_c, (*commhandle)->mpireq);
     if (mpi_mutex_flag)
       pthread_mutex_unlock(pth_mutex);
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
-    shmp = commarray[source][mypet].shmp;   // shared memory mp channel
-    shmp->ptr_dest = message;               // set the destination pointer
-    // synchronize with vmk_send()
-    pthread_mutex_lock(&(shmp->mutex1));
-    shmp->tcounter++;
-    if (shmp->tcounter < 2){
-      // wait for vmk_send()
-      pthread_cond_wait(&(shmp->cond1), &(shmp->mutex1));
-    }else{
-      // reset counter and wake up vmk_send()
-      shmp->tcounter = 0;
-      pthread_cond_broadcast(&(shmp->cond1));
-    }
-    pthread_mutex_unlock(&(shmp->mutex1));
-    // now ptr_src and ptr_dest are valid for this message
-    scpsize = size/2;           // send takes the lower half
-    rcpsize = size - scpsize;   // recv takes the upper half
-    pdest = (char *)shmp->ptr_dest;
-    psrc = (char *)shmp->ptr_src;
-    // do actual memcpy
-    memcpy(pdest + scpsize, psrc + scpsize, rcpsize);
-    // synchronize with vmk_send()
-    pthread_mutex_lock(&(shmp->mutex2));
-    shmp->tcounter++;
-    if (shmp->tcounter < 2){
-      // wait for vmk_send()
-      pthread_cond_wait(&(shmp->cond2), &(shmp->mutex2));
-    }else{
-      // reset counter and wake up vmk_send()
-      shmp->tcounter = 0;
-      pthread_cond_broadcast(&(shmp->cond2));
-    }
-    pthread_mutex_unlock(&(shmp->mutex2));
+    printf("non-blocking recv not implemented for VM_COMM_TYPE_PTHREAD.\n");
     break;
   case VM_COMM_TYPE_SHMHACK:
     // Shared memory hack sync with spin-lock
-    shmp = commarray[source][mypet].shmp;   // shared memory mp channel
-    if (size<=SHARED_BUFFER){
-      // use buffer
-      psrc = shmp->buffer;
-      // wait until buffer is ready to be used
-      sync_buffer_wait_fill(&shmp->shms, 0);
-      // do actual memcpy
-      memcpy(message, psrc, size);
-      // set flag indicating that recv's memcpy() is done and buffer is empty
-      sync_buffer_flag_empty(&shmp->shms, 0);
-    }else{
-      // don't use buffer
-      shmp->ptr_dest = message;               // set the destination pointer
-      // synchronize with vmk_send()
-      sync_b_flip(&shmp->shms);
-      // now ptr_src and ptr_dest are valid for this message
-      scpsize = size/2;           // send takes the lower half
-      rcpsize = size - scpsize;   // recv takes the upper half
-      pdest = (char *)shmp->ptr_dest;
-      psrc = (char *)shmp->ptr_src;
-      // do actual memcpy
-      memcpy(pdest + scpsize, psrc + scpsize, rcpsize);
-      // synchronize with vmk_send()
-      sync_b_flop(&shmp->shms);
-    }
+    printf("non-blocking recv not implemented for VM_COMM_TYPE_SHMHACK.\n");
     break;
   case VM_COMM_TYPE_POSIXIPC:
     // Shared memory hack sync with spin-lock
-    pipcmp = commarray[source][mypet].pipcmp;   // shared memory mp channel
-    i=0;
-    mess = (char *)message;
-    while (size>PIPC_BUFFER){
-      psrc = pipcmp->buffer[i];
-      // wait until buffer is ready to be used
-      sync_buffer_wait_fill(&pipcmp->shms, i);
-      // do the actual memcpy
-      memcpy(mess, psrc, PIPC_BUFFER);
-      // set flag indicating that send's memcpy() is done and buffer is valid
-      sync_buffer_flag_empty(&pipcmp->shms, i);
-      size -= PIPC_BUFFER;
-      mess += PIPC_BUFFER;
-      i = i^1; // 0->1  or  1->0
-    }
-    // do the remaining parts of the message
-    psrc = pipcmp->buffer[i];
-    // wait until buffer is ready to be used
-    sync_buffer_wait_fill(&pipcmp->shms, i);
-    // do the actual memcpy
-    memcpy(mess, psrc, size);
-    // set flag indicating that send's memcpy() is done and buffer is valid
-    sync_buffer_flag_empty(&pipcmp->shms, i);
+    printf("non-blocking recv not implemented for VM_COMM_TYPE_POSIXIPC.\n");
     break;
   case VM_COMM_TYPE_MPIUNI:
     // Shared memory hack for mpiuni
@@ -3007,6 +2926,7 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source,
     }
     break;
   default:
+    printf("unknown comm_type.\n");
     break;
   }
 }
