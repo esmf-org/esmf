@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.66 2007/04/03 16:36:23 cdeluca Exp $
+! $Id: ESMF_BundleComm.F90,v 1.67 2007/04/23 16:54:58 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.66 2007/04/03 16:36:23 cdeluca Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.67 2007/04/23 16:54:58 rosalind Exp $'
 
 !==============================================================================
 !
@@ -228,8 +228,8 @@
       type(ESMF_BundleType), pointer :: btypep    ! bundle type info
    
       ! Initialize return code   
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -313,8 +313,8 @@
       type(ESMF_BundleType), pointer :: btypep    ! bundle type info
    
       ! Initialize return code   
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -406,8 +406,8 @@
 
    
       ! Initialize return code   
-      status = ESMF_FAILURE
-      if(present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if(present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -609,8 +609,8 @@
       integer :: bopt, bflag
    
       ! Initialize return code   
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -752,8 +752,8 @@
       type(ESMF_RouteHandle) :: routehandle
    
       ! Initialize return code   
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
@@ -870,8 +870,8 @@
       integer :: bopt, bflag, rcount
    
       ! Initialize return code   
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
@@ -1109,8 +1109,8 @@
       integer :: bopt, bflag
    
       ! Initialize return code   
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
@@ -1248,8 +1248,8 @@
       integer :: status                           ! Error status
    
       ! Initialize return code   
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Call Grid method to perform actual work??  TODO: is this right?
       !call ESMF_GridReduce(field%btypep%grid, &
@@ -1349,8 +1349,8 @@
       type(ESMF_RouteHandle) :: routehandle
    
       ! Initialize return code   
-      localrc = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
@@ -1474,8 +1474,8 @@
       integer :: bopt, bflag, rcount
    
       ! Initialize return code   
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
@@ -1736,8 +1736,8 @@
       integer :: bopt, bflag
    
       ! Initialize return code   
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
@@ -1884,8 +1884,8 @@
       integer :: decomps(ESMF_MAXGRIDDIM), decompids(ESMF_MAXDIM)
    
       ! Initialize return code   
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1992,8 +1992,8 @@
    
       ! Initialize return code   
       ESMF_BundleCommPrepCheck = ESMF_BUNDLECOMM_NOMATCH
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)

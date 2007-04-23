@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.18 2007/03/31 05:51:13 cdeluca Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.19 2007/04/23 16:56:10 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.18 2007/03/31 05:51:13 cdeluca Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.19 2007/04/23 16:56:10 rosalind Exp $'
 !
 !==============================================================================
 !
@@ -261,7 +261,7 @@ module ESMF_InternArrayCommMod
     integer, dimension(:), allocatable :: tempMLCCPD, tempGCCPD
 
     ! initialize return code; assume failure until success is certain
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -852,8 +852,8 @@ module ESMF_InternArrayCommMod
     type(ESMF_Route) :: route
 
     ! initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
     ! Check init status of arguments
     do i=1, size(arrayList)
@@ -963,8 +963,8 @@ module ESMF_InternArrayCommMod
     type(ESMF_Route) :: route
 
     ! initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
     ! Check init status of arguments
 !    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -1203,7 +1203,7 @@ module ESMF_InternArrayCommMod
       integer :: gridrank, datarank, cellCount
 
       ! initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
     ! Check init status of arguments
     if (localFlag) then
@@ -1439,8 +1439,8 @@ module ESMF_InternArrayCommMod
       integer, allocatable :: srctotal(:), dsttotal(:)
 
       ! initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
     ! Check init status of arguments
     do i=1, size(arrayList)
@@ -1540,8 +1540,8 @@ module ESMF_InternArrayCommMod
       integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
 
       ! initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      if (present(rc)) rc = ESMF_FAILURE
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -1656,7 +1656,7 @@ module ESMF_InternArrayCommMod
       type(ESMF_Route) :: route
 
       ! initialize return code; assume failure until success certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     if (srcLocalFlag) then
@@ -1808,7 +1808,7 @@ module ESMF_InternArrayCommMod
       type(ESMF_Route) :: route
 
       ! initialize return code; assume failure until success certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
       
     ! Before going further down into this code, make sure
     ! that this DE has at least src or dst data.   If neither, return now.
@@ -2101,7 +2101,7 @@ module ESMF_InternArrayCommMod
       type(ESMF_Route) :: route
 
       ! initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     if (srcLocalFlag) then
@@ -2441,7 +2441,7 @@ module ESMF_InternArrayCommMod
       type(ESMF_Route) :: route
 
       ! initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_InternArrayGetInit, srcArray, rc)
@@ -2843,7 +2843,7 @@ module ESMF_InternArrayCommMod
       integer, allocatable :: srctotal(:), dsttotal(:)
 
       ! initialize return code; assume failure until success certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     do i=1, size(srcArrayList)
@@ -2967,7 +2967,7 @@ module ESMF_InternArrayCommMod
       integer :: counts(ESMF_MAXDIM), srctotal(1), dsttotal(1)
 
       ! initialize return code; assume failure until success certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_InternArrayGetInit, srcArray, rc)
@@ -3061,7 +3061,7 @@ module ESMF_InternArrayCommMod
         integer :: size_decomp
 
         ! initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
