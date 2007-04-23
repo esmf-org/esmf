@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.129 2007/03/31 05:50:51 cdeluca Exp $
+! $Id: ESMF_Base.F90,v 1.130 2007/04/23 18:03:35 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -148,7 +148,7 @@ module ESMF_BaseMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.129 2007/03/31 05:50:51 cdeluca Exp $'
+               '$Id: ESMF_Base.F90,v 1.130 2007/04/23 18:03:35 rosalind Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -204,7 +204,7 @@ module ESMF_BaseMod
     integer :: status, allocNAttrs
 
     ! Initialize return code
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     allocNAttrs = 0   ! default value, overwrite if argument specified
     if (present(nattr)) allocNAttrs = nattr
@@ -260,7 +260,7 @@ module ESMF_BaseMod
     rcpresent = .FALSE.
     if(present(rc)) then
       rcpresent = .TRUE.
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_IMPL
     endif
 
     ! check input parameters
@@ -315,7 +315,7 @@ module ESMF_BaseMod
 
     integer :: status 
 
-    status = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
       
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)
@@ -362,7 +362,7 @@ module ESMF_BaseMod
 
     integer :: status 
 
-    status = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
       
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)
@@ -405,7 +405,7 @@ module ESMF_BaseMod
 
     integer :: status 
 
-    status = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, anytype, rc)
@@ -456,7 +456,7 @@ module ESMF_BaseMod
 !EOPI
     integer :: status 
 
-    status = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, anytype, rc)
@@ -778,7 +778,7 @@ module ESMF_BaseMod
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif
 
       ! TODO: remove this once everyone is initializing their Base objects.
