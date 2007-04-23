@@ -1,4 +1,4 @@
-//$Id: ESMC_ErrMsgs.C,v 1.7 2007/03/31 05:51:17 cdeluca Exp $
+//$Id: ESMC_ErrMsgs.C,v 1.8 2007/04/23 17:59:00 tjcnrl Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -19,66 +19,67 @@ static const char *errMsg[] = {
 
 // F90 Error message                                     Return Code (1-500)
 // -----------------------------------------------       ----------------------
-  "Invalid object ",                                  // ESMF_RC_OBJ_BAD
-  "Object SetDefault method not called ",             // ESMF_RC_OBJ_INIT
-  "Object Create method not called ",                 // ESMF_RC_OBJ_CREATE
-  "Corrupted ESMF object detected ",                  // ESMF_RC_OBJ_COR
-  "Object is in wrong state ",                        // ESMF_RC_OBJ_WRONGSTATE
+  "Invalid object ",                                  //    1 = ESMF_RC_OBJ_BAD
+  "Object SetDefault method not called ",             //    2 = ESMF_RC_OBJ_INIT
+  "Object Create method not called ",                 //    3 = ESMF_RC_OBJ_CREATE
+  "Corrupted ESMF object detected ",                  //    4 = ESMF_RC_OBJ_COR
+  "Object is in wrong state ",                        //    5 = ESMF_RC_OBJ_WRONGSTATE
 
-  "Invalid argument ",                                // ESMF_RC_ARG_BAD
-  "Argument rank is not required size ",              // ESMF_RC_ARG_RANK
-  "Argument sizes do not match ",                     // ESMF_RC_ARG_SIZE
-  "Value unrecognized or out of range ",              // ESMF_RC_ARG_VALUE
-  "Two arguments not allowed to be the same ",        // ESMF_RC_ARG_DUP
-  "Two arguments must be same object type ",          // ESMF_RC_ARG_SAMETYPE
-  "Two arguments must have the same communicators ",  // ESMF_RC_ARG_SAMECOMM
-  "Arguments are incompatible ",                      // ESMF_RC_ARG_INCOMP
-  "Argument contains invalid ESMF object ",           // ESMF_RC_ARG_CORRUPT
-  "Wrong argument specified ",                        // ESMF_RC_ARG_WRONG
-  "Input argument out of range ",                     // ESMF_RC_ARG_OUTOFRANGE
-  "Unrecognized option string ",                      // ESMF_RC_ARG_OPT
+  "Invalid argument ",                                //    6 = ESMF_RC_ARG_BAD
+  "Argument rank is not required size ",              //    7 = ESMF_RC_ARG_RANK
+  "Argument sizes do not match ",                     //    8 = ESMF_RC_ARG_SIZE
+  "Value unrecognized or out of range ",              //    9 = ESMF_RC_ARG_VALUE
+  "Two arguments not allowed to be the same ",        //   10 = ESMF_RC_ARG_DUP
+  "Two arguments must be same object type ",          //   11 = ESMF_RC_ARG_SAMETYPE
+  "Two arguments must have the same communicators ",  //   12 = ESMF_RC_ARG_SAMECOMM
+  "Arguments are incompatible ",                      //   13 = ESMF_RC_ARG_INCOMP
+  "Argument contains invalid ESMF object ",           //   14 = ESMF_RC_ARG_CORRUPT
+  "Wrong argument specified ",                        //   15 = ESMF_RC_ARG_WRONG
+  "Input argument out of range ",                     //   16 = ESMF_RC_ARG_OUTOFRANGE
+  "Unrecognized option string ",                      //   17 = ESMF_RC_ARG_OPT
 
-  "Operation not yet supported ",                     // ESMF_RC_NOT_IMPL
+  "Operation not yet supported ",                     //   18 = ESMF_RC_NOT_IMPL
 
-  "Unable to open file ",                             // ESMF_RC_FILE_OPEN
-  "Unable to create file ",                           // ESMF_RC_FILE_CREATE
-  "Unable to read from file ",                        // ESMF_RC_FILE_READ
-  "Unable to write to file ",                         // ESMF_RC_FILE_WRITE
-  "Unexpected data in file ",                         // ESMF_RC_FILE_UNEXPECTED
-  "Unable to close file ",                            // ESMF_RC_FILE_CLOSE
-  "Instrumented region is still active ",             // ESMF_RC_FILE_ACTIVE
+  "Unable to open file ",                             //   19 = ESMF_RC_FILE_OPEN
+  "Unable to create file ",                           //   20 = ESMF_RC_FILE_CREATE
+  "Unable to read from file ",                        //   21 = ESMF_RC_FILE_READ
+  "Unable to write to file ",                         //   22 = ESMF_RC_FILE_WRITE
+  "Unexpected data in file ",                         //   23 = ESMF_RC_FILE_UNEXPECTED
+  "Unable to close file ",                            //   24 = ESMF_RC_FILE_CLOSE
+  "Instrumented region is still active ",             //   25 = ESMF_RC_FILE_ACTIVE
 
-  "Value cannot be a NULL pointer ",                  // ESMF_RC_PTR_NULL
-  "Invalid pointer ",                                 // ESMF_RC_PTR_BAD
-  "Pointer must already be allocated ",               // ESMF_RC_PTR_NOTALLOC
-  "Pointer must not already be allocated ",           // ESMF_RC_PTR_ISALLOC
-  "Unable to allocate requested memory ",             // ESMF_RC_MEM
-  "Memory corrupted ",                                // ESMF_RC_MEMC
+  "Value cannot be a NULL pointer ",                  //   26 = ESMF_RC_PTR_NULL
+  "Invalid pointer ",                                 //   27 = ESMF_RC_PTR_BAD
+  "Pointer must already be allocated ",               //   28 = ESMF_RC_PTR_NOTALLOC
+  "Pointer must not already be allocated ",           //   29 = ESMF_RC_PTR_ISALLOC
+  "Unable to allocate requested memory ",             //   30 = ESMF_RC_MEM
+  "Memory corrupted ",                                //   31 = ESMF_RC_MEMC
 
-  "Name already exists ",                             // ESMF_RC_DUP_NAME
-  "Name too long, must be less than ESMF_MAXSTR ",    // ESMF_RC_LONG_NAME
-  "String too long, must be less than ESMF_MAXSTR ",  // ESMF_RC_LONG_STR
-  "Cannot copy non-existent object ",                 // ESMF_RC_COPY_FAIL
-  "Cannot divide by zero ",                           // ESMF_RC_DIV_ZERO
-  "Cannot get value ",                                // ESMF_RC_CANNOT_GET
-  "Cannot set value ",                                // ESMF_RC_CANNOT_SET
-  "Not found ",                                       // ESMF_RC_NOT_FOUND
-  "Not valid " ,                                      // ESMF_RC_NOT_VALID
+  "Name already exists ",                             //   32 = ESMF_RC_DUP_NAME
+  "Name too long, must be less than ESMF_MAXSTR ",    //   33 = ESMF_RC_LONG_NAME
+  "String too long, must be less than ESMF_MAXSTR ",  //   34 = ESMF_RC_LONG_STR
+  "Cannot copy non-existent object ",                 //   35 = ESMF_RC_COPY_FAIL
+  "Cannot divide by zero ",                           //   36 = ESMF_RC_DIV_ZERO
+  "Cannot get value ",                                //   37 = ESMF_RC_CANNOT_GET
+  "Cannot set value ",                                //   38 = ESMF_RC_CANNOT_SET
+  "Not found ",                                       //   39 = ESMF_RC_NOT_FOUND
+  "Not valid " ,                                      //   40 = ESMF_RC_NOT_VALID
 
-  "Internal error: List overflow ",                   // ESMF_RC_INTNRL_LIST
-  "Internal error: Inconsistent data ",               // ESMF_RC_INTNRL_INCONS
-  "Internal error: Unknown error ",                   // ESMF_RC_INTNRL_BAD
+  "Internal error: List overflow ",                   //   41 = ESMF_RC_INTNRL_LIST
+  "Internal error: Inconsistent data ",               //   42 = ESMF_RC_INTNRL_INCONS
+  "Internal error: Unknown error ",                   //   43 = ESMF_RC_INTNRL_BAD
 
-  "System call error ",                               // ESMF_RC_SYS
-  "Resource is busy ",                                // ESMF_RC_BUSY
-  "Error in library called by ESMF ",                 // ESMF_RC_LIB
+  "System call error ",                               //   44 = ESMF_RC_SYS
+  "Resource is busy ",                                //   45 = ESMF_RC_BUSY
+  "Error in library called by ESMF ",                 //   46 = ESMF_RC_LIB
 
-  "Attribute unused ",                                // ESMF_RC_ATTR_UNUSED
-  "Object being used before creation ",             // ESMF_RC_OBJ_NOT_CREATED 
-  "Object being used after deletion ",              // ESMF_RC_OBJ_DELETED     
+  "Attribute unused ",                                //   47 = ESMF_RC_ATTR_UNUSED
+  "Object being used before creation ",               //   48 = ESMF_RC_OBJ_NOT_CREATED 
+  "Object being used after deletion ",                //   49 = ESMF_RC_OBJ_DELETED     
 
 
-// 48-500 reserved for future F90 return code definitions
+// 50-500 reserved for future F90 symmetric return code definitions
+                                                                          "",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
@@ -97,69 +98,70 @@ static const char *errMsg[] = {
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
-  "",
+
 
 // C++ Error message                                     Return Code (501-1000)
 // -----------------------------------------------       -----------------------
-  "Invalid object ",                                  // ESMC_RC_OBJ_BAD
-  "Object SetDefault method not called ",             // ESMC_RC_OBJ_INIT
-  "Object Create method not called ",                 // ESMC_RC_OBJ_CREATE
-  "Corrupted ESMF object detected ",                  // ESMC_RC_OBJ_COR
-  "Object is in wrong state ",                        // ESMC_RC_OBJ_WRONGSTATE
+  "Invalid object ",                                  //  501 = ESMC_RC_OBJ_BAD
+  "Object SetDefault method not called ",             //  502 = ESMC_RC_OBJ_INIT
+  "Object Create method not called ",                 //  503 = ESMC_RC_OBJ_CREATE
+  "Corrupted ESMF object detected ",                  //  504 = ESMC_RC_OBJ_COR
+  "Object is in wrong state ",                        //  505 = ESMC_RC_OBJ_WRONGSTATE
 
-  "Invalid argument ",                                // ESMC_RC_ARG_BAD
-  "Argument rank is not required size ",              // ESMC_RC_ARG_RANK
-  "Argument sizes do not match ",                     // ESMC_RC_ARG_SIZE
-  "Value unrecognized or out of range ",              // ESMC_RC_ARG_VALUE
-  "Two arguments not allowed to be the same ",        // ESMC_RC_ARG_DUP
-  "Two arguments must be same object type ",          // ESMC_RC_ARG_SAMETYPE
-  "Two arguments must have the same communicators ",  // ESMC_RC_ARG_SAMECOMM
-  "Arguments are incompatible ",                      // ESMC_RC_ARG_INCOMP
-  "Argument contains invalid ESMF object ",           // ESMC_RC_ARG_CORRUPT
-  "Wrong argument specified ",                        // ESMC_RC_ARG_WRONG
-  "Input argument out of range ",                     // ESMC_RC_ARG_OUTOFRANGE
-  "Unrecognized option string ",                      // ESMC_RC_ARG_OPT
+  "Invalid argument ",                                //  506 = ESMC_RC_ARG_BAD
+  "Argument rank is not required size ",              //  507 = ESMC_RC_ARG_RANK
+  "Argument sizes do not match ",                     //  508 = ESMC_RC_ARG_SIZE
+  "Value unrecognized or out of range ",              //  509 = ESMC_RC_ARG_VALUE
+  "Two arguments not allowed to be the same ",        //  510 = ESMC_RC_ARG_DUP
+  "Two arguments must be same object type ",          //  511 = ESMC_RC_ARG_SAMETYPE
+  "Two arguments must have the same communicators ",  //  512 = ESMC_RC_ARG_SAMECOMM
+  "Arguments are incompatible ",                      //  513 = ESMC_RC_ARG_INCOMP
+  "Argument contains invalid ESMF object ",           //  514 = ESMC_RC_ARG_CORRUPT
+  "Wrong argument specified ",                        //  515 = ESMC_RC_ARG_WRONG
+  "Input argument out of range ",                     //  516 = ESMC_RC_ARG_OUTOFRANGE
+  "Unrecognized option string ",                      //  517 = ESMC_RC_ARG_OPT
 
-  "Operation not yet supported ",                     // ESMC_RC_NOT_IMPL
+  "Operation not yet supported ",                     //  518 = ESMC_RC_NOT_IMPL
 
-  "Unable to open file ",                             // ESMC_RC_FILE_OPEN
-  "Unable to create file ",                           // ESMC_RC_FILE_CREATE
-  "Unable to read from file ",                        // ESMC_RC_FILE_READ
-  "Unable to write to file ",                         // ESMC_RC_FILE_WRITE
-  "Unexpected data in file ",                         // ESMC_RC_FILE_UNEXPECTED
-  "Unable to close file ",                            // ESMC_RC_FILE_CLOSE
-  "Instrumented region is still active ",             // ESMC_RC_FILE_ACTIVE
+  "Unable to open file ",                             //  519 = ESMC_RC_FILE_OPEN
+  "Unable to create file ",                           //  520 = ESMC_RC_FILE_CREATE
+  "Unable to read from file ",                        //  521 = ESMC_RC_FILE_READ
+  "Unable to write to file ",                         //  522 = ESMC_RC_FILE_WRITE
+  "Unexpected data in file ",                         //  523 = ESMC_RC_FILE_UNEXPECTED
+  "Unable to close file ",                            //  524 = ESMC_RC_FILE_CLOSE
+  "Instrumented region is still active ",             //  525 = ESMC_RC_FILE_ACTIVE
 
-  "Value cannot be a NULL pointer ",                  // ESMC_RC_PTR_NULL
-  "Invalid pointer ",                                 // ESMC_RC_PTR_BAD
-  "Pointer must already be allocated ",               // ESMC_RC_PTR_NOTALLOC
-  "Pointer must not already be allocated ",           // ESMC_RC_PTR_ISALLOC
-  "Unable to allocate requested memory ",             // ESMC_RC_MEM
-  "Memory corrupted ",                                // ESMC_RC_MEMC
+  "Value cannot be a NULL pointer ",                  //  526 = ESMC_RC_PTR_NULL
+  "Invalid pointer ",                                 //  527 = ESMC_RC_PTR_BAD
+  "Pointer must already be allocated ",               //  528 = ESMC_RC_PTR_NOTALLOC
+  "Pointer must not already be allocated ",           //  529 = ESMC_RC_PTR_ISALLOC
+  "Unable to allocate requested memory ",             //  530 = ESMC_RC_MEM
+  "Memory corrupted ",                                //  531 = ESMC_RC_MEMC
 
-  "Name already exists ",                             // ESMC_RC_DUP_NAME
-  "Name too long, must be less than ESMF_MAXSTR ",    // ESMC_RC_LONG_NAME
-  "String too long, must be less than ESMF_MAXSTR ",  // ESMC_RC_LONG_STR
-  "Cannot copy non-existent object ",                 // ESMC_RC_COPY_FAIL
-  "Cannot divide by zero ",                           // ESMC_RC_DIV_ZERO
-  "Cannot get value ",                                // ESMC_RC_CANNOT_GET
-  "Cannot set value ",                                // ESMC_RC_CANNOT_SET
-  "Not found ",                                       // ESMC_RC_NOT_FOUND
-  "Not valid " ,                                      // ESMC_RC_NOT_VALID
+  "Name already exists ",                             //  532 = ESMC_RC_DUP_NAME
+  "Name too long, must be less than ESMF_MAXSTR ",    //  533 = ESMC_RC_LONG_NAME
+  "String too long, must be less than ESMF_MAXSTR ",  //  534 = ESMC_RC_LONG_STR
+  "Cannot copy non-existent object ",                 //  535 = ESMC_RC_COPY_FAIL
+  "Cannot divide by zero ",                           //  536 = ESMC_RC_DIV_ZERO
+  "Cannot get value ",                                //  537 = ESMC_RC_CANNOT_GET
+  "Cannot set value ",                                //  538 = ESMC_RC_CANNOT_SET
+  "Not found ",                                       //  539 = ESMC_RC_NOT_FOUND
+  "Not valid " ,                                      //  540 = ESMC_RC_NOT_VALID
 
-  "Internal error: List overflow ",                   // ESMC_RC_INTNRL_LIST
-  "Internal error: Inconsistent data ",               // ESMC_RC_INTNRL_INCONS
-  "Internal error: Unknown error ",                   // ESMC_RC_INTNRL_BAD
+  "Internal error: List overflow ",                   //  541 = ESMC_RC_INTNRL_LIST
+  "Internal error: Inconsistent data ",               //  542 = ESMC_RC_INTNRL_INCONS
+  "Internal error: Unknown error ",                   //  543 = ESMC_RC_INTNRL_BAD
 
-  "System call error ",                               // ESMC_RC_SYS
-  "Resource is busy ",                                // ESMC_RC_BUSY
-  "Error in library called by ESMF ",                 // ESMC_RC_LIB
+  "System call error ",                               //  544 = ESMC_RC_SYS
+  "Resource is busy ",                                //  545 = ESMC_RC_BUSY
+  "Error in library called by ESMF ",                 //  546 = ESMC_RC_LIB
 
-  "Attribute unused ",                                // ESMC_RC_ATTR_UNUSED
-  "Object being used before creation ",             // ESMC_RC_OBJ_NOT_CREATED 
-  "Object being used after deletion ",              // ESMC_RC_OBJ_DELETED     
+  "Attribute unused ",                                //  547 = ESMC_RC_ATTR_UNUSED
+  "Object being used before creation ",               //  548 = ESMC_RC_OBJ_NOT_CREATED 
+  "Object being used after deletion ",                //  549 = ESMC_RC_OBJ_DELETED     
 
-// 548-1000 reserved for future C++ return code definitions
+// 550-998 reserved for future C++ symmetric return code definitions
+                                                                          "",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
@@ -177,7 +179,11 @@ static const char *errMsg[] = {
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
-  "","","","","","","","","","","","","","","","","","","","","","","","","",
-  ""
+  "","","","","","","","","","","","","","","","","","","","","","","",
+
+// 999-1000 used for C++ non-symmetric return code definitions
+
+  "Improperly terminated optional argument list ",    //  999 = ESMC_RC_OPTARG_TERM
+  "Unknown optional argument ID "                     // 1000 = ESMC_RC_OPTARG_UNK
 
 };
