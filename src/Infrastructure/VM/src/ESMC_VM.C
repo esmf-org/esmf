@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.49 2007/03/31 05:51:28 cdeluca Exp $
+// $Id: ESMC_VM.C,v 1.50 2007/04/24 21:17:16 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.49 2007/03/31 05:51:28 cdeluca Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.50 2007/04/24 21:17:16 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -154,7 +154,7 @@ void ESMC_VMIdDestroy(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  *rc = ESMF_FAILURE;         // assume failure
+  *rc = ESMF_RC_NOT_IMPL;     // assume failure
   if (vmID==NULL){
     ESMC_LogDefault.ESMC_LogWrite("invalid vmID", ESMC_LOG_ERROR);
     return; // bail out
@@ -698,7 +698,7 @@ ESMC_VMId *ESMC_VM::ESMC_VMGetVMId(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  *rc = ESMF_FAILURE; // assume failure
+  *rc = ESMF_RC_NOT_IMPL;  // assume failure
   pthread_t mytid = vmk_mypthid();
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
@@ -848,7 +848,7 @@ void ESMC_VMGetArgs(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  *rc = ESMF_FAILURE; // assume failure
+  *rc = ESMF_RC_NOT_IMPL; // assume failure
   if (GlobalVM==NULL){
     ESMC_LogDefault.ESMC_LogWrite("invalid GlobalVM", ESMC_LOG_ERROR);
     return; // bail out
@@ -884,7 +884,7 @@ ESMC_VM *ESMC_VMGetGlobal(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  *rc = ESMF_FAILURE; // assume failure
+  *rc = ESMF_RC_NOT_IMPL; // assume failure
   if (GlobalVM==NULL){
     ESMC_LogDefault.ESMC_LogWrite("invalid GlobalVM", ESMC_LOG_ERROR);
     return NULL; // bail out
@@ -916,7 +916,7 @@ ESMC_VM *ESMC_VMGetCurrent(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  *rc = ESMF_FAILURE; // assume failure
+  *rc = ESMF_RC_NOT_IMPL; // assume failure
   pthread_t mytid = pthread_self();
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
@@ -956,7 +956,7 @@ ESMC_VMId *ESMC_VMGetCurrentID(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  *rc = ESMF_FAILURE; // assume failure
+  *rc = ESMF_RC_NOT_IMPL; // assume failure
   pthread_t mytid = pthread_self();
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
@@ -998,7 +998,7 @@ ESMC_VM *ESMC_VMInitialize(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  *rc = ESMF_FAILURE;         // assume failure
+  *rc = ESMF_RC_NOT_IMPL; // assume failurelure
   GlobalVM = new ESMC_VM;
   GlobalVM->vmk_init(mpiCommunicator);  // set up default ESMC_VMK (all MPI)
   if (GlobalVM==NULL){
@@ -1068,7 +1068,7 @@ void ESMC_VMFinalize(
 //EOPI
 //-----------------------------------------------------------------------------
   int localrc;
-  *rc = ESMF_FAILURE;         // assume failure
+  *rc = ESMF_RC_NOT_IMPL; // assume failure
   if (GlobalVM==NULL){
     ESMC_LogDefault.ESMC_LogWrite("invalid GlobalVM", ESMC_LOG_ERROR);
     return; // bail out
@@ -1110,7 +1110,7 @@ void ESMC_VMAbort(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  *rc = ESMF_FAILURE;         // assume failure
+  *rc = ESMF_RC_NOT_IMPL;     // assume failure
   if (GlobalVM==NULL){
     ESMC_LogDefault.ESMC_LogWrite("invalid GlobalVM", ESMC_LOG_ERROR);
     return; // bail out
