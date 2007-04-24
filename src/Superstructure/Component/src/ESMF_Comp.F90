@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.153 2007/04/12 16:59:29 oehmke Exp $
+! $Id: ESMF_Comp.F90,v 1.154 2007/04/24 01:39:38 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.153 2007/04/12 16:59:29 oehmke Exp $'
+      '$Id: ESMF_Comp.F90,v 1.154 2007/04/24 01:39:38 rosalind Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -325,7 +325,7 @@ end interface
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, cc, rc)
@@ -377,7 +377,7 @@ end interface
     integer :: localrc                        ! local return code
 
     ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Set init code
     ESMF_INIT_SET_CREATED(cc)
@@ -547,11 +547,11 @@ end function
         integer :: npets, mypet, i
 
         ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
 
@@ -811,11 +811,11 @@ end function
         logical :: rcpresent                    ! did user specify rc?
 
         ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
 
@@ -957,11 +957,11 @@ end function
         type(ESMF_Clock)        :: dummyclock
 
         ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
         
 
@@ -1145,11 +1145,11 @@ end function
         type (ESMF_BlockingFlag) :: blocking
 
         ! WriteRestart return code; assume failure until success is certain
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         if (.not.associated(compp)) then
@@ -1253,11 +1253,11 @@ end function
         type (ESMF_BlockingFlag) :: blocking
 
         ! ReadRestart return code; assume failure until success is certain
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
 
@@ -1362,11 +1362,11 @@ end function
         logical :: rcpresent                    ! did user specify rc?
 
         ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
 
@@ -1483,11 +1483,11 @@ end function
         logical :: rcpresent                    ! did user specify rc?
 
         ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
 
@@ -1582,11 +1582,11 @@ end function
         logical :: rcpresent                    ! did user specify rc?
 
         ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif
 
         ! Initialize output in case of error
@@ -1650,7 +1650,7 @@ end function
 !
 ! TODO: code goes here
 !
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
         ! Check init status of arguments
         ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
@@ -1694,7 +1694,7 @@ end function
 
         ESMF_INIT_SET_CREATED(ESMF_CompRead)
  
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
         end function ESMF_CompRead
 
@@ -1726,11 +1726,11 @@ end function
        logical :: rcpresent                    ! did user specify rc?
 
        ! Initialize return code; assume failure until success is certain
-       status = ESMF_FAILURE
+       status = ESMF_RC_NOT_IMPL
        rcpresent = .FALSE.
        if (present(rc)) then
          rcpresent = .TRUE.
-         rc = ESMF_FAILURE
+         rc = ESMF_RC_NOT_IMPL
        endif
 
         if (.not.associated(compp)) then
@@ -1794,11 +1794,11 @@ end function
        !character (len=ESMF_MAXSTR) :: msgbuf
 
        ! Initialize return code; assume failure until success is certain
-       status = ESMF_FAILURE
+       status = ESMF_RC_NOT_IMPL
        rcpresent = .FALSE.
        if (present(rc)) then
          rcpresent = .TRUE.
-         rc = ESMF_FAILURE
+         rc = ESMF_RC_NOT_IMPL
        endif
 
        defaultopts = "brief"
@@ -1882,11 +1882,11 @@ end function
     logical :: rcpresent
 
     ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
     if (present(rc)) then
       rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_IMPL
     endif
 
         if (.not.associated(compp)) then
@@ -1965,11 +1965,11 @@ end function
     logical :: rcpresent
 
     ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
     if (present(rc)) then
       rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_IMPL
     endif
 
 
@@ -2048,11 +2048,11 @@ end function
     logical :: rcpresent
 
     ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
     if (present(rc)) then
       rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_IMPL
     endif
 
 
@@ -2127,11 +2127,11 @@ end function
     type(ESMF_VM)           :: vm           ! VM for current context
 
     ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
+    status = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
     if (present(rc)) then
       rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_IMPL
     endif
 
 

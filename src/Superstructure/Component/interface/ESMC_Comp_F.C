@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.41 2007/03/31 05:51:30 cdeluca Exp $
+// $Id: ESMC_Comp_F.C,v 1.42 2007/04/24 01:39:38 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -420,8 +420,8 @@ void FTN(c_esmc_compwait)(
   cargotype *cargo = (cargotype *)*vm_cargo;  // pointer to cargo
   
   // initialize the return codes to failure
-  *status = ESMF_FAILURE;   // return code of ESMF callback code
-  *callrc = ESMF_FAILURE;   // return code of registered user code
+  *status = ESMF_RC_NOT_IMPL; // return code of ESMF callback code
+  *callrc = ESMF_RC_NOT_IMPL; // return code of registered user code
 
   // Now call the vmk_exit function which will block respective PETs
   vm_parent->vmk_exit(static_cast<ESMC_VMKPlan *>(vmplan), *vm_info);

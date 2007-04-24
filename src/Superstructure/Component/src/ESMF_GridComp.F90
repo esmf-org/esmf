@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.87 2007/04/05 20:07:08 oehmke Exp $
+! $Id: ESMF_GridComp.F90,v 1.88 2007/04/24 01:39:38 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.87 2007/04/05 20:07:08 oehmke Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.88 2007/04/24 01:39:38 rosalind Exp $'
 
 !==============================================================================
 !
@@ -233,7 +233,7 @@
         nullify(compclass)
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! Allocate a new comp class
         allocate(compclass, stat=localrc)
@@ -291,7 +291,7 @@
         integer :: localrc                       ! local error status
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
@@ -864,7 +864,7 @@
     integer :: localrc                     ! local error status
 
     ! Initialize return code; assume failure until success is certain       
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
@@ -923,7 +923,7 @@
     integer :: localrc                     ! local error status
 
     ! Initialize return code; assume failure until success is certain       
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
@@ -983,7 +983,7 @@
     integer :: localrc                     ! local error status
 
     ! Initialize return code; assume failure until success is certain       
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
@@ -1146,7 +1146,7 @@
     integer :: localrc                     ! local error status
 
     ! Initialize return code; assume failure until success is certain       
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
@@ -1199,7 +1199,7 @@
     logical :: localresult
 
     ! Initialize return code; assume failure until success is certain       
-    if (present(rc)) rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Initialize output value in case of error
     ESMF_GridCompIsPetLocal = .false.
