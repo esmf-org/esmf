@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.106 2007/04/05 19:19:59 oehmke Exp $
+! $Id: ESMF_State.F90,v 1.107 2007/04/24 01:15:24 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.106 2007/04/05 19:19:59 oehmke Exp $'
+      '$Id: ESMF_State.F90,v 1.107 2007/04/24 01:15:24 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -1125,7 +1125,7 @@ end interface
         integer :: i
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         if (present(bundleList)) then
@@ -1218,7 +1218,7 @@ end interface
         integer :: localrc                   ! local error status
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1398,7 +1398,7 @@ end interface
       integer :: localrc
       character(len=ESMF_MAXSTR) :: errmsg
 
-      localrc = ESMF_FAILURE
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1410,7 +1410,7 @@ end interface
                                   ESMF_CONTEXT, rc)) return
 
       ! Assume failure until we know we will succeed
-      if (present(rc)) rc=ESMF_FAILURE
+      if (present(rc)) rc=ESMF_RC_NOT_IMPL
       ! TODO: do we need an empty (or invalid) array to mark failure?
 
       if (present(nestedStateName)) then
@@ -1509,7 +1509,7 @@ end interface
       integer :: localrc
       character(len=ESMF_MAXSTR) :: errmsg
 
-      localrc = ESMF_FAILURE
+      localrc = ESMF_RC_NOT_IMPL
    
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1520,7 +1520,7 @@ end interface
                                   ESMF_CONTEXT, rc)) return
 
       ! Assume failure until we know we will succeed
-      if (present(rc)) rc=ESMF_FAILURE
+      if (present(rc)) rc=ESMF_RC_NOT_IMPL
       ! TODO: do we need an empty (or invalid) array to mark failure?
 
       if (present(nestedStateName)) then
@@ -1646,7 +1646,7 @@ end interface
       integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1709,7 +1709,7 @@ end interface
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1773,7 +1773,7 @@ end interface
       integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1836,7 +1836,7 @@ end interface
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1901,7 +1901,7 @@ end interface
       integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1965,7 +1965,7 @@ end interface
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -2030,7 +2030,7 @@ end interface
       integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -2093,7 +2093,7 @@ end interface
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -2158,7 +2158,7 @@ end interface
       integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -2221,7 +2221,7 @@ end interface
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -2286,7 +2286,7 @@ end interface
       integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -2341,7 +2341,7 @@ end interface
       integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -2405,7 +2405,7 @@ end interface
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -2478,7 +2478,7 @@ end interface
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -2559,7 +2559,7 @@ end interface
       logical :: exists
 
       ! Assume failure until we know we will succeed
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
       ! TODO: do we need an empty bundle to mark failure?
 
         ! check input variables
@@ -2669,7 +2669,7 @@ end interface
       integer :: localrc
 
       ! Assume failure until we know we will succeed
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
       ! TODO: do we need an empty field to mark failure?
 
         ! check input variables
@@ -2849,7 +2849,7 @@ end interface
       integer :: localrc
 
       ! Assume failure until we know we will succeed
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -2915,7 +2915,7 @@ end interface
       integer :: localrc
 
       ! Assume failure until we know we will succeed
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
       ! TODO: do we need an empty state to mark failure?
 
         ! check input variables
@@ -2991,7 +2991,7 @@ end interface
       integer :: localrc
 
       ! Assume no unless we find it and it is needed.
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
       ESMF_StateIsNeeded = .FALSE.
 
         ! check input variables
@@ -3064,7 +3064,7 @@ end interface
 
        defaultopts = "brief"
        ! Initialize return code; assume failure until success is certain
-       if (present(rc)) rc = ESMF_FAILURE
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -3213,7 +3213,7 @@ end interface
 
 
         ESMF_StateReadRestart = a 
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
         end function ESMF_StateReadRestart
 
@@ -3304,7 +3304,7 @@ end interface
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -3370,7 +3370,7 @@ end interface
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -3437,7 +3437,7 @@ end interface
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -3503,7 +3503,7 @@ end interface
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
   
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -3571,7 +3571,7 @@ end interface
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -3637,7 +3637,7 @@ end interface
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -3705,7 +3705,7 @@ end interface
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -3771,7 +3771,7 @@ end interface
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -3838,7 +3838,7 @@ end interface
       integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -3904,7 +3904,7 @@ end interface
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -3971,7 +3971,7 @@ end interface
       integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -4031,7 +4031,7 @@ end interface
       integer :: localrc
 
       ! Assume failure until we know we will succeed
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -4098,7 +4098,7 @@ end interface
 
       defaultopts = "brief"
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       if (.not.associated(state%statep)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -4151,7 +4151,7 @@ end interface
         type(ESMF_Field) :: fred
         integer :: localrc
 
-        localrc = ESMF_FAILURE
+        localrc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -4213,7 +4213,7 @@ end interface
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
 
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
         end subroutine ESMF_StateWriteRestart
 
 
@@ -4306,8 +4306,8 @@ end interface
         integer :: i
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
-        localrc = ESMF_FAILURE 
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
         ! check input variables
         if (present(bundles)) then
@@ -4482,7 +4482,7 @@ end interface
         integer :: status                   ! local error status
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! Initialize the base object, set the name, etc.
         call ESMF_BaseCreate(stypep%base, "State", statename, 0, status)
@@ -4539,7 +4539,7 @@ end interface
         integer :: localrc
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variable
         ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
@@ -4617,7 +4617,7 @@ end interface
       logical :: exists
 
       ! Initialize return code.  Assume failure until success assured.
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
@@ -4808,7 +4808,7 @@ end interface
       logical :: exists
 
       ! Initialize return code.  Assume failure until success assured.
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
@@ -5002,7 +5002,7 @@ end interface
       logical :: exists
 
       ! Initialize return code.  Assume failure until success assured.
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
@@ -5205,7 +5205,7 @@ end interface
       logical :: exists, fneedsdealloc
 
       ! Initialize return code.  Assume failure until success assured.
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
       fneedsdealloc = .FALSE.
       fname = ""
 
@@ -5554,7 +5554,7 @@ end interface
       logical :: exists
 
       ! Initialize return code.  Assume failure until success assured.
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
@@ -5771,8 +5771,8 @@ end interface
       type(ESMF_StateItem), pointer :: nextitem
 
       ! Initialize return code.  Assume failure until success assured.
-      localrc = ESMF_FAILURE 
-      if (present(rc)) rc = ESMF_FAILURE
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
@@ -5858,7 +5858,7 @@ end interface
       logical :: exists
 
       ! Initialize return code.  Assume failure until success assured.
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
   
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
@@ -6013,8 +6013,8 @@ end interface
       integer, parameter :: chunksize = 16         ! extend list by this
  
       ! Assume failure until success assured.  rc is not optional here.
-      localrc = ESMF_FAILURE
-      rc = ESMF_FAILURE
+      localrc = ESMF_RC_NOT_IMPL
+      rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)

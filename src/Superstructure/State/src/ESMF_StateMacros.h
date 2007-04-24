@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StateMacros.h,v 1.14 2007/03/31 05:51:33 cdeluca Exp $
+! $Id: ESMF_StateMacros.h,v 1.15 2007/04/24 01:15:25 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -102,13 +102,13 @@
         logical :: rcpresent                ! did user specify rc? @\
  @\
         ! Initialize return code; assume failure until success is certain @\
-        status = ESMF_FAILURE @\
+        status = ESMF_RC_NOT_IMPL @\
         rcpresent = .FALSE. @\
         array%this = ESMF_NULL_POINTER @\
  @\
         if (present(rc)) then @\
           rcpresent = .TRUE. @\
-          rc = ESMF_FAILURE @\
+          rc = ESMF_RC_NOT_IMPL @\
         endif @\
  @\
         ! check input variables @\
