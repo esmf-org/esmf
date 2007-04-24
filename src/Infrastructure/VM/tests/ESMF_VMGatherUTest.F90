@@ -1,4 +1,4 @@
-! $Id: ESMF_VMGatherUTest.F90,v 1.6 2007/04/24 02:42:48 theurich Exp $
+! $Id: ESMF_VMGatherUTest.F90,v 1.7 2007/04/24 18:13:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_VMGatherUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMGatherUTest.F90,v 1.6 2007/04/24 02:42:48 theurich Exp $'
+    '$Id: ESMF_VMGatherUTest.F90,v 1.7 2007/04/24 18:13:08 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -55,7 +55,6 @@ program ESMF_VMGatherUTest
   real(ESMF_KIND_R4), allocatable:: f4array1(:), f4array2(:)
   integer, allocatable:: recvCounts(:), recvOffsets(:)
      
-
 !------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
 ! always run. When the environment variable, EXHAUSTIVE, is set to ON then
@@ -64,7 +63,9 @@ program ESMF_VMGatherUTest
 ! added to allow a script to count the number and types of unit tests.
 !------------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+  !------------------------------------------------------------------------
 
   ! get global vm information
   call ESMF_VMGetGlobal(vm, rc=rc)
@@ -154,7 +155,7 @@ program ESMF_VMGatherUTest
   !------------------------------------------------------------------------
   !NEX_UTest
   ! Verify farray1 data after gather
-  write(name, *) "Verifying farray1 data after Gather Test for ESMF_KIND_R8"
+  write(name, *) "Verifying farray1 data after Gather() Test for ESMF_KIND_R8"
   write(failMsg, *) "Wrong data."
   rc = ESMF_SUCCESS
   if (localPet==gatherRoot) then
@@ -227,7 +228,7 @@ program ESMF_VMGatherUTest
   !------------------------------------------------------------------------
   !NEX_UTest
   ! Verify f4array2 data after gather
-  write(name, *) "Verifying f4array2 data after gather Test for ESMF_KIND_R4"
+  write(name, *) "Verifying f4array2 data after Gather() Test for ESMF_KIND_R4"
   write(failMsg, *) "Wrong data."
   rc = ESMF_SUCCESS
   do i=1, nsize
@@ -276,7 +277,7 @@ program ESMF_VMGatherUTest
   !------------------------------------------------------------------------
   !NEX_UTest
   ! Gather from gatherRoot
-  write(name, *) "Gather() Test for Integer"
+  write(name, *) "GatherV() Test for Integer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_VMGatherV(vm, sendData=array2, sendCount=nsize, recvData=array1, &
     recvCounts=recvCounts, recvOffsets=recvOffsets, root=gatherRoot, rc=rc)
@@ -285,7 +286,7 @@ program ESMF_VMGatherUTest
   !------------------------------------------------------------------------
   !NEX_UTest
   ! Verify array1 data after gather
-  write(name, *) "Verifying array1 data after Gather() Test for Integer"
+  write(name, *) "Verifying array1 data after GatherV() Test for Integer"
   write(failMsg, *) "Wrong data."
   rc = ESMF_SUCCESS
   if (localPet==gatherRoot) then
@@ -308,7 +309,7 @@ program ESMF_VMGatherUTest
   !------------------------------------------------------------------------
   !NEX_UTest
   ! Verify array2 data after gather
-  write(name, *) "Verifying array2 data after Gather() Test for Integer"
+  write(name, *) "Verifying array2 data after GatherV() Test for Integer"
   write(failMsg, *) "Wrong data."
   rc = ESMF_SUCCESS
   do i=1, nsize
@@ -321,7 +322,7 @@ program ESMF_VMGatherUTest
   !------------------------------------------------------------------------
   !NEX_UTest
   ! Gather from gatherRoot
-  write(name, *) "Gather() Test for ESMF_KIND_R8"
+  write(name, *) "GatherV() Test for ESMF_KIND_R8"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_VMGatherV(vm, sendData=farray2, sendCount=nsize, recvData=farray1, &
     recvCounts=recvCounts, recvOffsets=recvOffsets, root=gatherRoot, rc=rc)
@@ -330,7 +331,7 @@ program ESMF_VMGatherUTest
   !------------------------------------------------------------------------
   !NEX_UTest
   ! Verify farray1 data after gather
-  write(name, *) "Verifying farray1 data after Gather Test for ESMF_KIND_R8"
+  write(name, *) "Verifying farray1 data after GatherV() Test for ESMF_KIND_R8"
   write(failMsg, *) "Wrong data."
   rc = ESMF_SUCCESS
   if (localPet==gatherRoot) then
@@ -353,7 +354,7 @@ program ESMF_VMGatherUTest
   !------------------------------------------------------------------------
   !NEX_UTest
   ! Verify farray2 data after gather
-  write(name, *) "Verifying farray2 data after Gather() Test for ESMF_KIND_R8"
+  write(name, *) "Verifying farray2 data after GatherV() Test for ESMF_KIND_R8"
   write(failMsg, *) "Wrong data."
   rc = ESMF_SUCCESS
   do i=1, nsize
@@ -371,7 +372,7 @@ program ESMF_VMGatherUTest
   !------------------------------------------------------------------------
   !NEX_UTest
   ! Gather from gatherRoot
-  write(name, *) "Gather() Test for ESMF_KIND_R4"
+  write(name, *) "GatherV() Test for ESMF_KIND_R4"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_VMGatherV(vm, sendData=f4array2, sendCount=nsize, recvData=f4array1,&
     recvCounts=recvCounts, recvOffsets=recvOffsets, root=gatherRoot, rc=rc)
@@ -380,7 +381,7 @@ program ESMF_VMGatherUTest
   !------------------------------------------------------------------------
   !NEX_UTest
   ! Verify f4array1 data after gather
-  write(name, *) "Verifying f4array1 data after Gather() Test for ESMF_KIND_R4"
+  write(name, *) "Verifying f4array1 data after GatherV() Test for ESMF_KIND_R4"
   write(failMsg, *) "Wrong data."
   rc = ESMF_SUCCESS
   if (localPet==gatherRoot) then
@@ -403,7 +404,7 @@ program ESMF_VMGatherUTest
   !------------------------------------------------------------------------
   !NEX_UTest
   ! Verify f4array2 data after gather
-  write(name, *) "Verifying f4array2 data after gather Test for ESMF_KIND_R4"
+  write(name, *) "Verifying f4array2 data after GatherV() Test for ESMF_KIND_R4"
   write(failMsg, *) "Wrong data."
   rc = ESMF_SUCCESS
   do i=1, nsize
@@ -426,6 +427,8 @@ program ESMF_VMGatherUTest
   deallocate(recvCounts)
   deallocate(recvOffsets)
 
+  !------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
 end program ESMF_VMGatherUTest

@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.45 2007/04/24 02:46:52 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.46 2007/04/24 18:13:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 // reduction operations
 enum vmOp   { vmSUM=1, vmMIN, vmMAX};
 // typekind indicators
-enum vmType { vmI4=1, vmR4, vmR8};
+enum vmType { vmBYTE=1, vmI4, vmR4, vmR8};
 
 // VM_ANY_SOURCE and VM_ANY_TAG
 #define VM_ANY_SRC                    (-2)
@@ -286,12 +286,15 @@ class ESMC_VMK{
 
     int vmk_threadbarrier(void);
 
-    void vmk_reduce(void *in, void *out, int len, vmType type, vmOp op, 
+    int vmk_reduce(void *in, void *out, int len, vmType type, vmOp op, 
       int root);
-    void vmk_allreduce(void *in, void *out, int len, vmType type, vmOp op);
-    void vmk_allfullreduce(void *in, void *out, int len, vmType type,
+    int vmk_allreduce(void *in, void *out, int len, vmType type, vmOp op);
+    int vmk_allfullreduce(void *in, void *out, int len, vmType type,
       vmOp op);
     
+    int vmk_reduce_scatter(void *in, void *out, int *outCounts, vmType type,
+      vmOp op);
+
     int vmk_scatter(void *in, void *out, int len, int root);
     int vmk_scatter(void *in, void *out, int len, int root,
       vmk_commhandle **commhandle);
@@ -309,7 +312,7 @@ class ESMC_VMK{
     int vmk_allgatherv(void *in, int inCount, void *out, int *outCounts, 
       int *outOffsets, vmType type);
 
-    void vmk_alltoallv(void *in, int *inCounts, int *inOffsets, void *out, 
+    int vmk_alltoallv(void *in, int *inCounts, int *inOffsets, void *out, 
       int *outCounts, int *outOffsets, vmType type);
 
     int vmk_broadcast(void *data, int len, int root);

@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.86 2007/04/24 02:46:52 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.87 2007/04/24 18:13:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -141,6 +141,7 @@ module ESMF_VMMod
   public ESMF_VMRecvVMId
   public ESMF_VMReduce
   public ESMF_VMScatter
+  public ESMF_VMScatterV
   public ESMF_VMSend
   public ESMF_VMSendVMId
   public ESMF_VMSendRecv
@@ -182,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.86 2007/04/24 02:46:52 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.87 2007/04/24 18:13:08 theurich Exp $"
 
 !==============================================================================
 
@@ -404,6 +405,25 @@ module ESMF_VMMod
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMScatter} functions.   
+!EOPI 
+      end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMScatterV -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMScatterV
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMScatterVI4
+      module procedure ESMF_VMScatterVR4
+      module procedure ESMF_VMScatterVR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMScatterV} functions.   
 !EOPI 
       end interface
 
@@ -4846,6 +4866,240 @@ module ESMF_VMMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMScatterLogical
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMScatterVI4()"
+!BOP
+! !IROUTINE: ESMF_VMScatterV - Scatter 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMScatterV()
+  subroutine ESMF_VMScatterVI4(vm, sendData, sendCounts, sendOffsets, &
+    recvData, recvCount, root, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer,                  intent(in)              :: sendCounts(:)
+    integer,                  intent(in)              :: sendOffsets(:)
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
+    integer,                  intent(in)              :: recvCount
+    integer,                  intent(in)              :: root
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
+!   of kind {\tt ESMF\_KIND\_I4} from the {\tt root} PET to all PETs of an 
+!   {\tt ESMF\_VM} object (including {\tt root}).\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contiguous data array holding data to be send. Only the {\tt sendData}
+!        array specified by the {\tt root} PET will be used by this method.
+!   \item[sendCounts] 
+!        Number of {\tt sendData} elements to be send to corresponding
+!        receive PET.
+!   \item[sendOffsets] 
+!        Offsets in units of elements in {\tt sendData} marking the start of
+!        element sequence to be send to receive PET.
+!   \item[recvData] 
+!        Single data variable to be received. All PETs must specify a
+!        valid result variable.
+!   \item[recvCount] 
+!        Number of {\tt recvData} elements to receive by local PET from root
+!        PET.
+!   \item[root]
+!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: size
+    logical :: blocking
+    type(ESMF_CommHandle):: localcommhandle
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMScatterV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
+      recvData(1), recvCount, ESMF_TYPEKIND_I4, root, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMScatterVI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMScatterVR4()"
+!BOP
+! !IROUTINE: ESMF_VMScatterV - Scatter 4-byte reals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMScatterV()
+  subroutine ESMF_VMScatterVR4(vm, sendData, sendCounts, sendOffsets, &
+    recvData, recvCount, root, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    real(ESMF_KIND_R4), target,   intent(in)          :: sendData(:)
+    integer,                  intent(in)              :: sendCounts(:)
+    integer,                  intent(in)              :: sendOffsets(:)
+    real(ESMF_KIND_R4), target,   intent(out)         :: recvData(:)
+    integer,                  intent(in)              :: recvCount
+    integer,                  intent(in)              :: root
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
+!   of kind {\tt ESMF\_KIND\_R4} from the {\tt root} PET to all PETs of an 
+!   {\tt ESMF\_VM} object (including {\tt root}).\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contiguous data array holding data to be send. Only the {\tt sendData}
+!        array specified by the {\tt root} PET will be used by this method.
+!   \item[sendCounts] 
+!        Number of {\tt sendData} elements to be send to corresponding
+!        receive PET.
+!   \item[sendOffsets] 
+!        Offsets in units of elements in {\tt sendData} marking the start of
+!        element sequence to be send to receive PET.
+!   \item[recvData] 
+!        Single data variable to be received. All PETs must specify a
+!        valid result variable.
+!   \item[recvCount] 
+!        Number of {\tt recvData} elements to receive by local PET from root
+!        PET.
+!   \item[root]
+!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: size
+    logical :: blocking
+    type(ESMF_CommHandle):: localcommhandle
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMScatterV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
+      recvData(1), recvCount, ESMF_TYPEKIND_R4, root, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMScatterVR4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMScatterVR8()"
+!BOP
+! !IROUTINE: ESMF_VMScatterV - Scatter 8-byte reals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMScatterV()
+  subroutine ESMF_VMScatterVR8(vm, sendData, sendCounts, sendOffsets, &
+    recvData, recvCount, root, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    real(ESMF_KIND_R8), target,   intent(in)          :: sendData(:)
+    integer,                  intent(in)              :: sendCounts(:)
+    integer,                  intent(in)              :: sendOffsets(:)
+    real(ESMF_KIND_R8), target,   intent(out)         :: recvData(:)
+    integer,                  intent(in)              :: recvCount
+    integer,                  intent(in)              :: root
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
+!   of kind {\tt ESMF\_KIND\_R8} from the {\tt root} PET to all PETs of an 
+!   {\tt ESMF\_VM} object (including {\tt root}).\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contiguous data array holding data to be send. Only the {\tt sendData}
+!        array specified by the {\tt root} PET will be used by this method.
+!   \item[sendCounts] 
+!        Number of {\tt sendData} elements to be send to corresponding
+!        receive PET.
+!   \item[sendOffsets] 
+!        Offsets in units of elements in {\tt sendData} marking the start of
+!        element sequence to be send to receive PET.
+!   \item[recvData] 
+!        Single data variable to be received. All PETs must specify a
+!        valid result variable.
+!   \item[recvCount] 
+!        Number of {\tt recvData} elements to receive by local PET from root
+!        PET.
+!   \item[root]
+!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: size
+    logical :: blocking
+    type(ESMF_CommHandle):: localcommhandle
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMScatterV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
+      recvData(1), recvCount, ESMF_TYPEKIND_R8, root, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMScatterVR8
 !------------------------------------------------------------------------------
 
 

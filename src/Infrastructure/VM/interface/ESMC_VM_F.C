@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.68 2007/04/24 02:46:52 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.69 2007/04/24 18:13:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -68,8 +68,14 @@ extern "C" {
     }
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"Unsupported data type.",
       rc)) return;
-    (*vm)->vmk_allfullreduce(input, output, *count, vmt, (vmOp)(*op));
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+    localrc = (*vm)->vmk_allfullreduce(input, output, *count, vmt, (vmOp)(*op));
+    if (localrc){
+      char *message = new char[160];
+      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      delete [] message;
+    }else
+      *rc = ESMF_SUCCESS;
   }
 
   void FTN(c_esmc_vmallgather)(ESMC_VM **vm, void *input, void *output, 
@@ -160,8 +166,14 @@ extern "C" {
     }
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "Unsupported data type.",
       rc)) return;
-    (*vm)->vmk_allreduce(input, output, *count, vmt, (vmOp)(*op));
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+    localrc = (*vm)->vmk_allreduce(input, output, *count, vmt, (vmOp)(*op));
+    if (localrc){
+      char *message = new char[160];
+      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      delete [] message;
+    }else
+      *rc = ESMF_SUCCESS;
   }
 
   void FTN(c_esmc_vmalltoallv)(ESMC_VM **vm, void *sendData, int *sendCounts,
@@ -188,9 +200,15 @@ extern "C" {
     }
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "Unsupported data type.",
       rc)) return;
-    (*vm)->vmk_alltoallv(sendData, sendCounts, sendOffsets, recvData,
+    localrc = (*vm)->vmk_alltoallv(sendData, sendCounts, sendOffsets, recvData,
       recvCounts, recvOffsets, vmt);
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+    if (localrc){
+      char *message = new char[160];
+      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      delete [] message;
+    }else
+      *rc = ESMF_SUCCESS;
   }
 
   void FTN(c_esmc_vmbarrier)(ESMC_VM **ptr, int *rc){
@@ -410,8 +428,14 @@ extern "C" {
     }
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"Unsupported data type.",
       rc)) return;
-    (*vm)->vmk_reduce(input, output, *count, vmt, (vmOp)(*op), *root);
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+    localrc = (*vm)->vmk_reduce(input, output, *count, vmt, (vmOp)(*op), *root);
+    if (localrc){
+      char *message = new char[160];
+      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      delete [] message;
+    }else
+      *rc = ESMF_SUCCESS;
   }
 
   void FTN(c_esmc_vmscatter)(ESMC_VM **vm, void *input, void *output, int *size,
@@ -435,6 +459,41 @@ extern "C" {
     *commhandle = NULL; // reset the commhandle
     int localrc = (*vm)->vmk_scatter(input, output, *size, *root, 
       (vmk_commhandle **)commhandle);
+    if (localrc){
+      char *message = new char[160];
+      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      delete [] message;
+    }else
+      *rc = ESMF_SUCCESS;
+  }
+  
+  void FTN(c_esmc_vmscatterv)(ESMC_VM **vm, void *sendData, int *sendCounts,
+    int *sendOffsets, void *recvData, int *recvCount, ESMC_TypeKind *dtk, 
+    int *root, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmscatterv()"
+    // start assuming local success
+    int localrc = ESMF_SUCCESS;
+    // need to type cast or transform dtk and op into ESMC_VMK types
+    vmType vmt;
+    switch (*dtk){
+    case ESMC_TYPEKIND_I4:
+      vmt = vmI4;
+      break;
+    case ESMC_TYPEKIND_R4:
+      vmt = vmR4;
+      break;
+    case ESMC_TYPEKIND_R8:
+      vmt = vmR8;
+      break;
+    default:
+      localrc = ESMC_RC_ARG_BAD;
+    }
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "Unsupported data type.",
+      rc)) return;
+    localrc = (*vm)->vmk_scatterv(sendData, sendCounts, sendOffsets, recvData,
+      *recvCount, vmt, *root);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);

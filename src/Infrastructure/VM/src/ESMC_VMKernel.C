@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.90 2007/04/24 02:46:53 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.91 2007/04/24 18:13:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -3127,8 +3127,9 @@ int ESMC_VMK::vmk_threadbarrier(void){
 }
 
 
-void ESMC_VMK::vmk_reduce(void *in, void *out, int len, vmType type,
+int ESMC_VMK::vmk_reduce(void *in, void *out, int len, vmType type,
   vmOp op, int root){
+  int localrc=0;
   if (mpionly){
     // Find corresponding MPI operation
     MPI_Op mpiop;
@@ -3156,7 +3157,7 @@ void ESMC_VMK::vmk_reduce(void *in, void *out, int len, vmType type,
       mpitype = MPI_DOUBLE;
       break;
     }
-    MPI_Reduce(in, out, len, mpitype, mpiop, root, mpi_c);
+    localrc = MPI_Reduce(in, out, len, mpitype, mpiop, root, mpi_c);
   }else{
     // This is a very simplistic, probably very bad peformance implementation.
     int templen = len;
@@ -3175,7 +3176,7 @@ void ESMC_VMK::vmk_reduce(void *in, void *out, int len, vmType type,
     if (mypet==root)
       temparray = new char[templen*npets]; // allocate temp data array
     // gather all data onto root PET
-    vmk_gather(in, temparray, templen, root);
+    localrc = vmk_gather(in, temparray, templen, root);
     // root does the entire reduction on its local temparray data
     if (mypet==root){
       switch (op){
@@ -3326,12 +3327,14 @@ void ESMC_VMK::vmk_reduce(void *in, void *out, int len, vmType type,
       }
       delete [] temparray;
     }
-  }  
+  }
+  return localrc;
 }
 
 
-void ESMC_VMK::vmk_allreduce(void *in, void *out, int len, vmType type,
+int ESMC_VMK::vmk_allreduce(void *in, void *out, int len, vmType type,
   vmOp op){
+  int localrc=0;
   if (mpionly){
     // Find corresponding MPI operation
     MPI_Op mpiop;
@@ -3359,7 +3362,7 @@ void ESMC_VMK::vmk_allreduce(void *in, void *out, int len, vmType type,
       mpitype = MPI_DOUBLE;
       break;
     }
-    MPI_Allreduce(in, out, len, mpitype, mpiop, mpi_c);
+    localrc = MPI_Allreduce(in, out, len, mpitype, mpiop, mpi_c);
   }else{
     // This is a very simplistic, probably very bad peformance implementation.
     int templen = len;
@@ -3376,8 +3379,10 @@ void ESMC_VMK::vmk_allreduce(void *in, void *out, int len, vmType type,
     }
     char *temparray = new char[templen*npets]; // allocate temp data array
     // gather all data onto each PET
-    for (int i=0; i<npets; i++)
-      vmk_gather(in, temparray, templen, i);
+    for (int i=0; i<npets; i++){
+      localrc = vmk_gather(in, temparray, templen, i);
+      if (localrc) return localrc;
+    }
     // each PET does its own reduction on its local temparray data
     switch (op){
     case vmSUM:
@@ -3526,12 +3531,14 @@ void ESMC_VMK::vmk_allreduce(void *in, void *out, int len, vmType type,
       break;
     }
     delete [] temparray;
-  }  
+  }
+  return localrc;
 }
 
 
-void ESMC_VMK::vmk_allfullreduce(void *in, void *out, int len, 
+int ESMC_VMK::vmk_allfullreduce(void *in, void *out, int len, 
   vmType type, vmOp op){
+  int localrc=0;
   void *localresult;
   int local_i4;
   float local_r4;
@@ -3632,7 +3639,8 @@ void ESMC_VMK::vmk_allfullreduce(void *in, void *out, int len,
     }
     break;
   }
-  vmk_allreduce(localresult, out, 1, type, op);
+  localrc = vmk_allreduce(localresult, out, 1, type, op);
+  return localrc;
 }
 
 
@@ -3668,6 +3676,45 @@ int ESMC_VMK::vmk_scatter(void *in, void *out, int len, int root){
 }
 
 
+int ESMC_VMK::vmk_reduce_scatter(void *in, void *out, int *outCounts,
+  vmType type, vmOp op){
+  int localrc=0;
+  if (mpionly){
+    // Find corresponding MPI operation
+    MPI_Op mpiop;
+    switch (op){
+    case vmSUM:
+      mpiop = MPI_SUM;
+      break;
+    case vmMIN:
+      mpiop = MPI_MIN;
+      break;
+    case vmMAX:
+      mpiop = MPI_MAX;
+      break;
+    }
+    // Find corresponding MPI data type
+    MPI_Datatype mpitype;
+    switch (type){
+    case vmI4:
+      mpitype = MPI_INT;
+      break;
+    case vmR4:
+      mpitype = MPI_FLOAT;
+      break;
+    case vmR8:
+      mpitype = MPI_DOUBLE;
+      break;
+    }
+    localrc = MPI_Reduce_scatter(in, out, outCounts, mpitype, mpiop, mpi_c);
+  }else{
+    // TODO: not yet implemented
+    localrc = VMK_ERROR;
+  }
+  return localrc;
+}
+
+    
 int ESMC_VMK::vmk_scatter(void *in, void *out, int len, int root,
   vmk_commhandle **commhandle){
   int localrc=0;
@@ -3726,6 +3773,9 @@ int ESMC_VMK::vmk_scatterv(void *in, int *inCounts, int *inOffsets, void *out,
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
     switch (type){
+    case vmBYTE:
+      mpitype = MPI_BYTE;
+      break;
     case vmI4:
       mpitype = MPI_INT;
       break;
@@ -3874,6 +3924,9 @@ int ESMC_VMK::vmk_gatherv(void *in, int inCount, void *out, int *outCounts,
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
     switch (type){
+    case vmBYTE:
+      mpitype = MPI_BYTE;
+      break;
     case vmI4:
       mpitype = MPI_INT;
       break;
@@ -4002,6 +4055,9 @@ int ESMC_VMK::vmk_allgatherv(void *in, int inCount, void *out,
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
     switch (type){
+    case vmBYTE:
+      mpitype = MPI_BYTE;
+      break;
     case vmI4:
       mpitype = MPI_INT;
       break;
@@ -4066,12 +4122,16 @@ int ESMC_VMK::vmk_allgatherv(void *in, int inCount, void *out,
 }
 
 
-void ESMC_VMK::vmk_alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
+int ESMC_VMK::vmk_alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
   int *outCounts, int *outOffsets, vmType type){
+  int localrc=0;
   if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
     switch (type){
+    case vmBYTE:
+      mpitype = MPI_BYTE;
+      break;
     case vmI4:
       mpitype = MPI_INT;
       break;
@@ -4082,8 +4142,8 @@ void ESMC_VMK::vmk_alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
       mpitype = MPI_DOUBLE;
       break;
     }
-    MPI_Alltoallv(in, inCounts, inOffsets, mpitype, out, outCounts, outOffsets,
-      mpitype, mpi_c);
+    localrc = MPI_Alltoallv(in, inCounts, inOffsets, mpitype, out, outCounts,
+      outOffsets, mpitype, mpi_c);
   }else{
     // This is a very simplistic, probably very bad peformance implementation.
     int size=0;
@@ -4101,21 +4161,30 @@ void ESMC_VMK::vmk_alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
     char *inC = (char *)in;
     char *outC = (char *)out;
     // send to all PETs with id smaller than mypet
-    for (int i=0; i<mypet; i++)
-      vmk_send(inC+inOffsets[i]*size, inCounts[i]*size, i);
+    for (int i=0; i<mypet; i++){
+      localrc = vmk_send(inC+inOffsets[i]*size, inCounts[i]*size, i);
+      if (localrc) return localrc;
+    }
     // memcpy the local chunk
     memcpy(outC+outOffsets[mypet]*size, inC+inOffsets[mypet]*size,
       inCounts[mypet]*size);
     // receive the data from all Pets with id larger than mypet
-    for (int i=mypet+1; i<npets; i++)
-      vmk_recv(outC+outOffsets[i]*size, outCounts[i]*size, i);
+    for (int i=mypet+1; i<npets; i++){
+      localrc = vmk_recv(outC+outOffsets[i]*size, outCounts[i]*size, i);
+      if (localrc) return localrc;
+    }
     // send to all PETs with larger than mypet
-    for (int i=mypet+1; i<npets; i++)
-      vmk_send(inC+inOffsets[i]*size, inCounts[i]*size, i);
+    for (int i=mypet+1; i<npets; i++){
+      localrc = vmk_send(inC+inOffsets[i]*size, inCounts[i]*size, i);
+      if (localrc) return localrc;
+    }
     // receive the data from all Pets with id smaller than mypet
-    for (int i=0; i<mypet; i++)
-      vmk_recv(outC+outOffsets[i]*size, outCounts[i]*size, i);
+    for (int i=0; i<mypet; i++){
+      localrc = vmk_recv(outC+outOffsets[i]*size, outCounts[i]*size, i);
+      if (localrc) return localrc;
+    }
   }
+  return localrc;
 }
 
 
