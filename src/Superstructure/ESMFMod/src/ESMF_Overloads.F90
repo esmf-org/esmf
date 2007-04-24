@@ -1,4 +1,4 @@
-! $Id: ESMF_Overloads.F90,v 1.7 2007/03/31 05:51:32 cdeluca Exp $
+! $Id: ESMF_Overloads.F90,v 1.8 2007/04/24 01:55:40 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Overloads.F90,v 1.7 2007/03/31 05:51:32 cdeluca Exp $'
+      '$Id: ESMF_Overloads.F90,v 1.8 2007/04/24 01:55:40 rosalind Exp $'
 
 !==============================================================================
 !
@@ -201,13 +201,13 @@
         logical :: rcpresent                             ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif  
 
         ! pass thru f90/c++ interface - this requires first entry of object
@@ -255,13 +255,13 @@
         logical :: rcpresent                             ! did user specify rc?
 
         ! Get initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif  
 
         ! pass thru f90/c++ interface - this requires first entry of object
@@ -309,13 +309,13 @@
         logical :: rcpresent                             ! did user specify rc?
 
         ! Set initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif  
 
         ! pass thru f90/c++ interface - this requires first entry of object
@@ -363,13 +363,13 @@
         logical :: rcpresent                             ! did user specify rc?
 
         ! Get initial values
-        status = ESMF_FAILURE
+        status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_NOT_IMPL
         endif  
 
         ! pass thru f90/c++ interface - this requires first entry of object
@@ -413,11 +413,11 @@
       character (len=6) :: defaultopts
 
       ! Initialize return code; assume failure until success is certain  
-      status = ESMF_FAILURE       
+      status = ESMF_RC_NOT_IMPL   
       rcpresent = .FALSE.
       if (present(rc)) then
         rcpresent = .TRUE.
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif
 
       defaultopts = "quick"
@@ -471,11 +471,11 @@
       character (len=ESMF_MAXSTR) :: name
 
       ! Initialize return code; assume failure until success is certain  
-      status = ESMF_FAILURE       
+      status = ESMF_RC_NOT_IMPL   
       rcpresent = .FALSE.
       if (present(rc)) then
         rcpresent = .TRUE.
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif
 
       defaultopts = "brief"

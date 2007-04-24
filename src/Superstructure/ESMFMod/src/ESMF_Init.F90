@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.43 2007/03/31 05:51:32 cdeluca Exp $
+! $Id: ESMF_Init.F90,v 1.44 2007/04/24 01:55:40 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -158,7 +158,7 @@
       type(ESMF_VM) :: localvm
 
       ! assume failure until success
-      if (present(rc)) rc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
       
       ! initialize the framework
       call ESMF_FrameworkInternalInit(lang=ESMF_MAIN_F90, &
@@ -246,7 +246,7 @@
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif
 
       if (already_init) then
@@ -399,7 +399,7 @@
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_IMPL
       endif
 
       if (already_final) then
