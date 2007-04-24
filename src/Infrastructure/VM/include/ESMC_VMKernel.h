@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.44 2007/04/23 18:53:44 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.45 2007/04/24 02:46:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -53,6 +53,9 @@ enum vmType { vmI4=1, vmR4, vmR8};
 #define VM_COMM_TYPE_PTHREAD  (1)
 #define VM_COMM_TYPE_SHMHACK  (2)
 #define VM_COMM_TYPE_POSIXIPC (3)
+
+// - VMKernel error code
+#define VMK_ERROR             (-1)
 
 // - buffer lenghts in bytes
 #define PIPC_BUFFER                   (4096)
@@ -260,28 +263,28 @@ class ESMC_VMK{
     
     
     // p2p communication calls
-    void vmk_send(void *message, int size, int dest, int tag=-1);
-    void vmk_send(void *message, int size, int dest,
+    int vmk_send(void *message, int size, int dest, int tag=-1);
+    int vmk_send(void *message, int size, int dest,
       vmk_commhandle **commhandle, int tag=-1);
-    void vmk_recv(void *message, int size, int source, int tag=-1, 
+    int vmk_recv(void *message, int size, int source, int tag=-1, 
       vmk_status *status=NULL);
-    void vmk_recv(void *message, int size, int source,
+    int vmk_recv(void *message, int size, int source,
       vmk_commhandle **commhandle, int tag=-1);
     
-    void vmk_sendrecv(void *sendData, int sendSize, int dst,
+    int vmk_sendrecv(void *sendData, int sendSize, int dst,
       void *recvData, int recvSize, int src);
-    void vmk_sendrecv(void *sendData, int sendSize, int dst,
+    int vmk_sendrecv(void *sendData, int sendSize, int dst,
       void *recvData, int recvSize, int src, vmk_commhandle **commhandle);
 
-    void vmk_vassend(void *message, int size, int destVAS,
+    int vmk_vassend(void *message, int size, int destVAS,
       vmk_commhandle **commhandle, int tag=-1);
-    void vmk_vasrecv(void *message, int size, int srcVAS,
+    int vmk_vasrecv(void *message, int size, int srcVAS,
       vmk_commhandle **commhandle, int tag=-1);
 
     // collective communication calls
-    void vmk_barrier(void);
+    int vmk_barrier(void);
 
-    void vmk_threadbarrier(void);
+    int vmk_threadbarrier(void);
 
     void vmk_reduce(void *in, void *out, int len, vmType type, vmOp op, 
       int root);
@@ -289,28 +292,32 @@ class ESMC_VMK{
     void vmk_allfullreduce(void *in, void *out, int len, vmType type,
       vmOp op);
     
-    void vmk_scatter(void *in, void *out, int len, int root);
-    void vmk_scatter(void *in, void *out, int len, int root,
+    int vmk_scatter(void *in, void *out, int len, int root);
+    int vmk_scatter(void *in, void *out, int len, int root,
       vmk_commhandle **commhandle);
+    int vmk_scatterv(void *in, int *inCounts, int *inOffsets, void *out,
+      int outCount, vmType type, int root);
     
-    void vmk_gather(void *in, void *out, int len, int root);
-    void vmk_gather(void *in, void *out, int len, int root,
+    int vmk_gather(void *in, void *out, int len, int root);
+    int vmk_gather(void *in, void *out, int len, int root,
       vmk_commhandle **commhandle);
-    void vmk_allgather(void *in, void *out, int len);
-    void vmk_allgather(void *in, void *out, int len,
+    int vmk_gatherv(void *in, int inCount, void *out, int *outCounts, 
+      int *outOffsets, vmType type, int root);
+    int vmk_allgather(void *in, void *out, int len);
+    int vmk_allgather(void *in, void *out, int len,
       vmk_commhandle **commhandle);
-    void vmk_allgatherv(void *in, int inCount, void *out, int *outCounts, 
+    int vmk_allgatherv(void *in, int inCount, void *out, int *outCounts, 
       int *outOffsets, vmType type);
 
     void vmk_alltoallv(void *in, int *inCounts, int *inOffsets, void *out, 
       int *outCounts, int *outOffsets, vmType type);
 
-    void vmk_broadcast(void *data, int len, int root);
-    void vmk_broadcast(void *data, int len, int root,
+    int vmk_broadcast(void *data, int len, int root);
+    int vmk_broadcast(void *data, int len, int root,
       vmk_commhandle **commhandle);
     
     // non-blocking service calls
-    void vmk_commwait(vmk_commhandle **commhandle, vmk_status *status=NULL,
+    int vmk_commwait(vmk_commhandle **commhandle, vmk_status *status=NULL,
       int nanopause=0);
     void vmk_commqueuewait(void);
     void vmk_commcancel(vmk_commhandle **commhandle);

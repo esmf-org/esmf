@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.85 2007/04/20 21:35:02 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.86 2007/04/24 02:46:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -129,6 +129,7 @@ module ESMF_VMMod
   public ESMF_VMCommWait
   public ESMF_VMCommQueueWait
   public ESMF_VMGather
+  public ESMF_VMGatherV
   public ESMF_VMGet
   public ESMF_VMGetGlobal
   public ESMF_VMGetCurrent
@@ -181,7 +182,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.85 2007/04/20 21:35:02 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.86 2007/04/24 02:46:52 theurich Exp $"
 
 !==============================================================================
 
@@ -324,6 +325,25 @@ module ESMF_VMMod
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMGather} functions.   
+!EOPI 
+      end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMGatherV -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMGatherV
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMGatherVI4
+      module procedure ESMF_VMGatherVR4
+      module procedure ESMF_VMGatherVR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMGatherV} functions.   
 !EOPI 
       end interface
 
@@ -1162,7 +1182,7 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGatherV()
   subroutine ESMF_VMAllGatherVI4(vm, sendData, sendCount, recvData, &
-    recvCounts,  recvOffsets, blockingflag, commhandle, rc)
+    recvCounts, recvOffsets, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
@@ -2995,6 +3015,249 @@ module ESMF_VMMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMGatherLogical
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGatherVI4()"
+!BOP
+! !IROUTINE: ESMF_VMGatherV - GatherV 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMGatherV()
+  subroutine ESMF_VMGatherVI4(vm, sendData, sendCount, recvData, &
+    recvCounts, recvOffsets, root, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer,                  intent(in)              :: sendCount
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
+    integer,                  intent(in)              :: recvCounts(:)
+    integer,                  intent(in)              :: recvOffsets(:)
+    integer,                  intent(in)              :: root
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
+!   of kind {\tt ESMF\_Logical} from all PETs of an {\tt ESMF\_VM} object 
+!   into an array on root PET.\newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contiguous data array holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[sendCount] 
+!        Number of {\tt sendData} elements to send from local PET to all other
+!        PETs.
+!   \item[recvData] 
+!        Single data variable to be received. All PETs must specify a
+!        valid result variable.
+!   \item[recvCounts] 
+!        Number of {\tt recvData} elements to be received from corresponding
+!        source PET.
+!   \item[recvOffsets] 
+!        Offsets in units of elements in {\tt recvData} marking the start of
+!        element sequence to be received from source PET.
+!   \item[root]
+!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMGatherV(vm, sendData(1), sendCount, recvData(1), &
+      recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, root, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMGatherVI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGatherVR4()"
+!BOP
+! !IROUTINE: ESMF_VMGatherV - GatherV 4-byte reals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMGatherV()
+  subroutine ESMF_VMGatherVR4(vm, sendData, sendCount, recvData, &
+    recvCounts,  recvOffsets, root, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    real(ESMF_KIND_R4), target,   intent(in)          :: sendData(:)
+    integer,                  intent(in)              :: sendCount
+    real(ESMF_KIND_R4), target,   intent(out)         :: recvData(:)
+    integer,                  intent(in)              :: recvCounts(:)
+    integer,                  intent(in)              :: recvOffsets(:)
+    integer,                  intent(in)              :: root
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
+!   of kind {\tt ESMF\_Logical} from all PETs of an {\tt ESMF\_VM} object 
+!   into an array on root PET.\newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contiguous data array holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[sendCount] 
+!        Number of {\tt sendData} elements to send from local PET to all other
+!        PETs.
+!   \item[recvData] 
+!        Single data variable to be received. All PETs must specify a
+!        valid result variable.
+!   \item[recvCounts] 
+!        Number of {\tt recvData} elements to be received from corresponding
+!        source PET.
+!   \item[recvOffsets] 
+!        Offsets in units of elements in {\tt recvData} marking the start of
+!        element sequence to be received from source PET.
+!   \item[root]
+!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMGatherV(vm, sendData(1), sendCount, recvData(1), &
+      recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, root, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMGatherVR4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGatherVR8()"
+!BOP
+! !IROUTINE: ESMF_VMGatherV - AllGatherV 8-byte reals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMGatherV()
+  subroutine ESMF_VMGatherVR8(vm, sendData, sendCount, recvData, &
+    recvCounts,  recvOffsets, root, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    real(ESMF_KIND_R8), target,   intent(in)          :: sendData(:)
+    integer,                  intent(in)              :: sendCount
+    real(ESMF_KIND_R8), target,   intent(out)         :: recvData(:)
+    integer,                  intent(in)              :: recvCounts(:)
+    integer,                  intent(in)              :: recvOffsets(:)
+    integer,                  intent(in)              :: root
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
+!   of kind {\tt ESMF\_Logical} from all PETs of an {\tt ESMF\_VM} object 
+!   into an array on all PETs.\newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contiguous data array holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[sendCount] 
+!        Number of {\tt sendData} elements to send from local PET to all other
+!        PETs.
+!   \item[recvData] 
+!        Single data variable to be received. All PETs must specify a
+!        valid result variable.
+!   \item[recvCounts] 
+!        Number of {\tt recvData} elements to be received from corresponding
+!        source PET.
+!   \item[recvOffsets] 
+!        Offsets in units of elements in {\tt recvData} marking the start of
+!        element sequence to be received from source PET.
+!   \item[root]
+!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMGatherV(vm, sendData(1), sendCount, recvData(1), &
+      recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, root, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMGatherVR8
 !------------------------------------------------------------------------------
 
 

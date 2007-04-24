@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.89 2007/04/23 18:53:44 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.90 2007/04/24 02:46:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -2319,7 +2319,7 @@ int ESMC_VMK::vmk_commqueueitem_unlink(vmk_commhandle *commhandle){
 }
 
 
-void ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, vmk_status *status,
+int ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, vmk_status *status,
   int nanopause){
   // wait for all of the communications pointed to by *commhandle to complete
   // and delete all of the inside contents of *commhandle (even if it is a tree)
@@ -2327,12 +2327,13 @@ void ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, vmk_status *status,
   // container (only) if the *commhandle was part of the commqueue!
 //fprintf(stderr, "vmk_commwait: nhandles=%d\n", nhandles);
 //fprintf(stderr, "vmk_commwait: *commhandle=%p\n", *commhandle);
+  int localrc=0;
   if ((commhandle!=NULL) && ((*commhandle)!=NULL)){
     // wait for all non-blocking requests in commhandle to complete
     if ((*commhandle)->type==0){
       // this is a commhandle container
       for (int i=0; i<(*commhandle)->nelements; i++){
-        vmk_commwait(&((*commhandle)->handles[i]));  // recursive call
+        localrc = vmk_commwait(&((*commhandle)->handles[i]));  // recursive call
         delete (*commhandle)->handles[i];
       }
       delete [] (*commhandle)->handles;
@@ -2358,7 +2359,8 @@ void ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, vmk_status *status,
           for(;;){
             if (mpi_mutex_flag)
               pthread_mutex_lock(pth_mutex);
-            MPI_Test(&((*commhandle)->mpireq[i]), &completeFlag, mpi_s);
+            localrc = MPI_Test(&((*commhandle)->mpireq[i]), &completeFlag,
+              mpi_s);
             if (mpi_mutex_flag)
               pthread_mutex_unlock(pth_mutex);
             if (completeFlag) break;
@@ -2381,7 +2383,7 @@ void ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, vmk_status *status,
         }else{
           if (mpi_mutex_flag)
             pthread_mutex_lock(pth_mutex);
-          MPI_Wait(&((*commhandle)->mpireq[i]), mpi_s);
+          localrc = MPI_Wait(&((*commhandle)->mpireq[i]), mpi_s);
           if (mpi_mutex_flag)
             pthread_mutex_unlock(pth_mutex);
           if (status){
@@ -2402,6 +2404,7 @@ void ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, vmk_status *status,
       // this is a dummy commhandle and there is nothing to wait for...
     }else{
       printf("ESMC_VMK: only MPI non-blocking implemented\n");
+      localrc = VMK_ERROR;
     }
     // if this *commhandle is in the request queue x-> unlink and delete
     if (vmk_commqueueitem_unlink(*commhandle)){ 
@@ -2409,6 +2412,7 @@ void ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, vmk_status *status,
       *commhandle = NULL; // ensure this container will not point to anything
     }
   }
+  return localrc;
 }
 
 
@@ -2458,11 +2462,12 @@ void ESMC_VMK::vmk_commcancel(vmk_commhandle **commhandle){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-void ESMC_VMK::vmk_send(void *message, int size, int dest, int tag){
+int ESMC_VMK::vmk_send(void *message, int size, int dest, int tag){
   // p2p send
 #if (VERBOSITY > 9)
   printf("sending to: %d, %d\n", dest, lpid[dest]);
 #endif
+  int localrc=0;
   shared_mp *shmp;
   pipc_mp *pipcmp;
   int scpsize;
@@ -2478,7 +2483,7 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest, int tag){
     if (mpi_mutex_flag)
       pthread_mutex_lock(pth_mutex);
     if (tag == -1) tag = 1000*mypet+dest;   // default tag to simplify debugging
-    MPI_Send(message, size, MPI_BYTE, lpid[dest], tag, mpi_c);
+    localrc = MPI_Send(message, size, MPI_BYTE, lpid[dest], tag, mpi_c);
     if (mpi_mutex_flag)
       pthread_mutex_unlock(pth_mutex);
     break;
@@ -2591,16 +2596,18 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest, int tag){
     printf("unknown comm_type.\n");
     break;
   }
+  return localrc;
 }
 
 
-void ESMC_VMK::vmk_send(void *message, int size, int dest, 
+int ESMC_VMK::vmk_send(void *message, int size, int dest, 
   vmk_commhandle **commhandle, int tag){
   // p2p send
 //fprintf(stderr, "vmk_send: commhandle=%p\n", *commhandle);
 #if (VERBOSITY > 9)
   printf("sending to: %d, %d\n", dest, lpid[dest]);
 #endif
+  int localrc=0;
   shared_mp *shmp;
   pipc_mp *pipcmp;
   int scpsize;
@@ -2625,7 +2632,7 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest,
       pthread_mutex_lock(pth_mutex);
 //fprintf(stderr, "MPI_Isend: commhandle=%p\n", (*commhandle)->mpireq);
     if (tag == -1) tag = 1000*mypet+dest;   // default tag to simplify debugging
-    MPI_Isend(message, size, MPI_BYTE, lpid[dest], tag, mpi_c, 
+    localrc = MPI_Isend(message, size, MPI_BYTE, lpid[dest], tag, mpi_c, 
       (*commhandle)->mpireq);
     if (mpi_mutex_flag)
       pthread_mutex_unlock(pth_mutex);
@@ -2669,15 +2676,17 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest,
     printf("unknown comm_type.\n");
     break;
   }
+  return localrc;
 }
 
 
-void ESMC_VMK::vmk_recv(void *message, int size, int source, int tag,
+int ESMC_VMK::vmk_recv(void *message, int size, int source, int tag,
   vmk_status *status){
   // p2p recv
 #if (VERBOSITY > 9)
   printf("receiving from: %d, %d\n", source, lpid[source]);
 #endif
+  int localrc=0;
   pipc_mp *pipcmp;
   shared_mp *shmp;
   int scpsize, rcpsize;
@@ -2685,14 +2694,14 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source, int tag,
   char *psrc;
   int i;
   char *mess;
-  // TODO: VM_ANY_SRC will cause problems for VM's with mixed comm_types.
   int comm_type;
-  if (source == VM_ANY_SRC)
-    // default into VM_COMM_TYPE_MPI1 comm_type for VM_ANY_SRC
+  if (source == VM_ANY_SRC){
+    if (!mpionly) return VMK_ERROR; // bail out
     comm_type = VM_COMM_TYPE_MPI1;
-  else
+  }else{
     // use the predefined comm_type between source and destination (mypet)
     comm_type = commarray[source][mypet].comm_type;
+  }
   // set comm_type in status
   if (status)
     status->comm_type = comm_type;
@@ -2713,7 +2722,7 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source, int tag,
       mpi_s = &(status->mpi_s);
     else
       mpi_s = MPI_STATUS_IGNORE;
-    MPI_Recv(message, size, MPI_BYTE, mpiSource, tag, mpi_c, mpi_s);
+    localrc = MPI_Recv(message, size, MPI_BYTE, mpiSource, tag, mpi_c, mpi_s);
     if (mpi_mutex_flag)
       pthread_mutex_unlock(pth_mutex);
     if (status){
@@ -2839,16 +2848,18 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source, int tag,
     printf("unknown comm_type.\n");
     break;
   }
+  return localrc;
 }
 
 
-void ESMC_VMK::vmk_recv(void *message, int size, int source,
+int ESMC_VMK::vmk_recv(void *message, int size, int source,
   vmk_commhandle **commhandle, int tag){
   // p2p recv
 //fprintf(stderr, "vmk_recv: commhandle=%p\n", *commhandle);
 #if (VERBOSITY > 9)
   printf("receiving from: %d, %d\n", source, lpid[source]);
 #endif
+  int localrc=0;
   pipc_mp *pipcmp;
   shared_mp *shmp;
   int scpsize, rcpsize;
@@ -2861,14 +2872,14 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source,
     *commhandle = new vmk_commhandle;
     vmk_commqueueitem_link(*commhandle);
   }
-  // TODO: VM_ANY_SRC will cause problems for VM's with mixed comm_types.
   int comm_type;
-  if (source == VM_ANY_SRC)
-    // default into VM_COMM_TYPE_MPI1 comm_type for VM_ANY_SRC
+  if (source == VM_ANY_SRC){
+    if (!mpionly) return VMK_ERROR; // bail out
     comm_type = VM_COMM_TYPE_MPI1;
-  else
+  }else{
     // use the predefined comm_type between source and destination (mypet)
     comm_type = commarray[source][mypet].comm_type;
+  }
   // switch into the appropriate implementation
   switch(comm_type){
   case VM_COMM_TYPE_MPI1:
@@ -2885,8 +2896,8 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source,
     int mpiSource;
     if (source == VM_ANY_SRC) mpiSource = MPI_ANY_SOURCE;
     else mpiSource = lpid[source];
-    MPI_Irecv(message, size, MPI_BYTE, mpiSource, tag,
-      mpi_c, (*commhandle)->mpireq);
+    localrc = MPI_Irecv(message, size, MPI_BYTE, mpiSource, tag, mpi_c,
+      (*commhandle)->mpireq);
     if (mpi_mutex_flag)
       pthread_mutex_unlock(pth_mutex);
     break;
@@ -2929,42 +2940,48 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source,
     printf("unknown comm_type.\n");
     break;
   }
+  return localrc;
 }
 
 
-void ESMC_VMK::vmk_vassend(void *message, int size, int destVAS,
+int ESMC_VMK::vmk_vassend(void *message, int size, int destVAS,
   vmk_commhandle **commhandle, int tag){
   // non-blocking send where the destination is a VAS, _not_ a PET
   // todo: currently this is just a stub that uses the PET-based 
   //       non-blocking send. Hence this will not work for the ESMF-threading
   //       case for which it is actually thought for!
   // for this stub implementation figure out first PET to run in the destVAS
+  int localrc=0;
   int dest;
   for (dest=0; dest<npets; dest++)
     if (pid[dest] == destVAS) break;
-  vmk_send(message, size, dest, commhandle, tag);
+  localrc = vmk_send(message, size, dest, commhandle, tag);
+  return localrc;
 }
 
 
-void ESMC_VMK::vmk_vasrecv(void *message, int size, int srcVAS,
+int ESMC_VMK::vmk_vasrecv(void *message, int size, int srcVAS,
   vmk_commhandle **commhandle, int tag){
   // non-blocking recv where the source is a VAS, _not_ a PET
   // todo: currently this is just a stub that uses the PET-based 
   //       non-blocking recv. Hence this will not work for the ESMF-threading
   //       case for which it is actually thought for!
   // for this stub implementation figure out first PET to run in the sourceVAS
+  int localrc=0;
   int src;
   for (src=0; src<npets; src++)
     if (pid[src] == srcVAS) break;
-  vmk_recv(message, size, src, commhandle, tag);
+  localrc = vmk_recv(message, size, src, commhandle, tag);
+  return localrc;
 }
 
   
-void ESMC_VMK::vmk_barrier(void){
+int ESMC_VMK::vmk_barrier(void){
   // collective barrier over all PETs
+  int localrc=0;
   if (mpionly){
-    MPI_Barrier(mpi_c);
-    return;
+    localrc = MPI_Barrier(mpi_c);
+    return localrc;
   }
   int myp = pid[mypet];
   int myt = tid[mypet];
@@ -2998,15 +3015,17 @@ void ESMC_VMK::vmk_barrier(void){
     // master will sync against all other masters using MPI-1 and then do flop
     sync_b_flop(&shmp->shms);
   }
+  return localrc;
 }
 
 
-void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
+int ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
   void *recvData, int recvSize, int src){
   // p2p sendrecv
+  int localrc=0;
   if (mpionly){
     MPI_Status mpi_s;
-    MPI_Sendrecv(sendData, sendSize, MPI_BYTE, dst, 1000*mypet+dst, 
+    localrc = MPI_Sendrecv(sendData, sendSize, MPI_BYTE, dst, 1000*mypet+dst, 
       recvData, recvSize, MPI_BYTE, src, 1000*src+mypet, mpi_c, &mpi_s);
   }else{
     // A unique order of the send and receive is given by the PET index.
@@ -3016,20 +3035,26 @@ void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
     // the other is rcv.
     if (mypet<dst){
       // mypet is the first receiver
-      vmk_recv(recvData, recvSize, src);
-      vmk_send(sendData, sendSize, dst);
+      localrc = vmk_recv(recvData, recvSize, src);
+      if (localrc) return localrc;
+      localrc = vmk_send(sendData, sendSize, dst);
+      if (localrc) return localrc;
     }else{
       // dst is first receiver
-      vmk_send(sendData, sendSize, dst);
-      vmk_recv(recvData, recvSize, src);
+      localrc = vmk_send(sendData, sendSize, dst);
+      if (localrc) return localrc;
+      localrc = vmk_recv(recvData, recvSize, src);
+      if (localrc) return localrc;
     }
   }
+  return localrc;
 }
   
-void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
+int ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
   void *recvData, int recvSize, int src, vmk_commhandle **commhandle){
   // check if this needs a new entry in the request queue
 //fprintf(stderr, "vmk_sendrecv: commhandle=%p\n", *commhandle);
+  int localrc=0;
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
     vmk_commqueueitem_link(*commhandle);
@@ -3050,16 +3075,22 @@ void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
   // the other is rcv.
   if (mypet<dst){
     // mypet is the first receiver
-    vmk_recv(recvData, recvSize, src, &((*commhandle)->handles[0]));
-    vmk_send(sendData, sendSize, dst, &((*commhandle)->handles[1]));
+    localrc = vmk_recv(recvData, recvSize, src, &((*commhandle)->handles[0]));
+    if (localrc) return localrc;
+    localrc = vmk_send(sendData, sendSize, dst, &((*commhandle)->handles[1]));
+    if (localrc) return localrc;
   }else{
     // dst is first receiver
-    vmk_send(sendData, sendSize, dst, &((*commhandle)->handles[0]));
-    vmk_recv(recvData, recvSize, src, &((*commhandle)->handles[1]));
+    localrc = vmk_send(sendData, sendSize, dst, &((*commhandle)->handles[0]));
+    if (localrc) return localrc;
+    localrc = vmk_recv(recvData, recvSize, src, &((*commhandle)->handles[1]));
+    if (localrc) return localrc;
   }
+  return localrc;
 }
   
-void ESMC_VMK::vmk_threadbarrier(void){
+int ESMC_VMK::vmk_threadbarrier(void){
+  int localrc=0;
   if (!mpionly && !nothreadsflag){
     // collective barrier over all PETs in thread group with mypet
     int myp = pid[mypet];
@@ -3092,6 +3123,7 @@ void ESMC_VMK::vmk_threadbarrier(void){
       sync_b_flop(&shmp->shms);
     }
   }
+  return localrc;
 }
 
 
@@ -3604,16 +3636,18 @@ void ESMC_VMK::vmk_allfullreduce(void *in, void *out, int len,
 }
 
 
-void ESMC_VMK::vmk_scatter(void *in, void *out, int len, int root){
+int ESMC_VMK::vmk_scatter(void *in, void *out, int len, int root){
+  int localrc=0;
   if (mpionly){
-    MPI_Scatter(in, len, MPI_BYTE, out, len, MPI_BYTE, root, mpi_c);
+    localrc = MPI_Scatter(in, len, MPI_BYTE, out, len, MPI_BYTE, root, mpi_c);
   }else{
     // This is a very simplistic, probably very bad peformance implementation.
     if (mypet==root){
       // I am root -> send chunks to all other PETs
       char *rootin = (char *)in;
       for (int i=0; i<root; i++){
-        vmk_send(rootin, len, i);
+        localrc = vmk_send(rootin, len, i);
+        if (localrc) return localrc;
         rootin += len;
       }
       // memcpy root's chunk
@@ -3621,19 +3655,22 @@ void ESMC_VMK::vmk_scatter(void *in, void *out, int len, int root){
       rootin += len;
       // keep sending chunks
       for (int i=root+1; i<npets; i++){
-        vmk_send(rootin, len, i);
+        localrc = vmk_send(rootin, len, i);
+        if (localrc) return localrc;
         rootin += len;
       }
     }else{
       // all other PETs receive their chunk
-      vmk_recv(out, len, root);
+      localrc = vmk_recv(out, len, root);
     }
   }
+  return localrc;
 }
 
 
-void ESMC_VMK::vmk_scatter(void *in, void *out, int len, int root,
+int ESMC_VMK::vmk_scatter(void *in, void *out, int len, int root,
   vmk_commhandle **commhandle){
+  int localrc=0;
   // check if this needs a new entry in the request queue
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
@@ -3656,7 +3693,8 @@ void ESMC_VMK::vmk_scatter(void *in, void *out, int len, int root,
     // get ready to send chunks
     char *rootin = (char *)in;
     for (int i=0; i<root; i++){
-      vmk_send(rootin, len, i, &((*commhandle)->handles[i]));
+      localrc = vmk_send(rootin, len, i, &((*commhandle)->handles[i]));
+      if (localrc) return localrc;
       rootin += len;
     }
     // memcpy root's chunk
@@ -3664,7 +3702,8 @@ void ESMC_VMK::vmk_scatter(void *in, void *out, int len, int root,
     rootin += len;
     // keep sending chunks
     for (int i=root+1; i<npets; i++){
-      vmk_send(rootin, len, i, &((*commhandle)->handles[i-1]));
+      localrc = vmk_send(rootin, len, i, &((*commhandle)->handles[i-1]));
+      if (localrc) return localrc;
       rootin += len;
     }
   }else{
@@ -3674,41 +3713,112 @@ void ESMC_VMK::vmk_scatter(void *in, void *out, int len, int root,
     (*commhandle)->type=0;                // these are subhandles
     (*commhandle)->handles = new vmk_commhandle*[1];
     (*commhandle)->handles[0] = new vmk_commhandle; // allocate handle
-    vmk_recv(out, len, root, &((*commhandle)->handles[0]));
+    localrc = vmk_recv(out, len, root, &((*commhandle)->handles[0]));
   }
+  return localrc;
 }
 
 
-void ESMC_VMK::vmk_gather(void *in, void *out, int len, int root){
+int ESMC_VMK::vmk_scatterv(void *in, int *inCounts, int *inOffsets, void *out,
+  int outCount, vmType type, int root){
+  int localrc=0;
   if (mpionly){
-    MPI_Gather(in, len, MPI_BYTE, out, len, MPI_BYTE, root, mpi_c);
+    // Find corresponding MPI data type
+    MPI_Datatype mpitype;
+    switch (type){
+    case vmI4:
+      mpitype = MPI_INT;
+      break;
+    case vmR4:
+      mpitype = MPI_FLOAT;
+      break;
+    case vmR8:
+      mpitype = MPI_DOUBLE;
+      break;
+    }
+    localrc = MPI_Scatterv(in, inCounts, inOffsets, mpitype, out, outCount,
+      mpitype, root, mpi_c);
+  }else{
+    // This is a very simplistic, probably very bad peformance implementation.
+    int size=0;
+    switch (type){
+    case vmI4:
+      size=4;
+      break;
+    case vmR4:
+      size=4;
+      break;
+    case vmR8:
+      size=8;
+      break;
+    }
+    int root = 0; // arbitrary root, 0 always exists!
+    if (mypet==root){
+      // I am root -> send chunks to all other PETs
+      int len;
+      char *rootin;
+      for (int i=0; i<root; i++){
+        len = inCounts[i] * size;
+        rootin = (char *)in + inOffsets[i] * size;
+        localrc = vmk_send(rootin, len, i);
+        if (localrc) return localrc;
+      }
+      // memcpy root's chunk
+      len = inCounts[root] * size;
+      rootin = (char *)in + inOffsets[root] * size;
+      memcpy(out, rootin, len);
+      // keep sending chunks
+      for (int i=root+1; i<npets; i++){
+        len = inCounts[i] * size;
+        rootin = (char *)in + inOffsets[i] * size;
+        localrc = vmk_send(rootin, len, i);
+        if (localrc) return localrc;
+      }
+    }else{
+      // all other PETs receive their chunk
+      int len = outCount * size;
+      localrc = vmk_recv(out, len, root);
+    }
+  }
+  return localrc;
+}
+
+
+int ESMC_VMK::vmk_gather(void *in, void *out, int len, int root){
+  int localrc=0;
+  if (mpionly){
+    localrc = MPI_Gather(in, len, MPI_BYTE, out, len, MPI_BYTE, root, mpi_c);
   }else{
     // This is a very simplistic, probably very bad peformance implementation.
     if (mypet==root){
       // I am root -> receive chunks from all other PETs
       char *rootout = (char *)out;
       for (int i=0; i<root; i++){
-        vmk_recv(rootout, len, i);
+        localrc = vmk_recv(rootout, len, i);
+        if (localrc) return localrc;
         rootout += len;
       }
       // memcpy root's chunk
       memcpy(rootout, in, len);
       rootout += len;
-      // keep sending chunks
+      // keep receiving chunks
       for (int i=root+1; i<npets; i++){
-        vmk_recv(rootout, len, i);
+        localrc = vmk_recv(rootout, len, i);
+        if (localrc) return localrc;
         rootout += len;
       }
     }else{
       // all other PETs send their chunk
-      vmk_send(in, len, root);
+      localrc = vmk_send(in, len, root);
     }
   }
+  return localrc;
 }
 
 
-void ESMC_VMK::vmk_gather(void *in, void *out, int len, int root,
+int ESMC_VMK::vmk_gather(void *in, void *out, int len, int root,
   vmk_commhandle **commhandle){
+  int localrc = 0;
   // check if this needs a new entry in the request queue
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
@@ -3731,15 +3841,17 @@ void ESMC_VMK::vmk_gather(void *in, void *out, int len, int root,
     // get ready to receive chunks
     char *rootout = (char *)out;
     for (int i=0; i<root; i++){
-      vmk_recv(rootout, len, i, &((*commhandle)->handles[i]));
+      localrc = vmk_recv(rootout, len, i, &((*commhandle)->handles[i]));
+      if (localrc) return localrc;
       rootout += len;
     }
     // memcpy root's chunk
     memcpy(rootout, in, len);
     rootout += len;
-    // keep sending chunks
+    // keep receiving chunks
     for (int i=root+1; i<npets; i++){
-      vmk_recv(rootout, len, i, &((*commhandle)->handles[i-1]));
+      localrc = vmk_recv(rootout, len, i, &((*commhandle)->handles[i-1]));
+      if (localrc) return localrc;
       rootout += len;
     }
   }else{
@@ -3749,68 +3861,15 @@ void ESMC_VMK::vmk_gather(void *in, void *out, int len, int root,
     (*commhandle)->type=0;                // these are subhandles
     (*commhandle)->handles = new vmk_commhandle*[1];
     (*commhandle)->handles[0] = new vmk_commhandle; // allocate handle
-    vmk_send(in, len, root, &((*commhandle)->handles[0]));
+    localrc = vmk_send(in, len, root, &((*commhandle)->handles[0]));
   }
+  return localrc;
 }
 
 
-void ESMC_VMK::vmk_allgather(void *in, void *out, int len){
-  if (mpionly){
-    MPI_Allgather(in, len, MPI_BYTE, out, len, MPI_BYTE, mpi_c);
-  }else{
-    // This is a very simplistic, probably very bad peformance implementation.
-    int root = 0; // arbitrary root, 0 always exists!
-    if (mypet==root){
-      // I am root -> receive chunks from all other PETs
-      char *rootout = (char *)out;
-      for (int i=0; i<root; i++){
-        vmk_recv(rootout, len, i);
-        rootout += len;
-      }
-      // memcpy root's chunk
-      memcpy(rootout, in, len);
-      rootout += len;
-      // keep sending chunks
-      for (int i=root+1; i<npets; i++){
-        vmk_recv(rootout, len, i);
-        rootout += len;
-      }
-    }else{
-      // all other PETs send their chunk
-      vmk_send(in, len, root);
-    }
-    // now broadcast root's out to all other PETs
-    vmk_broadcast(out, len, root);
-  }
-}
-
-
-void ESMC_VMK::vmk_allgather(void *in, void *out, int len,
-  vmk_commhandle **commhandle){
-  // check if this needs a new entry in the request queue
-  if (*commhandle==NULL){
-    *commhandle = new vmk_commhandle;
-    vmk_commqueueitem_link(*commhandle);
-  }
-  // MPI does not offer a non-blocking allgather operation, hence there is no
-  // point in checking if the mpionly flag is set in this VM, in either case
-  // an explicit implementation must be used.
-  // There will be as many commhandles as there are PETs
-  (*commhandle)->nelements = npets;     // number of non-blocking gathers
-  (*commhandle)->type=0;                // these are subhandles
-  (*commhandle)->handles = new vmk_commhandle*[(*commhandle)->nelements];
-  for (int i=0; i<(*commhandle)->nelements; i++)
-    (*commhandle)->handles[i] = new vmk_commhandle; // allocate handles
-  // This is a very simplistic, probably very bad peformance implementation.
-  for (int root=0; root<npets; root++){
-    // Each PET is considered the root PET once for a non-blocking gather
-    vmk_gather(in, out, len, root, &((*commhandle)->handles[root]));
-  }
-}
-
-
-void ESMC_VMK::vmk_allgatherv(void *in, int inCount, void *out, 
-  int *outCounts, int *outOffsets, vmType type){
+int ESMC_VMK::vmk_gatherv(void *in, int inCount, void *out, int *outCounts, 
+  int *outOffsets, vmType type, int root){
+  int localrc=0;
   if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
@@ -3825,8 +3884,8 @@ void ESMC_VMK::vmk_allgatherv(void *in, int inCount, void *out,
       mpitype = MPI_DOUBLE;
       break;
     }
-    MPI_Allgatherv(in, inCount, mpitype, out, outCounts, outOffsets, mpitype,
-      mpi_c);
+    localrc = MPI_Gatherv(in, inCount, mpitype, out, outCounts, outOffsets,
+      mpitype, root, mpi_c);
   }else{
     // This is a very simplistic, probably very bad peformance implementation.
     int size=0;
@@ -3849,29 +3908,161 @@ void ESMC_VMK::vmk_allgatherv(void *in, int inCount, void *out,
       for (int i=0; i<root; i++){
         len = outCounts[i] * size;
         rootout = (char *)out + outOffsets[i] * size;
-        vmk_recv(rootout, len, i);
+        localrc = vmk_recv(rootout, len, i);
+        if (localrc) return localrc;
       }
       // memcpy root's chunk
       len = outCounts[root] * size;
       rootout = (char *)out + outOffsets[root] * size;
       memcpy(rootout, in, len);
-      // keep sending chunks
+      // keep receiving chunks
       for (int i=root+1; i<npets; i++){
         len = outCounts[i] * size;
         rootout = (char *)out + outOffsets[i] * size;
-        vmk_recv(rootout, len, i);
+        localrc = vmk_recv(rootout, len, i);
+        if (localrc) return localrc;
       }
     }else{
       // all other PETs send their chunk
       int len = inCount * size;
-      vmk_send(in, len, root);
+      localrc = vmk_send(in, len, root);
+    }
+  }
+  return localrc;
+}
+
+
+int ESMC_VMK::vmk_allgather(void *in, void *out, int len){
+  int localrc=0;
+  if (mpionly){
+    localrc = MPI_Allgather(in, len, MPI_BYTE, out, len, MPI_BYTE, mpi_c);
+  }else{
+    // This is a very simplistic, probably very bad peformance implementation.
+    int root = 0; // arbitrary root, 0 always exists!
+    if (mypet==root){
+      // I am root -> receive chunks from all other PETs
+      char *rootout = (char *)out;
+      for (int i=0; i<root; i++){
+        localrc = vmk_recv(rootout, len, i);
+        if (localrc) return localrc;
+        rootout += len;
+      }
+      // memcpy root's chunk
+      memcpy(rootout, in, len);
+      rootout += len;
+      // keep receiving chunks
+      for (int i=root+1; i<npets; i++){
+        localrc = vmk_recv(rootout, len, i);
+        if (localrc) return localrc;
+        rootout += len;
+      }
+    }else{
+      // all other PETs send their chunk
+      localrc = vmk_send(in, len, root);
+      if (localrc) return localrc;
+    }
+    // now broadcast root's out to all other PETs
+    localrc = vmk_broadcast(out, len, root);
+  }
+  return localrc;
+}
+
+
+int ESMC_VMK::vmk_allgather(void *in, void *out, int len,
+  vmk_commhandle **commhandle){
+  int localrc=0;
+  // check if this needs a new entry in the request queue
+  if (*commhandle==NULL){
+    *commhandle = new vmk_commhandle;
+    vmk_commqueueitem_link(*commhandle);
+  }
+  // MPI does not offer a non-blocking allgather operation, hence there is no
+  // point in checking if the mpionly flag is set in this VM, in either case
+  // an explicit implementation must be used.
+  // There will be as many commhandles as there are PETs
+  (*commhandle)->nelements = npets;     // number of non-blocking gathers
+  (*commhandle)->type=0;                // these are subhandles
+  (*commhandle)->handles = new vmk_commhandle*[(*commhandle)->nelements];
+  for (int i=0; i<(*commhandle)->nelements; i++)
+    (*commhandle)->handles[i] = new vmk_commhandle; // allocate handles
+  // This is a very simplistic, probably very bad peformance implementation.
+  for (int root=0; root<npets; root++){
+    // Each PET is considered the root PET once for a non-blocking gather
+    localrc = vmk_gather(in, out, len, root, &((*commhandle)->handles[root]));
+    if (localrc) return localrc;
+  }
+  return localrc;
+}
+
+
+int ESMC_VMK::vmk_allgatherv(void *in, int inCount, void *out, 
+  int *outCounts, int *outOffsets, vmType type){
+  int localrc=0;
+  if (mpionly){
+    // Find corresponding MPI data type
+    MPI_Datatype mpitype;
+    switch (type){
+    case vmI4:
+      mpitype = MPI_INT;
+      break;
+    case vmR4:
+      mpitype = MPI_FLOAT;
+      break;
+    case vmR8:
+      mpitype = MPI_DOUBLE;
+      break;
+    }
+    localrc = MPI_Allgatherv(in, inCount, mpitype, out, outCounts, outOffsets,
+      mpitype, mpi_c);
+  }else{
+    // This is a very simplistic, probably very bad peformance implementation.
+    int size=0;
+    switch (type){
+    case vmI4:
+      size=4;
+      break;
+    case vmR4:
+      size=4;
+      break;
+    case vmR8:
+      size=8;
+      break;
+    }
+    int root = 0; // arbitrary root, 0 always exists!
+    if (mypet==root){
+      // I am root -> receive chunks from all other PETs
+      int len;
+      char *rootout;
+      for (int i=0; i<root; i++){
+        len = outCounts[i] * size;
+        rootout = (char *)out + outOffsets[i] * size;
+        localrc = vmk_recv(rootout, len, i);
+        if (localrc) return localrc;
+      }
+      // memcpy root's chunk
+      len = outCounts[root] * size;
+      rootout = (char *)out + outOffsets[root] * size;
+      memcpy(rootout, in, len);
+      // keep receiving chunks
+      for (int i=root+1; i<npets; i++){
+        len = outCounts[i] * size;
+        rootout = (char *)out + outOffsets[i] * size;
+        localrc = vmk_recv(rootout, len, i);
+        if (localrc) return localrc;
+      }
+    }else{
+      // all other PETs send their chunk
+      int len = inCount * size;
+      localrc = vmk_send(in, len, root);
+      if (localrc) return localrc;
     }
     // now broadcast root's out to all other PETs
     int len=0;
     for (int i=0; i<npets; i++)
       len += outCounts[i] * size;
-    vmk_broadcast(out, len, root);
+    localrc = vmk_broadcast(out, len, root);
   }
+  return localrc;
 }
 
 
@@ -3928,27 +4119,31 @@ void ESMC_VMK::vmk_alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
 }
 
 
-void ESMC_VMK::vmk_broadcast(void *data, int len, int root){
+int ESMC_VMK::vmk_broadcast(void *data, int len, int root){
+  int localrc=0;
   if (mpionly){
-    MPI_Bcast(data, len, MPI_BYTE, root, mpi_c);
+    localrc = MPI_Bcast(data, len, MPI_BYTE, root, mpi_c);
   }else{
     // This is a very simplistic, probably very bad peformance implementation.
     if (mypet==root){
       // I am root -> send my data to all other PETs
       for (int i=0; i<npets; i++) {
         if (i==mypet) continue; // skip root PET
-        vmk_send(data, len, i);
+        localrc = vmk_send(data, len, i);
+        if (localrc) return localrc;
       }
     }else{
       // all other PETs receive the broadcasted data
-      vmk_recv(data, len, root);
+      localrc = vmk_recv(data, len, root);
     }
   }
+  return localrc;
 }
 
 
-void ESMC_VMK::vmk_broadcast(void *data, int len, int root,
+int ESMC_VMK::vmk_broadcast(void *data, int len, int root,
   vmk_commhandle **commhandle){
+  int localrc=0;
   // check if this needs a new entry in the request queue
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
@@ -3969,11 +4164,15 @@ void ESMC_VMK::vmk_broadcast(void *data, int len, int root,
     for (int i=0; i<(*commhandle)->nelements; i++)
       (*commhandle)->handles[i] = new vmk_commhandle; // allocate handles
     // get ready to send chunks
-    for (int i=0; i<root; i++)
-      vmk_send(data, len, i, &((*commhandle)->handles[i]));
+    for (int i=0; i<root; i++){
+      localrc = vmk_send(data, len, i, &((*commhandle)->handles[i]));
+      if (localrc) return localrc;
+    }
     // skip root
-    for (int i=root+1; i<npets; i++)
-      vmk_send(data, len, i, &((*commhandle)->handles[i-1]));
+    for (int i=root+1; i<npets; i++){
+      localrc = vmk_send(data, len, i, &((*commhandle)->handles[i-1]));
+      if (localrc) return localrc;
+    }
   }else{
     // all other PETs receive the broadcasted data
     // there will be a single receive that needs to be issued
@@ -3981,8 +4180,9 @@ void ESMC_VMK::vmk_broadcast(void *data, int len, int root,
     (*commhandle)->type=0;                // these are subhandles
     (*commhandle)->handles = new vmk_commhandle*[1];
     (*commhandle)->handles[0] = new vmk_commhandle; // allocate handle
-    vmk_recv(data, len, root, &((*commhandle)->handles[0]));
+    localrc = vmk_recv(data, len, root, &((*commhandle)->handles[0]));
   }
+  return localrc;
 }
 
 
