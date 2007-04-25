@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.C,v 1.3 2007/04/20 19:47:41 theurich Exp $
+// $Id: ESMC_Config.C,v 1.4 2007/04/25 16:44:24 tjcnrl Exp $
 //
 // Earth System Modeling Framework
 // copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -7,9 +7,13 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-
+//
+//==============================================================================
+#define ESMC_FILENAME "ESMC_Config.C"
+//==============================================================================
+//
 // ESMC Config method implementation (body) file
-
+//
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
@@ -17,24 +21,25 @@
 // The code in this file implements the C++ {\tt ESMC\_Config} methods declared
 // in the companion file ESMC_Config.h
 //
-// 
-//
 //-----------------------------------------------------------------------------
-//
- // insert any higher level, 3rd party or system includes here
+
+// insert any higher level, 3rd party or system includes here
 #include <string.h>
+
 #include "ESMCI_Util.h"
+
+// LogErr headers
 #include "ESMC_LogErr.h"
 #include "ESMF_LogMacros.inc"
 
- // associated class definition files
+// associated class definition files
 #include "ESMCI_Config.h"
 
 //-----------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
  static const char* const version = 
-             "$Id: ESMC_Config.C,v 1.3 2007/04/20 19:47:41 theurich Exp $";
+             "$Id: ESMC_Config.C,v 1.4 2007/04/25 16:44:24 tjcnrl Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -82,7 +87,7 @@ ESMC_Config* ESMC_ConfigCreate(
   int localrc;                // local return code
 
   // initialize return code
-  if (rc!=NULL) *rc = ESMF_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
   // allocate the new Config object
   ESMC_Config* config;
@@ -145,7 +150,7 @@ int ESMC_ConfigDestroy(
   int localrc;                // local return code
 
   // initialize return code
-  rc = ESMF_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -220,7 +225,7 @@ int ESMC_ConfigLoadFile(
   char* fName = NULL;
 
   // initialize return code
-  rc = ESMF_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -239,8 +244,7 @@ int ESMC_ConfigLoadFile(
         break;
       }
       default:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                        "unknown optional arg id", &rc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
         return rc;
         break;
     }
@@ -322,7 +326,7 @@ int ESMC_ConfigFindLabel(
   char* fLabel = NULL;
 
   // initialize return code
-  rc = ESMF_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -399,7 +403,7 @@ int ESMC_ConfigNextLine(
   int* tableEndp = NULL;      // pointer to tableEnd
 
   // initialize return code
-  rc = ESMF_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -417,8 +421,7 @@ int ESMC_ConfigNextLine(
         break;
       }
       default:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                        "unknown optional arg id", &rc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
         return rc;
         break;
     }
@@ -489,7 +492,7 @@ int ESMC_ConfigNextLine(
   int llen = 0;
 
   // initialize return code
-  rc = ESMF_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -512,8 +515,7 @@ int ESMC_ConfigNextLine(
         break;
       }
       default:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                        "unknown optional arg id", &rc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
         return rc;
         break;
     }
@@ -596,7 +598,7 @@ int ESMC_ConfigNextLine(
   int llen = 0;
 
   // initialize return code
-  rc = ESMF_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -614,8 +616,7 @@ int ESMC_ConfigNextLine(
         break;
       }
       default:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                        "unknown optional arg id", &rc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
         return rc;
         break;
     }
@@ -701,7 +702,7 @@ int ESMC_ConfigNextLine(
   int llen = 0;
 
   // initialize return code
-  rc = ESMF_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -719,8 +720,7 @@ int ESMC_ConfigNextLine(
         break;
       }
       default:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                        "unknown optional arg id", &rc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
         return rc;
         break;
     }
@@ -809,7 +809,7 @@ int ESMC_ConfigValidate(
   int olen = 0;
 
   // initialize return code
-  rc = ESMF_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -827,8 +827,7 @@ int ESMC_ConfigValidate(
         break;
       }
       default:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                        "unknown optional arg id", &rc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
         return rc;
         break;
     }
@@ -930,7 +929,7 @@ int ESMC_ConfigGetAttribute(
   int i;
 
   // initialize return code
-  rc = ESMF_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -963,8 +962,7 @@ int ESMC_ConfigGetAttribute(
             break;
           }
           default: {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                            "unknown optional arg id", &rc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
             return rc;
             break;
           }
@@ -1026,8 +1024,7 @@ int ESMC_ConfigGetAttribute(
             break;
           }
           default: {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                            "unknown optional arg id", &rc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
             return rc;
             break;
           }
@@ -1089,8 +1086,7 @@ int ESMC_ConfigGetAttribute(
             break;
           }
           default: {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                            "unknown optional arg id", &rc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
             return rc;
             break;
           }
@@ -1152,8 +1148,7 @@ int ESMC_ConfigGetAttribute(
             break;
           }
           default: {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                            "unknown optional arg id", &rc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
             return rc;
             break;
           }
@@ -1215,8 +1210,7 @@ int ESMC_ConfigGetAttribute(
             break;
           }
           default: {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                            "unknown optional arg id", &rc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
             return rc;
             break;
           }
@@ -1274,8 +1268,7 @@ int ESMC_ConfigGetAttribute(
             break;
           }
           default: {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                            "unknown optional arg id", &rc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
             return rc;
             break;
           }
@@ -1341,8 +1334,8 @@ int ESMC_ConfigGetAttribute(
 
     // unknown data type/kind
     default: {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                      "unknown data type/kind", &rc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                      "- unknown data type/kind", &rc);
       return rc;
       break;
     }
@@ -1409,7 +1402,7 @@ int ESMC_ConfigSetAttribute(
   int i;
 
   // initialize return code
-  rc = ESMF_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -1437,8 +1430,7 @@ int ESMC_ConfigSetAttribute(
             break;
           }
           default: {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                            "unknown optional arg id", &rc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
             return rc;
             break;
           }
@@ -1476,7 +1468,7 @@ int ESMC_ConfigSetAttribute(
       if (fLabel != NULL) {delete[] fLabel;}
 
       // set return code for this branch
-      rc = ESMF_RC_NOT_IMPL;
+      rc = ESMC_RC_NOT_IMPL;
 
       break;
     } // end ESMC_TYPEKIND_I4
@@ -1497,8 +1489,7 @@ int ESMC_ConfigSetAttribute(
             break;
           }
           default: {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                            "unknown optional arg id", &rc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
             return rc;
             break;
           }
@@ -1536,7 +1527,7 @@ int ESMC_ConfigSetAttribute(
       if (fLabel != NULL) {delete[] fLabel;}
 
       // set return code for this branch
-      rc = ESMF_RC_NOT_IMPL;
+      rc = ESMC_RC_NOT_IMPL;
 
       break;
     } // end ESMC_TYPEKIND_I8
@@ -1557,8 +1548,7 @@ int ESMC_ConfigSetAttribute(
             break;
           }
           default: {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                            "unknown optional arg id", &rc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
             return rc;
             break;
           }
@@ -1596,7 +1586,7 @@ int ESMC_ConfigSetAttribute(
       if (fLabel != NULL) {delete[] fLabel;}
 
       // set return code for this branch
-      rc = ESMF_RC_NOT_IMPL;
+      rc = ESMC_RC_NOT_IMPL;
 
       break;
     } // end ESMC_TYPEKIND_R4
@@ -1617,8 +1607,7 @@ int ESMC_ConfigSetAttribute(
             break;
           }
           default: {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                            "unknown optional arg id", &rc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
             return rc;
             break;
           }
@@ -1656,7 +1645,7 @@ int ESMC_ConfigSetAttribute(
       if (fLabel != NULL) {delete[] fLabel;}
 
       // set return code for this branch
-      rc = ESMF_RC_NOT_IMPL;
+      rc = ESMC_RC_NOT_IMPL;
 
       break;
     } // end ESMC_TYPEKIND_R8
@@ -1677,8 +1666,7 @@ int ESMC_ConfigSetAttribute(
             break;
           }
           default: {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                            "unknown optional arg id", &rc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
             return rc;
             break;
           }
@@ -1716,7 +1704,7 @@ int ESMC_ConfigSetAttribute(
       if (fLabel != NULL) {delete[] fLabel;}
 
       // set return code for this branch
-      rc = ESMF_RC_NOT_IMPL;
+      rc = ESMC_RC_NOT_IMPL;
 
       break;
     } // end ESMC_TYPEKIND_LOGICAL
@@ -1733,8 +1721,7 @@ int ESMC_ConfigSetAttribute(
             break;
           }
           default: {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                            "unknown optional arg id", &rc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_UNK, "", &rc);
             return rc;
             break;
           }
@@ -1779,15 +1766,15 @@ int ESMC_ConfigSetAttribute(
       if (fLabel != NULL) {delete[] fLabel;}
 
       // set return code for this branch
-      rc = ESMF_RC_NOT_IMPL;
+      rc = ESMC_RC_NOT_IMPL;
 
       break;
     } // end ESMC_TYPEKIND_CHARACTER
 
     // unknown data type/kind
     default: {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_BAD,
-                      "unknown data type/kind", &rc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                      "- unknown data type/kind", &rc);
       return rc;
       break;
     }

@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.4 2007/04/20 19:47:41 theurich Exp $
+// $Id: ESMC_Config.h,v 1.5 2007/04/25 16:44:24 tjcnrl Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -68,42 +68,35 @@ typedef struct {
 //EOP
 //-----------------------------------------------------------------------------
 
-}ESMC_Config ; // end class ESMC_Config
+} ESMC_Config ; // end class ESMC_Config
 
 
-//
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//
 // prototypes for the ESMC_Config API
-//
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//
 
-  ESMC_Config* ESMC_ConfigCreate(int* rc);
+ESMC_Config* ESMC_ConfigCreate(int* rc);
 
-  int ESMC_ConfigDestroy(ESMC_Config* config);
+int ESMC_ConfigDestroy(ESMC_Config* config);
 
-  int ESMC_ConfigLoadFile(ESMC_Config* config, char* fname, ...);
+int ESMC_ConfigLoadFile(ESMC_Config* config, char* fname, ...);
 
-  int ESMC_ConfigFindLabel(ESMC_Config* config, char* label);
+int ESMC_ConfigFindLabel(ESMC_Config* config, char* label);
 
-  int ESMC_ConfigNextLine(ESMC_Config* config, ...);
+int ESMC_ConfigNextLine(ESMC_Config* config, ...);
 
-  int ESMC_ConfigGetChar(ESMC_Config* config, char* value, ...);
+int ESMC_ConfigGetChar(ESMC_Config* config, char* value, ...);
 
-  int ESMC_ConfigGetLen(ESMC_Config* config, int* wordCount, ...);
+int ESMC_ConfigGetLen(ESMC_Config* config, int* wordCount, ...);
 
-  int ESMC_ConfigGetDim(ESMC_Config* config, int* lineCount, int* columnCount, ...);
+int ESMC_ConfigGetDim(ESMC_Config* config, int* lineCount, int* columnCount, ...);
 
-  int ESMC_ConfigValidate(ESMC_Config* config, ...);
+int ESMC_ConfigValidate(ESMC_Config* config, ...);
 
-  int ESMC_ConfigGetAttribute(ESMC_Config* config, void* value, ESMC_TypeKind tk, ...);
+int ESMC_ConfigGetAttribute(ESMC_Config* config, void* value, ESMC_TypeKind tk, ...);
 
-  int ESMC_ConfigSetAttribute(ESMC_Config* config, void* value, ESMC_TypeKind tk, ...);
+int ESMC_ConfigSetAttribute(ESMC_Config* config, void* value, ESMC_TypeKind tk, ...);
 
-}; // end prototypes for ESMC_Config API
+
+}; // end extern "C"
 
 
 #endif  // ESMC_Config_H
