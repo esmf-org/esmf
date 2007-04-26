@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.11 2007/04/26 21:57:19 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.12 2007/04/26 23:41:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DistGrid.C,v 1.11 2007/04/26 21:57:19 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DistGrid.C,v 1.12 2007/04/26 23:41:08 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -276,8 +276,10 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
   
   // setup temporary dimExtent and indexList arrays for DistGridConstruct()
+  // also setup temporary dimCongtigFlag array for DistGridConstruct()
   int *dimExtent = new int[dimCount*deCount];
   int **indexList = new int*[dimCount*deCount];
+  int *dimContigFlag = new int[dimCount*deCount];
   int deDivider = 1;  // reset
   for (int i=0; i<dimCount; i++){
     int dimLength = maxCorner->array[i] - minCorner->array[i] + 1;
@@ -289,7 +291,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
       case ESMF_DECOMP_HOMOGEN:
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
-          extentIndex = de*dimCount+i;  // index into dimExtent array
+          extentIndex = de*dimCount+i;  // index into temp. arrays
           dimExtent[extentIndex] = chunkLength;
           decompChunk = (j/deDivider)%regDecomp->array[i];
           if (decompChunk < chunkRest) ++dimExtent[extentIndex]; // distr. rest
@@ -301,12 +303,13 @@ ESMC_DistGrid *ESMC_DistGridCreate(
           for (int k=0; k<dimExtent[extentIndex]; k++){
             indexList[extentIndex][k] = indexStart + k; // block structure
           }
+          dimContigFlag[extentIndex] = 1; // flag contiguous dimension
         }
         break;
       case ESMF_DECOMP_RESTLAST:
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
-          extentIndex = de*dimCount+i;  // index into dimExtent array
+          extentIndex = de*dimCount+i;  // index into temp. arrays
           dimExtent[extentIndex] = chunkLength;
           decompChunk = (j/deDivider)%regDecomp->array[i];
           if (decompChunk == regDecomp->array[i]-1) 
@@ -317,12 +320,13 @@ ESMC_DistGrid *ESMC_DistGridCreate(
           for (int k=0; k<dimExtent[extentIndex]; k++){
             indexList[extentIndex][k] = indexStart + k; // block structure
           }
+          dimContigFlag[extentIndex] = 1; // flag contiguous dimension
         }
         break;
       case ESMF_DECOMP_RESTFIRST:
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
-          extentIndex = de*dimCount+i;  // index into dimExtent array
+          extentIndex = de*dimCount+i;  // index into temp. arrays
           dimExtent[extentIndex] = chunkLength;
           decompChunk = (j/deDivider)%regDecomp->array[i];
           if (decompChunk == 0) 
@@ -334,12 +338,13 @@ ESMC_DistGrid *ESMC_DistGridCreate(
           for (int k=0; k<dimExtent[extentIndex]; k++){
             indexList[extentIndex][k] = indexStart + k; // block structure
           }
+          dimContigFlag[extentIndex] = 1; // flag contiguous dimension
         }
         break;
       case ESMF_DECOMP_CYCLIC:
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
-          extentIndex = de*dimCount+i;  // index into dimExtent array
+          extentIndex = de*dimCount+i;  // index into temp. arrays
           dimExtent[extentIndex] = chunkLength;
           decompChunk = (j/deDivider)%regDecomp->array[i];
           if (decompChunk < chunkRest) ++dimExtent[extentIndex]; // distr. rest
@@ -350,6 +355,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
             // cyclic
             indexList[extentIndex][k] = indexStart + k * regDecomp->array[i];
           }
+          dimContigFlag[extentIndex] = 0; // flag non-contiguous dimension
         }
         break;
       default:
@@ -369,7 +375,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   
   // call into DistGridConstruct
   status = distgrid->ESMC_DistGridConstruct(dimCount, 1, dePatchList,
-    minCorner->array, maxCorner->array, NULL, dimExtent, indexList,
+    minCorner->array, maxCorner->array, dimContigFlag, dimExtent, indexList,
     ESMF_TRUE, connectionList, delayout, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
@@ -378,6 +384,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
   
   // garbage collection
+  delete [] dimContigFlag;
   delete [] dimExtent;
   for (int i=0; i<dimCount*deCount; i++)
     delete [] indexList[i];
@@ -587,14 +594,16 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
   
   // setup temporary dimExtent and indexList arrays for DistGridConstruct()
+  // also setup temporary dimCongtigFlag array for DistGridConstruct()
   int *dimExtent = new int[dimCount*deCount];
   int **indexList = new int*[dimCount*deCount];
+  int *dimContigFlag = new int[dimCount*deCount];
   for (int i=0; i<dimCount; i++){
     int dimLength = maxCorner->array[i] - minCorner->array[i] + 1;
     int de, extentIndex, deBlockIndexMin, deBlockIndexMax;
     for (int j=0; j<deCount; j++){
       de = deLabelList->array[j];
-      extentIndex = de*dimCount+i;  // index into dimExtent array
+      extentIndex = de*dimCount+i;  // index into temp. arrays
       deBlockIndexMin = j*deBlockList->extent[0]*deBlockList->extent[1] + i;
       deBlockIndexMax = deBlockIndexMin + deBlockList->extent[0];
       dimExtent[extentIndex] = deBlockList->array[deBlockIndexMax]
@@ -603,6 +612,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
       for (int k=0; k<dimExtent[extentIndex]; k++)
         indexList[extentIndex][k] =  deBlockList->array[deBlockIndexMin] + k;
     }
+    dimContigFlag[extentIndex] = 1; // flag contiguous dimension
   }
   // set up dePatchList
   int *dePatchList = new int[deCount];
@@ -612,7 +622,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   // todo: check for overlapping deBlocks!!
   // call into DistGridConstruct
   status = distgrid->ESMC_DistGridConstruct(dimCount, 1, dePatchList, 
-    minCorner->array, maxCorner->array, NULL, dimExtent, indexList,
+    minCorner->array, maxCorner->array, dimContigFlag, dimExtent, indexList,
     ESMF_FALSE, connectionList, delayout, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
@@ -621,6 +631,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
     
   // garbage collection
+  delete [] dimContigFlag;
   delete [] dimExtent;
   for (int i=0; i<dimCount*deCount; i++)
     delete [] indexList[i];
@@ -948,8 +959,10 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
     
   // setup temporary dimExtent and indexList arrays for DistGridConstruct()
+  // also setup temporary dimCongtigFlag array for DistGridConstruct()
   int *dimExtent = new int[dimCount*deCount];
   int **indexList = new int*[dimCount*deCount];
+  int *dimContigFlag = new int[dimCount*deCount];
   
   // the following differs from the single patch case in that there is an
   // extra outer loop over patches. The dimExtent and indexList arrays are
@@ -970,7 +983,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
           for (int jj=0; jj<deCountPPatch[patch]; jj++){
             int j = dePatchStart + jj;
             de = deLabelList->array[j];
-            extentIndex = de*dimCount+ii;  // index into dimExtent array
+            extentIndex = de*dimCount+ii;  // index into temp. arrays
             dimExtent[extentIndex] = chunkLength;
             decompChunk = (jj/deDivider)%regDecomp->array[i];
             if (decompChunk < chunkRest) ++dimExtent[extentIndex]; //distr. rest
@@ -982,13 +995,14 @@ ESMC_DistGrid *ESMC_DistGridCreate(
             for (int k=0; k<dimExtent[extentIndex]; k++){
               indexList[extentIndex][k] = indexStart + k; // block structure
             }
+            dimContigFlag[extentIndex] = 1; // flag contiguous dimension
           }
           break;
         case ESMF_DECOMP_RESTLAST:
           for (int jj=0; jj<deCountPPatch[patch]; jj++){
             int j = dePatchStart + jj;
             de = deLabelList->array[j];
-            extentIndex = de*dimCount+ii;  // index into dimExtent array
+            extentIndex = de*dimCount+ii;  // index into temp. arrays
             dimExtent[extentIndex] = chunkLength;
             decompChunk = (jj/deDivider)%regDecomp->array[i];
             if (decompChunk == regDecomp->array[i]-1) 
@@ -999,13 +1013,14 @@ ESMC_DistGrid *ESMC_DistGridCreate(
             for (int k=0; k<dimExtent[extentIndex]; k++){
               indexList[extentIndex][k] = indexStart + k; // block structure
             }
+            dimContigFlag[extentIndex] = 1; // flag contiguous dimension
           }
           break;
         case ESMF_DECOMP_RESTFIRST:
           for (int jj=0; jj<deCountPPatch[patch]; jj++){
             int j = dePatchStart + jj;
             de = deLabelList->array[j];
-            extentIndex = de*dimCount+ii;  // index into dimExtent array
+            extentIndex = de*dimCount+ii;  // index into temp. arrays
             dimExtent[extentIndex] = chunkLength;
             decompChunk = (jj/deDivider)%regDecomp->array[i];
             if (decompChunk == 0) 
@@ -1017,13 +1032,14 @@ ESMC_DistGrid *ESMC_DistGridCreate(
             for (int k=0; k<dimExtent[extentIndex]; k++){
               indexList[extentIndex][k] = indexStart + k; // block structure
             }
+            dimContigFlag[extentIndex] = 1; // flag contiguous dimension
           }
           break;
         case ESMF_DECOMP_CYCLIC:
           for (int jj=0; jj<deCountPPatch[patch]; jj++){
             int j = dePatchStart + jj;
             de = deLabelList->array[j];
-            extentIndex = de*dimCount+ii;  // index into dimExtent array
+            extentIndex = de*dimCount+ii;  // index into temp. arrays
             dimExtent[extentIndex] = chunkLength;
             decompChunk = (jj/deDivider)%regDecomp->array[i];
             if (decompChunk < chunkRest) ++dimExtent[extentIndex]; //distr. rest
@@ -1034,6 +1050,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
               // cyclic
               indexList[extentIndex][k] = indexStart + k * regDecomp->array[i];
             }
+            dimContigFlag[extentIndex] = 0; // flag non-contiguous dimension
           }
           break;
         default:
@@ -1062,7 +1079,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
 
   // call into DistGridConstruct
   status = distgrid->ESMC_DistGridConstruct(dimCount, patchCount, dePatchList,
-    minCorner->array, maxCorner->array, NULL, dimExtent, indexList,
+    minCorner->array, maxCorner->array, dimContigFlag, dimExtent, indexList,
     ESMF_TRUE, connectionList, delayout, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
@@ -1071,6 +1088,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
   
   // garbage collection
+  delete [] dimContigFlag;
   delete [] deCountPPatch;
   delete [] dimExtent;
   for (int i=0; i<dimCount*deCount; i++)
@@ -1243,12 +1261,8 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
   memcpy(minCorner, minCornerArg, sizeof(int)*dimCount*patchCount);
   maxCorner = new int[dimCount*patchCount];
   memcpy(maxCorner, maxCornerArg, sizeof(int)*dimCount*patchCount);
-  
-  if (dimContigFlagArg){// remove this conditional once all DGCreate() are done
-  dimContigFlag = new int[deCount];
+  dimContigFlag = new int[dimCount*deCount];
   memcpy(dimContigFlag, dimContigFlagArg, sizeof(int)*dimCount*deCount);
-  }// -> must add garbage collection in DGDestroy()
-  
   dimExtent = new int[dimCount*deCount];
   memcpy(dimExtent, dimExtentArg, sizeof(int)*dimCount*deCount);
   indexList = new int*[dimCount*deCount];
@@ -1316,6 +1330,7 @@ int ESMC_DistGrid::ESMC_DistGridDestruct(void){
   delete [] patchCellCount;
   delete [] dePatchList;
   delete [] deCellCount;
+  delete [] dimContigFlag;
   for (int i=0; i<dimCount*deCount; i++)
     delete [] indexList[i];
   delete [] indexList;
@@ -1530,9 +1545,10 @@ int ESMC_DistGrid::ESMC_DistGridGet(
 //
 // !ARGUMENTS:
 //
-  int de,                               // in  - DE   = {0, ..., deCount-1}
-  int dim,                              // in  - dim  = {1, ..., dimCount}
-  ESMC_InterfaceInt *indexListArg  // out - list of indices per DE per dim
+  int de,                           // in  - DE   = {0, ..., deCount-1}
+  int dim,                          // in  - dim  = {1, ..., dimCount}
+  ESMC_InterfaceInt *indexListArg,  // out - list of indices per DE per dim
+  int *contigFlag                   // out - contigFlag for this (de, dim)
   ){    
 //
 // !DESCRIPTION:
@@ -1568,6 +1584,9 @@ int ESMC_DistGrid::ESMC_DistGridGet(
       sizeof(int)*dimExtent[de*dimCount+(dim-1)]);
   }
   
+  if (contigFlag != NULL)
+    *contigFlag = dimContigFlag[de*dimCount+(dim-1)];
+    
   // return successfully
   return ESMF_SUCCESS;
 }
