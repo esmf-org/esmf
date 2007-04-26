@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_ErrReturnCodes.inc,v 1.7 2007/04/23 17:59:00 tjcnrl Exp $
+$Id: ESMF_ErrReturnCodes.inc,v 1.8 2007/04/26 04:55:49 cdeluca Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -44,16 +44,16 @@ Success/Failure Return codes for both Fortran and C++
 #endif
 
 #if 0
-==========================
-Fortran Symmetric Return codes 1-500
-==========================
+=====================================
+Fortran Symmetric Return Codes 1-500
+=====================================
 #endif
 
 #define  ESMF_RC_OBJ_BAD            1 
 #define  ESMF_RC_OBJ_INIT           2
 #define  ESMF_RC_OBJ_CREATE         3
 #define  ESMF_RC_OBJ_COR            4
-#define  ESMF_RC_OBJ_WRONGSTATE     5
+#define  ESMF_RC_OBJ_WRONG          5
 #define  ESMF_RC_ARG_BAD            6
 #define  ESMF_RC_ARG_RANK           7
 #define  ESMF_RC_ARG_SIZE           8
@@ -98,22 +98,26 @@ Fortran Symmetric Return codes 1-500
 #define  ESMF_RC_ATTR_UNUSED       47
 #define  ESMF_RC_OBJ_NOT_CREATED   48
 #define  ESMF_RC_OBJ_DELETED       49
+#define  ESMF_RC_NOT_SET           50
+#define  ESMF_RC_VAL_WRONG         51
+#define  ESMF_RC_VAL_ERRBOUND      52  
+#define  ESMF_RC_VAL_OUTOFRANGE    53
 
 #if 0
-50-500 reserved for future Fortran symmetric return code definitions
+54-500 reserved for future Fortran symmetric return code definitions
 #endif
 
 #if 0
-=========================
-C++ Symmetric Return codes 501-998
-=========================
+=====================================
+C++ Symmetric Return Codes 501-998
+=====================================
 #endif
 
 #define  ESMC_RC_OBJ_BAD          501 
 #define  ESMC_RC_OBJ_INIT         502
 #define  ESMC_RC_OBJ_CREATE       503
 #define  ESMC_RC_OBJ_COR          504
-#define  ESMC_RC_OBJ_WRONGSTATE   505
+#define  ESMC_RC_OBJ_WRONG        505
 #define  ESMC_RC_ARG_BAD          506
 #define  ESMC_RC_ARG_RANK         507
 #define  ESMC_RC_ARG_SIZE         508
@@ -158,15 +162,19 @@ C++ Symmetric Return codes 501-998
 #define  ESMC_RC_ATTR_UNUSED      547
 #define  ESMC_RC_OBJ_NOT_CREATED  548
 #define  ESMC_RC_OBJ_DELETED      549
+#define  ESMC_RC_NOT_SET          550
+#define  ESMC_RC_VAL_WRONG        551
+#define  ESMC_RC_VAL_ERRBOUND     552
+#define  ESMC_RC_VAL_OUTOFRANGE   553
 
 #if 0
-550-998 reserved for future C++ symmetric return code definitions
+554-998 reserved for future C++ symmetric return code definitions
 #endif
 
 #if 0
-=========================
-C++ Non-symmetric Return codes 999-1000
-=========================
+=====================================
+C++ Non-symmetric Return Codes 999-1000
+=====================================
 #endif
 
 #define  ESMC_RC_OPTARG_TERM      999

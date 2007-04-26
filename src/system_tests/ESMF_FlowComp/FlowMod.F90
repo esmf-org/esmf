@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.19 2007/02/16 05:27:52 rosalind Exp $
+! $Id: FlowMod.F90,v 1.20 2007/04/26 04:55:49 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -78,7 +78,7 @@
 !
 ! Set initial values
 !
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_SET
 !
 ! Query component for number of PETs, and create a layout which corresponds
 !
@@ -154,7 +154,7 @@
 !
 ! Set initial values
 !
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_SET
 !
 ! Initialize return code
 !
@@ -389,7 +389,7 @@
 !
 ! Set initial values
 !
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_SET
 !
 ! Initialize return code
 !
@@ -451,7 +451,7 @@
 !
 ! Set initial values
 !
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_SET
 
 !
 ! calculate RHOU's and RHOV's
@@ -547,7 +547,7 @@
 !
 ! Set initial values
 !
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_SET
 !
 ! Initialize return code
 !
@@ -628,7 +628,7 @@
 !
 ! Set initial values
 !
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_SET
 !
 ! Initialize return code
 !
@@ -719,7 +719,7 @@
 !
 ! Set initial values
 !
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_SET
 
 !
 !  update velocities
@@ -851,7 +851,7 @@
 !
 ! Set initial values
 !
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_SET
 
 !
 !  new p's and q's
@@ -924,7 +924,7 @@
 !
 ! Set initial values
 !
-      rc = ESMF_FAILURE
+      rc = ESMF_RC_NOT_SET
 !
 ! Print out some results before finalizing
 !

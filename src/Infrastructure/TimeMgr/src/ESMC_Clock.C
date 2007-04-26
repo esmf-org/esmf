@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.80 2007/04/23 17:30:09 rosalind Exp $
+// $Id: ESMC_Clock.C,v 1.81 2007/04/26 04:55:49 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.80 2007/04/23 17:30:09 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.81 2007/04/26 04:55:49 cdeluca Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -1628,36 +1628,36 @@ int ESMC_Clock::count=0;
         if (currTime < startTime || currTime > stopTime) {
           ESMC_LogDefault.ESMC_LogWrite("currTime out-of-range (startTime to "
                                         "stopTime).", ESMC_LOG_WARN);
-          return(ESMC_RC_OBJ_WRONGSTATE);
+          return(ESMC_RC_VAL_OUTOFRANGE);
         }
         if (currTime == startTime && timeStep < zeroTimeStep) {
           ESMC_LogDefault.ESMC_LogWrite("timeStep negative for positive "
                                         "startTime to stopTime range).",
                                         ESMC_LOG_WARN);
-          return(ESMC_RC_OBJ_WRONGSTATE);
+          return(ESMC_RC_VAL_OUTOFRANGE);
         }
       } else if (stopTime < startTime) {
         if (currTime > startTime || currTime < stopTime) {
           ESMC_LogDefault.ESMC_LogWrite("currTime out-of-range (startTime to "
                                         "stopTime).", ESMC_LOG_WARN);
-          return(ESMC_RC_OBJ_WRONGSTATE);
+          return(ESMC_RC_VAL_OUTOFRANGE);
         }
         if (currTime == startTime && timeStep > zeroTimeStep) {
           ESMC_LogDefault.ESMC_LogWrite("timeStep positive for negative "
                                         "startTime to stopTime range).",
                                         ESMC_LOG_WARN);
-          return(ESMC_RC_OBJ_WRONGSTATE);
+          return(ESMC_RC_VAL_OUTOFRANGE);
         }
       } else { // stopTime == startTime
         ESMC_LogDefault.ESMC_LogWrite("stopTime equals startTime.",
                                       ESMC_LOG_WARN);
-        return(ESMC_RC_OBJ_WRONGSTATE);
+        return(ESMC_RC_VAL_WRONG);
       }
 
       // check for zero time step
       if(timeStep == zeroTimeStep) {
         ESMC_LogDefault.ESMC_LogWrite("timeStep equals zero.", ESMC_LOG_WARN);
-        return(ESMC_RC_OBJ_WRONGSTATE);
+        return(ESMC_RC_VAL_WRONG);
       }
 
       // note:  don't check prevTime relative to currTime, as user could

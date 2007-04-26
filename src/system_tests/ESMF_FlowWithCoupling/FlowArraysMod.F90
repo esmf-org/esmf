@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.11 2007/04/03 16:36:27 cdeluca Exp $
+! $Id: FlowArraysMod.F90,v 1.12 2007/04/26 04:55:49 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -86,14 +86,14 @@
 !
 ! Set initial values
 !
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_SET
       rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
         rcpresent = .TRUE.
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_SET
       endif
 !
 ! create fields and get pointers to data
@@ -203,14 +203,14 @@
 !
 ! Set initial values
 !
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_SET
       rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
         rcpresent = .TRUE.
-        rc = ESMF_FAILURE
+        rc = ESMF_RC_NOT_SET
       endif
 !
 ! deallocate global arrays - destroy the Fields

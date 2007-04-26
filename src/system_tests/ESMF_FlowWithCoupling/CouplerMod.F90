@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.17 2005/05/17 18:22:06 theurich Exp $
+! $Id: CouplerMod.F90,v 1.18 2007/04/26 04:55:49 cdeluca Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -166,7 +166,7 @@
           injecttoflow = .FALSE.
       else
          print *, "Unexpected State in Coupler Run routine, named ", trim(statename)
-         rc = ESMF_FAILURE
+         rc = ESMF_RC_OBJ_WRONG
          return
       endif
 

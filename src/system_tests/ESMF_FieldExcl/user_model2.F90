@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.21 2007/04/03 16:36:25 cdeluca Exp $
+! $Id: user_model2.F90,v 1.22 2007/04/26 04:55:49 cdeluca Exp $
 !
 ! System test for Exclusive Components, user-written component 2.
 
@@ -87,7 +87,7 @@
       integer :: status
 
       ! Initially import state contains a field with a grid but no data.
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_SET
 
       ! Query component for VM and create a layout with the right breakdown
       call ESMF_GridCompGet(comp, vm=vm, rc=status)
@@ -210,7 +210,7 @@
 !      type(ESMF_Array) :: array1, array2
       integer :: status
 
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_SET
       !print *, "User Comp Run starting"
 
       ! Get information from the component.
@@ -353,7 +353,7 @@
       ! error is below 2%
       if (maxPerError .gt. 2.0) then
           write(*,*) "Test Failing because percentage error too large"
-          rc = ESMF_FAILURE 
+          rc = ESMF_RC_VAL_ERRBOUND
       else
           rc = ESMF_SUCCESS
       endif

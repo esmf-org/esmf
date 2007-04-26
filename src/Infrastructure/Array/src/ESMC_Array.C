@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.71 2007/04/23 18:53:43 theurich Exp $
+// $Id: ESMC_Array.C,v 1.72 2007/04/26 04:55:48 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMC_Array.C,v 1.71 2007/04/23 18:53:43 theurich Exp $";
+  static const char *const version = "$Id: ESMC_Array.C,v 1.72 2007/04/26 04:55:48 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -93,9 +93,9 @@ ESMC_Array *ESMC_ArrayCreate(
   int status;                 // local error status
    
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   // allocate the new Array object
   ESMC_Array *array;
@@ -667,9 +667,9 @@ ESMC_Array *ESMC_ArrayCreate(
   int status;                 // local error status
    
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   // allocate the new Array object
   ESMC_Array *array;
@@ -1146,9 +1146,9 @@ int ESMC_ArrayDestroy(
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (array == ESMC_NULL_POINTER || *array == ESMC_NULL_POINTER){
@@ -1225,9 +1225,9 @@ int ESMC_Array::ESMC_ArrayConstruct(
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
 
   // fill in the Array object
   typekind = typekindArg;
@@ -1385,9 +1385,9 @@ int ESMC_Array::ESMC_ArrayDestruct(void){
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   // garbage collection
   delete [] localDeList;
@@ -1470,9 +1470,9 @@ int ESMC_Array::ESMC_ArrayGet(
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   // fill simple return values
   if (typekindArg != NULL)
@@ -1851,9 +1851,9 @@ int ESMC_Array::ESMC_ArrayGetLinearIndexExclusive(
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   // determine the linearized index
   //todo: the following assumes rank==dimCount -> will need to skip over not
@@ -1903,8 +1903,8 @@ int ESMC_Array::ESMC_ArrayPrint(){
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
-  *rc = ESMF_FAILURE;
+  status = ESMC_RC_NOT_IMPL;
+  *rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (this == NULL){
@@ -1989,8 +1989,8 @@ int ESMC_Array::ESMC_ArraySerialize(
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
-  *rc = ESMF_FAILURE;
+  status = ESMC_RC_NOT_IMPL;
+  *rc = ESMC_RC_NOT_IMPL;
 
   char *cp;
   int *ip;
@@ -2058,8 +2058,8 @@ int ESMC_Array::ESMC_ArrayDeserialize(
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
-  *rc = ESMF_FAILURE;
+  status = ESMC_RC_NOT_IMPL;
+  *rc = ESMC_RC_NOT_IMPL;
 
   char *cp;
   int *ip;
@@ -2151,8 +2151,8 @@ int ESMC_Array::ESMC_ArrayScatter(
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
-  *rc = ESMF_FAILURE;
+  status = ESMC_RC_NOT_IMPL;
+  *rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (this == NULL){
@@ -2659,8 +2659,8 @@ int ESMC_ArraySparseMatMulStore(
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
-  *rc = ESMF_FAILURE;
+  status = ESMC_RC_NOT_IMPL;
+  *rc = ESMC_RC_NOT_IMPL;
 
   // get the current VM and VM releated information
   ESMC_VM *vm = ESMC_VMGetCurrent(&status);
@@ -3045,8 +3045,8 @@ int ESMC_ArraySparseMatMul(
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
-  *rc = ESMF_FAILURE;
+  status = ESMC_RC_NOT_IMPL;
+  *rc = ESMC_RC_NOT_IMPL;
 
   // get the current VM and VM releated information
   ESMC_VM *vm = ESMC_VMGetCurrent(&status);
@@ -3146,8 +3146,8 @@ int ESMC_ArraySparseMatMulRelease(
   int status;                 // local error status
 
   // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
-  *rc = ESMF_FAILURE;
+  status = ESMC_RC_NOT_IMPL;
+  *rc = ESMC_RC_NOT_IMPL;
 
   // get a handle on the storage in routehandle
   ArraySparseMatMulStorage *storage = 
@@ -5051,7 +5051,7 @@ int ESMC_newArrayDestroy(
   }else{
     ESMC_LogDefault.ESMC_LogWrite("Cannot delete bad newArray object.", 
       ESMC_LOG_ERROR);
-    return(ESMF_FAILURE);
+    return(ESMC_RC_PTR_NULL);
   }
 }
 //-----------------------------------------------------------------------------

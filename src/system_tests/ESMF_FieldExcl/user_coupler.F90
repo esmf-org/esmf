@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.17 2007/02/01 04:53:59 theurich Exp $
+! $Id: user_coupler.F90,v 1.18 2007/04/26 04:55:49 cdeluca Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -83,7 +83,7 @@
       integer :: pet_id
 
       !print *, "User Coupler Init starting"
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_SET
 
       ! Get VM from coupler component
       call ESMF_CplCompGet(comp, vm=vm, rc=status)
@@ -241,7 +241,7 @@
       integer :: status
 
       !print *, "User Coupler Final starting"
-      status = ESMF_FAILURE
+      status = ESMF_RC_NOT_SET
    
       ! Release resources stored for the Regridding.
       call ESMF_FieldRegridRelease(regridRH,   rc=status)
