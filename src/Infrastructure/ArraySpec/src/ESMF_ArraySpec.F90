@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.23 2007/04/17 14:06:10 rosalind Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.24 2007/04/26 17:29:25 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -89,7 +89,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.23 2007/04/17 14:06:10 rosalind Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.24 2007/04/26 17:29:25 rosalind Exp $'
 
 !==============================================================================
 
@@ -133,7 +133,7 @@ module ESMF_ArraySpecMod
     integer :: status ! local error status
     logical :: rcpresent ! did user specify rc?
 
-    ! Initialize return code; assume failure until success is certain
+    ! Initialize return code; assume routine is not implemented       
     status = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
     if (present(rc)) then
@@ -194,7 +194,7 @@ module ESMF_ArraySpecMod
     status = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
 
-    ! Initialize return code; assume failure until success is certain
+    ! Initialize return code; assume routine is not implemented 
     if (present(rc)) then
       rcpresent = .TRUE.
       rc = ESMF_RC_NOT_IMPL
