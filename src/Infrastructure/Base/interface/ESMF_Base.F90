@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.130 2007/04/23 18:03:35 rosalind Exp $
+! $Id: ESMF_Base.F90,v 1.131 2007/04/26 19:18:56 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -148,7 +148,7 @@ module ESMF_BaseMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.130 2007/04/23 18:03:35 rosalind Exp $'
+               '$Id: ESMF_Base.F90,v 1.131 2007/04/26 19:18:56 rosalind Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -203,7 +203,7 @@ module ESMF_BaseMod
 
     integer :: status, allocNAttrs
 
-    ! Initialize return code
+    ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     allocNAttrs = 0   ! default value, overwrite if argument specified
@@ -315,6 +315,9 @@ module ESMF_BaseMod
 
     integer :: status 
 
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     status = ESMF_RC_NOT_IMPL
       
     ! Check init status of arguments
@@ -362,6 +365,9 @@ module ESMF_BaseMod
 
     integer :: status 
 
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     status = ESMF_RC_NOT_IMPL
       
     ! Check init status of arguments
@@ -404,6 +410,9 @@ module ESMF_BaseMod
 !EOPI
 
     integer :: status 
+
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     status = ESMF_RC_NOT_IMPL
 
@@ -456,6 +465,9 @@ module ESMF_BaseMod
 !EOPI
     integer :: status 
 
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     status = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -500,6 +512,9 @@ module ESMF_BaseMod
 !
 !EOPI
 
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       !TODO: when code added here, change (inout) for namelist to just out.
       ! absoft compiler was unhappy.
 
@@ -541,6 +556,9 @@ module ESMF_BaseMod
 !
 !EOPI
 
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
   end subroutine ESMF_AttributeSetList
 
 
@@ -578,6 +596,9 @@ module ESMF_BaseMod
 !
 !EOPI
 
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
   end subroutine ESMF_AttributeGetList
 
 
@@ -614,6 +635,9 @@ module ESMF_BaseMod
 !
 !EOPI
 
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
   end subroutine ESMF_AttributeSetObjectList
 
 
@@ -649,6 +673,9 @@ module ESMF_BaseMod
 !     \end{description}
 !
 !EOPI
+
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
   end subroutine ESMF_AttributeGetObjectList
 
@@ -689,6 +716,9 @@ module ESMF_BaseMod
 !
 !EOPI
 
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
   end subroutine ESMF_AttributeCopy
 
 
@@ -725,6 +755,9 @@ module ESMF_BaseMod
 !     \end{description}
 !
 !EOPI
+
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
   end subroutine ESMF_AttributeCopyAll
 
@@ -774,12 +807,13 @@ module ESMF_BaseMod
       logical :: rcpresent                          ! Return code present   
       integer :: status
 
-      ! Initialize return code
+      ! Initialize return code; assume routine not implemented
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_RC_NOT_IMPL
       endif
+      status = ESMF_RC_NOT_IMPL
 
       ! TODO: remove this once everyone is initializing their Base objects.
       ! cheat for old code for now.
@@ -827,6 +861,10 @@ module ESMF_BaseMod
 !EOPI
       integer :: status
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
       call c_ESMC_GetName(base , name, status)
       if (present(rc)) rc = status
 
@@ -867,6 +905,10 @@ module ESMF_BaseMod
 !EOPI
     integer                     :: localrc
     character(len=ESMF_MAXSTR)  :: opts
+
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)
@@ -916,6 +958,10 @@ module ESMF_BaseMod
 !EOPI
     integer                     :: localrc
     character(len=ESMF_MAXSTR)  :: opts
+
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)

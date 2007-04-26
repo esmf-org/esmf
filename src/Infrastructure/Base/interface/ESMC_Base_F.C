@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.46 2007/03/31 05:50:51 cdeluca Exp $
+// $Id: ESMC_Base_F.C,v 1.47 2007/04/26 19:18:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.46 2007/03/31 05:50:51 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.47 2007/04/26 19:18:55 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -74,6 +74,9 @@ extern "C" {
   int status;
   char *cname = NULL;
   char *scname = NULL;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   // copy and convert F90 strings to null terminated ones
   if (superclass && (sclen > 0) && (superclass[0] != '\0')) {
@@ -125,6 +128,9 @@ extern "C" {
 //
 //EOP
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
   if (base && *base)
       delete (*base);
 
@@ -155,6 +161,9 @@ extern "C" {
 //EOP
 
   char *copts = NULL;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
     //printf("uninitialized Base object\n");
@@ -204,6 +213,9 @@ extern "C" {
 //
 //EOPI
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
 
   if (!base) {
     //printf("uninitialized Base object\n");
@@ -239,6 +251,9 @@ extern "C" {
 //     Deserialize the contents of a base object.
 //
 //EOPI
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   *base = new ESMC_Base;
   if (!base) {
@@ -277,6 +292,9 @@ extern "C" {
 //EOP
 
   char *copts = NULL;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
     //printf("uninitialized Base object\n");
@@ -324,6 +342,9 @@ extern "C" {
 //
 //EOPI
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
   if (!base) {
     if (rc) *rc = ESMF_FAILURE;
     return;
@@ -362,6 +383,9 @@ extern "C" {
 
   char *oname = NULL;
   char *cname = NULL;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
     if (rc) *rc = ESMF_FAILURE;
@@ -417,6 +441,9 @@ extern "C" {
 //
 //EOPI
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
   if (!base) {
     if (rc) *rc = ESMF_FAILURE;
     return;
@@ -452,6 +479,9 @@ extern "C" {
 
   int i, status;
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
   if (!base || !id) {
     printf("in c_ESMC_GetID, base or id bad, returning failure\n");
     if (rc) *rc = ESMF_FAILURE;
@@ -485,6 +515,9 @@ extern "C" {
 //     set an object ID from a Fortran caller.
 //
 //EOPI
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base || !id) {
     printf("in c_ESMC_SetID, base or id bad, returning failure\n");
@@ -521,6 +554,9 @@ extern "C" {
 //
 //EOPI
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
   if (!base) {
     printf("in c_ESMC_GetVMId, base is bad, returning failure\n");
     if (rc) *rc = ESMF_FAILURE;
@@ -553,6 +589,9 @@ extern "C" {
 //     allocate space and set the object's VMId.
 //
 //EOPI
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
     printf("in c_ESMC_SetVMId, base is bad, returning failure\n");
@@ -604,6 +643,9 @@ extern "C" {
 
   int status;
   char *cname;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
     if (rc) *rc = ESMF_FAILURE;
@@ -664,8 +706,11 @@ extern "C" {
   int i, status;
   char *cname, *cvalue;
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
   if (!base) {
-    if (rc) *rc = ESMF_FAILURE;
+    if (rc) *rc = ESMF_FAILURE;    
     return;
   }
 
@@ -738,8 +783,11 @@ extern "C" {
   ESMC_TypeKind attrTk;
   char *cname;
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
   if (!base) {
-    *rc = ESMF_FAILURE;
+    *rc = ESMF_FAILURE;    
     return;
   }
 
@@ -825,6 +873,9 @@ extern "C" {
   ESMC_TypeKind attrTypeKind;
   char *cname, *cvalue;
   int slen;              // actual attribute string length
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
     *rc = ESMF_FAILURE;
@@ -915,8 +966,11 @@ extern "C" {
 
   char *cname;
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
   if (!base) {
-    *rc = ESMF_FAILURE;
+    *rc = ESMF_FAILURE;    
     return;
   }
 
@@ -980,6 +1034,9 @@ extern "C" {
 
   char *cname;
 
+// Initialize return code; assume routine not implemented
+if (rc) *rc = ESMF_RC_NOT_IMPL;
+
   if (!base) {
     *rc = ESMF_FAILURE;
     return;
@@ -1040,6 +1097,10 @@ extern "C" {
 //EOP
 
   int i, status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  status = ESMC_RC_NOT_IMPL;
 
   if (!base) {
     *rc = ESMF_FAILURE;

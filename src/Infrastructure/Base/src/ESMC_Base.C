@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.79 2007/04/26 16:13:55 rosalind Exp $
+// $Id: ESMC_Base.C,v 1.80 2007/04/26 19:18:56 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.79 2007/04/26 16:13:55 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.80 2007/04/26 19:18:56 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -319,6 +319,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc, len;
   char msgbuf[ESMF_MAXSTR];
  
+    // Initialize local return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
   if (classname) {
      len = strlen(classname);
      if (len >= ESMF_MAXSTR) {
@@ -357,6 +360,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //EOPI
   int rc;
   char msgbuf[ESMF_MAXSTR];
+
+    // Initialize local return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
   if (nlen > ESMF_MAXSTR) {
        sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes\n",
@@ -418,6 +424,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int defname, defclass;
   char msgbuf[ESMF_MAXSTR];
  
+    // Initialize local return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
   // no name, no context:  generate a name "globalXXX" where xxx is a seq num
   // no name, but a context: name is contextXXX with the seq num again
   // name given: use it as is
@@ -481,6 +490,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //EOPI
   int rc;
   char msgbuf[ESMF_MAXSTR];
+
+    // Initialize local return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
   if (nlen > ESMF_MAXSTR) {
        sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes\n",
@@ -575,6 +587,10 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     int *ip, i, nbytes;
     ESMC_Status *sp;
     char *cp;
+    int localrc;
+
+    // Initialize local return code; assume routine not implemented
+    localrc = ESMC_RC_NOT_IMPL;
 
     ip = (int *)(buffer + *offset);
     ID = *ip++;
@@ -634,6 +650,10 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   int i;
   char msgbuf[ESMF_MAXSTR];
+  int localrc;
+
+    // Initialize local return code; assume routine not implemented
+    localrc = ESMC_RC_NOT_IMPL;
 
   sprintf(msgbuf,
        "Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n", 
@@ -676,7 +696,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOPI
 
-  return ESMF_SUCCESS;
+  return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_Read
 
@@ -706,6 +726,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     int *ip, i, rc;
     ESMC_Status *sp;
     char *cp;
+
+    // Initialize local return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     fixedpart = sizeof(ESMC_Base);
     if ((*length - *offset) < fixedpart) {
@@ -767,6 +790,11 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOPI
 
+  int localrc;
+
+   // Initialize local return code; assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+
   if (baseStatus != ESMF_STATUS_READY) 
     return ESMF_FAILURE;
 
@@ -795,7 +823,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOP
 
-  return ESMF_SUCCESS;
+  return ESMC_RC_NOT_IMPL;
 
 } // end ESMC_Write
 
@@ -829,6 +857,10 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 #define ATTR_CHUNK  4           // allocate and realloc in units of this
 
   void *saveme;   // in case of error
+  int rc;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   if ((attrCount + adding) <= attrAlloc) 
       return ESMF_SUCCESS;
@@ -874,6 +906,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //EOPI
 
   int i, rc;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   // simple sanity checks
   if ((!attr) || (!attr->attrName) || (attr->attrName[0] == '\0')) {
@@ -934,6 +969,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
   attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I4, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
@@ -969,6 +1007,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
   attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I4, count, value);  
   if (!attr)
     return ESMF_FAILURE;
@@ -1002,6 +1043,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   int rc;
   ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I8, 1, &value);  
   if (!attr)
@@ -1038,6 +1082,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
   attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I8, count, value);  
   if (!attr)
     return ESMF_FAILURE;
@@ -1071,6 +1118,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   int rc;
   ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R4, 1, &value);  
   if (!attr)
@@ -1107,6 +1157,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
   attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R4, count, value);  
   if (!attr)
     return ESMF_FAILURE;
@@ -1140,6 +1193,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   int rc;
   ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R8, 1, &value);  
   if (!attr)
@@ -1176,6 +1232,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
   attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R8, count, value);  
   if (!attr)
     return ESMF_FAILURE;
@@ -1209,6 +1268,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   int rc;
   ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   attr = new ESMC_Attribute(name, ESMC_TYPEKIND_LOGICAL, 1, &value);  
   if (!attr)
@@ -1245,6 +1307,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
   attr = new ESMC_Attribute(name, ESMC_TYPEKIND_LOGICAL, count, value);  
   if (!attr)
     return ESMF_FAILURE;
@@ -1278,6 +1343,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   int rc;
   ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   attr = new ESMC_Attribute(name, ESMC_TYPEKIND_CHARACTER, 1, value);  
   if (!attr)
@@ -1315,6 +1383,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   int rc;
   ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   attr = new ESMC_Attribute(name, tk, count, value);  
   if (!attr)
@@ -1392,6 +1463,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1445,6 +1519,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   int rc, i;
   ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
@@ -1503,6 +1580,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1556,6 +1636,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   int rc, i;
   ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
@@ -1614,6 +1697,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1667,6 +1753,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   int rc, i;
   ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
@@ -1725,6 +1814,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1778,6 +1870,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   int rc, i;
   ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
@@ -1836,6 +1931,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int rc;
   ESMC_Attribute *attr;
 
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1891,6 +1989,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   int rc, i;
   ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
@@ -1948,6 +2049,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   int rc;
   ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
@@ -2009,6 +2113,10 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   int rc, i;
   ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
@@ -2109,6 +2217,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   int rc, i;
   ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   attr = ESMC_AttributeGet(num);
   if (!attr) {
@@ -2393,6 +2504,9 @@ if (count) {
     int nbytes, rc;
     char *cp;
 
+    // Initialize local return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
     nbytes = sizeof(ESMC_Attribute);
     if (items > 1) 
         nbytes += items * ESMC_TypeKindSize(tk);
@@ -2400,7 +2514,7 @@ if (count) {
     if ((*length - *offset) < nbytes) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
                                "Buffer too short to add an Attr object", &rc);
-        return ESMF_FAILURE; 
+        return rc; 
         //buffer = (char *)realloc((void *)buffer, *length + nbytes);
         //*length += nbytes;
     }
@@ -2446,6 +2560,10 @@ if (count) {
     int nbytes;
     char *cp;
 
+   int localrc;
+   // Initialize local return code; assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+
     cp = (buffer + *offset);
     memcpy(this, cp, sizeof(ESMC_Attribute));
     cp += sizeof(ESMC_Attribute);
@@ -2457,8 +2575,9 @@ if (count) {
     }
    
     *offset = (cp - buffer);
-    
-  return ESMF_SUCCESS;
+   
+   localrc = ESMF_SUCCESS;
+   return localrc;
 
  } // end ESMC_Deserialize
 //-----------------------------------------------------------------------------
@@ -2483,6 +2602,9 @@ if (count) {
 //EOP
   int rc;
   char msgbuf[ESMF_MAXSTR];
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   if (tk != ESMF_NOKIND) 
       sprintf(msgbuf, "name '%s',  typekind %s", 
@@ -2579,7 +2701,12 @@ if (count) {
 //
 //EOP
 
-  return ESMF_SUCCESS;
+    int localrc;
+
+    // Initialize local return code; assume routine not implemented
+    localrc = ESMC_RC_NOT_IMPL;
+
+    return localrc;
 
 }  // end ESMC_AttributeSetObjectList
 
@@ -2604,8 +2731,12 @@ if (count) {
 //     Get the same attribute name from multiple objects in one call
 //
 //EOP
+    int localrc;
 
-  return ESMF_SUCCESS;
+    // Initialize local return code ; assume routine not implemented
+    localrc = ESMC_RC_NOT_IMPL;
+
+    return localrc;
 
 }  // end ESMC_AttributeGetObjectList
 
