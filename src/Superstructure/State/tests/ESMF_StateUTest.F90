@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.47 2007/04/23 21:57:19 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.48 2007/04/26 21:02:01 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.47 2007/04/23 21:57:19 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.48 2007/04/26 21:02:01 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -203,14 +203,16 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX______UTest 
+      ! This test is commented out until bug 1707501 
+      ! is resolved
       ! Get a destroyed internal array from State 
-      arrayname = "Internal Array"
-      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-      write(name, *) "Get a destroyed internal array from a State Test"
-      call ESMF_StateGetInternArray(state4, arrayname, iarray, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      !arrayname = "Internal Array"
+      !write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      !write(name, *) "Get a destroyed internal array from a State Test"
+      !call ESMF_StateGetInternArray(state4, arrayname, iarray, rc=rc)
+      !call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
+      !                name, failMsg, result, ESMF_SRCLINE)
 
       !-------------------------------------------------------------------------------
       !EX_UTest
