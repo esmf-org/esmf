@@ -1,4 +1,4 @@
-! $Id: ArraysGlobalMod.F90,v 1.13 2007/04/26 04:55:49 cdeluca Exp $
+! $Id: ArraysGlobalMod.F90,v 1.14 2007/04/26 06:19:44 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -73,14 +73,14 @@
 !
 ! Set initial values
 !
-      status = ESMF_RC_NOT_SET
+      status = ESMF_FAILURE
       rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
         rcpresent = .TRUE.
-        rc = ESMF_RC_NOT_SET
+        rc = ESMF_FAILURE
       endif
 !
 ! create fields and get pointers to data
@@ -169,14 +169,14 @@
 !
 ! Set initial values
 !
-      status = ESMF_RC_NOT_SET
+      status = ESMF_FAILURE
       rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
         rcpresent = .TRUE.
-        rc = ESMF_RC_NOT_SET
+        rc = ESMF_FAILURE
       endif
 !
 ! deallocate global arrays - destroy the Fields

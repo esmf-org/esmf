@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.24 2007/04/26 04:55:49 cdeluca Exp $
+! $Id: user_model1.F90,v 1.25 2007/04/26 06:19:44 cdeluca Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -85,7 +85,7 @@
         integer :: status
 
         ! this should be overwritten by a more specific error code on error
-        status = ESMF_RC_NOT_SET
+        status = ESMF_FAILURE
 
         ! Query component for VM and create a layout with the right breakdown
         call ESMF_GridCompGet(comp, vm=vm, rc=status)
@@ -343,7 +343,7 @@
         write(*,*) "Array contents matched correctly!!"
         rc = ESMF_SUCCESS
       else
-        rc = ESMF_RC_VAL_WRONG
+        rc = ESMF_FAILURE
       endif
 
     end subroutine verifyRedistResults
@@ -389,7 +389,7 @@
         write(*,*) "Array halo contents matched correctly!!"
         rc = ESMF_SUCCESS
       else
-        rc = ESMF_RC_VAL_WRONG
+        rc = ESMF_FAILURE
       endif
 
     end subroutine verifyHaloResults

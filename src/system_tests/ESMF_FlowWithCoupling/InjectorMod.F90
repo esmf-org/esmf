@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.26 2007/04/26 04:55:50 cdeluca Exp $
+! $Id: InjectorMod.F90,v 1.27 2007/04/26 06:19:45 cdeluca Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -128,7 +128,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       !
       ! Set initial values
       !
-      rc = ESMF_RC_NOT_SET
+      rc = ESMF_FAILURE
 
       ! Read in input file
       !
@@ -439,14 +439,14 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       !
       ! Set initial values
       !
-      status = ESMF_RC_NOT_SET
+      status = ESMF_FAILURE
       rcpresent = .FALSE.
       !
       ! Initialize return code
       !
       if(present(rc)) then
         rcpresent=.TRUE.
-        rc = ESMF_RC_NOT_SET
+        rc = ESMF_FAILURE
       endif
       ! 
       ! Get our layout from the component, and our de number

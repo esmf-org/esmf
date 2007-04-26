@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.21 2007/04/26 04:55:49 cdeluca Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.22 2007/04/26 06:19:44 cdeluca Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -55,7 +55,7 @@
 !
 ! Set initial values
 !
-    rc = ESMF_RC_NOT_SET
+    rc = ESMF_FAILURE
 
     print *, "System Test FlowComp:"
 

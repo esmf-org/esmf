@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.27 2007/04/26 04:55:50 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.28 2007/04/26 06:19:45 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -59,7 +59,7 @@
 !
 ! Initialize return code
 !
-      rc = ESMF_RC_NOT_SET
+      rc = ESMF_FAILURE
 !
 ! Register the callback routines.
 !
@@ -135,8 +135,8 @@
 !
 ! Set initial values
 !
-      status = ESMF_RC_NOT_SET
-      rc = ESMF_RC_NOT_SET
+      status = ESMF_FAILURE
+      rc = ESMF_FAILURE
 !
 ! Read in input file
 !
@@ -279,14 +279,14 @@
 !
 ! Set initial values
 !
-      status = ESMF_RC_NOT_SET
+      status = ESMF_FAILURE
       rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
         rcpresent=.TRUE.
-        rc = ESMF_RC_NOT_SET
+        rc = ESMF_FAILURE
       endif
 !
 ! get Grid from Component
@@ -592,8 +592,8 @@
 !
 ! Set initial values
 !
-      status = ESMF_RC_NOT_SET
-      rc = ESMF_RC_NOT_SET
+      status = ESMF_FAILURE
+      rc = ESMF_FAILURE
 !
 ! Increment counter
 !
@@ -738,14 +738,14 @@
 !
 ! Set initial values
 !
-      status = ESMF_RC_NOT_SET
+      status = ESMF_FAILURE
       rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
         rcpresent=.TRUE.
-        rc = ESMF_RC_NOT_SET
+        rc = ESMF_FAILURE
       endif
 !
 ! calculate RHOU's and RHOV's
@@ -865,14 +865,14 @@
 !
 ! Set initial values
 !
-      status = ESMF_RC_NOT_SET
+      status = ESMF_FAILURE
       rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
         rcpresent=.TRUE.
-        rc = ESMF_RC_NOT_SET
+        rc = ESMF_FAILURE
       endif
 !    
 ! calculate RHOI's
@@ -985,14 +985,14 @@
 !
 ! Set initial values
 !
-      status = ESMF_RC_NOT_SET
+      status = ESMF_FAILURE
       rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
         rcpresent=.TRUE.
-        rc = ESMF_RC_NOT_SET
+        rc = ESMF_FAILURE
       endif
 !    
 ! determine new densities
@@ -1105,14 +1105,14 @@
 !
 ! Set initial values
 !
-      status = ESMF_RC_NOT_SET
+      status = ESMF_FAILURE
       rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
         rcpresent=.TRUE.
-        rc = ESMF_RC_NOT_SET
+        rc = ESMF_FAILURE
       endif
 !
 !  update velocities
@@ -1268,14 +1268,14 @@
 !
 ! Set initial values
 !
-      status = ESMF_RC_NOT_SET
+      status = ESMF_FAILURE
       rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
         rcpresent=.TRUE.
-        rc = ESMF_RC_NOT_SET
+        rc = ESMF_FAILURE
       endif
 !
 !  new pressures and viscosities
@@ -1373,14 +1373,14 @@
 !
 ! Set initial values
 !
-      status = ESMF_RC_NOT_SET
+      status = ESMF_FAILURE
       rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
         rcpresent=.TRUE.
-        rc = ESMF_RC_NOT_SET
+        rc = ESMF_FAILURE
       endif
 !
 ! Collect results on DE 0 and output to a file
@@ -1473,8 +1473,8 @@
 !
 ! Set initial values
 !
-      status = ESMF_RC_NOT_SET
-      rc = ESMF_RC_NOT_SET
+      status = ESMF_FAILURE
+      rc = ESMF_FAILURE
 !
 ! Deallocate arrays
 !
