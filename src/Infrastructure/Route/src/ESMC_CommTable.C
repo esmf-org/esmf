@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.30 2007/04/20 19:35:36 rosalind Exp $
+// $Id: ESMC_CommTable.C,v 1.31 2007/04/26 16:13:57 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.30 2007/04/20 19:35:36 rosalind Exp $";
+            "$Id: ESMC_CommTable.C,v 1.31 2007/04/26 16:13:57 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -109,7 +109,7 @@
 // !REQUIREMENTS:  
 
      // Initialize return code
-     int status=ESMF_RC_NOT_IMPL;
+     int status=ESMC_RC_NOT_IMPL;
 
     return status;
 
@@ -144,7 +144,7 @@
     int i, *ip, rc;
 
     // Initialize return code
-    rc = ESMF_RC_NOT_IMPL;
+    rc = ESMC_RC_NOT_IMPL;
 
 
     myid = myvmid;
@@ -289,7 +289,7 @@
 // !REQUIREMENTS:  
 
     // Initialize return code
-    int rc = ESMF_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
 
     *count = commcount;
     
@@ -323,7 +323,7 @@
 // !REQUIREMENTS:  
 
     // Initialize return code
-    int rc = ESMF_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
 
     if (entry < 0 || entry >= commcount) {
         *partner = -1;
@@ -365,7 +365,7 @@
       char msgbuf[ESMF_MAXSTR];
 
       // Initialize return code
-      rc = ESMF_RC_NOT_IMPL;
+      rc = ESMC_RC_NOT_IMPL;
 
       if (partner < 0 || partner >= commcount) {
           sprintf(msgbuf, "CommTable partner value out of range, %d not >= 0 and < %d\n",
@@ -413,7 +413,7 @@
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 //
     // Initialize return code
-    int rc = ESMF_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
 
     return rc;
  } // end ESMC_CommTableValidate
@@ -444,7 +444,7 @@
     int i;
     char msgbuf[ESMF_MAXSTR];
     bool brief;
-    int rc = ESMF_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
 
     brief = strcmp(options, "brief") ? false : true;
 
@@ -509,7 +509,7 @@ fill(int max, int size, int xpos, int ypos, int base, int *results)
 //
 //EOPI
     // initialize return code
-    int rc = ESMF_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
 
     int i, npow2;
     int *results;

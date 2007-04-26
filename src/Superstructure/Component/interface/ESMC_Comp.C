@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.28 2007/04/24 01:39:38 rosalind Exp $
+// $Id: ESMC_Comp.C,v 1.29 2007/04/26 16:13:58 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -52,7 +52,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.28 2007/04/24 01:39:38 rosalind Exp $";
+           "$Id: ESMC_Comp.C,v 1.29 2007/04/26 16:13:58 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -98,7 +98,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
     comp = new ESMC_Comp;
     //f_esmf_compcreate(&comp, name, ctype, mtype, NULL, filepath, &rc)
 
-    *rc = ESMF_RC_NOT_IMPL;
+    *rc = ESMC_RC_NOT_IMPL;
     return NULL;
 
  } // end ESMC_CompCreate
@@ -131,7 +131,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
     // TODO: fix the calling conventions
 
     //f_esmf_compdestroy(comp, &rc)
-    rc = ESMF_RC_NOT_IMPL;
+    rc = ESMC_RC_NOT_IMPL;
 
     return rc;
 
@@ -161,7 +161,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //    and need 2 flavors based on state count
 //
     printf("ComponentInit method called \n");
-    return ESMF_RC_NOT_IMPL;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_CompInit
 
@@ -188,7 +188,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //    and need 2 flavors based on state count
 //
     printf("ComponentRun method called \n");
-    return ESMF_RC_NOT_IMPL;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_CompRun
 
@@ -215,7 +215,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //    and need 2 flavors based on state count
 //
     printf("ComponentFinal method called \n");
-    return ESMF_RC_NOT_IMPL;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_CompFinal
 
@@ -241,7 +241,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //
 //  TODO: code goes here
 //
-    return ESMF_RC_NOT_IMPL;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_CompGet
 
@@ -267,7 +267,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //
 //  TODO: code goes here
 //
-    return ESMF_RC_NOT_IMPL;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_CompSet
 
@@ -295,7 +295,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //
 //  code goes here
 //
-    return ESMF_RC_NOT_IMPL;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_CompValidate
 
@@ -323,7 +323,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //
 //  code goes here
 //
-    return ESMF_RC_NOT_IMPL;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_CompPrint
 

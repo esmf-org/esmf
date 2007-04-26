@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.59 2007/04/23 17:30:09 rosalind Exp $
+// $Id: ESMC_Alarm.C,v 1.60 2007/04/26 16:13:58 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.59 2007/04/23 17:30:09 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.60 2007/04/26 16:13:58 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -88,7 +88,7 @@ int ESMC_Alarm::count=0;
     int returnCode;
 
     // default return code
-    if (rc != ESMC_NULL_POINTER) *rc = ESMF_RC_NOT_IMPL;
+    if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
 
     if (ringTime == ESMC_NULL_POINTER && ringInterval == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogWrite("Must specify at least one of ringTime or "
@@ -221,7 +221,7 @@ int ESMC_Alarm::count=0;
     int returnCode;
 
     // default return code
-    if (rc != ESMC_NULL_POINTER) *rc = ESMF_RC_NOT_IMPL;
+    if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
 
     // can't copy a non-existent object
     if (alarm == ESMC_NULL_POINTER) {
@@ -799,7 +799,7 @@ int ESMC_Alarm::count=0;
     }
 
     // default return code
-    if (rc != ESMC_NULL_POINTER) *rc = ESMF_RC_NOT_IMPL;
+    if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
 
     // must be associated with a clock
     if(clock == ESMC_NULL_POINTER) {
@@ -1031,7 +1031,7 @@ int ESMC_Alarm::count=0;
     }
 
     // default return code
-    if (rc != ESMC_NULL_POINTER) *rc = ESMF_RC_NOT_IMPL;
+    if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
 
     // must be associated with a clock
     if(clock == ESMC_NULL_POINTER) {

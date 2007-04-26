@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.78 2007/04/23 18:03:35 rosalind Exp $
+// $Id: ESMC_Base.C,v 1.79 2007/04/26 16:13:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.78 2007/04/23 18:03:35 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.79 2007/04/26 16:13:55 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -2261,7 +2261,7 @@ if (count) {
 //
 //EOP
 
-  return ESMF_RC_NOT_IMPL;
+  return ESMC_RC_NOT_IMPL;
 
 }  // end ESMC_AttributeGetNameList
 
@@ -2286,7 +2286,7 @@ if (count) {
 //
 //EOP
 
-  return ESMF_RC_NOT_IMPL;
+  return ESMC_RC_NOT_IMPL;
 
 }  // end ESMC_AttributeSetList
 
@@ -2311,7 +2311,7 @@ if (count) {
 //
 //EOP
 
-  return ESMF_RC_NOT_IMPL;
+  return ESMC_RC_NOT_IMPL;
 
 }  // end ESMC_AttributeGetList
 
@@ -2337,7 +2337,7 @@ if (count) {
 
 //EOP
 
-  return ESMF_RC_NOT_IMPL;
+  return ESMC_RC_NOT_IMPL;
 
 }  // end ESMC_AttributeCopy
 
@@ -2363,7 +2363,7 @@ if (count) {
 
 //EOP
 
-  return ESMF_RC_NOT_IMPL;
+  return ESMC_RC_NOT_IMPL;
 
 }  // end ESMC_AttributeCopyAll
 

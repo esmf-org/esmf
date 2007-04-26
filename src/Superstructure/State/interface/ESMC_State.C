@@ -1,4 +1,4 @@
-// $Id: ESMC_State.C,v 1.9 2007/04/24 01:15:24 rosalind Exp $
+// $Id: ESMC_State.C,v 1.10 2007/04/26 16:13:59 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.9 2007/04/24 01:15:24 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.10 2007/04/26 16:13:59 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -137,7 +137,7 @@
 //
 //  code goes here
 //
-    return ESMF_RC_NOT_IMPL;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_StateConstruct
 
@@ -167,7 +167,7 @@
 //
 //  code goes here
 //
-    return ESMF_RC_NOT_IMPL;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_StateDestruct
 
@@ -194,7 +194,7 @@
 //
 //  code goes here
 //
-    //return ESMF_RC_NOT_IMPL;
+    //return ESMC_RC_NOT_IMPL;
 
  //} // end ESMC_StateGet<Value>
 
@@ -221,7 +221,7 @@
 //
 //  code goes here
 //
-    //return ESMF_RC_NOT_IMPL;
+    //return ESMC_RC_NOT_IMPL;
 
  //} // end ESMC_StateSet<Value>
 
@@ -248,7 +248,7 @@
 //
 //  code goes here
 //
-    return ESMF_RC_NOT_IMPL;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_StateValidate
 
@@ -275,7 +275,7 @@
 //
 //  code goes here
 //
-    return ESMF_RC_NOT_IMPL;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_StatePrint
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.67 2007/04/20 19:37:19 rosalind Exp $
+// $Id: ESMC_XPacket.C,v 1.68 2007/04/26 16:13:57 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.67 2007/04/20 19:37:19 rosalind Exp $";
+              "$Id: ESMC_XPacket.C,v 1.68 2007/04/26 16:13:57 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -336,7 +336,7 @@
 // !REQUIREMENTS:  
 
     // Initialize return code
-    int rc = ESMF_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
 
     int i;
 
@@ -396,7 +396,7 @@
 //EOPI
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    int rc = ESMF_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
     int i, j;
     int xpDataSize;
     int rank, offset, contigLength, stride[ESMF_MAXDIM], repCount[ESMF_MAXDIM];

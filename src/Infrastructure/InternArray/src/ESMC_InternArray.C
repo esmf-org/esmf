@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray.C,v 1.8 2007/04/18 18:43:47 rosalind Exp $
+// $Id: ESMC_InternArray.C,v 1.9 2007/04/26 16:13:56 rosalind Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArray.C,v 1.8 2007/04/18 18:43:47 rosalind Exp $";
+            "$Id: ESMC_InternArray.C,v 1.9 2007/04/26 16:13:56 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -497,7 +497,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    int rc = ESMF_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
     ESMC_InternArray *aptr = this;
 
     // check origin and alloc flag, and call dealloc routine if needed 
@@ -569,7 +569,7 @@
 //
 //  code goes here
 //
-    //int rc = ESMF_RC_NOT_IMPL;
+    //int rc = ESMC_RC_NOT_IMPL;
 
     //return rc;
 
@@ -1025,7 +1025,7 @@
 //
 //  code goes here
 //
-    int rc = ESMF_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
 
     return rc;
 
@@ -1056,7 +1056,7 @@
 //
 //  code goes here
 //
-    int rc = ESMF_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
     int i, j, k, l, m;
     int imax, jmax, kmax, lmax, mmax;
     int tcount, rcount;
@@ -1636,7 +1636,7 @@
 //
 //  code goes here
 //
-    int rc = ESMF_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
     int i, j, k, l, m;
     int imax, jmax, kmax, lmax, mmax;
     int tcount, rcount;

@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.8 2007/04/17 01:57:43 rosalind Exp $
+// $Id: ESMC_Field.C,v 1.9 2007/04/26 16:13:56 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Field.C,v 1.8 2007/04/17 01:57:43 rosalind Exp $";
+             "$Id: ESMC_Field.C,v 1.9 2007/04/26 16:13:56 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -82,7 +82,7 @@ int ESMC_FieldDestroy(ESMC_Field *f) {
 //
 //  code goes here
 //
-    return ESMF_RC_NOT_IMPL;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_FieldConstruct
 
@@ -112,7 +112,7 @@ int ESMC_FieldDestroy(ESMC_Field *f) {
 //
 //  code goes here
 //
-    return ESMF_RC_NOT_IMPL;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_FieldDestruct
 
@@ -191,7 +191,7 @@ int ESMC_FieldDestroy(ESMC_Field *f) {
 //
 //  code goes here
 //
-    return ESMF_RC_NOT_IMPL;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_FieldValidate
 
@@ -219,7 +219,7 @@ int ESMC_FieldDestroy(ESMC_Field *f) {
 //
 //  code goes here
 //
-    return ESMF_RC_NOT_IMPL;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_FieldPrint
 

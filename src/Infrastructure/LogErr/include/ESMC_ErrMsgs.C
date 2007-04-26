@@ -1,4 +1,4 @@
-//$Id: ESMC_ErrMsgs.C,v 1.9 2007/04/26 04:55:49 cdeluca Exp $
+//$Id: ESMC_ErrMsgs.C,v 1.10 2007/04/26 16:13:56 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ static const char *errMsg[] = {
   "Input argument out of range ",                     //   16 = ESMF_RC_ARG_OUTOFRANGE
   "Unrecognized option string ",                      //   17 = ESMF_RC_ARG_OPT
 
-  "Operation not yet supported ",                     //   18 = ESMF_RC_NOT_IMPL
+  "Operation not yet supported ",                     //   18 = ESMC_RC_NOT_IMPL
 
   "Unable to open file ",                             //   19 = ESMF_RC_FILE_OPEN
   "Unable to create file ",                           //   20 = ESMF_RC_FILE_CREATE

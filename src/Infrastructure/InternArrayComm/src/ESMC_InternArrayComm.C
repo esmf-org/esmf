@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArrayComm.C,v 1.7 2007/04/23 16:56:10 rosalind Exp $
+// $Id: ESMC_InternArrayComm.C,v 1.8 2007/04/26 16:13:56 rosalind Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArrayComm.C,v 1.7 2007/04/23 16:56:10 rosalind Exp $";
+            "$Id: ESMC_InternArrayComm.C,v 1.8 2007/04/26 16:13:56 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -78,7 +78,7 @@
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    int rc = ESMF_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
 
     ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
     "ESMC_ArrayHalo no longer supported; use ESMF_FieldHalo instead\n", &rc);
@@ -126,7 +126,7 @@ static int ESMC_newDELayoutGatherArray(
 //
 //EOP
 
-  int rc = ESMF_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;
   int i, j, k, l, m;     // general counter vars
 
   // get layout size
@@ -357,7 +357,7 @@ static int ESMC_newDELayoutGatherArray(
 //
 //EOP
 
-    int rc = ESMF_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
     int i, j, k, l, m;     // general counter vars
     int thisde;
     int i_exc, j_exc;
@@ -438,7 +438,7 @@ static int ESMC_newDELayoutGatherArray(
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    int rc = ESMF_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
     int i, j, k, l, m;     // general counter vars
     int thisde;
     int i_exc, j_exc;
@@ -519,7 +519,7 @@ static int ESMC_newDELayoutGatherArray(
 #endif
 
     *Array_out = NULL;
-    rc = ESMF_RC_NOT_IMPL;
+    rc = ESMC_RC_NOT_IMPL;
 
     return rc;
 
@@ -559,7 +559,7 @@ static int ESMC_newDELayoutGatherArray(
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    int rc = ESMF_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
     int i, j, k, l, m;     // general counter vars
     void *vp;
 
