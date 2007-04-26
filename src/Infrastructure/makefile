@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.76 2007/03/01 19:06:21 wsawyer Exp $ 
+# $Id: makefile,v 1.77 2007/04/26 21:47:33 dneckels Exp $ 
 
 ALL: build_here
 
@@ -12,7 +12,7 @@ DIRS     =	stubs Util Base IOSpec LogErr IO TimeMgr VM DELayout \
                 InternArray PhysGrid Route Grid FieldDataMap \
                 InternArrayComm Field BundleDataMap Bundle \
                 Regrid FieldComm BundleComm \
-                DistGrid Array
+                DistGrid Array GridUtil
 
 CLEANDIRS   =
 CLEANFILES  =

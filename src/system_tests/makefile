@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2006/10/03 17:45:18 theurich Exp $ 
+# $Id: makefile,v 1.24 2007/04/26 21:47:34 dneckels Exp $ 
 
 ALL: build_system_tests
 
@@ -26,7 +26,8 @@ DIRS     = \
            ESMF_FieldExcl \
            ESMF_SimpleCoupling \
            ESMF_FlowComp \
-           ESMF_FlowWithCoupling
+           ESMF_FlowWithCoupling \
+           ESMF_DistDir
 
 # tests not yet ready
 #           ESMF_RowReduce \        gjt: currently the code depends on DELayout comms, but it should be covered/converted to newArray
