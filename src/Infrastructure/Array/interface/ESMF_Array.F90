@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.51 2007/04/17 15:06:03 rosalind Exp $
+! $Id: ESMF_Array.F90,v 1.52 2007/04/26 16:10:13 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.51 2007/04/17 15:06:03 rosalind Exp $'
+    '$Id: ESMF_Array.F90,v 1.52 2007/04/26 16:10:13 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -923,8 +923,9 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
-    ! Assume failure until success
+    ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_ArrayScatterB(array, larray, rootPET, vm, localrc)
@@ -1006,8 +1007,9 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
-    ! Assume failure until success
+    ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_ArrayScatterB(array, larray, rootPET, vm, localrc)
@@ -1107,8 +1109,9 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
-    ! Assume failure until success
+    ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
@@ -1193,8 +1196,9 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
-    ! Assume failure until success
+    ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_ArrayReduceScalarB(array, result, ESMF_TYPEKIND_R8, reduceflag, &
@@ -1263,8 +1267,9 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
-    ! Assume failure until success
+    ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_ArrayReduceScalarNBRoot(array, result, ESMF_TYPEKIND_R8, reduceflag, &
@@ -1331,8 +1336,9 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
-    ! Assume failure until success
+    ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_ArrayReduceScalarNB(array, result, ESMF_TYPEKIND_R8, reduceflag, &
@@ -1400,8 +1406,9 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
-    ! Assume failure until success
+    ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_ArrayWaitRoot(array, rootPET, commhandle, vm, localrc)
@@ -1453,8 +1460,9 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
-    ! Assume failure until success
+    ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_ArrayWaitDE(array, de, vm, localrc)
@@ -1510,8 +1518,9 @@ contains
     integer :: localrc                        ! local return code
     integer :: i
 
-    ! Assume failure until success
+    ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     do i=1, size(arrayList)
@@ -1561,8 +1570,9 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
-    ! Assume failure until success
+    ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit, arraybundle, rc)
@@ -1620,6 +1630,8 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+  ! Initialize return code
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
   end subroutine ESMF_ArrayBundleGet
 !------------------------------------------------------------------------------
 
@@ -1683,6 +1695,8 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+  ! Initialize return code
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
   end subroutine ESMF_ArrayBundleHalo
 !------------------------------------------------------------------------------
 
@@ -1750,6 +1764,8 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+  ! Initialize return code
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
   end subroutine ESMF_ArrayBundleHaloStore
 !------------------------------------------------------------------------------
 
@@ -1789,6 +1805,8 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+  ! Initialize return code
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
   end subroutine ESMF_ArrayBundleHaloRun
 !------------------------------------------------------------------------------
 
@@ -1841,6 +1859,8 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+  ! Initialize return code
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
   end subroutine ESMF_ArrayBundleRedist
 !------------------------------------------------------------------------------
 
@@ -1887,6 +1907,8 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+  ! Initialize return code
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
   end subroutine ESMF_ArrayBundleRedistStore
 !------------------------------------------------------------------------------
 
@@ -1929,6 +1951,8 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+  ! Initialize return code
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
   end subroutine ESMF_ArrayBundleRedistRun
 !------------------------------------------------------------------------------
 
@@ -1998,6 +2022,8 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+  ! Initialize return code
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
   end subroutine ESMF_ArrayBundleSparseMatMulStr
 !------------------------------------------------------------------------------
 
@@ -2040,6 +2066,8 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+  ! Initialize return code
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
   end subroutine ESMF_ArrayBundleSparseMatMul
 !------------------------------------------------------------------------------
 
@@ -2075,8 +2103,9 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
-    ! Assume failure until success
+    ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit, arraybundle, rc)

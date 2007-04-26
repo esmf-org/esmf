@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.48 2007/03/31 05:50:47 cdeluca Exp $
+// $Id: ESMC_Array_F.C,v 1.49 2007/04/26 16:10:13 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,6 +55,9 @@ extern "C" {
     int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraycreatealldecomp()"
+    //Initialize return code
+    *rc = ESMC_RC_NOT_IMPL;
+    localrc = ESMC_RC_NOT_IMPL;
     // call into C++
     *ptr = ESMC_ArrayCreate(larrayList, *larrayCount, *distgrid, *dimmap,
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
@@ -75,6 +78,8 @@ extern "C" {
     int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraycreatealldecomp()"
+    //Initialize return code
+    *rc = ESMC_RC_NOT_IMPL;
     // call into C++
     *ptr = ESMC_ArrayCreate(arrayspec, *distgrid, *dimmap,
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
@@ -88,6 +93,8 @@ extern "C" {
   void FTN(c_esmc_arraydestroy)(ESMC_Array **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraydestroy()"
+    //Initialize return code
+    *rc = ESMC_RC_NOT_IMPL;
     // call into C++
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_ArrayDestroy(ptr),
       ESMF_ERR_PASSTHRU,
@@ -111,6 +118,8 @@ extern "C" {
     ESMC_DELayout **opt_delayout;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayget()"
+    //Initialize return code
+    *rc = ESMC_RC_NOT_IMPL;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(distgrid) == ESMC_NULL_POINTER)
       opt_distgrid = NULL;
@@ -134,6 +143,8 @@ extern "C" {
   void FTN(c_esmc_arrayprint)(ESMC_Array **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayprint()"
+    //Initialize return code
+    *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_ArrayPrint(),
       ESMF_ERR_PASSTHRU,
@@ -147,6 +158,8 @@ extern "C" {
     ESMC_RouteHandle **routehandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysparsematmulstore()"
+    //Initialize return code
+    *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_ArraySparseMatMulStore(
       *srcArray, *dstArray, factorList, *factorListCount, *factorIndexList,
@@ -160,6 +173,8 @@ extern "C" {
     ESMC_Array **dstArray, ESMC_RouteHandle **routehandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysparsematmul()"
+    //Initialize return code
+    *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_ArraySparseMatMul(
       *srcArray, *dstArray, routehandle),
@@ -174,6 +189,8 @@ extern "C" {
     ESMC_VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayscatter()"
+    //Initialize return code
+    *rc = ESMC_RC_NOT_IMPL;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
@@ -191,6 +208,8 @@ extern "C" {
     ESMC_VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayscatternotroot()"
+    //Initialize return code
+    *rc = ESMC_RC_NOT_IMPL;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
@@ -207,6 +226,8 @@ extern "C" {
     int *offset, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayserialize()"
+    //Initialize return code
+    *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->ESMC_ArraySerialize(
       buf, length, offset),
@@ -219,6 +240,8 @@ extern "C" {
     int *offset, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraydeserialize()"
+    //Initialize return code
+    *rc = ESMC_RC_NOT_IMPL;
     *array = new ESMC_Array;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->ESMC_ArrayDeserialize(

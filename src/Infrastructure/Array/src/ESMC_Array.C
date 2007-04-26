@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.72 2007/04/26 04:55:48 cdeluca Exp $
+// $Id: ESMC_Array.C,v 1.73 2007/04/26 16:10:16 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMC_Array.C,v 1.72 2007/04/26 04:55:48 cdeluca Exp $";
+  static const char *const version = "$Id: ESMC_Array.C,v 1.73 2007/04/26 16:10:16 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -92,7 +92,7 @@ ESMC_Array *ESMC_ArrayCreate(
   // local vars
   int status;                 // local error status
    
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
@@ -666,7 +666,7 @@ ESMC_Array *ESMC_ArrayCreate(
   // local vars
   int status;                 // local error status
    
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
@@ -1145,7 +1145,7 @@ int ESMC_ArrayDestroy(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
@@ -1224,7 +1224,7 @@ int ESMC_Array::ESMC_ArrayConstruct(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
@@ -1384,7 +1384,7 @@ int ESMC_Array::ESMC_ArrayDestruct(void){
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
@@ -1469,7 +1469,7 @@ int ESMC_Array::ESMC_ArrayGet(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
@@ -1850,7 +1850,7 @@ int ESMC_Array::ESMC_ArrayGetLinearIndexExclusive(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
@@ -1902,7 +1902,7 @@ int ESMC_Array::ESMC_ArrayPrint(){
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   *rc = ESMC_RC_NOT_IMPL;
 
@@ -1988,7 +1988,7 @@ int ESMC_Array::ESMC_ArraySerialize(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   *rc = ESMC_RC_NOT_IMPL;
 
@@ -2057,7 +2057,7 @@ int ESMC_Array::ESMC_ArrayDeserialize(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   *rc = ESMC_RC_NOT_IMPL;
 
@@ -2150,7 +2150,7 @@ int ESMC_Array::ESMC_ArrayScatter(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   *rc = ESMC_RC_NOT_IMPL;
 
@@ -2658,7 +2658,7 @@ int ESMC_ArraySparseMatMulStore(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   *rc = ESMC_RC_NOT_IMPL;
 
@@ -3044,7 +3044,7 @@ int ESMC_ArraySparseMatMul(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   *rc = ESMC_RC_NOT_IMPL;
 
@@ -3145,7 +3145,7 @@ int ESMC_ArraySparseMatMulRelease(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   *rc = ESMC_RC_NOT_IMPL;
 
@@ -3243,6 +3243,8 @@ int ESMC_newArray::ESMC_newArrayConstruct(
 //EOP
 //-----------------------------------------------------------------------------
   int localrc;
+  //Initialize localrc; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
   // determine required information
   if (vm==NULL)
     vm = ESMC_VMGetCurrent(&localrc);  // get current VM context
@@ -4048,6 +4050,8 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 //EOP
 //-----------------------------------------------------------------------------
   int localrc;
+  //Initialize localrc; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
   // determine required information
   if (vm==NULL)
     vm = ESMC_VMGetCurrent(&localrc);  // get current VM context
@@ -4861,6 +4865,10 @@ ESMC_newArray *ESMC_newArrayCreate(
 //EOP
 //-----------------------------------------------------------------------------
   int localrc;
+  // Initialize rc and localrc ; assume functions not implemented
+  localrc = ESMF_RC_NOT_IMPL;
+  if (*rc) *rc = ESMF_RC_NOT_IMPL;
+
   ESMC_newArray *array;
   // determine required information
   ESMC_VM *vm = ESMC_VMGetCurrent(&localrc);  // get current VM context
@@ -5041,6 +5049,10 @@ int ESMC_newArrayDestroy(
 //
 //EOP
 //-----------------------------------------------------------------------------
+int localrc;
+//Initialize localrc; assume routine not implemented
+localrc = ESMC_RC_NOT_IMPL;
+
   if (*array != ESMC_NULL_POINTER) {
 #if 0
     (*array)->ESMC_newArrayDestruct();
@@ -5053,6 +5065,7 @@ int ESMC_newArrayDestroy(
       ESMC_LOG_ERROR);
     return(ESMC_RC_PTR_NULL);
   }
+return localrc;
 }
 //-----------------------------------------------------------------------------
 

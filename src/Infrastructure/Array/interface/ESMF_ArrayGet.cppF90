@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.9 2007/04/17 15:06:03 rosalind Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.10 2007/04/26 16:10:16 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.9 2007/04/17 15:06:03 rosalind Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.10 2007/04/26 16:10:16 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -269,7 +269,7 @@ contains
     type(ESMF_DistGrid)           :: opt_distgrid           ! helper variable
     type(ESMF_DELayout)           :: opt_delayout           ! helper variable
 
-    ! Initialize return code; assume failure until success is certain
+    ! Initialize return code
     status = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
@@ -484,7 +484,7 @@ contains
     integer, allocatable:: localDeList(:) ! helper variable
     integer             :: de             ! helper variable
 
-    ! Initialize return code; assume failure until success is certain
+    ! Initialize return code
     status = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
@@ -586,7 +586,7 @@ contains
     type(ESMF_TypeKind)                 :: typekind @\
     type(ESMF_LocalArray), allocatable  :: larrayList(:) @\
 @\
-    ! Initialize return code; assume failure until success is certain @\
+    ! Initialize return code @\
     status = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
 @\
@@ -684,7 +684,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
     integer                             :: localDeCount
     type(ESMF_LocalArray), allocatable  :: larrayList(:)
     
-    ! Initialize return code; assume failure until success is certain
+    ! Initialize return code
     status = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
@@ -749,6 +749,10 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
+
+    ! Initialize return code
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
   end subroutine ESMF_ArrayGetTotalCellMask1D
 !------------------------------------------------------------------------------
 
@@ -784,6 +788,10 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
+
+    ! Initialize return code
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
   end subroutine ESMF_ArrayGetTotalCellMask2D
 !------------------------------------------------------------------------------
 
@@ -819,6 +827,10 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
+
+    ! Initialize return code
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
   end subroutine ESMF_ArrayGetTotalCellMask3D
 !------------------------------------------------------------------------------
 
@@ -877,6 +889,10 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
+
+    ! Initialize return code
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
   end subroutine ESMF_ArrayGetHalo
 !------------------------------------------------------------------------------
 

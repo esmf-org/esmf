@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.9 2007/04/17 15:06:03 rosalind Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.10 2007/04/26 16:10:14 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.9 2007/04/17 15:06:03 rosalind Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.10 2007/04/26 16:10:14 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -857,6 +857,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     
     ! Set init code
     ESMF_INIT_SET_CREATED(array)
@@ -943,6 +944,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocalArrayGetInit, larray, rc)
