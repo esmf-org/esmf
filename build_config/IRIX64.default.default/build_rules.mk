@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.29 2007/01/16 19:59:02 theurich Exp $
+# $Id: build_rules.mk,v 1.30 2007/04/27 22:13:33 dneckels Exp $
 # 
 # IRIX64.default.default
 #
@@ -70,9 +70,6 @@ ESMF_PTHREADSDEFAULT       = OFF
 
 ############################################################
 # Special compiler flags
-#
-# abide to C++ language standard; don't put libc into std name space
-ESMF_CXXCOMPILEOPTS       += -LANG:std=on:libc_in_namespace_std=off
 #
 # allow for multi-processor code (important for shared objects!)
 ESMF_CXXCOMPILEOPTS       += -mp
