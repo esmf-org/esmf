@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.106 2007/04/17 17:54:46 rosalind Exp $
+! $Id: ESMF_Bundle.F90,v 1.107 2007/04/27 14:23:33 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -529,6 +529,9 @@ end interface
 !     \end{description}
 !
 !EOPI
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleFieldAccessGetInit, ESMF_BundleFieldAccessInit,s)
 
      ! return success
@@ -619,6 +622,9 @@ end interface
 !     \end{description}
 !
 !EOPI
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
 
      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleFieldIntrlvGetInit, ESMF_BundleFieldIntrlvInit,s)
 
@@ -713,6 +719,9 @@ end interface
 !     \end{description}
 !
 !EOPI
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleCongrntDataGetInit, ESMF_BundleCongrntDataInit,s)
 
      ! return success
@@ -806,6 +815,9 @@ end interface
 !     \end{description}
 !
 !EOPI
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      ESMF_INIT_CHECK_SHALLOW(ESMF_LocalBundleGetInit,ESMF_LocalBundleInit,s)
 
      ! return success
@@ -901,6 +913,10 @@ end interface
 !     \end{description}
 !
 !EOPI
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+
      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleTypeGetInit,ESMF_BundleTypeInit,s)
 
      ! return success
@@ -1001,6 +1017,7 @@ end function
       ! Initialize return code in case we return early.
       ! Otherwise, count on AddFieldList call to set rc
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1072,6 +1089,7 @@ end function
       ! Initialize return code in case we return early.
       ! Otherwise, count on AddFieldList call to set rc
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1172,6 +1190,7 @@ end function
 
       ! Initialize return code in case we return early.
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       do i=1,fieldCount
@@ -1419,7 +1438,7 @@ end function
       integer :: status                           ! Error status
       type(ESMF_BundleType), pointer :: btype     ! internal data
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -1507,7 +1526,7 @@ end function
       type(ESMF_BundleType), pointer :: btype     ! internal data
       integer :: nitems                           ! items in return array
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -1628,8 +1647,9 @@ end function
 
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1692,8 +1712,9 @@ end function
       integer :: status                           ! Error status
       integer :: limit
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1758,8 +1779,9 @@ end function
 
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1822,8 +1844,9 @@ end function
       integer :: status                           ! Error status
       integer :: limit
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1887,8 +1910,9 @@ end function
 
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -1951,8 +1975,9 @@ end function
       integer :: status                           ! Error status
       integer :: limit
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2016,8 +2041,9 @@ end function
 
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2080,8 +2106,9 @@ end function
       integer :: status                           ! Error status
       integer :: limit
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2146,7 +2173,7 @@ end function
 
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -2211,7 +2238,7 @@ end function
       integer :: status                           ! Error status
       integer :: limit
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -2278,7 +2305,7 @@ end function
 
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -2334,7 +2361,7 @@ end function
 
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -2399,8 +2426,9 @@ end function
       type(ESMF_TypeKind) :: localTk
       integer :: localCount
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2473,8 +2501,9 @@ end function
       type(ESMF_TypeKind) :: localTk
       integer :: localCount
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2547,8 +2576,9 @@ end function
       type(ESMF_InternArray) :: array
       type(ESMF_FieldDataMap) :: datamap
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -2929,6 +2959,10 @@ end function
       integer :: i, status
       type(ESMF_BundleType), pointer :: bp
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
@@ -2987,6 +3021,9 @@ end function
 !     \end{description}
 !
 !EOPI
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
 !
 !  TODO: code goes here
 !
@@ -3022,6 +3059,9 @@ end function
 !
 !
 !EOPI
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
 !
@@ -3065,6 +3105,9 @@ end function
 !
 !EOPI
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
 
 !
 !  TODO: code goes here
@@ -3100,6 +3143,9 @@ end function
 !     \end{description}
 !
 !EOPI
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
 !
@@ -3140,6 +3186,9 @@ end function
 !     \end{description}
 !
 !EOPI
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
 !
@@ -3257,6 +3306,9 @@ end function
       integer :: i
       integer :: status
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
@@ -3333,6 +3385,9 @@ end function
 !
       type(ESMF_Bundle) :: b
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       allocate(b%btypep)
 
       b%btypep%bundlestatus = ESMF_STATUS_UNINIT
@@ -3381,6 +3436,9 @@ end function
 !
       type(ESMF_Bundle) :: b
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       allocate(b%btypep)
 
       b%btypep%bundlestatus = ESMF_STATUS_UNINIT
@@ -3420,6 +3478,9 @@ end function
 !
 !
 !EOPI
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
 !
@@ -3465,6 +3526,9 @@ end function
 !
 !
 !EOPI
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
 !
@@ -3561,8 +3625,9 @@ end function
 
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -3626,8 +3691,9 @@ end function
       integer :: status 
       integer :: limit
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -3693,8 +3759,9 @@ end function
 
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -3758,8 +3825,9 @@ end function
       integer :: status
       integer :: limit
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -3825,8 +3893,9 @@ end function
 
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -3885,8 +3954,9 @@ end function
 
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -3950,8 +4020,9 @@ end function
       integer :: limit
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -4022,8 +4093,9 @@ end function
       integer :: limit
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -4089,8 +4161,9 @@ end function
 
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -4154,8 +4227,9 @@ end function
       integer :: limit
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -4221,8 +4295,9 @@ end function
 
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
@@ -4279,6 +4354,9 @@ end function
 !
 !EOPI
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
 
 !
 !  TODO: code goes here
@@ -4329,7 +4407,7 @@ end function
       integer :: status                           ! Error status
       type(ESMF_BundleType), pointer :: btype     ! internal data
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -4403,7 +4481,7 @@ end function
       ! Local variables
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -4504,6 +4582,9 @@ end function
 !     \end{description}
 !
 !EOPI
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
 !
@@ -5003,7 +5084,7 @@ end function
 
       integer :: status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -5076,6 +5157,10 @@ end function
       integer :: localrc                     ! Error status
       integer :: i
       type(ESMF_BundleType), pointer :: bp   ! bundle type
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
 #if 0
         type(ESMF_Base) :: base                   ! base class object
@@ -5197,6 +5282,11 @@ end function
       integer :: i
       type(ESMF_BundleType), pointer :: bp   ! bundle type
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
       ! in case of error, make sure this is invalid.
       nullify(ESMF_BundleDeserialize%btypep)
 
@@ -5280,18 +5370,3 @@ end function
 
 
       end module ESMF_BundleMod
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

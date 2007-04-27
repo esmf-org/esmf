@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_BundleGetMacros.h,v 1.11 2007/04/17 17:54:46 rosalind Exp $
+! $Id: ESMF_BundleGetMacros.h,v 1.12 2007/04/27 14:23:33 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -97,7 +97,7 @@
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
  @\
-        ! Initialize return code; assume failure until success is certain @\
+        ! Initialize return code; assume routine not implemented @\
         status = ESMF_RC_NOT_IMPL @\
         rcpresent = .FALSE. @\
         array%this = ESMF_NULL_POINTER @\

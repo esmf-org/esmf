@@ -1,4 +1,4 @@
-// $Id: ESMC_Bundle.C,v 1.5 2007/03/31 05:50:52 cdeluca Exp $
+// $Id: ESMC_Bundle.C,v 1.6 2007/04/27 14:23:33 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Bundle.C,v 1.5 2007/03/31 05:50:52 cdeluca Exp $";
+             "$Id: ESMC_Bundle.C,v 1.6 2007/04/27 14:23:33 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -78,11 +78,14 @@ int ESMC_BundleDestroy(ESMC_Bundle *f) {
 //
 //EOP
 // !REQUIREMENTS:  
+    int localrc;
 
+    // Initialize local return code
+    localrc = ESMC_RC_NOT_IMPL;
 //
 //  code goes here
 //
-    return ESMF_FAILURE;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_BundleConstruct
 
@@ -108,11 +111,14 @@ int ESMC_BundleDestroy(ESMC_Bundle *f) {
 //
 //EOP
 // !REQUIREMENTS:  
+    int localrc;
 
+    // Initialize local return code
+    localrc = ESMC_RC_NOT_IMPL;
 //
 //  code goes here
 //
-    return ESMF_FAILURE;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_BundleDestruct
 //-----------------------------------------------------------------------------
@@ -134,7 +140,10 @@ int ESMC_BundleDestroy(ESMC_Bundle *f) {
 //
 //EOP
 // !REQUIREMENTS:  
+//  int localrc;
 
+//  // Initialize local return code
+//  localrc = ESMC_RC_NOT_IMPL;
 //
 //  code goes here
 //
@@ -160,7 +169,10 @@ int ESMC_BundleDestroy(ESMC_Bundle *f) {
 //
 //EOP
 // !REQUIREMENTS:  
+  //  int localrc;
 
+    // Initialize local return code
+   // localrc = ESMC_RC_NOT_IMPL;
 //
 //  code goes here
 //
@@ -186,11 +198,14 @@ int ESMC_BundleDestroy(ESMC_Bundle *f) {
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
+    int localrc;
 
+    // Initialize local return code
+    localrc = ESMC_RC_NOT_IMPL;
 //
 //  code goes here
 //
-    return ESMF_FAILURE;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_BundleValidate
 
@@ -214,11 +229,14 @@ int ESMC_BundleDestroy(ESMC_Bundle *f) {
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
+    int localrc;
 
+    // Initialize local return code
+    localrc = ESMC_RC_NOT_IMPL;
 //
 //  code goes here
 //
-    return ESMF_FAILURE;
+    return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_BundlePrint
 
