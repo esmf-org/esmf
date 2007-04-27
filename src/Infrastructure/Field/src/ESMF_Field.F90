@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.246 2007/04/05 17:34:25 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.247 2007/04/27 20:05:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -248,7 +248,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.246 2007/04/05 17:34:25 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.247 2007/04/27 20:05:08 oehmke Exp $'
 
 !==============================================================================
 !
@@ -2732,7 +2732,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSetLocalArray"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSetLocalArray - Set data Array associated with the Field
 !
 ! !INTERFACE:
@@ -2759,7 +2759,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
 
       integer :: localrc 
