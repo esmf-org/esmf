@@ -1,4 +1,4 @@
-// $Id: ESMC_DistDir.h,v 1.1 2007/04/26 21:47:33 dneckels Exp $
+// $Id: ESMC_DistDir.h,v 1.2 2007/04/27 17:59:24 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -24,6 +24,7 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <functional>
 
 
 namespace ESMC {

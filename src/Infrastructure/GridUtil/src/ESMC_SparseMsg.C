@@ -1,4 +1,4 @@
-// $Id: ESMC_SparseMsg.C,v 1.1 2007/04/26 21:47:34 dneckels Exp $
+// $Id: ESMC_SparseMsg.C,v 1.2 2007/04/27 17:59:24 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_SparseMsg.C,v 1.1 2007/04/26 21:47:34 dneckels Exp $";
+            "$Id: ESMC_SparseMsg.C,v 1.2 2007/04/27 17:59:24 dneckels Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -401,13 +401,13 @@ bool SparseMsg::filled()
     buffer &b = outBuffers[i];
 //std::cout << "buffer cur=" << (int) b.cur << ", end=" << (int) b.end << std::endl;
     if (b.cur > &b.beg[b.msize]) {
-      std::cout << "buffer overfilled!! cur=" << (int) b.cur << ", capacity at=" << (int) &b.beg[b.msize] << std::endl;
+      //std::cout << "buffer overfilled!! cur=" << (int) b.cur << ", capacity at=" << (int) &b.beg[b.msize] << std::endl;
       return false;
     }
 
     if (b.cur != &b.beg[b.msize]) {
-      std::cout << "buffer underfilled!! cur=" << (int) b.cur <<
-            ", end=" << (int) b.end << " capacity at:" << (int) &b.beg[b.msize] << std::endl;
+      //std::cout << "buffer underfilled!! cur=" << (int) b.cur <<
+       //     ", end=" << (int) b.end << " capacity at:" << (int) &b.beg[b.msize] << std::endl;
       return false;
     }
   }
@@ -442,12 +442,12 @@ bool SparseMsg::empty()
     buffer &b = inBuffers[i];
 //std::cout << "buffer cur=" << (int) b.cur << ", end=" << (int) b.end << std::endl;
     if (b.cur > b.end) {
-      std::cout << "buffer overpicked!! cur=" << (int) b.cur << ", end=" << (int) b.end << std::endl;
+      //std::cout << "buffer overpicked!! cur=" << (int) b.cur << ", end=" << (int) b.end << std::endl;
       return false;
     }
 
     if (b.cur != &b.beg[b.msize]) {
-      std::cout << "buffer underpicked!! cur=" << (int) b.cur << ", end=" << (int) b.end << std::endl;
+      //std::cout << "buffer underpicked!! cur=" << (int) b.cur << ", end=" << (int) b.end << std::endl;
       return false;
     }
   }
