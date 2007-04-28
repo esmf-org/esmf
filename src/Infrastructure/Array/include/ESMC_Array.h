@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.52 2007/04/26 21:57:19 theurich Exp $
+// $Id: ESMC_Array.h,v 1.53 2007/04/28 04:05:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -85,6 +85,8 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     int deCount;
     int localDeCount;
     int *localDeList;
+    // derived from DELayout
+    int *deList;  // localDE index for DE or -1 if not local
     
   public:
     // Construct and Destruct
