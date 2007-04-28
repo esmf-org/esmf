@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.13 2007/04/26 23:41:08 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.14 2007/04/28 04:08:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -61,7 +61,8 @@ class ESMC_DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int *deCellCount;             // number of cells for each DE
     int *dimContigFlag;           // flag contiguous indices by DE per dim
     int *dimExtent;               // extent of indexList held by DE per dim
-    int **indexList;              // indices held by DE per dim
+    int **indexList;              // indices held by all DEs per dim
+    int **localIndexList;         // indices held by local DEs per dim
     ESMC_Logical regDecompFlag;   // flag indicating regular decomposition
     int **connectionList;         // list of connection elements
     int connectionCount;          // number of elements in connection list
@@ -70,6 +71,8 @@ class ESMC_DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     ESMC_VM *vm;    
     // cached values from DELayout
     int deCount;
+    int localDeCount;
+    int *localDeList;
     // cached values from VM
     int localPet;
     int petCount;
@@ -89,6 +92,8 @@ class ESMC_DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_DistGridGet(int de, int *cellCount);
     int ESMC_DistGridGet(int de, int dim, ESMC_InterfaceInt *indexList=NULL,
       int *contigFlag=NULL);
+    int ESMC_DistGridGetLocal(int de, int dim, 
+      ESMC_InterfaceInt *localIndexList=NULL);
     int ESMC_DistGridGetSequenceIndex(int de, int *index);
     int ESMC_DistGridGetSequenceDe(int seqindex);
     int ESMC_DistGridGetPatchMinMaxCorner(int patch, int *minCorner, int

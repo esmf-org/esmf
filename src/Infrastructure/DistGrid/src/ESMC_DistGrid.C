@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.12 2007/04/26 23:41:08 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.13 2007/04/28 04:08:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DistGrid.C,v 1.12 2007/04/26 23:41:08 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DistGrid.C,v 1.13 2007/04/28 04:08:48 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1247,11 +1247,15 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
   delayout = delayoutArg;
   vm = vmArg;
   // fill in cached values
-  status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+  status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, 0, NULL, 0,
+    NULL, NULL, &localDeCount, NULL, 0, NULL, NULL, 0);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
     return localrc;
-  }
+  localDeList = new int[localDeCount];
+  status=delayout->ESMC_DELayoutGet(NULL, NULL, NULL, 0, NULL, 0,
+    NULL, NULL, NULL, localDeList, localDeCount, NULL, NULL, 0);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+    return localrc;
   status=vm->ESMC_VMGet(&localPet, &petCount, NULL, NULL, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     return localrc;
@@ -1269,6 +1273,16 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
   for (int i=0; i<dimCount*deCount; i++){
     indexList[i] = new int[dimExtent[i]];
     memcpy(indexList[i], indexListArg[i], sizeof(int)*dimExtent[i]);
+  }
+  // TODO: eventually get localIndexList from DistGridCreate() routines directly
+  localIndexList = new int*[dimCount*localDeCount];
+  for (int i=0; i<localDeCount; i++){
+    int de = localDeList[i];
+    for (int k=0; k<dimCount; k++){
+      localIndexList[i*dimCount+k] = new int[dimExtent[de*dimCount+k]];
+      memcpy(localIndexList[i*dimCount+k], indexListArg[de*dimCount+k],
+        sizeof(int)*dimExtent[de*dimCount+k]);
+    }
   }
   // determine the patchCellCount
   patchCellCount = new int[patchCount];
@@ -1334,6 +1348,9 @@ int ESMC_DistGrid::ESMC_DistGridDestruct(void){
   for (int i=0; i<dimCount*deCount; i++)
     delete [] indexList[i];
   delete [] indexList;
+  for (int i=0; i<dimCount*localDeCount; i++)
+    delete [] localIndexList[i];
+  delete [] localIndexList;
   for (int i=0; i<connectionCount; i++)
     delete [] connectionList[i];
   if (connectionList)
@@ -1630,6 +1647,66 @@ int ESMC_DistGrid::ESMC_DistGridGet(
     
   if (cellCount != NULL){
     *cellCount = deCellCount[de];
+  }
+  
+  // return successfully
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridGetLocal()"
+//BOP
+// !IROUTINE:  ESMC_DistGridGetLocal
+//
+// !INTERFACE:
+int ESMC_DistGrid::ESMC_DistGridGetLocal(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  int de,                           // in  - local DE = {0, ..., localDeCount-1}
+  int dim,                          // in  - dim  = {1, ..., dimCount}
+  ESMC_InterfaceInt *localIndexListArg    // out - list of indices per local DE
+                                          // per dim
+  ){    
+//
+// !DESCRIPTION:
+//    Get information about a DistGrid object
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // automatic variable for local return code
+  int *rc = &localrc;         // pointer to localrc
+  int status;                 // local error status
+
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  if (rc!=NULL)
+    *rc = ESMF_FAILURE;
+  
+  // fill localIndexListArg
+  if (localIndexListArg != NULL){
+    // localIndexListArg was provided -> do some error checking
+    if (localIndexListArg->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- localIndexListArg array must be of rank 1", rc);
+      return localrc;
+    }
+    if (localIndexListArg->extent[0] <
+      dimExtent[localDeList[de]*dimCount+(dim-1)]){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of localIndexListArg array size insufficiently", rc);
+      return localrc;
+    }
+    // fill in the values
+    memcpy(localIndexListArg->array, localIndexList[de*dimCount+(dim-1)],
+      sizeof(int)*dimExtent[localDeList[de]*dimCount+(dim-1)]);
   }
   
   // return successfully
