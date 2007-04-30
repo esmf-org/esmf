@@ -1,4 +1,4 @@
-!  $Id: ESMF_Config_C.F90,v 1.4 2007/04/20 08:40:40 theurich Exp $
+!  $Id: ESMF_Config_C.F90,v 1.5 2007/04/30 21:14:43 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Config_C.F90,v 1.4 2007/04/20 08:40:40 theurich Exp $'
+!      '$Id: ESMF_Config_C.F90,v 1.5 2007/04/30 21:14:43 rosalind Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -34,6 +34,9 @@
 
      type(ESMF_Config) :: config
      integer, intent(out), optional :: rc              
+
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
      config = ESMF_ConfigCreate(rc=rc)
 
@@ -49,6 +52,9 @@
 
      type(ESMF_Config) :: config
      integer, intent(out), optional :: rc     
+
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
      call ESMF_ConfigDestroy(config, rc=rc)
 
@@ -68,6 +74,9 @@
      integer, intent(out), optional  :: rc
 
      logical :: lunique
+
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
      if (present(unique)) then
        if (unique /= 0) then
@@ -94,6 +103,9 @@
      character(len=*), intent(in)    :: label
      integer, intent(out), optional  :: rc     
 
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      call ESMF_ConfigFindLabel(config, label, rc=rc)
 
    end subroutine f_esmf_configfindlabel
@@ -111,6 +123,9 @@
      integer, intent(out), optional    :: rc   
 
      logical :: ltableEnd
+
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
      if (present(tableEnd)) then
        call ESMF_ConfigNextLine(config, tableEnd=ltableEnd, rc=rc)
@@ -139,6 +154,9 @@
      character, intent(in), optional        :: dvalue
      integer, intent(out), optional         :: rc  
 
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      call ESMF_ConfigGetChar( config, value, label=label, default=dvalue, rc=rc)
 
    end subroutine f_esmf_configgetchar
@@ -155,6 +173,9 @@
      integer, intent(out)                   :: wordCount
      character(len=*), intent(in), optional :: label
      integer, intent(out), optional         :: rc
+
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
      wordCount = ESMF_ConfigGetLen(config, label=label,  rc=rc)
 
@@ -174,6 +195,9 @@
      character(len=*), intent(in), optional :: label
      integer, intent(out), optional         :: rc
 
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      call ESMF_ConfigGetDim(config, lineCount, columnCount, label,  rc=rc)
 
    end subroutine f_esmf_configgetdim
@@ -189,6 +213,9 @@
       type(ESMF_Config), intent(inout)         :: config
       character (len=*), intent(in),  optional :: options
       integer, intent(out), optional           :: rc
+
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
      call ESMF_ConfigValidate(config, options=options, rc=rc)
 
@@ -208,6 +235,9 @@
      character(len=*), intent(in), optional :: dvalue
      integer, intent(out), optional         :: rc
 
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      call ESMF_ConfigGetAttribute(config, value, label=label, default=dvalue, rc=rc)
 
    end subroutine f_esmf_configgetstring
@@ -225,6 +255,9 @@
      character(len=*), intent(in), optional       :: label
      integer(ESMF_KIND_I4), intent(in), optional  :: dvalue
      integer, intent(out), optional               :: rc     
+
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
      call ESMF_ConfigGetAttribute(config, value, label=label, default=dvalue, rc=rc)
 
@@ -244,6 +277,9 @@
      integer(ESMF_KIND_I8), intent(in), optional  :: dvalue
      integer, intent(out), optional               :: rc     
 
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      call ESMF_ConfigGetAttribute(config, value, label=label, default=dvalue, rc=rc)
 
    end subroutine f_esmf_configgetinti8
@@ -262,6 +298,9 @@
      real(ESMF_KIND_R4), intent(in), optional  :: dvalue
      integer, intent(out), optional            :: rc     
 
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      call ESMF_ConfigGetAttribute(config, value, label=label, default=dvalue, rc=rc)
 
    end subroutine f_esmf_configgetfloatr4
@@ -279,6 +318,9 @@
      character(len=*), intent(in), optional    :: label
      real(ESMF_KIND_R8), intent(in), optional  :: dvalue
      integer, intent(out), optional            :: rc     
+
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
      call ESMF_ConfigGetAttribute(config, value, label=label, default=dvalue, rc=rc)
 
@@ -300,6 +342,9 @@
 
      logical :: lvalue, ldvalue
       
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      if (present(dvalue)) then
        if (dvalue /= 0) then
          ldvalue = .true. 
@@ -334,6 +379,9 @@
      integer(ESMF_KIND_I4), intent(in), optional     :: dvalue
      integer, intent(out), optional                  :: rc     
 
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      call ESMF_ConfigGetAttribute(config, valueList, count, label=label, default=dvalue, rc=rc)
 
    end subroutine f_esmf_configgetintsi4
@@ -352,6 +400,9 @@
      character(len=*), intent(in), optional          :: label
      integer(ESMF_KIND_I8), intent(in), optional     :: dvalue
      integer, intent(out), optional                  :: rc     
+
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
      call ESMF_ConfigGetAttribute(config, valueList, count, label=label, default=dvalue, rc=rc)
 
@@ -372,6 +423,9 @@
      real(ESMF_KIND_R4), intent(in), optional     :: dvalue
      integer, intent(out), optional               :: rc     
 
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      call ESMF_ConfigGetAttribute(config, valueList, count, label=label, default=dvalue, rc=rc)
 
    end subroutine f_esmf_configgetfloatsr4
@@ -390,6 +444,9 @@
      character(len=*), intent(in), optional       :: label
      real(ESMF_KIND_R8), intent(in), optional     :: dvalue
      integer, intent(out), optional               :: rc     
+
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
      call ESMF_ConfigGetAttribute(config, valueList, count, label=label, default=dvalue, rc=rc)
 
@@ -412,6 +469,9 @@
 
      logical :: lvalueList(count), ldvalue
      integer :: i
+
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
      if (present(dvalue)) then
        if (dvalue /= 0) then

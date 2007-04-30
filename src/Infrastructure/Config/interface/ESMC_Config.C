@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.C,v 1.4 2007/04/25 16:44:24 tjcnrl Exp $
+// $Id: ESMC_Config.C,v 1.5 2007/04/30 21:14:43 rosalind Exp $
 //
 // Earth System Modeling Framework
 // copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
  static const char* const version = 
-             "$Id: ESMC_Config.C,v 1.4 2007/04/25 16:44:24 tjcnrl Exp $";
+             "$Id: ESMC_Config.C,v 1.5 2007/04/30 21:14:43 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -86,8 +86,9 @@ ESMC_Config* ESMC_ConfigCreate(
   // local vars
   int localrc;                // local return code
 
-  // initialize return code
+  // Initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   // allocate the new Config object
   ESMC_Config* config;
@@ -149,8 +150,9 @@ int ESMC_ConfigDestroy(
   int rc;                     // return code
   int localrc;                // local return code
 
-  // initialize return code
+  // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -224,8 +226,9 @@ int ESMC_ConfigLoadFile(
   int nlen;
   char* fName = NULL;
 
-  // initialize return code
+  // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -325,8 +328,9 @@ int ESMC_ConfigFindLabel(
   int llen;
   char* fLabel = NULL;
 
-  // initialize return code
+  // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -402,8 +406,9 @@ int ESMC_ConfigNextLine(
   ESMCI_ArgID argID;          // optional argument list id
   int* tableEndp = NULL;      // pointer to tableEnd
 
-  // initialize return code
+  // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -491,8 +496,9 @@ int ESMC_ConfigNextLine(
   char* fLabel = NULL;
   int llen = 0;
 
-  // initialize return code
+  // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -597,8 +603,9 @@ int ESMC_ConfigNextLine(
   char* fLabel = NULL;
   int llen = 0;
 
-  // initialize return code
+  // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -701,8 +708,9 @@ int ESMC_ConfigNextLine(
   char* fLabel = NULL;
   int llen = 0;
 
-  // initialize return code
+  // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -808,8 +816,9 @@ int ESMC_ConfigValidate(
   char* foptions = NULL;
   int olen = 0;
 
-  // initialize return code
+  // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -928,8 +937,9 @@ int ESMC_ConfigGetAttribute(
   int dlen = 0;               // length of default string value
   int i;
 
-  // initialize return code
+  // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
@@ -1401,8 +1411,9 @@ int ESMC_ConfigSetAttribute(
   int vlen = 0;               // length of input string value
   int i;
 
-  // initialize return code
+  // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {

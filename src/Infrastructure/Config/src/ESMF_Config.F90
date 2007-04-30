@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.39 2007/04/03 03:59:14 theurich Exp $
+! $Id: ESMF_Config.F90,v 1.40 2007/04/30 21:14:44 rosalind Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -319,6 +319,9 @@
 !     \end{description}
 !
 !EOPI
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      ESMF_INIT_CHECK_SHALLOW(ESMF_ConfigAttrUsedGetInit, ESMF_ConfigAttrUsedInit,s)
 
      ! return success
@@ -417,6 +420,9 @@
 !     \end{description}
 !
 !EOPI
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      ESMF_INIT_CHECK_SHALLOW(ESMF_ConfigClassGetInit, ESMF_ConfigClassInit,s)
 
      ! return success
@@ -488,6 +494,9 @@
       integer :: iret
       type(ESMF_ConfigClass), pointer :: config_local
       type(ESMF_ConfigAttrUsed), dimension(:), pointer :: attr_used_local
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       iret = 0
  
 ! Initialization
@@ -545,6 +554,9 @@
 !
 !EOP -------------------------------------------------------------------
       integer :: iret
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -613,6 +625,9 @@
 !EOP -------------------------------------------------------------------
 
       integer :: i, j, iret
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       iret = 0
 
@@ -699,6 +714,9 @@
       character(len=1) :: ch
       integer :: ib, ie, iret
       
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       iret = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -810,6 +828,9 @@
       character(len=LSZ) :: string
       real(ESMF_KIND_R4) :: x
       
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       iret = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -902,6 +923,9 @@
       character(len=LSZ) :: string
       real(ESMF_KIND_R8) :: x
       
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       iret = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -995,6 +1019,9 @@
 !EOP -------------------------------------------------------------------
       integer :: iret, i 
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       iret = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -1075,6 +1102,9 @@
 !EOP -------------------------------------------------------------------
       integer :: iret, i 
       
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       iret = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -1156,6 +1186,9 @@
       real(ESMF_KIND_R8) :: x
       integer(ESMF_KIND_I4) ::  n
       integer :: iret
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       iret = 0
       !check variables
@@ -1250,6 +1283,9 @@
       real(ESMF_KIND_R8) :: x
       integer(ESMF_KIND_I8) :: n
       integer :: iret
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       iret = 0
       !check variables
@@ -1346,6 +1382,9 @@
 !EOP -------------------------------------------------------------------
       integer :: iret, i 
       
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       iret = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -1517,6 +1556,9 @@
       character(len=LSZ) :: string
       integer :: iret
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       iret = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -1623,6 +1665,9 @@
 !EOP -------------------------------------------------------------------
       integer :: iret, i 
       
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       iret = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -1704,6 +1749,9 @@
       character(len=LSZ) :: string
       integer :: iret
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       iret = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -1784,6 +1832,10 @@
 !EOP -------------------------------------------------------------------
       integer :: n, iret
       logical :: tend
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       lineCount = 0
       columnCount = 0
       
@@ -1865,6 +1917,9 @@
       integer :: iret
       integer :: count 
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       iret = 0
       count = 0
       ESMF_ConfigGetLen = -1    ! assume error
@@ -1942,6 +1997,9 @@
 
       integer :: iret
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       iret = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -2006,6 +2064,9 @@
 !EOPI -------------------------------------------------------------------
       integer :: lu, ios, loop, ls, ptr, iret
       character(len=LSZ) :: line
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       iret = 0
       !check variables
@@ -2127,6 +2188,9 @@
       integer :: i, j, iret
       logical :: local_tend
 
+      ! Initialize return code; assume routine not implemented 
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       iret = 0
       local_tend = .false.
       !check variables
@@ -2199,9 +2263,9 @@
       character(len=ESMF_MAXSTR) :: logmsg
       logical :: duplicate
 
-      ! successful until proven otherwise
+      ! Initialize return code; assume routine not implemented
       if ( present (rc) ) then
-        rc = ESMF_SUCCESS
+        rc = ESMF_RC_NOT_IMPL
       endif
 
       !check variables
@@ -2224,7 +2288,6 @@
         if (this_line(1:2) .ne. '::' ) then  ! skip end-of-table mark
           k = index_(this_line, ':') - 1     ! label sans colon
           if (k .ge. 1) then  ! non-blank match
-
             ! found a label, trim it, 
             label = trim(adjustl(this_line(1:k)))
 
@@ -2305,7 +2368,9 @@
       character(len=LSZ) :: curVal, newVal
       integer :: iret, i, j, k, m, nchar, ninsert, ndelete, lenThisLine
 
-      iret = ESMF_SUCCESS
+      ! Initialize return code; assume routine not implemented
+      iret = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -2449,13 +2514,14 @@
 !EOPI -------------------------------------------------------------------
       integer :: i
 
-      ! successful until proven otherwise
+      ! Initialize return code; assume routine not implemented
       if ( present (rc) ) then
-        rc = ESMF_SUCCESS
+        rc = ESMF_RC_NOT_IMPL
       endif
 
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+
 
       ! find attr label and set its used flag to given value
       !  TODO:  pre-sort and use binary search, or use hash function
@@ -2465,6 +2531,8 @@
           exit
         endif
       enddo
+
+      if (present(rc)) rc = ESMF_SUCCESS
 
       return
 
@@ -2511,11 +2579,12 @@
 
 !EOP -------------------------------------------------------------------
       character(len=ESMF_MAXSTR) :: logmsg
-      integer :: i
+      integer :: i, localrc
 
       if (present(rc)) then
-        rc = ESMF_SUCCESS
+        rc = ESMF_RC_NOT_IMPL
       endif
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -2551,13 +2620,19 @@
                   "' unused (not retrieved via ESMF_ConfigGetAttribute() " // &
                   "or ESMF_ConfigGetChar())."
               call ESMF_LogWrite(logmsg, ESMF_LOG_WARNING, ESMF_CONTEXT)
-              if (present(rc)) then
-                rc = ESMF_RC_ATTR_UNUSED
-              endif
+                localrc = ESMF_RC_ATTR_UNUSED
             endif
           enddo
         endif
       endif
+
+      if (present(rc)) then
+        if (localrc == ESMF_RC_ATTR_UNUSED) then
+          rc = localrc
+        else
+          rc = ESMF_SUCCESS
+        end if
+      end if
 
       return
 
@@ -2868,7 +2943,7 @@ end function luavail
 ! !IROUTINE: clstext - close a text file opend with an opntext() call
 !
 ! !DESCRIPTION:
-!
+
 ! !INTERFACE:
 
     subroutine clstext(lu,ier,status)
