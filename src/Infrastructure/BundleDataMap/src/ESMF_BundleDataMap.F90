@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.33 2007/04/18 17:23:12 rosalind Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.34 2007/04/30 17:53:58 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.33 2007/04/18 17:23:12 rosalind Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.34 2007/04/30 17:53:58 rosalind Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -287,7 +287,11 @@
 
         !character(len=ESMF_MAXSTR) :: msgbuf
         character (len = ESMF_MAXSTR) :: str
+        integer :: localrc
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
       !jw  write (msgbuf, *)  "BundleDataMap print:"
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write (*, *)  "BundleDataMap print:"
@@ -300,12 +304,12 @@
         endif
 
         ! TODO: add print code here
-        call ESMF_InterleaveFlagString(bundledatamap%bil, str, rc)
+        call ESMF_InterleaveFlagString(bundledatamap%bil, str, localrc)
       !jw  write (msgbuf, *)  " Data: ", str
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write (*, *)  " Data: ", str
   
-        if (present(rc)) rc = ESMF_SUCCESS
+        if (present(rc)) rc = localrc
       
         end subroutine ESMF_BundleDataMapPrint
 
@@ -457,6 +461,9 @@
 !
 !
 !EOP
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
 
         bundledatamap%status = ESMF_STATUS_INVALID
 
@@ -608,8 +615,12 @@
 ! TODO: code goes here
 !
  
-        ESMF_BundleDataMapReadRestart%status = ESMF_STATUS_UNINIT
+        !Initialize return code; assume routine not implemented
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ESMF_BundleDataMapReadRestart%status = ESMF_STATUS_UNINIT
+        if (present(rc)) rc = ESMF_STATUS_UNINIT
+
 
         end function ESMF_BundleDataMapReadRestart
 
@@ -693,8 +704,11 @@
 !	Changed BOP/EOP to BOPI/EOPI until code is added.
 ! TODO: code goes here
 !
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
         ESMF_BundleDataMapRead%status = ESMF_STATUS_UNINIT
-        if (present(rc)) rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_STATUS_UNINIT
 
         end function ESMF_BundleDataMapRead
 

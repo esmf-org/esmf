@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap_C.F90,v 1.10 2007/03/31 05:50:54 cdeluca Exp $
+! $Id: ESMF_BundleDataMap_C.F90,v 1.11 2007/04/30 17:53:58 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 !==============================================================================
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_BundleDataMap_C.F90,v 1.10 2007/03/31 05:50:54 cdeluca Exp $'
+!      '$Id: ESMF_BundleDataMap_C.F90,v 1.11 2007/04/30 17:53:58 rosalind Exp $'
 !==============================================================================
 ! 
 !------------------------------------------------------------------------------
@@ -50,6 +50,8 @@
       type(ESMF_InterleaveFlag), intent(in) :: btype
       integer, intent(out), optional :: rc
      
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       call ESMF_BundleDataMapSetDefault(bdmp, btype, rc)
     
@@ -66,7 +68,10 @@
       type(ESMF_BundleDataMap), pointer :: bdmp
       type(ESMF_InterleaveFlag), intent(out) :: btype
       integer, intent(out) :: rc
-     
+      
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
 
       call ESMF_BundleDataMapGet(bdmp, btype, rc)
     
@@ -83,6 +88,8 @@
       type(ESMF_InterleaveFlag), intent(in) :: btype
       integer, intent(out) :: rc
      
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       call ESMF_BundleDataMapSet(bdmp, btype, rc)
     
@@ -98,6 +105,8 @@
       character(len=*) :: options
       integer, intent(out), optional :: rc
      
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       call ESMF_BundleDataMapValidate(bdmp, options, rc)
     
@@ -113,6 +122,8 @@
       character(len=*) :: options
       integer, intent(out), optional :: rc
      
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       call ESMF_BundleDataMapPrint(bdmp, options, rc)
     
