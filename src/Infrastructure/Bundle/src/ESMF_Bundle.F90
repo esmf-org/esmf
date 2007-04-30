@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.107 2007/04/27 14:23:33 rosalind Exp $
+! $Id: ESMF_Bundle.F90,v 1.108 2007/04/30 13:29:24 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -2723,7 +2723,7 @@ end function
     integer :: status                           ! Error status
     type(ESMF_BundleType), pointer :: btype
 
-    ! Initialize return code.  Assume failure until success assured.
+    ! Initialize return code.  Assume routine not implemented.
     status = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -2790,7 +2790,7 @@ end function
       !type(ESMF_Field) :: temp_field
       type(ESMF_BundleType), pointer :: btype
 
-      ! Initialize return code.  Assume failure until success assured.
+      ! Initialize return code.  Assume routine not implemented.
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -2880,7 +2880,7 @@ end function
       logical :: found                            ! did we find a match?
       type(ESMF_BundleType), pointer :: btype
 
-      ! Initialize return code.  Assume failure until success assured.
+      ! Initialize return code.  Assume routine not implemented.
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -3235,7 +3235,7 @@ end function
       !type(ESMF_InternArray) :: pkarray                ! Array for packed data
       type(ESMF_BundleType), pointer :: btype     ! internal data
 
-      ! Initialize return code.  Assume failure until success assured.
+      ! Initialize return code.  Assume routine not implemented.
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -4544,6 +4544,9 @@ end function
 !
 !  TODO: code goes here
 !
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                 "ESMF_BundleWrite", &
                                  ESMF_CONTEXT, rc)) return
@@ -4644,7 +4647,7 @@ end function
       type(ESMF_Grid) :: testgrid, matchgrid
       logical :: wasempty
 
-      ! Initialize return code.  Assume failure until success assured.
+      ! Initialize return code.  Assume routine not implemented.
       status = ESMF_RC_NOT_IMPL
       if(present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -4860,7 +4863,7 @@ end function
       integer :: status                           ! Error status
       !type(ESMF_InternArray) :: pkarray                 ! Array for packed data
 
-      ! Initialize return code.  Assume failure until success assured.
+      ! Initialize return code.  Assume routine not implemented.
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -4950,7 +4953,7 @@ end function
       integer :: status                           ! Error status
       integer :: i
 
-      ! Initialize return code.  Assume failure until success assured.
+      ! Initialize return code.  Assume routine not implemented.
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -5018,7 +5021,7 @@ end function
       integer :: status                            ! Error status
       !character (len = ESMF_MAXSTR) :: defaultname ! Bundle name if not given
 
-      ! Initialize return code.  Assume failure until success assured.
+      ! Initialize return code.  Assume routine not implemented.
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
