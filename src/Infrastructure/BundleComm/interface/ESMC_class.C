@@ -1,4 +1,4 @@
-// $Id: ESMC_class.C,v 1.4 2007/03/31 05:50:53 cdeluca Exp $
+// $Id: ESMC_class.C,v 1.5 2007/04/30 16:43:02 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_class.C,v 1.4 2007/03/31 05:50:53 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_class.C,v 1.5 2007/04/30 16:43:02 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -74,6 +74,10 @@
 //
      ESMC_<Class> *<class>;
 
+  // Initialize rc; assume functions not implemented
+  if (*rc) *rc = ESMF_RC_NOT_IMPL;
+
+
      FTN(f_esmf_<class>create)(<class>, &arg1, &arg2, &arg3, &rc);
 
      return <class>;
@@ -107,6 +111,9 @@
 //  code goes here
 //
     int rc;
+
+  // Initialize rc; assume functions not implemented
+  if (rc) rc = ESMF_RC_NOT_IMPL;
 
     FTN(f_esmf_<class>destroy)(<class>, &rc);
 
@@ -144,6 +151,9 @@
 //
     int rc;
 
+  // Initialize rc; assume function not implemented
+  if (rc) rc = ESMF_RC_NOT_IMPL;
+
     FTN(f_esmf_<class>init)(this, &arg1, &arg2, &arg3, &rc);
 
  } // end ESMC_<Class>Init
@@ -171,6 +181,9 @@
 //  code goes here
 //
     int rc;
+
+  // Initialize rc; assume function not implemented
+  if (rc) rc = ESMF_RC_NOT_IMPL;
 
     FTN(f_esmf_<class>getconfig)(this, &config, &rc);
 
@@ -201,6 +214,9 @@
 //  code goes here
 //
     int rc;
+
+  // Initialize rc; assume function not implemented
+  if (rc) rc = ESMF_RC_NOT_IMPL;
 
     FTN(f_esmf_<class>setconfig)(this, config, &rc);
 
@@ -233,6 +249,9 @@
 //
     int rc;
 
+  // Initialize rc; assume function not implemented
+  if (rc) rc = ESMF_RC_NOT_IMPL;
+
     FTN(f_esmf_<class>get)(this, &value, &rc);
 
     return rc;
@@ -263,6 +282,9 @@
 //  code goes here
 //
     int rc;
+
+  // Initialize rc; assume function not implemented
+  if (rc) rc = ESMF_RC_NOT_IMPL;
 
     FTN(f_esmf_<class>set)(this, value, &rc);
 
@@ -295,6 +317,9 @@
 //
     int rc;
 
+  // Initialize rc; assume function not implemented
+  if (rc) rc = ESMF_RC_NOT_IMPL;
+
     FTN(f_esmf_<class>validate)(this, options, &rc);
 
     return rc;
@@ -326,6 +351,9 @@
 //  code goes here
 //
     int rc;
+
+  // Initialize rc; assume function not implemented
+  if (rc) rc = ESMF_RC_NOT_IMPL;
 
     FTN(f_esmf_<class>print)(this, options, &rc);
 
