@@ -1,4 +1,4 @@
-// $Id: ESMC_Field_F.C,v 1.5 2007/03/31 05:51:02 cdeluca Exp $
+// $Id: ESMC_Field_F.C,v 1.6 2007/05/01 23:30:40 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Field_F.C,v 1.5 2007/03/31 05:51:02 cdeluca Exp $";
+             "$Id: ESMC_Field_F.C,v 1.6 2007/05/01 23:30:40 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -66,6 +66,8 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
                            ESMC_Status *iostatus, 
                            void *buffer, int *length, int *offset, int *localrc){
 
+    // Initialize return code; assume routine not implemented
+    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
     // either put the code here, or call into a real C++ function
     ESMC_Status *sp;
 
@@ -105,6 +107,8 @@ void FTN(c_esmc_fielddeserialize)(ESMC_Status *fieldstatus,
                              ESMC_Status *iostatus, 
                              void *buffer, int *offset, int *localrc){
 
+    // Initialize return code; assume routine not implemented
+    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
     // either put the code here, or call into a real C++ function
     ESMC_Status *sp;
 

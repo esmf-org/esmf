@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.6 2007/03/31 05:51:02 cdeluca Exp $
+!  $Id: ESMF_Field_C.F90,v 1.7 2007/05/01 23:30:40 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.6 2007/03/31 05:51:02 cdeluca Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.7 2007/05/01 23:30:40 rosalind Exp $'
 !==============================================================================
    subroutine f_esmf_fieldcreate(fieldp, rc)
        use ESMF_UtilTypesMod    ! ESMF base class
@@ -34,6 +34,10 @@
      integer, intent(out), optional :: rc              
 
      integer :: localrc              
+
+   ! initialize return code; assume routine not implemented
+     localrc = ESMF_RC_NOT_IMPL
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
      thefield = ESMF_FieldCreateNoData(rc=localrc)
     
@@ -49,6 +53,10 @@
      integer, intent(out), optional :: rc     
 
      integer :: localrc              
+
+   ! initialize return code; assume routine not implemented
+     localrc = ESMF_RC_NOT_IMPL
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
      call ESMF_FieldDestroy(fieldp, rc=localrc)
 

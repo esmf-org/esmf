@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.13 2007/04/16 21:30:28 rosalind Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.14 2007/05/01 23:30:41 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -90,7 +90,7 @@
         integer :: localrc                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
  @\
-        ! Initialize return code; assume failure until success is certain @\
+        ! Initialize return code; assume routine not implemented @\
         localrc = ESMF_RC_NOT_IMPL @\
         rcpresent = .FALSE. @\
         array%this = ESMF_NULL_POINTER @\
