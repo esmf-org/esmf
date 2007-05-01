@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.184 2007/04/26 21:47:32 dneckels Exp $
+#  $Id: common.mk,v 1.185 2007/05/01 21:11:38 dneckels Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -401,7 +401,7 @@ ESMF_PTHREADSDEFAULT        = ON
 
 ESMF_ARDEFAULT              = ar
 ESMF_ARCREATEFLAGSDEFAULT   = cr
-ESMF_AREXTRACTFLAGSDEFAULT  = -x
+ESMF_AREXTRACTDEFAULT       = $(ESMF_ARDEFAULT) -x
 ESMF_RANLIBDEFAULT          = ranlib
 ESMF_SEDDEFAULT             = sed
 ESMF_CPPDEFAULT             = gcc
@@ -549,8 +549,8 @@ endif
 ifneq ($(origin ESMF_ARCREATEFLAGS), environment)
 ESMF_ARCREATEFLAGS = $(ESMF_ARCREATEFLAGSDEFAULT)
 endif
-ifneq ($(origin ESMF_AREXTRACTFLAGS), environment)
-ESMF_AREXTRACTFLAGS = $(ESMF_AREXTRACTFLAGSDEFAULT)
+ifneq ($(origin ESMF_AREXTRACT), environment)
+ESMF_AREXTRACT = $(ESMF_AREXTRACTDEFAULT)
 endif
 ifneq ($(origin ESMF_RANLIB), environment)
 ESMF_RANLIB = $(ESMF_RANLIBDEFAULT)
@@ -2280,7 +2280,7 @@ shared:
 		    echo Converting $$NEXTLIB.a to $$NEXTLIB.$(ESMF_SL_SUFFIX) ;\
 		    mkdir tmp_$$NEXTLIB ;\
 		    cd tmp_$$NEXTLIB  ;\
-	            $(ESMF_AR) $(ESMF_AREXTRACTFLAGS) ../$$NEXTLIB.a ;\
+	                $(ESMF_AREXTRACT) ../$$NEXTLIB.a ;\
                     echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
 		    $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
 		    cd .. ;\
