@@ -1,4 +1,4 @@
-// $Id: ESMC_traits.h,v 1.1 2007/05/01 21:02:04 dneckels Exp $
+// $Id: ESMC_traits.h,v 1.2 2007/05/01 21:14:11 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -27,23 +27,23 @@ typedef unsigned int  UInt;
 
 // Default is_unsigned
 template <typename T>
-struct is_unsigned { enum {value = 0;} };
+struct is_unsigned { enum {value = 0}; };
 
 // is_unsigend::value = true specializations
-template <> struct is_unsigned<unsigned char> { enum {value = 1;} };
-template <> struct is_unsigned<unsigned short> { enum {value = 1;} };
-template <> struct is_unsigned<unsigned int> { enum {value = 1;} };
-template <> struct is_unsigned<unsigned long> { enum {value = 1;} };
-template <> struct is_unsigned<unsigned long long> { enum {value = 1;} };
+template <> struct is_unsigned<unsigned char> { enum {value = 1}; };
+template <> struct is_unsigned<unsigned short> { enum {value = 1}; };
+template <> struct is_unsigned<unsigned int> { enum {value = 1}; };
+template <> struct is_unsigned<unsigned long> { enum {value = 1}; };
+template <> struct is_unsigned<unsigned long long> { enum {value = 1}; };
 
 // Strip unsigned from a type.
 template <typename T>
-struct to_unsigned { T value; };
-template <> struct to_unsigned<unsigned char> { char value; };
-template <> struct to_unsigned<unsigned short> { short value; };
-template <> struct to_unsigned<unsigned int> { int value; };
-template <> struct to_unsigned<unsigned long> { long value; };
-template <> struct to_unsigned<unsigned long long> { long long value; };
+struct to_unsigned { typedef T type; };
+template <> struct to_unsigned<char> { typedef unsigned char type; };
+template <> struct to_unsigned<short> { typedef unsigned short type; };
+template <> struct to_unsigned<int> { typedef unsigned int type; };
+template <> struct to_unsigned<long> { typedef unsigned long type; };
+template <> struct to_unsigned<long long> { typedef unsigned long long type; };
 
 } // namespace
 

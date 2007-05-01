@@ -1,4 +1,4 @@
-// $Id: ESMC_Ptypes.h,v 1.1 2007/04/26 21:47:33 dneckels Exp $
+// $Id: ESMC_Ptypes.h,v 1.2 2007/05/01 21:14:11 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -20,6 +20,7 @@
 namespace ESMC {
 typedef unsigned char UChar;
 typedef unsigned int  UInt; 
+
 } // namespace
 
 #endif  // ESMC_Ptypes_h

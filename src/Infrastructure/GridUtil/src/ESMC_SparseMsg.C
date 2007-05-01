@@ -1,4 +1,4 @@
-// $Id: ESMC_SparseMsg.C,v 1.2 2007/04/27 17:59:24 dneckels Exp $
+// $Id: ESMC_SparseMsg.C,v 1.3 2007/05/01 21:14:11 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_SparseMsg.C,v 1.2 2007/04/27 17:59:24 dneckels Exp $";
+            "$Id: ESMC_SparseMsg.C,v 1.3 2007/05/01 21:14:11 dneckels Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -254,7 +254,6 @@ void SparseMsg::setSizes(
     }
   }
 
-  int ret;
   std::vector<vmk_status> stat(enD);
   if (num_incoming > 0) {
     for (UInt w = 0; w < enD; w++) {
@@ -364,7 +363,6 @@ void SparseMsg::communicate()
       vm.vmk_send(static_cast<void*>(outBuffers[i].beg), outBuffers[i].msize, outBuffers[i].pet, tag1);
   }
 
-  int ret;
   for (UInt w = 0; w < enD; w++) {
       vm.vmk_commwait(&commhp[w]);
   }

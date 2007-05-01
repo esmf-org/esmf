@@ -1,4 +1,4 @@
-// $Id: ESMC_DistDir.C,v 1.1 2007/04/26 21:47:33 dneckels Exp $
+// $Id: ESMC_DistDir.C,v 1.2 2007/05/01 21:14:11 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistDir.C,v 1.1 2007/04/26 21:47:33 dneckels Exp $";
+static const char *const version = "$Id: ESMC_DistDir.C,v 1.2 2007/05/01 21:14:11 dneckels Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -84,7 +84,8 @@ my_managed()
   id_type lmin = std::numeric_limits<id_type>::max(),
        lmax = 0;
   for (UInt i = 0; i < ngid; i++) {
-    if (gid[i] < 0) throw Ex() << "DistDir: gid[" << i << "]=" << gid[i] << " < 0.  Only unsigned values implemented.";
+    // If this is a signed type, make sure the value is positive.
+    if (is_unsigned<id_type>::value && gid[i] < 0) throw Ex() << "DistDir: gid[" << i << "]=" << gid[i] << " < 0.  Only unsigned values implemented.";
     if (gid[i] < lmin) lmin = gid[i];
     if (gid[i] > lmax) lmax = gid[i];
   }
