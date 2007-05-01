@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.54 2007/04/26 16:13:56 rosalind Exp $
+// $Id: ESMC_DELayout.C,v 1.55 2007/05/01 15:35:36 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.54 2007/04/26 16:13:56 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.55 2007/05/01 15:35:36 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -88,7 +88,7 @@ ESMC_DELayout *ESMC_DELayoutCreate(
   // local vars
   int status;                 // local error status
    
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
@@ -144,7 +144,7 @@ ESMC_DELayout *ESMC_DELayoutCreate(
   // local vars
   int status;                 // local error status
   
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
@@ -405,7 +405,7 @@ int ESMC_DELayoutDestroy(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
@@ -425,7 +425,8 @@ int ESMC_DELayoutDestroy(
   *delayout = ESMC_NULL_POINTER;
   
   // return successfully
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -466,7 +467,7 @@ int ESMC_DELayout::ESMC_DELayoutConstruct(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
@@ -583,7 +584,8 @@ int ESMC_DELayout::ESMC_DELayoutConstruct(
     vm->vmk_ipmutexunlock(serviceOfferMutex[0]); // unlock mutex
   
   // return successfully
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -609,6 +611,9 @@ int ESMC_DELayout::ESMC_DELayoutConstruct1D(ESMC_VM &vmArg, int deCountArg,
 //
 //EOP
 //-----------------------------------------------------------------------------
+  int localrc;
+  // Initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
   oldstyle = 1;           // while the old style delayout is still supported
   vm = &vmArg;                       // set the pointer onto this VM instance
   int npets =  vm->vmk_npets(); // get number of PETs
@@ -719,7 +724,8 @@ int ESMC_DELayout::ESMC_DELayoutConstruct1D(ESMC_VM &vmArg, int deCountArg,
   // more to set the correct VAS.
   for (int i=0; i<deCount; i++)
     deList[i].vas = vm->vmk_vas(deList[i].pet);
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -743,6 +749,9 @@ int ESMC_DELayout::ESMC_DELayoutConstructND(ESMC_VM &vmArg, int *deCountArg,
 //
 //EOP
 //-----------------------------------------------------------------------------
+  int localrc;
+  // Initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
   oldstyle = 1;           // while the old style delayout is still supported
   vm = &vmArg;                       // set the pointer onto this VM instance
   int npets =  vm->vmk_npets(); // get number of PETs
@@ -829,7 +838,8 @@ int ESMC_DELayout::ESMC_DELayoutConstructND(ESMC_VM &vmArg, int *deCountArg,
   // more to set the correct VAS.
   for (int i=0; i<deCount; i++)
     deList[i].vas = vm->vmk_vas(deList[i].pet);
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -857,7 +867,7 @@ int ESMC_DELayout::ESMC_DELayoutDestruct(void){
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
@@ -892,7 +902,8 @@ int ESMC_DELayout::ESMC_DELayoutDestruct(void){
   }
 
   // return successfully
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -936,7 +947,7 @@ int ESMC_DELayout::ESMC_DELayoutGet(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
@@ -1015,7 +1026,8 @@ int ESMC_DELayout::ESMC_DELayoutGet(
   }  
 
   // return successfully
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -1055,7 +1067,7 @@ int ESMC_DELayout::ESMC_DELayoutGetDeprecated(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
@@ -1126,7 +1138,8 @@ int ESMC_DELayout::ESMC_DELayoutGetDeprecated(
   }
 
   // return successfully
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -1152,8 +1165,12 @@ int ESMC_DELayout::ESMC_DELayoutGetVM(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  int localrc;
+  // Initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
   *vmArg = vm;
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -1188,6 +1205,9 @@ int ESMC_DELayout::ESMC_DELayoutGetDELocalInfo(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  int localrc;
+  // Initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
   int i;
   if (de < 0 || de >= deCount){
     // de out of range
@@ -1215,7 +1235,8 @@ int ESMC_DELayout::ESMC_DELayoutGetDELocalInfo(
     *nDEc = deList[de].nconnect;
   if (vas != ESMC_NULL_POINTER)
     *vas = deList[de].vas;
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -1246,6 +1267,9 @@ int ESMC_DELayout::ESMC_DELayoutGetDEMatchDE(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  int localrc;
+  // Initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
   int *tempMatchList = new int[layoutMatch.deCount]; // maximum number of DEs
   int tempMatchCount = 0;
   int vasCompare = deList[de].vas;
@@ -1263,7 +1287,8 @@ int ESMC_DELayout::ESMC_DELayoutGetDEMatchDE(
     for (int i=0; i<j; i++)
       deMatchList[i] = tempMatchList[i];
   delete [] tempMatchList;
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -1297,6 +1322,11 @@ int ESMC_DELayout::ESMC_DELayoutGetDEMatchPET(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  int localrc;
+
+  // Initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
   int npets = vmMatch.vmk_npets();  // maximum number of PETs in vmMatch
   int *tempMatchList = new int[npets];
   int tempMatchCount = 0;
@@ -1315,7 +1345,8 @@ int ESMC_DELayout::ESMC_DELayoutGetDEMatchPET(
     for (int i=0; i<j; i++)
       petMatchList[i] = tempMatchList[i];
   delete [] tempMatchList;
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -1338,6 +1369,10 @@ int ESMC_DELayout::ESMC_DELayoutPrint(){
 //
 //EOP
 //-----------------------------------------------------------------------------
+  int localrc;
+  // Initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
   // print info about the ESMC_DELayout object
   printf("--- ESMC_DELayoutPrint start ---\n");
   if (oldstyle){
@@ -1400,7 +1435,9 @@ int ESMC_DELayout::ESMC_DELayoutPrint(){
       printf("  vasLocalDeList[%d]=%d\n", i, vasLocalDeList[i]);
   }
   printf("--- ESMC_DELayoutPrint end ---\n");
-  return ESMF_SUCCESS;
+
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -1435,6 +1472,9 @@ int ESMC_DELayout::ESMC_DELayoutPrint(){
     ESMC_VM **vp;
     ESMC_DePinFlag *dp;
     de_type *dep;
+
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     // TODO: we cannot reallocate from C++ if the original buffer is
     //  allocated on the f90 side.  change the code to make the allocate
@@ -1511,7 +1551,8 @@ int ESMC_DELayout::ESMC_DELayoutPrint(){
 
     *offset = (cp - buffer);
    
-    return ESMF_SUCCESS;
+  rc = ESMF_SUCCESS;
+  return rc;
 
  } // end ESMC_Serialize
 //-----------------------------------------------------------------------------
@@ -1548,6 +1589,9 @@ int ESMC_DELayout::ESMC_DELayoutPrint(){
     ESMC_VM **vp;
     ESMC_DePinFlag *dp;
     de_type *dep;
+
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     // first get the base part of the object
     rc = a->ESMC_Base::ESMC_Deserialize(buffer, offset);
@@ -1641,7 +1685,8 @@ int ESMC_DELayout::ESMC_DELayoutValidate(){
 //
 //EOP
 //-----------------------------------------------------------------------------
-  int rc = ESMF_SUCCESS;
+  // Initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
 
   // validate info about the ESMC_DELayout object
   //printf("--- ESMC_DELayoutValidate start ---\n");
@@ -1703,7 +1748,7 @@ ESMC_DELayoutServiceReply ESMC_DELayout::ESMC_DELayoutServiceOffer(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   int status;                 // local error status
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
@@ -1794,7 +1839,7 @@ int ESMC_DELayout::ESMC_DELayoutServiceComplete(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  // initialize return code; assume failure until success is certain
+  // initialize return code; assume routine not implemented
   int localrc;                // automatic variable for local return code
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
@@ -1845,7 +1890,8 @@ int ESMC_DELayout::ESMC_DELayoutServiceComplete(
   vm->vmk_ipmutexunlock(serviceMutex[ii]);  // unlock service mutex
   serviceMutexFlag[ii] = 0;                 // reset
   
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -1878,6 +1924,10 @@ int ESMC_DELayout::ESMC_DELayoutCopy(
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // automatic variable for local return code
+
+  // Initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
   int *rc = &localrc;         // pointer to localrc
   // ensure this is a 1-to-1 delayout, if not bail out
   if (oneToOneFlag != ESMF_TRUE){
@@ -1899,7 +1949,8 @@ int ESMC_DELayout::ESMC_DELayoutCopy(
     vm->vmk_recv(destdata, blen, srcpet);
   }
   // return successfully
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -1930,6 +1981,11 @@ int ESMC_DELayout::ESMC_DELayoutCopy(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  int localrc;
+
+  // Initialize return code; assume routine not initialized
+  localrc = ESMC_RC_NOT_IMPL;
+
   int blen = len * ESMC_TypeKindSize(dtk);
   return ESMC_DELayoutCopy(srcdata, destdata, blen, srcDE, destDE);
 }
@@ -1964,6 +2020,11 @@ int ESMC_DELayout::ESMC_DELayoutExchange(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  int localrc;
+
+  // Initialize return code; assume routine not initialized
+  localrc = ESMC_RC_NOT_IMPL;
+
   if (de1<=de2){
     ESMC_DELayoutCopy(srcData1, dstData2, blen1, de1, de2);
     ESMC_DELayoutCopy(srcData2, dstData1, blen2, de2, de1);
@@ -1971,7 +2032,8 @@ int ESMC_DELayout::ESMC_DELayoutExchange(
     ESMC_DELayoutCopy(srcData2, dstData1, blen2, de2, de1);
     ESMC_DELayoutCopy(srcData1, dstData2, blen1, de1, de2);
   }
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -2006,6 +2068,11 @@ int ESMC_DELayout::ESMC_DELayoutExchange(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  int localrc;
+
+  // Initialize return code; assume routine not initialized
+  localrc = ESMC_RC_NOT_IMPL;
+
   int blen1 = len1 * ESMC_TypeKindSize(dtk1);
   int blen2 = len2 * ESMC_TypeKindSize(dtk2);
   return ESMC_DELayoutExchange(srcData1, srcData2, dstData1, dstData2,
@@ -2038,9 +2105,15 @@ int ESMC_DELayout::ESMC_DELayoutBcast(
 //EOP
 //-----------------------------------------------------------------------------
   // very crude implementation of a layout wide bcast
+  int localrc;
+
+  // Initialize return code; assume routine not initialized
+  localrc = ESMC_RC_NOT_IMPL;
+
   for (int i=0; i<deCount; i++)
     ESMC_DELayoutCopy(data, data, blen, rootDE, i);
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -2069,11 +2142,17 @@ int ESMC_DELayout::ESMC_DELayoutBcast(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  int localrc;
+
+  // Initialize return code; assume routine not initialized
+  localrc = ESMC_RC_NOT_IMPL;
+
   int blen = len * ESMC_TypeKindSize(dtk);
   // very crude implementation of a layout wide bcast
   for (int i=0; i<deCount; i++)
     ESMC_DELayoutCopy(data, data, blen, rootDE, i);
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -2103,6 +2182,11 @@ int ESMC_DELayout::ESMC_DELayoutScatter(
 //EOP
 //-----------------------------------------------------------------------------
   // very crude implementation of a layout wide scatter
+  int localrc;
+
+  // Initialize return code; assume routine not initialized
+  localrc = ESMC_RC_NOT_IMPL;
+
   int mypet = vm->vmk_mypet();
   if (deList[rootDE].pet==mypet){
     // my PET holds the rootDE
@@ -2115,7 +2199,8 @@ int ESMC_DELayout::ESMC_DELayoutScatter(
     for (int i=0; i<deCount; i++)
       ESMC_DELayoutCopy(srcdata, destdata, blen, rootDE, i);
   }
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -2145,6 +2230,11 @@ int ESMC_DELayout::ESMC_DELayoutScatter(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  int localrc;
+
+  // Initialize return code; assume routine not initialized
+  localrc = ESMC_RC_NOT_IMPL;
+
   int blen = len * ESMC_TypeKindSize(dtk);
   return ESMC_DELayoutScatter(srcdata, destdata, blen, rootDE);
 }
@@ -2176,6 +2266,11 @@ int ESMC_DELayout::ESMC_DELayoutGather(
 //EOP
 //-----------------------------------------------------------------------------
   // very crude implementation of a layout wide gather
+  int localrc;
+
+  // Initialize return code; assume routine not initialized
+  localrc = ESMC_RC_NOT_IMPL;
+
   int mypet = vm->vmk_mypet();
   if (deList[rootDE].pet==mypet){
     // my PET holds the rootDE -> receive chunks from all other DEs
@@ -2188,7 +2283,8 @@ int ESMC_DELayout::ESMC_DELayoutGather(
     for (int i=0; i<deCount; i++)
       ESMC_DELayoutCopy(srcdata, destdata, blen, i, rootDE);
   }
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -2218,8 +2314,14 @@ int ESMC_DELayout::ESMC_DELayoutGather(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  int localrc;
+
+  // Initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
   int blen = len * ESMC_TypeKindSize(dtk);
-  return ESMC_DELayoutGather(srcdata, destdata, blen, rootDE);
+  localrc = ESMC_DELayoutGather(srcdata, destdata, blen, rootDE);
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -2252,7 +2354,12 @@ int ESMC_DELayout::ESMC_DELayoutGatherV(
 //EOP
 //-----------------------------------------------------------------------------
   // very crude implementation of a layout wide gather
+  int localrc;
   int mypet = vm->vmk_mypet();
+
+  // Initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
   if (deList[rootDE].pet==mypet){
     // my PET holds the rootDE -> receive chunks from all other DEs
     char *tempdata;
@@ -2264,7 +2371,8 @@ int ESMC_DELayout::ESMC_DELayoutGatherV(
     for (int i=0; i<deCount; i++)
       ESMC_DELayoutCopy(srcdata, destdata, blen[i], i, rootDE);
   }
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -2298,9 +2406,14 @@ int ESMC_DELayout::ESMC_DELayoutGatherV(
 //EOP
 //-----------------------------------------------------------------------------
   int rc;
+  rc = ESMC_RC_NOT_IMPL;
   int *blen = new int[deCount];
   int *bdestdispl = new int[deCount];
   int dtk_size = ESMC_TypeKindSize(dtk);
+
+  // Initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
   for (int i=0; i<deCount; i++){
     blen[i] = len[i] * dtk_size;
     bdestdispl[i] = destdispl[i] * dtk_size;
@@ -2333,6 +2446,9 @@ int ESMC_DELayout::ESMC_DELayoutFindDEtoPET(int npets){
 //-----------------------------------------------------------------------------
 // TODO: Use the connectivity info to find best DE-to-PET mapping!
 // For now I simply connect in sequence...
+  int localrc;
+  // Initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
   if (deCount==npets){
     // 1:1 layout
     oneToOneFlag = ESMF_TRUE;
@@ -2364,7 +2480,8 @@ int ESMC_DELayout::ESMC_DELayoutFindDEtoPET(int npets){
     }
     delete [] ndepet;
   }
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
 
@@ -2387,6 +2504,9 @@ int ESMC_DELayout::ESMC_DELayoutFillLocal(int mypet){
 //
 //EOP
 //-----------------------------------------------------------------------------
+  int localrc;
+  // Initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
   localDeCount = 0;               // reset local de count
   for (int i=0; i<deCount; i++)
     if (deList[i].pet == mypet) ++localDeCount;
@@ -2397,6 +2517,7 @@ int ESMC_DELayout::ESMC_DELayoutFillLocal(int mypet){
       localDeList[j]=i;
       ++j;
     }
-  return ESMF_SUCCESS;
+  localrc = ESMF_SUCCESS;
+  return localrc;
 }
 //-----------------------------------------------------------------------------
