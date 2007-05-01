@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.74 2007/04/20 19:47:41 theurich Exp $
+// $Id: ESMC_Base.h,v 1.75 2007/05/01 21:15:34 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -214,7 +214,7 @@ class ESMC_Base
     // constructors/destructor
     ESMC_Base(void);
     ESMC_Base(char *superclass, char *name, int nattrs);
-    ~ESMC_Base(void);
+    virtual ~ESMC_Base(void);
 
 };   // end class ESMC_Base
 
