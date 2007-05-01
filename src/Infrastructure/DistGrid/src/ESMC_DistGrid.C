@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.13 2007/04/28 04:08:48 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.14 2007/05/01 21:07:57 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DistGrid.C,v 1.13 2007/04/28 04:08:48 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DistGrid.C,v 1.14 2007/05/01 21:07:57 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -97,10 +97,10 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   // local vars
   int status;                 // local error status
    
-  // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   // allocate the new DistGrid object
   ESMC_DistGrid *distgrid;
@@ -442,10 +442,10 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   // local vars
   int status;                 // local error status
    
-  // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;   
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   // allocate the new DistGrid object
   ESMC_DistGrid *distgrid;
@@ -684,10 +684,10 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   // local vars
   int status;                 // local error status
    
-  // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;   
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   // create a DELayout according to fastAxis argument
   // todo: once DELayout functions exist to determine communication capabilities
@@ -746,10 +746,10 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   // local vars
   int status;                 // local error status
    
-  // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;   
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   // allocate the new DistGrid object
   ESMC_DistGrid *distgrid;
@@ -1138,10 +1138,10 @@ int ESMC_DistGridDestroy(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;   
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (distgrid == ESMC_NULL_POINTER || *distgrid == ESMC_NULL_POINTER){
@@ -1208,10 +1208,10 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+    // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;   
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
 
   // fill in the DistGrid object
   dimCount = dimCountArg;
@@ -1332,10 +1332,10 @@ int ESMC_DistGrid::ESMC_DistGridDestruct(void){
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;   
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   // garbage collection
   delete [] dimExtent;
@@ -1392,9 +1392,9 @@ int ESMC_DistGrid::ESMC_DistGridPrint(){
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
-  *rc = ESMF_FAILURE;
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;   
+  *rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (this == NULL){
@@ -1483,10 +1483,10 @@ int ESMC_DistGrid::ESMC_DistGridGet(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;   
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   // fill simple return values
   if (delayoutArg != NULL)
@@ -1578,10 +1578,10 @@ int ESMC_DistGrid::ESMC_DistGridGet(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;   
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   // fill indexListArg
   if (indexListArg != NULL){
@@ -1638,10 +1638,10 @@ int ESMC_DistGrid::ESMC_DistGridGet(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;   
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   //TODO: check that 0 < de < deCount
     
@@ -1744,10 +1744,10 @@ int ESMC_DistGrid::ESMC_DistGridGetSequenceIndex(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;   
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   // determine the sequentialized index
   int patch = dePatchList[de];  // patches are basis 1 !!!!
@@ -1795,10 +1795,10 @@ int ESMC_DistGrid::ESMC_DistGridGetSequenceDe(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;   
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   // determine the DE that covers sequentialized index
   
@@ -1883,10 +1883,10 @@ int ESMC_DistGrid::ESMC_DistGridGetPatchMinMaxCorner(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;   
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   if (patch < 1 || patch > patchCount){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
@@ -1945,6 +1945,8 @@ int ESMC_DistGrid::ESMC_DistGridSerialize(
     ESMC_DePinFlag *dp;
     de_type *dep;
 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
     // TODO: we cannot reallocate from C++ if the original buffer is
     //  allocated on the f90 side.  change the code to make the allocate
     //  happen in C++; then this will be fine.  (for now make sure buffer
@@ -2036,6 +2038,8 @@ ESMC_DistGrid *ESMC_DistGridDeserialize(
     ESMC_DePinFlag *dp;
     de_type *dep;
 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
     // first get the base part of the object
     rc = a->ESMC_Base::ESMC_Deserialize(buffer, offset);
     a->delayout = ESMC_DELayoutDeserialize(buffer, offset);
@@ -2130,10 +2134,10 @@ int ESMC_Connection(
   int *rc = &localrc;         // pointer to localrc
   int status;                 // local error status
 
-  // initialize return code; assume failure until success is certain
-  status = ESMF_FAILURE;
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;   
   if (rc!=NULL)
-    *rc = ESMF_FAILURE;
+    *rc = ESMC_RC_NOT_IMPL;
   
   // check connetion argument
   if (connection == NULL){

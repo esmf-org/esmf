@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.11 2007/03/31 05:51:00 cdeluca Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.12 2007/05/01 21:07:57 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,6 +55,8 @@ extern "C" {
     ESMC_VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterd()"
+  if (rc!=NULL)
+    *rc = ESMC_RC_NOT_IMPL;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
       opt_delayout = NULL;
@@ -83,6 +85,8 @@ extern "C" {
     ESMC_VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreatedb()"
+  if (rc!=NULL)
+    *rc = ESMC_RC_NOT_IMPL;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
       opt_delayout = NULL;
@@ -111,6 +115,8 @@ extern "C" {
     ESMC_VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterdfa()"
+  if (rc!=NULL)
+    *rc = ESMC_RC_NOT_IMPL;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
@@ -137,6 +143,8 @@ extern "C" {
     ESMC_VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterdp()"
+  if (rc!=NULL)
+    *rc = ESMC_RC_NOT_IMPL;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
       opt_delayout = NULL;
@@ -156,6 +164,8 @@ extern "C" {
   void FTN(c_esmc_distgriddestroy)(ESMC_DistGrid **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgriddestroy()"
+  if (rc!=NULL)
+    *rc = ESMC_RC_NOT_IMPL;
     // call into C++
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_DistGridDestroy(ptr),
       ESMF_ERR_PASSTHRU,
@@ -168,6 +178,8 @@ extern "C" {
     ESMC_DELayout **opt_delayout;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridget()"
+  if (rc!=NULL)
+    *rc = ESMC_RC_NOT_IMPL;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER)
       opt_delayout = NULL;
@@ -186,6 +198,8 @@ extern "C" {
     ESMC_InterfaceInt **indexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetpdepdim()"
+  if (rc!=NULL)
+    *rc = ESMC_RC_NOT_IMPL;
     // call into C++, dealing with optional arguments 
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DistGridGet(
       *de, *dim, *indexList), 
@@ -196,6 +210,8 @@ extern "C" {
   void FTN(c_esmc_distgridprint)(ESMC_DistGrid **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridprint()"
+  if (rc!=NULL)
+    *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DistGridPrint(),
       ESMF_ERR_PASSTHRU,
@@ -208,6 +224,8 @@ extern "C" {
     ESMC_InterfaceInt **orientationVector, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_connection()"
+  if (rc!=NULL)
+    *rc = ESMC_RC_NOT_IMPL;
     // call into C++
     ESMC_LogDefault.ESMC_LogMsgFoundError(
       ESMC_Connection(*connection, *patchIndexA,

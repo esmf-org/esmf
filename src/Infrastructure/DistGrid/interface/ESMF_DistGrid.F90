@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.12 2007/03/31 05:51:00 cdeluca Exp $
+!$Id: ESMF_DistGrid.F90,v 1.13 2007/05/01 21:07:57 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.12 2007/03/31 05:51:00 cdeluca Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.13 2007/05/01 21:07:57 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -311,9 +311,9 @@ contains
     type(ESMF_InterfaceInt):: connectionListArg ! helper variable
     type(ESMF_InterfaceInt):: connectionTransformListArg ! helper variable
 
-    ! initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -527,9 +527,9 @@ contains
     type(ESMF_InterfaceInt):: connectionListArg ! helper variable
     type(ESMF_InterfaceInt):: connectionTransformListArg ! helper variable
 
-    ! initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -734,9 +734,9 @@ contains
     type(ESMF_InterfaceInt):: connectionListArg ! helper variable
     type(ESMF_InterfaceInt):: connectionTransformListArg ! helper variable
 
-    ! initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
@@ -944,8 +944,8 @@ contains
     ! Print current subroutine name
     print *, ">>ESMF_DistGridCreateDBFA<<"
 
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
@@ -1119,9 +1119,9 @@ contains
     type(ESMF_InterfaceInt):: connectionListArg ! helper variable
     type(ESMF_InterfaceInt):: connectionTransformListArg ! helper variable
 
-    ! initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1345,8 +1345,8 @@ contains
     ! Print current subroutine name
     print *, ">>ESMF_DistGridCreateDBP<<"
 
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1513,8 +1513,8 @@ contains
     ! Print current subroutine name
     print *, ">>ESMF_DistGridCreateRDPFA<<"
 
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
@@ -1678,8 +1678,8 @@ contains
     ! Print current subroutine name
     print *, ">>ESMF_DistGridCreateDBPFA<<"
 
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
@@ -1738,9 +1738,9 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: status       ! local error status
 
-    ! initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
@@ -1820,9 +1820,9 @@ contains
     type(ESMF_InterfaceInt):: patchListArg   ! helper variable
     type(ESMF_InterfaceInt):: dimExtentArg   ! helper variable
 
-    ! initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
@@ -1908,8 +1908,8 @@ contains
     integer :: localrc                        ! local return code
     type(ESMF_DELayout):: dummy
 
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
@@ -1967,9 +1967,9 @@ contains
     integer                     :: status         ! local error status
     type(ESMF_InterfaceInt):: indexListArg   ! helper variable
 
-    ! initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
@@ -2049,8 +2049,8 @@ contains
     integer :: localrc                        ! local return code
     type(ESMF_DELayout):: dummy
 
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
@@ -2100,9 +2100,9 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: status       ! local error status
 
-    ! initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
@@ -2150,8 +2150,8 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
@@ -2237,8 +2237,8 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Set init code
     ESMF_INIT_SET_CREATED(distgrid)
@@ -2301,9 +2301,9 @@ contains
     type(ESMF_InterfaceInt):: positionVectorArg ! helper variable
     type(ESMF_InterfaceInt):: orientationVectorArg ! helper variable
 
-    ! initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Deal with (optional) array arguments
     connectionArg = ESMF_InterfaceIntCreate(connection, rc=status)
@@ -2402,8 +2402,8 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_DELayoutGetVM(delayout, vm, localrc)
