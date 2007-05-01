@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.4 2007/04/26 21:47:32 dneckels Exp $
+# $Id: build_rules.mk,v 1.5 2007/05/01 20:51:57 dneckels Exp $
 #
 # Linux.pgigcc.default
 #
@@ -45,7 +45,7 @@ ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with pgf90) ---------------------
 ESMF_F90DEFAULT         = mpif77
 ESMF_F90LINKLIBS       += -llammpi++
-ESMF_CXXDEFAULT         = mpic++
+ESMF_CXXDEFAULT         = mpic++ -Wall
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
