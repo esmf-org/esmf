@@ -1,4 +1,4 @@
-// $Id: ESMC_traits.h,v 1.2 2007/05/01 21:14:11 dneckels Exp $
+// $Id: ESMC_traits.h,v 1.3 2007/05/02 20:26:17 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ template <> struct is_unsigned<unsigned int> { enum {value = 1}; };
 template <> struct is_unsigned<unsigned long> { enum {value = 1}; };
 template <> struct is_unsigned<unsigned long long> { enum {value = 1}; };
 
-// Strip unsigned from a type.
+// Add unsigned to a type
 template <typename T>
 struct to_unsigned { typedef T type; };
 template <> struct to_unsigned<char> { typedef unsigned char type; };
