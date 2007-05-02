@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldDataMap_F.C,v 1.7 2007/05/02 01:24:50 rosalind Exp $
+// $Id: ESMC_FieldDataMap_F.C,v 1.8 2007/05/02 03:09:52 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_FieldDataMap_F.C,v 1.7 2007/05/02 01:24:50 rosalind Exp $";
+             "$Id: ESMC_FieldDataMap_F.C,v 1.8 2007/05/02 03:09:52 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -72,19 +72,19 @@ extern "C" {
 void FTN(c_esmc_arraydatamapserialize)(int *status, int *dataRank,
                                   int *dataDimOrder,      /* ESMF_MAXDIM ints */
                                   int *dataNonGridCounts, /* ESMF_MAXDIM ints */
-                         void *buffer, int *length, int *offset, int *localrc) {
+                         void *buffer, int *length, int *offset, int *rc) {
 
     int i, *ip;
 
     // Initialize return code; assume routine not implemented
-    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     // TODO: verify length > needed, and if not, make room.
     int fixedpart = 16 * sizeof(int);
     if ((*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "Buffer too short to add a DataMap object", localrc);
+                         "Buffer too short to add a DataMap object", rc);
          return;
  
         //buffer = (char *)realloc((void *)buffer,
@@ -103,7 +103,7 @@ void FTN(c_esmc_arraydatamapserialize)(int *status, int *dataRank,
 
     *offset = (char *)ip - (char *)buffer;
 
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
 
     return;
 } 
@@ -112,12 +112,12 @@ void FTN(c_esmc_arraydatamapserialize)(int *status, int *dataRank,
 void FTN(c_esmc_arraydatamapdeserialize)(int *status, int *dataRank,
                                   int *dataDimOrder,      /* ESMF_MAXDIM ints */
                                   int *dataNonGridCounts, /* ESMF_MAXDIM ints */
-                                  void *buffer, int *offset, int *localrc) {
+                                  void *buffer, int *offset, int *rc) {
 
     int i, *ip;
 
     // Initialize return code; assume routine not implemented
-    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     ip = (int *)((char *)(buffer) + *offset);
     *status = *ip++;
@@ -129,7 +129,7 @@ void FTN(c_esmc_arraydatamapdeserialize)(int *status, int *dataRank,
 
     *offset = (char *)ip - (char *)buffer;
 
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
 
     return;
 } 
@@ -140,12 +140,12 @@ void FTN(c_esmc_fielddatamapserialize)(int *status, int *isScalar,
                                   int *rankLength,  /* ESMF_MAXDIM ints */
                                   int *interleave,  /* 4 ints */
                                   int *horzRelloc, int *vertRelloc,
-                         void *buffer, int *length, int *offset, int *localrc) {
+                         void *buffer, int *length, int *offset, int *rc) {
 
     int i, *ip;
 
     // Initialize return code; assume routine not implemented
-    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     // TODO: verify length > needed, and if not, make room.
 
@@ -161,7 +161,7 @@ void FTN(c_esmc_fielddatamapserialize)(int *status, int *isScalar,
 
     *offset = (char *)ip - (char *)buffer;
 
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
 
     return;
 } 
@@ -172,12 +172,12 @@ void FTN(c_esmc_fielddatamapdeserialize)(int *status, int *isScalar,
                                     int *rankLength,  /* ESMF_MAXDIM ints */
                                     int *interleave,  /* 4 ints */
                                     int *horzRelloc, int *vertRelloc,
-                                    void *buffer, int *offset, int *localrc) {
+                                    void *buffer, int *offset, int *rc) {
 
     int i, *ip;
 
     // Initialize return code; assume routine not implemented
-    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     ip = (int *)((char *)(buffer) + *offset);
     *status = *ip++;
@@ -191,7 +191,7 @@ void FTN(c_esmc_fielddatamapdeserialize)(int *status, int *isScalar,
 
     *offset = (char *)ip - (char *)buffer;
 
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
 
     return;
 } 
