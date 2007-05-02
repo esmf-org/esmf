@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldDataMap_F.C,v 1.6 2007/03/31 05:51:07 cdeluca Exp $
+// $Id: ESMC_FieldDataMap_F.C,v 1.7 2007/05/02 01:24:50 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_FieldDataMap_F.C,v 1.6 2007/03/31 05:51:07 cdeluca Exp $";
+             "$Id: ESMC_FieldDataMap_F.C,v 1.7 2007/05/02 01:24:50 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -76,6 +76,9 @@ void FTN(c_esmc_arraydatamapserialize)(int *status, int *dataRank,
 
     int i, *ip;
 
+    // Initialize return code; assume routine not implemented
+    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+
     // TODO: verify length > needed, and if not, make room.
     int fixedpart = 16 * sizeof(int);
     if ((*length - *offset) < fixedpart) {
@@ -113,6 +116,9 @@ void FTN(c_esmc_arraydatamapdeserialize)(int *status, int *dataRank,
 
     int i, *ip;
 
+    // Initialize return code; assume routine not implemented
+    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+
     ip = (int *)((char *)(buffer) + *offset);
     *status = *ip++;
     *dataRank = *ip++;
@@ -137,6 +143,9 @@ void FTN(c_esmc_fielddatamapserialize)(int *status, int *isScalar,
                          void *buffer, int *length, int *offset, int *localrc) {
 
     int i, *ip;
+
+    // Initialize return code; assume routine not implemented
+    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
     // TODO: verify length > needed, and if not, make room.
 
@@ -166,6 +175,9 @@ void FTN(c_esmc_fielddatamapdeserialize)(int *status, int *isScalar,
                                     void *buffer, int *offset, int *localrc) {
 
     int i, *ip;
+
+    // Initialize return code; assume routine not implemented
+    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
     ip = (int *)((char *)(buffer) + *offset);
     *status = *ip++;

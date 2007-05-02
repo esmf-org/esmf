@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.33 2007/04/17 03:21:45 rosalind Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.34 2007/05/02 01:24:50 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.33 2007/04/17 03:21:45 rosalind Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.34 2007/05/02 01:24:50 rosalind Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -277,7 +277,7 @@
         integer :: status                     ! local error status
         logical :: rcpresent                  ! did user specify rc?
 
-        ! initialize return code
+        ! initialize return code; assume routine not implemented
         status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
@@ -333,8 +333,12 @@
 !
 !EOP
 
+
         character (len = ESMF_MAXSTR) :: str
         !character (len = ESMF_MAXSTR) :: msgbuf
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       !jw  write (msgbuf, *)  "FieldDataMap print:"
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
@@ -685,6 +689,9 @@
 !
 !EOP
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
         call ESMF_ArrayDataMapSetInvalid(fielddatamap%adm, rc)
 
         fielddatamap%status = ESMF_STATUS_INVALID
@@ -927,8 +934,10 @@
 !	Changed BOP/EOP to BOPI/EOPI until code is added.
 ! TODO: code goes here
 !
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
         ESMF_FieldDataMapRead%status = ESMF_STATUS_UNINIT
-        if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_FieldDataMapRead
 
@@ -980,6 +989,10 @@
 !EOPI
 
       integer :: localrc                     ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,fielddatamap)
@@ -1049,6 +1062,10 @@
 !EOPI
 
       integer :: localrc                ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,fielddatamap)
