@@ -1,0 +1,158 @@
+% CVS $Id: code_conv_errorhandling.tex,v 1.1 2007/05/02 22:01:21 cdeluca Exp $
+
+\subsection{Code: Error Handling Conventions}
+
+\subsubsection{Objectives}
+
+The objectives of these conventions are:
+
+\begin{enumerate}
+\item to produce appropriate error messages when users try to call a method or branch in the ESMF software that is incomplete;
+\item to produce appropriate error messages for methods that have been implemented and reviewed, and to identify these methods clearly in the ESMF source code;
+\item to create defaults that enable developers to generate appropriate error messages throughout the development process, with a minimum of effort;
+\item to flexibly move between a mode where incomplete code is treated as an error (the user perspective) to a mode where it is not (the developer perspective, when using stubs for code construction).
+\end{enumerate}
+
+\subsubsection{Approach}
+
+ESMF methods are classified into two categories: pre-review, and post-review. As of the version 3.0.1 release, *all* methods are pre-review.
+
+Reviews are expected to begin once conventions for framework behavior are sufficiently well-defined. To pass review, methods must have their basic functionality fully implemented. If any unimplemented options are present, they must be documented and must generate appropriate errors in order for the method to pass review.
+
+A pre-review method has its return code ({\tt rc}) initialized to the value {\tt ESMF\_RC\_NOT\_IMPL} (not implemented). Possible sources of specific errors within the method, such as subroutine calls, generate local return codes ({\tt localrc}).
+
+The {\tt localrc} values are evaluated using the function {\tt ESMF\_LogMsgFoundError()}, which takes both the {\tt localrc} and the {\tt rc} as input arguments. If the {\tt localrc} does not indicate an error, {\tt rc} is output from {\tt ESMF\_LogMsgFoundError()} with the value it had going into the call, and the value of the function is {\tt .false.}. If {\tt localrc} does indicate an error, {\tt rc} is set to the {\tt localrc} value before being output from {\tt ESMF\_LogMsgFoundError()}, and the value of the function is {\tt .true.}.
+
+The convention is to place {\tt ESMF\_LogMsgFoundError()} into a conditional statement that causes a return from the method, with the correctly set {\tt rc}, when an error is found in {\tt localrc}, e.g.:
+\begin{verbatim}
+if (ESMF_LogMsgFoundError(localrc, <other args ...>, rc)) return
+\end{verbatim}
+Use of the {\tt ESMF\_LogMsgFoundError()} function is further described in the ESMF Reference Manual.
+
+Note that if no error is found, {\tt rc} retains its {\tt ESMF\_RC\_NOT\_IMPL} status throughout the method. The developer must explicitly set the {\tt rc} to {\tt ESMF\_SUCCESS} just before returning from any branch that is believed to be successful.
+
+The default {\tt rc} value thus becomes {\tt ESMF\_RC\_NOT\_IMPL} for any code that is not explicitly marked as reaching success by the developer. Stub methods and incomplete branches can be handled very naturally this way - the developer simply does not set {\tt rc=ESMF\_SUCCESS} before returning. There are two differences in the treatment of pre-review and post-review methods:
+\begin{enumerate}
+\item Post-review methods have their {\tt rc} initialized to the {\tt ESMF\_RC\_NOT\_SET} value. The rationale is that methods that are supposed to be implemented should not default to an error code that says that they are unimplemented. The difference in initialization also indicates a particular method's review status to someone browsing the source code.
+
+\item Any unimplemented or incomplete branch must have its {\tt rc} value explicitly set by the developer to {\tt ESMF\_RC\_NOT\_IMPL} before returning. This is to ensure that the behavior of the method is communicated as accurately as possible to the user via its return codes.
+
+\end{enumerate}
+
+These conventions achieve the first three objectives above, namely producing appropriate error messages throughout a method's life cycle, with minimal developer effort.
+
+\subsubsection{Error Masking}
+
+Under normal use - what a user will encounter by default - {\tt ESMF\_RC\_NOT\_IMPL} is treated as an error. However, through a special LogErr setting a developer who wishes to use stub methods and prototyping during code construction can equate {\tt ESMF\_RC\_NOT\_IMPL} with {\tt ESMF\_SUCCESS}. This achieves the fourth objective above, allowing for different user and developer modes of handling incomplete code. This is done by setting the errorMask argument in the {\tt ESMF\_LogSet()} call to {\tt ESMF\_RC\_NOT\_IMPL}, e.g.:
+
+\begin{verbatim}
+call ESMF_LogSet(errorMask = /ESMF_RC_NOT_IMPL/)
+\end{verbatim}
+
+\subsubsection{Example (pre-review method)}
+
+The following is an example of a pre-review method, {\tt sub()}, that calls two subroutines internally, {\tt subsub1()} and {\tt subsub2()}. The subroutine {\tt sub()} takes as input an integer argument that it can branch on and outputs a return code. Here {\tt branch==1} is fully implemented, {\tt branch==2} is incomplete, and other values of branch are not yet addressed. Several possible error scenarios are described following the code listing.
+
+\begin{verbatim}
+subroutine sub(branch, rc)
+integer :: branch
+integer, optional :: rc
+integer :: localrc   ! local return code
+
+if (present(rc)) rc=ESMF_RC_NOT_IMPL
+! ...code...
+if (branch==1) then
+call subsub1(localrc)
+if (ESMF_LogMsgFoundError(localrc, &
+  ESMF_ERR_PASSTHRU, &
+  ESMF_CONTEXT, rc)) then
+  !   ... any necessary garbage collection ...
+  return ! Return point 1
+endif !   ...fully implemented code...
+if (present(rc)) rc=ESMF_SUCCESS
+elseif (branch==2) then call subsub2(localrc)
+if (ESMF_LogMsgFoundError(localrc, &
+  ESMF_ERR_PASSTHRU, &
+  ESMF_CONTEXT, rc)) then
+  !   ... any necessary garbage collection ...
+  return ! Return point 2
+endif
+!   ...incomplete code...
+end if
+
+end subroutine
+\end{verbatim}
+
+Note: This example is quite artificial, since simple branching like this would be better handled with a switch case statement that had a well-defined default. However, the control sequence shown better illustrates the sorts of errors that can occur in a real code with complex conditionals.
+
+{\bf Possible scenarios:}
+\begin{enumerate}
+\item {\tt branch==1} and there is no error in {\tt subsub1()}. In this case, {\tt rc} retains the value of {\tt ESMF\_RC\_NOT\_IMPL} up to the point at which it is set to {\tt ESMF\_SUCCESS}, after which {\tt sub()} ends.
+
+\item {\tt branch==1} and there is an error in {\tt subsub1()}. The {\tt localrc} returned by {\tt subsub1()} will have the value of a specific error code, say {\tt ESMF\_RC\_DIV\_ZERO}. This will get passed into the evaluation {\tt ESMF\_LogMsgFoundErr()}, which will set {\tt rc} to the {\tt localrc} error value. Since the value of the evaluation expression is true, the method will return at Return point 1. It is important to perform any necessary garbage collection before returning to avoid memory leaks.
+
+\item {\tt branch==2} and there is no error in {\tt subsub2()}. Here the value of {\tt rc} is still {\tt ESMF\_RC\_NOT\_IMPL} when it is input into the {\tt ESMF\_LogMsgFoundErr()} call following {\tt subsub2()}. Since the code in this branch is not complete and {\tt rc} is never set to {\tt ESMF\_SUCCESS}, the {\tt rc} value is still {\tt ESMF\_RC\_NOT\_IMPL} at the end of {\tt sub()}. Note that to allow the default to work properly, {\tt rc} should not be set to {\tt ESMF\_SUCCESS} right before the end of the method!
+
+\item {\tt branch==2} and there is an error in {\tt subsub2()}. Much like scenario 2, the {\tt localrc} returned by {\tt subsub2()} will have the value of a specific error code. The {\tt localrc} will get passed into {\tt ESMF\_LogMsgFoundErr()}, which will set {\tt rc} to the {\tt localrc} error value, and then cause a return at Return point 2.
+
+\item any value where branch $/=1$ and branch $/= 2$ (e.g. {\tt branch==0}). Here there is a ``hole'' in the code, since the behavior of {\tt branch==0} is not yet addressed. However, with this approach the {\tt rc} value remains {\tt ESMF\_RC\_NOT\_IMPL} when {\tt sub()} ends, producing an appropriate error message for the user.
+
+\subsubsection{Example (post-review method)}
+
+This example is modeled on the pre-review example, but illustrates error handling for a post-review method. Here {\tt branch==1} is fully implemented, {\tt branch==2} is known to be incomplete, and other values of branch are cases that the developer and reviewers have missed. This is not what one would wish to see in reviewed code - ideally all cases should be implemented - but we cannot count on this. This example shows how deficiencies can most effectively be handled.
+
+The return code {\tt rc} is now initialized to {\tt ESMF\_RC\_NOT\_SET}. The developer has recognized that the {\tt branch==2} code is incomplete and {\tt rc} is set explicitly to {\tt ESMF\_RC\_NOT\_IMPL} before returning.
+
+\begin{verbatim}
+subroutine sub(branch, rc)
+integer :: branch
+integer, optional :: rc
+integer :: localrc   ! local return code
+
+if (present(rc)) rc=ESMF_RC_NOT_SET
+! ...code...
+if (branch==1) then
+call subsub1(localrc)
+if (ESMF_LogMsgFoundError(localrc, &
+  ESMF_ERR_PASSTHRU, &
+  ESMF_CONTEXT, rc)) then
+  !   ... any necessary garbage collection ...      return ! Return point 1
+endif
+!   ...fully implemented code...
+if (present(rc)) rc=ESMF_SUCCESS
+elseif (branch==2) then call subsub2(localrc)
+if (ESMF_LogMsgFoundError(localrc, &
+  ESMF_ERR_PASSTHRU, &
+  ESMF_CONTEXT, rc)) then
+  !   ... any necessary garage collection ...
+  return ! Return point 2
+endif
+!   ...incomplete code...
+if (present(rc)) rc=ESMF_RC_NOT_IMPL       end if
+end subroutine
+{\end{verbatim}
+
+{\bf Possible scenarios:}
+
+\item {\tt branch==1}. Here the behavior is essentially the same as in scenarios 1 and 2. When there is an error in {\tt subsub1()}, the returned {\tt rc} from {\tt sub()} has the error code {\tt subsub1()} generated. When there is not an error in {\tt subsub1()}, the returned {\tt rc} from {\tt sub()} is {\tt ESMF\_SUCCESS}.
+
+\item {\tt branch==2} and there is an error in {\tt subsub2()}. The behavior here is analagous to scenario 3. The returned {\tt rc} from {\tt sub()} has the error code {\tt subsub2()} generated.
+
+\item {\tt branch==2} and there is no error in {\tt subsub2()}. The value of {\tt rc} remains {\tt ESMF\_RC\_NOT\_SET} up to the point at which it is explicitly set to {\tt ESMF\_RC\_NOT\_IMPL}, and {\tt sub()} ends. Method documentation is expected to explain the gap in functionality.
+
+\item any value where branch $/=1$ and branch $/= 2$ (e.g. {\tt branch==0}). Here {\tt rc} is not explicitly set to a value before the branch returns, and so {\tt sub()} returns with the default {\tt rc} value of {\tt ESMF\_RC\_NOT\_SET}. The user can tell from this error code that the developer did not consider this either unimplemented code or successful code, and that there is an unexpected ``hole'' in the method's functionality. 
+
+\end{enumerate}
+
+
+
+
+
+
+
+
+
+
+
+
+

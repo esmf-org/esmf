@@ -1,0 +1,181 @@
+% CVS $Id: code_conv_autopromote.tex,v 1.1 2007/05/02 22:01:21 cdeluca Exp $
+
+\subsection{ESMF Data Type Autopromotion Support Policy and Guide}
+
+ESMF supports autopromotion of user code with respect to integer and real data types. This is data that a user would put in an array or field. By autopromotion we mean compiling user code with $-r8$, $-i8$ or similar options on those platforms where these options are available. If a code is compiled with autopromotion, user data will be processed correctly by ESMF. That is because user data arguments in ESMF calls already are overloaded for all TKR(type-kind-rank). It is important to note that ESMF itself must not be compiled with autopromotion flags.
+
+The ESMF API distinguishes four different flavors of integer and real arguments:
+\begin{itemize}
+\item integer parameters
+\item integer user data
+\item real parameters
+\item real user data
+\end{itemize}
+
+The ESMF API handles integer user data by overloading for TKR. The ESMF API handles real user data by overloading for TKR. The ESMF API handles integer parameters by using the system's default integer type. The ESMF API handles real parameters by explicitly specifying a kind.
+
+As a result of the ESMF API conventions the autopromotion of integer and real user data is automatically handled within ESMF.
+
+Integer parameters that are arguments to ESMF calls must be protected against integer autopromotion by explicitly specifying their kind as {\tt ESMF\_KIND\_I} in the user code.
+
+The safest way to handle real parameters is for the user to specify their explicit kind as expected by the API. However, the user may choose to omit the kind specifier for reasons of convenience. This however will make their code vulnerable with respect to autopromotion and make the user code less portable, breaking it where the system default real kind does not match the ESMF API.
+
+The requirements for safe interfacing of autopromoted user code with ESMF are as follows:
+\begin{enumerate}
+\item All integer parameter arguments (as opposed to user data) to ESMF routines must be of kind {\tt ESMF\_KIND\_I}. Following is an example of an ESMF call that includes both a user data argument, and integer parameter arguments
+\begin{verbatim}
+    ...
+
+ integer, dimension(:), pointer :: intptr        !User data arg.
+                                                 !->No need for 
+                                                 !kind specifier.
+
+ integer(ESMF_KIND_I), dimension(3) :: counts    ! Integer 
+                                                 ! parameter 
+
+ integer(ESMF_KIND_I), dimension(3) :: lbounds   ! Integer 
+                                                 ! parameter
+
+ integer(ESMF_KIND_I), dimension(3) :: ubounds   ! Integer 
+                                                 ! parameter
+
+ integer(ESMF_KIND_I) :: rc                      ! Integer 
+                                                 ! parameter
+  ...
+ call  ESMF_LocalArrayCreate(array, counts, intptr, &
+         lboounds, ubounds, rc)
+\end{verbatim}
+
+\item As explained in section I.3 above, all real parameters must be of the kind expected by the routine being called. e.g. In a call to {\tt ESMF\_ClockGet()}, the {\tt runTimeStepCount} argument must be of kind {\tt ESMF\_KIND\_R8}.
+\begin{verbatim}
+             ...
+            type(ESMF_Clock)  :: clock
+            real(ESMF_KIND_R8) :: runTimeStepCount
+            integer(ESMF_KIND_I) :: rc
+             ...
+            call ESMF_ClockGet(clock, runTimeStepCount, rc)
+\end{verbatim}
+\item When user data is autopromoted, the {\tt ESMF\_TypeKind} parameter argument corresponding to the autopromoted data must be adjusted appropriately. The {\tt ESMF\_TypeKind} parameter for an array or field that has been autopromoted can be obtained during execution by using the function {\tt ESMF\_TypeKindFind()}. {\tt ESMF\_TypeKindFind()} is an overloaded function that returns the {\tt ESMF\_TypeKind} parameter corresponding to the runtime type and kind of an input scalar.
+
+      e.g. In the following code excerpt {\tt ESMF\_TypeKindFind()} is used to determine at runtime the correct {\tt ESMF\_TypeKind} parameter to use in the {\tt ESMF\_ArraySpecSet()} routine in preparation for creation of an ESMF Array that will store integer data that may or may not be autopromoted.
+\begin{verbatim}
+          ...
+          integer :: iScalar
+          ...
+          type(ESMF_TypeKind) myTypeKind
+          myTypeKind= ESMF_TypeKindFind(iScalar)
+          call ESMF_ArraySpecSet(arrayspec, rank, myTypeKind, rc)
+\end{verbatim}
+\end{enumerate}
+
+\subsubsection{How We Arrived at This Autopromotion Support Policy}
+
+We considered the possibility of expanding autopromotion support to ESMF routine integer parameter arguments, in addition to those storing user data. Two options were considered as explained below. The reasons why we decided against such support, after discussion with the ESMF community, are as follows:
+\begin{enumerate}
+\item All user interfaces would need to be overloaded -this in addition to the overloading already present on some routines for user data.
+\item Most likely, cpp macros for all user interfaces would be needed, which does not improve readability.
+\item The additional necessary overloading would double (or more, depending on the option) the size of our post-processor code base.
+\item Typecasting support would incur performance overhead, regardless of whether autopromotion is used or not.
+\item There are routines, such as {\tt ESMF\_LocalArrayCreate()}, where all integer parameter arguments are optional. Overloading those routines violates the Fortran 95 standard and will not compile.
+\end{enumerate}
+
+Rejected Options:
+
+We considered and rejected two alternate options for autopromotion support. Here we illustrate with an example their impact on both the user code and the ESMF code. Note that this routine is overloaded for data arrays for all TKR supported and thus supports both real and integer autopromotion of user data.
+
+1st option: support autopromotion of integers (options sizes 4 or 8 bytes) as long as all integer parameter arguments are of the same kind.
+
+2nd option: support autopromotion of integers (options sizes 4 or 8 bytes). Mixed integer argument kinds.
+
+For our example we use a call to {\tt ESMF\_LocalArrayCreate()} in each of the 2 option scenarios. In reading these example scenarios please keep in mind that ESMF code will not be compiled with autopromotion.
+
+That is because only user code autopromotion is being considered. Thus the following statement could have different meaning if it is found within ESMF than in user code:
+\begin{verbatim}
+                         integer :: foo
+
+ In ESMF-------------------------------- ===>  foo is of default 
+                                               integer kind/size.
+
+ In User code compiled with autopromotion ==>  foo is an integer
+                                               of kind/size 
+                                               determined by
+                                               autopromotion flag.
+\end{verbatim}
+
+{\bf With 1st Option:}
+
+\begin{verbatim}
+
+  USER CODE:
+  ---- -----
+      ...
+     integer, dimension(:), pointer :: intptr
+     integer             , dimension(3) :: counts
+     integer             , dimension(3) :: lbounds
+     integer             , dimension(3) :: ubounds
+     integer              :: rc
+      ...
+      ...
+     call  ESMF_LocalArrayCreate(array, counts, intptr, &
+           lboounds, ubounds, rc)
+\end{verbatim}
+
+Changes in ESMF:
+
+The routine would need to be further overloaded in order to insure that all integer parameter call arguments ({\tt counts, lbounds, ubounds,} and {\tt rc}), are typecast to default integer inside the method (note that ESMF kind can be of size 4 or 8). It would be something like this:
+\begin{verbatim}
+  
+   subroutine ESMF_LocalArrayCreate(array, counts, intptr,.... &
+                       lbounds, ubounds, rc)
+   ......
+    integer(<esmfKind>) , intent(in), optional :: counts, &
+                          lbounds, ubounds
+    integer(<esmfKind>), intent(out), optional :: rc 
+    integer :: counts_noAP, lbounds_noAP, ubounds_noAP, rc_noAP
+  
+    if (PRESENT(counts)) counts_noAP=counts
+    if (PRESENT(lbounds)) lbounds_noAP=lbounds
+    if (PRESENT(ubounds)) ubounds_noAP=ubounds
+   ...
+   ....
+    if (PRESENT(rc)) rc=rc_nonAP
+   return
+\end{verbatim}
+
+With $<esmfKind>$ = {\tt ESMF\_KIND\_I4} in one copy and {\tt ESMF\_KIND\_I8} in the other. The number of copies of the routine will increase from 42 to 84.
+
+*(Note that in this particular routine, overloading is problematic because all the integer parameters are optional)
+
+{\bf With 2nd Option:}
+\begin{verbatim}
+  USER CODE:
+  ---- -----
+      ...
+     integer, dimension(:), pointer :: intptr
+     integer(ESMF_KIND_I4) , dimension(3) :: counts
+     integer(ESMF_KIND_I8), dimension(3) :: lbounds
+     integer             , dimension(3) :: ubounds
+     integer              :: rc
+      ...
+      ...
+     call  ESMF_LocalArrayCreate(array, counts, intptr, &
+                      lboounds, ubounds, rc)
+\end{verbatim}
+Changes in ESMF:
+
+The routine would need to be further overloaded to support call arguments {\tt counts, lbounds, ubounds,} and {\tt rc} each being of either 4-byte or 8-byte size. In order to provide for all possible combinations of data sizes for these 4 integer parameters, the number of overloads would increase from 42 to $[42*(2**4)]=672$, which explains why support of this option is not practical. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

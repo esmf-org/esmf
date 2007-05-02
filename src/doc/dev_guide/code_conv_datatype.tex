@@ -1,0 +1,230 @@
+% CVS $Id: code_conv_datatype.tex,v 1.1 2007/05/02 22:01:21 cdeluca Exp $
+
+\subsection{Code: Data Type Consistency Guidelines}
+
+The following tools and guidelines are in place in order to maintain the ESMF framework's portability and robustness, in light of the fact that neither the Fortran nor C++ standards require a fixed size for any given data type and/or kind. Please note that these guidelines pertain to the internal ESMF code, not to the user code that interfaces to it.
+
+\subsubsection{Use ESMF names for data types in C and ESMF data kinds in Fortran}
+
+\subsubsection{Fortran}
+
+Any occurrence of Fortran data kind parameters within ESMF code must be specified with ESMF parameters only. e.g.
+\begin{verbatim}
+       ESMF_KIND_I4
+       ESMF_KIND_I8
+       ESMF_KIND_R4
+       ESMF_KIND_R8
+\end{verbatim}
+These are internally defined such that the size of the data they describe is the number at the end of the parameter. e.g. in
+
+\begin{verbatim}
+       integer(ESMF_KIND_I8) :: someInteger
+\end{verbatim}
+someInteger is an 8 byte integer in any platform.
+
+Kind of literal constants:
+
+Only the ESMF kind parameters listed above are allowed when specifying the kind of literal Fortran constants. e.g.
+
+\begin{verbatim}
+     real(ESMF_KIND_R8) :: a,b
+     a=b*0.1_ESMF_KIND_R8
+\end{verbatim}
+
+In the example above {\tt 0.1\_ESMF\_KIND\_R8} is a literal constant of kind {\tt ESMF\_KIND\_R8} and value 0.1.
+
+This means that any other syntax, such as:
+\begin{verbatim}
+           a=b*0.1d0
+           a=b*0.1_8
+\end{verbatim}
+is NOT to be used.
+
+{\tt ESMF\_KIND\_I}, {\tt ESMF\_KIND\_R}: Note that the {\tt ESMF\_TypeKind} parameters: {\tt ESMF\_KIND\_I} and {\tt ESMF\_KIND\_R} are defined for use in user code only. They are handles offered to the user for ESMF internal default kinds and not to be used internally in the ESMF framework.
+
+{\bf Real Data:}
+\begin{enumerate}
+\item All real data in Fortran should be declared with an explicit ESMF defined kind parameter in the form:
+\begin{verbatim}
+              real(ESMF_KIND_R<n>) :: RealVariable
+\end{verbatim}
+
+      where $<n>$ is the size in bytes of the memory occupied by each real datum. Allowed values of n are those that correspond to supported type/kind data, e.g.
+\begin{verbatim}
+              real (ESMF_KIND_R8) :: a,b
+\end{verbatim}
+      declares a and b to be 8 byte reals
+
+\item Routines should be overloaded for all supported kinds(sizes) of real user data (e.g. in Array class routines).
+
+\item Real parameter arguments, such as the arguments to grid or regrid routines need not be cause for overloading. They should be declared with the kind required for appropriate accuracy and uniform behavior across platforms. Documentation should identify when specific data types and kinds are required in calling such routines.
+\end{enumerate}
+
+Integer Data:
+
+The standards for integer data differ between integers that store user data and integers that do not.
+
+Routines with user integer data arguments (e.g. integer arrays), must be overloaded for all integer data kinds supported. These will be declared as
+\begin{verbatim}
+                         integer(ESMF_KIND_I<n>)
+\end{verbatim}
+where $<n>$ denotes data size in byte units.
+
+Integers that do not represent user data must generally be declared without a specific kind (see the section below on Default Type Representation). Possible exceptions to this rule follow on items (3) and (4) below.
+
+Care should be exercised to insure that integer arguments to intrinsic Fortran functions are of the correct kind (usually default). Likewise, argument parameters to VM routines should be of default kind.
+
+In the case where a specific kind is required for integer ESMF routine arguments, such as occurs in TimeMgr routines, the requirement must be clearly documented (as noted above, ESMF kind parameters are to be used to specify the kind).
+
+Default Type Representation:
+
+Default Integer Data Internal to the ESMF:
+
+Internally in the ESMF framework, all integer data intended to be of default kind must be declared without specifying their kind, e.g.
+\begin{verbatim}
+               subroutine ESMF_SomeRoutine(foo)
+               integer :: foo
+\end{verbatim}
+This is for clarity purposes, as well as to minimize the overall size of the framework.
+
+{\tt ESMF\_KIND\_I} must not be used to declare data internally within ESMF.
+
+To provide some background, the handle {\tt ESMF\_KIND\_I} is provided to aid users who want to insure that their integer user code matches the kind of ESMF internal default integer data. It is particularly useful when user code is compiled with integer autopromotion. User code that calls ESMF routines with internal default integer arguments could declare those integers to be of {\tt kind=ESMF\_KIND\_I}, e.g.
+\begin{verbatim}
+                 program myUserCode
+                 integer(ESMF_KIND_I) :: my_foo
+                 call ESMF_SomeRoutine(my_foo)
+\end{verbatim}
+\subsubsection{C and C++}
+
+ESMF C datatypes are also declared with the property that their size remains constant across platforms. This convention is set in order to make ESMF more robust in terms of portability, as well as for the correct matching of Fortran-C routine interfaces. They have a direct size correspondence to their Fortran counterparts. Their names are:
+
+\begin{verbatim}   
+          ESMC_I4 (=) integer type of size 4 bytes
+          ESMC_I8 (=) integer type of size 8 bytes
+          ESMC_R4 (=) floating point type of size 4 bytes
+          ESMC_R8 (=) floating point type of size 8 bytes
+\end{verbatim}
+
+e.g.
+\begin{verbatim}
+          ESMC_R4 someFloat;
+\end{verbatim}
+here {\tt someFloat} is a 4 byte floating point in any platform.
+
+Real Data:
+\begin{enumerate}
+\item All real data in C should be declared with an explicit ESMF type in the form:
+\begin{verbatim}
+              ESMC_R<n>  RealVariable;
+\end{verbatim}
+      where $<n>$ is the size in bytes of the memory occupied by each real datum. (Allowed values of n are those that correspond to supported type/kind data). e.g.
+\begin{verbatim}
+              ESMC_R8  a,b;
+\end{verbatim}
+      which declares a and b to be 8 byte reals.
+
+\item Methods containing user data - such as arrays - as arguments must handle all supported real user data types and sizes.
+\end{enumerate}
+
+Integer Data:
+\begin{enumerate}
+\item All integers that do not represent user data must be declared using the C datatype {\tt int}.
+
+\item Methods containing user data - such as arrays - as arguments must handle all supported integer user data types and sizes.
+\end{enumerate}
+
+\subsubsection{ESMF\_TypeKind ``labels'': When knowing the data type/kind is necessary}
+
+An enumerated parameter in C++ and a corresponding sequence parameter in Fortran are provided in order to identify the type-and-kind of data being processed in various ESMF routines. There is a one to one correspondence between the Fortran sequence and the C++ enumerated type. They are mostly used as a tool to customize code for a specific data type and kind, and to insure the correct handling of user data across Fortran-C interfaces.
+
+In Fortran this sequenced type's name is {\tt ESMF\_TypeKind}.
+
+The {\tt ESMF\_TypeKind} parameter names declared are:
+
+\begin{verbatim}
+               ESMF_TYPEKIND_I4   (4 byte integer)
+               ESMF_TYPEKIND_I8   (8 byte integer)
+               ESMF_TYPEKIND_R4   (4 byte floating point)
+               ESMF_TYPEKIND_R8   (8 byte floating point)
+\end{verbatim}
+
+The following are supported for user interface use only (they are not to be used internally in the ESMF framework):
+\begin{verbatim}
+               ESMF_TYPEKIND_I    (labels integer_not_autopromoted data)
+               ESMF_TYPEKIND_R    (labels real_not_autopromoted data)
+\end{verbatim}
+
+Fortran {\tt ESMF\_TypeKind} parameters mostly appear in calls to C routines that create or manipulate arrays, fields, or bundles. e.g.
+\begin{verbatim}
+         ....
+         ESMF_TypeKind :: tk
+         ...
+          !-set tk
+         ...
+         call FTN(c_ESMC_VMAllFullReduce( ..., tk, ...  )
+         ...
+         ...
+\end{verbatim}
+Likewise in C the enumerated type's name is {\tt ESMC\_TypeKind}.
+
+The {\tt ESMC\_TypeKind} parameter names declared are:
+\begin{verbatim}
+               ESMC_TYPEKIND_I4   (4 byte integer)
+               ESMC_TYPEKIND_I8   (8 byte integer)
+               ESMC_TYPEKIND_R4   (4 byte floating point)
+               ESMC_TYPEKIND_R8   (8 byte floating point)
+\end{verbatim}
+
+In C, {\tt ESMC\_TypeKind} parameters are used to tailor computation to the type and kind of user data arguments being processed. e.g
+\begin{verbatim}
+  void FTN(c_esmc_vmallfullreduce)(.., ESMC_TypeKind *dtk, ..,int *rc){
+    .....      
+    switch (*dtk){
+    case ESMC_TYPEKIND_I4:
+      ....
+      break;
+    case ESMC_TYPEKIND_R4:
+      ....
+      break;
+    case ESMC_TYPEKIND_R8:
+      ...         
+      break;
+    default:
+      ....
+    }
+    ...
+\end{verbatim}
+
+\subsubsection{Guidelines for Fortran-C Interfaces}
+
+There must be a one to one correspondence of Fortran and C arguments as illustrated in the table below. So for example, if a Fortran routine calls a C method that expects an argument of type {\tt ESMC\_I4}, the argument in the Fortran call should be declared to be an integer of {\tt kind=ESMF\_KIND\_I4}.
+\begin{verbatim}
+     integer(ESMF_KIND_I4)  <-->  ESMC_I4  [4 bytes]
+     integer(ESMF_KIND_I8)  <-->  ESMC_I8  [8 bytes]
+     real(ESMF_KIND_R4)     <-->  ESMC_R4  [4 bytes]
+     real(ESMF_KIND_R8)     <-->  ESMC_R8  [8 bytes]
+     integer                <-->  int
+     etc.
+\end{verbatim}
+Also, {\tt ESMF\_TypeKind} and {\tt ESMC\_TypeKind} values are set to have matching values. That is:
+\begin{verbatim}
+             ESMF_TYPEKIND_I<n> = ESMC_TYPEKIND_I<n>
+             ESMF_TYPEKIND_R<n> = ESMC_TYPEKIND_R<n>
+\end{verbatim}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
