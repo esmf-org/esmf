@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.186 2007/05/02 22:40:53 donstark Exp $
+#  $Id: common.mk,v 1.187 2007/05/02 22:55:43 dneckels Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2244,6 +2244,11 @@ endif
 
 .C.a:
 	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
+	@if [ "$(ESMF_DEP)" = "on" ] ; then \
+           export ESMF_TMP=$(ESMF_LIBDIR) ; \
+           makedepend -f- --  $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $< -- 2> /dev/null | \
+	   perl -pe 's/(.*)\/([^\/]+):/$$ENV{'ESMF_TMP'}\/libesmf.a($$2):/' >> $(ESMF_DIR)/$(LOCDIR)/makefile.dep ; \
+	 fi
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
