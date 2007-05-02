@@ -1,0 +1,16 @@
+# Bundle test Harness Config file
+
+# test class
+test_class : Field 
+
+# descriptor file for the nonexhaustive case
+nonexhaustive::
+   ./harness_config/nonexhaustive_descriptor.rc
+::   # end of list
+
+# descriptor files for the exhaustive case
+exhaustive::
+   ./harness_config/exhaustive_descriptor.rc
+   ./harness_config/superexhaustive_descriptor.rc
+:: # end of list
+
