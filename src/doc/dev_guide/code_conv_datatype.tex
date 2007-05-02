@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_datatype.tex,v 1.1 2007/05/02 22:01:21 cdeluca Exp $
+% CVS $Id: code_conv_datatype.tex,v 1.2 2007/05/02 22:53:12 cdeluca Exp $
 
 \subsection{Code: Data Type Consistency Guidelines}
 
@@ -60,7 +60,7 @@ is NOT to be used.
 \item Real parameter arguments, such as the arguments to grid or regrid routines need not be cause for overloading. They should be declared with the kind required for appropriate accuracy and uniform behavior across platforms. Documentation should identify when specific data types and kinds are required in calling such routines.
 \end{enumerate}
 
-Integer Data:
+{\bf Integer Data:}
 
 The standards for integer data differ between integers that store user data and integers that do not.
 
@@ -112,7 +112,7 @@ e.g.
 \end{verbatim}
 here {\tt someFloat} is a 4 byte floating point in any platform.
 
-Real Data:
+{\bf Real Data:}
 \begin{enumerate}
 \item All real data in C should be declared with an explicit ESMF type in the form:
 \begin{verbatim}
@@ -127,7 +127,7 @@ Real Data:
 \item Methods containing user data - such as arrays - as arguments must handle all supported real user data types and sizes.
 \end{enumerate}
 
-Integer Data:
+{\bf Integer Data:}
 \begin{enumerate}
 \item All integers that do not represent user data must be declared using the C datatype {\tt int}.
 
