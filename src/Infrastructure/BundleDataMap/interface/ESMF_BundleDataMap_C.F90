@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap_C.F90,v 1.11 2007/04/30 17:53:58 rosalind Exp $
+! $Id: ESMF_BundleDataMap_C.F90,v 1.12 2007/05/02 01:37:21 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 !==============================================================================
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_BundleDataMap_C.F90,v 1.11 2007/04/30 17:53:58 rosalind Exp $'
+!      '$Id: ESMF_BundleDataMap_C.F90,v 1.12 2007/05/02 01:37:21 rosalind Exp $'
 !==============================================================================
 ! 
 !------------------------------------------------------------------------------
@@ -70,7 +70,7 @@
       integer, intent(out) :: rc
       
       ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      rc = ESMF_RC_NOT_IMPL
     
 
       call ESMF_BundleDataMapGet(bdmp, btype, rc)
@@ -89,7 +89,7 @@
       integer, intent(out) :: rc
      
       ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      rc = ESMF_RC_NOT_IMPL
 
       call ESMF_BundleDataMapSet(bdmp, btype, rc)
     
