@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.39 2007/04/02 20:27:30 theurich Exp $ 
+# $Id: makefile,v 1.40 2007/05/02 22:54:58 donstark Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -23,7 +23,9 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldUTest \
 		$(ESMF_TESTDIR)/ESMF_FRoute8UTest 
 
 TESTS_RUN     = RUN_ESMF_FieldUTest \
-		RUN_ESMF_FRouteUTest 
+		RUN_ESMF_FRouteUTest \
+                RUN_ESMF_FieldHarness2UTest \
+		RUN_ESMF_FieldHarness4UTest
 
 TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI \
                 RUN_ESMF_FRoute4UTestUNI \
@@ -75,5 +77,10 @@ RUN_ESMF_FRoute4UTestUNI:
 
 RUN_ESMF_FRoute8UTestUNI:
 	echo "PASS: ESMF_FRoute8UTest not set up to run on one processor." > $(ESMC_TESTDIR)/ESMF_FRoute8UTest.stdout
+        
+        
+RUN_ESMF_FieldHarness2UTest:
+	$(MAKE) TNAME=TestHarness HNAME=FieldHarness2 NP=2 htest
 
-
+RUN_ESMF_FieldHarness4UTest:
+	$(MAKE) TNAME=TestHarness HNAME=FieldHarness4 NP=4 htest
