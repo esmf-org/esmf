@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.46 2007/04/24 18:13:08 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.47 2007/05/02 15:24:54 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -28,6 +28,9 @@
 #define MPICH_IGNORE_CXX_SEEK
 #endif
 #include <mpi.h>
+
+// define NULL
+#include <cstddef> 
 
 // reduction operations
 enum vmOp   { vmSUM=1, vmMIN, vmMAX};
