@@ -1,4 +1,4 @@
-// $Id: ESMC_class.C,v 1.4 2007/03/31 05:51:06 cdeluca Exp $
+// $Id: ESMC_class.C,v 1.5 2007/05/03 21:52:49 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_class.C,v 1.4 2007/03/31 05:51:06 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_class.C,v 1.5 2007/05/03 21:52:49 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -74,6 +74,9 @@
 //
      ESMC_<Class> *<class>;
 
+     // Initialize return code; assume routine not implemented
+     if (rc /= NULL) *rc = ESMC_RC_NOT_IMPL;
+
      FTN(f_esmf_<class>create)(<class>, &arg1, &arg2, &arg3, &rc);
 
      return <class>;
@@ -107,6 +110,10 @@
 //  code goes here
 //
     int rc;
+
+
+     // Initialize return code; assume routine not implemented
+     rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_<class>destroy)(<class>, &rc);
 
@@ -144,7 +151,12 @@
 //
     int rc;
 
+     // Initialize return code; assume routine not implemented
+     rc = ESMC_RC_NOT_IMPL;
+
     FTN(f_esmf_<class>init)(this, &arg1, &arg2, &arg3, &rc);
+
+    return rc;
 
  } // end ESMC_<Class>Init
 
@@ -171,6 +183,9 @@
 //  code goes here
 //
     int rc;
+
+     // Initialize return code; assume routine not implemented
+     rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_<class>getconfig)(this, &config, &rc);
 
@@ -201,6 +216,9 @@
 //  code goes here
 //
     int rc;
+
+     // Initialize return code; assume routine not implemented
+     rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_<class>setconfig)(this, config, &rc);
 
@@ -233,6 +251,9 @@
 //
     int rc;
 
+     // Initialize return code; assume routine not implemented
+     rc = ESMC_RC_NOT_IMPL;
+
     FTN(f_esmf_<class>get)(this, &value, &rc);
 
     return rc;
@@ -263,6 +284,9 @@
 //  code goes here
 //
     int rc;
+
+     // Initialize return code; assume routine not implemented
+     rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_<class>set)(this, value, &rc);
 
@@ -295,6 +319,9 @@
 //
     int rc;
 
+     // Initialize return code; assume routine not implemented
+     rc = ESMC_RC_NOT_IMPL;
+
     FTN(f_esmf_<class>validate)(this, options, &rc);
 
     return rc;
@@ -326,6 +353,9 @@
 //  code goes here
 //
     int rc;
+
+     // Initialize return code; assume routine not implemented
+     rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_<class>print)(this, options, &rc);
 

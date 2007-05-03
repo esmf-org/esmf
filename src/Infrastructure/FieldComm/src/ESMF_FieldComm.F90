@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.90 2007/04/17 02:45:13 rosalind Exp $
+! $Id: ESMF_FieldComm.F90,v 1.91 2007/05/03 21:52:49 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.90 2007/04/17 02:45:13 rosalind Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.91 2007/05/03 21:52:49 rosalind Exp $'
 
 !==============================================================================
 !
@@ -238,7 +238,7 @@
       logical :: rcpresent                        ! Return code present
       type(ESMF_FieldType), pointer :: ftypep     ! field type info
    
-      ! Initialize return code   
+      ! Initialize return code; assume routine not implemented  
       status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -336,7 +336,7 @@
       logical :: rcpresent                        ! Return code present
       type(ESMF_FieldType), pointer :: ftypep     ! field type info
    
-      ! Initialize return code   
+      ! Initialize return code; assume routine not implemented  
       status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -435,7 +435,7 @@
       logical :: allInOne
       type(ESMF_FieldType), pointer :: ftypep     ! field type info
    
-      ! Initialize return code   
+      ! Initialize return code; assume routine not implemented  
       status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -519,6 +519,9 @@
 !
 !EOP
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       call ESMF_RouteHandleDestroy(routehandle, rc)
 
       end subroutine ESMF_FieldHaloRelease
@@ -584,7 +587,7 @@
       logical :: rcpresent                        ! Return code present
       type(ESMF_FieldType), pointer :: ftypep     ! field type info
    
-      ! Initialize return code   
+      ! Initialize return code; assume routine not implemented  
       status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -679,7 +682,7 @@
       integer :: i, dummy, dummy2, datarank
       integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
    
-      ! Initialize return code   
+      ! Initialize return code; assume routine not implemented  
       status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -827,7 +830,7 @@
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
       type(ESMF_RouteHandle) :: routehandle
    
-      ! Initialize return code   
+      ! Initialize return code; assume routine not implemented  
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
@@ -939,7 +942,7 @@
       integer :: htype
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
    
-      ! Initialize return code   
+      ! Initialize return code; assume routine not implemented  
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
@@ -1008,6 +1011,9 @@
 !
 !EOP
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       call ESMF_RouteHandleDestroy(routehandle, rc)
 
       end subroutine ESMF_FieldRedistRelease
@@ -1074,7 +1080,7 @@
       integer :: srcHalo, dstHalo
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
    
-      ! Initialize return code   
+      ! Initialize return code; assume routine not implemented  
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -1203,7 +1209,7 @@
       !type(ESMF_Grid) :: dstGrid
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
    
-      ! Initialize return code   
+      ! Initialize return code; assume routine not implemented  
       status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -1304,7 +1310,7 @@
       integer :: i, dummy, dummy2, datarank
       integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
    
-      ! Initialize return code   
+      ! Initialize return code; assume routine not implemented  
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
@@ -1424,7 +1430,7 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
    
-!     Initialize return code   
+!     Initialize return code; assume routine not implemented  
       status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -1534,7 +1540,7 @@
       integer :: localrc                          ! Error status
       type(ESMF_RouteHandle) :: routehandle
    
-      ! Initialize return code   
+      ! Initialize return code; assume routine not implemented  
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
@@ -1654,7 +1660,7 @@
       integer :: i, dummy, dummy2, datarank
       integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
    
-      ! Initialize return code   
+      ! Initialize return code; assume routine not implemented  
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
@@ -1788,6 +1794,9 @@
 !EOP
 ! !REQUIREMENTS: 
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       call ESMF_RouteHandleDestroy(routehandle, rc)
 
       end subroutine ESMF_FieldRegridRelease
@@ -1864,7 +1873,7 @@
       type(ESMF_FieldDataMap) :: srcDatamap, dstDatamap
       type(ESMF_Grid) :: srcGrid, dstGrid
    
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
@@ -1978,7 +1987,7 @@
       integer :: i, dummy, dummy2, datarank
       integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
    
-      ! Initialize return code   
+      ! Initialize return code; assume routine not implemented  
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
@@ -2137,7 +2146,7 @@
       integer :: dimlengths(ESMF_MAXDIM)   
       integer :: decomps(ESMF_MAXGRIDDIM), decompids(ESMF_MAXDIM)
    
-      ! Initialize return code   
+      ! Initialize return code; assume routine not implemented  
       status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -2269,7 +2278,7 @@
       integer :: AI_count
 
    
-      ! Initialize return code   
+      ! Initialize return code; assume routine not implemented  
       status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if(present(rc)) then

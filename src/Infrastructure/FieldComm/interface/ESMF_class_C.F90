@@ -1,4 +1,4 @@
-! $Id: ESMF_class_C.F90,v 1.5 2007/03/31 05:51:06 cdeluca Exp $
+! $Id: ESMF_class_C.F90,v 1.6 2007/05/03 21:52:49 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 !==============================================================================
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_class_C.F90,v 1.5 2007/03/31 05:51:06 cdeluca Exp $'
+      '$Id: ESMF_class_C.F90,v 1.6 2007/05/03 21:52:49 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -58,6 +58,9 @@
       integer, intent(in) :: arg3
       integer, intent(out), :: rc
 
+      ! Initialize return code; assume routine not implemented
+      rc = ESMF_RC_NOT_IMPL
+
       ! Local variable
       type(ESMF_<Class>), target :: the<class>
      
@@ -76,6 +79,9 @@
       integer, intent(out), :: rc
 
      
+      ! Initialize return code; assume routine not implemented
+      rc = ESMF_RC_NOT_IMPL
+
       call ESMF_<Class>Destroy(<class>p, rc)
     
     end subroutine f_esmf_<class>destroy
@@ -97,6 +103,9 @@
       integer, intent(out), :: rc
      
 
+      ! Initialize return code; assume routine not implemented
+      rc = ESMF_RC_NOT_IMPL
+
       call ESMF_<Class>Init(<class>p, arg1, arg2, arg3, rc)
     
     end subroutine f_esmf_<class>init
@@ -113,6 +122,9 @@
       integer, intent(out), :: rc
      
 
+      ! Initialize return code; assume routine not implemented
+      rc = ESMF_RC_NOT_IMPL
+
       call ESMF_<Class>GetConfig(<class>p, config, rc)
     
     end subroutine f_esmf_<class>getconfig
@@ -127,6 +139,9 @@
       type(ESMF_<Class>Config), pointer :: config
       integer, intent(out), :: rc
      
+
+      ! Initialize return code; assume routine not implemented
+      rc = ESMF_RC_NOT_IMPL
 
       call ESMF_<Class>SetConfig(<class>p, config, rc)
     
@@ -143,6 +158,9 @@
       integer, intent(out), :: rc
      
 
+      ! Initialize return code; assume routine not implemented
+      rc = ESMF_RC_NOT_IMPL
+
       call ESMF_<Class>Get(<class>p, <value>, rc)
     
     end subroutine f_esmf_<class>get
@@ -157,6 +175,9 @@
       type(ESMF_<Value>) :: <value>
       integer, intent(out), :: rc
      
+
+      ! Initialize return code; assume routine not implemented
+      rc = ESMF_RC_NOT_IMPL
 
       call ESMF_<Class>Set(<class>p, <value>, rc)
     
@@ -173,6 +194,9 @@
       integer, intent(out), :: rc
      
 
+      ! Initialize return code; assume routine not implemented
+      rc = ESMF_RC_NOT_IMPL
+
       call ESMF_<Class>Validate(<class>p, options, rc)
     
     end subroutine f_esmf_<class>validate
@@ -187,6 +211,9 @@
       character(len=*) :: options
       integer, intent(out), :: rc
      
+
+      ! Initialize return code; assume routine not implemented
+      rc = ESMF_RC_NOT_IMPL
 
       call ESMF_<Class>Print(<class>p, options, rc)
     
