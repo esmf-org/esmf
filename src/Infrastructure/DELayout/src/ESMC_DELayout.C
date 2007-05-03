@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.55 2007/05/01 15:35:36 rosalind Exp $
+// $Id: ESMC_DELayout.C,v 1.56 2007/05/03 19:56:01 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.55 2007/05/01 15:35:36 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.56 2007/05/03 19:56:01 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1720,6 +1720,8 @@ int ESMC_DELayout::ESMC_DELayoutValidate(){
     }
   // rc = this->ESMC_Validate();
 
+  // This is an incomplete success.
+     rc = ESMF_SUCCESS;
   return rc;
 }
 //-----------------------------------------------------------------------------
