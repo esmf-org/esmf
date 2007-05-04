@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMapEx.F90,v 1.7 2007/03/31 05:51:07 cdeluca Exp $
+! $Id: ESMF_FieldDataMapEx.F90,v 1.8 2007/05/04 14:56:10 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -101,7 +101,6 @@
       call ESMF_FieldDataMapPrint(fieldDM, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOP
 !\subsubsection{Setting Field DataMap Values}
