@@ -1,4 +1,4 @@
-% $Id: ESMF_archoverview.tex,v 1.17 2006/12/13 20:17:52 cdeluca Exp $
+% $Id: ESMF_archoverview.tex,v 1.18 2007/05/04 22:24:47 cdeluca Exp $
 
 \section{Architectural Overview}
 \label{sec:ArchOver}
@@ -261,10 +261,11 @@ Coupler Component processing
 to be latched to a common controlling clock, and to schedule notification of
 regular events (such as a coupling intervals) and unique events.
 
-\subsubsection{I/O Classes}
-The infrastructure layer defines a set of {\it I/O} classes for storing and retrieving Field and Grid information
-to and from persistent storage. Currently the I/O classes support a 
-netCDF format.
+\subsubsection{Config Resource File Manager}
+The Config class is a utility for accessing configuration files that are in
+ASCII format.  This utility enables configuration files to be prepared using
+more flexible formatting than Fortran namelists - for example, it permits the
+input of tables of data.
 
 \subsubsection{DELayout and Virtual Machine}
 To provide a mechanism for ensuring performance portability ESMF defines DELayout and Virtual Machine classes. These classes provide a set of
@@ -274,6 +275,9 @@ to specific platforms to ensure optimal parallel performance on many platforms.
 The LogErr class is designed to aid in managing the complexity of 
 multi-component applications. It provides ESMF with a unified mechanism 
 for managing logs and error reporting.
+
+\subsubsection{I/O Classes}
+The infrastructure layer will define a set of {\it I/O} classes for storing and retrieving Field and Grid information to and from persistent storage.  I/O classes are not yet implemented.
 
 
 
