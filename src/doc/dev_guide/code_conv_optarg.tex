@@ -1,0 +1,337 @@
+% CVS $Id: code_conv_optarg.tex,v 1.1 2007/05/04 20:59:11 tjcnrl Exp $
+
+\subsection{Code: Optional Argument Conventions for the C/C++ API}
+
+
+\subsubsection{Overview}
+
+Optional arguments in the public ESMC interface are implemented using the
+variable-length argument list functionality provided by \texttt{<stdarg.h>}.
+The \texttt{<stdarg.h>} header contains a set of macros which allows portable
+functions that accept variable-length argument lists (also known as variadic
+functions) to be written. Variadic functions are declared with an elipsis in
+place of the last parameter and must have at least one named (fixed) parameter.
+A typical example of such a function is printf which is declared as
+
+\begin{verbatim}
+        int printf(char *fmt, ...).
+\end{verbatim}
+
+\noindent
+The following type and macros are provided by {\tt<stdarg.h>} for processing
+variable-length argument lists.
+\begin{itemize}
+\item \texttt{va\_list}
+\newline
+Type suitable for use in accessing the variable-length argument list of a function
+with the stdarg macros;
+\item \texttt{void va\_start(va\_list ap, last\_arg)}
+\newline
+Initializes the variable argument list pointer \textit{ap} to the beginning of the
+variable argument list, before any calls to \texttt{va\_arg}. \textit{last\_arg} is
+the last fixed argument being passed to the function (the argument before the
+ellipsis).
+\item \textit{type} \texttt{va\_arg(va\_list ap, }\textit{type}\texttt{)}
+\newline
+Returns the next argument in the variable-length argument list pointed to by
+\texttt{ap}. Each invocation of \texttt{va\_arg} modifies \texttt{ap} such that
+the values of successive arguments are returned in turn. The \textit{type}
+parameter is the type the argument is expected to be. The parameter \textit{type}
+is a type name specified so that the type of a pointer to an object that has the
+specified type can be obtained simply by adding a \texttt{*} to \textit{type}.
+Different types can be mixed, but it is up to the function to know what type of
+argument is expected. Note that \texttt{ap} must be initialized with
+\texttt{va\_start}. If there is no next argument, then the result is undefined.
+\item \texttt{void va\_end(va\_list ap)}
+\newline
+Destroys the variable argument list pointer \texttt{ap}, rendering it invalid
+unless \texttt{va\_start} is called again. Each invocation of \texttt{va\_start}
+must be matched by a corresponding invocation of \texttt{va\_end} in the same
+function. After the call \texttt{va\_end(ap)} the variable \texttt{ap} is
+undefined. Multiple traversals of the list, each bracketed by \texttt{va\_start}
+and \texttt{va\_end} are possible.
+\end{itemize}
+\noindent
+Arguments corresponding to the variable-length argument list specified by
+\texttt{",..."} in a function prototype always undergo the following argument
+conversions: \texttt{bool} or \texttt{char} or \texttt{short} are converted to
+\texttt{int}, and \texttt{float} is converted to \texttt{double}.
+\newline
+
+In order to correctly retrieve arguments from the variable argument list it is
+necessary to know the type of each argument. In order to correctly terminate
+parsing the variable argument list it is also necessary to know the number of
+arguments in the list. Since the number of arguments and their types
+are not known at compile time the best one can do is establish a convention
+such that the caller will provide type and length information about the variable
+argument list. The convention, however, is not a guarantee that the caller does
+not mistakenly specify the types or number of arguments.
+The \texttt{scanf} and \texttt{printf} functions do this by having
+the last fixed argument be a character (format) string in which the caller
+specifies the types (for example, \texttt{"\%f\%d\%s"} for each argument in the
+variable argument list. Although, the format string specifies the number of
+expected arguments there is no actual "termination-flag" inserted at the end of
+the variable argument list. If the caller incorrectly specifies the in the format
+string more arguments than are actually provided then the function will likely
+access invalid sections of memory while parsing the variable argument list.
+Unless this error is trapped by the system the function will unwittingly process
+erroneous data.
+
+
+\subsubsection{Approach}
+
+The following conventions are established for the public ESMC optional argument
+API. The "class" associated with this API is called \texttt{ESMC\_Arg} and its
+header files are located in \texttt{Infrastructure/Util/include}. The public
+optional argument API for a class is provided by the public header for that class
+together with \texttt{ESMC\_Arg.h}. Macros for internal processing of optional
+arguments are provided by the \texttt{ESMCI\_Arg.h} header.
+Each ESMC class has a set of named optional arguments associated with its
+methods. Associated with each optional argument of a class is a unique (within
+the class) optional argument identifier (\textit{id}) of type
+\texttt{ESMCI\_ArgID}. The optional argument list provided by
+the caller must consist of a sequence of argument identifier and argument
+(\textit{id}, \textit{arg}) pairs. The optional argument list must be terminated
+by the global identifier \texttt{ESMCI\_ArgLastID}.
+The \texttt{ESMC\_ArgLast} macro is provided by \texttt{ESMC\_Arg.h} for the
+user to indicate the end of an optional argument list.
+\newline
+
+The global identifier \texttt{ESMCI\_ArgBaseID} is the starting identifier for
+local (class) optional argument identifiers. \texttt{ESMCI\_ArgBaseID}
+establishes a set of global optional argument identifiers, such that, the global
+set does not intersect with any class identifier set.
+The optional argument identifier list for a class will be declared in the public
+header for that class. The naming convention for optional argument identifiers
+is
+\begin{verbatim}
+                ESMCI_<ClassName>Arg<ArgName>ID
+\end{verbatim}
+where \texttt{ClassName} is the
+name of the class and \texttt{ArgName} is the name of the optional argument with
+the first letter capitalized. The optional argument identifier list is declared
+as enumeration constants with the first identifier set equal to
+\texttt{ESMCI\_ArgBaseID}. Here is an example for a class called "Xclass".
+\begin{verbatim}
+   // Optional argument identifier list for the ESMC_Xclass API.
+   enum {
+     ESMCI_XclassArgAoptID = ESMCI_ArgBaseID,  // ESMC_I1
+     ESMCI_XclassArgBoptID,                    // ESMC_I4
+     ESMCI_XclassArgCoptID,                    // ESMC_R4
+     ESMCI_XclassArgDoptID,                    // ESMC_R8
+     ESMCI_XclassArgEoptID,                    // ESMC_Fred
+   };
+\end{verbatim}
+\noindent
+It is helpful for the class developer to list the data type of
+each optional argument (as a comment) with its associated \textit{id}.
+\newline
+
+The \texttt{ESMCI\_Arg(ID,AR)} internal macro (declared in \texttt{ESMC\_Arg.h})
+is provided for casting an optional argument and its associated \textit{id} into
+the required sequence for passing to functions.
+\begin{verbatim}
+   #define ESMCI_Arg(ID,ARG)  ((ESMCI_ArgID)ID),(ARG)
+\end{verbatim}
+\noindent
+Each class will use this internal macro in its public header to declare
+user macros for the class specific optional arguments. 
+The naming convention for class specific optional argument expansion macros 
+is
+\begin{verbatim}
+                ESMC_<ClassName>Arg<ArgName>(ARG)
+\end{verbatim}
+where \texttt{ClassName} is the
+name of the class and \texttt{ArgName} is the name of the optional argument with
+the first letter capitalized. The argument of the macro is the actual caller
+provided optional argument.  Here is an example of how the macros are used for
+the class "Xclass".
+\begin{verbatim}
+   // Argument expansion macros for the ESMC_Xclass API.
+   #define ESMC_XclassArgAopt(ARG)  ESMCI_Arg(ESMCI_XclassArgAoptID,ARG)
+   #define ESMC_XclassArgBopt(ARG)  ESMCI_Arg(ESMCI_XclassArgBoptID,ARG)
+   #define ESMC_XclassArgCopt(ARG)  ESMCI_Arg(ESMCI_XclassArgCoptID,ARG)
+   #define ESMC_XclassArgDopt(ARG)  ESMCI_Arg(ESMCI_XclassArgDoptID,ARG)
+   #define ESMC_XclassArgEopt(ARG)  ESMCI_Arg(ESMCI_XclassArgEoptID,ARG)
+\end{verbatim}
+\noindent
+Here is an example call, with properly specified optional arguments, to a class
+function. The function has three named (fixed) arguments.
+\begin{verbatim}
+   rc = ESMC_XclassFunc(fixedArg1,fixedArg2,fixedArg3,
+                        ESMC_XclassArgAopt(aOptArg),
+                        ESMC_XclassArgCopt(cOptArg),
+                        ESMC_XclassArgDopt(dOptArg),
+                        ESMC_ArgLast)
+\end{verbatim}
+
+
+\subsubsection{Internal Macros for Processing the Optional Argument List}
+
+Internal macros for processing the optional argument list are declared in
+\texttt{ESMCI\_Arg.h}. These macros provide a consistent internal interface to
+the macros defined in \texttt{stdarg.h}. What follows is a description of each
+macro available to a class developer.
+
+\begin{itemize}
+\item \texttt{ESMCI\_ArgList}
+\newline
+Optional argument list data type (\texttt{va\_list}). The variable used for
+accessing the optional argument list must be declared as this type.
+\item \texttt{ESMCI\_ArgStart(AP,LAST)}
+\newline
+Internal macro to initialize optional argument list processing. \texttt{AP} is
+the optional argument list pointer. \texttt{LAST} is the last fixed argument
+(before the optional argument list).
+\item \texttt{ESMCI\_ArgEnd(AP)}
+\newline
+Internal macro to finalize optional argument list processing. \texttt{AP} is
+the optional argument list pointer.
+\item \texttt{ESMCI\_ArgGetID(AP)}
+\newline
+Internal macro to return an optional argument identifier. \texttt{AP} is
+the optional argument list pointer.
+\end{itemize}
+
+\noindent
+The following type specific \texttt{ESMCI\_ArgGet} macros are provided for
+returning optional argument values. These macros correctly account for the
+forced type conversions described above. In each macro, \texttt{AP} is the
+optional argument list pointer.
+\newline\newline
+\noindent
+Internal macros for returning standard C (non-pointer) types.
+\begin{verbatim}
+   #define ESMCI_ArgGetChar(AP)           (char)va_arg(AP,int)
+   #define ESMCI_ArgGetShort(AP)         (short)va_arg(AP,int)
+   #define ESMCI_ArgGetInt(AP)             (int)va_arg(AP,int)
+   #define ESMCI_ArgGetLong(AP)           (long)va_arg(AP,long)
+   #define ESMCI_ArgGetLongLong(AP)  (long long)va_arg(AP,long long)
+   #define ESMCI_ArgGetFloat(AP)         (float)va_arg(AP,double)
+   #define ESMCI_ArgGetDouble(AP)       (double)va_arg(AP,double)
+\end{verbatim}
+\noindent
+Internal macros for returning defined ESMC types.
+\begin{verbatim}
+   #define ESMCI_ArgGetI1(AP)          (ESMC_I1)va_arg(AP,int)
+   #define ESMCI_ArgGetI2(AP)          (ESMC_I2)va_arg(AP,int)
+   #define ESMCI_ArgGetI4(AP)          (ESMC_I4)va_arg(AP,int)
+   #define ESMCI_ArgGetI8(AP)          (ESMC_I8)va_arg(AP,ESMC_I8)
+   #define ESMCI_ArgGetR8(AP)          (ESMC_R8)va_arg(AP,double)
+   #define ESMCI_ArgGetR4(AP)          (ESMC_R4)va_arg(AP,double)
+\end{verbatim}
+\noindent
+Special internal macro for returning strings.
+\begin{verbatim}
+   #define ESMCI_ArgGetString(AP)               va_arg(AP,char*)
+\end{verbatim}
+\noindent
+General internal macro for returning all non-converted types.
+\begin{verbatim}
+   #define ESMCI_ArgGet(AP,TYPE)                va_arg(AP,TYPE)
+\end{verbatim}
+\noindent
+\texttt{TYPE} is the expected type of returned argument.
+
+
+\subsubsection{Parsing the Optional Argument List}
+
+Each class function with optional arguments will declare an optional argument
+list pointer and optional argument list \textit{id}.
+\begin{verbatim}
+  ESMCI_ArgList argPtr;       // optional argument list pointer
+  ESMCI_ArgID argID;          // optional argument list id
+\end{verbatim}
+
+\noindent
+Parsing the optional argument list consists of three distinct phases: initializing
+the argument list pointer, retrieving each argument in succession based on its
+\textit{id}, and finalizing the argument list pointer. The block for retrieving
+arguments must first retrieve an argument \textit{id}. If that \textit{id} is
+not \texttt{ESMCI\_ArgLastID} and is in the set of valid ids for that function,
+then the argument is retrieved using a type-appropriate \texttt{ESMCI\_ArgGet}
+macro. The following example code should be considered as "template" code for
+parsing an optional argument list.
+\begin{verbatim}
+  // parse the optional argument list:
+  ESMCI_ArgStart(argPtr,ifix);
+  while ( (argID = ESMCI_ArgGetID(argPtr)) != ESMCI_ArgLastID ) {
+    switch ( argID ) {
+      case ESMCI_XclassArgAoptID:
+        aOpt = ESMCI_ArgGetI1(argPtr);
+        break;
+      case ESMCI_XclassArgBoptID:
+        bOpt = ESMCI_ArgGetI4(argPtr);
+        break;
+      case ESMCI_XclassArgCoptID:
+        cOpt = ESMCI_ArgGetR4(argPtr);
+        break;
+      case ESMCI_XclassArgDoptID:
+        dOpt = ESMCI_ArgGetR8(argPtr);
+        break;
+      case ESMCI_XclassArgEoptID:
+        eOpt = ESMCI_ArgGet(argPtr,ESMC_Fred);
+        break;
+      default:
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        return rc;
+    } // end switch (argID)
+  } // end while (argID)
+  ESMCI_ArgEnd(argPtr);
+\end{verbatim}
+
+\noindent
+Prior to actually parsing the optional argument list a function must check the
+list for proper specification. This is done by using a code block similar to the
+parsing block shown above. The difference is that in this case the
+\texttt{ESMCI\_ArgGet} macros are only used to increment the argument list pointer.
+\begin{verbatim}
+  // check the optional argument list:
+  ESMCI_ArgStart(argPtr,lastFixed);
+  while ( (argID = ESMCI_ArgGetID(argPtr)) != ESMCI_ArgLastID ) {
+    switch ( argID ) {
+      case ESMCI_XclassArgAoptID: ESMCI_ArgGetI1(argPtr); break;
+      case ESMCI_XclassArgBoptID: ESMCI_ArgGetI4(argPtr); break;
+      case ESMCI_XclassArgCoptID: ESMCI_ArgGetR4(argPtr); break;
+      case ESMCI_XclassArgDoptID: ESMCI_ArgGetR8(argPtr); break;
+      case ESMCI_XclassArgEoptID: ESMCI_ArgGet(argPtr,ESMC_Fred); break;
+      default:
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        return rc;
+    } // end switch (argID)
+  } // end while (argID)
+  ESMCI_ArgEnd(argPtr);
+\end{verbatim}
+
+\noindent
+The following example shows how an optional argument list check block can be
+structured to handle an optional argument whose type is call dependent. In this
+case the type of the \texttt{dValue} optional argument depends on the value of the
+\texttt{ESMC\_TypeKind} argument \texttt{tk} (which is the last fixed argument).
+\begin{verbatim}
+  // check the optional argument list:
+  ESMCI_ArgStart(argPtr,tk);
+  while ( (argID = ESMCI_ArgGetID(argPtr)) != ESMCI_ArgLastID ) {
+    switch ( argID ) {
+      case ESMCI_ConfigArgCountID: ESMCI_ArgGetInt(argPtr); break;
+      case ESMCI_ConfigArgLabelID: ESMCI_ArgGetString(argPtr); break;
+      case ESMCI_ConfigArgDvalueID:
+        switch ( tk ) {
+          case ESMC_TYPEKIND_I4: ESMCI_ArgGetI4(argPtr); break;
+          case ESMC_TYPEKIND_I8: ESMCI_ArgGetI8(argPtr); break;
+          case ESMC_TYPEKIND_R4: ESMCI_ArgGetR4(argPtr); break;
+          case ESMC_TYPEKIND_R8: ESMCI_ArgGetR8(argPtr); break;
+          case ESMC_TYPEKIND_LOGICAL: ESMCI_ArgGetInt(argPtr); break;
+          case ESMC_TYPEKIND_CHARACTER: ESMCI_ArgGetString(argPtr); break;
+        } // end switch (tk)
+        break;
+      default:
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        return rc;
+    } // end switch (argID)
+  } // end while (argID)
+  ESMCI_ArgEnd(argPtr);
+\end{verbatim}
+
+
+
