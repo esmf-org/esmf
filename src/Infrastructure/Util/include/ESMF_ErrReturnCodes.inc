@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_ErrReturnCodes.inc,v 1.8 2007/04/26 04:55:49 cdeluca Exp $
+$Id: ESMF_ErrReturnCodes.inc,v 1.9 2007/05/04 21:37:34 tjcnrl Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@ Fortran Symmetric Return Codes 1-500
 
 #if 0
 =====================================
-C++ Symmetric Return Codes 501-998
+C++ Symmetric Return Codes 501-999
 =====================================
 #endif
 
@@ -168,17 +168,16 @@ C++ Symmetric Return Codes 501-998
 #define  ESMC_RC_VAL_OUTOFRANGE   553
 
 #if 0
-554-998 reserved for future C++ symmetric return code definitions
+554-999 reserved for future C++ symmetric return code definitions
 #endif
 
 #if 0
 =====================================
-C++ Non-symmetric Return Codes 999-1000
+C++ Non-symmetric Return Codes 1000
 =====================================
 #endif
 
-#define  ESMC_RC_OPTARG_TERM      999
-#define  ESMC_RC_OPTARG_UNK      1000
+#define  ESMC_RC_OPTARG_BAD      1000
 
 #if 0
 \end{verbatim}

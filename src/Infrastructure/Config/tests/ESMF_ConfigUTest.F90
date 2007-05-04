@@ -1,4 +1,4 @@
-! $ Id: $
+! $Id: ESMF_ConfigUTest.F90,v 1.31 2007/05/04 21:37:33 tjcnrl Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -1396,7 +1396,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.30 2007/04/03 22:17:42 theurich Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.31 2007/05/04 21:37:33 tjcnrl Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0

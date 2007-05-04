@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.C,v 1.10 2007/04/13 05:16:56 theurich Exp $
+// $Id: ESMC_Init.C,v 1.11 2007/05/04 21:37:34 tjcnrl Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -59,16 +59,30 @@ extern "C" {
     ESMCI_ArgList   argPtr;
     ESMCI_ArgID     argID;
     char *defaultConfigFilename;
-    
+
+    // check the optional argument list
+    ESMCI_ArgStart(argPtr, rc);
+    while ( (argID=ESMCI_ArgGetID(argPtr)) != ESMCI_ArgLastID ) {
+      switch ( argID ) {
+        case ESMCI_InitArgDefaultConfigFilenameID:
+          ESMCI_ArgGetString(argPtr);
+          break;
+        default:
+          printf("ESMC_Initialize: Improperly specified optional argument list\n");
+          return ESMC_RC_OPTARG_BAD;
+      }
+    }
+
     // parse the optional argument list
     ESMCI_ArgStart(argPtr, rc);
-    while((argID=ESMCI_ArgGetID(argPtr)) != ESMC_ArgLast){
-      switch(argID){
-        case ESMC_InitArgDefaultConfigFilenameID:{
-          defaultConfigFilename = ESMCI_ArgGetPtr(argPtr, char *);
-//printf("defaultConfigFilename: %s\n", defaultConfigFilename);
+    while ( (argID=ESMCI_ArgGetID(argPtr)) != ESMCI_ArgLastID ) {
+      switch ( argID ) {
+        case ESMCI_InitArgDefaultConfigFilenameID:
+          defaultConfigFilename = ESMCI_ArgGetString(argPtr);
           break;
-        }
+        default:
+          printf("ESMC_Initialize: Improperly specified optional argument list\n");
+          return ESMC_RC_OPTARG_BAD;
       }
     }
     

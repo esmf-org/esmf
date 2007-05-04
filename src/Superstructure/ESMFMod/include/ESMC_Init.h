@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.13 2007/04/13 05:16:56 theurich Exp $
+// $Id: ESMC_Init.h,v 1.14 2007/05/04 21:37:34 tjcnrl Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 
 // identifier list for optional ESMC arguments
 enum {
-  ESMC_InitArgDefaultConfigFilenameID   = ESMCI_ArgBaseID
+  ESMCI_InitArgDefaultConfigFilenameID   = ESMCI_ArgBaseID
 };
 
 // prototypes for C routines
@@ -52,7 +52,7 @@ extern "C" {
     int *rc,        // return code
     ...);           // optional arguments
 #define ESMC_InitArgDefaultConfigFilename(ARG)  \
-ESMCI_Arg(ESMC_InitArgDefaultConfigFilenameID), (char*)(ARG)
+ESMCI_Arg(ESMCI_InitArgDefaultConfigFilenameID,ARG)
 //  
 // !DESCRIPTION:
 //  Initialize the ESMF.  This method must be called before

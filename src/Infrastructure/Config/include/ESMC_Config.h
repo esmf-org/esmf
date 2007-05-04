@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.5 2007/04/25 16:44:24 tjcnrl Exp $
+// $Id: ESMC_Config.h,v 1.6 2007/05/04 21:37:33 tjcnrl Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -33,27 +33,28 @@
 //-----------------------------------------------------------------------------
 // 
 // !USES:
-#include "ESMC_Arg.h"
+#include "ESMCI_Util.h"
 #include "ESMC_F90Interface.h"
-#include "ESMC_Util.h"
+#include "ESMC_Arg.h"
 
 // Optional argument identifier list for the ESMC_Config API.
 enum {
-  ESMCI_ConfigArgLabelID   = ESMCI_ArgBaseID,  // label (string)
-  ESMCI_ConfigArgDvalueID,                     // default value
-  ESMCI_ConfigArgCountID,                      // count (int)
-  ESMCI_ConfigArgUniqueID,                     // unique (int)
-  ESMCI_ConfigArgTableEndID,                   // tableEnd (int*)
-  ESMCI_ConfigArgOptionsID,                    // options (string)
+  ESMCI_ConfigArgLabelID   = ESMCI_ArgBaseID,  // char*
+  ESMCI_ConfigArgDvalueID,                     // type depends on TypeKind
+  ESMCI_ConfigArgCountID,                      // int
+  ESMCI_ConfigArgUniqueID,                     // int
+  ESMCI_ConfigArgTableEndID,                   // int*
+  ESMCI_ConfigArgOptionsID,                    // char*
 };
 
 // Argument expansion macros for the ESMC_Config API.
-#define ESMC_ConfigArgLabel(ARG)      ESMCI_Arg(ESMCI_ConfigArgLabelID) , (ARG)
-#define ESMC_ConfigArgDvalue(ARG)     ESMCI_Arg(ESMCI_ConfigArgDvalueID) , (ARG)
-#define ESMC_ConfigArgCount(ARG)      ESMCI_Arg(ESMCI_ConfigArgCountID) , (ARG)
-#define ESMC_ConfigArgUnique(ARG)     ESMCI_Arg(ESMCI_ConfigArgUniqueID) , (ARG)
-#define ESMC_ConfigArgTableEnd(ARG)   ESMCI_Arg(ESMCI_ConfigArgTableEndID) , (ARG)
-#define ESMC_ConfigArgOptions(ARG)    ESMCI_Arg(ESMCI_ConfigArgOptionsID) , (ARG)
+#define ESMC_ConfigArgLabel(ARG)      ESMCI_Arg(ESMCI_ConfigArgLabelID,ARG)
+#define ESMC_ConfigArgDvalue(ARG)     ESMCI_Arg(ESMCI_ConfigArgDvalueID,ARG)
+#define ESMC_ConfigArgCount(ARG)      ESMCI_Arg(ESMCI_ConfigArgCountID,ARG)
+#define ESMC_ConfigArgUnique(ARG)     ESMCI_Arg(ESMCI_ConfigArgUniqueID,ARG)
+#define ESMC_ConfigArgTableEnd(ARG)   ESMCI_Arg(ESMCI_ConfigArgTableEndID,ARG)
+#define ESMC_ConfigArgOptions(ARG)    ESMCI_Arg(ESMCI_ConfigArgOptionsID,ARG)
+
 
 extern "C" {
 

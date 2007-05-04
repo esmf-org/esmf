@@ -17,7 +17,10 @@
 // //DESCRIPTION:
 // Example/test code which performs simple Configuration File routines.
 //
-#include <ESMC.h>
+#include <stdio.h>
+#include <string.h>
+#include "ESMC.h"
+#include "ESMC_LogErr.h"
 
 #undef ESMC_METHOD
 #define ESMC_METHOD "main()"
@@ -37,9 +40,9 @@ int main ( int argc, char **argv )
       char fname [ESMF_MAXSTR] = "myResourceFile.rc";    // file name
       char fn1[10], fn2[10], fn3[10];
       int rc;             // error return code (0 is OK)
-      int n = 0;
-      float r = 0.0;
-      float table[7][3];
+      ESMC_I4 n = 0;
+      ESMC_R4 r = 0.0;
+      ESMC_R4 table[7][3];
 
       ESMC_Config *cf;
 //EOC
@@ -81,7 +84,7 @@ int main ( int argc, char **argv )
       }
 
 //BOC
-      rc = cf->ESMC_ConfigLoadFile(fname);
+      rc = ESMC_ConfigLoadFile(cf, fname, ESMC_ArgLast);
 //EOC
 
       if (rc != ESMF_SUCCESS) {
@@ -96,7 +99,7 @@ int main ( int argc, char **argv )
 //EOE
 
 //BOC
-      rc = cf->ESMC_ConfigFindLabel("constants:");
+      rc = ESMC_ConfigFindLabel(cf, "constants:");
 //EOC
 
       if (rc != ESMF_SUCCESS) {
@@ -110,8 +113,10 @@ int main ( int argc, char **argv )
 //EOE
 
 //BOC
-      rc = cf->ESMC_ConfigGetAttribute(&r, ESMC_LastArg);  // results in r = 3.1415
-      rc = cf->ESMC_ConfigGetAttribute(&n, ESMC_LastArg);  // results in n = 25
+      rc = ESMC_ConfigGetAttribute(cf, &r, ESMC_TYPEKIND_R4,
+                      ESMC_ArgLast);  // results in r = 3.1415
+      rc = ESMC_ConfigGetAttribute(cf, &n, ESMC_TYPEKIND_I4,
+                      ESMC_ArgLast);  // results in n = 25
 //EOC
       if (rc != ESMF_SUCCESS) {
         finalrc = ESMF_FAILURE;
@@ -134,7 +139,7 @@ int main ( int argc, char **argv )
 //EOE
 
 //BOC
-      rc = cf->ESMC_ConfigFindLabel("my_file_names:");
+      rc = ESMC_ConfigFindLabel(cf, "my_file_names:");
 //EOC
 
       if (rc != ESMF_SUCCESS) {
@@ -143,9 +148,12 @@ int main ( int argc, char **argv )
       }
 
 //BOC
-      rc = cf->ESMC_ConfigGetAttribute(fn1, ESMC_LastArg);  // results in fn1 = 'jan87.dat'
-      rc = cf->ESMC_ConfigGetAttribute(fn2, ESMC_LastArg);  // results in fn2 = 'jan88.dat'
-      rc = cf->ESMC_ConfigGetAttribute(fn3, ESMC_LastArg);  // results in fn3 = 'jan89.dat'
+      rc = ESMC_ConfigGetAttribute(cf, fn1, ESMC_TYPEKIND_CHARACTER,
+                      ESMC_ArgLast);  // results in fn1 = 'jan87.dat'
+      rc = ESMC_ConfigGetAttribute(cf, fn2, ESMC_TYPEKIND_CHARACTER,
+                      ESMC_ArgLast);  // results in fn2 = 'jan88.dat'
+      rc = ESMC_ConfigGetAttribute(cf, fn3, ESMC_TYPEKIND_CHARACTER,
+                      ESMC_ArgLast);  // results in fn3 = 'jan89.dat'
 //EOC
       if (rc != ESMF_SUCCESS) {
         finalrc = ESMF_FAILURE;
@@ -170,7 +178,7 @@ int main ( int argc, char **argv )
 //EOE
 
 //BOC
-      rc = cf->ESMC_ConfigFindLabel("my_table_name::");
+      rc = ESMC_ConfigFindLabel(cf, "my_table_name::");
 //EOC
 
       if (rc != ESMF_SUCCESS) {
@@ -186,9 +194,10 @@ int main ( int argc, char **argv )
 
 //BOC
       for (i = 0; i < 7; i++) {
-        rc = cf->ESMC_ConfigNextLine();
+        rc = ESMC_ConfigNextLine(cf, ESMC_ArgLast);
         for (j = 0; j < 3; j++) {
-          rc = cf->ESMC_ConfigGetAttribute((&table[i][j]), ESMC_LastArg);
+          rc = ESMC_ConfigGetAttribute(cf, (&table[i][j]), ESMC_TYPEKIND_R4,
+                          ESMC_ArgLast);
         }
       }
 //EOC

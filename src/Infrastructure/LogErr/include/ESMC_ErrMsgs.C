@@ -1,4 +1,4 @@
-//$Id: ESMC_ErrMsgs.C,v 1.10 2007/04/26 16:13:56 rosalind Exp $
+//$Id: ESMC_ErrMsgs.C,v 1.11 2007/05/04 21:37:34 tjcnrl Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -169,7 +169,7 @@ static const char *errMsg[] = {
   "Value inconsistent with error bound ",             //  552 = ESMC_RC_VAL_ERRBOUND
   "Value out of range ",                              //  553 = ESMC_RC_VAL_OUTOFRANGE
 
-// 552-998 reserved for future C++ symmetric return code definitions
+// 552-999 reserved for future C++ symmetric return code definitions
                                                                          
            "","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
@@ -188,11 +188,10 @@ static const char *errMsg[] = {
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
-  "","","","","","","","","","","","","","","","","","","","","","","",
+  "","","","","","","","","","","","","","","","","","","","","","","","",
 
-// 999-1000 used for C++ non-symmetric return code definitions
+// 1000 used for C++ non-symmetric return code definitions
 
-  "Improperly terminated optional argument list ",    //  999 = ESMC_RC_OPTARG_TERM
-  "Unknown optional argument ID "                     // 1000 = ESMC_RC_OPTARG_UNK
+  "Improperly specified optional argument list ",     // 1000 = ESMC_RC_OPTARG_BAD
 
 };
