@@ -1,4 +1,4 @@
-! $Id: ESMF_InternDG.F90,v 1.8 2007/04/18 19:03:25 rosalind Exp $
+! $Id: ESMF_InternDG.F90,v 1.9 2007/05/05 03:05:49 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -216,7 +216,7 @@ module ESMF_InternDGMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternDG.F90,v 1.8 2007/04/18 19:03:25 rosalind Exp $'
+    '$Id: ESMF_InternDG.F90,v 1.9 2007/05/05 03:05:49 rosalind Exp $'
 
 !==============================================================================
 !
@@ -3249,6 +3249,9 @@ module ESMF_InternDGMod
 !
 !  code goes here
 !
+     ! initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternDGGetInit, InternDG, rc)
     
@@ -3289,6 +3292,9 @@ module ESMF_InternDGMod
  
       integer :: i, j
       type(ESMF_InternDGType) , pointer :: dg
+
+     ! initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternDGGetInit, InternDG, rc)
@@ -3361,6 +3367,9 @@ module ESMF_InternDGMod
       integer :: nDEs
       type(ESMF_InternDGGlobal), pointer :: glob
 
+     ! initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternDGGetInit, InternDG, rc)
     
@@ -3430,6 +3439,9 @@ module ESMF_InternDGMod
       integer :: localrc, status             ! Error status, allocation status
       integer :: dimCount, i, i1, nDE1, nDE2
       integer, dimension(:,:), allocatable :: cellCountPerDEPerDim
+
+     ! initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! figure out sizes
       nDE2       = 1

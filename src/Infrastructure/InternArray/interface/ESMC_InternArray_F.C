@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray_F.C,v 1.6 2007/03/31 05:51:12 cdeluca Exp $
+// $Id: ESMC_InternArray_F.C,v 1.7 2007/05/05 03:05:47 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -410,6 +410,9 @@ extern "C" {
 //
 //EOP
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
   if (!iarray) {
     //printf("uninitialized InternArray object\n");
     ESMC_LogDefault.ESMC_LogWrite("InternArray object uninitialized", ESMC_LOG_INFO);
@@ -447,6 +450,9 @@ extern "C" {
 //
 //EOP
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
   // create a new iarray object to deserialize into
   *iarray = new ESMC_InternArray;
 
@@ -483,6 +489,9 @@ extern "C" {
 //     the data values.
 //
 //EOP
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!iarray) {
     //printf("uninitialized InternArray object\n");
@@ -522,6 +531,9 @@ extern "C" {
 //
 //EOP
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+ 
   // create a new iarray object to deserialize into
   *iarray = new ESMC_InternArray;
 

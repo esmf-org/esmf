@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayCreate.cpp,v 1.13 2007/04/18 18:43:47 rosalind Exp $
+! $Id: ESMF_InternArrayCreate.cpp,v 1.14 2007/05/05 03:05:48 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayCreate.cpp,v 1.13 2007/04/18 18:43:47 rosalind Exp $'
+    '$Id: ESMF_InternArrayCreate.cpp,v 1.14 2007/05/05 03:05:48 rosalind Exp $'
       
 !==============================================================================
 ! 
@@ -241,7 +241,7 @@ TypeKindRankDeclarationMacro(ArrayCreateByFullPtr)
         rcpresent = .FALSE.
         array%this = ESMF_NULL_POINTER
 
-        ! Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume routine not implemented
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_RC_NOT_IMPL
@@ -353,7 +353,7 @@ TypeKindRankDeclarationMacro(ArrayCreateByMTPtr)
         rcpresent = .FALSE.
         array%this = ESMF_NULL_POINTER
 
-        ! Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume routine not implemented
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_RC_NOT_IMPL
@@ -425,7 +425,7 @@ TypeKindRankDeclarationMacro(ArrayDeallocate)
         integer :: rank
         type(ESMF_TypeKind) :: kind
 
-        ! Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume routine not implemented
         status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         if (present(rc)) then
@@ -535,7 +535,7 @@ TypeKindRankDeclarationMacro(ArrayDeallocate)
         ! Local vars
         integer :: localkind
 
-        ! Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume routine not implemented
         ! Note from this point down in the calling stack rc is not optional.
         ! This is all internal code, heavily macroized - no reason to add
         ! unnecessary code to check for non-present error return variables.

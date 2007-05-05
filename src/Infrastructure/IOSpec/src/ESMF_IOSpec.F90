@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.15 2007/01/29 18:55:40 theurich Exp $
+! $Id: ESMF_IOSpec.F90,v 1.16 2007/05/05 03:05:47 rosalind Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -31,10 +31,13 @@
 !BOPI
 ! !MODULE: ESMF_IOSpecMod
 !
+! !INCLUDES
+#include "ESMF.h"
+
 ! !USES:
       use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod
-      !use ESMF_LogErrMod
+      use ESMF_LogErrMod
       implicit none
 
 ! !PUBLIC TYPES:
@@ -220,7 +223,10 @@ end function
 !EOPI
       integer :: status
 
-      status = ESMF_FAILURE
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
 
 #if   defined(PARCH_linux)
       print *, "need to call flush() here"
@@ -270,6 +276,9 @@ end function
 
 !EOP
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       if (present(filename)) then
           filename = iospec%filename
       endif
@@ -316,6 +325,9 @@ end function
 ! !REQUIREMENTS: 
 
 !EOP
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       if (present(filename)) then
           iospec%filename = filename

@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.249 2007/04/18 17:20:01 rosalind Exp $
+! $Id: ESMF_Grid.F90,v 1.250 2007/05/05 03:05:46 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.249 2007/04/18 17:20:01 rosalind Exp $'
+      '$Id: ESMF_Grid.F90,v 1.250 2007/05/05 03:05:46 rosalind Exp $'
 
 !==============================================================================
 !
@@ -416,7 +416,7 @@
       type(ESMF_CoordSystem) :: vertCoordSystem
       type(ESMF_GridVertStagger) :: vertStaggerUse
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -530,7 +530,7 @@
       nullify(grid)
       nullify(ESMF_GridCreateEmpty%ptr)
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       allocate(grid, stat=localrc)
@@ -599,7 +599,7 @@
       ! Initialize pointers
       nullify(ESMF_GridCreateRead%ptr)
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Call GridCreateRead routines based on GridStructure
@@ -700,7 +700,7 @@
       ! Initialize pointers
       nullify(ESMF_GridCreateCopy%ptr)
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Call GridCreateCopy routines based on GridStructure
@@ -808,7 +808,7 @@
       ! Initialize pointers
       nullify(ESMF_GridCreateCutout%ptr)
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -925,7 +925,7 @@
       ! Initialize pointers
       nullify(ESMF_GridCreateDiffRes%ptr)
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -1034,7 +1034,7 @@
       ! Initialize pointers
       nullify(ESMF_GridCreateExchange%ptr)
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -1129,7 +1129,7 @@
       integer :: localrc                          ! local error status
       logical :: dummy
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -1288,7 +1288,7 @@
 
       integer :: localrc                          ! local error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -1412,7 +1412,7 @@
 
       integer :: localrc                          ! local error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -1566,7 +1566,7 @@
 
       integer :: localrc                          ! local error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -1791,7 +1791,7 @@
 
       integer :: localrc                          ! local error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -1982,7 +1982,7 @@
 
       integer :: localrc                          ! local error status
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -2056,7 +2056,7 @@
       integer :: localrc                          ! local error status
       integer :: limit
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -2133,7 +2133,7 @@
 
       integer :: localrc                          ! local error status
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -2208,7 +2208,7 @@
       integer :: localrc                          ! local error status
       integer :: limit
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -2284,7 +2284,7 @@
 
       integer :: localrc                          ! local error status
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -2358,7 +2358,7 @@
       integer :: localrc                          ! local error status
       integer :: limit
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -2434,7 +2434,7 @@
 
       integer :: localrc                          ! local error status
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -2509,7 +2509,7 @@
       integer :: localrc                          ! local error status
       integer :: limit
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -2585,7 +2585,7 @@
 
       integer :: localrc                          ! local error status
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -2659,7 +2659,7 @@
       integer :: localrc                          ! local error status
       integer :: limit
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -2735,7 +2735,7 @@
 
       integer :: localrc                          ! local error status
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -2801,7 +2801,7 @@
 
       integer :: localrc                          ! local error status
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -2876,7 +2876,7 @@
       type(ESMF_TypeKind) :: localTk
       integer :: localCount
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -2961,7 +2961,7 @@
       type(ESMF_TypeKind) :: localTk
       integer :: localCount
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -3062,7 +3062,7 @@
 
       integer :: localrc                          ! local error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -3214,7 +3214,7 @@
       type(ESMF_InternArray), dimension(:), pointer :: localCornerCoord
       type(ESMF_InternArray), dimension(:), pointer :: localFaceCoord
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -3387,7 +3387,7 @@
       type(ESMF_InternArray), dimension(:), pointer :: localCornerCoord
       type(ESMF_InternArray), dimension(:), pointer :: localFaceCoord
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -3564,7 +3564,7 @@
 
       integer :: localrc                          ! local error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -3727,7 +3727,7 @@
 
       integer :: localrc                          ! local error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -3887,7 +3887,7 @@
 
       integer :: localrc                          ! local error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -3997,7 +3997,7 @@
       integer :: i
       integer :: localrc                          ! local error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -4131,7 +4131,7 @@
       integer :: i                                ! loop index
       type(ESMF_GridClass), pointer :: gridp      ! Pointer to new grid
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -4263,7 +4263,7 @@
 
       integer :: localrc                          ! local error status
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -4323,7 +4323,7 @@
       integer :: localrc                          ! local error status
       integer :: limit
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
   
       ! check input variables
@@ -4384,7 +4384,7 @@
 
       integer :: localrc                          ! local error status
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -4444,7 +4444,7 @@
       integer :: localrc                          ! local error status
       integer :: limit
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
   
       ! check input variables
@@ -4505,7 +4505,7 @@
 
       integer :: localrc                          ! local error status
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -4565,7 +4565,7 @@
       integer :: localrc                          ! local error status
       integer :: limit
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -4626,7 +4626,7 @@
 
       integer :: localrc                          ! local error status
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -4686,7 +4686,7 @@
       integer :: localrc                          ! local error status
       integer :: limit
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -4747,7 +4747,7 @@
 
       integer :: localrc                          ! local error status
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -4807,7 +4807,7 @@
       integer :: localrc                          ! local error status
       integer :: limit
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -4867,8 +4867,9 @@
 
       integer :: localrc                          ! local error status
       
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -4975,6 +4976,9 @@
 ! !REQUIREMENTS:
 
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,array,rc)
@@ -5026,6 +5030,9 @@
 !EOPI
 ! !REQUIREMENTS:
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
@@ -5070,6 +5077,9 @@
 ! !REQUIREMENTS:
 
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
 !
 !  code goes here
 !
@@ -5109,6 +5119,9 @@
 !
 !EOPI
 ! !REQUIREMENTS:
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 !
 !  code goes here
@@ -5152,6 +5165,9 @@
 !EOPI
 ! !REQUIREMENTS:
 
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -5199,6 +5215,9 @@
 ! !REQUIREMENTS:
 
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
@@ -5242,6 +5261,9 @@
 !
 !EOPI
 ! !REQUIREMENTS:
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -5287,6 +5309,9 @@
 !EOPI
 ! !REQUIREMENTS:
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
@@ -5328,6 +5353,9 @@
 !
 !EOPI
 ! !REQUIREMENTS:
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -5373,6 +5401,9 @@
 !
 !EOPI
 ! !REQUIREMENTS:
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -5420,7 +5451,7 @@
       integer :: localrc                          ! local error status
       logical :: dummy
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -5563,7 +5594,7 @@
       integer :: localrc                          ! local error status
       logical :: dummy
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -5699,7 +5730,7 @@
       integer :: localrc                          ! local error status
       logical :: dummy
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -5812,7 +5843,7 @@
       integer :: localrc                          ! local error status
       logical :: dummy
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! branch to appropriate PhysGrid routine to compute distance
@@ -5891,7 +5922,7 @@
 
       integer :: localrc                          ! local error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -5998,7 +6029,7 @@
 
       integer :: localrc                          ! local error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -6099,7 +6130,7 @@
 
       integer :: localrc                          ! local error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -6218,7 +6249,7 @@
       integer :: localrc                          ! local error status
       integer :: i,j
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -6327,7 +6358,7 @@
       integer :: localrc                          ! local error status
       integer :: i,j
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -6450,7 +6481,7 @@
       integer :: localrc                          ! local error status
       integer :: i,j
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -6578,7 +6609,7 @@
 !      integer :: localrc                          ! local error status
 !      logical :: dummy
 !
-!      ! Initialize return code; assume failure until success is certain
+!      ! Initialize return code; assume routine not implemented
 !      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 !
 !!     Call Search routines based on GridStructure

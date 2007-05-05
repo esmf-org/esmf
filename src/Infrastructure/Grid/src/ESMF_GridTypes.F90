@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.58 2007/04/18 17:20:01 rosalind Exp $
+! $Id: ESMF_GridTypes.F90,v 1.59 2007/05/05 03:05:47 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -566,7 +566,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.58 2007/04/18 17:20:01 rosalind Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.59 2007/05/05 03:05:47 rosalind Exp $'
 
 !==============================================================================
 !
@@ -665,7 +665,7 @@
       integer :: i
       !character (len = ESMF_MAXSTR) :: defaultname ! default grid name
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Set the Grid name if present, otherwise construct a default one
@@ -737,7 +737,7 @@
 
       integer :: localrc                          ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -789,7 +789,7 @@
 
       integer :: localrc                          ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -856,6 +856,9 @@
       type(ESMF_InternDG), dimension(:), pointer, save :: temp_dgrids
       integer :: localrc                          ! Error status
       integer :: i, oldcount, alloccount
+
+      ! Initialize return code; assume routine not implemented
+      rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,gridp,rc)
@@ -953,7 +956,7 @@
 
       integer :: localrc                          ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -1021,6 +1024,9 @@
       integer, dimension(:), pointer, save :: temp_dgIndex
       integer :: localrc                          ! Error status
       integer :: i, oldcount, alloccount
+
+      ! Initialize return code; assume routine not implemented
+      rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridClassGetInit,gridp,rc)
@@ -1148,7 +1154,7 @@
       character (len=ESMF_MAXSTR) :: nameTmp    ! temporary name variable
       type(ESMF_RelLoc) :: rellocTmp
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -1248,7 +1254,7 @@
       type(ESMF_RelLoc) :: thisRelloc
       integer :: i
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -1320,7 +1326,7 @@
       logical :: found                          ! found flag for searches
       character (len=ESMF_MAXSTR) :: nameTmp    ! temporary name variable
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
@@ -1383,7 +1389,7 @@
 
       !integer :: localrc                          ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables

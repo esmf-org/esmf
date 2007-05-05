@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArray.F90,v 1.17 2007/04/18 18:43:47 rosalind Exp $
+! $Id: ESMF_InternArray.F90,v 1.18 2007/05/05 03:05:48 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -142,7 +142,7 @@ module ESMF_InternArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArray.F90,v 1.17 2007/04/18 18:43:47 rosalind Exp $'
+    '$Id: ESMF_InternArray.F90,v 1.18 2007/05/05 03:05:48 rosalind Exp $'
 !
 !==============================================================================
 !
@@ -330,7 +330,7 @@ end subroutine
       logical :: rcpresent   ! Return code present
       integer :: lrank       ! Local use to get rank
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if (present(rc)) then
@@ -436,7 +436,7 @@ end subroutine
 
       integer :: status                           ! Error status
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
@@ -495,7 +495,7 @@ end subroutine
       integer :: status                           ! Error status
       integer :: limit
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
@@ -556,6 +556,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
@@ -611,6 +614,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -669,6 +675,9 @@ end subroutine
 !EOP
 
       integer :: status                           ! Error status
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -729,6 +738,9 @@ end subroutine
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -783,6 +795,9 @@ end subroutine
 !EOP
 
       integer :: status                           ! Error status
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -839,6 +854,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -898,6 +916,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
@@ -953,6 +974,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -1012,6 +1036,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
@@ -1059,6 +1086,9 @@ end subroutine
 !EOP
 
       integer :: status                           ! Error status
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -1116,6 +1146,9 @@ end subroutine
       integer :: status                           ! Error status
       type(ESMF_TypeKind) :: localTk
       integer :: localCount
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -1183,6 +1216,9 @@ end subroutine
       type(ESMF_TypeKind) :: localTk
       integer :: localCount
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
@@ -1233,6 +1269,9 @@ end subroutine
 !EOPI
 
         integer :: status, i
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! Check init status of arguments
 !        ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -1294,6 +1333,9 @@ end subroutine
 !EOPI
 
         integer :: status, i
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! Check init status of arguments
         ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -1369,7 +1411,7 @@ end subroutine
        integer :: status                     ! local error status
        logical :: rcpresent        
 
-       ! Initialize return code; assume failure until success is certain
+       ! Initialize return code; assume routine not implemented
        status = ESMF_RC_NOT_IMPL
        rcpresent = .FALSE.
        if (present(rc)) then
@@ -1436,6 +1478,9 @@ end subroutine
 !
         type (ESMF_InternArray) :: a
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
 !       ! this is just to prevent compiler warnings
         a%this = ESMF_NULL_POINTER
 
@@ -1488,6 +1533,9 @@ end subroutine
 
         type (ESMF_InternArray) :: a 
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
 !       ! this is just to prevent compiler warnings
         a%this = ESMF_NULL_POINTER
 
@@ -1539,6 +1587,9 @@ end subroutine
 !EOP
 
       integer :: status                           ! Error status
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -1597,6 +1648,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -1657,6 +1711,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
        ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
@@ -1714,6 +1771,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -1774,6 +1834,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
@@ -1831,6 +1894,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -1891,6 +1957,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
@@ -1948,6 +2017,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -2008,6 +2080,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
@@ -2065,6 +2140,9 @@ end subroutine
 
       integer :: status                           ! Error status
       integer :: limit
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -2125,6 +2203,9 @@ end subroutine
 
       integer :: status                           ! Error status
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
 
@@ -2177,6 +2258,9 @@ end subroutine
 
         integer :: status
         integer :: i
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! Check init status of arguments
         ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -2317,7 +2401,7 @@ end subroutine
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
-      ! Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
       rcpresent = .FALSE.
       if (present(rc)) then
@@ -2377,7 +2461,7 @@ end subroutine
     character(len=6)  :: defaultopts      ! default print options 
     integer           :: status           ! local error status
 
-    ! Assume failure until success
+    ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -2436,7 +2520,7 @@ end subroutine
        integer :: status                      ! local error status
        logical :: rcpresent        
 
-       ! Initialize return code; assume failure until success is certain
+       ! Initialize return code; assume routine not implemented
        status = ESMF_RC_NOT_IMPL
        rcpresent = .FALSE.
        if (present(rc)) then
@@ -2537,7 +2621,7 @@ end subroutine
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
-    ! Assume failure until success
+    ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Set init code

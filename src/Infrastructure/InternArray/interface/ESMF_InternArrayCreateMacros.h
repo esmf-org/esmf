@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_InternArrayCreateMacros.h,v 1.9 2007/04/18 18:43:47 rosalind Exp $
+! $Id: ESMF_InternArrayCreateMacros.h,v 1.10 2007/05/05 03:05:48 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -116,7 +116,7 @@
         integer :: status                   ! local error status @\
         integer :: hwidth                   ! local copy of halo width @\
  @\
-        ! Initialize return code; assume failure until success is certain @\
+        ! Initialize return code; assume routine not implemented @\
         status = ESMF_RC_NOT_IMPL @\
         if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
         array%this = ESMF_NULL_POINTER @\
@@ -242,7 +242,7 @@
         integer, dimension(mrank) :: lbounds ! per dim @\
         integer, dimension(mrank) :: ubounds ! per dim @\
  @\
-        ! Initialize return code; assume failure until success is certain @\
+        ! Initialize return code; assume routine not implemented @\
         status = ESMF_RC_NOT_IMPL @\
         if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
         array%this = ESMF_NULL_POINTER @\
@@ -389,7 +389,7 @@
         integer, dimension(ESMF_MAXDIM) :: lb, ub @\
         integer, dimension(ESMF_MAXDIM) :: offsets @\
  @\
-        ! Initialize return code; assume failure until success is certain @\
+        ! Initialize return code; assume routine not implemented @\
         status = ESMF_RC_NOT_IMPL @\
         if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
         zerosize = .FALSE. @\

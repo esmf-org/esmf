@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray.C,v 1.9 2007/04/26 16:13:56 rosalind Exp $
+// $Id: ESMC_InternArray.C,v 1.10 2007/05/05 03:05:48 rosalind Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArray.C,v 1.9 2007/04/26 16:13:56 rosalind Exp $";
+            "$Id: ESMC_InternArray.C,v 1.10 2007/05/05 03:05:48 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -102,6 +102,8 @@
      ESMC_InternArray *a = new ESMC_InternArray;
      int status;
 
+     if (rc != NULL)
+         *rc = ESMC_RC_NOT_IMPL;
 
      status = a->ESMC_ArrayConstruct(rank, dk, icounts, base, 
                                      ESMC_FROM_CPLUSPLUS,
@@ -146,6 +148,9 @@
      ESMC_InternArray *a = new ESMC_InternArray;
      int status;
 
+     // Initialize return code; assume routine not implemented
+     if (rc != NULL) *rc = ESMF_RC_NOT_IMPL;
+
 
      status = a->ESMC_ArrayConstruct(rank, dk, icounts, base, 
                                      ESMC_FROM_CPLUSPLUS,
@@ -182,11 +187,15 @@
 //EOP
 // !REQUIREMENTS:  
 
+     // Initialize return code; assume routine not implemented
+     int rc = ESMF_RC_NOT_IMPL;
+
     array->ESMC_ArrayDestruct();
 
     delete array;
 
-    return 0;
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_InternArrayDestroy
 
@@ -220,6 +229,9 @@
 
      ESMC_InternArray *a = new ESMC_InternArray;
      int status;
+
+     // Initialize return code; assume routine not implemented
+     if (rc != NULL) *rc = ESMF_RC_NOT_IMPL;
 
      status = a->ESMC_ArrayConstruct(rank, dk, NULL, NULL, oflag,
                             NULL, ESMC_ARRAY_NO_ALLOCATE, 
@@ -294,6 +306,9 @@
      ESMC_InternArray *a = new ESMC_InternArray;
      int status;
 
+     // Initialize return code; assume routine not implemented
+     if (rc != NULL) *rc = ESMF_RC_NOT_IMPL;
+
      if (base == NULL) 
          status = a->ESMC_ArrayConstruct(rank, dk, icounts, base, 
                                      ESMC_FROM_FORTRAN, f90ptr, 
@@ -353,10 +368,13 @@
 //
 //EOP
 // !REQUIREMENTS:  
-    int i, status;
+    int i, status, rc;
     ESMC_InternArray *aptr;
     int alloc_stride;
     int C, twidth;
+
+     // Initialize return code; assume routine not implemented
+     rc = ESMF_RC_NOT_IMPL;
 
     rank = irank;
     kind = dk;
@@ -497,7 +515,9 @@
 //EOP
 // !REQUIREMENTS:  
 
+    // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
+
     ESMC_InternArray *aptr = this;
 
     // check origin and alloc flag, and call dealloc routine if needed 
@@ -606,6 +626,9 @@
 //EOP
 // !REQUIREMENTS:  
 
+     // Initialize return code; assume routine not implemented
+     int rc = ESMF_RC_NOT_IMPL;
+
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
     int alloc_stride;
@@ -712,7 +735,8 @@
     iscontig = contig;
     needs_dealloc = dealloc;
 
-    return ESMF_SUCCESS; 
+    rc = ESMF_SUCCESS; 
+    return rc;
 
  } // end ESMC_ArraySetInfo
 
@@ -737,6 +761,9 @@
 //EOP
 // !REQUIREMENTS:  
 
+     // Initialize return code; assume routine not implemented
+     int rc = ESMF_RC_NOT_IMPL;
+
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
   
@@ -749,7 +776,8 @@
 
     memcpy((void *)p, (void *)(&this->f90dopev), bytes);
 
-    return ESMF_SUCCESS; 
+    rc = ESMF_SUCCESS; 
+    return rc;
 
  } // end ESMC_ArrayGetF90Ptr
 
@@ -774,6 +802,9 @@
 //EOP
 // !REQUIREMENTS:  
 
+     // Initialize return code; assume routine not implemented
+     int rc = ESMF_RC_NOT_IMPL;
+
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
   
@@ -785,7 +816,8 @@
 
     memcpy((void *)(&this->f90dopev), (void *)p, bytes);
 
-    return ESMF_SUCCESS; 
+    rc = ESMF_SUCCESS; 
+    return rc;
 
  } // end ESMC_ArraySetF90Ptr
 
@@ -812,6 +844,9 @@
 // !REQUIREMENTS:  
 
      int i, rc;
+
+     // Initialize return code; assume routine not implemented
+     rc = ESMF_RC_NOT_IMPL;
 
      switch(dt) {
        case ESMC_DOMAIN_ALLOCATED:
@@ -868,6 +903,9 @@
 
      int i, rc;
 
+     // Initialize return code; assume routine not implemented
+     rc = ESMF_RC_NOT_IMPL;
+
      switch(dt) {
        case ESMC_DOMAIN_ALLOCATED:
          for (i=0; i<this->rank; i++) 
@@ -919,7 +957,8 @@
          return(rc);
     }
 
-     return ESMF_SUCCESS;
+     rc = ESMF_SUCCESS;
+     return rc;
 
  } // end ESMC_ArrayGetAxisIndex
 
@@ -959,8 +998,11 @@
 //
 //EOPI
 
-     int i, j, ij, count;
+     int i, j, ij, count, rc;
      int halo_widths[ESMF_MAXDIM][2];
+
+     // Initialize return code; assume routine not implemented
+     rc = ESMF_RC_NOT_IMPL;
 
      // TODO: when widths are 2*Ndim, compute all of them.
      for (i=0; i<rank; i++) {
@@ -995,7 +1037,8 @@
        }
      }
 
-     return ESMF_SUCCESS;
+     rc = ESMF_SUCCESS;
+     return rc;
 
  } // end ESMC_ArrayGetAllAxisIndices
 
@@ -1025,6 +1068,7 @@
 //
 //  code goes here
 //
+    // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
 
     return rc;
@@ -1056,6 +1100,7 @@
 //
 //  code goes here
 //
+    // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
     int i, j, k, l, m;
     int imax, jmax, kmax, lmax, mmax;
@@ -1636,6 +1681,7 @@
 //
 //  code goes here
 //
+    // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
     int i, j, k, l, m;
     int imax, jmax, kmax, lmax, mmax;
@@ -1956,12 +2002,15 @@
     char *cp;
     struct ESMC_AxisIndex *ap;
 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
     fixedpart = sizeof(ESMC_InternArray) + byte_count;
     if ((*length - *offset) < fixedpart) {
         
          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
                                "Buffer too short to add an InternArray object", &rc);
-         return ESMF_FAILURE;
+         return rc;
 
         //buffer = (char *)realloc((void *)buffer, 
         //                         *length + 2*fixedpart + byte_count);
@@ -1994,7 +2043,8 @@
     cp = (char *)ip;
     *offset = (cp - buffer);
    
-    return ESMF_SUCCESS;
+ // rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_Serialize
 
@@ -2025,6 +2075,9 @@
     char *cp;
     struct ESMC_AxisIndex *ap;
 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
     // First, deserialize the base class, then the localarray part, then
     // finally the data unique to arrays.
     rc = ESMC_Base::ESMC_Deserialize(buffer, offset);
@@ -2052,7 +2105,8 @@
     cp = (char *)ip;
     *offset = (cp - buffer);
    
-    return ESMF_SUCCESS;
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_ArrayDeserialize
 
@@ -2085,11 +2139,15 @@
     char *cp;
     int i, *ip;
 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
     fixedpart = sizeof(ESMC_InternArray);
     if ((*length - *offset) < fixedpart) {
          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
-                               "Buffer too short to add an InternArray object", &rc);
-         return ESMF_FAILURE;
+                               "Buffer too short to add an InternArray object", 
+                               &rc);
+         return rc;
         //buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
         //*length += 2 * fixedpart;
     }
@@ -2121,7 +2179,8 @@
     cp = (char *)ip;
     *offset = (cp - buffer);
    
-    return ESMF_SUCCESS;
+ // rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_Serialize
 
@@ -2150,7 +2209,7 @@
 //EOPI
     struct ESMC_AxisIndex *ap;
     char *cp;
-    int i, *ip;
+    int i, *ip, rc;
 
     // call base, then localarray.
     this->ESMC_Base::ESMC_Deserialize(buffer, offset);
@@ -2178,7 +2237,8 @@
     cp = (char *)ip;
     *offset = (cp - buffer);
    
-    return ESMF_SUCCESS;
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_ArrayDeserializeNoData
 

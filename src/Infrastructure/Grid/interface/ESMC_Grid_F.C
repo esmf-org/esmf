@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid_F.C,v 1.8 2007/03/31 05:51:08 cdeluca Exp $
+// $Id: ESMC_Grid_F.C,v 1.9 2007/05/05 03:05:46 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Grid_F.C,v 1.8 2007/03/31 05:51:08 cdeluca Exp $";
+             "$Id: ESMC_Grid_F.C,v 1.9 2007/05/05 03:05:46 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -64,6 +64,10 @@ void FTN(c_esmc_gridserialize)(int *dimCount,
     int *ip, i;
      ESMC_I8 l;
     ESMC_R8 *dp;
+
+    // Initialize return code; assume routine not implemented
+    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+
 
     // TODO: verify length > needed, and if not, make room.
     int fixedpart =  24 * sizeof(int *);   // rough estimate
@@ -134,6 +138,9 @@ void FTN(c_esmc_griddeserialize)(int *dimCount,
     int *ip, i;
      ESMC_I8 l;
     ESMC_R8 *dp;
+
+    // Initialize return code; assume routine not implemented
+    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
     ip = (int *)((char *)(buffer) + *offset);
     *dimCount        = *ip++; 

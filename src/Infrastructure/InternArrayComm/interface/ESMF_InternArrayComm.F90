@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.19 2007/04/23 16:56:10 rosalind Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.20 2007/05/05 03:05:48 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.19 2007/04/23 16:56:10 rosalind Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.20 2007/05/05 03:05:48 rosalind Exp $'
 !
 !==============================================================================
 !
@@ -435,6 +435,9 @@ module ESMF_InternArrayCommMod
     type(ESMF_DELayout) :: delayout
     type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
+     ! initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     ! Check init status of arguments
 !    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
@@ -579,6 +582,9 @@ module ESMF_InternArrayCommMod
     type(ESMF_AxisIndex),pointer :: localAIsPerRank(:)
     type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
+     ! initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     ! Check init status of arguments
 !    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
@@ -661,6 +667,9 @@ module ESMF_InternArrayCommMod
     type(ESMF_DELayout) :: delayout
     type(ESMF_GridStorage) :: gridStorage
     type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
+
+     ! initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
@@ -1030,6 +1039,9 @@ module ESMF_InternArrayCommMod
 !
 !EOP
 
+     ! initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
@@ -1100,6 +1112,9 @@ module ESMF_InternArrayCommMod
       ! arrangement.  solutions might be to either make the intent at
       ! this level (inout) as well, even though that is confusing to users,
       ! or make a temporary here and do an assignment before returning.
+
+     ! initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
     ! Check init status of arguments
@@ -1895,6 +1910,9 @@ module ESMF_InternArrayCommMod
 !
 !EOP
 
+     ! initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
@@ -1974,6 +1992,9 @@ module ESMF_InternArrayCommMod
 
     ! if problems compiling, see the comment in HaloStore() for
     ! suggestions regarding intent(out) vs intent(inout).
+
+     ! initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     if (srcLocalFlag) then

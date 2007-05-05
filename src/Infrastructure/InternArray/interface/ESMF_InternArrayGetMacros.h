@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_InternArrayGetMacros.h,v 1.6 2007/04/18 18:43:47 rosalind Exp $
+! $Id: ESMF_InternArrayGetMacros.h,v 1.7 2007/05/05 03:05:48 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -96,7 +96,7 @@
     integer :: lb(mrank), ub(mrank)  ! size info for the array @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
  @\
-    ! initialize return code; assume failure until success is certain @\
+    ! initialize return code; assume routine not implemented @\
     status = ESMF_RC_NOT_IMPL @\
     rcpresent = .FALSE. @\
     if (present(rc)) then @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayDataMap.F90,v 1.7 2007/04/18 18:43:47 rosalind Exp $
+! $Id: ESMF_InternArrayDataMap.F90,v 1.8 2007/05/05 03:05:48 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@ module ESMF_InternArrayDataMapMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version =  &
-    '$Id: ESMF_InternArrayDataMap.F90,v 1.7 2007/04/18 18:43:47 rosalind Exp $'
+    '$Id: ESMF_InternArrayDataMap.F90,v 1.8 2007/05/05 03:05:48 rosalind Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -864,6 +864,9 @@ end function
 !
 !EOP
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, arraydatamap)
 
@@ -1093,6 +1096,9 @@ end function
 !	Changed BOP/EOP to BOPI/EOPI until code is added.
 ! TODO: code goes here
 !
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
         ESMF_ArrayDataMapRead%status = ESMF_STATUS_UNINIT
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1198,6 +1204,9 @@ end function
 !
 !EOPI
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
         if (relloc .eq. ESMF_CELL_UNDEFINED) string = "Undefined"
         if (relloc .eq. ESMF_CELL_CENTER)    string = "Cell Center"
         if (relloc .eq. ESMF_CELL_NFACE)     string = "Cell North Face"
@@ -1245,6 +1254,9 @@ end function
 !
 !EOPI
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
         if (interleave .eq. ESMF_INTERLEAVE_BY_BLOCK) string = "Block Interleave"
         if (interleave .eq. ESMF_INTERLEAVE_BY_ITEM) string = "Item Interleave"
 
@@ -1281,6 +1293,9 @@ end function
 !
 !
 !EOPI
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
         if (interleaveType%il_type .eq. ESMF_INTERLEAVE_BY_BLOCK) string = "Block Interleave"
         if (interleaveType%il_type .eq. ESMF_INTERLEAVE_BY_ITEM) string = "Item Interleave"
 
@@ -1317,6 +1332,9 @@ end function
 !     \end{description}
 !
 !EOPI
+
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         if (indexorder.eq.ESMF_INDEX_I  ) string = "I"
         if (indexorder.eq.ESMF_INDEX_IJ ) string = "IJ"
