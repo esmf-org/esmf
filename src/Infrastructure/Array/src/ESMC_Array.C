@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.77 2007/05/04 18:21:29 theurich Exp $
+// $Id: ESMC_Array.C,v 1.78 2007/05/07 22:56:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMC_Array.C,v 1.77 2007/05/04 18:21:29 theurich Exp $";
+  static const char *const version = "$Id: ESMC_Array.C,v 1.78 2007/05/07 22:56:32 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2301,8 +2301,16 @@ int ESMC_Array::ESMC_ArrayScatter(
               int srcPet;
               delayout->ESMC_DELayoutGetDEMatchPET(de, *vm, NULL, &srcPet, 1);
               *commh = NULL;  // invalidate
-              vm->vmk_recv(indexList[jj],
+              status = vm->vmk_recv(indexList[jj],
                 sizeof(int)*dimExtent[de*dimCount+j], srcPet, commh);
+              if (status){
+                char *message = new char[160];
+                sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+                  message, rc);
+                delete [] message;
+                return localrc;
+              }
             }else{
               // this DE is _is_ local -> look up indexList locally
               ESMC_InterfaceInt *indexListArg =
@@ -2387,7 +2395,16 @@ int ESMC_Array::ESMC_ArrayScatter(
         int dstPet;
         delayout->ESMC_DELayoutGetDEMatchPET(de, *vm, NULL, &dstPet, 1);
         *commh = NULL; // invalidate
-        vm->vmk_send(sendBuffer[de], deCellCount[de]*dataSize, dstPet, commh);
+        status = vm->vmk_send(sendBuffer[de], deCellCount[de]*dataSize, dstPet,
+          commh);
+        if (status){
+          char *message = new char[160];
+          sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+            message, rc);
+          delete [] message;
+          return localrc;
+        }
         
         // clean-up
         for (int j=0; j<rank; j++)
@@ -2425,8 +2442,16 @@ int ESMC_Array::ESMC_ArrayScatter(
             delete indexListArg;
             // send indexList of local DE to rootPet
             *commh = NULL;  // invalidate
-            vm->vmk_send(indexList[jj], sizeof(int)*dimExtent[de*dimCount+j],
-              rootPet, commh);
+            status = vm->vmk_send(indexList[jj],
+              sizeof(int)*dimExtent[de*dimCount+j], rootPet, commh);
+            if (status){
+              char *message = new char[160];
+              sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+                message, rc);
+              delete [] message;
+              return localrc;
+            }
           }
         } // jj
         // wait for all outstanding indexList sends
@@ -2454,7 +2479,16 @@ int ESMC_Array::ESMC_ArrayScatter(
       recvBuffer[i] = new char[deCellCount[de]*dataSize];
     *commh = NULL; // invalidate
     // receive data into recvBuffer
-    vm->vmk_recv(recvBuffer[i], deCellCount[de]*dataSize, rootPet, commh);
+    status = vm->vmk_recv(recvBuffer[i], deCellCount[de]*dataSize, rootPet,
+      commh);
+    if (status){
+      char *message = new char[160];
+      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+        message, rc);
+      delete [] message;
+      return localrc;
+    }
   }
   
   // - done issuing nb receives (potentially all Pets) -
@@ -2568,6 +2602,7 @@ int ESMC_Array::ESMC_ArrayScatter(
         delete [] sendBuffer[i];
     delete [] sendBuffer;
   }
+  delete commh;
   
   // return successfully
   return ESMF_SUCCESS;
