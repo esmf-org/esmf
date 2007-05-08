@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.78 2007/05/07 22:56:32 theurich Exp $
+// $Id: ESMC_Array.C,v 1.79 2007/05/08 23:39:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMC_Array.C,v 1.78 2007/05/07 22:56:32 theurich Exp $";
+  static const char *const version = "$Id: ESMC_Array.C,v 1.79 2007/05/08 23:39:59 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2254,6 +2254,8 @@ int ESMC_Array::ESMC_ArrayScatter(
 
   // prepare for comms
   vmk_commhandle **commh = new vmk_commhandle*; // used by all comm calls
+  vmk_commhandle **commhList = 
+    new vmk_commhandle*[rank]; // used for indexList comm
   
   // distgrid -> dimExtent[]
   int *dimExtent = new int[dimCount*deCount];
@@ -2288,6 +2290,7 @@ int ESMC_Array::ESMC_ArrayScatter(
         status = distgrid->ESMC_DistGridGet(de, 1, NULL, &contigFlag);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
           rc)) return localrc;
+        int commhListCount = 0;  // reset
         for (int jj=0; jj<rank; jj++){
           int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor
           if (j){
@@ -2300,9 +2303,10 @@ int ESMC_Array::ESMC_ArrayScatter(
               // this DE is _not_ local -> receive indexList from respective Pet
               int srcPet;
               delayout->ESMC_DELayoutGetDEMatchPET(de, *vm, NULL, &srcPet, 1);
-              *commh = NULL;  // invalidate
+              commhList[commhListCount] = new vmk_commhandle;
               status = vm->vmk_recv(indexList[jj],
-                sizeof(int)*dimExtent[de*dimCount+j], srcPet, commh);
+                sizeof(int)*dimExtent[de*dimCount+j], srcPet, 
+                &(commhList[commhListCount]));
               if (status){
                 char *message = new char[160];
                 sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -2311,6 +2315,7 @@ int ESMC_Array::ESMC_ArrayScatter(
                 delete [] message;
                 return localrc;
               }
+              commhListCount++;
             }else{
               // this DE is _is_ local -> look up indexList locally
               ESMC_InterfaceInt *indexListArg =
@@ -2335,8 +2340,9 @@ int ESMC_Array::ESMC_ArrayScatter(
             ++tensorIndex;
           }
         } // jj
-        sendBuffer[de] = new char[deCellCount[de]*dataSize]; // cont. sendBuffer
-        
+
+        // prepare contiguous sendBuffer for this DE
+        sendBuffer[de] = new char[deCellCount[de]*dataSize];
         int sendBufferIndex = 0;  // reset
         // reset counters for multi-dim while-loop
         tensorIndex=0;  // reset
@@ -2354,8 +2360,11 @@ int ESMC_Array::ESMC_ArrayScatter(
           }
         }
         
-        // wait for all outstanding indexList receives
-        vm->vmk_commqueuewait();
+        // wait for all outstanding indexList receives for this DE
+        for (int jj=0; jj<commhListCount; jj++){
+          vm->vmk_commwait(&(commhList[jj]));
+          delete commhList[jj];
+        }
         
         // loop over all cells in exclusive region for this DE 
         // via multi-dim while-loop
@@ -2367,7 +2376,7 @@ int ESMC_Array::ESMC_ArrayScatter(
             linearIndex += indexList[j][ii[j]];
           }
         
-          // copy this element into the contiguous sendBuffer
+          // copy this element into the contiguous sendBuffer for this DE
           if (contigFlag){
             // contiguous data in first dimension
             memcpy(sendBuffer[de]+sendBufferIndex*dataSize,
@@ -2603,6 +2612,7 @@ int ESMC_Array::ESMC_ArrayScatter(
     delete [] sendBuffer;
   }
   delete commh;
+  delete [] commhList;
   
   // return successfully
   return ESMF_SUCCESS;
