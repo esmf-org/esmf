@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.91 2007/04/24 18:13:08 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.92 2007/05/08 21:08:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -250,7 +250,7 @@ void ESMC_VMK::vmk_init(MPI_Comm mpiCommunicator){
   // obtain command line arguments and store in the VM class
   argc = 0; // reset
   for (int k=0; k<100; k++)
-    argv[k] = new char[160];
+    argv[k] = new char[1600];
 #ifdef ESMF_MPICH
   // currently only obtain arguments for MPICH because it needs it!!!
   vmk_obtain_args();
