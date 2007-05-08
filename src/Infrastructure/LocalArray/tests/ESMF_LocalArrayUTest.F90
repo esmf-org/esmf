@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.42 2007/04/20 22:08:08 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.43 2007/05/08 19:15:36 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -80,107 +80,6 @@
     print *, "array 1a destroy returned"
 
 #ifdef ESMF_EXHAUSTIVE
-
-
-    !--------------------------------------------------------------------------
-    !EX_UTest
-    write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
-    write(name, *) "Get Local Array from uncreated Field Test"
-    call ESMF_FieldGetLocalArray(f1, array1, rc)
-    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
-
-
-    !--------------------------------------------------------------------------
-    !EX_UTest
-    write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
-    write(name, *) "Set Local Array in uncreated Field Test"
-    call ESMF_FieldSetLocalArray(f1, array1, rc)
-    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
-
-    !--------------------------------------------------------------------------
-    !EX_UTest
-    f1 = ESMF_FieldCreateNoData(rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS."
-    write(name, *) "Creating a Field with no data Test Req. FLD1.1.3"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-
-    !--------------------------------------------------------------------------
-    !EX_UTest
-    write(failMsg, *) "Did not return ESMF_RC_OBJ_BAD"
-    write(name, *) "Get Local Array from empty Field Test"
-    call ESMF_FieldGetLocalArray(f1, array1, rc)
-    call ESMF_Test((rc.eq.ESMF_RC_OBJ_BAD), name, failMsg, result, ESMF_SRCLINE)
-
-    !--------------------------------------------------------------------------
-    !EX_UTest
-    write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
-    write(name, *) "Set un-initialized Local Array in Field Test"
-    call ESMF_FieldSetLocalArray(f1, array3, rc)
-    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
-
-    !--------------------------------------------------------------------------
-    !EX_UTest
-    ! Allocate and set initial data values, using a lower bound != 1
-    ni = 515 
-    allocate(intptr(5:ni+5))
-    do i=5,ni+5
-       intptr(i) = 11*i
-    enddo
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a Local Array with Integer 1D Data Test"
-    array3 = ESMF_LocalArrayCreate(intptr, ESMF_DATA_REF, rc)
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !--------------------------------------------------------------------------
-    !EX_UTest
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set Local Array in Field Test"
-    call ESMF_FieldSetLocalArray(f1, array3, rc)
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !--------------------------------------------------------------------------
-    !EX_UTest
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Get Local Array from Field Test"
-    call ESMF_FieldGetLocalArray(f1, array3, rc)
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !--------------------------------------------------------------------------
-    !EX_UTest
-    write(failMsg, *) "Did not return ESMF_SUCCESS."
-    write(name, *) "Local Array Destroy Test"
-    call ESMF_LocalArrayDestroy(array3, rc=rc)
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !--------------------------------------------------------------------------
-    !EX_UTest
-    write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-    write(name, *) "Set destroyed Local Array in Field Test"
-    call ESMF_FieldSetLocalArray(f1, array3, rc)
-    call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
-
-    !------------------------------------------------------------------------
-    !EX_UTest
-    ! Verifing that a Field  can be destroyed
-    call ESMF_FieldDestroy(f1, rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Destroying a Field Test"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !--------------------------------------------------------------------------
-    !EX_UTest
-    write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-    write(name, *) "Get Local Array from destroyed Field Test"
-    call ESMF_FieldGetLocalArray(f1, array3, rc)
-    call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
-
-    !--------------------------------------------------------------------------
-    !EX_UTest
-    write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-    write(name, *) "Set Local Array in destroyed Field Test"
-    call ESMF_FieldSetLocalArray(f1, array3, rc)
-    call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !EX_UTest
