@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.187 2007/05/02 22:55:43 dneckels Exp $
+#  $Id: common.mk,v 1.188 2007/05/09 04:56:14 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -917,14 +917,6 @@ tree_include:
 	    cp -f ../include/$$hfile $(ESMF_INCDIR) ; \
 	  fi ; \
 	done
-
-# create .F90 source files from .cpp files.
-cppfiles: chkdir_include include
-	cd $(ESMF_DIR) ;\
-	$(MAKE) ACTION=tree_cppfiles tree
-
-# action for 'tree' target.
-tree_cppfiles:  $(CPPFILES)
 
 #-------------------------------------------------------------------------------
 # Clean and clobber targets.
@@ -2083,20 +2075,20 @@ alldoc: doc
 # subsystem doc directory and will build only that doc.
 # this is also the default if you call make from a doc subdir.
 
-onedoc: chkdir_doc include cppfiles tex
+onedoc: chkdir_doc include tex
 	@echo "========================================="
 	@echo "Building Single Document"
 	@echo "========================================="
 	@$(MAKE) dvi pdf html
 	@echo "Build onedoc completed."
 
-tex: chkdir_doc include cppfiles
+tex: chkdir_doc include
 	cd $(ESMF_DIR) ;\
 	$(MAKE) ACTION=tree_tex tree
 
 tree_tex: $(TEXFILES_TO_MAKE)
 
-dvi: chkdir_doc include cppfiles tex
+dvi: chkdir_doc include tex
 	@echo "========================================="
 	@echo "dvi rule from common.mk, Building .dvi files"
 	@echo "dvi files are:" $(DVIFILES)
@@ -2116,7 +2108,7 @@ pdf: chkdir_doc
 tree_pdf: chkdir_doc $(PDFFILES)
 
 
-html: chkdir_doc include cppfiles tex
+html: chkdir_doc include tex
 	@echo "========================================="
 	@echo "html rule from common.mk, Building .html files"
 	@echo "html files are:" $(HTMLFILES)
