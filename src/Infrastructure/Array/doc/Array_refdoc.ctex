@@ -1,4 +1,4 @@
-% $Id: Array_refdoc.ctex,v 1.13 2007/03/31 05:50:46 cdeluca Exp $ 
+% $Id: Array_refdoc.ctex,v 1.14 2007/05/09 04:56:37 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -96,21 +96,21 @@
 \input{ESMF_ArrayCreate_fapi}
 \mbox{}\hrulefill\
 \input{ESMF_ArrayGather_fapi}
-\mbox{}\hrulefill\ 
+\mbox{}\hrulefill\
 \input{ESMF_ArrayGet_fapi}
-\mbox{}\hrulefill\ 
+\mbox{}\hrulefill\
 \input{ESMF_ArrayScatter_fapi}
-\mbox{}\hrulefill\ 
+\mbox{}\hrulefill\
 \input{ESMF_Array_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Array/doc/ESMF_ArrayCreate_fapi}
-\mbox{}\hrulefill\ 
+\mbox{}\hrulefill\
 \input{../Infrastructure/Array/doc/ESMF_ArrayGather_fapi}
-\mbox{}\hrulefill\ 
+\mbox{}\hrulefill\
 \input{../Infrastructure/Array/doc/ESMF_ArrayGet_fapi}
 \mbox{}\hrulefill\
 \input{../Infrastructure/Array/doc/ESMF_ArrayScatter_fapi}
-\mbox{}\hrulefill\ 
+\mbox{}\hrulefill\
 \input{../Infrastructure/Array/doc/ESMF_Array_fapi}
 \mbox{}\hrulefill\ \input{../Infrastructure/LocalArray/doc/ESMF_LocalArrayCreate_fapi}
 \mbox{}\hrulefill\ \input{../Infrastructure/LocalArray/doc/ESMF_LocalArrayGet_fapi}
