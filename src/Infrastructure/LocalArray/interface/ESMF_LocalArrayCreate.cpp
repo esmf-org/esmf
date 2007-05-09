@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cpp,v 1.15 2007/04/17 02:28:51 rosalind Exp $
+! $Id: ESMF_LocalArrayCreate.cpp,v 1.16 2007/05/09 02:47:50 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -161,7 +161,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cpp,v 1.15 2007/04/17 02:28:51 rosalind Exp $'
+    '$Id: ESMF_LocalArrayCreate.cpp,v 1.16 2007/05/09 02:47:50 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -331,6 +331,10 @@ end function
     integer, dimension(1) :: countlist
     integer, dimension(1) :: lb, ub
 
+    ! Initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     countlist(1) = counts
     lb(1) = 1
     if (present(lbounds)) lb(1) = lbounds
@@ -405,8 +409,9 @@ end function
 
     array%this = ESMF_NULL_POINTER
 
-    ! Initialize return code; assume failure until success is certain
+    ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Assume defaults first, then alter if lb or ub specified. 
     lb = 1
@@ -493,8 +498,9 @@ end function
 
     array%this = ESMF_NULL_POINTER
 
-    ! Initialize return code; assume failure until success is certain
+    ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
@@ -568,7 +574,7 @@ end function
         status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
 
-        ! Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume routine not implemented
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_RC_NOT_IMPL
@@ -808,7 +814,7 @@ end function
         status = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
 
-        ! Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume routine not implemented
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_RC_NOT_IMPL
@@ -1108,8 +1114,9 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
     integer :: rank
     type(ESMF_TypeKind) :: kind
 
-    ! Initialize return code; assume failure until success is certain
+    ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
@@ -1188,6 +1195,10 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
 
     integer :: localrc
 
+    ! Initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
 
@@ -1228,6 +1239,10 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
 !EOPI
 
     integer :: localrc
+
+    ! Initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
@@ -1316,8 +1331,9 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
     integer :: localrc    ! local return code
     integer :: lrank      ! Local use to get rank
 
-    ! Initialize return code; assume failure until success is certain
+    ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
@@ -1413,8 +1429,9 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
 
     integer :: localrc    ! local return code
 
-    ! Initialize return code; assume failure until success is certain
+    ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
@@ -1698,6 +1715,7 @@ AllTypesMacro(ArrayLocalVar)
 
 
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    status = ESMF_RC_NOT_IMPL
  
     localkind = kind
 
@@ -1908,7 +1926,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         rcpresent = .FALSE.
         newarray%this = ESMF_NULL_POINTER
 
-        ! Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume routine not implemented
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_RC_NOT_IMPL
@@ -2083,7 +2101,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
        integer :: status                      ! local error status
        logical :: rcpresent        
 
-       ! Initialize return code; assume failure until success is certain
+       ! Initialize return code; assume routine not implemented
        status = ESMF_RC_NOT_IMPL
        rcpresent = .FALSE.
        if (present(rc)) then
@@ -2177,7 +2195,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
     integer :: status                     ! local error status
     logical :: rcpresent        
 
-    ! Initialize return code; assume failure until success is certain
+    ! Initialize return code; assume routine not implemented
     status = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
     if (present(rc)) then
@@ -2227,7 +2245,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
     logical :: rcpresent        
     !character(len=ESMF_MAXSTR) :: msgbuf
 
-    ! Initialize return code; assume failure until success is certain
+    ! Initialize return code; assume routine not implemented
     status = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
     if (present(rc)) then
@@ -2575,6 +2593,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     
     ! Set init code
     ESMF_INIT_SET_CREATED(array)
@@ -2621,6 +2640,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     
     ! Copy C++ pointer
     this = array%this
@@ -2667,6 +2687,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     
     ! Copy C++ pointer
     localarray%this = this

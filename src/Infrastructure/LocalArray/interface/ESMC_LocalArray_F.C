@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.21 2007/03/31 05:51:15 cdeluca Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.22 2007/05/09 02:47:50 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -401,6 +401,9 @@ char *name = NULL;
 //
 //EOP
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;       
+
   // create a new localarray object to deserialize into
   *localarray = new ESMC_LocalArray;
 
@@ -437,6 +440,9 @@ char *name = NULL;
 //     the data values.
 //
 //EOP
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;       
 
   if (!localarray) {
     //printf("uninitialized LocalArray object\n");
@@ -475,6 +481,9 @@ char *name = NULL;
 //     any of the data (counts explicitly set to 0).
 //
 //EOP
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   // create a new localarray object to deserialize into
   *localarray = new ESMC_LocalArray;

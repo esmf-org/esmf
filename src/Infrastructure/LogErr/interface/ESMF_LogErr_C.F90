@@ -1,4 +1,4 @@
-!  $Id: ESMF_LogErr_C.F90,v 1.10 2007/03/31 05:51:17 cdeluca Exp $
+!  $Id: ESMF_LogErr_C.F90,v 1.11 2007/05/09 02:48:28 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -22,7 +22,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LogErr_C.F90,v 1.10 2007/03/31 05:51:17 cdeluca Exp $'
+!      '$Id: ESMF_LogErr_C.F90,v 1.11 2007/05/09 02:48:28 rosalind Exp $'
 !==============================================================================
 
    subroutine f_esmf_logwrite0(msg,msgtype,rc)
@@ -32,6 +32,9 @@
         character(len=*), intent(in)                :: msg
         type(ESMF_MsgType), intent(in)              :: msgtype
         integer, intent(out)                        :: rc
+
+        ! Initialize return code; assume routine not implemented
+        rc = ESMF_RC_NOT_IMPL
 
         call ESMF_LogWrite(msg, msgtype, rc=rc)
 
@@ -47,6 +50,9 @@
         character(len=*), intent(in)                :: file
         character(len=*), intent(in)                :: method
         integer, intent(out)                        :: rc
+
+        ! Initialize return code; assume routine not implemented
+        rc = ESMF_RC_NOT_IMPL
 
         call ESMF_LogWrite(msg, msgtype, line, file, method, rc=rc)
 

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.32 2007/04/17 02:28:51 rosalind Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.33 2007/05/09 02:47:50 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@
     type (ESMF_LocalArray) :: array     ! new array object @\
     integer                :: localrc   ! local return code @\
  @\
-    ! Initialize return code; assume failure until success is certain @\
+    ! Initialize return code; assume routine not implemented @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
     array%this = ESMF_NULL_POINTER @\
@@ -222,7 +222,7 @@
     integer, dimension(mrank) :: lbounds ! per dim @\
     integer, dimension(mrank) :: ubounds ! per dim @\
  @\
-    ! Initialize return code; assume failure until success is certain @\
+    ! Initialize return code; assume routine not implemented @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
     ! Set default for copyflag @\
@@ -366,7 +366,7 @@
         integer, dimension(ESMF_MAXDIM) :: lb, ub @\
         integer, dimension(ESMF_MAXDIM) :: offsets @\
  @\
-        ! Initialize return code; assume failure until success is certain @\
+        ! Initialize return code; assume routine not implemented @\
         status = ESMF_RC_NOT_IMPL @\
         rcpresent = .FALSE. @\
         if (present(rc)) then @\
@@ -524,8 +524,9 @@
         type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap ! to pass f90 ptr to C++ @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr  @\
  @\
-        ! Initialize return code; assume failure until success is certain @\
+        ! Initialize return code; assume routine not implemented @\
         status = ESMF_RC_NOT_IMPL @\
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
         ! Recursive branch @\
         if (present(fshape)) then @\
@@ -618,7 +619,7 @@
         integer :: lb(mrank), ub(mrank)  ! size info for the array @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: lp ! local copy @\
  @\
-        ! initialize return code; assume failure until success is certain @\
+        ! initialize return code; assume routine not implemented @\
         status = ESMF_RC_NOT_IMPL @\
         rcpresent = .FALSE. @\
         if (present(rc)) then @\
@@ -731,7 +732,7 @@
         integer :: lb(mrank), ub(mrank)  ! size info for the array @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: lp ! local copy @\
  @\
-        ! initialize return code; assume failure until success is certain @\
+        ! initialize return code; assume routine not implemented @\
         status = ESMF_RC_NOT_IMPL @\
         rcpresent = .FALSE. @\
         if (present(rc)) then @\
@@ -821,6 +822,8 @@
  @\
         integer :: status                               ! local error status @\
  @\
+        ! Initialize return code; assume routine not implemented @\
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL @\ 
         status = ESMF_RC_NOT_IMPL  @\
  @\
         call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) @\

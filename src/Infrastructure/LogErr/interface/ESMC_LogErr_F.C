@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr_F.C,v 1.22 2007/04/26 16:13:56 rosalind Exp $
+// $Id: ESMC_LogErr_F.C,v 1.23 2007/05/09 02:48:28 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.22 2007/04/26 16:13:56 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.23 2007/05/09 02:48:28 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -66,6 +66,9 @@ extern "C" {
 //EOP
 // !REQUIREMENTS: 
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
   if (ESMC_LogDefault.errorMaskCount > 0)
     delete [] ESMC_LogDefault.errorMask;
   if (rc) *rc = ESMF_SUCCESS;
@@ -94,6 +97,9 @@ extern "C" {
 //
 //EOP
 // !REQUIREMENTS: 
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   // copy and convert F90 strings to null terminated ones
   strcpy(msg,ESMC_LogGetErrMsg(*rc));

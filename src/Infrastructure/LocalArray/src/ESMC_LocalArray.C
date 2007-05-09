@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.24 2007/04/26 16:13:56 rosalind Exp $
+// $Id: ESMC_LocalArray.C,v 1.25 2007/05/09 02:47:50 rosalind Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -40,7 +40,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.24 2007/04/26 16:13:56 rosalind Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.25 2007/05/09 02:47:50 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -64,6 +64,7 @@
     ESMC_TypeKind dk,          // short/long, etc
     int *icounts,              // number of items in each dim
     void *base,                // if non-null, this is already allocated memory
+
     ESMC_DataCopy docopy,      // if base != NULL, copy data?
     char *name,                // array name
     int *rc) {                 // return code
@@ -99,6 +100,9 @@
      ESMC_LocalArray *a = new ESMC_LocalArray;
      int status;
 
+     // Initialize return code; assume routine not implemented
+     if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
+     status = ESMC_RC_NOT_IMPL;
 
      status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
                                           ESMC_FROM_CPLUSPLUS,
@@ -167,6 +171,9 @@
      ESMC_LocalArray *a = new ESMC_LocalArray;
      int status;
 
+     // Initialize return code; assume routine not implemented
+     if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
+     status = ESMC_RC_NOT_IMPL;
 
      status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
                                           ESMC_FROM_CPLUSPLUS,
@@ -202,12 +209,18 @@
 //      only.
 //
 //EOP
+ 
+     int rc;
+
+     // Initialize return code; assume routine not implemented
+     rc = ESMC_RC_NOT_IMPL;
 
     array->ESMC_LocalArrayDestruct();
 
     delete array;
 
-    return 0;
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_LocalArrayDestroy
 
@@ -243,6 +256,10 @@
 
      ESMC_LocalArray *a = new ESMC_LocalArray;
      int status;
+
+     // Initialize return code; assume routine not implemented
+     if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
+     status = ESMC_RC_NOT_IMPL;
 
      status = a->ESMC_LocalArrayConstruct(rank, dk, NULL, NULL, oflag,
                             NULL, ESMC_ARRAY_NO_ALLOCATE, 
@@ -316,6 +333,10 @@
 //
      ESMC_LocalArray *a = new ESMC_LocalArray;
      int status;
+ 
+   // Initialize return code; assume routine not implemented
+   if (rc!= NULL) *rc = ESMC_RC_NOT_IMPL;
+   status = ESMC_RC_NOT_IMPL;
 
      if (base == NULL) 
          status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
@@ -377,9 +398,13 @@
     int i, status;
     int totalcount;
     ESMC_LocalArray *aptr;
+    int rc;
 
     rank = irank;
     kind = dk;
+
+   // Initialize return code; assume routine not implemented
+   rc = ESMC_RC_NOT_IMPL;
 
     base_addr = base;
     totalcount = 1;
@@ -448,12 +473,13 @@
 //
 //EOP
 
+   // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
     ESMC_LocalArray *aptr = this;
 
     // check origin and alloc flag, and call dealloc routine if needed 
     if (needs_dealloc != ESMF_TRUE)
-        return ESMF_SUCCESS;
+    return ESMF_SUCCESS;
 
     // if there is an F90 dope vector, we have to call back into fortran
     // to deallocate this.   if we want to support a C++ only library,
@@ -496,6 +522,10 @@
   // local vars
   int status;                 // local error status
   
+   // Initialize return code; assume routine not implemented
+   if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
+   status = ESMC_RC_NOT_IMPL;
+
   // allocate memory for new LocalArray object
   ESMC_LocalArray *larray = new ESMC_LocalArray;
   
@@ -573,7 +603,11 @@
     int i, rank = this->rank;
     int totalcount;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
-  
+    int rc;
+
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;  
+
     if (fptr) {
         // note - starts at 1; base includes rank 1 size
         for (i=1; i<rank; i++)
@@ -613,7 +647,9 @@
 
     byte_count = ESMC_TypeKindSize(kind) * totalcount;
 
-    return ESMF_SUCCESS; 
+    rc = ESMF_SUCCESS;
+    return rc;
+
 
  } // end ESMC_LocalArraySetInfo
 
@@ -646,7 +682,11 @@
 
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
-  
+    int rc;
+ 
+     // Initialize return code; assume routine not implemented
+     rc = ESMC_RC_NOT_IMPL;
+
     if (fptr) {
         // note - starts at 1; base includes rank 1 size
         for (i=1; i<rank; i++)
@@ -672,7 +712,8 @@
             offsets[i] = offset[i];
     
 
-    return ESMF_SUCCESS; 
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_LocalArrayGetInfo
 
@@ -698,7 +739,11 @@
 
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
-  
+    int rc;
+    
+     // Initialize return code; assume routine not implemented
+     rc = ESMC_RC_NOT_IMPL;
+
     // note - starts at 1; base includes rank 1 size
     for (i=1; i<rank; i++)
 	bytes += ESMF_F90_PTR_PLUS_RANK;
@@ -708,7 +753,8 @@
 
     memcpy((void *)p, (void *)(&this->f90dopev), bytes);
 
-    return ESMF_SUCCESS; 
+    rc = ESMF_SUCCESS;
+    return rc; 
 
  } // end ESMC_LocalArrayGetF90Ptr
 
@@ -735,7 +781,11 @@
 
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
-  
+    int rc;
+
+     // Initialize return code; assume routine not implemented
+     rc = ESMC_RC_NOT_IMPL;
+
     for (i=1; i<rank; i++)
 	bytes += ESMF_F90_PTR_PLUS_RANK;
    
@@ -779,7 +829,9 @@
 
     ESMC_LocalArray *newa;
 
-    *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
+
 
     return NULL;
 
@@ -811,6 +863,7 @@
 
     ESMC_LocalArray *newa;
 
+    // Initialize return code; assume routine not implemented
     *rc = ESMC_RC_NOT_IMPL;
 
     return NULL;
@@ -849,6 +902,9 @@
     int fixedpart, nbytes, rc;
     char *cp;
     int *ip, i;
+
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     fixedpart = sizeof(ESMC_LocalArray);
     if ((*length - *boffset) < fixedpart) {
@@ -920,6 +976,9 @@
     int *ip, i, rc;
     ESMC_LocalArray *aptr;
 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
     // Deserialize the Base class first.
     rc = ESMC_Base::ESMC_Deserialize(buffer, boffset);
 
@@ -985,6 +1044,9 @@
     char *cp;
     int *ip, i;
 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
     fixedpart = sizeof(ESMC_LocalArray);
     if ((*length - *boffset) < fixedpart) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
@@ -1040,6 +1102,9 @@
 //EOPI
     char *cp;
     int *ip, i, nbytes, rc;
+
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     // DeserializeNoData the Base class first.
     rc = ESMC_Base::ESMC_Deserialize(buffer, boffset);
@@ -1100,12 +1165,13 @@
 //      Print information about a {\tt ESMC\_LocalArray}.  The options control
 //      the type of information and level of detail.  {\tt ESMC\_Base} class
 //      method. 
-//
+
 //EOP
 
 //
 //  code goes here
 //
+    // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
     int i, j, k, l, m;
     int imax, jmax, kmax, lmax, mmax;
@@ -1695,6 +1761,7 @@
 //
 //  code goes here
 //
+    // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
 
     return rc;
@@ -1725,7 +1792,9 @@
 //
 //  code goes here
 //
+    // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
+
     int i, j, k, l, m;
     int imax, jmax, kmax, lmax, mmax;
     int tcount, rcount;
