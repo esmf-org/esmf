@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.10 2007/02/02 05:51:06 theurich Exp $
+# $Id: build_rules.mk,v 1.11 2007/05/09 18:11:33 tjcnrl Exp $
 #
 # Linux.g95.default
 #
@@ -97,13 +97,31 @@ endif
 endif
 
 ############################################################
-# On IA64 set long and pointer types to 64-bit
+# Construct the ABISTRING
 #
+ifeq ($(ESMF_MACHINE),x86_64)
+ifeq ($(ESMF_ABI),32)
+ESMF_ABISTRING := $(ESMF_MACHINE)_32
+endif
 ifeq ($(ESMF_ABI),64)
-ESMF_CXXCOMPILEOPTS       += -march=k8 -m64 -mcmodel=medium
-ESMF_CXXLINKOPTS          += -march=k8 -m64 -mcmodel=medium
-ESMF_F90COMPILEOPTS       += -march=k8 -m64 -mcmodel=medium
-ESMF_F90LINKOPTS          += -march=k8 -m64 -mcmodel=medium
+ESMF_ABISTRING := x86_64_small
+endif
+endif
+
+############################################################
+# Set memory model compiler flags according to ABISTRING
+#
+ifeq ($(ESMF_ABISTRING),x86_64_32)
+ESMF_CXXCOMPILEOPTS     += -m32
+ESMF_CXXLINKOPTS        += -m32
+ESMF_F90COMPILEOPTS     += -m32
+ESMF_F90LINKOPTS        += -m32
+endif
+ifeq ($(ESMF_ABISTRING),x86_64_medium)
+ESMF_CXXCOMPILEOPTS     += -mcmodel=medium
+ESMF_CXXLINKOPTS        += -mcmodel=medium
+ESMF_F90COMPILEOPTS     += -mcmodel=medium
+ESMF_F90LINKOPTS        += -mcmodel=medium
 endif
 
 ############################################################
@@ -123,10 +141,13 @@ ESMF_F90LINKRPATHS += \
 ############################################################
 # Determine where g95's libraries are located
 #
-ESMF_CXXLINKPATHS += \
-  -L$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
-ESMF_CXXLINKRPATHS += \
-  -Wl,-rpath,$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
+# Actually we don't want the specify the g95 library path as a search
+# path for the linker since this can cause the g95 versions of the gcc
+# libs to be picked up instead of the system gcc libs
+#ESMF_CXXLINKPATHS += \
+#  -L$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
+#ESMF_CXXLINKRPATHS += \
+#  -Wl,-rpath,$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
@@ -136,7 +157,9 @@ ESMF_F90LINKLIBS += -lrt -lstdc++
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt -lf95
+# Here we explicitly specify libf95.a (instead of -lf95) since
+# we are not providing the g95 library path as a linker search path.
+ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a)
 
 ############################################################
 # Blank out shared library options

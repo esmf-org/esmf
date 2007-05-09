@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.28 2006/11/27 19:22:32 theurich Exp $
+# $Id: build_rules.mk,v 1.29 2007/05/09 18:11:33 tjcnrl Exp $
 #
 # Linux.pgi.default
 #
@@ -94,6 +94,12 @@ endif
 ############################################################
 # Set memory model compiler flags according to ABISTRING
 #
+ifeq ($(ESMF_ABISTRING),x86_64_32)
+ESMF_CXXCOMPILEOPTS     += -tp k8-32
+ESMF_CXXLINKOPTS        += -tp k8-32
+ESMF_F90COMPILEOPTS     += -tp k8-32
+ESMF_F90LINKOPTS        += -tp k8-32
+endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
 ESMF_F90COMPILEOPTS     += -mcmodel=medium
 ESMF_F90LINKOPTS        += -mcmodel=medium
@@ -122,7 +128,7 @@ ESMF_F90LINKRPATHS += $(ESMF_RPATHPREFIX)$(shell $(ESMF_DIR)/scripts/libpath.pgC
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lrt -lC $(shell $(ESMF_DIR)/scripts/libs.pgCC $(ESMF_CXXCOMPILER))
+ESMF_F90LINKLIBS += -lrt -lstd -lC $(shell $(ESMF_DIR)/scripts/libs.pgCC $(ESMF_CXXCOMPILER))
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
