@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.60 2007/04/26 16:13:58 rosalind Exp $
+// $Id: ESMC_Alarm.C,v 1.61 2007/05/09 02:50:13 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.60 2007/04/26 16:13:58 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.61 2007/05/09 02:50:13 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -265,10 +265,14 @@ int ESMC_Alarm::count=0;
 //
 //EOP
 
+  // Initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
   // TODO: alarm->ESMC_AlarmDestruct(); constructor calls it!
   delete *alarm;   // ok to delete null pointer
   *alarm = ESMC_NULL_POINTER;
-  return(ESMF_SUCCESS);
+  rc = ESMF_SUCCESS;
+  return(rc);
 
  } // end ESMC_AlarmDestroy
 
@@ -306,7 +310,8 @@ int ESMC_Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmSet()"
 
-    int rc = ESMF_SUCCESS;
+  // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
  
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -381,6 +386,7 @@ int ESMC_Alarm::count=0;
       *this = saveAlarm;
     }
 
+    rc = ESMF_SUCCESS;
     return(rc);
 
  } // end ESMC_AlarmSet
@@ -424,7 +430,8 @@ int ESMC_Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmGet()"
 
-    int rc = ESMF_SUCCESS;
+  // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -499,6 +506,7 @@ int ESMC_Alarm::count=0;
       *sticky = this->sticky;
     }
 
+    rc = ESMF_SUCCESS;
     return(rc);
      
  } // end ESMC_AlarmGet
@@ -525,7 +533,8 @@ int ESMC_Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmEnable()"
 
-    int rc = ESMF_SUCCESS;
+  // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
  
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -535,7 +544,8 @@ int ESMC_Alarm::count=0;
 
     enabled = true;
 
-    return(ESMF_SUCCESS);
+    rc = ESMF_SUCCESS;
+    return(rc);           
 
  } // end ESMC_AlarmEnable
 
@@ -561,7 +571,8 @@ int ESMC_Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmDisable()"
 
-    int rc = ESMF_SUCCESS;
+  // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
  
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -572,7 +583,8 @@ int ESMC_Alarm::count=0;
     ringing = false;
     enabled = false;
 
-    return(ESMF_SUCCESS);
+    rc = ESMF_SUCCESS;
+    return(rc);           
 
  } // end ESMC_AlarmDisable
 
@@ -604,6 +616,7 @@ int ESMC_Alarm::count=0;
       return(false);
     }
 
+    // Initialize return code; assume routine not implemented
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
     return(enabled);
@@ -633,7 +646,8 @@ int ESMC_Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmRingerOn()"
 
-    int rc = ESMF_SUCCESS;
+  // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
  
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -653,7 +667,8 @@ int ESMC_Alarm::count=0;
 
     ringing = true;
 
-    return(ESMF_SUCCESS);
+    rc = ESMF_SUCCESS;
+    return(rc);      
 
  } // end ESMC_AlarmRingerOn
 
@@ -679,7 +694,8 @@ int ESMC_Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmRingerOff()"
 
-    int rc = ESMF_SUCCESS;
+  // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
  
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -720,7 +736,8 @@ int ESMC_Alarm::count=0;
       }
     }
 
-    return(ESMF_SUCCESS);
+    rc = ESMF_SUCCESS;
+    return(rc);    
 
  } // end ESMC_AlarmRingerOff
 
@@ -755,6 +772,7 @@ int ESMC_Alarm::count=0;
       return(false);
     }
 
+    // Initialize return code; assume routine not implemented
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
     return(enabled && ringing);
@@ -861,6 +879,9 @@ int ESMC_Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmWasPrevRinging()"
 
+    // Initialize return code; assume routine not implemented
+    if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
+
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", rc);
@@ -895,7 +916,8 @@ int ESMC_Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmSticky()"
 
-    int rc = ESMF_SUCCESS;
+  // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
  
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -905,7 +927,8 @@ int ESMC_Alarm::count=0;
 
     sticky = true;
 
-    return(ESMF_SUCCESS);
+    rc = ESMF_SUCCESS;
+    return(rc);          
 
  } // end ESMC_AlarmSticky
 
@@ -934,7 +957,8 @@ int ESMC_Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmNotSticky()"
 
-    int rc = ESMF_SUCCESS;
+  // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
  
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -962,7 +986,8 @@ int ESMC_Alarm::count=0;
       this->ringTimeStepCount = *ringTimeStepCount;
     }
 
-    return(ESMF_SUCCESS);
+    rc = ESMF_SUCCESS;
+    return(rc);          
 
  } // end ESMC_AlarmNotSticky
 
@@ -987,6 +1012,9 @@ int ESMC_Alarm::count=0;
 
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmIsSticky()"
+
+    // Initialize return code; assume routine not implemented
+    if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1319,6 +1347,9 @@ int ESMC_Alarm::count=0;
     // TODO:  read alarm state from iospec/name, then allocate/restore
     //        (share code with ESMC_AlarmCreate()).
 
+    // Initialize return code; assume routine not implemented
+    if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
+
     return(ESMC_NULL_POINTER);
 
  } // end ESMC_AlarmReadRestart
@@ -1346,7 +1377,8 @@ int ESMC_Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmWriteRestart()"
 
-    int rc = ESMF_SUCCESS;
+  // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
  
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1356,7 +1388,8 @@ int ESMC_Alarm::count=0;
 
     // TODO:  save alarm state using iospec/name.  Default to disk file.
 
-    return(ESMF_SUCCESS);
+    rc = ESMF_SUCCESS;
+    return(rc);
 
  } // end ESMC_AlarmWriteRestart
 
@@ -1384,7 +1417,8 @@ int ESMC_Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmValidate()"
 
-    int rc = ESMF_SUCCESS;
+  // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
  
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1410,7 +1444,8 @@ int ESMC_Alarm::count=0;
 
     // TODO: validate id ?
 
-    return(ESMF_SUCCESS);
+    rc = ESMF_SUCCESS;
+    return(rc);
 
  } // end ESMC_AlarmValidate
 
@@ -1436,7 +1471,8 @@ int ESMC_Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmPrint()"
 
-    int rc = ESMF_SUCCESS;
+  // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
  
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1587,7 +1623,8 @@ int ESMC_Alarm::count=0;
 
     printf("end Alarm ------------------------------\n\n");
 
-    return(ESMF_SUCCESS);
+    rc = ESMF_SUCCESS;
+    return(rc);
 
  } // end ESMC_AlarmPrint
 
@@ -1615,6 +1652,9 @@ int ESMC_Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_Alarm(void) constructor"
 
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
     name[0] = '\0';
     clock = ESMC_NULL_POINTER;
     ringTimeStepCount = 0;
@@ -1628,7 +1668,7 @@ int ESMC_Alarm::count=0;
     // initialize ring interval to zero
     ESMC_I4 s = 0;
     // TODO: use native C++ method when ready
-    int rc = ringInterval.ESMC_TimeIntervalSet(ESMC_NULL_POINTER,
+    rc = ringInterval.ESMC_TimeIntervalSet(ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1776,7 +1816,7 @@ int ESMC_Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmResetRingBegin()"
 
-    int rc = ESMF_SUCCESS;
+    int rc = ESMC_RC_NOT_IMPL;
 
     // determine ringBegin for previous alarm event, aligned to the clock
     //  startTime
@@ -1791,6 +1831,7 @@ int ESMC_Alarm::count=0;
       ringBegin = (ringTime - remainder) + clock->timeStep;
     }
 
+    rc = ESMF_SUCCESS;
     return(rc);
 
 } // end ESMC_AlarmResetRingBegin
