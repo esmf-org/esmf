@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.11 2007/05/09 18:11:33 tjcnrl Exp $
+# $Id: build_rules.mk,v 1.12 2007/05/09 21:22:52 theurich Exp $
 #
 # Linux.g95.default
 #
@@ -99,6 +99,14 @@ endif
 ############################################################
 # Construct the ABISTRING
 #
+ifeq ($(ESMF_MACHINE),ia64)
+ifeq ($(ESMF_ABI),32)
+ESMF_ABISTRING := $(ESMF_MACHINE)_32
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_ABISTRING := $(ESMF_MACHINE)_64
+endif
+endif
 ifeq ($(ESMF_MACHINE),x86_64)
 ifeq ($(ESMF_ABI),32)
 ESMF_ABISTRING := $(ESMF_MACHINE)_32
@@ -111,6 +119,12 @@ endif
 ############################################################
 # Set memory model compiler flags according to ABISTRING
 #
+ifeq ($(ESMF_ABISTRING),ia64_32)
+ESMF_CXXCOMPILEOPTS     += -m32
+ESMF_CXXLINKOPTS        += -m32
+ESMF_F90COMPILEOPTS     += -m32
+ESMF_F90LINKOPTS        += -m32
+endif
 ifeq ($(ESMF_ABISTRING),x86_64_32)
 ESMF_CXXCOMPILEOPTS     += -m32
 ESMF_CXXLINKOPTS        += -m32
@@ -139,17 +153,6 @@ ESMF_F90LINKRPATHS += \
   -Wl,-rpath,$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so))
 
 ############################################################
-# Determine where g95's libraries are located
-#
-# Actually we don't want the specify the g95 library path as a search
-# path for the linker since this can cause the g95 versions of the gcc
-# libs to be picked up instead of the system gcc libs
-#ESMF_CXXLINKPATHS += \
-#  -L$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
-#ESMF_CXXLINKRPATHS += \
-#  -Wl,-rpath,$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
-
-############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
 ESMF_F90LINKLIBS += -lrt -lstdc++
@@ -157,8 +160,11 @@ ESMF_F90LINKLIBS += -lrt -lstdc++
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-# Here we explicitly specify libf95.a (instead of -lf95) since
-# we are not providing the g95 library path as a linker search path.
+# Explicitly specify libf95.a (instead of -lf95) since we are not providing 
+# the g95 library path as a linker search path. Providing the g95 library path
+# could potentially cause the linker to pick gcc system libs from g95's version
+# of gcc rather than the actually used gcc version. The following approach
+# avoids this.
 ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a)
 
 ############################################################
