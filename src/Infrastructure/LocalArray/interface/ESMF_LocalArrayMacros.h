@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.33 2007/05/09 02:47:50 rosalind Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.34 2007/05/09 05:13:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -823,7 +823,7 @@
         integer :: status                               ! local error status @\
  @\
         ! Initialize return code; assume routine not implemented @\
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL @\ 
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
         status = ESMF_RC_NOT_IMPL  @\
  @\
         call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) @\
