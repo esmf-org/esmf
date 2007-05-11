@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.89 2007/05/11 02:41:59 rosalind Exp $
+! $Id: ESMF_VM.F90,v 1.90 2007/05/11 20:54:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.89 2007/05/11 02:41:59 rosalind Exp $"
+      "$Id: ESMF_VM.F90,v 1.90 2007/05/11 20:54:27 theurich Exp $"
 
 !==============================================================================
 
@@ -6240,7 +6240,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMValidate()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMValidate - Validate VM internals
 
 ! !INTERFACE:
@@ -6263,7 +6263,7 @@ module ESMF_VMMod
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -7693,7 +7693,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CommHandleValidate()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CommHandleValidate - Validate CommHandle internals
 
 ! !INTERFACE:
@@ -7716,7 +7716,7 @@ module ESMF_VMMod
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -7736,6 +7736,8 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_CommHandleValidate
 !------------------------------------------------------------------------------
