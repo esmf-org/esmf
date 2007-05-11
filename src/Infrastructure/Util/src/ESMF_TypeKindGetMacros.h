@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_TypeKindGetMacros.h,v 1.5 2007/03/31 05:51:27 cdeluca Exp $
+! $Id: ESMF_TypeKindGetMacros.h,v 1.6 2007/05/11 02:40:16 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -67,10 +67,10 @@
     integer, intent(out), optional :: rc @\
     type(ESMF_TypeKind) :: TypeKindGet##mtypekind @\
 @\
-    if (present(rc)) rc = ESMF_FAILURE @\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
     ESMF_TypeKindGet##mtypekind = ESMF_TYPEKIND_##mtypekind @\
 @\
-    rc = ESMF_SUCCESS @\
+    if (present(rc)) rc = ESMF_SUCCESS @\
 @\
     end function ESMF_TypeKindGet##mtypekind @\
 @\

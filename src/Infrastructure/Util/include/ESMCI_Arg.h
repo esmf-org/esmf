@@ -1,4 +1,4 @@
-// $Id: ESMCI_Arg.h,v 1.1 2007/05/04 21:37:34 tjcnrl Exp $
+// $Id: ESMCI_Arg.h,v 1.2 2007/05/11 02:40:13 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -105,6 +105,9 @@ int ESMC_XclassFunc( int ifix, ... ) {
   ESMC_R4   cOpt;
   ESMC_R8   dOpt;
   ESMC_Fred eOpt;
+
+   // Initialize return code; assume rutine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
 
   // check the optional argument list:
   ESMCI_ArgStart(argPtr,ifix);

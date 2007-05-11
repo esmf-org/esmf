@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.22 2007/04/20 19:47:41 theurich Exp $
+// $Id: ESMC_Util.C,v 1.23 2007/05/11 02:40:14 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.22 2007/04/20 19:47:41 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.23 2007/05/11 02:40:14 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -106,6 +106,9 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 //
 //EOPI
 
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
      if (ai == NULL) 
          return ESMF_FAILURE;
 
@@ -113,7 +116,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
      ai->max = max;
      ai->stride = stride;
 
-     return ESMF_SUCCESS;
+     rc = ESMF_SUCCESS;
+    return rc;
 };
 
 //-----------------------------------------------------------------------------
@@ -139,6 +143,9 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 //
 //EOPI
 
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
      if (ai == NULL) 
          return ESMF_FAILURE;
 
@@ -146,7 +153,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
      ai->max = max;
      ai->stride = (max-min) + 1;
 
-     return ESMF_SUCCESS;
+     rc = ESMF_SUCCESS;
+    return rc;
 };
 
 //-----------------------------------------------------------------------------
@@ -172,6 +180,9 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 //
 //EOPI
 
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
      if (ai == NULL) 
         return ESMF_FAILURE;
 
@@ -179,7 +190,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
      if (max) *max = ai->max;
      if (stride) *stride = ai->stride;
 
-     return ESMF_SUCCESS;
+     rc = ESMF_SUCCESS;
+    return rc;
 };
 
 //-----------------------------------------------------------------------------
@@ -203,6 +215,9 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 //EOPI
      char msgbuf[ESMF_MAXSTR];
 
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
      if (ai == NULL) 
         ESMC_LogDefault.ESMC_LogWrite("Empty (NULL) AxisIndex pointer", 
                                        ESMC_LOG_INFO);
@@ -210,7 +225,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
      sprintf(msgbuf, "min=%d, max=%d, stride=%d\n", ai->min, ai->max, ai->stride);
      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
 
-     return ESMF_SUCCESS;
+     rc = ESMF_SUCCESS;
+    return rc;
 }
 
 //-----------------------------------------------------------------------------
@@ -234,11 +250,15 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 //
 //EOP
 
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
   dst->min = src->min;
   dst->max = src->max;
   dst->stride = src->stride;
 
-  return ESMF_SUCCESS;
+  rc = ESMF_SUCCESS;
+    return rc;
 }
 
 //-----------------------------------------------------------------------------
@@ -359,6 +379,9 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 //EOP
   int i;
 
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
   for (i=0; i<ndims; i++) {
 
     dstglobal[i].min = srclocal[i].min + globalStarts[i];
@@ -367,7 +390,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 
   }
   
-  return ESMF_SUCCESS;
+  rc = ESMF_SUCCESS;
+    return rc;
 }
 
 //-----------------------------------------------------------------------------
@@ -398,6 +422,9 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 //EOP
   int i;
 
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
   for (i=0; i<ndims; i++) {
 
     dstlocal[i].min = srcglobal[i].min - globalref[i].min;
@@ -406,7 +433,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 
   }
   
-  return ESMF_SUCCESS;
+  rc = ESMF_SUCCESS;
+    return rc;
 }
 
 //-----------------------------------------------------------------------------
@@ -662,6 +690,9 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
     int clen, rc;
     char msgbuf[ESMF_MAXSTR];
 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (slen <= 0) ||
         (dst == NULL) || (dlen <= 0)) {
@@ -688,7 +719,8 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 
     // return ok.  caller has passed us in dst buffer so it is up to them
     // to manage that space.
-    return ESMF_SUCCESS;
+    rc = ESMF_SUCCESS;
+    return rc;
 }
 
 //-----------------------------------------------------------------------------
@@ -714,6 +746,9 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
     int clen, rc;
     char msgbuf[ESMF_MAXSTR];
 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
     // minor idiotproofing
     if ((src == NULL) || (dst == NULL) || (dlen <= 0)) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
@@ -738,7 +773,8 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
         *cp = ' ';
 
     // return ok. 
-    return ESMF_SUCCESS;
+    rc = ESMF_SUCCESS;
+    return rc;
 }
 
 //-----------------------------------------------------------------------------
@@ -768,6 +804,9 @@ extern "C" {
     char *cp;
     int clen;
     char msgbuf[ESMF_MAXSTR];
+
+    // Initialize return code; assume routine not implemented
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (*slen <= 0) ||
@@ -827,6 +866,9 @@ extern "C" {
     char *cp;
     int clen;
     char msgbuf[ESMF_MAXSTR];
+
+    // Initialize return code; assume routine not implemented
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (*slen <= 0) ||

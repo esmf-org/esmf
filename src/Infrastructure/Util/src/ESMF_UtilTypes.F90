@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.45 2007/03/31 05:51:27 cdeluca Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.46 2007/05/11 02:40:16 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -696,6 +696,10 @@ end interface
 !     \end{description}
 !
 !EOPI
+
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      ESMF_INIT_CHECK_SHALLOW(ESMF_ObjectIDGetInit,ESMF_ObjectIDInit,s)
 
      ! return success
@@ -789,6 +793,10 @@ end interface
 !     \end{description}
 !
 !EOPI
+
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit,ESMF_AxisIndexInit,s)
 
      ! return success
@@ -880,6 +888,10 @@ end interface
 !     \end{description}
 !
 !EOPI
+
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainGetInit,ESMF_DomainInit,s)
 
      ! return success
@@ -972,6 +984,10 @@ end interface
 !     \end{description}
 !
 !EOPI
+
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,s)
 
      ! return success

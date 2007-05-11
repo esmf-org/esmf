@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.34 2007/04/04 22:45:31 cdeluca Exp $
+! $Id: ESMF_LogErr.F90,v 1.35 2007/05/11 02:40:14 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -303,6 +303,9 @@ contains
 !     \end{description}
 !
 !EOPI
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,s)
 
      ! return success
@@ -399,6 +402,9 @@ contains
 !     \end{description}
 !
 !EOPI
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,s)
 
      ! return success
@@ -491,6 +497,9 @@ contains
 !     \end{description}
 !
 !EOPI
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
      ESMF_INIT_CHECK_SHALLOW(ESMF_LogEntryGetInit,ESMF_LogEntryInit,s)
 
      ! return success
@@ -566,6 +575,7 @@ end function
     integer::rc2,status
     type(ESMF_LogPrivate),pointer     :: alog
 	
+    ! Initialize return code; assume routine not implemented
     if (present(rc)) then
       rc=ESMF_FAILURE
     endif
@@ -623,6 +633,9 @@ end subroutine ESMF_LogClose
         integer :: rc2,k
         type(ESMF_Log)                                    :: log
 
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
         ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
         ! Loop through all ESMF_LogTable(*) and close the files
@@ -677,6 +690,7 @@ end subroutine ESMF_LogFinalize
       alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
     endif
 
+    ! Initialize return code; assume routine not implemented
     if (present(rc)) then
       rc=ESMF_FAILURE 
     endif
@@ -988,6 +1002,7 @@ end function ESMF_LogFoundError
 
         type(ESMF_LogPrivate),pointer          :: alog
 
+        ! Initialize return code; assume routine not implemented
 	if (present(rc)) then
           rc=ESMF_FAILURE
         endif
@@ -1069,6 +1084,9 @@ end subroutine ESMF_LogGet
 !      \end{description}
 ! 
 !EOPI
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     call ESMF_LogOpen(ESMF_LogDefault, filename, logtype, rc)
 
 end subroutine ESMF_LogInitialize
@@ -1399,6 +1417,7 @@ end subroutine ESMF_LogMsgSetError
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
+    ! Initialize return code; assume routine not implemented
     if (present(rc)) then
         rc=ESMF_FAILURE
     endif
@@ -1612,9 +1631,8 @@ end subroutine ESMF_LogOpen
       isDefault = .true.
     endif
     
-    if (present(rc)) then
-        rc=ESMF_FAILURE
-    endif
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     if (associated(alog)) then
 
@@ -1760,9 +1778,10 @@ end subroutine ESMF_LogSet
     else
       alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
     endif
-    
+
+    ! Initialize return code; assume routine not implemented
     if (present(rc)) then
-      rc=ESMF_FAILURE
+      rc=ESMF_RC_NOT_IMPL
     endif
 
     if (associated(alog)) then
@@ -1866,6 +1885,9 @@ end subroutine ESMF_LogWrite
 ! 
 !EOPI
     
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogEntryGetInit,ESMF_LogEntryInit,logEntryIn)
 
     logEntryOut%h    = logEntryIn%h

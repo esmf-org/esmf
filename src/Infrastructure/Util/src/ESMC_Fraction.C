@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.C,v 1.5 2007/03/31 05:51:27 cdeluca Exp $
+// $Id: ESMC_Fraction.C,v 1.6 2007/05/11 02:40:14 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Fraction.C,v 1.5 2007/03/31 05:51:27 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Fraction.C,v 1.6 2007/05/11 02:40:14 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -66,10 +66,15 @@
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_FractionSetw()"
 
+    // Initialize return code; assume file not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
    this->w = w;
 
    // ensure simplified form
-   return(ESMC_FractionSimplify());
+   rc = ESMC_FractionSimplify();
+   return(rc);
+
 
  }  // end ESMC_FractionSetw
 
@@ -95,10 +100,15 @@
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_FractionSetn()"
 
+    // Initialize return code; assume file not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
    this->n = n;
 
    // ensure simplified form
-   return(ESMC_FractionSimplify());
+   rc = ESMC_FractionSimplify();
+   return(rc);
+
 
  }  // end ESMC_FractionSetn
 
@@ -124,10 +134,14 @@
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_FractionSetd()"
 
+    // Initialize return code; assume file not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
    this->d = d;
 
    // ensure simplified form
-   return(ESMC_FractionSimplify());
+   rc = ESMC_FractionSimplify();
+   return(rc);
 
  }  // end ESMC_FractionSetd
 
@@ -330,6 +344,9 @@
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_FractionSimplify()"
 
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
     // check for divide-by-zero
     if (d == 0) {
       ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
@@ -367,13 +384,15 @@
     // this should never happen since GCD never returns zero!
     if (gcd == 0) {
       ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
-      return(ESMF_FAILURE);
+      rc = ESMC_RC_DIV_ZERO;
+      return(rc);
     }
 
     n /= gcd;
     d /= gcd;
 
-    return(ESMF_SUCCESS);
+    rc = ESMF_SUCCESS;
+    return(rc);
 
  }  // end ESMC_FractionSimplify
 
@@ -1220,6 +1239,9 @@
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_FractionValidate()"
 
+    // Initialize return code; assume file not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
     // must have non-zero denominator
     if (d == 0) {
       char logMsg[ESMF_MAXSTR];
@@ -1228,7 +1250,8 @@
       return(ESMF_FAILURE);
     }
 
-    return(ESMF_SUCCESS);
+    rc = ESMF_SUCCESS;
+    return(rc);
 
 }  // end ESMC_FractionValidate
 
@@ -1251,13 +1274,17 @@
 //EOP
 // !REQUIREMENTS:  
 
+    // Initialize return code; assume file not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
     printf("Fraction -------------------------------\n");
     printf("w = %lld\n", w);
     printf("n = %d\n", n);
     printf("d = %d\n", d);
     printf("end Fraction ---------------------------\n\n");
 
-    return(ESMF_SUCCESS);
+    rc = ESMF_SUCCESS;
+    return(rc);
 
 }  // end ESMC_FractionPrint
 
@@ -1309,6 +1336,9 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+ // Initialize return code
+ int rc = ESMC_RC_NOT_IMPL;
 
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_Fraction::ESMC_Fraction(w,n,d) constructor"
