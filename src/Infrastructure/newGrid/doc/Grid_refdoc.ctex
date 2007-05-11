@@ -1,4 +1,4 @@
-% $Id: Grid_refdoc.ctex,v 1.1 2007/05/11 16:09:19 oehmke Exp $
+% $Id: Grid_refdoc.ctex,v 1.2 2007/05/11 17:24:53 oehmke Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -72,18 +72,18 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Grid_usage}
-\input{ESMF_GridCreate0Ex_fapi}
-\input{ESMF_GridCreate1Ex_fapi}
-\input{ESMF_GridCreate2Ex_fapi}
-\input{ESMF_GridCreate3Ex_fapi}
-\input{ESMF_GridCreate5Ex_fapi}
+\input{ESMF_GridUsageEx_fapi}
+\input{ESMF_GridCreateCartEx_fapi}
+\input{ESMF_GridCreateTripoleEx_fapi}
+\input{ESMF_GridCreateSph2Dplus1Ex_fapi}
+\input{ESMF_GridCreateFromF90ArraysEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Grid/doc/Grid_usage}
-\input{../Infrastructure/Grid/doc/ESMF_GridCreate0Ex_fapi}
-\input{../Infrastructure/Grid/doc/ESMF_GridCreate1Ex_fapi}
-\input{../Infrastructure/Grid/doc/ESMF_GridCreate2Ex_fapi}
-\input{../Infrastructure/Grid/doc/ESMF_GridCreate3Ex_fapi}
-\input{../Infrastructure/Grid/doc/ESMF_GridCreate5Ex_fapi}
+\input{../Infrastructure/Grid/doc/ESMF_GridUsageEx_fapi}
+\input{../Infrastructure/Grid/doc/ESMF_GridCreateCartEx_fapi}
+\input{../Infrastructure/Grid/doc/ESMF_GridCreateTripoleEx_fapi}
+\input{../Infrastructure/Grid/doc/ESMF_GridCreateSph2Dplus1Ex_fapi}
+\input{../Infrastructure/Grid/doc/ESMF_GridCreateFromF90ArraysEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
