@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.92 2007/05/08 21:08:38 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.93 2007/05/11 20:26:22 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -186,8 +186,8 @@ void ESMC_VMK::vmk_obtain_args(void){
   system(command);
 #elif defined ESMF_OS_Darwin
   // this is a BSD derived OS
-  sprintf(command, "env COLUMNS=8000 ps -p %d -o command > .args.%d", mypid,
-    mypid);
+  sprintf(command, "env COLUMNS=8000 ps -w -w -p %d -o command > .args.%d",
+          mypid, mypid);
   system(command);
   sprintf(fname, ".args.%d", mypid);
   fp=fopen(fname, "r");
