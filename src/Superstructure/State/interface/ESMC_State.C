@@ -1,4 +1,4 @@
-// $Id: ESMC_State.C,v 1.10 2007/04/26 16:13:59 rosalind Exp $
+// $1.10 2007/04/26 16:13:59 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -22,6 +22,7 @@
 //
  // insert any higher level, 3rd party or system includes here
  #include "ESMC_Start.h"
+#include "ESMC_LogErr.h"
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -39,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.10 2007/04/26 16:13:59 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.11 2007/05/11 02:43:19 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -72,6 +73,7 @@
 //
 //EOP
     ESMC_State *state = NULL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_statecreate)(state, name, rc);
 
@@ -104,6 +106,9 @@
 
     int rc;
    
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
     FTN(f_esmf_statedestroy)(state, &rc);
 
     return rc;
@@ -137,7 +142,13 @@
 //
 //  code goes here
 //
-    return ESMC_RC_NOT_IMPL;
+    int rc;
+
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
+
+    return rc;
 
  } // end ESMC_StateConstruct
 
@@ -167,7 +178,12 @@
 //
 //  code goes here
 //
-    return ESMC_RC_NOT_IMPL;
+    int rc;
+
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
+    return rc;
 
  } // end ESMC_StateDestruct
 
@@ -194,7 +210,12 @@
 //
 //  code goes here
 //
-    //return ESMC_RC_NOT_IMPL;
+//  int rc;
+//
+//  // Initialize return code; assume routine not implemented
+//  rc = ESMC_RC_NOT_IMPL;
+
+    //return rc;
 
  //} // end ESMC_StateGet<Value>
 
@@ -221,7 +242,12 @@
 //
 //  code goes here
 //
-    //return ESMC_RC_NOT_IMPL;
+//  int rc;
+//
+//  // Initialize return code; assume routine not implemented
+//  rc = ESMC_RC_NOT_IMPL;
+
+    //return rc;
 
  //} // end ESMC_StateSet<Value>
 
@@ -248,7 +274,12 @@
 //
 //  code goes here
 //
-    return ESMC_RC_NOT_IMPL;
+    int rc;
+
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
+    return rc;
 
  } // end ESMC_StateValidate
 
@@ -275,7 +306,12 @@
 //
 //  code goes here
 //
-    return ESMC_RC_NOT_IMPL;
+    int rc;
+
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
+    return rc;
 
  } // end ESMC_StatePrint
 

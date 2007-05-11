@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.36 2007/03/31 05:51:33 cdeluca Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.37 2007/05/11 02:43:19 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.36 2007/03/31 05:51:33 cdeluca Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.37 2007/05/11 02:43:19 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -178,6 +178,10 @@
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
 
     ! This turns off the fast option on Regrid; it is working now for
@@ -267,6 +271,10 @@
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
+
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
 
     ! get total num pets.  this is not needed by the code, just the debug
@@ -450,6 +458,10 @@
     integer :: localrc
     type(ESMF_StateItemInfo), pointer :: si
 
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
     ! shortname for use in the code below
     si => stateInfoList(1)
 
@@ -552,6 +564,10 @@
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
+
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! shorthand for the code below
     si => stateInfoList(1)

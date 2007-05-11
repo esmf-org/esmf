@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.107 2007/04/24 01:15:24 rosalind Exp $
+! $Id: ESMF_State.F90,v 1.108 2007/05/11 02:43:19 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.107 2007/04/24 01:15:24 rosalind Exp $'
+      '$Id: ESMF_State.F90,v 1.108 2007/05/11 02:43:19 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -389,6 +389,10 @@ end interface
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,array,rc)
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -448,6 +452,10 @@ end interface
          ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,arrayList(i),rc)
       enddo
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -501,6 +509,10 @@ end interface
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
 
       call ESMF_StateValidate(state, rc=localrc)
@@ -562,6 +574,10 @@ end interface
          ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,arrayList(i),rc)
       enddo
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -617,6 +633,10 @@ end interface
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -676,6 +696,10 @@ end interface
          ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundleList(i),rc)
       enddo
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -732,6 +756,10 @@ end interface
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -791,6 +819,10 @@ end interface
          ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList(i),rc)
       enddo
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -843,6 +875,10 @@ end interface
       
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -903,6 +939,10 @@ end interface
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -959,6 +999,10 @@ end interface
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,nestedState,rc)
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
 
       call ESMF_StateValidate(state, rc=localrc)
@@ -1021,6 +1065,10 @@ end interface
       do i=1,nestedStateCount
          ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,nestedStateList(i),rc)
       enddo
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
 
       call ESMF_StateValidate(state, rc=localrc)
@@ -2779,6 +2827,9 @@ end interface
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &

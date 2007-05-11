@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.C,v 1.9 2007/03/31 05:51:30 cdeluca Exp $
+// $Id: ESMC_CplComp.C,v 1.10 2007/05/11 02:46:12 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_CplComp.C,v 1.9 2007/03/31 05:51:30 cdeluca Exp $";
+           "$Id: ESMC_CplComp.C,v 1.10 2007/05/11 02:46:12 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -90,6 +90,10 @@
     // the null must be given in form of a variable in order to satisfy
     // fortran's pass by reference! *gjt*
     void *null = NULL;
+
+    // Initialize return code; assume routine not implemented
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
     comp = new ESMC_CplComp;
     FTN(f_esmf_cplcompcreate)(comp, name, (ESMC_Config*)null, configFile, clock,
       rc, strlen(name), strlen(configFile));
@@ -123,6 +127,10 @@
 
     int rc;
 
+
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
     FTN(f_esmf_cplcompdestroy)(component, &rc);
 
     return rc;
@@ -153,6 +161,9 @@
 //EOP
 
     int rc;
+
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_cplcompinitialize)(this, importState, exportState, clock, 
                                    &phase, &blockingFlag, &rc);
@@ -185,6 +196,9 @@
 
     int rc;
 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
     FTN(f_esmf_cplcomprun)(this, importState, exportState, clock, &phase, 
                            &blockingFlag, &rc);
 
@@ -216,6 +230,9 @@
 
     int rc;
 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
     FTN(f_esmf_cplcompfinalize)(this, importState, exportState, clock, 
                                  &phase, &blockingFlag, &rc);
 
@@ -243,6 +260,9 @@
 
     int rc;
 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
     FTN(f_esmf_cplcompget)(this, &rc);
 
     return rc;
@@ -268,6 +288,9 @@
 //EOP
 
     int rc;
+
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_cplcompset)(this, &rc);
 
@@ -298,6 +321,10 @@
     int rc;
     const ESMC_CplComp *comp;
 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
+
     comp = this;
     FTN(f_esmf_cplcompvalidate)(comp, options, &rc, strlen(options));
 
@@ -327,6 +354,9 @@
 
     int rc;
     const ESMC_CplComp *comp;
+
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     comp = this;
     FTN(f_esmf_cplcompprint)(comp, options, &rc, strlen(options));

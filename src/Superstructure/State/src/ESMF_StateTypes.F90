@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.17 2007/04/24 01:15:25 rosalind Exp $
+! $Id: ESMF_StateTypes.F90,v 1.18 2007/05/11 02:43:20 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -282,7 +282,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.17 2007/04/24 01:15:25 rosalind Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.18 2007/05/11 02:43:20 rosalind Exp $'
 
 !==============================================================================
 ! 
@@ -645,6 +645,7 @@ end function
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit, sc, rc)

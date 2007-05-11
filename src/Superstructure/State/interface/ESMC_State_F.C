@@ -1,4 +1,4 @@
-// $Id: ESMC_State_F.C,v 1.5 2007/03/31 05:51:33 cdeluca Exp $
+// $Id: ESMC_State_F.C,v 1.6 2007/05/11 02:43:19 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_State_F.C,v 1.5 2007/03/31 05:51:33 cdeluca Exp $";
+             "$Id: ESMC_State_F.C,v 1.6 2007/05/11 02:43:19 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -71,6 +71,8 @@ void FTN(c_esmc_stateserialize)(int *statestatus,
                            void *buffer, int *length, int *offset, int *localrc){
 
     int *ip;
+
+    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
     // TODO: verify length > needed, else realloc longer
     int fixedpart = 10 * sizeof (int *);
@@ -115,6 +117,8 @@ void FTN(c_esmc_statedeserialize)(int *statestatus,
                              void *buffer, int *offset, int *localrc){
 
     int *ip;
+
+    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
     ip = (int *)((char *)(buffer) + *offset);
     *statestatus = *ip++;
@@ -165,6 +169,8 @@ void FTN(c_esmc_stateitemserialize)(int *otype,
     int *ip;
     char *cp;
 
+    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+
     // TODO: verify length > needed, else realloc longer
 
     ip = (int *)((char *)(buffer) + *offset);
@@ -199,6 +205,8 @@ void FTN(c_esmc_stateitemdeserialize)(int *otype,
 
     int *ip;
     char *cp;
+
+    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
     ip = (int *)((char *)(buffer) + *offset);
     *otype = *ip++;

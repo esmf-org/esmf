@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.50 2007/04/24 21:17:16 rosalind Exp $
+// $Id: ESMC_VM.C,v 1.51 2007/05/11 02:41:59 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.50 2007/04/24 21:17:16 rosalind Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.51 2007/05/11 02:41:59 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -119,6 +119,9 @@ ESMC_VMId ESMC_VMIdCreate(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  //Initialize return code; assume routine not implemented
+  *rc = ESMC_RC_NOT_IMPL;
+
   // allocates memory for vmKey member
   ESMC_VMId vmID;    // temporary stack variable
   vmID.vmKey = new char[vmKeyWidth];
@@ -230,6 +233,9 @@ int ESMC_VMIdCopy(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  //Initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
   if (vmIDdst==NULL || vmIDsrc==NULL){
     ESMC_LogDefault.ESMC_LogWrite("invalid vmIDs", ESMC_LOG_ERROR);
     return ESMF_FAILURE;    // bail out
@@ -501,6 +507,9 @@ int ESMC_VM::ESMC_VMEnter(
 //EOPI
 //-----------------------------------------------------------------------------
   int matchTableIndex_old;
+  //Initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
   if(vmp->nothreadflag){
     // take care of book keeping for ESMF...
     matchTableIndex_old = matchTableIndex;
@@ -553,6 +562,9 @@ int ESMC_VM::ESMC_VMGet(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  //Initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
   if (localPet != ESMC_NULL_POINTER)
     *localPet = this->vmk_mypet();
   if (petCount != ESMC_NULL_POINTER)
@@ -600,6 +612,9 @@ int ESMC_VM::ESMC_VMGetPETLocalInfo(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  //Initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
   if (peCount != ESMC_NULL_POINTER)
     *peCount = this->vmk_ncpet(pet);
   if (ssiId != ESMC_NULL_POINTER)
@@ -652,6 +667,9 @@ int ESMC_VM::ESMC_VMGetPETMatchPET(
   int *tempMatchList = new int[npets];
   int vasCompare = pid[pet];        // this is pet's virtual address space id
   int j=0;
+  //Initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
   for (int i=0; i<npets; i++)
     if (vmMatch.vmk_vas(i) == vasCompare){
       tempMatchList[j] = i;
@@ -740,6 +758,9 @@ int ESMC_VM::ESMC_VMSendVMId(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  //Initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
   if (vmID==ESMC_NULL_POINTER){
     ESMC_LogDefault.ESMC_LogWrite("invalid vmID", ESMC_LOG_ERROR);
     return ESMF_FAILURE;
@@ -774,6 +795,9 @@ int ESMC_VM::ESMC_VMRecvVMId(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  //Initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
   if (vmID==ESMC_NULL_POINTER){
     ESMC_LogDefault.ESMC_LogWrite("invalid vmID", ESMC_LOG_ERROR);
     return ESMF_FAILURE;

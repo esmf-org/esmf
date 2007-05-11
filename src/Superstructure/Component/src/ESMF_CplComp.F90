@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.76 2007/04/24 01:39:38 rosalind Exp $
+! $Id: ESMF_CplComp.F90,v 1.77 2007/05/11 02:46:12 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.76 2007/04/24 01:39:38 rosalind Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.77 2007/05/11 02:46:12 rosalind Exp $'
 
 !==============================================================================
 !
@@ -229,6 +229,7 @@
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
         ! Allocate a new comp class
         allocate(compclass, stat=localrc)
@@ -286,6 +287,7 @@
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
         ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
@@ -419,6 +421,8 @@
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         call ESMF_CompExecute(cplcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETFINAL, phase=phase, &
@@ -479,6 +483,8 @@
 !EOP
 
         ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         call ESMF_CompGet(cplcomp%compp, name, vm=vm, contextflag=contextflag, &
           clock=clock, configFile=configFile, config=config, rc=rc)
@@ -555,6 +561,8 @@
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         call ESMF_CompExecute(cplcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETINIT, phase=phase, &
@@ -593,6 +601,8 @@
 !EOP
 
      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
      !jw  call ESMF_LogWrite("Coupler Component:", ESMF_LOG_INFO)
        print *, "Coupler Component:"
@@ -661,6 +671,8 @@
         ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 	! Changed BOP to BOPI until implemented.
         call ESMF_CompReadRestart(cplcomp%compp, iospec, clock, phase, &
@@ -735,6 +747,8 @@
 !   \end{description}
 !
 !EOP
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
@@ -796,6 +810,8 @@
 !
 !EOP
 
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
         ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
@@ -848,6 +864,7 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
@@ -906,6 +923,7 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
@@ -965,6 +983,7 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
@@ -1076,6 +1095,8 @@
 !   \end{description}
 !
 !EOP
+        ! Initialize return code; assume routine not implemented
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
@@ -1125,6 +1146,7 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
@@ -1176,6 +1198,7 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
     ! Initialize output value in case of error
     ESMF_CplCompIsPetLocal = .false.

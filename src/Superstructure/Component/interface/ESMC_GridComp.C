@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.C,v 1.13 2007/03/31 05:51:31 cdeluca Exp $
+// $Id: ESMC_GridComp.C,v 1.14 2007/05/11 02:46:12 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_GridComp.C,v 1.13 2007/03/31 05:51:31 cdeluca Exp $";
+           "$Id: ESMC_GridComp.C,v 1.14 2007/05/11 02:46:12 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -76,6 +76,9 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //EOP
 
     int rc;
+ 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     // this should go directly to C++ entry point
     ESMC_SetServ(this, func, &rc);
@@ -132,6 +135,9 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 // !REQUIREMENTS:  
 
     int rc;
+ 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     FTN(esmf_gridcompsetentrypoint)(this, (char *)functionType, (void *)functionPtr,
                                     &phase, &rc, strlen(functionType));
@@ -175,6 +181,10 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
     // fortran's pass by reference! *gjt*
     void *null = NULL;
     comp = new ESMC_GridComp;
+
+    // Initialize return code; assume routine not implemented
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
     FTN(f_esmf_gridcompcreate)(comp, name, &mtype, grid, (ESMC_Config*)null,
       configFile, clock, rc, strlen(name), strlen(configFile));
 
@@ -206,6 +216,9 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 // !REQUIREMENTS:  
 
     int rc;
+ 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_gridcompdestroy)(component, &rc);
 
@@ -237,6 +250,9 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //EOP
 
     int rc;
+ 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_gridcompinitialize)(this, importState, exportState, clock, 
                                    &phase, &blockingFlag, &rc);
@@ -268,6 +284,9 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //EOP
 
     int rc;
+ 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_gridcomprun)(this, importState, exportState, clock, 
                             &phase, &blockingFlag, &rc);
@@ -299,6 +318,9 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //EOP
 
     int rc;
+ 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_gridcompfinalize)(this, importState, exportState, clock, 
                                  &phase, &blockingFlag, &rc);
@@ -326,6 +348,9 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //EOP
 
     int rc;
+ 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_gridcompget)(this, &rc);
 
@@ -352,6 +377,9 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //EOP
 
     int rc;
+ 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_gridcompset)(this, &rc);
 
@@ -380,6 +408,9 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //EOP
 
     int rc;
+ 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_gridcompvalidate)(this, options, &rc, strlen(options));
 
@@ -408,6 +439,9 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //EOP
 
     int rc;
+ 
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
 
     FTN(f_esmf_gridcompprint)(this, options, &rc, strlen(options));
 

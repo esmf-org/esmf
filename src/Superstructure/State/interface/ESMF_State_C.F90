@@ -1,4 +1,4 @@
-!  $Id: ESMF_State_C.F90,v 1.6 2007/03/31 05:51:33 cdeluca Exp $
+! $Id: ESMF_State_C.F90,v 1.7 2007/05/11 02:43:19 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.6 2007/03/31 05:51:33 cdeluca Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.7 2007/05/11 02:43:19 rosalind Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -48,6 +48,9 @@
        character(*) :: name
        integer :: rc              
 
+       ! Initialize return code; assume routine not implemented
+       rc = ESMF_RC_NOT_IMPL
+
        state = ESMF_StateCreate(statename=name, rc=rc)
     
    end subroutine f_esmf_statecreate
@@ -59,6 +62,9 @@
 
        type(ESMF_State) :: state
        integer :: rc              
+
+       ! Initialize return code; assume routine not implemented
+       rc = ESMF_RC_NOT_IMPL
 
        call ESMF_StateDestroy(state, rc)
     
@@ -73,6 +79,9 @@
        integer :: func
        integer :: rc              
 
+       ! Initialize return code; assume routine not implemented
+       rc = ESMF_RC_NOT_IMPL
+
        !call ESMF_StateAddData(statep, rc)
     
    end subroutine f_esmf_stateadddata
@@ -86,6 +95,9 @@
        character(*) :: name
        integer :: rc     
 
+       ! Initialize return code; assume routine not implemented
+       rc = ESMF_RC_NOT_IMPL
+
        !call ESMF_StateGetData(statep, rc)
 
    end subroutine f_esmf_stategetdata
@@ -98,6 +110,9 @@
        type(ESMF_State), pointer :: statep      
        character(*) :: name
        integer :: rc     
+
+       ! Initialize return code; assume routine not implemented
+       rc = ESMF_RC_NOT_IMPL
 
        !call ESMF_StateGet(statep, rc)
 

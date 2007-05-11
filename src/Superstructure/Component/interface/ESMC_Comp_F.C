@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.43 2007/04/26 16:13:58 rosalind Exp $
+// $Id: ESMC_Comp_F.C,v 1.44 2007/05/11 02:46:12 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -52,6 +52,10 @@ static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase,
      void *f90comp = ptr;
      ESMC_FTable *tabptr;
 
+     // Initialize return code; assume routine not implemented
+     if (status) *status = ESMC_RC_NOT_IMPL;
+     localrc = ESMC_RC_NOT_IMPL;
+
      //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
      //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
      if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)) {
@@ -87,6 +91,10 @@ static void ESMC_GetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     enum dtype dtype;
     int localrc;
 
+     // Initialize return code; assume routine not implemented
+     if (status) *status = ESMC_RC_NOT_IMPL;
+     localrc = ESMC_RC_NOT_IMPL;
+
      //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
      //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
     if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
@@ -105,6 +113,10 @@ static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     char *name = "localdata";
     enum dtype dtype = DT_VOIDP;
     int localrc;
+
+     // Initialize return code; assume routine not implemented
+     if (status) *status = ESMC_RC_NOT_IMPL;
+     localrc = ESMC_RC_NOT_IMPL;
 
      //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
      //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
@@ -275,6 +287,10 @@ extern "C" {
          enum dtype dtype = DT_VOIDP;
          int localrc;
 
+     // Initialize return code; assume routine not implemented
+     if (status) *status = ESMC_RC_NOT_IMPL;
+     localrc = ESMC_RC_NOT_IMPL;
+
          if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
                                               "null pointer found", status);
@@ -307,6 +323,10 @@ extern "C" {
          char *tbuf; 
          enum dtype dtype;
          int localrc;
+
+     // Initialize return code; assume routine not implemented
+     if (status) *status = ESMC_RC_NOT_IMPL;
+     localrc = ESMC_RC_NOT_IMPL;
 
          if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
@@ -375,6 +395,10 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   int localrc;              // local return code
   char *name;               // trimmed type string
 
+     // Initialize return code; assume routine not implemented
+     if (status) *status = ESMC_RC_NOT_IMPL;
+     localrc = ESMC_RC_NOT_IMPL;
+
   newtrim(type, slen, phase, NULL, &name);
 
   // Things get a little confusing here with pointers, so I will define
@@ -412,6 +436,9 @@ void FTN(c_esmc_compwait)(
   void **vm_cargo,          // p2 to member which holds cargo
   int *callrc,              // return code of the user component method
   int *status) {            // return error code in status
+
+     // Initialize return code; assume routine not implemented
+     if (status) *status = ESMC_RC_NOT_IMPL;
 
   // Things get a little confusing here with pointers, so I will define
   // some temp. variables that make matters a little clearer I hope:

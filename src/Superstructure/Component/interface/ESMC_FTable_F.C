@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.22 2007/03/31 05:51:31 cdeluca Exp $
+// $Id: ESMC_FTable_F.C,v 1.23 2007/05/11 02:46:12 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -46,11 +46,14 @@ extern "C" {
      // no need for explicit create methods - call the native class 
      // constructor and destructor methods directly.
      void FTN(c_esmc_ftablecreate)(ESMC_FTable **ptr, int *status) {
+         *status = ESMC_RC_NOT_IMPL;
+
          (*ptr) = new ESMC_FTable;
          (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
 
      void FTN(c_esmc_ftabledestroy)(ESMC_FTable **ptr, int *status) {
+         *status = ESMC_RC_NOT_IMPL;
          delete (*ptr);
          *ptr = 0;
          *status = ESMF_SUCCESS;
@@ -60,8 +63,9 @@ extern "C" {
      void FTN(c_esmc_ftablecallentrypoint)(ESMC_FTable **ptr, char *type, 
                                         int *phase, int *status, int slen) {
          int funcrc;
-         int localrc;
          char *name;
+         int localrc = ESMC_RC_NOT_IMPL;
+         *status = ESMC_RC_NOT_IMPL;
 
          newtrim(type, slen, phase, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
@@ -89,6 +93,7 @@ extern "C" {
      void FTN(c_esmc_ftablegetentrypoint)(ESMC_FTable **ptr, char *type, 
                        void **func, enum ftype *ftype, int *status, int slen) {
          char *name;
+         *status = ESMC_RC_NOT_IMPL;
 
          newtrim(type, slen, NULL, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
@@ -101,6 +106,7 @@ extern "C" {
      void FTN(c_esmc_ftablesetentrypoint)(ESMC_FTable **ptr, char *type,
                                            void *func, int *status, int slen) {
          char *name;
+         *status = ESMC_RC_NOT_IMPL;
 
          newtrim(type, slen, NULL, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
@@ -113,6 +119,8 @@ extern "C" {
      void FTN(c_esmc_ftablesetargs)(ESMC_FTable **ptr, char *type,
                             int *acount, void **alist, int *status, int slen) {
          char *name;
+
+         *status = ESMC_RC_NOT_IMPL;
 
          newtrim(type, slen, NULL, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
@@ -130,6 +138,8 @@ extern "C" {
          char *fname;
          int acount = 5;
          void *alist[5];
+
+         *status = ESMC_RC_NOT_IMPL;
 
          newtrim(type, slen, phase, NULL, &fname);
          //printf("after newtrim, name = '%s'\n", fname);
@@ -173,6 +183,8 @@ extern "C" {
                         void *data, enum dtype *dtype, int *status, int slen) {
          char *name;
 
+         *status = ESMC_RC_NOT_IMPL;
+
          newtrim(type, slen, NULL, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
 
@@ -184,6 +196,8 @@ extern "C" {
      void FTN(c_esmc_ftablegetinternalstate)(ESMC_FTable ***ptr, char *type,
                        void **data, enum dtype *dtype, int *status, int slen) {
          char *name;
+
+         *status = ESMC_RC_NOT_IMPL;
 
          newtrim(type, slen, NULL, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);

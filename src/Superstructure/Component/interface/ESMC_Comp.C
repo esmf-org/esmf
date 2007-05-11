@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.29 2007/04/26 16:13:58 rosalind Exp $
+// $Id: ESMC_Comp.C,v 1.30 2007/05/11 02:46:12 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -52,7 +52,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.29 2007/04/26 16:13:58 rosalind Exp $";
+           "$Id: ESMC_Comp.C,v 1.30 2007/05/11 02:46:12 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -92,6 +92,9 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 // !REQUIREMENTS:  AAAn.n.n
 
     ESMC_Comp *comp;
+
+    // Initialize return code; assume routine not implemented
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     // TODO: make this match the correct calling convention
 
@@ -160,8 +163,11 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //  TODO: call directly into jump table?
 //    and need 2 flavors based on state count
 //
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
     printf("ComponentInit method called \n");
-    return ESMC_RC_NOT_IMPL;
+    return rc;
 
  } // end ESMC_CompInit
 
@@ -187,8 +193,11 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //  TODO: call directly into jump table?
 //    and need 2 flavors based on state count
 //
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
     printf("ComponentRun method called \n");
-    return ESMC_RC_NOT_IMPL;
+    return rc;
 
  } // end ESMC_CompRun
 
@@ -214,8 +223,11 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //  TODO: call directly into jump table?
 //    and need 2 flavors based on state count
 //
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
     printf("ComponentFinal method called \n");
-    return ESMC_RC_NOT_IMPL;
+    return rc;
 
  } // end ESMC_CompFinal
 
@@ -241,7 +253,10 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //
 //  TODO: code goes here
 //
-    return ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
+    return rc;
 
  } // end ESMC_CompGet
 
@@ -267,7 +282,10 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //
 //  TODO: code goes here
 //
-    return ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
+    return rc;
 
  } // end ESMC_CompSet
 
@@ -295,7 +313,10 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //
 //  code goes here
 //
-    return ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
+    return rc;
 
  } // end ESMC_CompValidate
 
@@ -323,7 +344,10 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //
 //  code goes here
 //
-    return ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
+    return rc;
 
  } // end ESMC_CompPrint
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.88 2007/04/24 01:39:38 rosalind Exp $
+! $Id: ESMF_GridComp.F90,v 1.89 2007/05/11 02:46:13 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.88 2007/04/24 01:39:38 rosalind Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.89 2007/05/11 02:46:13 rosalind Exp $'
 
 !==============================================================================
 !
@@ -234,6 +234,7 @@
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
         ! Allocate a new comp class
         allocate(compclass, stat=localrc)
@@ -292,6 +293,7 @@
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
@@ -425,6 +427,9 @@
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
 
+        ! Initialize return code; assume routine not implemented
+        rc = ESMF_RC_NOT_IMPL
+
         call ESMF_CompExecute(gridcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETFINAL, phase=phase, &
           blockingflag=blockingflag, rc=rc)
@@ -489,6 +494,9 @@
 !EOP
 
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+
+        ! Initialize return code; assume routine not implemented
+        rc = ESMF_RC_NOT_IMPL
 
         call ESMF_CompGet(gridcomp%compp, name, vm=vm, contextflag=contextflag,&
                           gridcomptype=gridcomptype, grid=grid, clock=clock, &
@@ -566,6 +574,9 @@
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
 
+        ! Initialize return code; assume routine not implemented
+        rc = ESMF_RC_NOT_IMPL
+
         call ESMF_CompExecute(gridcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETINIT, phase=phase, &
           blockingflag=blockingflag, rc=rc)
@@ -602,6 +613,9 @@
 !EOP
 
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+
+        ! Initialize return code; assume routine not implemented
+        rc = ESMF_RC_NOT_IMPL
 
 
      !jw  call ESMF_LogWrite("Gridded Component:", ESMF_LOG_INFO)
@@ -670,6 +684,9 @@
 !EOP
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
+        ! Initialize return code; assume routine not implemented
+        rc = ESMF_RC_NOT_IMPL
 
 	! Change BOPI to BOP when implemented.
         call ESMF_CompReadRestart(gridcomp%compp, iospec, clock, phase, &
@@ -749,6 +766,9 @@
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
 
+        ! Initialize return code; assume routine not implemented
+        rc = ESMF_RC_NOT_IMPL
+
         call ESMF_CompExecute(gridcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETRUN, phase=phase, &
           blockingflag=blockingflag, rc=rc)
@@ -815,6 +835,9 @@
         ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
+        ! Initialize return code; assume routine not implemented
+        rc = ESMF_RC_NOT_IMPL
+
         call ESMF_CompSet(gridcomp%compp, name, &
                           gridcomptype=gridcomptype, grid=grid, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
@@ -865,6 +888,7 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
@@ -924,6 +948,7 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
@@ -984,6 +1009,7 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
@@ -1037,6 +1063,9 @@
 
       ! Check Init Status
       ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+
+        ! Initialize return code; assume routine not implemented
+        rc = ESMF_RC_NOT_IMPL
 
       ! If all checks pass return success
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1102,7 +1131,8 @@
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-
+        ! Initialize return code; assume routine not implemented
+        rc = ESMF_RC_NOT_IMPL
 
 	!Change BOPI to BOP when implemented.
         call ESMF_CompWriteRestart(gridcomp%compp, iospec, clock, phase, &
@@ -1147,6 +1177,7 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
@@ -1200,6 +1231,7 @@
 
     ! Initialize return code; assume failure until success is certain       
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
     ! Initialize output value in case of error
     ESMF_GridCompIsPetLocal = .false.

@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.26 2007/04/26 16:13:58 rosalind Exp $
+// $Id: ESMC_FTable.C,v 1.27 2007/05/11 02:46:12 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.26 2007/04/26 16:13:58 rosalind Exp $";
+           "$Id: ESMC_FTable.C,v 1.27 2007/05/11 02:46:12 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -83,6 +83,9 @@
 //EOP
 // !REQUIREMENTS:  
 
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
     // TODO: allocate space for N items, rounded up?
     if (nfuncp > funcalloc) {
         funcs = (funcinfo *)realloc((void *)funcs, nfuncp * sizeof(funcinfo));
@@ -95,7 +98,8 @@
 
     //printf("TableExtend called, sizeof(funcinfo)=%d, sizeof(datainfo)=%d\n",
     //                            sizeof(funcinfo), sizeof(datainfo));
-    return ESMF_SUCCESS;
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_FTableExtend
 
@@ -120,12 +124,16 @@
 //EOP
 // !REQUIREMENTS:  
 
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
     // fill in values
     *nfuncp = funccount;
     *ndatap = datacount;
 
     //printf("TableQuery method called \n");
-    return ESMF_SUCCESS;
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_FTableQuery
 
@@ -151,6 +159,9 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     int i, thisfunc;
     //char msgbuf[ESMF_MAXSTR];
@@ -182,7 +193,8 @@
     }
    
 
-    return ESMF_SUCCESS;
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_FTableSetFuncPtr
 
@@ -210,6 +222,9 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     int i, thisfunc;
     //char msgbuf[ESMF_MAXSTR];
@@ -241,7 +256,8 @@
     }
    
 
-    return ESMF_SUCCESS;
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_FTableSetFuncPtr
 
@@ -269,6 +285,9 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     int i, thisfunc;
     //char msgbuf[ESMF_MAXSTR];
@@ -306,7 +325,8 @@
     }
    
 
-    return ESMF_SUCCESS;
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_FTableSetFuncPtr
 
@@ -334,6 +354,9 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     int i, thisfunc;
     //char msgbuf[ESMF_MAXSTR];
@@ -367,7 +390,8 @@
     }
    
 
-    return ESMF_SUCCESS;
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_FTableSetFuncPtr
 
@@ -394,7 +418,10 @@
 //EOP
 // !REQUIREMENTS:  
 
-    int i, j, status;
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+    int status = ESMC_RC_NOT_IMPL;
+    int i, j;
     char msgbuf[ESMF_MAXSTR];
 
     for (i=0; i<funccount; i++) {
@@ -438,6 +465,9 @@
 //EOP
 // !REQUIREMENTS:  
 
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
  // TODO: test this code
     if (datacount >= dataalloc) {
         data = (datainfo *)realloc((void *)data, (datacount+4) * sizeof(datainfo));
@@ -450,7 +480,8 @@
    
     datacount++;
 
-    return ESMF_SUCCESS;
+    rc = ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_FTableSetDataPtr
 
@@ -477,6 +508,9 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     int i;
 
@@ -558,6 +592,7 @@
 // !REQUIREMENTS:  
 
     int i, status;
+    status = ESMC_RC_NOT_IMPL;
 
     *rc = ESMC_RC_NOT_IMPL;
     for (i=0; i<funccount; i++) {
@@ -678,6 +713,8 @@
     ESMC_VM **vm = &vmm;
     
     *rc = ESMC_RC_NOT_IMPL;
+    status = ESMC_RC_NOT_IMPL;
+
     for (i=0; i<funccount; i++) {
         if (strcmp(name, funcs[i].funcname))
            continue;
@@ -869,6 +906,9 @@
 //
 //  code goes here
 //
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
     return ESMC_RC_NOT_IMPL;
 
  } // end ESMC_FTableValidate
@@ -899,7 +939,10 @@
 //
 //  code goes here
 //
-    return ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
+    return rc;
 
  } // end ESMC_FTablePrint
 
