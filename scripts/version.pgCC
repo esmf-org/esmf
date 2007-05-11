@@ -2,7 +2,9 @@
 # this script expects the pgCC command (or a wrapper to pgCC, e.g. mpiCC)
 # and returns the version of pgCC and the optional wrapper
 PATHEXE=`which $1`
-PGCCEXE=`$1 -dryrun 2>&1 | grep "\/.pgCCrc" | head -1 | awk '{ print $3} '| sed 's/.pgCCrc/pgCC/g'`
+PGCCEXE=`$1 -dryrun 2>&1 | grep "\/\.pg" | head -1 | awk '{ print $3} '`
+PGCCEXE=$PGCCEXE"TermX"
+PGCCEXE=`echo $PGCCEXE | sed 's/\.pg.*TermX/pgCC/g'`
 if [ $PGCCEXE = $PATHEXE ]; then
 $PGCCEXE -V
 else
