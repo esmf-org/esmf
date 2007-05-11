@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.7 2007/05/09 18:11:33 tjcnrl Exp $
+# $Id: build_rules.mk,v 1.8 2007/05/11 00:02:17 theurich Exp $
 #
 # Dawin.g95.default
 #
@@ -125,15 +125,6 @@ ESMF_F90LINKPATHS += \
   -L$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a))
 
 ############################################################
-# Determine where g95's libraries are located
-#
-# Actually we don't want the specify the g95 library path as a search
-# path for the linker since this can cause the g95 versions of the gcc
-# libs to be picked up instead of the system gcc libs
-#ESMF_CXXLINKPATHS += \
-#  -L$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
-
-############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
 ESMF_F90LINKLIBS += -lstdc++
@@ -141,8 +132,11 @@ ESMF_F90LINKLIBS += -lstdc++
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-# Here we explicitly specify libf95.a (instead of -lf95) since
-# we are not providing the g95 library path as a linker search path.
+# Explicitly specify libf95.a (instead of -lf95) since we are not providing 
+# the g95 library path as a linker search path. Providing the g95 library path
+# could potentially cause the linker to pick gcc system libs from g95's version
+# of gcc rather than the actually used gcc version. The following approach
+# avoids this.
 ESMF_CXXLINKLIBS += $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a)
 
 ############################################################
