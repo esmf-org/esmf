@@ -1,0 +1,35 @@
+% $Id: Grid_rest.tex,v 1.1 2007/05/11 16:09:20 oehmke Exp $
+
+%\subsubsection{Restrictions and Future Work}
+
+\begin{itemize}
+
+\item {\bf During the first phase only single tile grids are supported:}
+Currently, only grids containing a single tile are supported. 
+In the near future, support for multipatch grids will be added. 
+
+\item {\bf Future adaptation:}  Currently Grids
+are created and then remain unchanged. In the future, it would
+be useful to provide support for the various forms of grid
+adaptation. This would allow the grids to dynamically change
+their resolution to more closely match what is needed at a particular
+time and postion during a computation for front tracking or adaptive meshes.
+
+\item {\bf Future Grid masks:}  Grid masks will be implemented.
+
+\item {\bf Future Exchange Grids:}  The functionality for creating an 
+exchange grid between two ordinary grids will be implemented
+to assist with the remapping of data during a regrid operation. 
+
+\item {\bf Future Unstructured Grid:}  Currently only grids which can be constructed from a set of logically rectangular tiles are supported. In the future more general unstructured grids will be implemented.
+
+\item {\bf Future Grid IO:} In the future it would be useful to have a grid method which can read in a grid specification and distribution from a file and construct the grid. There may need to be a set of these methods corresponding to different group's file formats.
+
+\item {\bf Future Grid Generation:} This class for now only contains
+the basic functionality for operating on the grid. In the future
+methods will be added to enable the automatic generation of various types of
+grids. 
+
+
+\end{itemize}
+

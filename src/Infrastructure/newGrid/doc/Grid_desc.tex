@@ -1,0 +1,47 @@
+% $Id: Grid_desc.tex,v 1.1 2007/05/11 16:09:19 oehmke Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2008, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+% <Describe class function and relation to other classes.>
+
+
+The ESMF Grid class is used to describe the geometry and discretization
+of a physical grid.  Through its connection to the {\tt ESMF\_DistGrid}
+class it also contains the description of the decomposition of the 
+physical grid across the available computational resources and the grid's underlying
+topology. The Grid class is constructed on top of the 
+{\tt ESMF\_Array} class to hold its internal data and to provide
+some communication. 
+
+\medskip
+
+The Grid class has a range of capabilities:
+\begin{itemize}
+
+\item It is able to describe grids of dimension from 1D up to 7D (the fortran limit).
+
+\item The user may set arbitarily which grid dimensions are distributed. 
+
+\item The user may use factorized grid coordinate arrays. This allows
+      memory savings and a representation that more closely matches 
+      the structure of the  coordinate data. 
+
+\item  It is able to store grid coordinates for multiple stagger locations for up to the maximum dimension. There are predefined staggers and predefined stagger locations for ease of use, however, the user can also specify their own if they need something different (see Section~\ref{ref:stagger} for a more in depth discussion of staggers).
+
+\item It can represent, via the ESMF\_DistGrid class, complex connections such 
+      as those used in the tripole and cube-sphere grids. 
+
+\item It can represent grid mosaics containing multiple logically rectangular
+tiles. (similar to those described by V. Balaji in the Oct. 2006 report ``A Standard Description of Grids Used in Earth System Models''). These tiles can be connected in a variety of ways to create a complex index space topology. Each tile of the topology can contain arbitrary coordinates. This allows the class to represent a large range of multipatch curvilinear grids. 
+
+\end{itemize}
+
+\medskip
+
+ With these capabilities, the ESMF Grid class should support the structured grid needs of its user community. 
