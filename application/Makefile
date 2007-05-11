@@ -40,7 +40,7 @@ include $(ESMF_INSTALL_LIBDIR_ABSPATH)/esmf.mk
 
 
 # -----------------------------------------------------------------------------
-all: esmf_application esmc_application
+all: esmf_application
 
 esmf_application:
 
