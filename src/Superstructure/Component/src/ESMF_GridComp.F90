@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.89 2007/05/11 02:46:13 rosalind Exp $
+! $Id: ESMF_GridComp.F90,v 1.90 2007/05/11 21:34:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.89 2007/05/11 02:46:13 rosalind Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.90 2007/05/11 21:34:32 theurich Exp $'
 
 !==============================================================================
 !
@@ -428,7 +428,7 @@
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
 
         ! Initialize return code; assume routine not implemented
-        rc = ESMF_RC_NOT_IMPL
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         call ESMF_CompExecute(gridcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETFINAL, phase=phase, &
@@ -496,7 +496,7 @@
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
         ! Initialize return code; assume routine not implemented
-        rc = ESMF_RC_NOT_IMPL
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         call ESMF_CompGet(gridcomp%compp, name, vm=vm, contextflag=contextflag,&
                           gridcomptype=gridcomptype, grid=grid, clock=clock, &
@@ -575,7 +575,7 @@
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
 
         ! Initialize return code; assume routine not implemented
-        rc = ESMF_RC_NOT_IMPL
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         call ESMF_CompExecute(gridcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETINIT, phase=phase, &
@@ -615,7 +615,7 @@
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
         ! Initialize return code; assume routine not implemented
-        rc = ESMF_RC_NOT_IMPL
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
      !jw  call ESMF_LogWrite("Gridded Component:", ESMF_LOG_INFO)
@@ -686,7 +686,7 @@
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
         ! Initialize return code; assume routine not implemented
-        rc = ESMF_RC_NOT_IMPL
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 	! Change BOPI to BOP when implemented.
         call ESMF_CompReadRestart(gridcomp%compp, iospec, clock, phase, &
@@ -767,7 +767,7 @@
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
 
         ! Initialize return code; assume routine not implemented
-        rc = ESMF_RC_NOT_IMPL
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         call ESMF_CompExecute(gridcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETRUN, phase=phase, &
@@ -836,7 +836,7 @@
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
         ! Initialize return code; assume routine not implemented
-        rc = ESMF_RC_NOT_IMPL
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         call ESMF_CompSet(gridcomp%compp, name, &
                           gridcomptype=gridcomptype, grid=grid, clock=clock, &
@@ -1064,8 +1064,8 @@
       ! Check Init Status
       ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
-        ! Initialize return code; assume routine not implemented
-        rc = ESMF_RC_NOT_IMPL
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! If all checks pass return success
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1132,7 +1132,7 @@
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
         ! Initialize return code; assume routine not implemented
-        rc = ESMF_RC_NOT_IMPL
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 	!Change BOPI to BOP when implemented.
         call ESMF_CompWriteRestart(gridcomp%compp, iospec, clock, phase, &
