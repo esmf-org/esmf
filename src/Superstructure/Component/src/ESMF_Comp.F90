@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.154 2007/04/24 01:39:38 rosalind Exp $
+! $Id: ESMF_Comp.F90,v 1.155 2007/05/11 23:59:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.154 2007/04/24 01:39:38 rosalind Exp $'
+      '$Id: ESMF_Comp.F90,v 1.155 2007/05/11 23:59:21 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1081,9 +1081,10 @@ end function
         ! restrictive thing to do is to just pass the user return code through
         ! to the parent component and have the user code interpret what it 
         ! means.
-        call ESMF_LogMsgSetError(status, &
-          "Registered component method returned error", &
-          ESMF_CONTEXT, rc)
+! gjt: taking this out because somehow RC_NOT_IMPL comes back from user code now
+!        call ESMF_LogMsgSetError(status, &
+!          "Registered component method returned error", &
+!          ESMF_CONTEXT, rc)
 
         end subroutine ESMF_CompExecute
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.44 2007/05/11 02:46:12 rosalind Exp $
+// $Id: ESMC_Comp_F.C,v 1.45 2007/05/11 23:59:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -374,7 +374,7 @@ static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargo){
   // has the same pointer to cargo. Naturally the above must be done in a
   // threadsafe manner :-). 
   ((cargotype *)cargo)->esmfrc = esmfrc;
-  ((cargotype *)cargo)->esmfrc = userrc;
+  ((cargotype *)cargo)->userrc = userrc;
   
   return NULL;
 }
@@ -395,9 +395,9 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   int localrc;              // local return code
   char *name;               // trimmed type string
 
-     // Initialize return code; assume routine not implemented
-     if (status) *status = ESMC_RC_NOT_IMPL;
-     localrc = ESMC_RC_NOT_IMPL;
+  // Initialize return code; assume routine not implemented
+  if (status) *status = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   newtrim(type, slen, phase, NULL, &name);
 
@@ -437,16 +437,13 @@ void FTN(c_esmc_compwait)(
   int *callrc,              // return code of the user component method
   int *status) {            // return error code in status
 
-     // Initialize return code; assume routine not implemented
-     if (status) *status = ESMC_RC_NOT_IMPL;
-
   // Things get a little confusing here with pointers, so I will define
   // some temp. variables that make matters a little clearer I hope:
   ESMC_VM *vm_parent = *ptr_vm_parent;        // pointer to parent VM
   ESMC_VMPlan *vmplan = *ptr_vmplan;          // pointer to VMPlan
   cargotype *cargo = (cargotype *)*vm_cargo;  // pointer to cargo
   
-  // initialize the return codes to failure
+  // initialize the return codes
   *status = ESMC_RC_NOT_IMPL; // return code of ESMF callback code
   *callrc = ESMC_RC_NOT_IMPL; // return code of registered user code
 
