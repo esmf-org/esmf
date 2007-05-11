@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.10 2007/04/26 16:10:14 rosalind Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.11 2007/05/11 18:11:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.10 2007/04/26 16:10:14 rosalind Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.11 2007/05/11 18:11:34 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -158,7 +158,7 @@ contains
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayCreate() @\
 ! function ESMF_ArrayCreateAssmdShape<rank><type><kind>(farray, & @\
-!   distgrid, dimmap, computationalLWidth, computationalUWidth, totalLWidth, & @\
+!   distgrid, dimmap, computationalLWidth, computationalUWidth, totalLWidth,& @\
 !   totalUWidth, indexflag, staggerLoc, vectorDim, lbounds, ubounds, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -198,7 +198,7 @@ contains
 ! {\tt ESMF\_ArraySetTensor()} to change these default settings after the @\
 ! Array object has been created. @\
 ! @\
-! The return value is the new {\tt ESMF\_Array}. @\
+! The return value is the newly created {\tt ESMF\_Array} object. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -218,9 +218,7 @@ contains
 !      {\tt farray}. The default is to map all of distgrid|s dimensions against the @\
 !      lower dimension of {\tt farray} in sequence. Unmapped {\tt farray} @\
 !      dimensions are considered to be not distributed dimensions and form a @\
-!      tensor of rank = farray.rank - distgrid.dimCount or farray.rank - @\
-!      distgrid.dimCount - 1 if {\tt farray} contains an additional DE @\
-!      dimension. @\
+!      tensor of rank = farray.rank - distgrid.dimCount. @\
 ! \item[{[computationalLWidth]}] @\
 !      This vector argument must have dimCount elements, where dimCount is @\
 !      specified in distgrid. It specifies the lower corner of the computational @\
@@ -244,19 +242,29 @@ contains
 !      each direction as to fit the computational region into the memory @\
 !      region provided by the {\tt farray} argument. @\
 ! \item[{[indexflag]}] @\
-!      Flag that indicates how the DE-local indices are to be defined. @\
+!      Indicate how DE-local indices are defined. By default each DE|s @\
+!      exclusive region is placed to start at the local index space origin, @\
+!      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be @\
+!      aligned with the global index space, if a global index space is well @\
+!      defined by the associated DistGrid. See section \ref{opt:indexflag} @\
+!      for a list of valid indexflag options. @\
 ! \item[{[staggerLoc]}] @\
-!      Stagger location is an arbitrary integer index. @\
+!      Stagger location is an arbitrary integer index. This information is @\
+!      used to correctly apply connection transformations of the @\
+!      corresponding DistGrid during halo operations. @\
 ! \item[{[vectorDim]}] @\
 !      If the data stored in this Array object is a component of a vector field @\
 !      then the {\tt vectorDim} argument may be used to identify the dimension @\
 !      along which the vector component is aligned. This information is used to @\
 !      correctly apply the {\tt signChangeVector} defined in the connection @\
-!      transformations of the corresponding DistGrid. @\
+!      transformations of the corresponding DistGrid during halo operations. @\
 ! \item[{[lbounds]}] @\
 !      Lower bounds for the array dimensions that are not distributed. @\
+!      By default lbound is 1. @\
 ! \item[{[ubounds]}] @\
 !      Upper bounds for the array dimensions that are not distributed. @\
+!      By default ubound is equal to the extent of the corresponding @\
+!      dimension in {\tt farray}. @\
 ! \item[{[rc]}] @\
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -387,7 +395,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! {\tt ESMF\_ArraySetTensor()} to change these default settings after the 
 ! Array object has been created.
 !
-! The return value is the new {\tt ESMF\_Array}.
+! The return value is the newly created {\tt ESMF\_Array} object.
 !
 ! The arguments are:
 ! \begin{description}
@@ -408,36 +416,52 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      value. The elements map each dimension of distgrid to a dimension in
 !      arrayspec. The default is to map all of distgrid|s dimensions against the
 !      lower dimension of arrayspec in sequence.
-! \item[{[computationalLWidth]}] 
+! \item[{[computationalLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[computationalUWidth]}] 
+!      The default is a zero vector.
+! \item[{[computationalUWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the upper corner of the computational
 !      region with respect to the upper corner of the exclusive region.
-! \item[{[totalMemoryLWidth]}] 
+!      The default is a zero vector.
+! \item[{[totalLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the total memory
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[totalMemoryUWidth]}] 
+!      The default is a zero vector.
+! \item[{[totalUWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the upper corner of the total memory
 !      region with respect to the upper corner of the exclusive region.
+!      The default is a vector that contains the remaining number of cells in
+!      each direction as to fit the computational region into the memory
+!      region provided by the {\tt larrayList} argument.
 ! \item[{[indexflag]}]
-!      Flag that indicates how the DE-local indices are to be defined.
+!      Indicate how DE-local indices are defined. By default each DE's
+!      exclusive region is placed to start at the local index space origin,
+!      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
+!      aligned with the global index space, if a global index space is well
+!      defined by the associated DistGrid. See section \ref{opt:indexflag}
+!      for a list of valid indexflag options.
 ! \item[{[staggerLoc]}]
-!      Stagger location is an arbitrary integer index.
+!      Stagger location is an arbitrary integer index. This information is
+!      used to correctly apply connection transformations of the
+!      corresponding DistGrid during halo operations.
 ! \item[{[vectorDim]}]
 !      If the data stored in this Array object is a component of a vector field
 !      then the {\tt vectorDim} argument may be used to identify the dimension
 !      along which the vector component is aligned. This information is used to
 !      correctly apply the {\tt signChangeVector} defined in the connection
-!      transformations of the corresponding DistGrid.
-! \item[{[lbounds]}] 
-!      Lower bounds for tensor array dimensions.
-! \item[{[ubounds]}] 
-!      Upper bounds for tensor array dimensions.
+!      transformations of the corresponding DistGrid during halo operations.
+! \item[{[lbounds]}]
+!      Lower bounds for the array dimensions that are not distributed.
+!      By default lbound is 1.
+! \item[{[ubounds]}]
+!      Upper bounds for the array dimensions that are not distributed.
+!      By default ubound is equal to the extent of the corresponding
+!      dimension in {\tt larrayList}.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -591,7 +615,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! by the arguments to this call: {\tt distgrid} and the optional {\tt Width} 
 ! arguments.
 !
-! The return value is the new {\tt ESMF\_Array}.
+! The return value is the newly created {\tt ESMF\_Array} object.
 !
 ! The arguments are:
 ! \begin{description}
@@ -624,19 +648,26 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      specified in distgrid. It specifies the upper corner of the total memory
 !      region with respect to the upper corner of the exclusive region.
 ! \item[{[indexflag]}]
-!      Flag that indicates how the DE-local indices are to be defined.
+!      Indicate how DE-local indices are defined. By default each DE's
+!      exclusive region is placed to start at the local index space origin,
+!      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
+!      aligned with the global index space, if a global index space is well
+!      defined by the associated DistGrid. See section \ref{opt:indexflag}
+!      for a list of valid indexflag options.
 ! \item[{[staggerLoc]}]
-!      Stagger location is an arbitrary integer index.
+!      Stagger location is an arbitrary integer index. This information is
+!      used to correctly apply connection transformations of the
+!      corresponding DistGrid during halo operations.
 ! \item[{[vectorDim]}]
 !      If the data stored in this Array object is a component of a vector field
 !      then the {\tt vectorDim} argument may be used to identify the dimension
 !      along which the vector component is aligned. This information is used to
 !      correctly apply the {\tt signChangeVector} defined in the connection
-!      transformations of the corresponding DistGrid.
-! \item[{[lbounds]}] 
-!      Lower bounds for tensor array dimensions.
-! \item[{[ubounds]}] 
-!      Upper bounds for tensor array dimensions.
+!      transformations of the corresponding DistGrid during halo operations.
+! \item[{[lbounds]}]
+!      Lower bounds for the array dimensions that are not distributed.
+! \item[{[ubounds]}]
+!      Upper bounds for the array dimensions that are not distributed.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.10 2007/04/26 16:10:16 rosalind Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.11 2007/05/11 18:11:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.10 2007/04/26 16:10:16 rosalind Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.11 2007/05/11 18:11:34 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -177,49 +177,58 @@ contains
 !        Upon return this holds a list of the associated {\tt ESMC\_LocalArray}
 !        objects. {\tt larrayList} must be allocated to be at least of size
 !        {\tt localDeCount}, i.e. the number of DEs associated with the calling
-!        PET.`
+!        PET.
 !     \item[{[indexflag]}]
 !       Upon return this flag indicates how the DE-local indices are defined.
+!       See section \ref{opt:indexflag} for a list of possible return values.
+!     \item[{[dimmap]}]
+!       Upon return this list holds the Array dimensions against which the
+!       DistGrid dimensions are mapped. {\tt dimmap} must be allocated to be
+!       at least of size {\tt dimCount}.
+!     \item[{[inverseDimmap]}]
+!       Upon return this list holds the DistGrid dimensions against which the
+!       Array dimensions are mapped. {\tt inverseDimmap} must be allocated to
+!       be at least of size {\tt rank}.
 !     \item[{[exclusiveLBound]}]
 !        Upon return this holds the lower bounds of the exclusive regions for
 !        all PET-local DEs. {\tt exclusiveLBound} must be allocated to be
-!        of size (dimCount, localDeCount).
+!        of size {\tt (dimCount, localDeCount)}.
 !     \item[{[exclusiveUBound]}]
 !        Upon return this holds the upper bounds of the exclusive regions for
 !        all PET-local DEs. {\tt exclusiveUBound} must be allocated to be
-!        of size (dimCount, localDeCount).
+!        of size {\tt (dimCount, localDeCount)}.
 !     \item[{[computationalLBound]}]
 !        Upon return this holds the lower bounds of the computational regions for
 !        all PET-local DEs. {\tt computationalLBound} must be allocated to be
-!        of size (dimCount, localDeCount).
+!        of size {\tt (dimCount, localDeCount)}.
 !     \item[{[computationalUBound]}]
 !        Upon return this holds the upper bounds of the computational regions for
 !        all PET-local DEs. {\tt computationalUBound} must be allocated to be
-!        of size (dimCount, localDeCount).
+!        of size {\tt (dimCount, localDeCount)}.
 !     \item[{[totalLBound]}]
 !        Upon return this holds the lower bounds of the total regions for
 !        all PET-local DEs. {\tt totalLBound} must be allocated to be
-!        of size (dimCount, localDeCount).
+!        of size {\tt (dimCount, localDeCount)}.
 !     \item[{[totalUBound]}]
 !        Upon return this holds the upper bounds of the total regions for
 !        all PET-local DEs. {\tt totalUBound} must be allocated to be
-!        of size (dimCount, localDeCount).
+!        of size {\tt (dimCount, localDeCount)}.
 !     \item[{[computationalLWidth]}]
 !        Upon return this holds the lower width of the computational regions for
 !        all PET-local DEs. {\tt computationalLWidth} must be allocated to be
-!        of size (dimCount, localDeCount).
+!        of size {\tt (dimCount, localDeCount)}.
 !     \item[{[computationalUWidth]}]
 !        Upon return this holds the upper width of the computational regions for
 !        all PET-local DEs. {\tt computationalUWidth} must be allocated to be
-!        of size (dimCount, localDeCount).
+!        of size {\tt (dimCount, localDeCount)}.
 !     \item[{[totalLWidth]}]
 !        Upon return this holds the lower width of the total memory regions for
 !        all PET-local DEs. {\tt computationalUWidth} must be allocated to be
-!        of size (dimCount, localDeCount).
+!        of size {\tt (dimCount, localDeCount)}.
 !     \item[{[totalUWidth]}]
 !        Upon return this holds the upper width of the total memory regions for
 !        all PET-local DEs. {\tt totalUWidth} must be allocated to be
-!        of size (dimCount, localDeCount).
+!        of size {\tt (dimCount, localDeCount)}.
 !     \item [{[name]}]
 !        Name of the Array object.
 !     \item[{[distgrid]}]
@@ -231,7 +240,7 @@ contains
 !        Upon return this array holds the extents for all dimensions of the
 !        DE-local LR boxes for all DEs in the DistGrid associated with the Array
 !        object. The supplied variable must be at least of size 
-!        {\tt (/dimCount, deCount/)}.
+!        {\tt (dimCount, deCount)}.
 !     \item[{[delayout]}]
 !        Upon return this holds the associated {\tt ESMF\_DELayout} object.
 !     \item[{[deCount]}]
@@ -448,7 +457,7 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!     Get internal information per dim per DE.
+!     Get internal information per dim per local DE.
 !
 ! This interface works for any number of DEs per PET.
 !
@@ -461,10 +470,10 @@ contains
 !     \item[localDe]
 !        Local DE for which information is requested.
 !     \item[{[dimExtent]}]
-!        Upon return this holds the DistGrid dimExtent for (dim, localDe).
+!        Upon return this holds the DistGrid dimExtent for {\tt (dim, localDe)}.
 !     \item[{[indexList]}]
 !        Upon return this holds the list of DistGrid patch-local indices
-!        associated with (dim, localDe).
+!        associated with {\tt (dim, localDe)}.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -559,7 +568,7 @@ contains
 !   \begin{description} @\
 !   \item[array] @\
 !     Queried {\tt ESMF\_Array} object. @\
-!   \item[{[farrayPtr]}] @\
+!   \item[farrayPtr] @\
 !     Upon return {\tt farrayPtr} points to the DE-local data allocation of @\
 !     {\tt array}. @\
 !   \item[{[rc]}] @\
