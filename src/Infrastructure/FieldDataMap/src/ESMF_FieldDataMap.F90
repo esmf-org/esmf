@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.34 2007/05/02 01:24:50 rosalind Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.35 2007/05/11 21:53:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.34 2007/05/02 01:24:50 rosalind Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.35 2007/05/11 21:53:20 theurich Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -347,6 +347,7 @@
       !jw    write (msgbuf, *)  "Uninitialized or Invalid object"
       !jw    call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
           write (*, *)  "Uninitialized or Invalid object"
+          if (present(rc)) rc = ESMF_SUCCESS ! or stuff will fail!
           return
         endif
 
