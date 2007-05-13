@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.11 2007/03/31 05:51:33 cdeluca Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.12 2007/05/13 00:53:47 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,6 +13,7 @@
 
 module ESMF_StateReconcileEx_Mod
 
+use ESMF_Mod
 
 contains
 
@@ -25,7 +26,6 @@ contains
 !BOC
 ! Initialize routine which creates "field1" on PETs 0 and 1
 subroutine comp1_init(gcomp, istate, ostate, clock, rc)
-    use ESMF_Mod
     type(ESMF_GridComp), intent(inout) :: gcomp
     type(ESMF_State), intent(inout) :: istate, ostate
     type(ESMF_Clock), intent(in) :: clock
@@ -46,7 +46,6 @@ end subroutine comp1_init
 
 ! Initialize routine which creates "field2" on PETs 2 and 3
 subroutine comp2_init(gcomp, istate, ostate, clock, rc)
-    use ESMF_Mod
     type(ESMF_GridComp), intent(inout) :: gcomp
     type(ESMF_State), intent(inout) :: istate, ostate
     type(ESMF_Clock), intent(in) :: clock
@@ -66,7 +65,6 @@ subroutine comp2_init(gcomp, istate, ostate, clock, rc)
 end subroutine comp2_init
 
 subroutine comp_dummy(gcomp, rc)
-   use ESMF_MOd
    type(ESMF_GridComp), intent(inout) :: gcomp
    integer, intent(out) :: rc
 
