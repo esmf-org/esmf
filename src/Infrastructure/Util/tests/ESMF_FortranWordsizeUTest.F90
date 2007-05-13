@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsizeUTest.F90,v 1.5 2007/02/27 21:58:11 theurich Exp $
+! $Id: ESMF_FortranWordsizeUTest.F90,v 1.6 2007/05/13 15:43:35 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FortranWordsizeUTest.F90,v 1.5 2007/02/27 21:58:11 theurich Exp $'
+      '$Id: ESMF_FortranWordsizeUTest.F90,v 1.6 2007/05/13 15:43:35 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -98,7 +98,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
     write(name, *) "Dummy test to keep number of tests correct"
-    call ESMF_Test((ESMF_SUCCESS.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)"
+    call ESMF_Test((ESMF_SUCCESS.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
     !------------------------------------------------------------------------
     !NEX_UTest
@@ -111,7 +111,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
     write(name, *) "Dummy test to keep number of tests correct"
-    call ESMF_Test((ESMF_SUCCESS.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)"
+    call ESMF_Test((ESMF_SUCCESS.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
 
     !------------------------------------------------------------------------
