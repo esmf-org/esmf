@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.3 2007/05/14 17:40:28 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.4 2007/05/14 23:11:27 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -216,7 +216,7 @@ program ESMF_GridCreateEx
 
 !BOE
 
-!\subsubsection{Creation: Coordinate Storage}
+!\subsubsection{Creation: Coordinate Storage}~\label{sec:usage:coordstore}
 !
 ! Depending on the user's coordinate data there are many possible
 ! arrangements for the coordinates to be stored in memory. 
@@ -286,7 +286,7 @@ program ESMF_GridCreateEx
 
 
 !BOE
-!\subsubsection{Creation: Stagger Location}
+!\subsubsection{Creation: Stagger Location}\label{sec:usage:staggerloc}
 !
 ! In this document, stagger location refers to the places in a Grid
 ! cell that can contain data. For example, data can be located
@@ -554,7 +554,7 @@ The following code illustrates aligning the positive corner with the center.
 
 
 !BOE
-!\subsubsection{Creation: Set/Commit}
+!\subsubsection{Creation: Set/Commit}\label{sec:usage:setcommit}
 ! 
 !  As an alternative to the monolithic one call create, ESMF provides
 ! a set/commit paradigm for grid creation which allows the user

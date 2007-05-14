@@ -1,16 +1,5 @@
 
 
-\subsubsection{Grid Composition}\label{sec:gridcomp}
-  An ESMF Grid is constructed of a hierarchy of elements. At the top
-level a grid is constructed of a set of tiles. Each tile is a logically
-rectangular distributed index space. A tile will usually have some
-physical significanc (e.g. the face of a cube). The piece of a tile
-which resides on one DE is called a local tile. The six faces of a
-cube sphere Grid are each tiles and each of 
-the tiles/faces can be divided into many local tiles by its distribution 
-across processors. 
-
-% Need to work Cells into the above??
 
 \subsubsection{Grid Topology} 
 
