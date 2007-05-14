@@ -1,4 +1,4 @@
-! $Id: ESMF_TypeKindGetUTest.F90,v 1.4 2007/03/01 22:32:28 rosalind Exp $
+! $Id: ESMF_TypeKindGetUTest.F90,v 1.5 2007/05/14 05:07:03 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TypeKindGetUTest.F90,v 1.4 2007/03/01 22:32:28 rosalind Exp $'
+      '$Id: ESMF_TypeKindGetUTest.F90,v 1.5 2007/05/14 05:07:03 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -86,6 +86,7 @@
 
     print *, "The typekind of default integer is", typekind
 
+#ifndef ESMF_NO_INTEGER_1_BYTE
     ! ESMF_KIND_I1 integer
     !------------------------------------------------------------------------
     !NEX_UTest
@@ -99,7 +100,9 @@
      write(name, *) "Checking ESMF_TypeKind parameter for ESMF_KIND_I1 integer"
     call ESMF_Test((typekind%dkind .eq. ESMF_TYPEKIND_I1%dkind), &
                     name, failMsg, result, ESMF_SRCLINE)
+#endif
 
+#ifndef ESMF_NO_INTEGER_2_BYTE
     ! ESMF_KIND_I2 integer
     !------------------------------------------------------------------------
     !NEX_UTest
@@ -113,6 +116,7 @@
      write(name, *) "Checking ESMF_TypeKind parameter for ESMF_KIND_I2 integer"
     call ESMF_Test((typekind%dkind .eq. ESMF_TYPEKIND_I2%dkind), &
                     name, failMsg, result, ESMF_SRCLINE)
+#endif
 
     ! ESMF_KIND_I4 integer
     !------------------------------------------------------------------------
