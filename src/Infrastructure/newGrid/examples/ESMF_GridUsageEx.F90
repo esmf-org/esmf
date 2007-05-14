@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.2 2007/05/14 17:11:03 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.3 2007/05/14 17:40:28 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
 program ESMF_GridCreateEx
 
 !==============================================================================
-!EXAMPLE        String used by test script to count examples.
+!EX_NOTWORKING_AMPLE        String used by test script to count examples.
 !==============================================================================
 
 
