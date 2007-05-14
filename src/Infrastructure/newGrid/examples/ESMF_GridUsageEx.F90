@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.1 2007/05/11 16:57:46 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.2 2007/05/14 17:11:03 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@ program ESMF_GridCreateEx
 
 
 !BOE
-!\subsubsection{Simple Initial Example}
+!\subsubsection{Create 2D, Single-Tile, Rectilinear Grid}
 !
 ! The following is a simple example of creating a grid and
 ! loading in a set of coordinates. This code creates a 10x20
