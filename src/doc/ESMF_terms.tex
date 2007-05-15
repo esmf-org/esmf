@@ -17,17 +17,24 @@ numerical and computational methods.
   and averaging data values.  Generally accumulators are associated with 
   temporal averaging, although they might be associated with 
   other weighted averaging operations.  ESMF does not yet have accumulators.
-  
+
 \label{glos:ASP}
 \item[Address space (ASP)] A term that refers to 
   the memory that a computer program can write to directly using
   simple language primitives. 
 
+\label{glos:API}
+\item[Application Programming Interface {API)] API refers to the 
+  set of routines and types in a software package that are
+  available to its users.  It doesn't include private or internal
+  routines or types.
+  
 \label{glos:Alarm}
-\item[Alarm] The ESMF Alarm class represents an event that occurs at a particular 
-  time (or set of times).  It is like an alarm on a real alarm clock 
-  except that in order to determine whether it is "ringing", an ESMF Alarm 
-  is "read" by an explicit application action.  An Alarm is associated
+\item[Alarm] Like a real alarm clock, the ESMF Alarm class notifies
+  the user of an event that occurs at a particular 
+  time (or set of times).  In order to determine whether it
+  is "ringing", an ESMF Alarm is ``read'' by an explicit
+  application action.  An Alarm is associated
   with a particular \htmlref{Clock}{glos:Clock}.
 
 \label{glos:Application}
@@ -38,7 +45,8 @@ numerical and computational methods.
 
 \label{glos:Array}
 \item[Array] An ESMF class that represents a multi-dimensional
-  data array.  Unlike a native Fortran or C++ array, an ESMF Array can store information about its halo.  See also \htmlref{halo}{glos:Halo}.
+  data array.  Unlike a native Fortran or C++ array, an ESMF Array
+  can store information about halo points.  See also \htmlref{halo}{glos:Halo}.
 
 \label{glos:BackGrid}
 \item[Background grid] 
@@ -53,17 +61,16 @@ data format.  See \htmladdnormallink{BUFR links}{http://dss.ucar.edu/docs/format
 
 \label{glos:Bundle}
 \item[Bundle] The ESMF Bundle class represents a set of fields that 
-  are associated with the same physical grid and are distributed in a similar 
-  fashion across the same physical axes.  Fields within a Bundle may be
-  staggered differently and may have different dimensions. 
-  See also \htmlref{Field}{glos:Field}, \htmlref{Packed Bundle}{glos:PackedBundle},
+  are associated with the same physical grid and are distributed in 
+  the same fashion across the same physical axes.  Fields within a
+  Bundle may be staggered differently and may have different (non-distributed)
+  dimensions.  See also \htmlref{Field}{glos:Field}, \htmlref{Packed Bundle}{glos:PackedBundle},
   \htmlref{Loose Bundle}{glos:LooseBundle}. 
 
 \label{glos:Calendar}
-\item[Calendar] Calendar is an ESMF class that 
+\item[Calendar] The Calendar is an ESMF class that 
   stores a representation of a particular calendar type, such as Gregorian.
-  In this glossary we list calendars specific to modeling, 
-  such as \htmlref{360-day}
+  See also specific calendar types such as \htmlref{360-day}
   {glos:360DayCal} and \htmlref{no-leap}{glos:NoLeap}.
 
 \label{glos:Cell}
@@ -85,17 +92,17 @@ are in the \htmladdnormallink{ESMF Project Plan}{http://www.esmf.ucar.edu/esmf\_
 
 \label{glos:Clock}
 \item[Clock] Clock is an ESMF class that tracks the passage of time and 
-  reports the current time instant, like a real clock.  An ESMF Clock 
+  reports the current time instant.  An ESMF Clock 
   is stepped forward in increments of a time step, and can be associated
   with one or more Alarms.
   See also \htmlref{Time}{glos:TimeInstant}, \htmlref{Time Interval}{glos:TimeInterval}, \htmlref{Alarm}{glos:Alarm}.
 
 \label{glos:Component}
-\item[Component] A large-scale computational entity 
-  associated with a particular physical process or computational function, 
-  such as a land model.  A component is also an ESMF class that represents
-  a large-scale computational entity; currently ESMF supports \htmlref{Gridded 
-  Component}{glos:GridComp} and \htmlref{Coupler Component}{glos:Coupler} classes.
+\item[Component] The ESMF Component class represents large-scale
+  computational entities associated with a particular physical
+  process or computational function, such as a land model.  
+  Currently ESMF supports \htmlref{Gridded Component}{glos:GridComp}
+  and \htmlref{Coupler Component}{glos:Coupler} classes.
   Components may be \htmlref{generic}{glos:GenericComp} or 
   \htmlref{user-supplied}{glos:UserComp}.  
 
@@ -115,8 +122,7 @@ are in the \htmladdnormallink{ESMF Project Plan}{http://www.esmf.ucar.edu/esmf\_
 \item[Concurrent execution] 
   Concurrent execution of model components occurs when two or more components,
   whether in the same or different executables, run simultaneously.
-  Components executing concurrently may have coincident or 
-  non-overlapping distributions.  See also \htmlref{sequential execution}
+  See also \htmlref{sequential execution}
   {glos:SequentialExecution}.
 
 \label{glos:Congruent}
@@ -126,11 +132,23 @@ are in the \htmladdnormallink{ESMF Project Plan}{http://www.esmf.ucar.edu/esmf\_
 
 \label{glos:Coupler}
 \item[Coupler Component]
-  An ESMF component that includes all data and actions needed to enable 
+  An ESMF Component that includes all data and actions needed to enable 
   communication between two or more Gridded Components. 
   See also \htmlref{component}{glos:Component}, \htmlref{Gridded Component}
-  {glos:GridComp}.
+  {glos:GridComp}. 
 
+\label{glos:CurvilinearGrid}
+\item[Curvilinear grid]
+  A curvilinear grid is a logically rectangular grid in which 
+  coordinates in physical space must be specified by giving 
+  the explicit coordinates for each point.  Curvilinear
+  grids are often uniform or rectilinear grids that have been 
+  warped, for example in order to place a pole over land points
+  in an ocean grid.  See also 
+  \htmlref{logically rectangular grid}{glos:LogRectGrid},
+  \htmlref{Uniform grid}{glos:UniformGrid}, \htmlref{Rectilinear grid}
+  {glos:RectilinearGrid}.  
+  
 \label{glos:DataDep}
 \item[Data dependency] The property of a computational
   operator that defines the data indices required to perform
@@ -174,9 +192,15 @@ are in the \htmladdnormallink{ESMF Project Plan}{http://www.esmf.ucar.edu/esmf\_
 
 \label{glos:Decomp_Element}
 \item[Decomposition Element (DE)]
-  Decomposition Elements represent a 
-  virtual portion of a computational task.
-  A DELayout assigns a topology to Decomposition Elements.
+  A DE is the smallest unit of decomposition of a
+  computational task.  DEs are virtual units, not necessarily having 
+  a 1-to-1 correspondence to the Persistent Execution Threads (PETs)
+  of a VM or the physical Processing Elements (PEs) in the underlying
+  physical machine. Consequently there are no restrictions on the 
+  number of DEs that can be created. The application writer may chose
+  the number of DEs to best match the computational problem and the
+  employed algorithm.  A DELayout assigns a topology to
+  Decomposition Elements.
   See also \htmlref{DELayout}{glos:DELayout}.
 
 \label{glos:DeepObjects}
@@ -188,11 +212,10 @@ are in the \htmladdnormallink{ESMF Project Plan}{http://www.esmf.ucar.edu/esmf\_
 
 \label{glos:DistGrid}
 \item[Distributed Grid]
-  Distributed Grid is a private ESMF class that defines the 
+  DistGrid is the ESMF class that defines the 
   decomposition of a Grid's global index space across a DELayout.
-  Distributed Grid objects are contained in an ESMF Grid. 
-  See also \htmlref{Grid}{glos:Grid}, \htmlref{Physical Grid}{glos:PhysGrid},
-  \htmlref{DELayout}{glos:DELayout}.
+  DistGrid objects are contained in an ESMF Grid. 
+  See also \htmlref{Grid}{glos:Grid}, \htmlref{DELayout}{glos:DELayout}.
 
 \label{glos:Distribution}
 \item[Distribution] The function that expresses
@@ -202,9 +225,9 @@ are in the \htmladdnormallink{ESMF Project Plan}{http://www.esmf.ucar.edu/esmf\_
 
 \label{glos:DomainDecomp}
 \item[Domain decomposition] The act of grid 
-  distribution: creating a DELayout; and associating grid points with 
-  the DELayout.  The dimensionality of the domain decomposition is the 
-  same as the dimensionality of the associated DELayout.
+  distribution: creating a DistGrid, and associating grid points with 
+  the DistGrid.  The dimensionality of the domain decomposition is the 
+  same as the dimensionality of the associated DistGrid.
 
 \label{glos:Exact}
 \item [Exact] The word exact is used
@@ -266,7 +289,7 @@ of its data.  See also \htmlref{Grid}{glos:Grid}.
 \label{glos:GenericTrans} 
 \item[Generic transform] A generic transform 
   is an operation supplied by the framework, for example, a method 
-  that converts gridded data from one supported Physical Grid and/or 
+  that converts gridded data from one supported grid and/or 
   decomposition to another using a specified technique.  See also \htmlref{user 
   transform}{glos:UserTrans}.
 
@@ -286,6 +309,16 @@ of its data.  See also \htmlref{Grid}{glos:Grid}.
   \htmlref{global domain}{glos:GlobDomain}.
   See also \htmlref{global reduction}{glos:GlobReduction}.
 
+\label{glos:Gregorian calendar}
+\item[Gregorian]
+  The Gregorian calendar is the most widely used calendar
+in the world.  The calendar's zeroth year is at the
+birth of Jesus Christ.  Years after the origin (anno Domini,
+or AD) are positive, and before (Before Christ, or BC) are
+negative.  Several corrections (leap year, 100 year, 400 year) 
+are necessary to keep the calendar aligned with solar cycles.
+  See also \htmlref{Calendar}{glos:Calendar}.
+
 \label{glos:GRIB}
 \item[GRIB]
   The GRid in Binary Data format from the World Meteorological Organization.
@@ -296,18 +329,12 @@ This format is frequently used by operational weather centers.  See the
 \label{glos:Grid} 
 \item[Grid] 
   The discrete division of space associated with
-  a particular coordinate system.  The ESMF Grid class contains all 
-  Physical Grid and memory 
-  organization information (via Distributed Grid and DELayout) required 
-  to manipulate 
+  a particular coordinate system.  The ESMF Grid class contains 
+  coordinate, domain decomposition, and memory 
+  organization information required to manipulate 
   Fields, as well as to create and execute Grid transforms. 
   See also \htmlref{Physical Grid}{glos:PhysGrid}, \htmlref{Distributed Grid}
   {glos:DistGrid}, \htmlref{DELayout}{glos:DELayout}.
-
-\label{glos:GridMetrics} 
-\item[Grid metrics] 
-  Terms relating measurements 
-  in index space to Physical Grid quantities like distances and areas.
 
 \label{glos:GridStagger} 
 \item[Grid staggering] 
@@ -367,7 +394,7 @@ This format is frequently used by operational weather centers.  See the
 
 \label{glos:IndexSpaceLoc} 
 \item[Index space location] 
-  A location within an index space.  A index space location may be fractional.
+  A location within an index space.  An index space location may be fractional.
   See also \htmlref{physical location}{glos:PhysLoc}.
 
 \label{glos:Instantiate}
@@ -394,6 +421,16 @@ This format is frequently used by operational weather centers.  See the
   to create the ESMF software.  The main form of communication for 
   the JST is the weekly telecon.  Terms of Reference are in the \htmladdnormallink{ESMF Project Plan}{http://www.esmf.ucar.edu/esmf\_pubs/paper\_0503\_projectplan.pdf}.
 
+\label{glos:LocalArray}
+\item[LocalArray]
+  A LocalArray is the portion of an ESMF Array that resides on a 
+  particular DE.  See also \htmlref{Array}{glos:Array}.
+
+\label{glos:LocalTile}
+\item[LocalTile]
+  A LocalTile is the portion of a grid Tile that resides on a 
+  particular DE.  See also \htmlref{Tile}{glos:GridTile}.
+
 \label{glos:LocStream} 
 \item[Location Stream] 
   An ESMF class that represents
@@ -404,10 +441,10 @@ This format is frequently used by operational weather centers.  See the
 
 \label{glos:RecGrid} 
 \item[Logically rectangular grid] 
-  A grid in 
-  which sequential indices are physically adjacent, and in which the 
-  extent of each index is independent of the other indices.
-  See also \htmlref{Grid}{glos:Grid}.
+  A grid in which a set of coordinates (x,y,z, ...) in physical
+  space can be mapped one-to-one to a set of regularly spaced 
+  points (i,j,k, ...) in a rectangular logical space, preserving
+  proximate relationships.  See also \htmlref{Grid}{glos:Grid}.
 
 \label{glos:LooseBundle} 
 \item[Loose Bundle] 
@@ -428,6 +465,12 @@ This format is frequently used by operational weather centers.  See the
   The portion of memory associated with the data on a given DE.  
   The memory domain is always at least 
   as large as the total domain.  See also \htmlref{total domain}{glos:TotDomain}.
+
+\label{glos:MosaicGrid}
+\item[Mosaic grid]
+  A mosaic grid is composed of multiple logically rectangular
+  grid tiles that are connected at their edges, for example, a cubed sphere
+  grid.  See also \htmlref{grid tile}{glos:GridTile}.
 
 \label{glos:MPMD} 
 \item[MPMD] 
@@ -468,9 +511,15 @@ in the Earth sciences. See \htmladdnormallink{NetCDF home page}{http://www.unida
   a data buffer with field data arranged contiguously in memory. See 
   also \htmlref{Bundle}{glos:Bundle}, \htmlref{loose Bundle}{glos:LooseBundle}.
 
+\label{glos:Parallel}
+\item[Parallel execution]
+  The term parallel execution refers to the execution of a software
+  application on more than one \htmlref{PE}{glos:PET}.
+  See also \htmlref{serial}{glos:Serial}.
+
 \label{glos:PE} 
 \item[PE] 
-Short for \htmlref{Processing Element}{glos:Processing_Element}.
+  Short for \htmlref{Processing Element}{glos:Processing_Element}.
 
 \label{glos:PET} 
 \item[PET] 
@@ -482,14 +531,6 @@ Short for \htmlref{Processing Element}{glos:Processing_Element}.
   path for executing an instruction sequence. A PET has a lifetime at least 
   as long as the associated data objects. The PET is a key abstraction 
   used in the ESMF \htmlref{Virtual Machine}{glos:VM}.
-
-\label{glos:PhysGrid} 
-\item[Physical Grid] 
-  Physical Grid is a private ESMF class that contains a variety of information on the location 
-  in physical space and physical metrics (area, grid lengths, etc.) 
-  of various grid points.  Physical Grid objects are contained in an 
-  ESMF Grid.  See also \htmlref{Grid}{glos:Grid}, 
-  \htmlref{Distributed Grid}{glos:DistGrid}.  
 
 \label{glos:PhysLoc} 
 \item[Physical location] 
@@ -505,6 +546,17 @@ Short for \htmlref{Processing Element}{glos:Processing_Element}.
 \item[Processing Element (PE)] 
   A Processing Element (PE) is the smallest physical processing unit available
   on a particular hardware platform.
+
+\label{glos:RectilinearGrid}
+\item[Rectilinear grid]
+  A rectilinear grid is a logically rectangular grid in which 
+  coordinates in physical space can be fully specified by giving 
+  the spacing of grid points along each grid axis.  The coordinates
+  of each point in physical space are located where these 
+  values intersect.  The spacing along each dimension may vary.
+  See also \htmlref{logically rectangular grid}{glos:LogRectGrid},
+  \htmlref{Uniform grid}{glos:UniformGrid}, \htmlref{Curvilinear grid}
+  {glos:CurvilinearGrid}.  
 
 \label{glos:Scheduler} 
 \item[Scheduler] 
@@ -526,6 +578,12 @@ Short for \htmlref{Processing Element}{glos:Processing_Element}.
   different executables and may have coincident or non-overlapping 
   memory distributions.  See \htmlref{concurrent execution}.
   {glos:ConcurrentExecution}.
+
+\label{glos:Serial}
+\item{Serial Execution}
+  The term serial execution refers to the execution of a software
+  application on only one PET.  See also \htmlref{parallel execution}
+  {glos:Parallel}.
 
 \label{glos:ShallowObjects} 
 \item[Shallow object] 
@@ -584,6 +642,15 @@ Short for \htmlref{Processing Element}{glos:Processing_Element}.
   \htmlref{sequential execution}{glos:SequentialExecution}, 
   \htmlref{concurrent execution}{glos:ConcurrentExecution}.
 
+\label{glos:GridTile}
+  Some grids used in Earth system modeling, such as cubed sphere grids, are
+  most naturally represented
+  as a set of logically rectangular grids that are connected at their 
+  edges.  Following V. Balaji [2006] we refer to each of the 
+  logically rectangular grids in a composite grid, or mosaic grid, as a
+  Tile.  See also \htmlref{mosaic grid}{glos:MosaicGrid}, 
+  \htmlref{LocalTile}{glos:LocalTile}.
+
 \label{glos:TimeInstant}
 \item [Time] 
   Time is an ESMF class that is made up of a time and date and an 
@@ -608,6 +675,16 @@ Short for \htmlref{Processing Element}{glos:Processing_Element}.
   of the data points allocated, included replicated points from neighboring
   DEs.  See also \htmlref{computational domain}{glos:CompDomain}, 
   \htmlref{exclusive domain}{glos:ExcDomain}, \htmlref{halo}{glos:Halo}
+
+\label{glos:UniformGrid}
+  A logically rectangular grid in which the coordinates in physical 
+  space can be completely specified by the two sets of coordinates
+  that define the opposing corner points of the physical span.  The coordinates
+  of each point in physical space can be obtained by interpolating from
+  the corner points, using the evenly spaced logical grid to specify 
+  grid point locations.  See also \htmlref{logically rectangular grid}{glos:LogRectGrid},
+  \htmlref{Rectiliner grid}{glos:RectilinerGrid}, \htmlref{Curvilinear grid}
+  {glos:CurvilinearGrid}.  
 
 \label{glos:UserComp} 
 \item[User component] 
