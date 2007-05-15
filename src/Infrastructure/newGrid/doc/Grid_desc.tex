@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.3 2007/05/14 23:11:26 oehmke Exp $
+% $Id: Grid_desc.tex,v 1.4 2007/05/15 21:57:17 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -8,16 +8,33 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-% <Describe class function and relation to other classes.>
-
-
 The ESMF Grid class is used to describe the geometry and discretization
-of a physical grid.  Through its connection to the {\tt ESMF\_DistGrid}
-class it also contains the description of the decomposition of the 
-physical grid across the available computational resources and the grid's
-underlying topology. The Grid class is constructed on top of the 
-{\tt ESMF\_Array} class to hold its internal data and to provide
-some communication. 
+of a structured physical grid.  It also contains the description of the
+grid's underlying topology and the decomposition of the physical grid
+across the available computational resources.  The most frequent 
+use of the Grid class is to describe physical grids in user
+code so that sufficient information is available to ESMF methods
+such as regridding. 
+
+\begin{center}
+\begin{tabular}{|p{6in}|}
+\hline
+\vspace{.01in}
+{\bf Key Features} \\[.01in]
+Representation of structured grids, including uniform and
+rectilinear grids (e.g. lat-lon grids), curvilinear grids (e.g. displaced pole grids), 
+and grids formed by connected logically rectangular regions (e.g. cubed
+sphere grids).\\
+Support for 2D, 3D, and higher dimension grids.\\ 
+Distribution of grids across computational resources for parallel
+operations -  users set which grid dimensions are distributed.\\
+Options for users to define grid coordinates themselves or call prefabricated
+coordinate generation routines for common grids.\\
+Options for one-shot or incremental construction of grids.\\
+Options for using a set of pre-defined stagger locations or for setting
+custom stagger locations.\\[.03in] \hline
+\end{tabular}
+\end{center}
 
 \medskip
 
@@ -46,13 +63,12 @@ The Grid class has a range of capabilities:
 \item It can represent grid mosaics containing multiple logically rectangular
 tiles. These tiles can be connected in a variety of ways to create a complex index space topology. Each tile of the topology can contain arbitrary coordinates. This allows the class to represent a large range of multipatch curvilinear grids. We have followed as closely as possible the description of V. Balaji in the Oct. 2006 report ``A Standard Description of Grids Used in Earth System Models.'' 
 
-
 \end{itemize}
 
 
-\subsubsection{Layered Interface} 
+\subsubsection{Options for Grid Creation} 
 
- The Grid class is constructed using a layered approach to allow the 
+The Grid class is constructed using a layered approach to allow the 
 users to select the level of control they want in interacting with
 the Grid interface. At the highest level are the Grid Generation interfaces. 
 These create a specific grid shape and fill in the appropriate coordinates. 
@@ -65,18 +81,18 @@ complete control over the description of their grids, but
 make no assumptions about a specific topology or distribution. 
 
 \subsubsection{Grid Composition}\label{sec:gridcomp}
-  An ESMF Grid is constructed of a hierarchy of elements. At the top
-level a grid is constructed of a set of tiles. Each tile is a logically
+An ESMF Grid is constructed of a hierarchy of elements. At the top
+level a grid is constructed of a set of {\bf Tiles}. Each tile is a logically
 rectangular distributed index space. A tile will usually have some
 physical significanc (e.g. the face of a cube). The piece of a tile
-which resides on one DE is called a local tile. The six faces of a
-cube sphere Grid are each tiles and each of 
-the tiles/faces can be divided into many local tiles by its distribution 
-across processors. 
+which resides on one DE is called a {\bf LocalTile}. For example, the six
+faces of a cubed sphere Grid are each tiles and each of 
+the tiles/faces can be divided into many LocalTiles by its
+distribution across DEs. 
 
 \subsubsection{Factorized Coordinate Storage}
 
- Often the coordinates for a grid do not vary across the entire
+Often the coordinates for a grid do not vary across the entire
 index space. For example, in a 2D rectilinear grid for a fixed y
 inddex the y coordinate value will not change as x index changes,
 and for a fixed x index the x coordinate value will not change as the
@@ -103,7 +119,7 @@ please see Section~\ref{sec:usage:staggerloc}.
 \subsubsection{Deferred Creation}
 
  With a more complex interface such as that for Grid creation
-for clarities sake it is often useful to be able to proceed in stages
+for clarity's sake it is often useful to be able to proceed in stages
 (e.g. setting various properties in understandable chunks). The 
 Grid class provides the facility to do this using a set/commit paradigm.
 This capability is also useful in distributing a grid object before
