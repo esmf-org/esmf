@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.5 2007/05/16 15:30:21 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.6 2007/05/16 21:58:08 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,8 +44,9 @@ containing multiple logically rectangular
 tiles. These tiles can be connected in a variety of ways to create a complex index space topology. Each tile of the topology can contain arbitrary coordinates. This allows the class to represent a large range of multipatch curvilinear grids. We have followed as closely as possible the description of V. Balaji in the Oct. 2006 report ``A Standard Description of Grids Used in Earth System Models.'' 
 Define uniform, rectilinear, curvilinear.  
 
-\subsubsection{Grid Composition}\label{sec:gridcomp}
-[maybe combine with previous section]
+\subsubsection{Grid Composition}
+\label{sec:gridcomp}
+
 An ESMF Grid is constructed of a hierarchy of elements. At the top
 level a grid is constructed of a set of {\bf Tiles}. Each tile is a logically
 rectangular distributed index space. A tile will usually have some
@@ -69,8 +70,7 @@ the general grid creation interfaces (See Section~\textbf{Need Ref}). These allo
 complete control over the description of their grids, but
 make no assumptions about a specific topology or distribution. 
 
-{\bf Deferred Grid Creation}\\
-[maybe combine with previous section]\\
+\subsubsection{Deferred Grid Creation}
  With a more complex interface such as that for Grid creation
 for clarity's sake it is often useful to be able to proceed in stages
 (e.g. setting various properties in understandable chunks). The 
@@ -79,6 +79,50 @@ This capability is also useful in distributing a grid object before
 initialization or when multiple components contribute to the 
 definition of a grid. Section~\ref{sec:usage:setcommit}
 contains a description and example of this interface. 
+
+\begin{tabular}{|p{2.5in}|p{1.5in}|p{1.5in}|p{1.5in}|}
+\hline
+\multicolumn{4}|c|{\bf Options for Grid Creation} \\[.01in]
+\hline
+Command sequence & Missing & Function & Status \\ 
+\hline
+{\tt ESMF\_GridCreateEmpty()} 
+& topology information and coordinates, other options undefined
+& allocated placeholder that can be filled in
+& ESMF\_GRIDSTATUS\_NOT\_READY \\
+\hline
+{\tt ESMF\_GridCreate()}\newline
+or \newline
+{\tt ESMF\_GridCreateEmpty()}\newline
+{\tt ESMF\_GridSet()}\newline
+{\tt ESMF\_GridSet()}\newline
+...\newline
+{\tt ESMF\_GridCommit(ESMF\_GRIDSTATUS\_FIELD\_READY)}\newline
+or shortcut method, e.g. \newline
+{\tt ESMF\_GridCreateLatLonSphere()}\newline
+{\tt ESMF\_GridCreateLatLonRect()}
+& coordinates
+& can be used as the basis for Field allocation
+& ESMF\_GRIDSTATUS\_FIELD\_READY\\
+\hline
+{\tt ESMF\_GridCreate()}\newline
+{\tt ESMF\_GridSetCoordFromArray()}\newline
+{\tt ESMF\_GridCommit(ESMF\_GRIDSTATUS\_REGRID\_READY)}\newline
+or \newline 
+{\tt ESMF\_GridCreate()}\newline
+{\tt ESMF\_GridGetLocalTile(localTile)}\newline
+... user fills in localTile coordinate values
+{\tt ESMF\_GridCommit(ESMF\_GRIDSTATUS\_REGRID\_READY)}\newline
+or \newline
+{\tt ESMF\_GridCreateLatLonSphere()}\newline
+{\tt ESMF\_GridSetCoordLatLonSphere()}\newline
+{\tt ESMF\_GridCommit(ESMF\_GRIDSTATUS\_REGRID\_READY)}
+& nothing; Grid is complete
+& can be used in regrid methods
+& ESMF\_GRIDSTATUS\_FIELD\_READY\\
+\hline
+\end{tabular}
+
 
 \subsubsection{Factorized Coordinate Storage}
 
