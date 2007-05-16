@@ -1,16 +1,22 @@
 # Bundle test Harness Config file
 
 # test class
-test_class : Field 
+test_class: FIELD 
+
+# request extra report
+#	-1 = report test failures 
+# 	 0 = no output
+#	 1 = report successful tests
+#	 2 = report both successes and failures.
+test_report: 0 
 
 # descriptor file for the nonexhaustive case
 nonexhaustive::
-   ./harness_config/nonexhaustive_descriptor.rc
+   'nonexhaustive_descriptor.rc'
 ::   # end of list
 
 # descriptor files for the exhaustive case
 exhaustive::
-   ./harness_config/exhaustive_descriptor.rc
-   ./harness_config/superexhaustive_descriptor.rc
+   'exhaustive_descriptor.rc'
 :: # end of list
 
