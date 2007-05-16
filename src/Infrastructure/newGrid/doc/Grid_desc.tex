@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.6 2007/05/16 21:58:08 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.7 2007/05/16 23:02:47 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -28,8 +28,10 @@ sphere grids).\\
 Support for 2D, 3D, and higher dimension grids.\\ 
 Distribution of grids across computational resources for parallel
 operations -  users set which grid dimensions are distributed.\\
+Options to define periodicity implicitly via standard shapes
+(e.g. sphere, rectangle) or specify it explicitly.\\ 
 Options for users to define grid coordinates themselves or call
-prefabricated coordinate generation routines for common grids.\\
+prefabricated coordinate generation routines for standard grids.\\
 Options for one-shot or incremental construction of grids.\\
 Options for using a set of pre-defined stagger locations or for setting
 custom stagger locations.\\[.03in] \hline
@@ -80,46 +82,50 @@ initialization or when multiple components contribute to the
 definition of a grid. Section~\ref{sec:usage:setcommit}
 contains a description and example of this interface. 
 
-\begin{tabular}{|p{2.5in}|p{1.5in}|p{1.5in}|p{1.5in}|}
+\begin{tabular}{|p{2.6in}|p{1in}|p{1in}|p{1.4in}|}
 \hline
-\multicolumn{4}|c|{\bf Options for Grid Creation} \\[.01in]
+\multicolumn{4}{|l|}{Options for Grid Creation} \\
 \hline
-Command sequence & Missing & Function & Status \\ 
+Command sequence & Missing & Function & ESMF\_GRIDSTATUS\_ \\ 
 \hline
-{\tt ESMF\_GridCreateEmpty()} 
-& topology information and coordinates, other options undefined
-& allocated placeholder that can be filled in
-& ESMF\_GRIDSTATUS\_NOT\_READY \\
+ESMF\_GridCreateEmpty() 
+& Topology information and coordinates, other options undefined
+& Allocated placeholder that can be filled in
+& NOT\_READY \\
 \hline
-{\tt ESMF\_GridCreate()}\newline
-or \newline
-{\tt ESMF\_GridCreateEmpty()}\newline
-{\tt ESMF\_GridSet()}\newline
-{\tt ESMF\_GridSet()}\newline
+ESMF\_GridCreate()\newline
+{\bf or} \newline
+ESMF\_GridCreateEmpty()\newline
+ESMF\_GridSet()\newline
+ESMF\_GridSet()\newline
 ...\newline
-{\tt ESMF\_GridCommit(ESMF\_GRIDSTATUS\_FIELD\_READY)}\newline
-or shortcut method, e.g. \newline
-{\tt ESMF\_GridCreateLatLonSphere()}\newline
-{\tt ESMF\_GridCreateLatLonRect()}
-& coordinates
-& can be used as the basis for Field allocation
-& ESMF\_GRIDSTATUS\_FIELD\_READY\\
+ESMF\_GridCommit(\newline
+\indent ESMF\_GRIDSTATUS\_FIELD\_READY)\newline
+{\bf or shortcut method, e.g.} \newline
+ESMF\_GridCreateLatLonSphere()\newline
+ESMF\_GridCreateLatLonRect()
+& Coordinates
+& Can be used as the basis for Field allocation
+& FIELD\_READY\\
 \hline
-{\tt ESMF\_GridCreate()}\newline
-{\tt ESMF\_GridSetCoordFromArray()}\newline
-{\tt ESMF\_GridCommit(ESMF\_GRIDSTATUS\_REGRID\_READY)}\newline
-or \newline 
-{\tt ESMF\_GridCreate()}\newline
-{\tt ESMF\_GridGetLocalTile(localTile)}\newline
+ESMF\_GridCreate()\newline
+ESMF\_GridSetCoordFromArray()\newline
+ESMF\_GridCommit(\newline
+\indent ESMF\_GRIDSTATUS\_REGRID\_READY)\newline
+{\bf or} \newline 
+ESMF\_GridCreate()\newline
+ESMF\_GridGetLocalTile(localTile)\newline
 ... user fills in localTile coordinate values
-{\tt ESMF\_GridCommit(ESMF\_GRIDSTATUS\_REGRID\_READY)}\newline
-or \newline
-{\tt ESMF\_GridCreateLatLonSphere()}\newline
-{\tt ESMF\_GridSetCoordLatLonSphere()}\newline
-{\tt ESMF\_GridCommit(ESMF\_GRIDSTATUS\_REGRID\_READY)}
-& nothing; Grid is complete
-& can be used in regrid methods
-& ESMF\_GRIDSTATUS\_FIELD\_READY\\
+ESMF\_GridCommit(\newline
+\indent ESMF\_GRIDSTATUS\_REGRID\_READY)\newline
+{\bf or shortcut method, e.g.} \newline
+ESMF\_GridCreateLatLonSphere()\newline
+ESMF\_GridSetCoordLatLonSphere()\newline
+ESMF\_GridCommit(\newline
+ESMF\_GRIDSTATUS\_REGRID\_READY)
+& Nothing; Grid is complete
+& Can be used in regrid methods
+& REGRID\_READY\\
 \hline
 \end{tabular}
 
