@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.4 2007/05/15 21:57:17 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.5 2007/05/16 15:30:21 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -28,43 +28,32 @@ sphere grids).\\
 Support for 2D, 3D, and higher dimension grids.\\ 
 Distribution of grids across computational resources for parallel
 operations -  users set which grid dimensions are distributed.\\
-Options for users to define grid coordinates themselves or call prefabricated
-coordinate generation routines for common grids.\\
+Options for users to define grid coordinates themselves or call
+prefabricated coordinate generation routines for common grids.\\
 Options for one-shot or incremental construction of grids.\\
 Options for using a set of pre-defined stagger locations or for setting
 custom stagger locations.\\[.03in] \hline
 \end{tabular}
 \end{center}
 
-\medskip
+\subsubsection{Supported Grids}
 
-The Grid class has a range of capabilities:
-\begin{itemize}
-
-\item It is able to describe grids of dimension from 1D up to 7D (the fortran limit).
-
-\item The user may set arbitarily which grid dimensions are distributed. 
-
-\item A layered interface to allow users to trade off ease of use
-      for depth of control when interacting with the grids. 
-
-\item The user may use factorized grid coordinate arrays. That is, if
-      the coordinates do not vary along all the dimensions of a Grid
-      then the coordinate storage can be reduced to set a lower
-      ranked arrays instead of an array the same rank as the Grid.
-      This allows memory savings and a representation that more
-      closely matches the structure of the coordinate data. 
-
-\item  It is able to store grid coordinates for multiple stagger locations for up to the maximum dimension. There are predefined staggers and predefined stagger locations for ease of use, however, the user can also specify their own if they need something different (see Section~\ref{ref:stagger} for a more in depth discussion of staggers).
-
-\item It can represent, via the ESMF\_DistGrid class, complex connections such 
-      as those used in the tripole and cube-sphere grids. 
-
-\item It can represent grid mosaics containing multiple logically rectangular
+The Grid class can represent, via the ESMF\_DistGrid class, complex connections such 
+as those used in the tripole and cube-sphere grids.   It can represent grid mosaics
+containing multiple logically rectangular
 tiles. These tiles can be connected in a variety of ways to create a complex index space topology. Each tile of the topology can contain arbitrary coordinates. This allows the class to represent a large range of multipatch curvilinear grids. We have followed as closely as possible the description of V. Balaji in the Oct. 2006 report ``A Standard Description of Grids Used in Earth System Models.'' 
+Define uniform, rectilinear, curvilinear.  
 
-\end{itemize}
-
+\subsubsection{Grid Composition}\label{sec:gridcomp}
+[maybe combine with previous section]
+An ESMF Grid is constructed of a hierarchy of elements. At the top
+level a grid is constructed of a set of {\bf Tiles}. Each tile is a logically
+rectangular distributed index space. A tile will usually have some
+physical significanc (e.g. the face of a cube). The piece of a tile
+which resides on one DE is called a {\bf LocalTile}. For example, the six
+faces of a cubed sphere Grid are each tiles and each of 
+the tiles/faces can be divided into many LocalTiles by its
+distribution across DEs. 
 
 \subsubsection{Options for Grid Creation} 
 
@@ -80,15 +69,16 @@ the general grid creation interfaces (See Section~\textbf{Need Ref}). These allo
 complete control over the description of their grids, but
 make no assumptions about a specific topology or distribution. 
 
-\subsubsection{Grid Composition}\label{sec:gridcomp}
-An ESMF Grid is constructed of a hierarchy of elements. At the top
-level a grid is constructed of a set of {\bf Tiles}. Each tile is a logically
-rectangular distributed index space. A tile will usually have some
-physical significanc (e.g. the face of a cube). The piece of a tile
-which resides on one DE is called a {\bf LocalTile}. For example, the six
-faces of a cubed sphere Grid are each tiles and each of 
-the tiles/faces can be divided into many LocalTiles by its
-distribution across DEs. 
+{\bf Deferred Grid Creation}\\
+[maybe combine with previous section]\\
+ With a more complex interface such as that for Grid creation
+for clarity's sake it is often useful to be able to proceed in stages
+(e.g. setting various properties in understandable chunks). The 
+Grid class provides the facility to do this using a set/commit paradigm.
+This capability is also useful in distributing a grid object before
+initialization or when multiple components contribute to the 
+definition of a grid. Section~\ref{sec:usage:setcommit}
+contains a description and example of this interface. 
 
 \subsubsection{Factorized Coordinate Storage}
 
@@ -104,34 +94,27 @@ memory. Please see Section~\ref{sec:usage:coordstore} for
 description and examples of the use of factorized coordinate
 storage in ESMF Grids. 
 
-
 \subsubsection{Staggering}
 
- A useful finite difference technique is to place different physical quantities at different locations within a grid cell. This {\em {staggering}} of the physical variables on the mesh is introduced so that the difference of a field is naturally defined at the location of another variable. When creating an 
+ A useful finite difference technique is to place different physical
+quantities at different locations within a grid cell. This {\bf staggering}
+of the physical variables on the mesh is introduced so that the difference
+of a field is naturally defined at the location of another variable. When creating an 
 ESMF Grid the user specifies which stagger locations the grid should 
-contain (default is only the cell center). Later, when creating an  ESMF\_Field
-on the Grid the user will specify upon which stagger location the Field
-and their data will reside.
+contain (default is only the cell center).  Staggers can be set for up to the 
+maximum grid dimension.  Later, when creating an  ESMF\_Field on the Grid the user
+will specify upon which stagger location the Field and their data will reside.
+
+There are predefined staggers and predefined stagger locations for ease of use,
+however, the user can also specify their own if they need something different 
+(see Section~\ref{ref:stagger} for a more in depth discussion of staggers).
  
 For examples and a full description of the stagger interface 
 please see Section~\ref{sec:usage:staggerloc}. 
-
-\subsubsection{Deferred Creation}
-
- With a more complex interface such as that for Grid creation
-for clarity's sake it is often useful to be able to proceed in stages
-(e.g. setting various properties in understandable chunks). The 
-Grid class provides the facility to do this using a set/commit paradigm.
-This capability is also useful in distributing a grid object before
-initialization or when multiple components contribute to the 
-definition of a grid. Section~\ref{sec:usage:setcommit}
-contains a description and example of this interface. 
-
 
 To add:
 
 {\bf Treatment of global and global data}{br}
  
-Default data placement is where?
 
 
