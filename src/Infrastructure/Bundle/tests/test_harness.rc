@@ -1,7 +1,7 @@
 # Bundle test Harness Config file
 
 # test class
-test_class : 'BUNDLE' 
+test_class: 'BUNDLE' 
 
 # request extra report
 #       -1 = report test failures
