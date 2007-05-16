@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.40 2007/05/02 22:54:58 donstark Exp $ 
+# $Id: makefile,v 1.41 2007/05/16 00:29:10 donstark Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -80,7 +80,11 @@ RUN_ESMF_FRoute8UTestUNI:
         
         
 RUN_ESMF_FieldHarness2UTest:
+	cp -f test_harness.rc $(ESMF_TESTDIR)
+	cp -f harness_config/*.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=TestHarness HNAME=FieldHarness2 NP=2 htest
 
 RUN_ESMF_FieldHarness4UTest:
+	cp -f test_harness.rc $(ESMF_TESTDIR)
+	cp -f harness_config/*.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=TestHarness HNAME=FieldHarness4 NP=4 htest
