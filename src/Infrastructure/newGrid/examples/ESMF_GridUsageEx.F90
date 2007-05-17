@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.4 2007/05/14 23:11:27 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.5 2007/05/17 20:53:29 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -44,8 +44,9 @@ program ESMF_GridCreateEx
 ! The following is a simple example of creating a grid and
 ! loading in a set of coordinates. This code creates a 10x20
 ! 2D grid with the coordinates varying from (10,10) to (100,200).
-! The grid is distributed across 8 DEs (2 in the first
-! dimension, 4 in the second). The grid is created with
+! The grid is partitioned  in the first dimension into two pieces both
+! of size 5. The grid is partitioned in the second dimension into 3
+! pieces of size 7,7 and 6.  The grid is created with
 ! global indices to make it easier to generate the coordinates. 
 ! After grid creation the local bounds and f90 arrays are retrieved
 ! and the coordinates set.
@@ -53,10 +54,11 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-   grid2D=ESMF_GridCreate(minIndex=(1,1/), maxIndex=(/10,20/),     &
-            regDecomp=(/2,4/), indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+   grid2D=ESMF_GridCreateBox(countsPerDEDim1=(/5,5/),     &
+                                                 countsPerDEDim2=(/7,7,6/),  &
+                                                 indexflag=ESMF_INDEX_GLOBAL, rc=rc)
 
-   call ESMF_GridLocalTileGet(grid2D, exclusiveLBound=lbnd, exclusiveUBound=ubnd, rc=rc)
+   call ESMF_GridLocalTileGet(grid2D, computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
    call ESMF_GridLocalTileGetData(grid2D, comp=1, coordsX, rc=rc)
    call ESMF_GridLocalTileGetData(g rid2D, comp=2, coordsY, rc=rc)
 
@@ -80,8 +82,14 @@ program ESMF_GridCreateEx
 ! the spherical Grid generation method would produce a Grid object
 ! with its latitude and longitude values set to locations on a sphere. 
 !
-! There are several methods of creating an ESMF Grid. The first of these allows
-! the user to create a Grid from scratch with maximum control over the 
+! There are several methods of creating an ESMF Grid. The first
+! set of these are designed to easily allow the user to create
+! the most common grids. There are specific creates for 
+! several common shapes. The arguments for each specific shape 
+! create have been pruned to simplify the interface. 
+!
+! The second set of creates allows the user to create a Grid from 
+! scratch with maximum control over the 
 ! specifics of the Grid to be created. The user can create a Grid and specify 
 ! the dimension, size, type, 
 ! topology (via DistGrid), distribution
@@ -89,7 +97,7 @@ program ESMF_GridCreateEx
 ! Grid which is ready to be used in all respects, except its coordinate 
 ! values are uninitialized.
 !
-! The second method of Grid creation allows the user to construct a
+! The thrid method of Grid creation allows the user to construct a
 ! Grid from a set of Arrays containing 
 ! coordinate information. These Arrays
 ! need to have a coherent configuration (same dimension, sizes conforming
@@ -97,7 +105,7 @@ program ESMF_GridCreateEx
 ! call to succeed. The Grid can either be created to contain the actual
 ! Arrays, or the Grid can be created containing copies of the orignal arrays. 
 !
-! The third method of creation allows the user to construct a Grid that
+! The fourth method of creation allows the user to construct a Grid that
 ! would be an appropriate container for coordinates for a specific data 
 ! Array. Given an Array, the user can construct a Grid with exactly the 
 ! same shape, size and layout as the array. 
