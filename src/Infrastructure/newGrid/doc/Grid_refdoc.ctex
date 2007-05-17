@@ -1,4 +1,4 @@
-% $Id: Grid_refdoc.ctex,v 1.2 2007/05/11 17:24:53 oehmke Exp $
+% $Id: Grid_refdoc.ctex,v 1.3 2007/05/17 18:36:13 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -122,15 +122,9 @@
 \input{../Infrastructure/Grid/doc/ESMF_StaggerLoc_fapi}
 #endif
 
-
-#ifdef STANDALONE
-%\section{Glossary}
-%\input{Grid_glos}
-#endif
-
 #ifdef STANDALONE
 %\section{Bibliography}
-%\bibliography{comp} 
+%\bibliography{Grid} 
 %\bibliographystyle{plain}
 %\addcontentsline{toc}{section}{Bibliography}
 #endif

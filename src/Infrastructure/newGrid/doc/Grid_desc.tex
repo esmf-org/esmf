@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.7 2007/05/16 23:02:47 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.8 2007/05/17 18:36:13 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,23 +40,37 @@ custom stagger locations.\\[.03in] \hline
 
 \subsubsection{Supported Grids}
 
-The Grid class can represent, via the ESMF\_DistGrid class, complex connections such 
-as those used in the tripole and cube-sphere grids.   It can represent grid mosaics
-containing multiple logically rectangular
-tiles. These tiles can be connected in a variety of ways to create a complex index space topology. Each tile of the topology can contain arbitrary coordinates. This allows the class to represent a large range of multipatch curvilinear grids. We have followed as closely as possible the description of V. Balaji in the Oct. 2006 report ``A Standard Description of Grids Used in Earth System Models.'' 
-Define uniform, rectilinear, curvilinear.  
+The Grid class is based on the concepts described in {\it A Standard Descriptor 
+of Grids Used in Earth System Models} \cite{BalajiGridSpec}.  In this document
+Balaji introduces the {\bf mosaic} as a general construct useful for
+describing a wide variety of Earth system
+model grids.  A mosaic is composed of {\bf logically rectangular} grid {\bf tiles}
+connected at their edges.  Mosaic grids includes simple, single tile grids as
+a special case.  Grid tiles can have uniform, rectilinear, or curvilinear
+coordinates.  The coordinates of {\bf uniform} grids are equally spaced along their
+axes, and can be fully specified by the coordinates of the two opposing points
+that define the grid's physical span.  The coordinates of {\bf rectilinear} grids
+are unequally spaced along their axes, and can be fully specified by giving
+the spacing of grid points along each axis.  The coordinates of {\bf curvilinear 
+grids} must be specified by giving the explicit set of coordinates for each
+grid point.  Curvilinear grids are often uniform or rectangular grids that 
+have been warped; for example, to place a pole over land points so that it
+does not affect the computations performed on an ocean model grid.  Any of
+these logically rectangular grids can be combined through edge connections
+to form a mosaic.
 
-\subsubsection{Grid Composition}
-\label{sec:gridcomp}
+\subsubsection{Grid Classes in ESMF}
 
-An ESMF Grid is constructed of a hierarchy of elements. At the top
-level a grid is constructed of a set of {\bf Tiles}. Each tile is a logically
-rectangular distributed index space. A tile will usually have some
-physical significanc (e.g. the face of a cube). The piece of a tile
-which resides on one DE is called a {\bf LocalTile}. For example, the six
-faces of a cubed sphere Grid are each tiles and each of 
-the tiles/faces can be divided into many LocalTiles by its
-distribution across DEs. 
+The ESMF Grid class is a representation of a mosaic grid.  Each ESMF
+Grid is constructed of one or more Tiles. The DistGrid class enables
+the user to define complex connections among Tiles such as those used in
+cubed sphere grids.  A Tile will usually have some physical significance
+(e.g. the region of the world covered by one face of a cubed sphere grid).  
+
+The piece of a Tile which resides on one DE is
+called a {\bf LocalTile}. For example, the six faces of a cubed sphere
+Grid are each Tiles and each of the Tiles can be divided into many
+LocalTiles by its distribution across DEs. 
 
 \subsubsection{Options for Grid Creation} 
 
@@ -129,12 +143,11 @@ ESMF\_GRIDSTATUS\_REGRID\_READY)
 \hline
 \end{tabular}
 
-
 \subsubsection{Factorized Coordinate Storage}
 
 Often the coordinates for a grid do not vary across the entire
 index space. For example, in a 2D rectilinear grid for a fixed y
-inddex the y coordinate value will not change as x index changes,
+index the y coordinate value will not change as x index changes,
 and for a fixed x index the x coordinate value will not change as the
 y index changes. In cases such as this the entire range of 
 coordinates does not need to be stored, instead a reduced
