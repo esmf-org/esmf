@@ -1,4 +1,4 @@
-% $Id: ESMF_usrdoc.ctex,v 1.29 2006/12/13 20:18:02 cdeluca Exp $
+% $Id: ESMF_usrdoc.ctex,v 1.30 2007/05/17 18:37:55 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -83,7 +83,7 @@
 \section{Glossary}
 \input{ESMF_terms}
 
-%\section{Bibliography}
+%\section{References}
 \bibliography{ESMF} 
 \bibliographystyle{plain}
 \addcontentsline{toc}{section}{References}

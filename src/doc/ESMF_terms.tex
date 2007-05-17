@@ -86,7 +86,7 @@ Climate and Forecast Conventions.  These are emerging conventions for expressing
 Earth science metadata.  See the \htmladdnormallink{CF home page}{http://www.cgd.ucar.edu/cms/eaton/cf-metadata/}.
 
 \label{glos:CRB}
-\item[Change Review Board] The Change Review Board is the ESMF management
+\item[Change Review Board (CRB)] The Change Review Board is the ESMF management
 body that sets project schedules and priorities.  Its Terms of Reference
 are in the \htmladdnormallink{ESMF Project Plan}{http://www.esmf.ucar.edu/esmf\_pubs/paper\_0503\_projectplan.pdf}.
 
@@ -113,8 +113,8 @@ are in the \htmladdnormallink{ESMF Project Plan}{http://www.esmf.ucar.edu/esmf\_
   {glos:TotDomain}, \htmlref{halo}{glos:Halo}.
 
 \label{glos:CompResource}
-\item[Compute resource] Something that appears as a
-  physical or virtual computer resource. Example of compute resources
+\item[Computational resource] Something that appears as a
+  physical or virtual computer resource. Example of computational resources
   are a CPU, a network connection, a communication API, a protocol, a 
   particular network fabric or a piece of computer memory. 
 
@@ -144,7 +144,8 @@ are in the \htmladdnormallink{ESMF Project Plan}{http://www.esmf.ucar.edu/esmf\_
   the explicit coordinates for each point.  Curvilinear
   grids are often uniform or rectilinear grids that have been 
   warped, for example in order to place a pole over land points
-  in an ocean grid.  See also 
+  so it does not affect the computations performed on an
+  ocean model grid.  See also 
   \htmlref{logically rectangular grid}{glos:LogRectGrid},
   \htmlref{Uniform grid}{glos:UniformGrid}, \htmlref{Rectilinear grid}
   {glos:RectilinearGrid}.  
@@ -550,10 +551,10 @@ in the Earth sciences. See \htmladdnormallink{NetCDF home page}{http://www.unida
 \label{glos:RectilinearGrid}
 \item[Rectilinear grid]
   A rectilinear grid is a logically rectangular grid in which 
-  coordinates in physical space can be fully specified by giving 
-  the spacing of grid points along each grid axis.  The coordinates
-  of each point in physical space are located where these 
-  values intersect.  The spacing along each dimension may vary.
+  the coordinates in physical space can be fully specified by
+  the spacing of grid points along each grid axis.  The
+  gridpoints are located where the coordinate values intersect.
+  The spacing along each axis may vary.  
   See also \htmlref{logically rectangular grid}{glos:LogRectGrid},
   \htmlref{Uniform grid}{glos:UniformGrid}, \htmlref{Curvilinear grid}
   {glos:CurvilinearGrid}.  
@@ -682,7 +683,8 @@ in the Earth sciences. See \htmladdnormallink{NetCDF home page}{http://www.unida
   that define the opposing corner points of the physical span.  The coordinates
   of each point in physical space can be obtained by interpolating from
   the corner points, using the evenly spaced logical grid to specify 
-  grid point locations.  See also \htmlref{logically rectangular grid}{glos:LogRectGrid},
+  evenly spaced grid point locations.  See also 
+  \htmlref{logically rectangular grid}{glos:LogRectGrid},
   \htmlref{Rectiliner grid}{glos:RectilinerGrid}, \htmlref{Curvilinear grid}
   {glos:CurvilinearGrid}.  
 
