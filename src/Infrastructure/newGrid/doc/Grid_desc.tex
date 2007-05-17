@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.9 2007/05/17 21:57:48 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.10 2007/05/17 22:16:57 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -13,8 +13,8 @@ of a structured physical grid.  It also contains the description of the
 grid's underlying topology and the decomposition of the physical grid
 across the available computational resources.  The most frequent 
 use of the Grid class is to describe physical grids in user
-code so that sufficient information is available to ESMF methods
-such as regridding. 
+code so that sufficient information is available to perform ESMF
+methods such as regridding. 
 
 \begin{center}
 \begin{tabular}{|p{6in}|}
@@ -46,7 +46,9 @@ Balaji introduces the {\bf mosaic} as a general construct useful for
 describing a wide variety of Earth system
 model grids.  A mosaic is composed of {\bf logically rectangular} grid {\bf tiles}
 connected at their edges.  Mosaic grids includes simple, single tile grids as
-a special case.  Grid tiles can have uniform, rectilinear, or curvilinear
+a special case.
+
+Grid tiles can have uniform, rectilinear, or curvilinear
 coordinates.  The coordinates of {\bf uniform} grids are equally spaced along their
 axes, and can be fully specified by the coordinates of the two opposing points
 that define the grid's physical span.  The coordinates of {\bf rectilinear} grids
@@ -54,15 +56,15 @@ are unequally spaced along their axes, and can be fully specified by giving
 the spacing of grid points along each axis.  The coordinates of {\bf curvilinear 
 grids} must be specified by giving the explicit set of coordinates for each
 grid point.  Curvilinear grids are often uniform or rectangular grids that 
-have been warped; for example, to place a pole over land points so that it
+have been warped; for example, to place a pole over a land mass so that it
 does not affect the computations performed on an ocean model grid.  Any of
 these logically rectangular grids can be combined through edge connections
-to form a mosaic.
-
+to form a mosaic.  Figure \ref{fig:LogRectGrids} 
 \begin{center}
 \begin{figure}
 \scalebox{0.9}{\includegraphics{LogRectGrids}}
-\caption{Types of logically rectangular grid tiles.}
+\caption{Types of logically rectangular grid tiles.  Red circles show the
+values needed to specify grid coordinates for each type.}
 \label{fig:LogRectGrids}
 \end{figure}
 \end{center}
