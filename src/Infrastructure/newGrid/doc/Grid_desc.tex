@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.10 2007/05/17 22:16:57 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.11 2007/05/17 23:07:41 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -27,7 +27,9 @@ and grids formed by connected logically rectangular regions (e.g. cubed
 sphere grids).\\
 Support for 2D, 3D, and higher dimension grids.\\ 
 Distribution of grids across computational resources for parallel
-operations -  users set which grid dimensions are distributed.\\
+operations - users set which grid dimensions are distributed.\\
+Grids can be created already distributed, so that no single
+resource needs global information in the process.\\
 Options to define periodicity implicitly via standard shapes
 (e.g. sphere, rectangle) or specify it explicitly.\\ 
 Options for users to define grid coordinates themselves or call
@@ -40,7 +42,7 @@ custom stagger locations.\\[.03in] \hline
 
 \subsubsection{Supported Grids}
 
-The Grid class is based on the concepts described in {\it A Standard Descriptor 
+The ESMF Grid class is based on the concepts described in {\it A Standard Descriptor 
 of Grids Used in Earth System Models} \cite{BalajiGridSpec}.  In this document
 Balaji introduces the {\bf mosaic} as a general construct useful for
 describing a wide variety of Earth system
@@ -57,9 +59,13 @@ the spacing of grid points along each axis.  The coordinates of {\bf curvilinear
 grids} must be specified by giving the explicit set of coordinates for each
 grid point.  Curvilinear grids are often uniform or rectangular grids that 
 have been warped; for example, to place a pole over a land mass so that it
-does not affect the computations performed on an ocean model grid.  Any of
-these logically rectangular grids can be combined through edge connections
-to form a mosaic.  Figure \ref{fig:LogRectGrids} 
+does not affect the computations performed on an ocean model grid.  Figure
+\ref{fig:LogRectGrids} shows examples of each type of grid.
+
+Any of these logically rectangular grids can be combined through edge
+connections to form a mosaic.  Cubed sphere and yin-yang grids, shown in 
+Figure {not done yet} are examples of mosaic grids.
+ 
 \begin{center}
 \begin{figure}
 \scalebox{0.9}{\includegraphics{LogRectGrids}}
@@ -69,18 +75,28 @@ values needed to specify grid coordinates for each type.}
 \end{figure}
 \end{center}
 
-\subsubsection{Grid Classes in ESMF}
+\subsubsection{Grid Representation in ESMF}
 
 The ESMF Grid class is a representation of a mosaic grid.  Each ESMF
 Grid is constructed of one or more Tiles. The DistGrid class enables
 the user to define complex connections among Tiles such as those used in
 cubed sphere grids.  A Tile will usually have some physical significance
-(e.g. the region of the world covered by one face of a cubed sphere grid).  
+(e.g. the region of the world covered by one face of a cubed sphere grid).
 
-The piece of a Tile which resides on one DE is
-called a {\bf LocalTile}. For example, the six faces of a cubed sphere
-Grid are each Tiles and each of the Tiles can be divided into many
-LocalTiles by its distribution across DEs. 
+The piece of a Tile which resides on one DE is called a {\bf LocalTile}.
+For example, the six faces of a cubed sphere grid are each Tiles, and
+each Tile can be divided across DEs into many LocalTiles. 
+
+\subsubsection{Coordinate specification}
+
+Grid Tile coordinates are specified according to the information needed
+for the grid type.  Uniform grids are specified with coordinate corner
+points, rectilinear grids with coordinate locations for each dimension,
+and curvilinear grids with coordinates for each grid point.  Hybrid
+grids - for example, a curvilinear horizontal grid with regular spacing
+in the vertical dimension - can be specified as well.  See 
+Section~\ref{sec:usage:coordstore} for more description and examples of
+setting Tile coordinates.
 
 \subsubsection{Options for Grid Creation} 
 
@@ -152,20 +168,6 @@ ESMF\_GRIDSTATUS\_REGRID\_READY)
 & REGRID\_READY\\
 \hline
 \end{tabular}
-
-\subsubsection{Factorized Coordinate Storage}
-
-Often the coordinates for a grid do not vary across the entire
-index space. For example, in a 2D rectilinear grid for a fixed y
-index the y coordinate value will not change as x index changes,
-and for a fixed x index the x coordinate value will not change as the
-y index changes. In cases such as this the entire range of 
-coordinates does not need to be stored, instead a reduced
-(factorized) set of coordinate arrays can be stored which 
-still describe the coordinates for the full grid, but at a large reduction in 
-memory. Please see Section~\ref{sec:usage:coordstore} for
-description and examples of the use of factorized coordinate
-storage in ESMF Grids. 
 
 \subsubsection{Staggering}
 
