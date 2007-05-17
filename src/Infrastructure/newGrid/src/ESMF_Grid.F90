@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.2 2007/05/17 20:53:29 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.3 2007/05/17 23:32:02 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.2 2007/05/17 20:53:29 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.3 2007/05/17 23:32:02 oehmke Exp $'
 
 
 
@@ -213,63 +213,6 @@
 
       end function ESMF_GridSet
 
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridAddStaggerLoc"
-!BOP
-! !IROUTINE: ESMF_GridAddStaggerLoc - Add stagger location information to a partially created grid. 
-
-! !INTERFACE:
-     function ESMF_GridAddStaggerLoc(grid, staggerLoc, &
-                        staggerLocLWidth, staggerLocUWidth, &
-                        staggerLocAlign, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid),       intent(in)              :: grid 
-      type (ESMF_StaggerLoc), intent(in)             :: staggerLoc
-      integer,               intent(in),   optional  :: staggerLocLWidth(:)
-      integer,               intent(in),   optional  :: staggerLocUWidth(:)
-      integer,               intent(in),   optional  :: staggerLocAlign(:)
-      integer,               intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!  Add a stagger location to a partially created grid in preparation for committing and creating. Note that 
-! once a grid is committed and created it's an error to try to add stagger locations to it. Note also 
-! that new values overwrite old values if previously set. 
-!
-! The arguments are:
-! \begin{description}
-!     \item[{grid}]
-!          Partially created Grid to set information into.
-! \item[{[staggerLoc]}]
-!        The stagger location to add.
-! \item[{[staggerLocLWidth]}] 
-!      This array should be the same rank as the grid. It specifies the lower corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[staggerLocUWidth]}] 
-!      This array should be the same rank as the grid. It specifies the upper corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[staggerLocAlign]}] 
-!      This array is of size  grid rank.
-!      For this stagger location, it specifies which element
-!      has the same index value as the center. For example, 
-!      for a 2D cell with corner stagger it specifies which 
-!      of the 4 corners has the same index as the center. 
-!      If this is set and staggerLocUWidth is not,
-!      this determines the default array padding for a stagger. 
-!      If not set, then this defaults to all negative. (e.g. 
-!      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
-! \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end function ESMF_GridAddStaggerLoc
-
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -419,11 +362,201 @@
 
       end subroutine ESMF_GridGet
 
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAddStaggerLoc"
 !BOP
 ! !IROUTINE: ESMF_GridAddStaggerLoc - Add stagger location information to a partially created grid. 
+
+! !INTERFACE:
+ ! Private name; call using ESMF_GridAddStaggerLoc()
+     function ESMF_GridAddStaggerLocNoSet(grid, staggerLoc, &
+                        staggerLocLWidth, staggerLocUWidth, &
+                        staggerLocAlign, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),       intent(in)              :: grid 
+      type (ESMF_StaggerLoc), intent(in)             :: staggerLoc
+      integer,               intent(in),   optional  :: staggerLocLWidth(:)
+      integer,               intent(in),   optional  :: staggerLocUWidth(:)
+      integer,               intent(in),   optional  :: staggerLocAlign(:)
+      integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!  Add a stagger location to a grid.
+!
+! The arguments are:
+! \begin{description}
+!     \item[{grid}]
+!          Partially created Grid to set information into.
+! \item[{[staggerLoc]}]
+!        The stagger location to add.
+! \item[{[staggerLocLWidth]}] 
+!      This array should be the same rank as the grid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[staggerLocUWidth]}] 
+!      This array should be the same rank as the grid. It specifies the upper corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[staggerLocAlign]}] 
+!      This array is of size  grid rank.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and staggerLocUWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+      end function ESMF_GridAddStaggerLocNoSet
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAddStaggerLoc"
+!BOP
+! !IROUTINE: ESMF_GridAddStaggerLoc - Add stagger location information to a grid. 
+
+! !INTERFACE:
+ ! Private name; call using ESMF_GridAddStaggerLoc()
+     function ESMF_GridAddStaggerLocFptr(grid, staggerLoc, &
+                        comp1,comp2,comp3,staggerLocLWidth, staggerLocUWidth, &
+                        staggerLocAlign, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),       intent(in)             :: grid 
+      type (ESMF_StaggerLoc), intent(in)       :: staggerLoc
+      real (ESMF_KIND_R8), intent(in)            :: comp1(:), comp2(:), comp3(:), comp4(:)
+      integer,               intent(in),   optional  :: staggerLocLWidth(:)
+      integer,               intent(in),   optional  :: staggerLocUWidth(:)
+      integer,               intent(in),   optional  :: staggerLocAlign(:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!  Add a stagger location to a grid. This subroutine lets the user add a
+! stagger location and set the coordinates from F90 pointers at the same
+! time. (This subroutine is only usable for grids up to 4D). 
+!
+! The arguments are:
+! \begin{description}
+!     \item[{grid}]
+!          Partially created Grid to set information into.
+! \item[{[staggerLoc]}]
+!        The stagger location to add.
+! \item[[comp1, comp2,...}]
+!        The F90 pointers to get the coordinate data from.
+! \item[{[staggerLocLWidth]}] 
+!      This array should be the same rank as the grid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[staggerLocUWidth]}] 
+!      This array should be the same rank as the grid. It specifies the upper corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[staggerLocAlign]}] 
+!      This array is of size  grid rank.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and staggerLocUWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+!\item[{[doCopy]}]
+!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
+!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
+!          of the array.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+      end function ESMF_GridAddStaggerLocFptr
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAddStaggerLoc"
+!BOP
+! !IROUTINE: ESMF_GridAddStaggerLoc - Add stagger location information to a grid. 
+
+! !INTERFACE:
+ ! Private name; call using ESMF_GridAddStaggerLoc()
+     function ESMF_GridAddStaggerLocArray(grid, staggerLoc, &
+                        comp1,comp2,comp3,staggerLocLWidth, staggerLocUWidth, &
+                        staggerLocAlign, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),       intent(in)             :: grid 
+      type (ESMF_StaggerLoc), intent(in)       :: staggerLoc
+      type(ESMF_ARRAY), intent(in)               :: comp1, comp2, comp3, comp4
+      integer,               intent(in),   optional  :: staggerLocLWidth(:)
+      integer,               intent(in),   optional  :: staggerLocUWidth(:)
+      integer,               intent(in),   optional  :: staggerLocAlign(:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!  Add a stagger location to a grid. This subroutine lets the user add a
+! stagger location and set the coordinates from ase at the same
+! time. (This subroutine is only usable for grids up to 4D). 
+!
+! The arguments are:
+! \begin{description}
+!     \item[{grid}]
+!          Partially created Grid to set information into.
+! \item[{[staggerLoc]}]
+!        The stagger location to add.
+! \item[[comp1, comp2,...}]
+!        Arrays to get the coordinate data from.
+! \item[{[staggerLocLWidth]}] 
+!      This array should be the same rank as the grid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[staggerLocUWidth]}] 
+!      This array should be the same rank as the grid. It specifies the upper corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[staggerLocAlign]}] 
+!      This array is of size  grid rank.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and staggerLocUWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+!\item[{[doCopy]}]
+!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
+!          in Array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
+!          of the Array.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+      end function ESMF_GridAddStaggerLocArray
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridStaggerLocGet"
+!BOP
+! !IROUTINE: ESMF_GridStaggerLocGet - Add stagger location information to a partially created grid. 
 
 ! !INTERFACE:
      subroutine ESMF_GridStaggerLocGet(grid, staggerLoc, &
@@ -473,6 +606,85 @@
 
       end function ESMF_GridStaggerLocGet
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLocalTileCalcBnds"
+!BOP
+! !IROUTINE: ESMF_GridLocalTileCalcBnds - Given 
+
+! !INTERFACE:
+     subroutine ESMF_GridLocalTileCalcBnds(grid, tile, localDE, coordComp, staggerLoc, &
+                        staggerLocLWidth, staggerLocUWidth, &
+                        staggerAlign, lBounds, uBounds, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid 
+      integer,               intent(in), optional :: tile 
+      integer,               intent(in), optional :: localDE
+      integer, intent(in),  optional :: coordComp
+      type (ESMF_StaggerLoc), intent(in)  :: staggerLoc
+      integer,               intent(in),   optional  :: staggerLocLWidth(:)
+      integer,               intent(in),   optional  :: staggerLocUWidth(:)
+      integer,               intent(in),   optional  :: staggerAlign(:)
+      integer,               intent(out)                 :: lBounds(:),uBounds(:)
+      integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!  Given a tile and stagger location information this subroutine calculates
+!  what the bounds of the array on this tile and localDE would be 
+!  if that stagger location were added. This is useful for preallocating
+!  coordinate arrays to be used in {\tt ESMF\_GridStaggerLocAdd}.
+!
+! The arguments are:
+! \begin{description}
+!\item[{grid}]
+!          Grid to get information from.
+!\item[{[tile]}]
+!          The grid tile to get the information for. If not set, defaults to 
+!          the first tile. 
+!\item[{[localDE]}]
+!          The local DE from which to get the information.  If not set, defaults to 
+!          the first DE on this processor. 
+!\item[{coordComp}]
+!          The coordinate component to put the data in (e.g. 1=x). Defaults to 1. 
+! \item[{staggerLoc}]
+!        The stagger location to add.
+! \item[{[staggerLocLWidth]}] 
+!      This array should be the same rank as the grid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[staggerLocUWidth]}] 
+!      This array should be the same rank as the grid. It specifies the upper corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[staggerAlign]}] 
+!      This array is of size  grid rank.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and staggerLocUWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+! \item[{lBounds}] 
+!      This array should have size=rank of the specified coord. comp. 
+!      It specifies the lower bounds
+!       of the array for the given tile, DE, staggerLoc, and coordComp.
+! \item[{uBounds}] 
+!      This array should have size=rank of the coord. comp. It specifies the upper bounds
+!       of the array for the given tile, DE, staggerLoc, and coordComp.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+      end function ESMF_GridStaggerLocCalcSize
+
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridLocalTileGet"
@@ -491,6 +703,7 @@
       type(ESMF_Grid), intent(in) :: grid
       integer, intent(in),optional :: tile
      integer, intent(in),optional :: localDE
+      integer, intent(in),  optional :: coordComp
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
       integer,      intent(out), optional :: exclusiveLBound(:)
       integer,      intent(out), optional :: exclusiveUBound(:)
@@ -517,6 +730,8 @@
 !     \item[{[localDE]}]
 !          The local DE from which to get the information.  If not set, defaults to 
 !          the first DE on this processor. 
+!     \item[{coordComp}]
+!          The coordinate component to put the data in (e.g. 1=x). Defaults to 1. 
 !     \item[{staggerLoc}]
 !          The stagger location to get the information for. If not set, defaults
 !          to center.  
