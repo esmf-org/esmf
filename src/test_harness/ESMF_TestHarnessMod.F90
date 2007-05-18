@@ -79,28 +79,28 @@
   type memory_record
      character(ESMF_MAXSTR) :: name
      integer :: chunks               ! number of logically rectangular chunks
-     integer, allocatable :: rank
+     integer, pointer :: rank(:)
   end type memory_record
 
   type grid_record
      character(ESMF_MAXSTR) :: name
      integer :: topology                     ! key representing the geometry of the grid
      integer :: rank                         ! rank of the grid
-     integer, allocatable :: order(:)        ! axis number, zero for free.
-     integer, allocatable :: size(:)         ! number of grid elements along axis
-     integer, allocatable :: stagger(:,:)    ! stagger location (axis,rank)
-     logical, allocatable :: periodicity(:)  ! (rank) periodicity along axis
-     logical, allocatable :: halo(:)         ! (rank) periodicity along axis
-     integer, allocatable :: halo_size(:,:)  ! (rank,2) halo size along axis
+     integer, pointer :: order(:)        ! axis number, zero for free.
+     integer, pointer :: size(:)         ! number of grid elements along axis
+     integer, pointer :: stagger(:,:)    ! stagger location (axis,rank)
+     logical, pointer :: periodicity(:)  ! (rank) periodicity along axis
+     logical, pointer :: halo(:)         ! (rank) periodicity along axis
+     integer, pointer :: halo_size(:,:)  ! (rank,2) halo size along axis
   end type grid_record
 
   type dist_record
      character(ESMF_MAXSTR) :: name
      integer :: topology                ! key (simple block, block-cyclic, arbitrary)
      integer :: rank                    ! rank of distribution
-     integer, allocatable :: order(:)   ! axis number, zero for free.
-     integer, allocatable :: size(:)    ! number of DE for axis number, zero for free.
-     integer, allocatable :: period(:)  ! period for block-cyclic, zero for simple block
+     integer, pointer :: order(:)   ! axis number, zero for free.
+     integer, pointer :: size(:)    ! number of DE for axis number, zero for free.
+     integer, pointer :: period(:)  ! period for block-cyclic, zero for simple block
   end type dist_record
 
 
@@ -118,7 +118,7 @@
   ! sized char type
   type sized_char_array
      integer :: size
-     type(character_array), allocatable :: string(:)
+     type(character_array), pointer :: string(:)
   end type sized_char_array
 
   type problem_descriptor_record
@@ -141,9 +141,872 @@
 
 !==============================================================================
 
-  subroutine TestHarnessBlank
-  end subroutine TestHarnessBlank
-!------------------------------------------------------------------------------
+
+  !-------------------------------------------------------------------------
+  subroutine interpret_descriptor_string(                             &
+                  problem_descriptor,                                 &
+                  returnrc)
+  !-------------------------------------------------------------------------
+  ! Parse a single  problem descriptor string for problem description items
+  ! such as process (REDISTRIBUTION or REMAPPING), memory topology and rank,
+  ! distribution and grid rank.
+  !-------------------------------------------------------------------------
+
+  ! arguments
+  type(problem_descriptor_record), intent(inout) :: problem_descriptor
+  integer, intent(out) :: returnrc
+
+  ! local variables
+  integer :: localrc = ESMF_SUCCESS ! assume success
+
+  ! test variables
+  integer :: SrcMemRank, DstMemRank
+  integer, allocatable :: SrcMemLoc(:), DstMemLoc(:)
+  integer :: SrcMemBeg, SrcMemEnd, DstMemBeg, DstMemEnd
+  integer :: SrcDistRank, DstDistRank, SrcGridRank, DstGridRank
 
 
+  !-------------------------------------------------------------------------
+  ! parse the prolem descriptor string
+  !-------------------------------------------------------------------------
+  ! Initialize to failure.
+  problem_descriptor%process%name = 'NONE'
+  problem_descriptor%process%tag = Harness_Error
+
+  !-------------------------------------------------------------------------
+  ! Determine testing process (REDISTRIBUTION or REMAPPING)
+  !-------------------------------------------------------------------------
+  print*,'pds is:',problem_descriptor%string
+  call process_query(problem_descriptor%string,                        &
+                     problem_descriptor%process%name,                  &
+                     problem_descriptor%process%tag,                   &
+                     problem_descriptor%process%location,              &
+                     localrc)
+
+  !-------------------------------------------------------------------------
+  ! Determine memory layout (Logically Rectangular or General)
+  !-------------------------------------------------------------------------
+  if ( .NOT. memory_topology(problem_descriptor%string, localrc) ) then
+     ! if memory structure is General, i.e. multiple logically rectangular
+     ! chunks of memory.
+
+  else  ! set memory structure to LOGICALLY_RECTANGULAR
+     print*,'set memory structure to LOGICALLY_RECTANGULAR'
+     call memory_rank(problem_descriptor%string,                       &
+                      SrcMemRank, DstMemRank,                          &
+                      SrcMemBeg, SrcMemEnd,                            &
+                      DstMemBeg, DstMemEnd, localrc)
+
+     allocate( SrcMemLoc(SrcMemRank+1), DstMemLoc(DstMemRank+1) )
+
+     call memory_locate(problem_descriptor%string,                     &
+                        SrcMemRank,                                    &
+                        SrcMemBeg, SrcMemEnd,                          &
+                        SrcMemLoc, localrc)
+
+     call memory_locate(problem_descriptor%string,                     &
+                        DstMemRank,                                    &
+                        DstMemBeg, DstMemEnd,                          &
+                        DstMemLoc, localrc)
+
+     if (localrc /= ESMF_SUCCESS) then
+        print*,'Syntax error in problem descriptor string:',    &
+                                                  problem_descriptor%string
+        returnrc = ESMF_FAILURE
+        return
+     endif
+
+     !-------------------------------------------------------------------------
+     ! Determine the problem's source distribution rank, order, and topology 
+     !-------------------------------------------------------------------------
+     SrcDistRank = dist_rank(problem_descriptor%string,                &
+                             SrcMemBeg, SrcMemEnd, localrc)
+
+     allocate( problem_descriptor%src_dist%order(SrcDistRank) )
+     problem_descriptor%src_dist%rank = SrcDistRank
+     call dist_query(problem_descriptor%string,                        &
+                     SrcMemBeg, SrcMemEnd, SrcMemRank,                 &
+                     problem_descriptor%src_dist%topology,             &
+                     problem_descriptor%src_dist%order, localrc)
+      
+     !-------------------------------------------------------------------------
+     ! Determine the problem's destination distribution rank, order, and topology 
+     !-------------------------------------------------------------------------
+     DstDistRank = dist_rank(problem_descriptor%string,                &
+                             DstMemBeg, DstMemEnd, localrc)
+     allocate( problem_descriptor%dst_dist%order(DstDistRank) )
+     problem_descriptor%dst_dist%rank = DstDistRank
+     call dist_query(problem_descriptor%string,                        &
+                     DstMemBeg, DstMemEnd, DstMemRank,                 &
+                     problem_descriptor%dst_dist%topology,             &
+                     problem_descriptor%dst_dist%order, localrc)
+             
+     !-------------------------------------------------------------------------
+     ! Determine source grid rank and order
+     !-------------------------------------------------------------------------
+     SrcGridRank = grid_rank(problem_descriptor%string, SrcMemBeg, SrcMemEnd, localrc)
+     allocate( problem_descriptor%src_grid%order(SrcGridRank) )
+     problem_descriptor%src_grid%rank = SrcGridRank
+     call grid_query(problem_descriptor%string,                        &
+                     SrcMemBeg, SrcMemEnd, SrcMemRank,                 &
+                     problem_descriptor%src_grid%topology,             &
+                     problem_descriptor%src_grid%order, localrc)
+             
+     !-------------------------------------------------------------------------
+     ! Determine destination grid rank and order
+     !-------------------------------------------------------------------------
+     DstGridRank = grid_rank(problem_descriptor%string, DstMemBeg, DstMemEnd, localrc)
+     allocate( problem_descriptor%dst_grid%order(DstGridRank) )
+     problem_descriptor%dst_Grid%rank = DstGridRank
+     call grid_query(problem_descriptor%string,                        &
+                     DstMemBeg, DstMemEnd, DstMemRank,                 &
+                     problem_descriptor%dst_grid%topology,             &
+                     problem_descriptor%dst_grid%order, localrc)
+            !
+     print*,'SrcDistRank ', SrcDistRank,' DstDistRank ', DstDistRank
+     print*,'SrcGridRank ', SrcGridRank,' DstGridRank ', DstGridRank
+
+     deallocate( SrcMemLoc, DstMemLoc )
+  endif       ! memory topology
+
+  !-------------------------------------------------------------------------
+  end subroutine interpret_descriptor_string
+  !-------------------------------------------------------------------------
+
+ !----------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    integer function char2int( lstring, sloc, rc )
+    !------------------------------------------------------------------------
+    ! This function converts a character representation of an integer digit
+    ! between 0-9 into its integer equivalent.
+    !------------------------------------------------------------------------
+
+    ! arguments
+    character(len=1), intent(in   ) :: lstring
+    integer,          intent(in   ) :: sloc
+    integer,          intent(  out) :: rc
+
+    ! local variables
+    integer :: ntemp
+
+    !------------------------------------------------------------------------
+    ! Convert string to integer
+    !------------------------------------------------------------------------
+    ntemp = iachar( lstring(sloc:sloc) )-iachar('0')
+    
+    rc = ESMF_SUCCESS
+    ! check to see that values is within the acceptable range
+    if ( ntemp < 0 .and. ntemp > 9 ) then
+       rc = ESMF_FAILURE
+       ! syntax error, no grid layout specified
+       print*,'Syntax error, no grid layout'
+       char2int = 0
+    else
+       char2int = ntemp
+    endif
+    
+    !------------------------------------------------------------------------
+    end function char2int
+    !------------------------------------------------------------------------
+
+ !-------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    subroutine dist_query(lstring, MemBeg, MemEnd, MemRank, MemTopology, MemOrder, rc)
+    !------------------------------------------------------------------------
+    ! This subroutine returns distribution topology (B - block, C - block 
+    ! cyclic, A - arbitrary) and order as specified by the descriptor string. 
+    !------------------------------------------------------------------------
+
+    ! arguments
+    character(len=*), intent(in   ) :: lstring
+    integer,          intent(in   ) :: MemBeg, MemEnd
+    integer,          intent(in   ) :: MemRank
+    integer,          intent(  out) :: MemTopology
+    integer,          intent(  out) :: MemOrder(:)
+    integer,          intent(  out) :: rc
+
+    ! local variables
+    character(len=3) :: pattern3
+    integer :: i
+    integer, allocatable :: MemLoc(:)
+
+    ! initialize variables
+    rc = ESMF_SUCCESS
+    
+    !------------------------------------------------------------------------
+    ! Check each memory chunk and extract distribution information. 
+    !------------------------------------------------------------------------
+    pattern3 = 'BCA'
+    allocate( MemLoc(MemRank) )
+    call set_locate(lstring(MemBeg:MemEnd), pattern3, MemRank, MemLoc)
+    MemLoc = MemLoc + MemBeg - 1     ! shift to global string position
+    
+    !------------------------------------------------------------------------
+    ! check that distribution tags are consistent
+    !------------------------------------------------------------------------
+    do i=1,MemRank
+       if ( lstring(MemLoc(1):MemLoc(1)) /= lstring(MemLoc(i):MemLoc(i)) ) then
+          rc = ESMF_FAILURE
+          ! syntax error, more than one type of distribution specified
+          print*,'Syntax error, more than one type of distribution specified'
+       endif
+    enddo
+    !
+    do i=1,MemRank
+       if ( lstring( MemLoc(i):MemLoc(i) ) == 'B' ) then
+       
+          MemTopology = Harness_BlockDist
+          MemOrder(i) = char2int( lstring, MemLoc(i)+1, rc )
+                    
+       elseif ( lstring( MemLoc(i):MemLoc(i) ) == 'C' ) then
+       
+          MemTopology = Harness_CyclicDist
+          MemOrder(i) = char2int( lstring, MemLoc(i)+1, rc )
+          
+       elseif ( lstring( MemLoc(i):MemLoc(i) ) == 'A' ) then
+       
+          MemTopology = Harness_ArbitraryDist
+          
+       else  ! Error
+       
+          MemTopology = Harness_DistError
+          
+       endif
+    enddo
+  
+    !------------------------------------------------------------------------
+    end subroutine dist_query
+    !------------------------------------------------------------------------
+
+ !-------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    integer function dist_rank(lstring, MemBeg, MemEnd, rc)
+    !------------------------------------------------------------------------
+    ! This function returns the distribution rank as specified by the 
+    ! descriptor string. 
+    !------------------------------------------------------------------------
+
+    ! arguments
+    character(len=*), intent(in   ) :: lstring
+    integer,          intent(  out) :: MemBeg, MemEnd
+    integer,          intent(  out) :: rc
+
+    ! local variables
+    character(len=3) :: pattern3
+    integer :: nDist
+
+    !------------------------------------------------------------------------
+    ! Check each memory chunk to see if any of the dimensions are distributed. 
+    !------------------------------------------------------------------------
+    pattern3 = 'BCA'
+    nDist = set_query(lstring(MemBeg:MemEnd), pattern3)
+
+    rc = ESMF_SUCCESS
+    if ( nDist == 0 ) then
+       rc = ESMF_FAILURE
+       ! syntax error, no distribution specified
+       print*,'Syntax error, no distribution'
+    endif
+    dist_rank = nDist
+
+    !------------------------------------------------------------------------
+    end function dist_rank
+    !------------------------------------------------------------------------
+
+ !-------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    subroutine grid_query(lstring, MemBeg, MemEnd, MemRank, MemTopology, MemOrder, rc)
+    !------------------------------------------------------------------------
+    ! This subroutine returns grid topology (G - tensor, S - spherical, 
+    ! U - unstructured) and order as specified by the descriptor string. 
+    !------------------------------------------------------------------------
+
+    ! arguments
+    character(len=*), intent(in   ) :: lstring
+    integer,          intent(in   ) :: MemBeg, MemEnd
+    integer,          intent(in   ) :: MemRank
+    integer,          intent(  out) :: MemTopology
+    integer,          intent(  out) :: MemOrder(:)
+    integer,          intent(  out) :: rc
+
+    ! local variables
+    character(len=3) :: pattern3
+    integer :: i
+    integer, allocatable :: MemLoc(:)
+
+    ! initialize variables
+    rc = ESMF_SUCCESS
+    
+    !------------------------------------------------------------------------
+    ! Check each memory chunk and extract distribution information. 
+    !------------------------------------------------------------------------
+    pattern3 = 'GSU'
+    allocate( MemLoc(MemRank) )
+    call set_locate(lstring(MemBeg:MemEnd), pattern3, MemRank, MemLoc)
+    MemLoc = MemLoc + MemBeg - 1     ! shift to global string position
+    
+    !------------------------------------------------------------------------
+    ! check that distribution tags are consistent
+    !------------------------------------------------------------------------
+    do i=1,MemRank
+       if ( lstring(MemLoc(1):MemLoc(1)) /= lstring(MemLoc(i):MemLoc(i)) ) then
+          rc = ESMF_FAILURE
+          ! syntax error, more than one type of distribution specified
+          print*,'Syntax error, more than one type of distribution specified'
+       endif
+    enddo
+    !
+    do i=1,MemRank
+       if ( lstring( MemLoc(i):MemLoc(i) ) == 'G' ) then
+       
+          MemTopology = Harness_TensorGrid
+          MemOrder(i) = char2int( lstring, MemLoc(i)+1, rc )
+                    
+       elseif ( lstring( MemLoc(i):MemLoc(i) ) == 'S' ) then
+       
+          MemTopology = Harness_SphericalGrid
+          MemOrder(i) = char2int( lstring, MemLoc(i)+1, rc )
+          
+       elseif ( lstring( MemLoc(i):MemLoc(i) ) == 'U' ) then
+       
+          MemTopology = Harness_UnstructuredGrid
+          
+       else  ! Error
+       
+          MemTopology = Harness_DistError
+          
+       endif
+    enddo
+  
+    !------------------------------------------------------------------------
+    end subroutine grid_query
+    !------------------------------------------------------------------------
+
+ !----------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    integer function grid_rank(lstring, MemBeg, MemEnd, rc)
+    !------------------------------------------------------------------------
+    ! This function returns the grid rank as specified by the descriptor
+    ! string.
+    !------------------------------------------------------------------------
+
+    ! arguments
+    character(len=*), intent(in   ) :: lstring
+    integer,          intent(in   ) :: MemBeg, MemEnd
+    integer,          intent(  out) :: rc
+
+    ! local variables
+    character(len=3) :: pattern3
+    integer :: nGrid
+
+    !------------------------------------------------------------------------
+    ! Check each memory chunk to see if any of the dimensions are associated
+    ! with a grid.
+    !------------------------------------------------------------------------
+    pattern3 = 'GSU'
+    nGrid = set_query(lstring(MemBeg:MemEnd), pattern3)
+
+    rc = ESMF_SUCCESS
+    if ( nGrid == 0 ) then
+       rc = ESMF_FAILURE
+       ! syntax error, no grid layout specified
+       print*,'Syntax error, no grid layout'
+    endif
+    grid_rank = nGrid
+
+    !------------------------------------------------------------------------
+    end function grid_rank
+    !------------------------------------------------------------------------
+
+ !----------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    subroutine memory_locate(lstring, MemCount,       &
+                               MemBeg, MemEnd,        &
+                               MemLoc, rc)
+    !------------------------------------------------------------------------
+    ! This subroutine returns the location of the memory delimiters as
+    ! specified by the descriptor string.
+    !------------------------------------------------------------------------
+
+    ! arguments
+    character(len=*), intent(in   ) :: lstring
+    integer,          intent(in   ) :: MemCount
+    integer,          intent(in   ) :: MemBeg, MemEnd
+    integer,          intent(inout) :: MemLoc(:)
+    integer,          intent(  out) :: rc
+
+    ! local variables
+    character(len=1) :: pattern
+    integer, allocatable :: mloc(:)
+
+    ! initialize variables
+    pattern = ';'
+    MemLoc(1) = MemBeg
+
+    allocate( mloc(MemCount-1) )
+
+    call pattern_locate(lstring(MemBeg:MemEnd),pattern,MemCount-1,mloc)
+    MemLoc(2:MemCount) = mloc(1:MemCount-1) + MemBeg -1
+    MemLoc(MemCount+1) = MemEnd
+ 
+    deallocate( mloc )
+    
+    !------------------------------------------------------------------------
+    end subroutine memory_locate
+    !------------------------------------------------------------------------
+
+ !----------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    subroutine memory_rank(lstring, SrcRank, DstRank, SrcBeg, SrcEnd, DstBeg, DstEnd, rc)
+    !------------------------------------------------------------------------
+    ! If the memory topology is structured, this function returns the memory
+    ! rank as specified by the descriptor string. 
+    ! 
+    !------------------------------------------------------------------------
+
+    ! arguments
+    character(len=*), intent(in   ) :: lstring
+    integer,          intent(  out) :: SrcRank,DstRank
+    integer,          intent(  out) :: SrcBeg, SrcEnd, DstBeg, DstEnd
+    integer,          intent(  out) :: rc
+
+    ! local variables
+    character(len=1) :: pattern
+    character(len=2) :: pattern2
+    integer :: nMemory
+    integer :: MemPos(4)
+
+    logical :: flag
+
+    ! initialize variables
+    flag = .false.
+
+    !------------------------------------------------------------------------
+    ! The structured memory is delineated by square brackets. To determine
+    ! how this memory is specified, it is first necessary to determne 
+    ! the existence of two matching pairs of square brackets.
+    !------------------------------------------------------------------------
+    pattern2 = '[]'
+    nMemory = set_query(lstring, pattern2)
+
+    if (nMemory ==0) then
+       ! syntax error, no brackets
+       print*,'Syntax error, no brackets'
+    elseif (nMemory == 4) then
+       !---------------------------------------------------------------------
+       ! there must be two pairs of matching brackets
+       !---------------------------------------------------------------------
+       call set_locate(lstring,pattern2, nMemory, MemPos)
+       SrcBeg = MemPos(1)
+       SrcEnd = MemPos(2)
+       DstBeg = MemPos(3)
+       DstEnd = MemPos(4)
+       if( lstring(SrcBeg:SrcBeg)=='[' .and. lstring(SrcEnd:SrcEnd)==']'  &
+           .and. lstring(DstBeg:DstBeg)=='[' .and. lstring(SrcEnd:SrcEnd)==']' ) then
+           print*,'two pairs of brackets found'
+           flag = .true.
+       endif
+    else 
+       ! brackets are mismatched
+       print*,'Syntax error, missing or extra brackets'
+    endif
+    !------------------------------------------------------------------------
+    ! if the brackets exist and match, continue to extract memory information
+    !------------------------------------------------------------------------
+    if (flag) then
+       !---------------------------------------------------------------------
+       ! Extract Memory Rank
+       !---------------------------------------------------------------------
+       pattern = ';'
+       SrcRank = pattern_query(lstring(SrcBeg:SrcEnd),pattern) + 1
+       DstRank = pattern_query(lstring(DstBeg:DstEnd),pattern) + 1
+       
+       !---------------------------------------------------------------------
+       ! Extract Memory Rank
+       !---------------------------------------------------------------------
+    else ! not flag
+       ! Syntax error, brackets not consistent
+       print*,'Syntax error, brackets not consistent'
+    endif       ! if memory chunks
+     
+    !------------------------------------------------------------------------
+    end subroutine memory_rank
+    !------------------------------------------------------------------------
+
+ !----------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    logical function memory_topology(lstring, rc)
+    !------------------------------------------------------------------------
+    ! function checks the input test string to determine if the memory topology
+    ! is structured (true) or unstructured (false). 
+    !------------------------------------------------------------------------
+
+    ! arguments
+    character(len=*), intent(in   ) :: lstring
+    integer,          intent(  out) :: rc
+
+    ! local variables
+    character(len=2) :: pattern
+    integer :: nMemory
+
+    !--------------------------------------------------------------------
+    ! Memory Layout (Single Chunk Logically Rectangular or General)
+    !--------------------------------------------------------------------
+    pattern = '()'
+    nMemory = set_query(lstring, pattern)
+
+    if ( nMemory == 0 ) then
+       memory_topology = .true.
+    else 
+       memory_topology = .false.
+    endif
+
+    !------------------------------------------------------------------------
+    end function memory_topology
+    !----------------------------------------------------------------------
+
+ !----------------------------------------------------------------------------
+
+    !----------------------------------------------------------------------
+    subroutine pattern_locate(lstring, pattern, number_hits, hits)
+    !----------------------------------------------------------------------
+    ! Locates all instances of PATTERN in STRING, placing the positions in 
+    ! hits.
+    !----------------------------------------------------------------------
+
+    ! arguments
+    character(len=*), intent(in) :: lstring
+    character(len=*), intent(in) :: pattern
+    integer, intent(in)  :: number_hits
+    integer, dimension(:), intent(out) :: hits
+
+    ! local variables
+    integer :: n, k, klast, count
+    integer :: len_string, len_pattern
+
+    ! initialize variables
+    count = 0
+    len_string = len(lstring)
+    len_pattern = len(pattern)
+
+    !----------------------------------------------------------------------
+    ! error check
+    !----------------------------------------------------------------------
+    if (len_string <= len_pattern) print*,    &
+                            'ERROR string_query: string shorter than pattern'
+    if (len_pattern <= 0) print*, 'ERROR string_query: no pattern'
+    !----------------------------------------------------------------------
+    ! Search string for a match with pattern.
+    !----------------------------------------------------------------------
+    klast = 0
+    do n=1,number_hits
+       k = index(lstring(klast+1:len_string),pattern)
+       if ( k > 0 ) then
+          hits(n) = k+klast
+          count = count + 1
+          klast = k+klast
+          k = 0
+       else
+          exit
+       endif
+    enddo
+    !
+    if (number_hits /= count) print*,'ERROR string_locate', number_hits, count
+    
+    !------------------------------------------------------------------------
+    end subroutine pattern_locate
+    !------------------------------------------------------------------------
+
+ !----------------------------------------------------------------------------
+
+    !----------------------------------------------------------------------
+    integer function pattern_query(string,pattern)
+    !----------------------------------------------------------------------
+    ! Counts the number of instances PATTERN is found in STRING,
+    ! and returns zero if the pattern does not occur as a substring.
+    !----------------------------------------------------------------------
+
+    ! arguments
+    character(len=*), intent(in) :: string
+    character(len=*), intent(in) :: pattern
+
+    ! local variables
+    integer :: k, klast, count
+    integer :: len_string, len_pattern
+
+    ! initialize variables
+    count = 0
+    len_string = len(string)
+    len_pattern = len(pattern)
+
+    !----------------------------------------------------------------------
+    ! error check
+    !----------------------------------------------------------------------
+    if (len_string <= len_pattern) print*,    &
+                            'ERROR pattern_query: string shorter than pattern'
+    if (len_pattern <= 0) print*, 'ERROR pattern_query: no pattern'
+    !----------------------------------------------------------------------
+    ! Search string for a match with pattern. 
+    !----------------------------------------------------------------------
+    klast = 0
+    do 
+       ! Examine a sub-string and find the fisrt instance of the pattern.
+       k = index(string(klast+1:len_string),pattern) 
+       ! if index is nonzero, there is a match, increment count and slide 
+       ! sub-string window forward.
+       if ( k > 0 ) then 
+          count = count + 1
+          klast = k + klast
+          k = 0
+       else
+          exit
+       endif  
+    enddo
+
+    pattern_query = count
+    
+    !------------------------------------------------------------------------
+    end function pattern_query
+    !------------------------------------------------------------------------
+
+ !----------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    subroutine  process_query(lstring, lname, tag, location, rc)
+    !------------------------------------------------------------------------
+    ! routine checks the input test string for a method specifier. Acceptable
+    ! methods include:
+    ! REDIST (-->), BILINEAR REMAP (=B=>), CONSERVATIVE REMAP (=C=>), 
+    ! SECOND ORDER CONSERVATIVE REMAP (=S=>), NEAREST NEIGHBOR REMAP (=N=>),
+    ! EXCHANGE GRID CONSERVATIVE REMAPPING (=E=>), and a USER SPECIFIED REMAP 
+    ! METHOD (=X=>).
+    ! 
+    !------------------------------------------------------------------------
+
+    ! arguments
+    character(len=*), intent(in   ) :: lstring
+    character(len=*), intent(inout) :: lname
+    integer,          intent(inout) :: tag
+    integer,          intent(inout) :: location
+    integer,          intent(  out) :: rc
+
+    ! local variables
+    character(len=2) :: pattern_remap
+    character(len=3) :: pattern_redist
+    character(len=4) :: pattern4
+    integer :: nRedist, RedistPos(1), nRemap, RemapPos(1)
+
+    !--------------------------------------------------------------------
+    ! Determine the Process (REDISTRIBUTION or REMAPPING)
+    !--------------------------------------------------------------------
+    pattern_redist = '-->'
+    nRedist = pattern_query(lstring, pattern_redist)
+
+    !--------------------------------------------------------------------
+    ! Check if Process is  REDISTRIBUTION
+    !--------------------------------------------------------------------
+    if (nRedist == 1) then
+       ! if redist keep position
+       call pattern_locate(lstring, pattern_redist, nRedist, RedistPos)
+       print*,'process is Redist'
+       lname = 'REDIST'
+       tag  = Harness_Redist
+       location = RedistPos(1)
+    elseif (nRedist > 1) then
+       ! ERROR syntax error in process declaration
+       print*,'ERROR syntax error in process declaration'
+    elseif (nRedist == 0) then
+       print*,'process is not redistribution, check to see if it is a remap'
+
+       pattern_remap = '=>'
+       nRemap = pattern_query(lstring, pattern_remap)
+       !-----------------------------------------------------------------
+       ! Check if Process is  REMAP
+       !-----------------------------------------------------------------
+       if (nRemap == 1) then
+          ! if remap, keep position
+          call pattern_locate(lstring, pattern_remap, nRemap, RemapPos)
+          location = RemapPos(1)-2
+          ! If Remapping, what type
+          pattern4 = lstring(RemapPos(1)-2:RemapPos(1)+1)
+          ! looks like remap, so check what method type.
+          select case (pattern4)
+
+              case('=B=>')
+                 ! remap method Bilinear
+                 print*,'remap method Bilinear'
+                 lname = 'BilinearRemap'
+                 tag  = Harness_BilinearRemap
+
+              case('=C=>')
+                 ! remap method first order conservative
+                 print*,'remap method first order conservative'
+                 lname = 'ConservRemap'
+                 tag  = Harness_ConservRemap
+
+              case('=S=>')
+                 ! remap method second order conservative
+                 print*,'remap method second order conservative'
+                 lname = '2ndOrderConservRemap'
+                 tag  = Harness_2ndConservRemap
+
+               case('=E=>')
+                  ! remap method exchange grid
+                  print*,'remap method exchange grid'
+                  lname = 'ExchangeGridRemap'
+                  tag  = Harness_ExchangeRemap
+
+               case('=N=>')
+                  ! remap method nearest neighbor
+                  print*,'remap method nearest neighbor'
+                  lname = 'NearestNeighborRemap'
+                  tag  = Harness_NearNeighRemap
+
+               case('=X=>')
+                  ! remap method undefined/user provided
+                  print*,'remap method undefined/user provided'
+                  lname = 'UserProvidedRemap'
+                  tag  = Harness_UserProvRemap
+
+               case default
+                  ! syntax error no recognized method specified
+                  print*,'syntax error no recognized method specified'
+                  location = 0
+
+          end select  ! remap type
+
+          elseif (nRemap > 1) then
+
+             ! ERROR syntax error in process declaration
+             print*,'ERROR syntax error in process declaration'
+
+          elseif (nRemap == 0) then
+
+             ! ERROR no process is specified
+             print*,'ERROR no process is specified'
+
+          endif         ! if remap
+       endif            ! if redist
+
+    !------------------------------------------------------------------------
+    end subroutine process_query
+    !------------------------------------------------------------------------
+
+!--------------------------------------------------------------------------
+
+    !----------------------------------------------------------------------
+    subroutine set_locate(string, set, number_hits, hits)
+    !----------------------------------------------------------------------
+    ! Locates all instances of SET in STRING, placing the positions in
+    ! hits.
+    !----------------------------------------------------------------------
+
+    ! arguments
+    character(len=*), intent(in) :: string
+    character(len=*), intent(in) :: set
+    integer, intent(in)  :: number_hits
+    integer, dimension(:), intent(out) :: hits
+
+    ! local variables
+    integer :: n, k, klast, count
+    integer :: len_string, len_set
+
+    ! initialize variables
+    count = 0
+    len_string = len(string)
+    len_set = len(set)
+
+    !----------------------------------------------------------------------
+    ! error check
+    !----------------------------------------------------------------------
+    if (len_string <= len_set) print*,    &
+                            'ERROR set_query: string shorter than set'
+    if (len_set <= 0) print*, 'ERROR set_query: no set'
+    !----------------------------------------------------------------------
+    ! Search string for a match with set.
+    !----------------------------------------------------------------------
+    klast = 0
+    do n=1,number_hits
+       k = scan(string(klast+1:len_string),set)
+       if ( k > 0 ) then
+          hits(n) = k+klast
+          count = count + 1
+          klast = k+klast
+          k = 0
+       else
+          exit
+       endif
+    enddo
+    !
+    if (number_hits /= count) print*,'ERROR set_locate'
+
+    !------------------------------------------------------------------------
+    end subroutine set_locate
+    !------------------------------------------------------------------------
+
+ !-------------------------------------------------------------------------
+
+    !----------------------------------------------------------------------
+    integer function set_query(lstring,set)
+    !----------------------------------------------------------------------
+    ! Counts the number of instances SET is found in STRING,
+    ! and returns zero if the SET does not occur as a substring.
+    !----------------------------------------------------------------------
+
+    ! arguments
+    character(len=*), intent(in) :: lstring
+    character(len=*), intent(in) :: set
+
+    ! local variables
+    integer :: k, klast, count
+    integer :: len_string, len_set
+
+    ! initialize variables
+    count = 0
+    len_string = len(lstring)
+    len_set = len(set)
+    !----------------------------------------------------------------------
+    ! error check
+    !----------------------------------------------------------------------
+    if (len_string <= len_set) print*,    &
+                            'ERROR set_query: string shorter than set'
+    if (len_set <= 0) print*, 'ERROR set_query: no pattern'
+    !----------------------------------------------------------------------
+    ! Search string for a match with pattern.
+    !----------------------------------------------------------------------
+    klast = 0
+
+    do
+       ! Examine a sub-string and find the first instance of the SET.
+       k = scan(lstring(klast+1:len_string),set)
+       ! if index is nonzero, there is a match, increment count and slide
+       ! sub-string window forward.
+       if ( k > 0 ) then
+          count = count + 1
+          klast = k + klast
+          k = 0
+       else
+          exit
+       endif 
+    enddo
+
+    set_query = count
+    
+    !------------------------------------------------------------------------
+    end function set_query
+    !------------------------------------------------------------------------
+
+ !----------------------------------------------------------------------------
+
+!============================================================================
   end module ESMF_TestHarnessMod
+!============================================================================
+
