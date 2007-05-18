@@ -1,4 +1,4 @@
-// $Id: ESMC_Macros.h,v 1.13 2007/03/31 05:51:27 cdeluca Exp $
+// $Id: ESMC_Macros.h,v 1.14 2007/05/18 21:34:34 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -48,7 +48,7 @@
 #define ESMF_REVISION      2
 #define ESMF_PATCHLEVEL    0
 
-#define ESMF_VERSION_STRING "3.0.2 beta snapshot"
+#define ESMF_VERSION_STRING "3.0.2"
 
 #endif   // ESMC_MACROS_H
 
