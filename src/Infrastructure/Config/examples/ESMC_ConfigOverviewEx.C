@@ -11,7 +11,7 @@
 //
 
 //-------------------------------------------------------------------------
-//EXAMPLE        String used by test script to count examples.
+//EX______AMPLE        String used by test script to count examples.
 //==============================================================================
 //
 // //DESCRIPTION:
