@@ -68,7 +68,6 @@
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 
-
   ! report results
   call TestHarnessReport(test_report_flag,rc)
 
@@ -267,6 +266,28 @@ contains
        print*,k,problem_descriptor(count)%gridfiles%string(k)%name
      enddo
      print*,'------------------------------------------'
+
+  call interpret_descriptor_string(problem_descriptor(count),returnrc)
+
+  print*,'          '
+  print*,'process: ',problem_descriptor(count)%process%name
+  print*,'process tag ',problem_descriptor(count)%process%tag
+  print*,'          '
+  print*,'Source dist rank:',problem_descriptor(count)%src_dist%rank
+  print*,'Source dist topology:',problem_descriptor(count)%src_dist%topology
+  print*,'Source dist order:',problem_descriptor(count)%src_dist%order
+  print*,'----'
+  print*,'Source grid rank:',problem_descriptor(count)%src_grid%rank
+  print*,'Source grid topology:',problem_descriptor(count)%src_grid%topology
+  print*,'Source grid order:',problem_descriptor(count)%src_grid%order
+  print*,'==========='
+  print*,'Destination dist rank:',problem_descriptor(count)%dst_dist%rank
+  print*,'Destination dist topology:',problem_descriptor(count)%dst_dist%topology
+  print*,'Destination dist order:',problem_descriptor(count)%dst_dist%order
+  print*,'----'
+  print*,'Destination grid rank:',problem_descriptor(count)%dst_grid%rank
+  print*,'Destination grid topology:',problem_descriptor(count)%dst_grid%topology
+  print*,'Destination grid order:',problem_descriptor(count)%dst_grid%order
   enddo
 
   !--------------------------------------------------------------------------
@@ -550,6 +571,8 @@ contains
   end subroutine read_problem_descriptor_names
 
 !23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+ !----------------------------------------------------------------------------
 
 !--------------------------------------------------------------------------
 !--------------------------------------------------------------------------
