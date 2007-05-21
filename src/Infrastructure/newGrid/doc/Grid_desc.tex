@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.12 2007/05/18 18:32:04 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.13 2007/05/21 22:51:03 oehmke Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -157,6 +157,33 @@ uniform grids.
 See Section~\ref{sec:usage:coordstore} for more description and examples of
 setting Tile coordinates.
 
+\subsubsection{Staggering}
+
+ A useful finite difference technique is to place different physical
+quantities at different locations within a grid cell. This {\bf staggering}
+of the physical variables on the mesh is introduced so that the difference
+of a field is naturally defined at the location of another variable. 
+
+The ESMF Grid class supports a wide variety of stagger locations (including
+those sufficient to specify any of the standard Arakawa staggers). The 
+Grid supports staggers located at cell centers, corners, edges, 
+faces, and higher dimensional elements. The user may specify
+common stagger locations using predefined values, or may construct
+custom ones for cases which the predefines don't cover.
+
+As a default the ESMF Grid class provides symmetric staggering, so
+that cell centers are enclosed by cell perimeter (e.g. corner) 
+stagger locations. This means the coordinate arrays for
+some stagger locations may be padded to one element larger in some
+dimensions than the cell center arrays to allow the enclosure. 
+However, to achieve other types of staggering, the user may alter 
+or eliminate this padding by using the appropriate options when adding
+a stagger location to a Grid. 
+ 
+For examples and a full description of the stagger interface 
+please see Section~\ref{sec:usage:staggerloc}. 
+
+
 \subsubsection{Stages in Grid Creation} 
 
 In ESMF there are two stages to Grid creation.
@@ -239,27 +266,8 @@ ESMF\_GRIDSTATUS\_REGRID\_READY)
 \hline
 \end{tabular}
 
-\subsubsection{Staggering}
 
- A useful finite difference technique is to place different physical
-quantities at different locations within a grid cell. This {\bf staggering}
-of the physical variables on the mesh is introduced so that the difference
-of a field is naturally defined at the location of another variable. When creating an 
-ESMF Grid the user specifies which stagger locations the grid should 
-contain (default is only the cell center).  Staggers can be set for up to the 
-maximum grid dimension.  Later, when creating an  ESMF\_Field on the Grid the user
-will specify upon which stagger location the Field and their data will reside.
 
-There are predefined staggers and predefined stagger locations for ease of use,
-however, the user can also specify their own if they need something different 
-(see Section~\ref{ref:stagger} for a more in depth discussion of staggers).
- 
-For examples and a full description of the stagger interface 
-please see Section~\ref{sec:usage:staggerloc}. 
-
-To add:
-
-{\bf Treatment of global and global data}{br}
  
 
 

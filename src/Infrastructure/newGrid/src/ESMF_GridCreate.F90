@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreate.F90,v 1.2 2007/05/17 23:32:02 oehmke Exp $
+! $Id: ESMF_GridCreate.F90,v 1.3 2007/05/21 22:51:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridCreate.F90,v 1.2 2007/05/17 23:32:02 oehmke Exp $'
+      '$Id: ESMF_GridCreate.F90,v 1.3 2007/05/21 22:51:03 oehmke Exp $'
 
 
 
@@ -73,19 +73,19 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateBox"
+#define ESMF_METHOD "ESMF_GridCreateShapeBox"
 !BOP
-! !IROUTINE: ESMF_GridCreateBox - Create a new Spherical Grid
+! !IROUTINE: ESMF_GridCreateShapeBox - Create a new rectangular Grid
 
 ! !INTERFACE:
-      function ESMF_GridCreateBox(name,coordTypeKind,  &
+      function ESMF_GridCreateShapeBox(name,coordTypeKind,  &
                         countsPerDEDim1,countsPerDeDim2, countsPerDEDim3, &
                         periodicDim1, periodicDim2, &
-                        coordStore, coordIndexOrder, indexflag, gridType,     &
-                        haloDepth, petMap, rc)
+                        coordCompDep1, coordCompDep2, coordCompDep3, &
+                        indexflag, haloDepth, petMap, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateBox
+      type(ESMF_Grid) :: ESMF_GridCreateShapeBox
 !
 ! !ARGUMENTS:
       character (len=*), intent(in), optional :: name 
@@ -93,12 +93,12 @@
        integer,               intent(in),                  :: countsPerDEDim1(:)
        integer,               intent(in),                  :: countsPerDEDim2(:)
        integer,               intent(in),   optional  :: countsPerDEDim3(:)
-       logical,               intent(in), optional    :: periodicDim1
-       logical,               intent(in), optional    :: periodicDim2
+       logical,               intent(in),   optional  :: periodicDim1
+       logical,               intent(in),   optional  :: periodicDim2
+       integer,               intent(in),   optional  :: coordCompDep1(:)
+       integer,               intent(in),   optional  :: coordCompDep2(:)
+       integer,               intent(in),   optional  :: coordCompDep3(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       type(ESMF_CoordStore), intent(in),   optional  :: coordStore
-       type(ESMF_CoordIndexOrder),  intent(in),   optional  :: coordIndexOrder
-       type(ESMF_GridType),  intent(in),   optional  :: gridType
        integer,               intent(in),   optional  :: haloDepth
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
@@ -115,40 +115,50 @@
 !     The type/kind of the grid coordinate data. 
 !     If not specified then the type/kind will be 8 byte reals. 
 ! \item[{countsPerDEDim1}] 
-!     This arrays specifies the number of cells per DE for dimension 1
-!     for the exclusive region (the center stagger location). Dimension 1
-!     is the dimension around the sphere (e.g. longitude).
+!     This arrays specifies the number of cells per DE for index dimension 1
+!     for the exclusive region (the center stagger location).
 !     If the array has only one entry, then the dimension is undistributed. 
-! \item[countsPerDEDim2}] 
-!     This array specifies the number of cells per DE for dimension 2
-!     for the exclusive region (center stagger location). Dimension 2
-!     is the dimension from pole to pole on the sphere (e.g. latitude).  
+! \item[{countsPerDEDim2}] 
+!     This array specifies the number of cells per DE for index dimension 2
+!     for the exclusive region (center stagger location). 
 !     If the array has only one entry, then the dimension is undistributed. 
-! \item[countsPerDEDim3}] 
-!     This array specifies the number of cells per DE for dimension 3
-!     for the exclusive region (center stagger location).  Dimension 3
-!     is the dimension outward from the sphere (e.g. radius).  
+! \item[{[countsPerDEDim3]}] 
+!     This array specifies the number of cells per DE for index dimension 3
+!     for the exclusive region (center stagger location).  
 !     If not specified  then grid is 2D. Also, If the array has only one entry,
 !     then the dimension is undistributed. 
 ! \item[{[periodicDim1]}] 
-!     If TRUE then the grid is connected such that dimension 1 is periodic.
+!     If TRUE then the grid is connected such that index dimension 1 is periodic.
 !     If FALSE then there is no such connection. Defaults to FALSE.
-! \item[{[periodicDim1]}] 
-!     If TRUE then the grid is connected such that dimension 2 is periodic.
+! \item[{[periodicDim2]}] 
+!     If TRUE then the grid is connected such that index dimension 2 is periodic.
 !     If FALSE then there is no such connection. Defaults to FALSE.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
-! \item[{[gridType]}]
-!      Flag that indicates the type of the grid. If not given, defaults
-!       to ESMF\_GRIDTYPE\_SPH.
-! \item[{[coordStore]}]
-!       Flag to set the coordinate storage array structure. The options
-!       are ESMF\_COORDSTORE\_CURV which sets the coordinate
-!       arrays to the same rank as the grid, and ESMF\_COORDSTORE\_RECTL
-!       which yields grid rank 1D arrays. If not set defaults to  
-!       ESMF\_COORDSTORE\_CURVL.
-! \item[{[coordIndexOrder]}]
-!       Flag to set the index order in the coordinate storage arrays. 
+! \item[{[coordCompDep1]}] 
+!     This array specifies the dependence of the first 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the first
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/1/). 
+! \item[{[coordCompDep2]}] 
+!     This array specifies the dependence of the second 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the second
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/2/). 
+! \item[{[coordCompDep3]}] 
+!     This array specifies the dependence of the third 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the third
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/3/). 
 ! \item[{[haloDepth}]
 !       Sets the depth of the computational padding around the exclusive
 !       regions on each DE.  The actual value for any edge is the maximum
@@ -166,22 +176,24 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      end function ESMF_GridCreateBox
+      end function ESMF_GridCreateShapeBox
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateSphere"
+#define ESMF_METHOD "ESMF_GridCreateShapeSphere"
 !BOP
-! !IROUTINE: ESMF_GridCreateSphere - Create a new Spherical Grid
+! !IROUTINE: ESMF_GridCreateShapeSphere - Create a new Spherical Grid
 
 ! !INTERFACE:
-      function ESMF_GridCreateSphere(name,coordTypeKind,  &
+      function ESMF_GridCreateShapeSphere(name,coordTypeKind,  &
                         countsPerDEDim1,countsPerDeDim2, countsPerDEDim3, &
-                        coordStore, coordIndexOrder, indexflag, gridType,     &
-                        haloDepth, petMap, rc)
+                        connMinPole, connMaxPole, &
+                        coordCompDep1, coordCompDep2, coordCompDep3, &
+                        indexflag, haloDepth, petMap, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateSphere
+      type(ESMF_Grid) :: ESMF_GridCreateShapeSphere
 !
 ! !ARGUMENTS:
       character (len=*), intent(in), optional :: name 
@@ -189,54 +201,77 @@
        integer,               intent(in),                  :: countsPerDEDim1(:)
        integer,               intent(in),                  :: countsPerDEDim2(:)
        integer,               intent(in),   optional  :: countsPerDEDim3(:)
+       logical,               intent(in),   optional   :: connMinPole
+       logical,               intent(in),   optional   :: connMaxPole
+       integer,               intent(in),   optional  :: coordCompDep1(:)
+       integer,               intent(in),   optional  :: coordCompDep2(:)
+       integer,               intent(in),   optional  :: coordCompDep3(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       type(ESMF_CoordStore), intent(in),   optional  :: coordStore
-       type(ESMF_CoordIndexOrder),  intent(in),   optional  :: coordIndexOrder
-       type(ESMF_GridType),  intent(in),   optional  :: gridType
        integer,               intent(in),   optional  :: haloDepth
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Grid} object. This subroutine constructs a single tile spherical
-! grid. A Spherical grid is connected across both poles and along the branch cut. 
+! grid. A Spherical grid has a pole at either end of index dimension 2 and is periodic
+! in index dimension 1. The two pole connections may be turned off by the 
+! {\tt connMinPole} and {\tt connMaxPole} flags. 
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
-! \item[{countsPerDEDim1}] 
-!     This arrays specifies the number of cells per DE for dimension 1
-!     for the exclusive region (the center stagger location). Dimension 1
-!     is the dimension around the sphere (e.g. longitude).
-!     If the array has only one entry, then the dimension is undistributed. 
-! \item[countsPerDEDim2}] 
-!     This array specifies the number of cells per DE for dimension 2
-!     for the exclusive region (center stagger location). Dimension 2
-!     is the dimension from pole to pole on the sphere (e.g. latitude).  
-!     If the array has only one entry, then the dimension is undistributed. 
-! \item[countsPerDEDim3}] 
-!     This array specifies the number of cells per DE for dimension 3
-!     for the exclusive region (center stagger location).  Dimension 3
-!     is the dimension outward from the sphere (e.g. radius).  
-!     If not specified  then grid is 2D. Also, If the array has only one entry,
-!     then the dimension is undistributed. 
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
 !     If not specified then the type/kind will be 8 byte reals. 
+! \item[{countsPerDEDim1}] 
+!     This arrays specifies the number of cells per DE for index dimension 1
+!     for the exclusive region (the center stagger location). Index dimension 1
+!     is the dimension which circles the pole.
+!     If the array has only one entry, then the dimension is undistributed. 
+! \item[{countsPerDEDim2}] 
+!     This array specifies the number of cells per DE for index dimension 2
+!     for the exclusive region (center stagger location). Index dimension 2
+!     is the dimension from pole to pole.  
+!     If the array has only one entry, then the dimension is undistributed. 
+! \item[{[countsPerDEDim3]}] 
+!     This array specifies the number of cells per DE for index dimension 3
+!     for the exclusive region (center stagger location).  Index dimension 3
+!     is the dimension outward from the sphere.  
+!     If not specified  then grid is 2D. Also, If the array has only one entry,
+!     then the dimension is undistributed. 
+! \item[{[connMinPole]}] 
+!     If TRUE then the sphere pole at the minimum end of dimension 2
+!     is connected.  If FALSE then there is no such connection. Defaults to TRUE.
+! \item[{[connMaxPole]}] 
+!     If TRUE then the sphere pole at the maximum end of dimension 2
+!     is connected.  If FALSE then there is no such connection. Defaults to TRUE.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
-! \item[{[gridType]}]
-!      Flag that indicates the type of the grid. If not given, defaults
-!       to ESMF\_GRIDTYPE\_SPH.
-! \item[{[coordStore]}]
-!       Flag to set the coordinate storage array structure. The options
-!       are ESMF\_COORDSTORE\_CURV which sets the coordinate
-!       arrays to the same rank as the grid, and ESMF\_COORDSTORE\_RECTL
-!       which yields grid rank 1D arrays. If not set defaults to  
-!       ESMF\_COORDSTORE\_CURVL.
-! \item[{[coordIndexOrder]}]
-!       Flag to set the index order in the coordinate storage arrays. 
+! \item[{[coordCompDep1]}] 
+!     This array specifies the dependence of the first 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the first
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/1/). 
+! \item[{[coordCompDep2]}] 
+!     This array specifies the dependence of the second 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the second
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/2/). 
+! \item[{[coordCompDep3]}] 
+!     This array specifies the dependence of the third 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the third
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/3/). 
 ! \item[{[haloDepth}]
 !       Sets the depth of the computational padding around the exclusive
 !       regions on each DE.  The actual value for any edge is the maximum
@@ -254,24 +289,24 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      end function ESMF_GridCreateSphere
-
+      end function ESMF_GridCreateShapeSphere
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateTripole"
+#define ESMF_METHOD "ESMF_GridCreateShapeTripole"
 !BOP
-! !IROUTINE: ESMF_GridCreateTripole - Create a new Spherical Grid
+! !IROUTINE: ESMF_GridCreateShapeTripole - Create a new Tripole Grid
 
 ! !INTERFACE:
-      function ESMF_GridCreateTripole(name,coordTypeKind,  &
+      function ESMF_GridCreateShapeTripole(name,coordTypeKind,  &
                         countsPerDEDim1,countsPerDeDim2, countsPerDEDim3, &
-                        coordStore, coordIndexOrder, indexflag, gridType,     &
-                        haloDepth, petMap, rc)
+                        connPole, connBipole, &
+                        coordCompDep1, coordCompDep2, coordCompDep3, &
+                        indexflag, haloDepth, petMap, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateTripole
+      type(ESMF_Grid) :: ESMF_GridCreateShapeTripole
 !
 ! !ARGUMENTS:
       character (len=*), intent(in), optional :: name 
@@ -279,54 +314,77 @@
        integer,               intent(in),                  :: countsPerDEDim1(:)
        integer,               intent(in),                  :: countsPerDEDim2(:)
        integer,               intent(in),   optional  :: countsPerDEDim3(:)
+       logical,               intent(in),   optional   :: connPole
+       logical,               intent(in),   optional   :: connBipole
+       integer,               intent(in),   optional  :: coordCompDep1(:)
+       integer,               intent(in),   optional  :: coordCompDep2(:)
+       integer,               intent(in),   optional  :: coordCompDep3(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       type(ESMF_CoordStore), intent(in),   optional  :: coordStore
-       type(ESMF_CoordIndexOrder),  intent(in),   optional  :: coordIndexOrder
-       type(ESMF_GridType),  intent(in),   optional  :: gridType
        integer,               intent(in),   optional  :: haloDepth
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Grid} object. This subroutine constructs a single tile tripole
-! grid. A Tripole grid is connected across both poles and along the branch cut. 
+! Create an {\tt ESMF\_Grid} object. This subroutine constructs a single tile Tripole
+! grid. A Tripole grid has pole at the min end of the index space and a bipole at
+! the maximum end. The two pole connections may be turned off by the 
+! {\tt connPole} and {\tt connBipole} flags. 
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
-! \item[{countsPerDEDim1}] 
-!     This arrays specifies the number of cells per DE for dimension 1
-!     for the exclusive region (the center stagger location). Dimension 1
-!     is the dimension around the sphere (e.g. longitude).
-!     If the array has only one entry, then the dimension is undistributed. 
-! \item[countsPerDEDim2}] 
-!     This array specifies the number of cells per DE for dimension 2
-!     for the exclusive region (center stagger location). Dimension 2
-!     is the dimension from pole to pole on the sphere (e.g. latitude).  
-!     If the array has only one entry, then the dimension is undistributed. 
-! \item[countsPerDEDim3}] 
-!     This array specifies the number of cells per DE for dimension 3
-!     for the exclusive region (center stagger location).  Dimension 3
-!     is the dimension outward from the sphere (e.g. radius).  
-!     If not specified  then grid is 2D. Also, If the array has only one entry,
-!     then the dimension is undistributed. 
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
 !     If not specified then the type/kind will be 8 byte reals. 
+! \item[{countsPerDEDim1}] 
+!     This arrays specifies the number of cells per DE for index dimension 1
+!     for the exclusive region (the center stagger location). Index dimension 1
+!     is the dimension which circles the pole.
+!     If the array has only one entry, then the dimension is undistributed. 
+! \item[{countsPerDEDim2}] 
+!     This array specifies the number of cells per DE for index dimension 2
+!     for the exclusive region (center stagger location). Index dimension 2
+!     is the dimension from pole to pole.  
+!     If the array has only one entry, then the dimension is undistributed. 
+! \item[{[countsPerDEDim3]}] 
+!     This array specifies the number of cells per DE for index dimension 3
+!     for the exclusive region (center stagger location).  Index dimension 3
+!     is the dimension outward from the sphere.  
+!     If not specified  then grid is 2D. Also, If the array has only one entry,
+!     then the dimension is undistributed. 
+! \item[{[connPole]}] 
+!     If TRUE then the pole at the minimum end of the index space
+!     is connected.  If FALSE then there is no such connection. Defaults to TRUE.
+! \item[{[connBipole]}] 
+!     If TRUE then the bipole at the maximum end of the index space
+!     is connected.  If FALSE then there is no such connection. Defaults to TRUE.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
-! \item[{[gridType]}]
-!      Flag that indicates the type of the grid. If not given, defaults
-!       to ESMF\_GRIDTYPE\_SPH.
-! \item[{[coordStore]}]
-!       Flag to set the coordinate storage array structure. The options
-!       are ESMF\_COORDSTORE\_CURV which sets the coordinate
-!       arrays to the same rank as the grid, and ESMF\_COORDSTORE\_RECTL
-!       which yields grid rank 1D arrays. If not set defaults to  
-!       ESMF\_COORDSTORE\_CURVL.
-! \item[{[coordIndexOrder]}]
-!       Flag to set the index order in the coordinate storage arrays. 
+! \item[{[coordCompDep1]}] 
+!     This array specifies the dependence of the first 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the first
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/1/). 
+! \item[{[coordCompDep2]}] 
+!     This array specifies the dependence of the second 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the second
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/2/). 
+! \item[{[coordCompDep3]}] 
+!     This array specifies the dependence of the third 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the third
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/3/). 
 ! \item[{[haloDepth}]
 !       Sets the depth of the computational padding around the exclusive
 !       regions on each DE.  The actual value for any edge is the maximum
@@ -344,7 +402,133 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      end function ESMF_GridCreateTripole
+      end function ESMF_GridCreateShapeTripole
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateShape"
+!BOP
+! !IROUTINE: ESMF_GridCreateShape - Create a new rectangular Grid
+
+! !INTERFACE:
+      function ESMF_GridCreateShape(name,coordTypeKind,  &
+                        countsPerDEDim1,countsPerDeDim2, countsPerDEDim3, &
+                        connDim1, connDim2, connDim3, &
+                        coordCompDep1, coordCompDep2, coordCompDep3, &
+                        indexflag, gridType, haloDepth, petMap, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateShape
+!
+! !ARGUMENTS:
+      character (len=*), intent(in), optional :: name 
+       type(ESMF_TypeKind),  intent(in),optional  :: coordTypeKind
+       integer,               intent(in),                  :: countsPerDEDim1(:)
+       integer,               intent(in),                  :: countsPerDEDim2(:)
+       integer,               intent(in),   optional  :: countsPerDEDim3(:)
+       type(ESMF_GridConn), intent(in),   optional  :: connDim1(2)
+       type(ESMF_GridConn), intent(in),   optional  :: connDim2(2)
+       type(ESMF_GridConn), intent(in),   optional  :: connDim3(2)
+       integer,               intent(in),   optional  :: coordCompDep1(:)
+       integer,               intent(in),   optional  :: coordCompDep2(:)
+       integer,               intent(in),   optional  :: coordCompDep3(:)
+       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       integer,               intent(in),   optional  :: haloDepth
+       integer,               intent(in),   optional  :: petMap(:,:,:)
+       integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_Grid} object. This subroutine constructs a single tile rectangular
+! grid. 
+!
+! The arguments are:
+! \begin{description}
+! \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+! \item[{[coordTypeKind]}] 
+!     The type/kind of the grid coordinate data. 
+!     If not specified then the type/kind will be 8 byte reals. 
+! \item[{countsPerDEDim1}] 
+!     This arrays specifies the number of cells per DE for index dimension 1
+!     for the exclusive region (the center stagger location).
+!     If the array has only one entry, then the dimension is undistributed. 
+! \item[{countsPerDEDim2}] 
+!     This array specifies the number of cells per DE for index dimension 2
+!     for the exclusive region (center stagger location). 
+!     If the array has only one entry, then the dimension is undistributed. 
+! \item[{[countsPerDEDim3]}] 
+!     This array specifies the number of cells per DE for index dimension 3
+!     for the exclusive region (center stagger location).  
+!     If not specified  then grid is 2D. Also, If the array has only one entry,
+!     then the dimension is undistributed. 
+! \item[{[connDim1]}] 
+!     Two element array describing the index dimension 1 connections.
+!      The first element represents the minimum end of dimension 1.
+!      The second element represents the minimum end of dimension 1.
+!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
+!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
+!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+! \item[{[connDim2]}] 
+!     Two element array describing the index dimension 2 connections.
+!      The first element represents the minimum end of dimension 2.
+!      The second element represents the minimum end of dimension 2.
+!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
+!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
+!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+! \item[{[connDim3]}] 
+!     Two element array describing the index dimension 3 connections.
+!      The first element represents the minimum end of dimension 3.
+!      The second element represents the minimum end of dimension 3.
+!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
+!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
+!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+! \item[{[indexflag]}]
+!      Flag that indicates how the DE-local indices are to be defined.
+! \item[{[coordCompDep1]}] 
+!     This array specifies the dependence of the first 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the first
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/1/). 
+! \item[{[coordCompDep2]}] 
+!     This array specifies the dependence of the second 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the second
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/2/). 
+! \item[{[coordCompDep3]}] 
+!     This array specifies the dependence of the third 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the third
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/3/). 
+! \item[{[haloDepth}]
+!       Sets the depth of the computational padding around the exclusive
+!       regions on each DE.  The actual value for any edge is the maximum
+!       between the halo and stagger location padding. If not specified 
+!       this is set to 0.
+! \item[{[petMap]}]
+!       Sets the mapping of pets to the created DEs. This 3D
+!       should be of size size(countsPerDEDim1)xsize(countsPerDEDim2)x
+!       size(countsPerDEDim3). If countsPerDEDim3 isn't present, then
+!       the last dimension is of size 1.   
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+      end function ESMF_GridCreateShape
+
 
 
 
@@ -825,108 +1009,6 @@
 
       end function ESMF_GridCreateFromArrays
 
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateLikeArray"
-!BOP
-! !IROUTINE: ESMF_GridCreateLikeArray - Create a new Grid with a similar shape to an array
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridCreate()
-      function ESMF_GridCreateLikeArray(name, refStaggerLoc, array, &
-         staggerLocs, coordCompRanks, coordCompDimMap, &
-         staggerLocLWidth, staggerLocUWidth, &
-         staggerLocAligns, gridType, &
-         computationalLWidth, computationalUWidth, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateLikeArray
-!
-! !ARGUMENTS:
-       character (len=*),     intent(in),    optional :: name
-       type (ESMF_StaggerLoc),intent(in),    optional :: refStaggerLoc
-       integer,               intent(in),   optional  :: coordCompDimMap(:,:)
-       type (ESMF_Array),     intent(in)              :: array
-       type (ESMF_StaggerLoc), intent(in)             :: staggerLocs(:)
-       integer,               intent(in),   optional  :: coordCompRanks(:)
-       integer,               intent(in),   optional  :: staggerLocLWidth(:,:)
-       integer,               intent(in),   optional  :: staggerLocUWidth(:,:)
-       integer,               intent(in),   optional  :: staggerLocAligns(:,:)
-       integer,               intent(in),   optional  :: gridType
-       integer,               intent(in),   optional  :: computationalLWidth(:,:)
-       integer,               intent(in),   optional  :: computationalUWidth(:,:)
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Creates a new grid based on an array. The coordinate arrays for stagger location
-!      {\tt refStaggerLoc} will be a copy of array. The rest of the stagger location's 
-!      arrays will be based on array, but will vary slightly depending on the differences 
-!      between them and refStaggerLoc. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{[name]}]
-!          {\tt ESMF\_Grid} name.
-! \item[{[refStaggerLoc]}]
-!       The stagger location which to make the same size, shape, and distribution as array.
-!       The default value for this parameter is the cell center. 
-! \item[{array}]
-!          The array whose size and shape the grid should copy. 
-! \item[{staggerLocs}]
-!          A list of all the stagger locations the grid should contain.
-! \item[{[coordCompRanks]}]
-!      List that has as many elements as the grid rank .
-!      Gives the dimension of each component (e.g. x) array. This is 
-!      to allow factorization of the coordinate arrays. If not specified
-!      all arrays are the same size as the grid. 
-! \item[{[coordCompDimMap]}]
-!      2D list of size grid rank x grid rank. This array describes the
-!      map of each component array's dimensions onto the grids
-!      dimensions. Each entry {\tt coordCompDimMap(i,j)} tells which
-!      grid dimension component i's, jth dimension maps to. 
-!      Note that if j is bigger than {\tt coordCompRanks(i)} than its ignored.        
-! \item[{[staggerLocLWidth]}] 
-!      This array is of size grid rank by size(staggerLocs).
-!      For each stagger location, it specifies the lower corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[staggerLocUWidth]}] 
-!      This array is of size  grid rank by size(staggerLocs).
-!      For each stagger location, it specifies the upper corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[staggerLocAligns]}] 
-!      This array is of size  grid rank by size(staggerLocs).
-!      For each stagger location, it specifies which element
-!      has the same index value as the center. For example, 
-!      for a 2D cell with corner stagger it specifies which 
-!      of the 4 corners has the same index as the center. 
-!      If this is set and staggerLocUWidth is not,
-!      this determines the default array padding for a stagger. 
-!      If not set, then this defaults to all negative. (e.g. 
-!      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
-! \item[{[gridType]}]
-!      Flag that indicates the type of the grid. If not given, defaults
-!       to ESMF\_GRIDTYPE\_UNKNOWN.
-! \item[{[computationalLWidth]}]
-!       Array of the same size as the {\tt distGrid} dimcount. 
-!       Sets the size of the computational padding around the exclusive
-!       regions on each DE. If {\tt staggerLocLWidth} is also set
-!       the actual value for any edge is the maximum between the two. 
-! \item[{[computationalUWidth]}]
-!       Array of the same size as the {\tt distGrid} dimcount. 
-!       Sets the size of the computational padding around the exclusive
-!       regions on each DE. If {\tt staggerLocUWidth} is also set
-!       the actual value for any edge is the maximum between the two. 
-! \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-
-      end function ESMF_GridCreateLikeArray
 
 
 !------------------------------------------------------------------------------

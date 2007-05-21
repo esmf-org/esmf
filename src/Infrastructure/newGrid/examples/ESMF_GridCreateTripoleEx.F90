@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateTripoleEx.F90,v 1.2 2007/05/14 17:40:28 oehmke Exp $
+! $Id: ESMF_GridCreateTripoleEx.F90,v 1.3 2007/05/21 22:51:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@ program ESMF_GridCreateEx
 ! This program shows examples of Grid creation
 
 !BOE
-! \subsubsection{Example: 2D Tripole Grid Creation}
+! \subsubsection{Example: 2D Tripole Grid Creation From Arrays}
 !
 ! This example illustrates the creation of a 2D tripole Grid from coordinate data
 ! read in on a single processor and then distributed to the rest of the processors. 
@@ -149,8 +149,8 @@ program ESMF_GridCreateEx
 
 !EOE
 !BOC
-      call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL,  &
-                 kind=ESMF_R8, rank=gridRank)
+      call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8,  &
+                 rank=gridRank)
 
       gridCntrCoordArrayLat = ESMF_ArrayCreate(arrayspec=arrayspec,  &
                                                  distgrid=distgrid, rc=rc)
