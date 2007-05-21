@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.4 2007/05/21 23:25:13 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.5 2007/05/21 23:27:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.4 2007/05/21 23:25:13 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.5 2007/05/21 23:27:14 oehmke Exp $'
 
 
 
@@ -428,13 +428,15 @@
 ! !INTERFACE:
  ! Private name; call using ESMF_GridAddStaggerLoc()
      function ESMF_GridAddStaggerLocFptr(grid, staggerLoc, &
-                        comp1,comp2,comp3,staggerLocLWidth, staggerLocUWidth, &
+                        comp1, comp2, comp3, &
+                        staggerLocLWidth, staggerLocUWidth, &
                         staggerLocAlign, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),       intent(in)             :: grid 
       type (ESMF_StaggerLoc), intent(in)       :: staggerLoc
-      real (ESMF_KIND_R8), intent(in)            :: comp1(:), comp2(:), comp3(:), comp4(:)
+      real (ESMF_KIND_R8), intent(in)            :: comp1(:), comp2(:)
+      real (ESMF_KIND_R8), intent(in)            :: comp3(:)
       integer,               intent(in),   optional  :: staggerLocLWidth(:)
       integer,               intent(in),   optional  :: staggerLocUWidth(:)
       integer,               intent(in),   optional  :: staggerLocAlign(:)
@@ -452,8 +454,12 @@
 !          Partially created Grid to set information into.
 ! \item[{[staggerLoc]}]
 !        The stagger location to add.
-! \item[[comp1, comp2,...}]
-!        The F90 pointers to get the coordinate data from.
+! \item[{[comp1]}]
+!        The F90 pointer to coordinate data for the first coordinate component (e.g. x).
+! \item[{[comp2]}]
+!        The F90 pointer to coordinate data for the second coordinate component (e.g. y).
+! \item[{[comp3]}]
+!        The F90 pointer to coordinate data for the third coordinate component (e.g. z).
 ! \item[{[staggerLocLWidth]}] 
 !      This array should be the same rank as the grid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region.
@@ -485,7 +491,6 @@
       end function ESMF_GridAddStaggerLocFptr
 
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAddStaggerLoc"
@@ -495,13 +500,15 @@
 ! !INTERFACE:
  ! Private name; call using ESMF_GridAddStaggerLoc()
      function ESMF_GridAddStaggerLocArray(grid, staggerLoc, &
-                        comp1,comp2,comp3,staggerLocLWidth, staggerLocUWidth, &
+                        comp1, comp2, comp3, &
+                        staggerLocLWidth, staggerLocUWidth, &
                         staggerLocAlign, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),       intent(in)             :: grid 
       type (ESMF_StaggerLoc), intent(in)       :: staggerLoc
-      type(ESMF_ARRAY), intent(in)               :: comp1, comp2, comp3, comp4
+      type(ESMF_ARRAY), intent(in)            :: comp1(:), comp2(:)
+      type(ESMF_ARRAY), intent(in)            :: comp3(:)
       integer,               intent(in),   optional  :: staggerLocLWidth(:)
       integer,               intent(in),   optional  :: staggerLocUWidth(:)
       integer,               intent(in),   optional  :: staggerLocAlign(:)
@@ -510,7 +517,7 @@
 !
 ! !DESCRIPTION:
 !  Add a stagger location to a grid. This subroutine lets the user add a
-! stagger location and set the coordinates from ase at the same
+! stagger location and set the coordinates from F90 pointers at the same
 ! time. (This subroutine is only usable for grids up to 4D). 
 !
 ! The arguments are:
@@ -519,8 +526,12 @@
 !          Partially created Grid to set information into.
 ! \item[{[staggerLoc]}]
 !        The stagger location to add.
-! \item[[comp1, comp2,...}]
-!        Arrays to get the coordinate data from.
+! \item[{[comp1]}]
+!        ESMF Array holding coordinate data for the first coordinate component (e.g. x).
+! \item[{[comp2]}]
+!         ESMF Array holding coordinate data for the second coordinate component (e.g. y).
+! \item[{[comp3]}]
+!         ESMF Array holding coordinate data for the third coordinate component (e.g. z).
 ! \item[{[staggerLocLWidth]}] 
 !      This array should be the same rank as the grid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region.
@@ -540,8 +551,8 @@
 !      center and the padding is all on the postive side.) 
 !\item[{[doCopy]}]
 !          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
-!          in Array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
-!          of the Array.
+!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
+!          of the array.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -550,6 +561,8 @@
 ! !REQUIREMENTS:  TODO
 
       end function ESMF_GridAddStaggerLocArray
+
+
 
 
 !------------------------------------------------------------------------------

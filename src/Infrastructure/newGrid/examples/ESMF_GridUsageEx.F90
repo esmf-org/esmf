@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.6 2007/05/21 22:51:03 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.7 2007/05/21 23:27:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -370,8 +370,8 @@ program ESMF_GridCreateEx
 !BOC
    grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
            countsPerDEDim2=(/7,7,6/), &
-           connDim1=(/ESMF_GRIDCONN_PERIODIC,ESMF_GRIDCONN_PERIODIC/), &
-           connDim1=(/ESMF_GRIDCONN_BIPOLE,ESMF_GRIDCONN_BIPOLE/), &
+           connDim1=(/ESMF_GRIDCONN_PERIODIC, ESMF_GRIDCONN_PERIODIC/), &
+           connDim2=(/ESMF_GRIDCONN_BIPOLE, ESMF_GRIDCONN_BIPOLE/), &
            rc=rc)   
 !EOC
 
@@ -432,7 +432,7 @@ program ESMF_GridCreateEx
 ! in specifying a Grid's stagger locations.  
 !
 ! To set which stagger locations in a Grid have coordinate data, the subroutine
-! {\tt ESMF_GridAddStaggerLoc} is used. The following example
+! {\tt ESMF\_GridAddStaggerLoc} is used. The following example
 ! adds the corner stagger location to {\tt grid}.
 !EOE
 
@@ -444,14 +444,14 @@ program ESMF_GridCreateEx
 ! The user may also add coordinate data at the same time as adding
 ! the stagger locations.  The following example
 ! adds the corner stagger location to {\tt grid}, plus associated 
-! coordinate data. Note, the input coordinate arrays (Coord_X, Coord_Y) may be either
+! coordinate data. Note, the input coordinate arrays (CoordX, CoordY) may be either
 ! F90 or ESMF Array's (The F90 arrays are restricted to single DE to PET mappings).
 ! They also need to be of the proper size and rank to coorespond to the Grid. 
 !EOE
 
 !BOC 
    call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGER_CORNER, &
-          comp1=Coord_X, comp2=Coord_Y, rc=rc)
+          comp1=CoordX, comp2=CoordY, rc=rc)
 !EOC  
 
 
