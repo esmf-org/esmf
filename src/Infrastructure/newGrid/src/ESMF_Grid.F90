@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.3 2007/05/17 23:32:02 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.4 2007/05/21 23:25:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.3 2007/05/17 23:32:02 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.4 2007/05/21 23:25:13 oehmke Exp $'
 
 
 
@@ -1123,6 +1123,62 @@ piece of tile on our processor from a fortran array.
 
 
       end function ESMF_GridHalo
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLocalTileSetData"
+!BOP
+! !IROUTINE: ESMF_GridLocalTileSetData - set the coordinate data for the particular
+piece of tile on our processor from a fortran array.
+
+! !INTERFACE:
+      subroutine ESMF_GridGenCoordsUniform(grid, tile, staggerLoc, &
+                                            begCoord, endCoord, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in),optional :: tile
+      type (ESMF_StaggerLoc), intent(in),optional :: staggerLoc
+      real, intent(in), optional :: begCoord(:), endCoord(:)
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    Generates coordinates and loads them into the grid. This 
+!   method generates coordinates uniformly between {\tt begCoord} and
+!   {\tt endCoord}. {\tt begCoord} is associated with the minimum
+!   end of the index range and {\tt endCoord} is associated with
+!   the maximum end. Note that its fine to have coordinates
+!   go from big to small with increasing index by setting a larger value 
+!   in {\tt begCoord} than {\tt endCoord}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item[{[tile]}]
+!          The grid tile to set the information for. If not set, defaults to 
+!          the first tile. 
+!     \item[{staggerLoc}]
+!          The stagger location to set the information for. If not set, defaults
+!          to center. 
+!     \item[{begCoord}]
+!          Array the same rank as the grid. These values correspond to 
+!          the minimum end of the index ranges, and is the starting value
+!          for the uniform coordinates.
+!     \item[{endCoord}]
+!          Array the same rank as the grid. These values correspond to 
+!          the maximum end of the index ranges, and is the ending value
+!          for the uniform coordinates.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+      end subroutine ESMF_GridGenCoordsUniform
+
+
 
 
 !------------------------------------------------------------------------------
