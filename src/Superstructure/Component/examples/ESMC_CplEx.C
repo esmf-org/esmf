@@ -1,9 +1,9 @@
-// $Id: ESMC_CplEx.C,v 1.17 2007/05/21 17:01:20 svasquez Exp $
+// $Id: ESMC_CplEx.C,v 1.18 2007/05/21 20:06:11 svasquez Exp $
 //
 // Example/test code which creates a new comp.
 
 //-------------------------------------------------------------------------
-// !EX___AMPLE        String used by test script to count examples.
+// !EXAMPLE        String used by test script to count examples.
 //-------------------------------------------------------------------------
 
 
