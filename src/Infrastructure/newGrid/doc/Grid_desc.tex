@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.13 2007/05/21 22:51:03 oehmke Exp $
+% $Id: Grid_desc.tex,v 1.14 2007/05/22 17:22:17 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -96,12 +96,15 @@ a Grid creation shortcut.
 \label{sec:ShapeShortcut}
 ESMF has shortcuts for creation of standard Grid {\bf shapes}.  
 In many cases, these enable the user to bypass the step of creating 
-a DistGrid before creating the Grid.  
-{\bf Sphere} and {\bf Box} are the simplest shapes.
-A Sphere is periodic in the
-longitudinal dimension and has defined poles.  A Box is a cartesion
-space up to seven dimensions.  The periodicity of a Box can be
-defined on a per-dimension basis by the user.  
+a DistGrid before creating the Grid.  The basic call is 
+ESMF\_GridCreateShape().  With this call, the user can specify for
+each dimension whether it is periodoc, is not periodic, is a pole, or
+is a bipole.
+
+ESMF also provides simple standard shapes, {\bf Sphere} and {\bf Box}.
+A Sphere is periodic in the longitudinal dimension and has defined
+poles.  A Box is a cartesion space up to seven dimensions.  The
+periodicity of a Box can be defined on a per-dimension basis by the user.  
 
 If the user's grid shape is too complex for an ESMF shortcut routine,
 a DistGrid can be created to specify the shape in detail. 
@@ -110,12 +113,22 @@ This DistGrid is then passed into a Grid create call.
 \subsubsection{Shortcuts for Specification of Grid Distribution} 
 
 The shortcuts for creating standard Grid shapes have options
-for data distribution.  The main distribution options are 
-{\bf regular} and {\bf arbitrary}.  {\bf define}
+for data distribution.  The user specifies which dimensions 
+are to be distributed through a coordinate dependency (coordDep)
+argument.
 
-If the user's grid distribution is too complex for an ESMF shortcut routine,
-a DistGrid can be created to specify the grid distribution
-in detail.  This DistGrid is then passed into a Grid create call.
+The main distribution options are block, regular and arbitrary.
+A {\bf block} distribution is one in which the same number of
+contiguous grid points are assigned to each DE in the
+distributed dimension.  A regular distribution is one in which
+unequal numbers of contiguous gridpoints are assigned to each
+DE in the distributed dimension.  An arbitrary distribution is
+one in which any gridpoint can be assigned to any DE.
+
+If the user's grid distribution is too complex for an ESMF
+shortcut routine, a DistGrid can be created to specify the grid
+distribution in detail.  This DistGrid is then passed into a
+Grid create call.
 
 \subsubsection{Coordinate Specification}
 
@@ -183,7 +196,6 @@ a stagger location to a Grid.
 For examples and a full description of the stagger interface 
 please see Section~\ref{sec:usage:staggerloc}. 
 
-
 \subsubsection{Stages in Grid Creation} 
 
 In ESMF there are two stages to Grid creation.
@@ -213,8 +225,6 @@ contribute to the definition of a grid.
 
 The Grid class uses create, set or generate, and 
 commit calls during grid creation.
-
-
 
 \medskip
 \begin{tabular}{|p{2.6in}|p{1in}|p{1in}|p{1.4in}|}
