@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.9 2007/05/22 17:27:56 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.10 2007/05/22 23:30:18 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@ program ESMF_GridCreateEx
 
 
 !BOE
-!\subsubsection{Create 2D, Single-Tile, Rectilinear Grid}
+!\subsubsection{Example: Create 2D, Single-Tile, Uniform Grid}
 !
 ! The following is a simple example of creating a grid and
 ! loading in a set of coordinates. This code creates a 10x20
@@ -55,7 +55,7 @@ program ESMF_GridCreateEx
 
 !BOC
    ! Create the empty grid
-   grid2D=ESMF_GridCreateShapeBox(countsPerDEDim1=(/5,5/),     &
+   grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/),     &
             countsPerDEDim2=(/7,7,6/), indexflag=ESMF_GLOBAL, &
             rc=rc)
 
@@ -74,7 +74,6 @@ program ESMF_GridCreateEx
         coordsX(i,j) = i*10.0
    enddo
 
-
    ! Get the Y coordinate bounds
    call ESMF_GridLocalTileGet(grid2D, coordComp=2, &
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
@@ -87,11 +86,10 @@ program ESMF_GridCreateEx
         coordsY(i) = i*10.0
    enddo
 
-
-
+   ! We now have all our coordinates so commit as regrid ready.
+   call ESMF_GridCommit(grid2D1, ESMF_GRIDSTATUS_REGRID_READY, rc=rc)
 
 !EOC
-
 
 !BOE
 !\subsubsection{Creation: Shapes}
@@ -99,7 +97,7 @@ program ESMF_GridCreateEx
 ! There are several methods of creating an ESMF Grid. The first
 ! set of these are designed to easily allow the user to create
 ! the most common grids. There are specific creates for 
-! several common shapes. The method {\tt ESMF\_GridCreateShapeBox}
+! several common shapes. The method {\tt ESMF\_GridCreateShape}
 ! creates a rectangular grid. The method 
 ! {\tt ESMF\_GridCreateShapeSphere} creates a Grid with a pole
 ! at either end of the first dimension and periodic in the second.
@@ -139,7 +137,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-   grid=ESMF_GridCreateShapeBox(countsPerDEDim1=(/5,5/), &
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
           countsPerDEDim2=(/7,7,6/), rc=rc)   
 !EOC
 
@@ -149,7 +147,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-   grid=ESMF_GridCreateShapeBox(countsPerDEDim1=(/5,5/), &
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
           countsPerDEDim2=(/7,7,6/), countsPerDEDim1=(/15,15/), rc=rc)   
 !EOC
 
@@ -159,7 +157,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-   grid=ESMF_GridCreateShapeBox(countsPerDEDim1=(/5,5/), &
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
           countsPerDEDim2=(/7,7,6/), countsPerDEDim1=(/30/), rc=rc)   
 !EOC
 
@@ -179,7 +177,7 @@ program ESMF_GridCreateEx
    petMap(:,2,1) = (/3,2/)
    petMap(:,3,1) = (/1,0/)
 
-   grid=ESMF_GridCreateShapeBox(countsPerDEDim1=(/5,5/), &
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
            countsPerDEDim2=(/7,7,6/), petMap=petMap, rc=rc)   
 !EOC
 
@@ -211,7 +209,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-   grid=ESMF_GridCreateShapeBox(countsPerDEDim1=(/5,5/), &
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
           countsPerDEDim2=(/7,7,6/), coordCompDep1=(/2/), &
           coordCompDep2=(/1/), rc=rc)   
 !EOC 
@@ -223,7 +221,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-   grid=ESMF_GridCreateShapeBox(countsPerDEDim1=(/5,5/), &
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
           countsPerDEDim2=(/7,7,6/), coordCompDep1=(/1,2/), &
           coordCompDep2=(/1,2/), rc=rc)   
 !EOC 
@@ -237,7 +235,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-   grid=ESMF_GridCreateShapeBox(countsPerDEDim1=(/5,5/), &
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
           countsPerDEDim2=(/7,7,6/), countsPerDEDim1=(/30/), &
           coordCompDep1=(/1,2/), coordCompDep2=(/1,2/), &
           coordCompDep3=(/3/), rc=rc)   
@@ -252,7 +250,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-   grid=ESMF_GridCreateShapeBox(countsPerDEDim1=(/5,5/), &
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
            countsPerDEDim2=(/7,7,6/), indexflag=ESMF_GLOBAL, rc=rc)   
 !EOC
 
@@ -268,7 +266,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC 
-   grid=ESMF_GridCreateShapeBox(coordTypeKind=ESMF_TYPEKIND_I4, &
+   grid=ESMF_GridCreateShape(coordTypeKind=ESMF_TYPEKIND_I4, &
           countsPerDEDim1=(/5,5/), countsPerDEDim2=(/7,7,6/), rc=rc)   
 !EOC  
 
@@ -286,68 +284,14 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC 
-   grid=ESMF_GridCreateShapeBox(countsPerDEDim1=(/5,5/), &
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
            countsPerDEDim2=(/7,7,6/), haloDepth=1, rc=rc)   
 !EOC  
 
 
 !BOE
 !
-!\subsubsection{Creation: GridCreateShapeBox Specific Arguments}
-!
-! Aside from the above common arguments the shortcut shape grid create
-! methods have some specific arguments. The shape specific 
-! arguments all deal with turning on and off connectivity. 
-! The {\tt ESMF\_GridCreateShapeBox} command has two specific arguments
-! {\tt periodicDim1} and {\tt periodicDim2}. These can be used
-! to setup a connection between the ends of the given dimension.
-! For example, to connect the box into a torus (i.e. doubly periodic)
-! the user would do the following. 
-!EOE
-
-!BOC
-   grid=ESMF_GridCreateShapeBox(countsPerDEDim1=(/5,5/), &
-           countsPerDEDim2=(/7,7,6/), periodicDim1=.true., &
-           periodicDim2=.true., rc=rc)   
-!EOC
-
-!BOE
-!
-!\subsubsection{Creation: GridCreateShapeSphere Specific Arguments}
-!
-! The {\tt ESMF\_GridCreateShapeSphere} command has two specific arguments
-! {\tt connMinPole} and {\tt connMaxPole}. These can be used
-! to independently  turn on and off the pole connections at either end of the sphere. 
-! These are both on by default, but for example, to create single poled hemisphere
-! the user could do the following. 
-!EOE
-
-!BOC
-   grid=ESMF_GridCreateShapeSphere(countsPerDEDim1=(/5,5/), &
-           countsPerDEDim2=(/7,7,6/), connMinPole=.false., rc=rc)   
-!EOC
-
-
-!BOE
-!
-!\subsubsection{Creation: GridCreateShapeTripole Specific Arguments}
-!
-! The {\tt ESMF\_GridCreateShapeTripole} command has two specific arguments
-! {\tt connPole} and {\tt connBipole}. These can be used
-! to independently  turn on and off the pole connections at either end of the sphere. 
-! These are both on by default, but for example, to create a hemisphere
-! with just a bipole the user could do the following. 
-!EOE
-
-!BOC
-   grid=ESMF_GridCreateShapeTripole(countsPerDEDim1=(/5,5/), &
-           countsPerDEDim2=(/7,7,6/), connPole=.false., rc=rc)   
-!EOC
-
-
-!BOE
-!
-!\subsubsection{Creation: GridCreateShape Specific Arguments}
+!\subsubsection{Creation: Edge Connections}
 !
 ! The {\tt ESMF\_GridCreateShape} command has three specific arguments
 ! {\tt connDim1}, {\tt connDim2}, and {\tt connDim3}. These can be used
@@ -371,6 +315,30 @@ program ESMF_GridCreateEx
            connDim2=(/ESMF_GRIDCONN_BIPOLE, ESMF_GRIDCONN_BIPOLE/), &
            rc=rc)   
 !EOC
+
+!BOE
+!
+! This table shows the ESMF\_GRIDCONN\_ values which can be used to create various shapes. 
+! Note that the dimensions the connections are on is arbitrary. For example,
+! putting the settings for specifying a sphere into {\tt connDim2} and {\tt connDim3} instead would
+! still result in a sphere, but oriented along a different axis. 
+!
+! \medskip
+! \begin{tabular}{|l|c|c||c|c||}
+! \hline
+!         & {\bf connDim1(1)} & {\bf connDim1(2)}  & {\bf connDim2(1)} & {\bf connDim2(2)}  \\ 
+! \hline
+! {\bf Rectangle}  & NONE & NONE & NONE & NONE \\
+! {\bf Bipole Sphere} & POLE & POLE & PERIODIC & PERIODIC \\
+! {\bf Tripole Sphere} & POLE & BIPOLE & PERIODIC & PERIODIC \\
+! {\bf Cylinder} & NONE & NONE & PERIODIC & PERIODIC \\
+! {\bf Torus}  & PERIODIC & PERIODIC & PERIODIC & PERIODIC \\
+! \hline
+! \hline
+! \end{tabular}
+!
+!EOE
+
 
 !BOE
 !\subsubsection{Creation: Set/Commit}\label{sec:usage:setcommit}
@@ -398,7 +366,7 @@ program ESMF_GridCreateEx
           countsPerDEDim1=(/7,7,6/), rc=rc)
 
    ! Turn grid into a usable ESMF Grid
-   call ESMF_GridCommit(grid, rc=rc)
+   call ESMF_GridCommit(grid, ESMF_GRIDSTATUS_SHAPE_READY, rc=rc)
 
    ! Add Center Stagger Location
    call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
@@ -566,27 +534,6 @@ program ESMF_GridCreateEx
 !EOC
 
 !BOE
-!\subsubsection{Grid Metadata}
-!
-! To allow the storage of data describing a particular
-! type of grid, the capability to add metadata name-value
-! pairs to a Grid object is provided. Metadata is 
-! more strictly controlled than attributes. The valid
-! metadata labels are controlled by ESMF. The 
-! valid metadata for a grid will also depend on the grid's type
-! set via {\tt gridType} during creation.
-! Metadata can be used inside ESMF routines, so it should only 
-! be set with caution by users. Metadata should 
-! also be set to the same value across processors. 
-! The following code is an example of setting metadata
-! value "Radius" to 10.0.  
-!EOE
-
-!BOC
-   call ESMF_GridSetMetaData(grid, "Radius", 10.0, rc=rc)
-!EOC
-
-!BOE
 !\subsubsection{Grid Attributes}
 !
 ! As is typical for ESMF classes, the Grid class allows
@@ -664,7 +611,7 @@ program ESMF_GridCreateEx
    petMap(:,1,1) = (/1,2/)
 
    ! Create Grid
-   grid=ESMF_GridCreateShapeBox(coordTypeKind=ESMF_TYPEKIND_R4, &
+   grid=ESMF_GridCreateShape(coordTypeKind=ESMF_TYPEKIND_R4, &
                            countsPerDEDim1=(/10,10/), &
                            countsPerDEDim2=(/10,10/), &
                            coordCompDep1=(/1,2/), &
@@ -715,7 +662,7 @@ program ESMF_GridCreateEx
 
 
    ! Set the Grid type and kind
-   grid=ESMF_GridSetShapeBox(coordTypeKind=ESMF_TYPEKIND_R4, rc=rc)
+   grid=ESMF_GridSetShape(coordTypeKind=ESMF_TYPEKIND_R4, rc=rc)
 
 
    ! Set the grid size and distribution
@@ -724,11 +671,11 @@ program ESMF_GridCreateEx
    petMap(:,1,1) = (/1,2/)
 
    ! Set Grid 
-   grid=ESMF_GridSetShapeBoxcountsPerDEDim1=(/10,10/), &
+   grid=ESMF_GridSetShape(countsPerDEDim1=(/10,10/), &
           countsPerDEDim2=(/10,10/), petMap=petMap, rc=rc)   
 
    ! Set the grid coordinate array index dependency
-   grid=ESMF_GridSetShapeBox(coordCompDep1=(/1,2/), coordCompDep2=(/1,2/), &
+   grid=ESMF_GridSetShape(coordCompDep1=(/1,2/), coordCompDep2=(/1,2/), &
           rc=rc)   
 
   ! We now have all our information set in the grid so commit the shape.
@@ -782,12 +729,14 @@ program ESMF_GridCreateEx
    ! count specified in gridVertSize.  
 
    ! Create Grid
-   grid2D1=ESMF_GridCreateShapeSphere(countsPerDEDim1=gridDist1, &
+   grid2D1=ESMF_GridCreateShape(countsPerDEDim1=gridDist1, &
                               countsPerDEDim2=gridDist2, &
-                              countsPerDEDim2=(/gridVertSize/), &
+                              countsPerDEDim3=(/gridVertSize/), &
+                              connDim1=(/ESMF_GRIDCONN_POLE,ESMF_GRIDCONN_POLE/), & 
+                              connDim2=(/ESMF_GRIDCONN_PERIODIC,ESMF_GRIDCONN_PERIODIC/), &
                               coordCompDep1=(/1,2/), &
                               coordCompDep2=(/1,2/), &
-                              coordCompDep2=(/3/), &
+                              coordCompDep3=(/3/), &
                               indexflag=ESMF_GLOBAL, &
                               rc=rc)   
 
