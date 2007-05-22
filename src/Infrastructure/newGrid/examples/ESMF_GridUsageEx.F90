@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.8 2007/05/22 04:30:32 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.9 2007/05/22 17:27:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -88,13 +88,10 @@ program ESMF_GridCreateEx
    enddo
 
 
+
+
 !EOC
 
-
-   call ESMF_GridGenCoordsUniform(grid2D, ESMF_STAGGERLOC_CENTER, &
-          minCoord=(/10,10/), maxCoord=(/100,200/), rc=rc)
-
-!EOC
 
 !BOE
 !\subsubsection{Creation: Shapes}
@@ -115,10 +112,10 @@ program ESMF_GridCreateEx
 ! in each of the three dimensions. Despite the fact that
 ! these subroutines create different shapes, the majority of
 ! their arguments are the same. At first we explain the
-! common arguments with examples, the few dissimilar arguments
-! are covered. 
+! common arguments, the shape specific arguments are covered
+! at the end. 
 !
-!\subsubsection{Creation: Size, Shape, and Distribution}
+!\subsubsection{Creation: Size, Shape, and Distribution of Index Space}
 !
 ! To specify the rank, size and distribution of the index space
 ! for the shortcut calls, the {\tt countsPerDEDim1,2,3}
@@ -189,7 +186,7 @@ program ESMF_GridCreateEx
 
 !BOE
 !
-!\subsubsection{Creation: Coordinate Specification And Index Dependency}
+!\subsubsection{Creation: Coordinate Specification And Index Space Dependency}
 !
 ! To specify how the coordinate arrays are mapped to the 
 ! index dimensions the arguments {\tt coordCompDep1,2,3}
@@ -641,29 +638,26 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-      ! Use ESMF framework module
-      use ESMF_Mod
-      implicit none
+   ! Use ESMF framework module
+   use ESMF_Mod
+   implicit none
 
-      ! Local variables  
-      integer:: rc, finalrc
-      integer:: myPet, npets, rootPet
-      type(ESMF_VM):: vm
-      type(ESMF_Grid) :: patchgrid
-      real(ESMF_KIND_R4), pointer :: fptrX(:,:),fptrY(:,:)
-      integer :: petMap(2,2,1)
+   ! Local variables  
+   integer:: rc, finalrc
+   integer:: myPet, npets, rootPet
+   type(ESMF_VM):: vm
+   type(ESMF_Grid) :: patchgrid
+   real(ESMF_KIND_R4), pointer :: fptrX(:,:),fptrY(:,:)
+   integer :: petMap(2,2,1)
 !EOC         
 
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, rc=rc)
       call ESMF_VMGet(vm, localPet=myPet, petCount=npets, rc=rc)
 
-!BOE
-! Create a grid with the correct size, shape, and distribution to
-! hold the data. 
-!EOE
-
 !BOC
+   ! Create a grid with the correct size, shape, and distribution to
+   ! hold the data. 
 
    ! Set petMap
    petMap(:,2,1) = (/3,4/)
@@ -678,24 +672,77 @@ program ESMF_GridCreateEx
                            petMap=petMap, &
                            rc=rc)   
 
+
+   ! Add a center stagger location and at the same time set {\tt grid} to 
+   ! reference the coordinate arrays. 
+   call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+                  coordComp1=fptrX, coordComp2=fptrY, rc=rc)
+ 
+   ! We now have all our coordinates so commit as regrid ready.
+   call ESMF_GridCommit(grid2D1, ESMF_GRIDSTATUS_REGRID_READY, rc=rc)
+
 !EOC
 
+
 !BOE
-! Add a center stagger location and at the same time set {\tt grid} to 
-! reference the coordinate arrays. 
+! \subsubsection{Example: Grid Creation from Existing F90 Arrays Using CreateEmpty/Set/Commit}
+!
+!  This example illustrates the use of the CreateEmpty/Set/Commit paradigm.
+!  It repeats the above example using this grid creation technique.
 !EOE
 
 !BOC
+   ! Use ESMF framework module
+   use ESMF_Mod
+   implicit none
+
+   ! Local variables  
+   integer:: rc, finalrc
+   integer:: myPet, npets, rootPet
+   type(ESMF_VM):: vm
+   type(ESMF_Grid) :: patchgrid
+   real(ESMF_KIND_R4), pointer :: fptrX(:,:),fptrY(:,:)
+   integer :: petMap(2,2,1)
+!EOC         
+
+      finalrc = ESMF_SUCCESS
+      call ESMF_Initialize(vm=vm, rc=rc)
+      call ESMF_VMGet(vm, localPet=myPet, petCount=npets, rc=rc)
+
+!BOC
+   ! Create an empty grid
+   grid=ESMF_GridCreateEmpty(rc=rc)
+
+
+   ! Set the Grid type and kind
+   grid=ESMF_GridSetShapeBox(coordTypeKind=ESMF_TYPEKIND_R4, rc=rc)
+
+
+   ! Set the grid size and distribution
+   ! Init petMap
+   petMap(:,2,1) = (/3,4/)
+   petMap(:,1,1) = (/1,2/)
+
+   ! Set Grid 
+   grid=ESMF_GridSetShapeBoxcountsPerDEDim1=(/10,10/), &
+          countsPerDEDim2=(/10,10/), petMap=petMap, rc=rc)   
+
+   ! Set the grid coordinate array index dependency
+   grid=ESMF_GridSetShapeBox(coordCompDep1=(/1,2/), coordCompDep2=(/1,2/), &
+          rc=rc)   
+
+  ! We now have all our information set in the grid so commit the shape.
+  call ESMF_GridCommit(grid2D1, ESMF_GRIDSTATUS_SHAPE_READY, rc=rc)
+
+
+  ! Add a center stagger location and at the same time set {\tt grid} to 
+  ! reference the coordinate arrays. 
   call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
                   coordComp1=fptrX, coordComp2=fptrY, rc=rc)
-!EOC
+ 
+  ! We now have all our coordinate data so commit as regrid ready.
+  call ESMF_GridCommit(grid2D1, ESMF_GRIDSTATUS_REGRID_READY, rc=rc)
 
-!BOE
-! We now have all our coordinates so commit as regrid ready.
-!EOE
-
-!BOC
-   call ESMF_GridCommit(grid2D1, ESMF_GRIDSTATUS_READY, rc=rc)
 !EOC
 
 
@@ -710,30 +757,29 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-      ! Use ESMF framework module
-      use ESMF_Mod
-      implicit none
+   ! Use ESMF framework module
+   use ESMF_Mod
+   implicit none
 
-      ! Local variables  
-      integer:: rc, finalrc
-      integer:: myPet, npets, rootPet
-      type(ESMF_VM):: vm
-      type(ESMF_Grid) :: grid2D1
-      integer :: gridDist1(:),gridDist2(:) gridVertSize
-      integer :: lbnd(2),ubnd(2)
-      integer :: lbndV(1),ubndV(1)
-      real(ESMF_TYPEKIND_R8), pointer :: coordsLat(:,:),coordsLon(:,:)
-      real(ESMF_TYPEKIND_R8), pointer :: coordsVert(:)
+   ! Local variables  
+   integer:: rc, finalrc
+   integer:: myPet, npets, rootPet
+   type(ESMF_VM):: vm
+   type(ESMF_Grid) :: grid2D1
+   integer :: gridDist1(:),gridDist2(:) gridVertSize
+   integer :: lbnd(2),ubnd(2)
+   integer :: lbndV(1),ubndV(1)
+   real(ESMF_TYPEKIND_R8), pointer :: coordsLat(:,:),coordsLon(:,:)
+   real(ESMF_TYPEKIND_R8), pointer :: coordsVert(:)
 !EOC         
 
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, rc=rc)
 
-!BOE    
-! Construct a 2D spherical grid with an undistributed third dimension. Using
-! the 2D distribution specified in gridDist1 and gridDist2, and the vertical
-! count specified in gridVertSize.  
-!EOE
+!BOC
+   ! Construct a 2D spherical grid with an undistributed third dimension. Using
+   ! the 2D distribution specified in gridDist1 and gridDist2, and the vertical
+   ! count specified in gridVertSize.  
 
    ! Create Grid
    grid2D1=ESMF_GridCreateShapeSphere(countsPerDEDim1=gridDist1, &
@@ -746,23 +792,17 @@ program ESMF_GridCreateEx
                               rc=rc)   
 
 
-!BOE
-! Add the center and corner stagger locations. 
-!EOE
 
-!BOC
+  ! Add the center and corner stagger locations. 
   call ESMF_GridAddStaggerLoc(grid2D1,staggerLoc=ESMF_STAGGERLOC_CENTER,rc=rc)
   call ESMF_GridAddStaggerLoc(grid2D1,staggerLoc=ESMF_STAGGERLOC_CORNER,rc=rc)
-!EOC
 
-!BOE
-! Set the horizontal coordinates by using the non-ESMF functions
-! CalcHorzLat, CalcHorzLon to calculate them from the global indices. 
-!EOE
 
-!BOC
+  ! Set the horizontal coordinates by using the non-ESMF functions
+  ! CalcHorzLat, CalcHorzLon to calculate them from the global indices. 
    call ESMF_GridLocalTileGet(grid2D1, coordComp=1, &
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
+
 
    ! Get pointers to the coordinate component storage
    call ESMF_GridLocalTileGetData(grid2D1, coordComp=1, coordsLon, rc=rc)
@@ -776,15 +816,11 @@ program ESMF_GridCreateEx
    enddo
    enddo
 
-!EOC
 
-!BOE
-! Set the vertical  coordinates by using the non-ESMF function
-! CalcVert.
-!EOE
+   ! Set the vertical  coordinates by using the non-ESMF function
+   ! CalcVert.
 
-!BOC
-   ! We actually know this already, but go through the exercise anyway.
+   ! We actually know teh bounds already, but go through the exercise anyway.
    call ESMF_GridLocalTileGet(grid2D1, coordComp=3, &
           computationalLBound=lbndV, computationalUBound=ubndV, rc=rc)
 
@@ -793,17 +829,16 @@ program ESMF_GridCreateEx
 
    ! Set the vertical coordinates
    do i=lbndV(1),ubndV(1)
-        coordsVert(i) = CalcHorzVert(i)
+        coordsVert(i) = CalcVert(i)
    enddo
-!EOC
 
-!BOE
-! We now have all our coordinates so commit as regrid ready.
-!EOE
 
-!BOC
+   ! We now have all our coordinates so commit as regrid ready.
    call ESMF_GridCommit(grid2D1, ESMF_GRIDSTATUS_READY, rc=rc)
 !EOC
+
+
+
 
 
 !BOE
@@ -921,7 +956,7 @@ program ESMF_GridCreateEx
 
 !BOE
 
-!\subsubsection{Creation: Advanced: Coordinate Storage}~\label{sec:usage:coordstore}
+!\subsubsection{Creation: Advanced: Coordinate Specification and Index Space Dependency}~\label{sec:usage:coordstore}
 !
 ! Depending on the user's coordinate data there are many possible
 ! arrangements for the coordinates to be stored in memory. 
@@ -988,6 +1023,28 @@ program ESMF_GridCreateEx
    Grid2D=ESMF_GridCreate(maxIndex=(/10,20/), coordCompRanks=(/1,1/) , &
                coordCompDimMap=coordCompDimMap, rc=rc)
 !EOC  
+
+!BOE
+!\subsubsection{Creation: Advanced: Miscellaneous}
+!
+! There are also a couple of other grid arguments which don't
+! fit into the above categories. One of these
+! is {\tt gridType}. This parameter is used to indicate
+! the shape of the grid to other ESMF routines, so 
+! they can behave appropriately. It also
+! indicates which metadata values are available 
+! in the grid. The only setting currently available
+! for {\tt gridType} is ESMF\_GRIDTYPE\_UNKNOWN.
+!
+! Another argument is {\tt noData}, this 
+! parameter allows the user to create a grid without
+! allocating the internal data storage. The user
+! could employ this option if they wanted to set their own
+! coordinate arrays in the grid after the create. 
+! This option is currently unimplemented. 
+!EOE
+
+
 
 !BOE
 !\subsubsection{Stagger Location: Advanced}~\label{sec:usage:staggerloc:adv}
@@ -1106,27 +1163,6 @@ The following code illustrates aligning the positive corner with the center.
    call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, &
           staggerLocAlign=(/+1,+1/), rc=rc)
 !EOC  
-
-!BOE
-!\subsubsection{Creation: Advanced: Miscellaneous}
-!
-! There are also a couple of other grid arguments which don't
-! fit into the above categories. One of these
-! is {\tt gridType}. This parameter is used to indicate
-! the shape of the grid to other ESMF routines, so 
-! they can behave appropriately. It also
-! indicates which metadata values are available 
-! in the grid. The only setting currently available
-! for {\tt gridType} is ESMF\_GRIDTYPE\_UNKNOWN.
-!
-! Another argument is {\tt noData}, this 
-! parameter allows the user to create a grid without
-! allocating the internal data storage. The user
-! could employ this option if they wanted to set their own
-! coordinate arrays in the grid after the create. 
-! This option is currently unimplemented. 
-!EOE
-
 
 
 10 continue
