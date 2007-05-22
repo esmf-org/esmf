@@ -48,6 +48,8 @@
   ! local variables
   integer :: localPet, petCount
   integer :: test_report_flag
+  integer :: problem_descriptor_count
+  integer :: count
   character(ESMF_MAXSTR) :: test_harness_name = "test_harness.rc"
 
   ! -------- beginning of executable code below here -------
@@ -64,8 +66,17 @@
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   !
-  call read_test_name(test_report_flag,rc)
+  call read_test_filenames(test_report_flag,problem_descriptor_count,rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+  do count=1,problem_descriptor_count
+     call interpret_descriptor_string(problem_descriptor(count),rc)
+  enddo
+
+  do count=1,problem_descriptor_count
+     call read_distgrid(problem_descriptor(count), rc)
+  enddo
+
 
 
   ! report results
@@ -87,7 +98,7 @@ contains
 ! !IROUTINE: read_test_name
 
 ! !INTERFACE:
-  subroutine read_test_name(report_flag,returnrc)
+  subroutine read_test_filenames(report_flag,npds,returnrc)
 !
 ! !ARGUMENTS:
   integer, intent(  out) :: report_flag
@@ -95,6 +106,10 @@ contains
 
 !
 ! !DESCRIPTION:
+! Routine opens the test_harness.rc config file, extracts the problem descriptor file 
+! names, and then opens those files and extracts the the problem descriptor strings 
+! and saves the names of the associated specification files.
+!
 
   ! local ESMF types
   type(ESMF_Config)      :: localcf
@@ -110,7 +125,7 @@ contains
   ! local character strings
   character(ESMF_MAXSTR) :: ltest_class, ltag
 
-  integer :: nGridFiles, nDistFiles, k, count, file, nfiles, ncolumns, npds
+  integer :: file, nfiles, ncolumns, npds
   integer :: localrc = ESMF_SUCCESS
   logical :: flag = .true.
 
@@ -176,7 +191,7 @@ contains
      return
   endif
   print*,'test report flag is', report_flag
-  if ( report_flag.lt.-1 .or. report_flag.gt.2) then
+  if ( report_flag.lt.-2 .or. report_flag.gt.2) then
      print*,'error, report flag improperly set.'
      returnrc = ESMF_FAILURE
      return
@@ -248,54 +263,18 @@ contains
   endif
 
   !--------------------------------------------------------------------------
+  ! take the list of problem descriptor files provided by test_harness.rc
+  ! and extract all the problem descriptor strings and the associated 
+  ! specifier file names. 
   !--------------------------------------------------------------------------
   call read_problem_descriptor_names(nfiles,descriptor_file,npds,localrc)
-
-  print*,'                     '
-  do count=1,npds
-     print*,'Problem Descriptor String:',problem_descriptor(count)%string
-     nDistFiles = problem_descriptor(count)%distfiles%size
-     print*,'nDistFiles:',nDistFiles
-     do  k=1,nDistFiles
-        print*,k,problem_descriptor(count)%distfiles%string(k)%name
-     enddo
-
-     nGridFiles = problem_descriptor(count)%gridfiles%size
-     print*,'nGridFiles:',nGridFiles
-     do  k=1,nGridFiles
-       print*,k,problem_descriptor(count)%gridfiles%string(k)%name
-     enddo
-     print*,'------------------------------------------'
-
-  call interpret_descriptor_string(problem_descriptor(count),returnrc)
-
-  print*,'          '
-  print*,'process: ',problem_descriptor(count)%process%name
-  print*,'process tag ',problem_descriptor(count)%process%tag
-  print*,'          '
-  print*,'Source dist rank:',problem_descriptor(count)%src_dist%rank
-  print*,'Source dist topology:',problem_descriptor(count)%src_dist%topology
-  print*,'Source dist order:',problem_descriptor(count)%src_dist%order
-  print*,'----'
-  print*,'Source grid rank:',problem_descriptor(count)%src_grid%rank
-  print*,'Source grid topology:',problem_descriptor(count)%src_grid%topology
-  print*,'Source grid order:',problem_descriptor(count)%src_grid%order
-  print*,'==========='
-  print*,'Destination dist rank:',problem_descriptor(count)%dst_dist%rank
-  print*,'Destination dist topology:',problem_descriptor(count)%dst_dist%topology
-  print*,'Destination dist order:',problem_descriptor(count)%dst_dist%order
-  print*,'----'
-  print*,'Destination grid rank:',problem_descriptor(count)%dst_grid%rank
-  print*,'Destination grid topology:',problem_descriptor(count)%dst_grid%topology
-  print*,'Destination grid order:',problem_descriptor(count)%dst_grid%order
-  enddo
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
   deallocate( descriptor_file )
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
-  end subroutine read_test_name
+  end subroutine read_test_filenames
 
 !23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
 
@@ -582,24 +561,66 @@ contains
   subroutine TestHarnessReport(report_flag,localrc)
 !
 ! !ARGUMENTS:
-  integer, intent(out) :: report_flag
-  integer, intent(out) :: localrc
+  integer, intent(in   ) :: report_flag
+  integer, intent(  out) :: localrc
 
 !
 ! !DESCRIPTION:
 ! This routine provides an additional reporting capability of the test results
 ! in a more human readable form.
 !--------------------------------------------------------------------------
-   ! initialize local rc
-   localrc = ESMF_SUCCESS
-!--------------------------------------------------------------------------
-! test report flag
+! Action associated to test report flag value.
+!    -2 = debug report
 !    -1 = report test failures
 !     0 = no output
 !     1 = report successful tests
 !     2 = report both successes and failures.
 !--------------------------------------------------------------------------
+   ! local variables
+   integer :: count,k
+
+   ! initialize local rc
+   localrc = ESMF_SUCCESS
+
+!--------------------------------------------------------------------------
+! begin 
+!--------------------------------------------------------------------------
   select case (report_flag)
+     case(-2)
+     ! debug report
+  do count=1,problem_descriptor_count
+     print*,'Problem Descriptor String:',problem_descriptor(count)%string
+     print*,'nDistFiles:',problem_descriptor(count)%distfiles%size
+     do  k=1,problem_descriptor(count)%distfiles%size
+        print*,k,problem_descriptor(count)%distfiles%string(k)%name
+     enddo
+
+     print*,'nGridFiles:',problem_descriptor(count)%gridfiles%size
+     do  k=1,problem_descriptor(count)%gridfiles%size
+       print*,k,problem_descriptor(count)%gridfiles%string(k)%name
+     enddo
+     print*,'------------------------------------------'
+
+  print*,'          '
+  print*,'process: ',problem_descriptor(count)%process%name
+  print*,'process tag ',problem_descriptor(count)%process%tag
+  print*,'          '
+  print*,'Source dist rank:',problem_descriptor(count)%src_dist%rank
+  print*,'Source dist topology:',problem_descriptor(count)%src_dist%topology
+  print*,'Source dist order:',problem_descriptor(count)%src_dist%order
+  print*,'----'
+  print*,'Source grid rank:',problem_descriptor(count)%src_grid%rank
+  print*,'Source grid topology:',problem_descriptor(count)%src_grid%topology
+  print*,'Source grid order:',problem_descriptor(count)%src_grid%order
+  print*,'==========='
+  print*,'Destination dist rank:',problem_descriptor(count)%dst_dist%rank
+  print*,'Destination dist topology:',problem_descriptor(count)%dst_dist%topology
+  print*,'Destination dist order:',problem_descriptor(count)%dst_dist%order
+  print*,'----'
+  print*,'Destination grid rank:',problem_descriptor(count)%dst_grid%rank
+  print*,'Destination grid topology:',problem_descriptor(count)%dst_grid%topology
+  print*,'Destination grid order:',problem_descriptor(count)%dst_grid%order
+  enddo
 
      case(-1)
         ! only report failures
