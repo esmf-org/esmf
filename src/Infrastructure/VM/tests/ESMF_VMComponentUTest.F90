@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.5 2007/03/31 05:51:29 cdeluca Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.6 2007/05/22 21:51:31 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -29,8 +29,6 @@ module ESMF_VMComponentUTest_gcomp_mod
     type(ESMF_GridComp), intent(inout):: gcomp
     integer, intent(out):: rc
     
-    print *, '*** hi from mygcomp_register_nexh ***'
-    
     ! register INIT method
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, mygcomp_init, &
       ESMF_SINGLEPHASE, rc)
@@ -56,8 +54,6 @@ module ESMF_VMComponentUTest_gcomp_mod
     ! arguments
     type(ESMF_GridComp), intent(inout):: gcomp
     integer, intent(out):: rc
-    
-    print *, '*** hi from mygcomp_register_exh ***'
     
     ! register INIT method
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, mygcomp_init, &
@@ -101,8 +97,6 @@ module ESMF_VMComponentUTest_gcomp_mod
     ! local variables
     type(ESMF_VM):: vm
     
-    print *, '*** hi from mygcomp_init ***'
-    
     ! get this component's vm    
     call ESMF_GridCompGet(gcomp, vm=vm)
 
@@ -122,8 +116,6 @@ module ESMF_VMComponentUTest_gcomp_mod
     ! local variables
     type(ESMF_VM):: vm
 
-    print *, '*** hi from mygcomp_run ***'
-    
     ! get this component's vm    
     call ESMF_GridCompGet(gcomp, vm=vm)
 
@@ -142,8 +134,6 @@ module ESMF_VMComponentUTest_gcomp_mod
 
     ! local variables
     type(ESMF_VM):: vm
-
-    print *, '*** hi from mygcomp_final ***'
 
     ! get this component's vm    
     call ESMF_GridCompGet(gcomp, vm=vm)
@@ -186,10 +176,12 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.5 2007/03/31 05:51:29 cdeluca Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.6 2007/05/22 21:51:31 samsoncheung Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
+  integer, parameter :: ConThreads = 900        ! Number of concurrent threads
+                                                ! for exhaustive test section
 
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
@@ -250,7 +242,7 @@ program ESMF_VMComponentUTest
   loop_rc=ESMF_SUCCESS 
 
   do j=1, 20
-    do i=1, 1000
+    do i=1, ConThreads
 
       gcomp(i) = ESMF_GridCompCreate(name='My gridded component', rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 20
@@ -259,7 +251,7 @@ program ESMF_VMComponentUTest
       if (loop_rc /= ESMF_SUCCESS) goto 20
 
     enddo
-    do i=1, 1000
+    do i=1, ConThreads
 
       call ESMF_GridCompDestroy(gcomp(i), rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 20
