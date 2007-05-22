@@ -61,6 +61,11 @@
   integer, parameter :: Harness_UnstructuredGrid = 203
 
 
+  ! Test Result Parameters
+  integer, parameter :: HarnessTest_SUCCESS      = 1000
+  integer, parameter :: HarnessTest_FAILURE      = 1001
+
+
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
 !  private
@@ -69,6 +74,13 @@
      character(ESMF_MAXSTR) :: descriptor
      character(ESMF_MAXSTR) :: flags
   end type name_record
+
+  type test_report   
+     integer :: status                ! status of test
+     integer :: dist_config           ! index of distribution specification 
+     integer :: grid_config           ! index of grid specification
+     integer :: func_config           ! index of test function specification
+  end type test_report
 
   type process_record
      character(ESMF_MAXSTR) :: name
@@ -101,6 +113,7 @@
      integer, pointer :: order(:)   ! axis number, zero for free.
      integer, pointer :: size(:)    ! number of DE for axis number, zero for free.
      integer, pointer :: period(:)  ! period for block-cyclic, zero for simple block
+     integer, pointer :: specifier(:,:)  ! 
   end type dist_record
 
 
@@ -122,16 +135,17 @@
   end type sized_char_array
 
   type problem_descriptor_record
-     character(ESMF_MAXSTR) :: string   ! problem descriptor string
-     type(process_record) :: process    ! method process
-     type(sized_char_array) :: distfiles   ! distribution specification files
-     type(sized_char_array) :: gridfiles   ! grid specification files
-     type(memory_record) :: src_memory        ! memory topology
-     type(memory_record) :: dst_memory        ! memory topology
-     type(dist_record) :: src_dist            ! distribution topology
-     type(dist_record) :: dst_dist            ! distribution topology
-     type(grid_record) :: src_grid            ! grid topology
-     type(grid_record) :: dst_grid            ! grid topology
+     character(ESMF_MAXSTR) :: string           ! problem descriptor string
+     type(test_report), pointer :: report(:)    ! record of test result
+     type(process_record) :: process            ! method process
+     type(sized_char_array) :: distfiles        ! distribution specification files
+     type(sized_char_array) :: gridfiles        ! grid specification files
+     type(memory_record) :: src_memory          ! memory topology
+     type(memory_record) :: dst_memory          ! memory topology
+     type(dist_record) :: src_dist  ! src distribution specification
+     type(dist_record) :: dst_dist  ! dst distribution specification
+     type(grid_record) :: src_grid  !  src grid specification
+     type(grid_record) :: dst_grid  !  dst grid specification
   end type problem_descriptor_record
 
 !
@@ -142,10 +156,12 @@
 !==============================================================================
 
 
+ !----------------------------------------------------------------------------
+ ! Routines to parse input files for descriptor string, and specifier files.
+ !----------------------------------------------------------------------------
+
   !-------------------------------------------------------------------------
-  subroutine interpret_descriptor_string(                             &
-                  problem_descriptor,                                 &
-                  returnrc)
+  subroutine interpret_descriptor_string(problem_descriptor, returnrc)
   !-------------------------------------------------------------------------
   ! Parse a single  problem descriptor string for problem description items
   ! such as process (REDISTRIBUTION or REMAPPING), memory topology and rank,
@@ -167,8 +183,10 @@
 
 
   !-------------------------------------------------------------------------
-  ! parse the prolem descriptor string
+  ! initialize variables
   !-------------------------------------------------------------------------
+  returnrc = ESMF_SUCCESS
+
   ! Initialize to failure.
   problem_descriptor%process%name = 'NONE'
   problem_descriptor%process%tag = Harness_Error
@@ -273,10 +291,86 @@
   end subroutine interpret_descriptor_string
   !-------------------------------------------------------------------------
 
+
+  !-------------------------------------------------------------------------
+  subroutine read_distgrid(descriptor, returnrc)
+  !-------------------------------------------------------------------------
+  ! Routine extracts from the distgrid specifier files the DistGrid information
+  !-------------------------------------------------------------------------
+
+  ! arguments
+  type(problem_descriptor_record), intent(inout) :: descriptor
+  integer, intent(out) :: returnrc
+
+  ! local variables
+  integer :: localrc = ESMF_SUCCESS ! assume success
+
+  type(ESMF_Config)   :: localcf
+
+  integer :: count,totalcount
+  integer :: src_dist_rank,dst_dist_rank
+  integer, allocatable :: partialcount(:)
+  character(ESMF_MAXSTR) :: lfile, ltag
+  integer :: ncol
+! logical :: flag
+
+  ! initialize variables
+  returnrc = ESMF_SUCCESS
+
+  ! create a config handle and load the config file
+  localcf = ESMF_ConfigCreate(localrc)
+
+  ! loop over the number of DistGrid descriptor files, and count the total entries.
+  print*,'number of descriptor files is:',descriptor%distfiles%size
+
+  allocate( partialcount(descriptor%distfiles%size) )
+
+  do count=1, descriptor%distfiles%size
+     lfile = descriptor%distfiles%string(count)%name
+     call ESMF_ConfigLoadFile( localcf, trim( lfile ), rc=localrc )
+     if (localrc /= ESMF_SUCCESS) then
+        print*,'error, could not open DistGrid specifier file:',trim( lfile )
+        returnrc = ESMF_FAILURE
+        return
+     endif
+
+     src_dist_rank = descriptor%src_dist%rank
+     dst_dist_rank = descriptor%dst_dist%rank
+
+     print*,'src/dst rank of dist is:',src_dist_rank,'/',dst_dist_rank
+
+     ! so what tag to look for? if src_dist_rank = dst_dist_rank, then
+     ! look for symmetric tag of the form distgrid_block_#D#D
+ 10  format('distgrid_block_',i1.0,'D',i1.0,'D')
+     write(ltag,10) src_dist_rank,dst_dist_rank
+     print*,'looking for tag:', trim( ltag )
+     if( src_dist_rank /= dst_dist_rank) then
+        print*,'error,src dist rank ',src_dist_rank,' /= dst dist rank ',dst_dist_rank
+        returnrc = ESMF_FAILURE
+        return
+     endif
+     ! obtain the number of config entries
+     call ESMF_ConfigGetDim(localcf,partialcount(count),ncol,trim(ltag),rc=localrc)
+  enddo
+  totalcount = sum(partialcount)
+  print*,'total dist specifiers:',totalcount
+
+
+  !
+
+  deallocate(partialcount)
+
+  !-------------------------------------------------------------------------
+  end subroutine read_distgrid
+  !-------------------------------------------------------------------------
+
+
+ !----------------------------------------------------------------------------
+ ! Routines to search strings
  !----------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    integer function char2int( lstring, sloc, rc )
+    integer function char2int( lstring, sloc, localrc )
     !------------------------------------------------------------------------
     ! This function converts a character representation of an integer digit
     ! between 0-9 into its integer equivalent.
@@ -285,20 +379,22 @@
     ! arguments
     character(len=1), intent(in   ) :: lstring
     integer,          intent(in   ) :: sloc
-    integer,          intent(  out) :: rc
+    integer,          intent(  out) :: localrc
 
     ! local variables
     integer :: ntemp
+
+    ! initialize variables
+    localrc = ESMF_SUCCESS
 
     !------------------------------------------------------------------------
     ! Convert string to integer
     !------------------------------------------------------------------------
     ntemp = iachar( lstring(sloc:sloc) )-iachar('0')
     
-    rc = ESMF_SUCCESS
     ! check to see that values is within the acceptable range
     if ( ntemp < 0 .and. ntemp > 9 ) then
-       rc = ESMF_FAILURE
+       localrc = ESMF_FAILURE
        ! syntax error, no grid layout specified
        print*,'Syntax error, no grid layout'
        char2int = 0
@@ -313,7 +409,7 @@
  !-------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    subroutine dist_query(lstring, MemBeg, MemEnd, MemRank, MemTopology, MemOrder, rc)
+    subroutine dist_query(lstring, MemBeg, MemEnd, MemRank, MemTopology, MemOrder, localrc)
     !------------------------------------------------------------------------
     ! This subroutine returns distribution topology (B - block, C - block 
     ! cyclic, A - arbitrary) and order as specified by the descriptor string. 
@@ -325,7 +421,7 @@
     integer,          intent(in   ) :: MemRank
     integer,          intent(  out) :: MemTopology
     integer,          intent(  out) :: MemOrder(:)
-    integer,          intent(  out) :: rc
+    integer,          intent(  out) :: localrc
 
     ! local variables
     character(len=3) :: pattern3
@@ -333,7 +429,7 @@
     integer, allocatable :: MemLoc(:)
 
     ! initialize variables
-    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
     
     !------------------------------------------------------------------------
     ! Check each memory chunk and extract distribution information. 
@@ -348,7 +444,7 @@
     !------------------------------------------------------------------------
     do i=1,MemRank
        if ( lstring(MemLoc(1):MemLoc(1)) /= lstring(MemLoc(i):MemLoc(i)) ) then
-          rc = ESMF_FAILURE
+          localrc = ESMF_FAILURE
           ! syntax error, more than one type of distribution specified
           print*,'Syntax error, more than one type of distribution specified'
        endif
@@ -358,12 +454,12 @@
        if ( lstring( MemLoc(i):MemLoc(i) ) == 'B' ) then
        
           MemTopology = Harness_BlockDist
-          MemOrder(i) = char2int( lstring, MemLoc(i)+1, rc )
+          MemOrder(i) = char2int( lstring, MemLoc(i)+1, localrc )
                     
        elseif ( lstring( MemLoc(i):MemLoc(i) ) == 'C' ) then
        
           MemTopology = Harness_CyclicDist
-          MemOrder(i) = char2int( lstring, MemLoc(i)+1, rc )
+          MemOrder(i) = char2int( lstring, MemLoc(i)+1, localrc )
           
        elseif ( lstring( MemLoc(i):MemLoc(i) ) == 'A' ) then
        
@@ -383,7 +479,7 @@
  !-------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    integer function dist_rank(lstring, MemBeg, MemEnd, rc)
+    integer function dist_rank(lstring, MemBeg, MemEnd, localrc)
     !------------------------------------------------------------------------
     ! This function returns the distribution rank as specified by the 
     ! descriptor string. 
@@ -391,12 +487,15 @@
 
     ! arguments
     character(len=*), intent(in   ) :: lstring
-    integer,          intent(  out) :: MemBeg, MemEnd
-    integer,          intent(  out) :: rc
+    integer,          intent(in   ) :: MemBeg, MemEnd
+    integer,          intent(  out) :: localrc
 
     ! local variables
     character(len=3) :: pattern3
     integer :: nDist
+
+    ! initialize variables
+    localrc = ESMF_SUCCESS
 
     !------------------------------------------------------------------------
     ! Check each memory chunk to see if any of the dimensions are distributed. 
@@ -404,9 +503,8 @@
     pattern3 = 'BCA'
     nDist = set_query(lstring(MemBeg:MemEnd), pattern3)
 
-    rc = ESMF_SUCCESS
     if ( nDist == 0 ) then
-       rc = ESMF_FAILURE
+       localrc = ESMF_FAILURE
        ! syntax error, no distribution specified
        print*,'Syntax error, no distribution'
     endif
@@ -419,7 +517,7 @@
  !-------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    subroutine grid_query(lstring, MemBeg, MemEnd, MemRank, MemTopology, MemOrder, rc)
+    subroutine grid_query(lstring, MemBeg, MemEnd, MemRank, MemTopology, MemOrder, localrc)
     !------------------------------------------------------------------------
     ! This subroutine returns grid topology (G - tensor, S - spherical, 
     ! U - unstructured) and order as specified by the descriptor string. 
@@ -431,7 +529,7 @@
     integer,          intent(in   ) :: MemRank
     integer,          intent(  out) :: MemTopology
     integer,          intent(  out) :: MemOrder(:)
-    integer,          intent(  out) :: rc
+    integer,          intent(  out) :: localrc
 
     ! local variables
     character(len=3) :: pattern3
@@ -439,7 +537,7 @@
     integer, allocatable :: MemLoc(:)
 
     ! initialize variables
-    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
     
     !------------------------------------------------------------------------
     ! Check each memory chunk and extract distribution information. 
@@ -454,7 +552,7 @@
     !------------------------------------------------------------------------
     do i=1,MemRank
        if ( lstring(MemLoc(1):MemLoc(1)) /= lstring(MemLoc(i):MemLoc(i)) ) then
-          rc = ESMF_FAILURE
+          localrc = ESMF_FAILURE
           ! syntax error, more than one type of distribution specified
           print*,'Syntax error, more than one type of distribution specified'
        endif
@@ -464,12 +562,12 @@
        if ( lstring( MemLoc(i):MemLoc(i) ) == 'G' ) then
        
           MemTopology = Harness_TensorGrid
-          MemOrder(i) = char2int( lstring, MemLoc(i)+1, rc )
+          MemOrder(i) = char2int( lstring, MemLoc(i)+1, localrc )
                     
        elseif ( lstring( MemLoc(i):MemLoc(i) ) == 'S' ) then
        
           MemTopology = Harness_SphericalGrid
-          MemOrder(i) = char2int( lstring, MemLoc(i)+1, rc )
+          MemOrder(i) = char2int( lstring, MemLoc(i)+1, localrc )
           
        elseif ( lstring( MemLoc(i):MemLoc(i) ) == 'U' ) then
        
@@ -489,7 +587,7 @@
  !----------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    integer function grid_rank(lstring, MemBeg, MemEnd, rc)
+    integer function grid_rank(lstring, MemBeg, MemEnd, localrc)
     !------------------------------------------------------------------------
     ! This function returns the grid rank as specified by the descriptor
     ! string.
@@ -498,11 +596,14 @@
     ! arguments
     character(len=*), intent(in   ) :: lstring
     integer,          intent(in   ) :: MemBeg, MemEnd
-    integer,          intent(  out) :: rc
+    integer,          intent(  out) :: localrc
 
     ! local variables
     character(len=3) :: pattern3
     integer :: nGrid
+
+    ! initialize variables
+    localrc = ESMF_SUCCESS
 
     !------------------------------------------------------------------------
     ! Check each memory chunk to see if any of the dimensions are associated
@@ -511,11 +612,10 @@
     pattern3 = 'GSU'
     nGrid = set_query(lstring(MemBeg:MemEnd), pattern3)
 
-    rc = ESMF_SUCCESS
     if ( nGrid == 0 ) then
-       rc = ESMF_FAILURE
        ! syntax error, no grid layout specified
        print*,'Syntax error, no grid layout'
+       localrc = ESMF_FAILURE
     endif
     grid_rank = nGrid
 
@@ -526,9 +626,7 @@
  !----------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    subroutine memory_locate(lstring, MemCount,       &
-                               MemBeg, MemEnd,        &
-                               MemLoc, rc)
+    subroutine memory_locate(lstring, MemCount, MemBeg, MemEnd, MemLoc, localrc)      
     !------------------------------------------------------------------------
     ! This subroutine returns the location of the memory delimiters as
     ! specified by the descriptor string.
@@ -539,11 +637,14 @@
     integer,          intent(in   ) :: MemCount
     integer,          intent(in   ) :: MemBeg, MemEnd
     integer,          intent(inout) :: MemLoc(:)
-    integer,          intent(  out) :: rc
+    integer,          intent(  out) :: localrc
 
     ! local variables
     character(len=1) :: pattern
     integer, allocatable :: mloc(:)
+
+    ! initialize variables
+    localrc = ESMF_SUCCESS
 
     ! initialize variables
     pattern = ';'
@@ -564,9 +665,10 @@
  !----------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    subroutine memory_rank(lstring, SrcRank, DstRank, SrcBeg, SrcEnd, DstBeg, DstEnd, rc)
+    subroutine memory_rank(lstring, SrcRank, DstRank, SrcBeg, SrcEnd,           &
+                                                      DstBeg, DstEnd, returnrc)
     !------------------------------------------------------------------------
-    ! If the memory topology is structured, this function returns the memory
+    ! If the memory topology is structured, this routine returns the memory
     ! rank as specified by the descriptor string. 
     ! 
     !------------------------------------------------------------------------
@@ -575,7 +677,7 @@
     character(len=*), intent(in   ) :: lstring
     integer,          intent(  out) :: SrcRank,DstRank
     integer,          intent(  out) :: SrcBeg, SrcEnd, DstBeg, DstEnd
-    integer,          intent(  out) :: rc
+    integer,          intent(  out) :: returnrc
 
     ! local variables
     character(len=1) :: pattern
@@ -584,6 +686,9 @@
     integer :: MemPos(4)
 
     logical :: flag
+
+    ! initialize variables
+    returnrc = ESMF_SUCCESS
 
     ! initialize variables
     flag = .false.
@@ -599,6 +704,8 @@
     if (nMemory ==0) then
        ! syntax error, no brackets
        print*,'Syntax error, no brackets'
+       returnrc = ESMF_FAILURE
+       return
     elseif (nMemory == 4) then
        !---------------------------------------------------------------------
        ! there must be two pairs of matching brackets
@@ -616,6 +723,8 @@
     else 
        ! brackets are mismatched
        print*,'Syntax error, missing or extra brackets'
+       returnrc = ESMF_FAILURE
+       return
     endif
     !------------------------------------------------------------------------
     ! if the brackets exist and match, continue to extract memory information
@@ -634,6 +743,8 @@
     else ! not flag
        ! Syntax error, brackets not consistent
        print*,'Syntax error, brackets not consistent'
+       returnrc = ESMF_FAILURE
+       return
     endif       ! if memory chunks
      
     !------------------------------------------------------------------------
@@ -643,7 +754,7 @@
  !----------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    logical function memory_topology(lstring, rc)
+    logical function memory_topology(lstring, localrc)
     !------------------------------------------------------------------------
     ! function checks the input test string to determine if the memory topology
     ! is structured (true) or unstructured (false). 
@@ -651,11 +762,14 @@
 
     ! arguments
     character(len=*), intent(in   ) :: lstring
-    integer,          intent(  out) :: rc
+    integer,          intent(  out) :: localrc
 
     ! local variables
     character(len=2) :: pattern
     integer :: nMemory
+
+    ! initialize variables
+    localrc = ESMF_SUCCESS
 
     !--------------------------------------------------------------------
     ! Memory Layout (Single Chunk Logically Rectangular or General)
@@ -780,7 +894,7 @@
  !----------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    subroutine  process_query(lstring, lname, tag, location, rc)
+    subroutine  process_query(lstring, lname, tag, location, returnrc)
     !------------------------------------------------------------------------
     ! routine checks the input test string for a method specifier. Acceptable
     ! methods include:
@@ -796,13 +910,16 @@
     character(len=*), intent(inout) :: lname
     integer,          intent(inout) :: tag
     integer,          intent(inout) :: location
-    integer,          intent(  out) :: rc
+    integer,          intent(  out) :: returnrc
 
     ! local variables
     character(len=2) :: pattern_remap
     character(len=3) :: pattern_redist
     character(len=4) :: pattern4
     integer :: nRedist, RedistPos(1), nRemap, RemapPos(1)
+
+    ! initialize variables
+    returnrc = ESMF_SUCCESS
 
     !--------------------------------------------------------------------
     ! Determine the Process (REDISTRIBUTION or REMAPPING)
@@ -823,6 +940,9 @@
     elseif (nRedist > 1) then
        ! ERROR syntax error in process declaration
        print*,'ERROR syntax error in process declaration'
+       returnrc = ESMF_FAILURE
+       return
+
     elseif (nRedist == 0) then
        print*,'process is not redistribution, check to see if it is a remap'
 
@@ -878,8 +998,10 @@
 
                case default
                   ! syntax error no recognized method specified
-                  print*,'syntax error no recognized method specified'
                   location = 0
+                  print*,'syntax error no recognized method specified'
+                  returnrc = ESMF_FAILURE
+                  return
 
           end select  ! remap type
 
@@ -887,11 +1009,15 @@
 
              ! ERROR syntax error in process declaration
              print*,'ERROR syntax error in process declaration'
+             returnrc = ESMF_FAILURE
+             return
 
           elseif (nRemap == 0) then
 
              ! ERROR no process is specified
              print*,'ERROR no process is specified'
+             returnrc = ESMF_FAILURE
+             return
 
           endif         ! if remap
        endif            ! if redist
@@ -1004,7 +1130,6 @@
     end function set_query
     !------------------------------------------------------------------------
 
- !----------------------------------------------------------------------------
 
 !============================================================================
   end module ESMF_TestHarnessMod
