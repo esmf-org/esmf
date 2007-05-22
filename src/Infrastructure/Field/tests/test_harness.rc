@@ -4,11 +4,12 @@
 test_class: FIELD 
 
 # request extra report
+#	-2 = debug dump
 #	-1 = report test failures 
 # 	 0 = no output
 #	 1 = report successful tests
 #	 2 = report both successes and failures.
-test_report: 0 
+test_report: -2 
 
 # descriptor file for the nonexhaustive case
 nonexhaustive::
