@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2007/05/21 20:04:46 svasquez Exp $ 
+# $Id: makefile,v 1.29 2007/05/22 18:18:43 theurich Exp $ 
 
 ALL:      build_examples
 run:      run_examples
@@ -36,10 +36,10 @@ EXAMPLES_RUN   = run_ESMF_AppMainEx \
 EXAMPLES_RUN_UNI = run_ESMF_AppMainEx_uni \
                    run_ESMF_CplEx_uni \
                    run_ESMF_GCompEx_uni \
-                   run_ESMF_InternalStateEx_uni
-#                   run_ESMC_AppMainEx_uni \
-#                   run_ESMC_CplEx_uni \
-#                   run_ESMC_GCompEx_uni
+                   run_ESMF_InternalStateEx_uni \
+                   run_ESMC_AppMainEx_uni \
+                   run_ESMC_CplEx_uni \
+                   run_ESMC_GCompEx_uni
                    
 include $(ESMF_DIR)/makefile
 
