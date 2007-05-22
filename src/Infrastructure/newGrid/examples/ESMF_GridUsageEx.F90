@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.7 2007/05/21 23:27:14 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.8 2007/05/22 04:30:32 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -833,7 +833,7 @@ program ESMF_GridCreateEx
 ! size, topology, and distribution. In the ESMF advanced create
 ! there are three options for doing this. 
 !
-! (\bf Need to figure out what to do with the below}
+! {\bf Need to figure out what to do with the below}
 !
 ! In the simplest method the user employs the {\tt maxIndex}
 ! parameters to specify the Grid size in the Grid create call. 
