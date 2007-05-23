@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.1 2007/05/11 15:53:40 oehmke Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.2 2007/05/23 21:17:50 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -64,12 +64,43 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.1 2007/05/11 15:53:40 oehmke Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.2 2007/05/23 21:17:50 oehmke Exp $'
 
 
 !==============================================================================
 
       contains
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StaggerLocInit"
+!BOP
+! !IROUTINE: ESMF_StaggerLocInit - Initialize a stagger location to center.
+
+! !INTERFACE:
+      subroutine ESMF_StaggerLocInit(stagLoc,rc)
+!
+! !ARGUMENTS:
+      type (ESMF_StaggerLoc), intent(inout) :: stagLoc
+      integer, optional :: rc 
+
+! !DESCRIPTION:
+!   Sets a stagger location to center.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[stagLoc]
+!          Stagger location to be initialized
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+
+      end subroutine ESMF_StaggerLocInit
 
 
 !------------------------------------------------------------------------------
@@ -108,40 +139,6 @@
 ! !REQUIREMENTS:  TODO
 
       end subroutine ESMF_StaggerLocSet
-
-
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StaggerLocInit"
-!BOP
-! !IROUTINE: ESMF_StaggerLocInit - Initialize a stagger location to center.
-
-! !INTERFACE:
-      subroutine ESMF_StaggerLocInit(stagLoc,rc)
-!
-! !ARGUMENTS:
-      type (ESMF_StaggerLoc), intent(inout) :: stagLoc
-      integer, optional :: rc 
-
-! !DESCRIPTION:
-!   Sets a stagger location to center.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[stagLoc]
-!          Stagger location to be initialized
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-
-      end subroutine ESMF_StaggerLocInit
-
 
 
 !------------------------------------------------------------------------------
