@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.15 2007/05/23 19:56:56 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.16 2007/05/23 20:50:23 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -122,8 +122,8 @@ program ESMF_GridCreateEx
 ! ESMF then breaks the index space as evenly as possible 
 ! into the specified number of pieces. If {\tt minIndex} is 
 ! not specified, then the bottom of the index range is assumed
-! to be (1,1,...). If {\tt blockDecomp} is not specified, then
-! by default ESMF creates an NPx1x1... distribution where 
+! to be (1,1,...,1). If {\tt blockDecomp} is not specified, then
+! by default ESMF creates an NPx1x1...1 distribution where 
 ! NP is the number of processors. (i.e. The first index dimension
 ! is evenly divided across the processors, the rest are not divided.)
 ! The rank of the Grid is the size of {\tt maxIndex}. To create
