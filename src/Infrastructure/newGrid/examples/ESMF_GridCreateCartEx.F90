@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateCartEx.F90,v 1.3 2007/05/21 22:51:03 oehmke Exp $
+! $Id: ESMF_GridCreateCartEx.F90,v 1.4 2007/05/23 19:56:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@ program ESMF_GridCreateEx
 !==============================================================================
 
 !BOE
-! \subsubsection{Example: 2D Cartesian Grid Creation From DistGrid}~\label{sec:example1}
+! \subsubsection{Example: 2D Cartesian Grid Creation From DistGrid}~\label{sec:usage:ex:adv:cart}
 !
 ! This example illustrates the creation of a simple 2D Cartesian Grid using a distgrid.
 ! The size of the Grid is gridSize(1) by gridSize(2) elements. 

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.14 2007/05/23 17:59:02 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.15 2007/05/23 19:56:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -97,7 +97,7 @@ program ESMF_GridCreateEx
 !
 ! There are several methods of creating an ESMF Grid. The first
 ! of these is designed to easily allow the user to create
-! the most common grids. The method {\tt ESMF\_GridCreateShape}
+! the most common grid shapes. The method {\tt ESMF\_GridCreateShape}
 ! creates a single tile logically rectangular grid and 
 ! allows the user to specify the connections for each 
 ! edge in each of three dimensions. By employing this method 
@@ -107,10 +107,42 @@ program ESMF_GridCreateEx
 ! and create them using the more general grid create, see Section~\ref{sec:usage:adv:create}
 ! for a description of this process.
 !
-!\subsubsection{Creation: Size, Shape, and Distribution of Index Space}
+!\subsubsection{Creation: Size, Rank, and Distribution of Index Space}
 !
-! To specify the rank, size and distribution of the index space
-! for the shortcut calls, the {\tt countsPerDEDim1,2,3}
+! The shortcut grid creation method supports three types of
+! distribution (see Section~\ref{sec:desc:dist}). In addition to describing
+! the partition of the index space, these methods also 
+! simultaneously describe its size and rank. 
+!
+! One supported type of distribution is block distribution. 
+! To use this type the user specifies the 
+! global minimum and maximum ranges of the index space
+! ({\tt minIndex} and {\tt maxIndex}) and the number
+! of pieces to break each dimension into (via {\tt blockDecomp}).
+! ESMF then breaks the index space as evenly as possible 
+! into the specified number of pieces. If {\tt minIndex} is 
+! not specified, then the bottom of the index range is assumed
+! to be (1,1,...). If {\tt blockDecomp} is not specified, then
+! by default ESMF creates an NPx1x1... distribution where 
+! NP is the number of processors. (i.e. The first index dimension
+! is evenly divided across the processors, the rest are not divided.)
+! The rank of the Grid is the size of {\tt maxIndex}. To create
+! an undistributed dimension set that entry in {\tt blockDecomp}
+! to 1. The following is an example of creating a 10x20x30 3D grid
+! where the first dimensions is broken into 2 pieces, the second
+! is broken into 4 pieces, and the third is undistributed. 
+!EOE
+
+!BOC
+   grid=ESMF_GridCreateShape(maxIndex=(/10,20,30/), &
+          blockDecomp=(/2,4,1/), rc=rc)   
+!EOC
+
+!BOE
+! A second supported type of distribution is regular distribution. 
+! In this type the user specifies the exact number of cells per
+! DE in each dimension. For the {\tt ESMF\_GridCreateShape} call
+! The {\tt countsPerDEDim1,2,3}
 ! arguments are used. These specify a rectangular
 ! distribution containing size(countsPerDEDim1) by
 ! size(countsPerDEDim2) by size(countsPerDEDim3)
@@ -122,7 +154,6 @@ program ESMF_GridCreateEx
 ! {\tt countsPerDEDim2} are specified the grid
 ! will be 2D. If any of these arrays has size
 ! 1 then that index dimension is undistributed. 
-! {\bf Need picture}
 !
 ! The following call illustrates the creation of
 ! a 10x20 2D rectangular Grid distributed across six processors
@@ -157,7 +188,8 @@ program ESMF_GridCreateEx
 
 !BOE
 !
-! The {\tt petMap} parameter may be used to specify which PETs 
+! For the previous two types of distribution (block and regular), the 
+! {\tt petMap} parameter may be used to specify which PETs 
 ! the DEs in the Grid are assigned to. The {\tt petMap} 
 ! array is the same size in each dimension as the number of DEs in
 ! that dimension. If the Grid is 2D then the third dimension is 
@@ -175,6 +207,35 @@ program ESMF_GridCreateEx
            countsPerDEDim2=(/7,7,6/), petMap=petMap, rc=rc)   
 !EOC
 
+
+
+!BOE
+! A third supported type of distribution is arbitrary distribution. 
+! To use this type the user specifies the 
+! global minimum and maximum ranges of the index space
+! ({\tt minIndex} and {\tt maxIndex}) and the set of
+! index space locations residing on the local processor (via {\tt localIndices}).
+! Again, if {\tt minIndex} is  not specified, then the bottom of the 
+! index range is assumed to be (1,1,...). 
+! The rank of the Grid is the size of {\tt maxIndex}. 
+! The following is an example of creating a 5x5 2D grid
+! with the diagonal (i.e. indices (i,i) where i goes from 1 to 5)
+! on this processor (The rest of the processors would have to declare
+! the remainder of the Grid locations.)
+!EOE
+
+!BOC
+   ! Set local indices
+   localIndices(:,1)=(/1,1/)
+   localIndices(:,2)=(/2,2/)
+   localIndices(:,3)=(/3,3/)
+   localIndices(:,4)=(/4,4/)
+   localIndices(:,5)=(/5,5/)
+
+   ! Create Grid
+   grid=ESMF_GridCreateShape(maxIndex=(/5,5/), &
+          localIndices=localIndices, rc=rc)   
+!EOC
 
 !BOE
 !
@@ -821,84 +882,32 @@ program ESMF_GridCreateEx
 !
 ! Beyond the shortcut methods for creating a grid, there is
 ! a set of methods which give the user more control over the
-! specifics of the grid. 
-!
-! The first set of these methods allows the user to create a Grid from 
-! scratch with maximum control over the 
-! specifics of the Grid to be created. The user can create a Grid and specify 
-! the dimension, size, type, topology (via DistGrid), and distribution
-! (via DistGrid). 
-!
-! The second advanced method of Grid creation allows the user to construct a
-! Grid from a set of Arrays containing coordinate information. These Arrays
-! need to have a coherent configuration (same dimension, sizes conforming
-! to stagger locations, same distribution, same types, etc.) for the
-! call to succeed. The Grid can either be created to contain the actual
-! Arrays, or the Grid can be created containing copies of the orignal arrays. 
+! specifics of the grid.  The following describe the more 
+! general interfaces. 
 !
 !
-!\subsubsection{Creation: Advanced: Size, Shape, and Distribution}~\label{sec:usage:adv:create}
-!
-! Typically the first step in creating a Grid is to describe its
-! size, topology, and distribution. In the ESMF advanced create
-! there are three options for doing this. 
-!
-! {\bf Need to figure out what to do with the below}
-!
-! In the simplest method the user employs the {\tt maxIndex}
-! parameters to specify the Grid size in the Grid create call. 
-! This creates a Grid of upper bound  {\it maxIndex}, with the rest of the 
-! options set to default values. 
-!
-! The following illustrates the creation of a simple 10 x 20 2D 
-! Grid with all the default options. It has lower bound (1,1,1,..) with
-! ESMF\_R8 coordinates and the default 
-! distribution (first dimension spiit across all the processors, the rest of the dimensions
-! distributed, but only across a single processor width). It contains data in 
-! the center stagger location, and the coordinate data is stored in two 2D arrays. 
-!EOE
+!\subsubsection{Creation: Advanced: Size, Rank, Shape, and Distribution}~\label{sec:usage:adv:create}
 
-!BOC 
-   Grid2D=ESMF_GridCreate(maxIndex=(/10,20/), rc=rc)
-!EOC  
+%% NEED TO ADD MORE HERE EXPLAINING HOW THE GENERAL DIST DIFFER FROM THE 
+%% SHORTCUT AND EXPLAINING MORE ABOUT USING THE DIST GRID
 
-!BOE
-! For more control over the Grid index space, the lower bound, {\it minIndex}, can 
-! also be specified. 
-!EOE
-
-!BOC 
-   Grid2D=ESMF_GridCreate(minIndex=(/5,5/),maxIndex=(/15,25/), rc=rc)
-!EOC  
-
-!BOE
-! To create a slightly more complex distribution the
-! {\tt regDecomp} argument can be used to describe how many DEs to 
-! break each dimension into. Here the Grid is
-! distributed in the first dimension into 2 pieces and
-! the second into 4. 
-!EOE
-
-!BOC 
-   Grid2D=ESMF_GridCreate(maxIndex=(/10,20/), regDecomp=(/2,4/), rc=rc)
-!EOC  
-
-!BOE
-! For direct control over the topology and distribution of the Grid, 
-! the user can first create a DistGrid (and possibly a DElayout) to describe 
-! the Grid in detail. Please see the DistGrid design document for an in depth
-! description of its use. Once the DistGrid is created the user
-! can either employ it directly to create the Grid or create
-! Arrays and then create the Grid from those. Creation with a DistGrid is covered 
-! in the examples in Sections~\ref{sec:example1}-~\ref{sec:example5}, so please
-! see those for an illustration of its use. 
-!EOE
-
-!BOE
-! The proceeding arguments only dealt with the disributed part
-! of a Grid (e.g. {\it maxIndex} only specifies distributed dimensions).
-! To add undistributed dimensions to the Grid, the parameters
-! {\tt lbounds} and {\tt ubounds} may be used. The {\tt lbounds} argument
+! There are four methods of specifying the distribution in the more
+! general grid creation interface. Three of them are basically the same as
+! those used in the shortcut create 
+! and the user is directed to Section~\ref{sec:usage:short:create} for further explanation
+! of those. The fourth method is to first create an ESMF DistGrid object describing
+! the distribution and shape of the Grid and then to employ that to either directly
+! create a Grid, or to create Arrays first and then to create a Grid from those. 
+! This method gives the user maximum control over the topology and distribution of the Grid. 
+! Please see the DistGrid design document for an in depth description of its use. 
+! Also, Example~\ref{sec:usage:ex:adv:cart} and Example~\ref{sec:usage:ex:adv:tripole}
+! illustrate its use in creating two types of Grid. 
+!
+! A DistGrid only describes the distributed dimensions of the index
+! space, so when creating a Grid from a DistGrid some arguments
+! are need to describe the undistributed part, To add undistributed dimensions
+! to the Grid, the arguments {\tt lbounds} and {\tt ubounds} may be used. 
+! The {\tt lbounds} argument
 ! contains the lower bounds of the undistributed dimensions and {\tt ubounds}
 ! contains the upper bounds. As an example, the following call constructs
 ! a 10x20x30 Grid with a lower bound of (1,2,3), with the third dimension
@@ -906,8 +915,11 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC 
-   Grid3D=ESMF_GridCreate(minIndex=(/1,2/), maxIndex=(/11,22/), &
-            lbounds=(/3/), ubounds=(/33/), rc=rc)
+   ! Create DistGrid
+   distgrid = ESMF_DistGridCreate(minCorner=(/1,2/), maxCorner=(/11,22/), rc=rc)  
+
+   ! Create Grid
+   grid=ESMF_GridCreate(distGrid=distgrid, lbounds=(/3/), ubounds=(/33/), rc=rc)
 !EOC  
 
 !BOE
@@ -924,10 +936,13 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC 
-   Grid3D=ESMF_GridCreate(minIndex=(/1,2/), maxIndex=(/11,22/), &
-            lbounds=(/3/), ubounds=(/33/), dimmap=(/2,3/), rc=rc)
-!EOC  
+   ! Create DistGrid
+   distgrid = ESMF_DistGridCreate(minCorner=(/1,2/), maxCorner=(/11,22/), rc=rc)  
 
+   ! Create Grid
+   grid=ESMF_GridCreate(distGrid=distgrid, lbounds=(/3/), ubounds=(/33/), 
+          dimmap=(/2,3/), rc=rc)
+!EOC  
 
 !BOE
 
