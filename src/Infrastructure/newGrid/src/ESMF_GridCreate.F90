@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreate.F90,v 1.7 2007/05/23 21:17:50 oehmke Exp $
+! $Id: ESMF_GridCreate.F90,v 1.8 2007/05/23 23:06:45 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridCreate.F90,v 1.7 2007/05/23 21:17:50 oehmke Exp $'
+      '$Id: ESMF_GridCreate.F90,v 1.8 2007/05/23 23:06:45 oehmke Exp $'
 
 
 
@@ -620,7 +620,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFromArrays"
 !BOP
-! !IROUTINE: ESMF_GridCreateFromArrays - Create a new Grid from a set of Arrays
+! !IROUTINE: ESMF_GridCreate - Create a new Grid from a set of Arrays
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()

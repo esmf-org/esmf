@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.17 2007/05/23 21:37:06 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.18 2007/05/23 23:06:44 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -68,7 +68,7 @@ program ESMF_GridCreateEx
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
 
    ! Get pointers to the X coordinate component storage
-   call ESMF_GridLocalTileGetData(grid2D1, coordComp=1, coordsX, rc=rc)
+   call ESMF_GridLocalTileGetCoord(grid2D, coordComp=1, coordsX, rc=rc)
 
    ! Calculate and set the X coordinates
    do i=lbnd(1),ubnd(1)
@@ -80,7 +80,7 @@ program ESMF_GridCreateEx
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
 
    ! Get pointers to the X coordinate component storage
-   call ESMF_GridLocalTileGetData(grid2D1, coordComp=2, coordsY, rc=rc)
+   call ESMF_GridLocalTileGetCoord(grid2D, coordComp=2, coordsY, rc=rc)
 
    ! Calculate and set the X coordinates
    do i=lbnd(1),ubnd(1)
@@ -88,7 +88,7 @@ program ESMF_GridCreateEx
    enddo
 
    ! We now have all our coordinates so commit as regrid ready.
-   call ESMF_GridCommit(grid2D1, ESMF_GRIDSTATUS_REGRID_READY, rc=rc)
+   call ESMF_GridCommit(grid2D, ESMF_GRIDSTATUS_REGRID_READY, rc=rc)
 
 !EOC
 
@@ -103,8 +103,8 @@ program ESMF_GridCreateEx
 ! edge in each of three dimensions. By employing this method 
 ! the user should be able to create most of the common grid shapes,
 ! for example, rectangle, bipole sphere, tripole sphere, etc. 
-! For more complex shapes the user may define them via distgrid
-! and create them using the more general grid create, see Section~\ref{sec:usage:adv:create}
+! For more complex shapes the user may define them via DistGrid
+! and create them using the more general Grid create, see Section~\ref{sec:usage:adv:create}
 ! for a description of this process.
 !
 !\subsubsection{Creation: Size, Rank, and Distribution of Index Space}
@@ -142,16 +142,16 @@ program ESMF_GridCreateEx
 ! A second supported type of distribution is regular distribution. 
 ! In this type the user specifies the exact number of cells per
 ! DE in each dimension. For the {\tt ESMF\_GridCreateShape} call
-! The {\tt countsPerDEDim1,2,3}
+! the {\tt countsPerDEDim1,2,3}
 ! arguments are used. These specify a rectangular
 ! distribution containing size(countsPerDEDim1) by
 ! size(countsPerDEDim2) by size(countsPerDEDim3)
-! DEs. The entries in each of these arrays specifies 
+! DEs. The entries in each of these arrays specify 
 ! the size of the DEs in that dimension for that row or column.
 ! The rank of the grid is determined by the presence of 
 ! {\tt countsPerDEDim3}. If it's present the Grid
 ! will be 3D, if just {\tt countsPerDEDim1} and
-! {\tt countsPerDEDim2} are specified the grid
+! {\tt countsPerDEDim2} are specified the Grid
 ! will be 2D. If any of these arrays has size
 ! 1 then that index dimension is undistributed. 
 !
@@ -482,7 +482,7 @@ program ESMF_GridCreateEx
 !BOE
 ! The second pair of methods enable the user to set or get data using
 ! a fortran pointer. These methods only work with the local piece of the 
-! Grid on the DE. {\tt ESMF\_GridLocalTileSetData} enables the user
+! Grid on the DE. {\tt ESMF\_GridLocalTileSetCoord} enables the user
 ! to set data into the local piece of the coordinates residing on the DE.
 ! The following call gets a pointer (fptr) to the fortran array holding the 
 ! first component (e.g. x) coordinates for the corner stagger
@@ -491,14 +491,14 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-   call ESMF_GridLocalTileSetData(grid, tile=2, &
+   call ESMF_GridLocalTileSetCoord(grid, tile=2, &
           staggerLoc=ESMF_STAGGERLOC_CORNER,    &
           coordComp=1, fptr, &
           doCopy=ESMF_DATA_REF, rc=rc)
 !EOC
 
 !BOE
-! The call {\tt ESMF\_GridLocalTileGetData} gets a fortran pointer to 
+! The call {\tt ESMF\_GridLocalTileGetCoord} gets a fortran pointer to 
 ! the coordinate data. The user can then operate on this array in the usual
 ! manner. The following call allocates an array (fptr) and
 ! makes copy of the part of tile 1's third component (e.g. z)  coordinates which
@@ -506,7 +506,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-   call ESMF_GridLocalTileGetData(grid, tile=1, localDE=2, &
+   call ESMF_GridLocalTileGetCoord(grid, tile=1, localDE=2, &
           coordComp=3, fptr, doCopy=ESMF_DO_COPY, rc=rc)
 
 !EOC
@@ -711,7 +711,7 @@ program ESMF_GridCreateEx
                   coordComp1=fptrX, coordComp2=fptrY, rc=rc)
  
    ! We now have all our coordinates so commit as regrid ready.
-   call ESMF_GridCommit(grid2D1, ESMF_GRIDSTATUS_REGRID_READY, rc=rc)
+   call ESMF_GridCommit(grid, ESMF_GRIDSTATUS_REGRID_READY, rc=rc)
 
 !EOC
 
@@ -839,8 +839,8 @@ program ESMF_GridCreateEx
 
 
    ! Get pointers to the coordinate component storage
-   call ESMF_GridLocalTileGetData(grid2D1, coordComp=1, coordsLon, rc=rc)
-   call ESMF_GridLocalTileGetData(grid2D1, coordComp=2, coordsLat, rc=rc)
+   call ESMF_GridLocalTileGetCoord(grid2D1, coordComp=1, coordsLon, rc=rc)
+   call ESMF_GridLocalTileGetCoord(grid2D1, coordComp=2, coordsLat, rc=rc)
 
    ! Set the coordinates
    do j=lbnd(2),ubnd(2)
@@ -859,7 +859,7 @@ program ESMF_GridCreateEx
           computationalLBound=lbndV, computationalUBound=ubndV, rc=rc)
 
    ! Get pointers to the coordinate component storage
-   call ESMF_GridLocalTileGetData(grid2D1, coordComp=3, coordsVert, rc=rc)
+   call ESMF_GridLocalTileGetCoord(grid2D1, coordComp=3, coordsVert, rc=rc)
 
    ! Set the vertical coordinates
    do i=lbndV(1),ubndV(1)
@@ -870,11 +870,6 @@ program ESMF_GridCreateEx
    ! We now have all our coordinates so commit as regrid ready.
    call ESMF_GridCommit(grid2D1, ESMF_GRIDSTATUS_READY, rc=rc)
 !EOC
-
-
-
-
-
 
 
 !BOE

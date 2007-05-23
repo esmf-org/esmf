@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.7 2007/05/23 19:06:24 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.8 2007/05/23 23:06:44 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.7 2007/05/23 19:06:24 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.8 2007/05/23 23:06:44 oehmke Exp $'
 
 
 
@@ -586,7 +586,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordIntoArray"
 !BOP
-! !IROUTINE: ESMF_GridGetCoordIntoArray - Puts  the coordinates of a stagger location into an Array
+! !IROUTINE: ESMF_GridGetCoord  - Puts  the coordinates of a stagger location into an Array
 
 ! !INTERFACE:
       subroutine ESMF_GridGetCoordIntoArray(grid, staggerLoc,coordComp, array, &
@@ -630,12 +630,12 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridGetLocalTileCoord"
+#define ESMF_METHOD "ESMF_GridLocalTileGetCoord"
 !BOP
-! !IROUTINE: ESMF_GridGetLocalTileCoord - Gets  the coordinates of a particular location in a tile.
+! !IROUTINE: ESMF_GridLocalTileGetCoord - Gets  the coordinates of a particular location in a tile.
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetLocalTileCoord(grid, staggerLoc, tile, localDE, &
+      subroutine ESMF_GridLocalTileGetCoord(grid, staggerLoc, tile, localDE, &
                             indices, coords, rc)
 !
 ! !ARGUMENTS:
@@ -675,7 +675,7 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      end subroutine ESMF_GridGetLocalTileCoord
+      end subroutine ESMF_GridLocalTileGetCoord
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -894,12 +894,12 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridLocalTileGetData"
+#define ESMF_METHOD "ESMF_GridLocalTileGetCoord"
 !BOP
-! !IROUTINE: ESMF_GridLocalTileGetData - get the fortran data pointer for the piece of  a tile on this DE.
+! !IROUTINE: ESMF_GridLocalTileGetCoord - get the fortran data pointer for the piece of  a tile on this DE.
 
 ! !INTERFACE:
-      subroutine ESMF_GridLocalTileGetData(grid, tile, localDE, &
+      subroutine ESMF_GridLocalTileGetCoord(grid, tile, localDE, &
                             staggerLoc, coordComp, fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
@@ -944,18 +944,18 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      end subroutine ESMF_GridLocalTileGetData
+      end subroutine ESMF_GridLocalTileGetCoord
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridLocalTileSetData"
+#define ESMF_METHOD "ESMF_GridLocalTileSetCoord"
 !BOP
-! !IROUTINE: ESMF_GridLocalTileSetData - set the coordinate data for the particular
+! !IROUTINE: ESMF_GridLocalTileSetCoord - set the coordinate data for the particular
 piece of tile on our processor from a fortran array.
 
 ! !INTERFACE:
-      subroutine ESMF_GridLocalTileSetData(grid, tile, localDE, staggerLoc, &
+      subroutine ESMF_GridLocalTileSetCoord(grid, tile, localDE, staggerLoc, &
                             coordComp, fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
@@ -1001,7 +1001,59 @@ piece of tile on our processor from a fortran array.
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      end subroutine ESMF_GridLocalTileSetData
+      end subroutine ESMF_GridLocalTileSetCoord
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLocalTileSetCoord"
+!BOP
+! !IROUTINE: ESMF_GridLocalTileSetCoord - Sets  the coordinates of a particular location in a tile.
+
+! !INTERFACE:
+      subroutine ESMF_GridLocalTileSetCoord(grid, staggerLoc, tile, localDE, &
+                            indices, coords, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
+      integer, intent(in),optional :: tile
+      integer, intent(in),optional :: localDE
+      integer, intent(in) :: indices(:)
+      real, intent(in) :: coords(:)
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Given a stagger location, tile and a set of indices, sets the coordinates
+!     of the position represented by the indices in the tile to the value in coords.
+!     This subroutine would need to be type overloaded for the coordinates. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{staggerLoc}]
+!          The stagger location from which to get the arrays. If not specified, 
+!          defaults to the center. 
+!     \item[{[tile]}]
+!          The grid tile to get the information for. If not set, defaults to 
+!          the first tile. 
+!     \item[{[localDE]}]
+!          The local DE to get the information for. If not set, defaults to 
+!          the first DE on this processor. 
+!     \item[{indices}]
+!           Integer array containing the index coordinates in the tile for which to 
+!           calculate the coordinates.
+!     \item[{coords}]
+!           The location described by the indices will be set to {\it coords} . 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+      end subroutine ESMF_GridLocalTileSetCoord
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1196,7 +1248,7 @@ piece of tile on our processor from a fortran array.
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetCoordFromArray"
 !BOP
-! !IROUTINE: ESMF_GridSetCoordFromArray - Sets  the coordinates of a stagger location from an  Array.
+! !IROUTINE: ESMF_GridSetCoord - Sets  the coordinates of a stagger location from an  Array.
 
 ! !INTERFACE:
       subroutine ESMF_GridSetCoordFromArray(grid, staggerLoc,coordComp, &
@@ -1234,57 +1286,6 @@ piece of tile on our processor from a fortran array.
 ! !REQUIREMENTS:  TODO
 
       end subroutine ESMF_GridSetCoordFromArray
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridSetLocalTileCoord"
-!BOP
-! !IROUTINE: ESMF_GridSetLocalTileCoord - Sets  the coordinates of a particular location in a tile.
-
-! !INTERFACE:
-      subroutine ESMF_GridSetLocalTileCoord(grid, staggerLoc, tile, localDE, &
-                            indices, coords, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
-      integer, intent(in),optional :: tile
-      integer, intent(in),optional :: localDE
-      integer, intent(in) :: indices(:)
-      real, intent(in) :: coords(:)
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Given a stagger location, tile and a set of indices, sets the coordinates
-!     of the position represented by the indices in the tile to the value in coords.
-!     This subroutine would need to be type overloaded for the coordinates. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{staggerLoc}]
-!          The stagger location from which to get the arrays. If not specified, 
-!          defaults to the center. 
-!     \item[{[tile]}]
-!          The grid tile to get the information for. If not set, defaults to 
-!          the first tile. 
-!     \item[{[localDE]}]
-!          The local DE to get the information for. If not set, defaults to 
-!          the first DE on this processor. 
-!     \item[{indices}]
-!           Integer array containing the index coordinates in the tile for which to 
-!           calculate the coordinates.
-!     \item[{coords}]
-!           The location described by the indices will be set to {\it coords} . 
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end subroutine ESMF_GridSetLocalTileCoord
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
