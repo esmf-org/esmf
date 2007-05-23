@@ -1,4 +1,4 @@
-% $Id: Grid_refdoc.ctex,v 1.6 2007/05/22 16:13:54 oehmke Exp $
+% $Id: Grid_refdoc.ctex,v 1.7 2007/05/23 15:30:40 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -21,7 +21,7 @@
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{\bf Grid Design (Draft 6)}
-\newcommand{\myauthors}{\it Bob Oehmke and Don Stark}
+\newcommand{\myauthors}{\it Bob Oehmke, Don Stark and Cecelia DeLuca}
 #endif
 
 #ifdef STANDALONE
@@ -62,13 +62,6 @@
 \input{../Infrastructure/newGrid/doc/Grid_desc}
 #endif
 
-\subsection{Grid Options}
-#ifdef STANDALONE
-\input{Grid_options}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/newGrid/doc/Grid_options}
-#endif
-
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Grid_usage}
@@ -100,6 +93,12 @@
 \input{../Infrastructure/newGrid/doc/Grid_implnote}
 #endif
 
+\subsection{Grid Options}
+#ifdef STANDALONE
+\input{Grid_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/newGrid/doc/Grid_options}
+#endif
 
 \subsection{Class API: General Grid Methods}
 #ifdef STANDALONE

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.10 2007/05/22 23:30:18 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.11 2007/05/23 15:31:35 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -315,30 +315,6 @@ program ESMF_GridCreateEx
            connDim2=(/ESMF_GRIDCONN_BIPOLE, ESMF_GRIDCONN_BIPOLE/), &
            rc=rc)   
 !EOC
-
-!BOE
-!
-! This table shows the ESMF\_GRIDCONN\_ values which can be used to create various shapes. 
-! Note that the dimensions the connections are on is arbitrary. For example,
-! putting the settings for specifying a sphere into {\tt connDim2} and {\tt connDim3} instead would
-! still result in a sphere, but oriented along a different axis. 
-!
-! \medskip
-! \begin{tabular}{|l|c|c||c|c||}
-! \hline
-!         & {\bf connDim1(1)} & {\bf connDim1(2)}  & {\bf connDim2(1)} & {\bf connDim2(2)}  \\ 
-! \hline
-! {\bf Rectangle}  & NONE & NONE & NONE & NONE \\
-! {\bf Bipole Sphere} & POLE & POLE & PERIODIC & PERIODIC \\
-! {\bf Tripole Sphere} & POLE & BIPOLE & PERIODIC & PERIODIC \\
-! {\bf Cylinder} & NONE & NONE & PERIODIC & PERIODIC \\
-! {\bf Torus}  & PERIODIC & PERIODIC & PERIODIC & PERIODIC \\
-! \hline
-! \hline
-! \end{tabular}
-!
-!EOE
-
 
 !BOE
 !\subsubsection{Creation: Set/Commit}\label{sec:usage:setcommit}

@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.15 2007/05/22 23:17:12 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.16 2007/05/23 15:30:40 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -14,7 +14,7 @@ grid's underlying topology and the decomposition of the physical grid
 across the available computational resources.  The most frequent 
 use of the Grid class is to describe physical grids in user
 code so that sufficient information is available to perform ESMF
-methods such as regridding. 
+methods such as regridding.  
 
 \begin{center}
 \begin{tabular}{|p{6in}|}
@@ -30,20 +30,20 @@ Distribution of grids across computational resources for parallel
 operations - users set which grid dimensions are distributed.\\
 Grids can be created already distributed, so that no single
 resource needs global information in the process.\\
-Options to define periodicity and connectivity implicitly via
+Options to define periodicity and other connectivities implicitly via
 shape shortcuts or specify them explicitly.\\ 
 Options for users to define grid coordinates themselves or call
 prefabricated coordinate generation routines for standard grids.\\
 Options for incremental construction of grids.\\
 Options for using a set of pre-defined stagger locations or for setting
-custom stagger locations.\\[.03in] \hline
+custom stagger locations.\\ [.03in] \hline
 \end{tabular}
 \end{center}
 
 \subsubsection{Supported Grids}
 
 The ESMF Grid class is based on the concepts described in {\it A Standard Descriptor 
-of Grids Used in Earth System Models} \cite{BalajiGridSpec}.  In this document
+of Grids Used in Earth System Models} [Balaji 2006].  In this document
 Balaji introduces the mosaic concept as a means of describing a wide variety of
 Earth system model grids.  A mosaic is composed of logically rectangular
 grid tiles connected at their edges.  Mosaic grids includes simple,
@@ -65,14 +65,12 @@ All of these logically rectangular grid types can be combined through edge
 connections to form a mosaic.  Cubed sphere and yin-yang grids, shown in 
 Figure {not done yet} are examples of mosaic grids.
  
-\begin{center}
 \begin{figure}
 \scalebox{0.9}{\includegraphics{LogRectGrids}}
 \caption{Types of logically rectangular grid tiles.  Red circles show the
 values needed to specify grid coordinates for each type.}
 \label{fig:LogRectGrids}
 \end{figure}
-\end{center}
 
 \subsubsection{Grid Representation in ESMF}
 
@@ -94,19 +92,40 @@ a Grid creation shortcut.
 
 \subsubsection{Shortcuts for Shape Specification and Periodicity}
 \label{sec:ShapeShortcut}
-ESMF has shortcuts for creation of standard Grid {\bf shapes}.  
-In many cases, these enable the user to bypass the step of creating 
+ESMF has shortcuts for creation of standard Grid {\bf shapes} up
+to 3D.  In many cases, these enable the user to bypass the step of creating 
 a DistGrid before creating the Grid.  The basic call is 
 ESMF\_GridCreateShape().  With this call, the user can specify for
 each dimension whether it is periodic, is not periodic, is a pole, or
 is a bipole.
 
 Table \ref{table:Shapes} shows how standard shapes can be created
-using this call and specifying connectivities.
+using this call and specifying connectivities using the
+ESMF\_GridConn parameter.  Note that the dimensions
+the connections are on is arbitrary. For example, putting the
+settings for specifying a sphere into {\tt connDim2} and
+{\tt connDim3\} instead would still result in a sphere, but
+oriented along a different axis.
+
+\medskip
+\begin{tabular}{|l|c|c||c|c||}
+\label{table:Shapes}
+\hline
+& {\bf connDim1(1)} & {\bf connDim1(2)}  & {\bf connDim2(1)} & {\bf connDi\m2(2)}  \\
+\hline
+{\bf Rectangle}  & NONE & NONE & NONE & NONE \\
+{\bf Bipole Sphere} & POLE & POLE & PERIODIC & PERIODIC \\
+{\bf Tripole Sphere} & POLE & BIPOLE & PERIODIC & PERIODIC \\
+{\bf Cylinder} & NONE & NONE & PERIODIC & PERIODIC \\
+{\bf Torus}  & PERIODIC & PERIODIC & PERIODIC & PERIODIC \\
+\hline
+\hline
+\end{tabular}
 
 If the user's grid shape is too complex for an ESMF shortcut routine,
-a DistGrid can be created to specify the shape in detail. 
-This DistGrid is then passed into a Grid create call.
+or involves more than three dimensions, a DistGrid can be created
+to specify the shape in detail.  This DistGrid is then passed
+into a Grid create call.
 
 \subsubsection{Shortcuts for Specification of Grid Distribution} 
 
@@ -125,13 +144,12 @@ one in which any gridpoint can be assigned to any DE.
 
 Figure \ref{fig:GridDecomps} illustrates each of these decompositions.
  
-\begin{center}
 \begin{figure}
 \scalebox{0.9}{\includegraphics{GridDecomps}}
-\caption{Types of decompositions for a matrix a.}
+\caption{Types of decompositions.  Block and regular decompositions for
+a 6x6 matrix {\bf a}, and arbitrary decomposition for a 6x3 matrix {\bf b}.}
 \label{fig:GridDecomps}
 \end{figure}
-\end{center}
 
 A distribution can also be specified using the DistGrid.  This
 DistGrid is then passed into a Grid create call.
@@ -178,7 +196,7 @@ setting Tile coordinates.
 
 \subsubsection{Staggering}
 
- A useful finite difference technique is to place different physical
+A useful finite difference technique is to place different physical
 quantities at different locations within a grid cell. This {\bf staggering}
 of the physical variables on the mesh is introduced so that the difference
 of a field is naturally defined at the location of another variable. 
@@ -221,16 +239,25 @@ Each stage has at least one ESMF call, and depending on
 whether shortcuts are used or not, may have more.
 This gives the user the opportunity to trade off the 
 ease of using a prefabricated grid with the flexibility 
-of specifying details about their grid.  Incremental
+of specifying details about the grid.  Incremental
 construction can also be useful when distributing a grid object
 before setting coordinates or when multiple components
 contribute to the definition of a grid. 
 
-\medskip
 \subsubsection{Options for Grid Creation}
 
 The Grid class uses create, set or generate, and 
-commit calls during grid creation.
+commit calls during grid creation.  The following chart
+shows typical sequences.
+
+There are two simple rules for when commit calls are required:
+\begin{enumerate}
+\item An ESMF\_GridCommit() call with an ESMF\_GRIDSTATUS\_SHAPE\_READY
+argument is required when ESMF_GridCreateEmpty() is used to initiate
+Grid creation.
+\item An ESMF\_GridCommit() call with an ESMF\_GRIDSTATUS\_REGRID\_READY
+argument is required before using any ESMF Grid in a regridding call.
+\end{enumerate}
 
 \medskip
 \begin{tabular}{|p{2.6in}|p{1in}|p{1in}|p{1.4in}|}
@@ -254,8 +281,7 @@ ESMF\_GridSet()\newline
 ESMF\_GridCommit(\newline
 \hspace{.1in} ESMF\_GRIDSTATUS\_SHAPE\_READY)\newline
 {\bf or shortcut method, e.g.} \newline
-ESMF\_GridCreateShapeSphere()\newline
-ESMF\_GridCreateShapeBox()
+ESMF\_GridCreateShape()\newline
 & Space for coordinates is allocated but coordinate
 values are not set
 & Can be used as the basis for Field allocation
@@ -273,7 +299,7 @@ ESMF\_GridCommit(\newline
 \hspace{.1in} ESMF\_GRIDSTATUS\_REGRID\_READY)\newline
 {\bf or shortcut method, e.g.} \newline
 ESMF\_GridCreateShapeSphere()\newline
-ESMF\_GridGenCoordSphere()\newline
+ESMF\_GridGenCoordUni()\newline
 ESMF\_GridCommit(\newline
 ESMF\_GRIDSTATUS\_REGRID\_READY)
 & Nothing; Grid is complete
