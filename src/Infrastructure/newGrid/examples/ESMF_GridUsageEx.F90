@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.13 2007/05/23 17:51:58 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.14 2007/05/23 17:59:02 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@ program ESMF_GridCreateEx
 ! There are several methods of creating an ESMF Grid. The first
 ! of these is designed to easily allow the user to create
 ! the most common grids. The method {\tt ESMF\_GridCreateShape}
-! creates a single patch logically rectangular grid and 
+! creates a single tile logically rectangular grid and 
 ! allows the user to specify the connections for each 
 ! edge in each of three dimensions. By employing this method 
 ! the user should be able to create most of the common grid shapes,
@@ -617,7 +617,7 @@ program ESMF_GridCreateEx
    integer:: rc, finalrc
    integer:: myPet, npets, rootPet
    type(ESMF_VM):: vm
-   type(ESMF_Grid) :: patchgrid
+   type(ESMF_Grid) :: grid
    real(ESMF_KIND_R4), pointer :: fptrX(:,:),fptrY(:,:)
    integer :: petMap(2,2,1)
 !EOC         
@@ -671,7 +671,7 @@ program ESMF_GridCreateEx
    integer:: rc, finalrc
    integer:: myPet, npets, rootPet
    type(ESMF_VM):: vm
-   type(ESMF_Grid) :: patchgrid
+   type(ESMF_Grid) :: grid
    real(ESMF_KIND_R4), pointer :: fptrX(:,:),fptrY(:,:)
    integer :: petMap(2,2,1)
 !EOC         
