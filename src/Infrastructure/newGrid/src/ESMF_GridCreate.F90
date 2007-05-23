@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreate.F90,v 1.4 2007/05/22 23:30:18 oehmke Exp $
+! $Id: ESMF_GridCreate.F90,v 1.5 2007/05/23 18:37:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridCreate.F90,v 1.4 2007/05/22 23:30:18 oehmke Exp $'
+      '$Id: ESMF_GridCreate.F90,v 1.5 2007/05/23 18:37:14 oehmke Exp $'
 
 
 
@@ -255,7 +255,7 @@
 !         tells the number of points for that dimension for that DE. 
 !         When a dimension has less than the maximum number of DEs then 0
 !         should be used to fill the remaining slots. 
-! \item[{[regDecomp]}] 
+! \item[{[blockDecomp]}] 
 !      List that has the same number of elements as {\tt maxIndex}.
 !      Each entry is the number of decounts for that dimension.
 !      If not specified, the default decomposition will be deCountx1x1..x1. 
@@ -345,7 +345,7 @@
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateFromExtents(name,coordTypeKind, minIndex,maxIndex, dimmap, &
-                        regDecomp, lbounds, ubounds, coordCompRanks, &
+                        blockDecomp, lbounds, ubounds, coordCompRanks, &
                         coordCompDimMap, staggerLocs, &
                         staggerLocLWidth, staggerLocUWidth, &
                         staggerLocAligns,indexflag, gridType, noData,
@@ -360,7 +360,7 @@
        type(ESMF_TypeKind),  intent(in),optional  :: coordTypeKind
        integer,               intent(in),   optional  :: minIndex(:)
        integer,               intent(in),             :: maxIndex(:)
-       integer,               intent(in),   optional  :: regDecomp(:)
+       integer,               intent(in),   optional  :: blockDecomp(:)
        integer,               intent(in),   optional  :: dimmap(:)
        integer,               intent(in),   optional  :: lbounds(:)
        integer,               intent(in),   optional  :: ubounds(:)
@@ -394,7 +394,7 @@
 !       to (1,1,1...).
 ! \item[{maxIndex}] 
 !        The upper extent of the grid array.
-! \item[{[regDecomp]}] 
+! \item[{[blockDecomp]}] 
 !      List that has the same number of elements as {\tt maxIndex}.
 !      Each entry is the number of decounts for that dimension.
 !      If not specified, the default decomposition will be deCountx1x1..x1. 
