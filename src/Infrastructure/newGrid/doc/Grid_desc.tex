@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.19 2007/05/23 19:56:56 oehmke Exp $
+% $Id: Grid_desc.tex,v 1.20 2007/05/23 21:37:06 oehmke Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -254,7 +254,7 @@ shows typical sequences.
 There are two simple rules for when commit calls are required:
 \begin{enumerate}
 \item An ESMF\_GridCommit() call with an ESMF\_GRIDSTATUS\_SHAPE\_READY
-argument is required when ESMF_GridCreateEmpty() is used to initiate
+argument is required when ESMF\_GridCreateEmpty() is used to initiate
 Grid creation.
 \item An ESMF\_GridCommit() call with an ESMF\_GRIDSTATUS\_REGRID\_READY
 argument is required before using any ESMF Grid in a regridding call.

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.16 2007/05/23 20:50:23 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.17 2007/05/23 21:37:06 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -882,8 +882,8 @@ program ESMF_GridCreateEx
 !
 ! Beyond the shortcut methods for creating a grid, there is
 ! a set of methods which give the user more control over the
-! specifics of the grid.  The following describe the more 
-! general interfaces. 
+! specifics of the grid.  The following describes the more 
+! general interface. 
 !
 !
 !\subsubsection{Creation: Advanced: Size, Rank, Shape, and Distribution}~\label{sec:usage:adv:create}
