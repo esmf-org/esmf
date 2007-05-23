@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.17 2007/05/23 17:32:14 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.18 2007/05/23 19:32:40 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@ ESMF\_GridCreateShape().  With this call, the user can specify for
 each dimension whether it is periodic, is not periodic, is a pole, or
 is a bipole.
 
-Table \ref{table:Shapes} shows how standard shapes can be created
+The table below shows how standard shapes can be created
 using this call.  Connectivities are specified using the
 ESMF\_GridConn parameter.  Note that the dimensions
 the connections are on is arbitrary. For example, putting the
@@ -109,9 +109,8 @@ oriented along a different axis.
 
 \medskip
 \begin{tabular}{|l|c|c||c|c||}
-\label{table:Shapes}
 \hline
-& {\bf connDim1(1)} & {\bf connDim1(2)}  & {\bf connDim2(1)} & {\bf connDi\m2(2)}  \\
+& {\bf connDim1(1)} & {\bf connDim1(2)}  & {\bf connDim2(1)} & {\bf connDim2(2)}  \\
 \hline
 {\bf Rectangle}  & NONE & NONE & NONE & NONE \\
 {\bf Bipole Sphere} & POLE & POLE & PERIODIC & PERIODIC \\
