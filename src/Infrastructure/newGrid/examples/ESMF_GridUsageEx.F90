@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.11 2007/05/23 15:31:35 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.12 2007/05/23 17:32:14 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -291,21 +291,15 @@ program ESMF_GridCreateEx
 
 !BOE
 !
-!\subsubsection{Creation: Edge Connections}
+!\subsubsection{Creation: Tile Edge Connections}
 !
 ! The {\tt ESMF\_GridCreateShape} command has three specific arguments
-! {\tt connDim1}, {\tt connDim2}, and {\tt connDim3}. These can be used
+! {\tt connDim1}, {\tt connDim2}, and {\tt connDim3} of parameter type
+! {\tt ESMF\_GridConn}. These can be used
 ! to setup different types of connections at the ends of each dimension.
-! Each of these parameters is a two element array. The first element is 
-! the connection type at the minimum end of the dimension and the second
-! is the connection type at the maximum end. The default value
-! for all the connections is ESMF\_GRIDCONN\_NONE, specifying no
-! connection. Other options are ESMF\_GRIDCONN\_POLE specifying
-! a pole connection, ESMF\_GRIDCONN\_BIPOLE specifying a bipole
-! connection, and ESMF\_GRIDCONN\_PERIODIC specifying a periodic connection. 
-! If one end of an index dimension specifies a periodic connection 
-! then both must. The following constructs a sphere with a bipole
-! at either end of dimension 2.
+! Each of these parameters is a two element array. See section 
+! \ref{sec:opt:gridconn} for a list of valid values of {\tt ESMF\_GridConn}.
+! The following constructs a sphere with a bipole at either end of dimension 2.
 !EOE
 
 !BOC

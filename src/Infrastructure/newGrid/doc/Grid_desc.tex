@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.16 2007/05/23 15:30:40 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.17 2007/05/23 17:32:14 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ each dimension whether it is periodic, is not periodic, is a pole, or
 is a bipole.
 
 Table \ref{table:Shapes} shows how standard shapes can be created
-using this call and specifying connectivities using the
+using this call.  Connectivities are specified using the
 ESMF\_GridConn parameter.  Note that the dimensions
 the connections are on is arbitrary. For example, putting the
 settings for specifying a sphere into {\tt connDim2} and
@@ -130,7 +130,8 @@ into a Grid create call.
 \subsubsection{Shortcuts for Specification of Grid Distribution} 
 
 The shortcuts for creating standard Grid shapes have options
-for data distribution.  The user specifies which dimensions 
+for data distribution (also referred to as decomposition).  The
+user specifies which dimensions 
 are to be distributed through a coordinate dependency (coordDep)
 argument.
 
@@ -140,14 +141,15 @@ contiguous grid points are assigned to each DE in the
 distributed dimension.  A {\bf regular} distribution is one in which
 unequal numbers of contiguous gridpoints are assigned to each
 DE in the distributed dimension.  An {\bf arbitrary} distribution is
-one in which any gridpoint can be assigned to any DE.
+one in which any gridpoint can be assigned to any DE.  Any ofthese
+distribution options can be applied to any of the grid shapes (i.e.,
+rectangle) or types (i.e., rectilinear).
 
-Figure \ref{fig:GridDecomps} illustrates each of these decompositions.
- 
+Figure \ref{fig:GridDecomps} illustrates options for distribution.
 \begin{figure}
 \scalebox{0.9}{\includegraphics{GridDecomps}}
-\caption{Types of decompositions.  Block and regular decompositions for
-a 6x6 matrix {\bf a}, and arbitrary decomposition for a 6x3 matrix {\bf b}.}
+\caption{Examples of block and regular decompositions for
+a 6x6 matrix {\bf a}, and an arbitrary decomposition for a 6x3 matrix {\bf b}.}
 \label{fig:GridDecomps}
 \end{figure}
 

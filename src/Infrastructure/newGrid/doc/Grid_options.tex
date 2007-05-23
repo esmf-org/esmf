@@ -1,7 +1,51 @@
-% $Id: Grid_options.tex,v 1.4 2007/05/22 23:17:12 cdeluca Exp $
+% $Id: Grid_options.tex,v 1.5 2007/05/23 17:32:14 cdeluca Exp $
+
+\subsubsection{ESMF\_GridConn}\label{sec:opt:gridconn}
+{\sf DESCRIPTION:\\}
+The {\tt ESMF\_GridCreateShape} command has three specific arguments
+{\tt connDim1}, {\tt connDim2}, and {\tt connDim3}. These can be used
+to setup different types of connections at the ends of each dimension
+of a Tile.  Each of these parameters is a two element array. The first
+element is the connection type at the minimum end of the dimension
+and the second is the connection type at the maximum end. The default
+value for all the connections is ESMF\_GRIDCONN\_NONE, specifying no
+connection.
+
+\medskip
+\begin{description}
+\item [ESMF\_GRIDCONN\_NONE] No connection.
+
+\item [ESMF\_GRIDCONN\_PERIODIC] Periodic connection.
+
+\item [ESMF\_GRIDCONN\_POLE] Pole.
+
+\item [ESMF\_GRIDCONN\_BIPOLE] Bipole connection.
+\end{description}
+
+\subsubsection{ESMF\_GridStatus}\label{sec:opt:gridstatus}
+
+ {\sf DESCRIPTION:\\}
+The ESMF Grid class can exist in three states. These states are
+present so that the library code can detect if a Grid has been
+appropriately setup for the task at hand. The following
+are the valid values of ESMF\_GRIDSTATUS.
+
+\medskip
+\begin{description}
+\item [ESMF\_GRIDSTATUS\_NOT\_READY:] Status after a grid has been created with 
+      {\tt ESMF\_GridCreateEmpty}. The only action which may be performed on a
+      grid in this state is the setting grid parameters or a commit to move 
+      to the next status. 
+\item [ESMF\_GRIDSTATUS\_SHAPE\_READY:] Status after a grid has been created with 
+      a non-empty create. The grid is complete except that it contains no coordinate
+      information. Most actions may be performed on a grid in this state
+      except those requiring coordinate values (e.g. regrid).
+\item [ESMF\_GRIDSTATUS\_REGRID\_READY:] The grid contains valid coordinate
+      values and is now ready to be used in regrid. 
+\end{description}
 
 
- \subsubsection{ESMF\_StaggerLoc}\label{sec:opt:staggerloc}
+\subsubsection{ESMF\_StaggerLoc}\label{sec:opt:staggerloc}
 
  {\sf DESCRIPTION:\\}
  In the ESMF Grid class, data can be located at different positions in a
@@ -68,26 +112,4 @@ The 3D predefined stagger locations are:\\
 \item [ESMF\_STAGGERLOC\_CENTER\_VFACE:] The center of the top and bottom face. The face bounded by the 1st and 2nd dimensions [8]. 
 \end{description}
 
-
- \subsubsection{ESMF\_GridStatus}\label{sec:opt:gridstatus}
-
- {\sf DESCRIPTION:\\}
-The ESMF Grid class can exist in three states. These states are
-present so that the library code can detect if a Grid has been
-appropriately setup for the task at hand. The following
-are the valid values of ESMF\_GRIDSTATUS.
-
-\medskip
-\begin{description}
-\item [ESMF\_GRIDSTATUS\_NOTREADY:] Status after a grid has been created with 
-      {\tt ESMF\_GridCreateEmpty}. The only action which may be performed on a
-      grid in this state is the setting grid parameters or a commit to move 
-      to the next status. 
-\item [ESMF\_GRIDSTATUS\_SHAPE\_READY:] Status after a grid has been created with 
-      a non-empty create. The grid is complete except that it contains no coordinate
-      information. Most actions may be performed on a grid in this state
-      except those requiring coordinate values (e.g. regrid).
-\item [ESMF\_GRIDSTATUS\_REGRID\_READY:] The grid contains valid coordinate
-      values and is now ready to be used in regrid. 
-\end{description}
 
