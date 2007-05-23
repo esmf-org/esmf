@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreate.F90,v 1.5 2007/05/23 18:37:14 oehmke Exp $
+! $Id: ESMF_GridCreate.F90,v 1.6 2007/05/23 19:13:47 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,139 +62,13 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridCreate.F90,v 1.5 2007/05/23 18:37:14 oehmke Exp $'
+      '$Id: ESMF_GridCreate.F90,v 1.6 2007/05/23 19:13:47 cdeluca Exp $'
 
 
 
 !==============================================================================
 
       contains
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateShape"
-!BOP
-! !IROUTINE: ESMF_GridCreateShape - Create a new rectangular Grid
-
-! !INTERFACE:
-      function ESMF_GridCreateShape(name,coordTypeKind,  &
-                        countsPerDEDim1,countsPerDeDim2, countsPerDEDim3, &
-                        connDim1, connDim2, connDim3, &
-                        coordCompDep1, coordCompDep2, coordCompDep3, &
-                        indexflag, gridType, haloDepth, petMap, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateShape
-!
-! !ARGUMENTS:
-      character (len=*), intent(in), optional :: name 
-       type(ESMF_TypeKind),  intent(in),    optional  :: coordTypeKind
-       integer,               intent(in),             :: countsPerDEDim1(:)
-       integer,               intent(in),             :: countsPerDEDim2(:)
-       integer,               intent(in),   optional  :: countsPerDEDim3(:)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim1(2)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim2(2)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim3(2)
-       integer,               intent(in),   optional  :: coordCompDep1(:)
-       integer,               intent(in),   optional  :: coordCompDep2(:)
-       integer,               intent(in),   optional  :: coordCompDep3(:)
-       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       integer,               intent(in),   optional  :: haloDepth
-       integer,               intent(in),   optional  :: petMap(:,:,:)
-       integer,               intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-! Create an {\tt ESMF\_Grid} object. This subroutine constructs a single tile rectangular
-! grid. 
-!
-! The arguments are:
-! \begin{description}
-! \item[{[name]}]
-!          {\tt ESMF\_Grid} name.
-! \item[{[coordTypeKind]}] 
-!     The type/kind of the grid coordinate data. 
-!     If not specified then the type/kind will be 8 byte reals. 
-! \item[{countsPerDEDim1}] 
-!     This arrays specifies the number of cells per DE for index dimension 1
-!     for the exclusive region (the center stagger location).
-!     If the array has only one entry, then the dimension is undistributed. 
-! \item[{countsPerDEDim2}] 
-!     This array specifies the number of cells per DE for index dimension 2
-!     for the exclusive region (center stagger location). 
-!     If the array has only one entry, then the dimension is undistributed. 
-! \item[{[countsPerDEDim3]}] 
-!     This array specifies the number of cells per DE for index dimension 3
-!     for the exclusive region (center stagger location).  
-!     If not specified  then grid is 2D. Also, If the array has only one entry,
-!     then the dimension is undistributed. 
-! \item[{[connDim1]}] 
-!     Two element array describing the index dimension 1 connections.
-!      The first element represents the minimum end of dimension 1.
-!      The second element represents the minimum end of dimension 1.
-!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
-!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
-!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
-! \item[{[connDim2]}] 
-!     Two element array describing the index dimension 2 connections.
-!      The first element represents the minimum end of dimension 2.
-!      The second element represents the minimum end of dimension 2.
-!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
-!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
-!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
-! \item[{[connDim3]}] 
-!     Two element array describing the index dimension 3 connections.
-!      The first element represents the minimum end of dimension 3.
-!      The second element represents the minimum end of dimension 3.
-!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
-!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
-!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
-! \item[{[indexflag]}]
-!      Flag that indicates how the DE-local indices are to be defined.
-! \item[{[coordCompDep1]}] 
-!     This array specifies the dependence of the first 
-!     coordinate component on the three index dimensions
-!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
-!     array specifies the number of dimensions of the first
-!     coordinate component array. The values specify which
-!     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/1/). 
-! \item[{[coordCompDep2]}] 
-!     This array specifies the dependence of the second 
-!     coordinate component on the three index dimensions
-!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
-!     array specifies the number of dimensions of the second
-!     coordinate component array. The values specify which
-!     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/2/). 
-! \item[{[coordCompDep3]}] 
-!     This array specifies the dependence of the third 
-!     coordinate component on the three index dimensions
-!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
-!     array specifies the number of dimensions of the third
-!     coordinate component array. The values specify which
-!     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/3/). 
-! \item[{[haloDepth}]
-!       Sets the depth of the computational padding around the exclusive
-!       regions on each DE.  The actual value for any edge is the maximum
-!       between the halo and stagger location padding. If not specified 
-!       this is set to 0.
-! \item[{[petMap]}]
-!       Sets the mapping of pets to the created DEs. This 3D
-!       should be of size size(countsPerDEDim1)xsize(countsPerDEDim2)x
-!       size(countsPerDEDim3). If countsPerDEDim3 isn't present, then
-!       the last dimension is of size 1.   
-! \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end function ESMF_GridCreateShape
-
-
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -708,6 +582,131 @@
 ! !REQUIREMENTS:  TODO
 
       end function ESMF_GridCreateEmpty
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateShape"
+!BOP
+! !IROUTINE: ESMF_GridCreateShape - Create a new rectangular Grid
+
+! !INTERFACE:
+      function ESMF_GridCreateShape(name,coordTypeKind,  &
+                        countsPerDEDim1,countsPerDeDim2, countsPerDEDim3, &
+                        connDim1, connDim2, connDim3, &
+                        coordCompDep1, coordCompDep2, coordCompDep3, &
+                        indexflag, gridType, haloDepth, petMap, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateShape
+!
+! !ARGUMENTS:
+      character (len=*), intent(in), optional :: name 
+       type(ESMF_TypeKind),  intent(in),    optional  :: coordTypeKind
+       integer,               intent(in),             :: countsPerDEDim1(:)
+       integer,               intent(in),             :: countsPerDEDim2(:)
+       integer,               intent(in),   optional  :: countsPerDEDim3(:)
+       type(ESMF_GridConn),   intent(in),   optional  :: connDim1(2)
+       type(ESMF_GridConn),   intent(in),   optional  :: connDim2(2)
+       type(ESMF_GridConn),   intent(in),   optional  :: connDim3(2)
+       integer,               intent(in),   optional  :: coordCompDep1(:)
+       integer,               intent(in),   optional  :: coordCompDep2(:)
+       integer,               intent(in),   optional  :: coordCompDep3(:)
+       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       integer,               intent(in),   optional  :: haloDepth
+       integer,               intent(in),   optional  :: petMap(:,:,:)
+       integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_Grid} object. This subroutine constructs a single tile rectangular
+! grid. 
+!
+! The arguments are:
+! \begin{description}
+! \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+! \item[{[coordTypeKind]}] 
+!     The type/kind of the grid coordinate data. 
+!     If not specified then the type/kind will be 8 byte reals. 
+! \item[{countsPerDEDim1}] 
+!     This arrays specifies the number of cells per DE for index dimension 1
+!     for the exclusive region (the center stagger location).
+!     If the array has only one entry, then the dimension is undistributed. 
+! \item[{countsPerDEDim2}] 
+!     This array specifies the number of cells per DE for index dimension 2
+!     for the exclusive region (center stagger location). 
+!     If the array has only one entry, then the dimension is undistributed. 
+! \item[{[countsPerDEDim3]}] 
+!     This array specifies the number of cells per DE for index dimension 3
+!     for the exclusive region (center stagger location).  
+!     If not specified  then grid is 2D. Also, If the array has only one entry,
+!     then the dimension is undistributed. 
+! \item[{[connDim1]}] 
+!     Two element array describing the index dimension 1 connections.
+!      The first element represents the minimum end of dimension 1.
+!      The second element represents the minimum end of dimension 1.
+!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
+!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
+!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+! \item[{[connDim2]}] 
+!     Two element array describing the index dimension 2 connections.
+!      The first element represents the minimum end of dimension 2.
+!      The second element represents the minimum end of dimension 2.
+!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
+!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
+!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+! \item[{[connDim3]}] 
+!     Two element array describing the index dimension 3 connections.
+!      The first element represents the minimum end of dimension 3.
+!      The second element represents the minimum end of dimension 3.
+!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
+!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
+!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+! \item[{[indexflag]}]
+!      Flag that indicates how the DE-local indices are to be defined.
+! \item[{[coordCompDep1]}] 
+!     This array specifies the dependence of the first 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the first
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/1/). 
+! \item[{[coordCompDep2]}] 
+!     This array specifies the dependence of the second 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the second
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/2/). 
+! \item[{[coordCompDep3]}] 
+!     This array specifies the dependence of the third 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the third
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/3/). 
+! \item[{[haloDepth}]
+!       Sets the depth of the computational padding around the exclusive
+!       regions on each DE.  The actual value for any edge is the maximum
+!       between the halo and stagger location padding. If not specified 
+!       this is set to 0.
+! \item[{[petMap]}]
+!       Sets the mapping of pets to the created DEs. This 3D
+!       should be of size size(countsPerDEDim1)xsize(countsPerDEDim2)x
+!       size(countsPerDEDim3). If countsPerDEDim3 isn't present, then
+!       the last dimension is of size 1.   
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+      end function ESMF_GridCreateShape
+
+
 
 
       end module ESMF_GridCreateMod
