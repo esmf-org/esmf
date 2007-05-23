@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.8 2007/05/23 23:06:44 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.9 2007/05/23 23:34:39 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.8 2007/05/23 23:06:44 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.9 2007/05/23 23:34:39 oehmke Exp $'
 
 
 
@@ -630,55 +630,6 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridLocalTileGetCoord"
-!BOP
-! !IROUTINE: ESMF_GridLocalTileGetCoord - Gets  the coordinates of a particular location in a tile.
-
-! !INTERFACE:
-      subroutine ESMF_GridLocalTileGetCoord(grid, staggerLoc, tile, localDE, &
-                            indices, coords, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
-      integer, intent(in),optional :: tile
-      integer, intent(in),optional :: localDE
-      integer, intent(in) :: indices(:)
-      real, intent(out) :: coords(:)
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Given stagger location, tile and a set of indices, returns the coordinates
-!     of the position represented by the indices in the tile. This subroutine would
-!     need to be type overloaded for the coordinates. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{staggerLoc}]
-!          The stagger location from which to get the arrays. If not specified, 
-!          defaults to the center. 
-!     \item[{[tile]}]
-!          The grid tile to get the information for. If not set, defaults to 
-!          the first tile. 
-!     \item[{[localDE]}]
-!          The local DE to get the information for. If not set, defaults to 
-!          the first DE on this processor. 
-!     \item[{indices}]
-!           Integer array containing the index coordinates in the tile for which to 
-!           calculate the coordinates.
-!     \item[{coords}]
-!           Coordinates returned by subroutine. 
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end subroutine ESMF_GridLocalTileGetCoord
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridHalo"
 !BOP
 ! !IROUTINE: ESMF_GridHalo - Do a halo operation on the coordinate arrays in a grid.
@@ -723,6 +674,8 @@
 
 
       end function ESMF_GridHalo
+
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -799,7 +752,6 @@
 ! !REQUIREMENTS:  TODO
 
       end function ESMF_GridLocalTileCalcBnds
-
 
 
 !------------------------------------------------------------------------------
@@ -896,6 +848,56 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridLocalTileGetCoord"
 !BOP
+! !IROUTINE: ESMF_GridLocalTileGetCoord - Gets  the coordinates of a particular location in a tile.
+
+! !INTERFACE:
+      subroutine ESMF_GridLocalTileGetCoord(grid, staggerLoc, tile, localDE, &
+                            indices, coords, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
+      integer, intent(in),optional :: tile
+      integer, intent(in),optional :: localDE
+      integer, intent(in) :: indices(:)
+      real, intent(out) :: coords(:)
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Given stagger location, tile and a set of indices, returns the coordinates
+!     of the position represented by the indices in the tile. This subroutine would
+!     need to be type overloaded for the coordinates. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{staggerLoc}]
+!          The stagger location from which to get the arrays. If not specified, 
+!          defaults to the center. 
+!     \item[{[tile]}]
+!          The grid tile to get the information for. If not set, defaults to 
+!          the first tile. 
+!     \item[{[localDE]}]
+!          The local DE to get the information for. If not set, defaults to 
+!          the first DE on this processor. 
+!     \item[{indices}]
+!           Integer array containing the index coordinates in the tile for which to 
+!           calculate the coordinates.
+!     \item[{coords}]
+!           Coordinates returned by subroutine. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+      end subroutine ESMF_GridLocalTileGetCoord
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLocalTileGetCoord"
+!BOP
 ! !IROUTINE: ESMF_GridLocalTileGetCoord - get the fortran data pointer for the piece of  a tile on this DE.
 
 ! !INTERFACE:
@@ -945,6 +947,57 @@
 ! !REQUIREMENTS:  TODO
 
       end subroutine ESMF_GridLocalTileGetCoord
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLocalTileSetCoord"
+!BOP
+! !IROUTINE: ESMF_GridLocalTileSetCoord - Sets  the coordinates of a particular location in a tile.
+
+! !INTERFACE:
+      subroutine ESMF_GridLocalTileSetCoord(grid, staggerLoc, tile, localDE, &
+                            indices, coords, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
+      integer, intent(in),optional :: tile
+      integer, intent(in),optional :: localDE
+      integer, intent(in) :: indices(:)
+      real, intent(in) :: coords(:)
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Given a stagger location, tile and a set of indices, sets the coordinates
+!     of the position represented by the indices in the tile to the value in coords.
+!     This subroutine would need to be type overloaded for the coordinates. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{staggerLoc}]
+!          The stagger location from which to get the arrays. If not specified, 
+!          defaults to the center. 
+!     \item[{[tile]}]
+!          The grid tile to get the information for. If not set, defaults to 
+!          the first tile. 
+!     \item[{[localDE]}]
+!          The local DE to get the information for. If not set, defaults to 
+!          the first DE on this processor. 
+!     \item[{indices}]
+!           Integer array containing the index coordinates in the tile for which to 
+!           calculate the coordinates.
+!     \item[{coords}]
+!           The location described by the indices will be set to {\it coords} . 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+      end subroutine ESMF_GridLocalTileSetCoord
 
 
 !------------------------------------------------------------------------------
@@ -1003,56 +1056,6 @@ piece of tile on our processor from a fortran array.
 
       end subroutine ESMF_GridLocalTileSetCoord
 
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridLocalTileSetCoord"
-!BOP
-! !IROUTINE: ESMF_GridLocalTileSetCoord - Sets  the coordinates of a particular location in a tile.
-
-! !INTERFACE:
-      subroutine ESMF_GridLocalTileSetCoord(grid, staggerLoc, tile, localDE, &
-                            indices, coords, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
-      integer, intent(in),optional :: tile
-      integer, intent(in),optional :: localDE
-      integer, intent(in) :: indices(:)
-      real, intent(in) :: coords(:)
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Given a stagger location, tile and a set of indices, sets the coordinates
-!     of the position represented by the indices in the tile to the value in coords.
-!     This subroutine would need to be type overloaded for the coordinates. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{staggerLoc}]
-!          The stagger location from which to get the arrays. If not specified, 
-!          defaults to the center. 
-!     \item[{[tile]}]
-!          The grid tile to get the information for. If not set, defaults to 
-!          the first tile. 
-!     \item[{[localDE]}]
-!          The local DE to get the information for. If not set, defaults to 
-!          the first DE on this processor. 
-!     \item[{indices}]
-!           Integer array containing the index coordinates in the tile for which to 
-!           calculate the coordinates.
-!     \item[{coords}]
-!           The location described by the indices will be set to {\it coords} . 
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end subroutine ESMF_GridLocalTileSetCoord
 
 
 !------------------------------------------------------------------------------
