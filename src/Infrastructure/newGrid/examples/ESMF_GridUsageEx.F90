@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.12 2007/05/23 17:32:14 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.13 2007/05/23 17:51:58 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -44,8 +44,9 @@ program ESMF_GridCreateEx
 ! The following is a simple example of creating a grid and
 ! loading in a set of coordinates. This code creates a 10x20
 ! rectilinear 2D grid with the coordinates varying from (10,10) to (100,200).
-! The grid is partitioned in the first dimension into two pieces both
-! of size 5. The grid is partitioned in the second dimension into 3
+! The grid is partitioned using regular distribution. In the first dimension
+! it is divided into two pieces both
+! of size 5. The grid is divided in the second dimension into 3
 ! pieces of size 7,7 and 6.  The grid is created with
 ! global indices to make it easier to generate the coordinates. 
 ! After grid creation the local bounds and f90 arrays are retrieved
@@ -95,23 +96,16 @@ program ESMF_GridCreateEx
 !\subsubsection{Creation: Shapes}
 !
 ! There are several methods of creating an ESMF Grid. The first
-! set of these are designed to easily allow the user to create
-! the most common grids. There are specific creates for 
-! several common shapes. The method {\tt ESMF\_GridCreateShape}
-! creates a rectangular grid. The method 
-! {\tt ESMF\_GridCreateShapeSphere} creates a Grid with a pole
-! at either end of the first dimension and periodic in the second.
-! The method {\tt ESMF\_GridCreateShapeTripole} creates a grid
-! with a bipole at one end of the first dimension and 
-! a pole at the other. The tripole grid is also periodic
-! in the second dimension. The method {ESMF\_GridCreateShape}
-! allows the user to specify variations on the first three
-! grids, by allowing the user to specify connections
-! in each of the three dimensions. Despite the fact that
-! these subroutines create different shapes, the majority of
-! their arguments are the same. At first we explain the
-! common arguments, the shape specific arguments are covered
-! at the end. 
+! of these is designed to easily allow the user to create
+! the most common grids. The method {\tt ESMF\_GridCreateShape}
+! creates a single patch logically rectangular grid and 
+! allows the user to specify the connections for each 
+! edge in each of three dimensions. By employing this method 
+! the user should be able to create most of the common grid shapes,
+! for example, rectangle, bipole sphere, tripole sphere, etc. 
+! For more complex shapes the user may define them via distgrid
+! and create them using the more general grid create, see Section~\ref{sec:usage:adv:create}
+! for a description of this process.
 !
 !\subsubsection{Creation: Size, Shape, and Distribution of Index Space}
 !
@@ -292,12 +286,12 @@ program ESMF_GridCreateEx
 !BOE
 !
 !\subsubsection{Creation: Tile Edge Connections}
-!
-! The {\tt ESMF\_GridCreateShape} command has three specific arguments
-! {\tt connDim1}, {\tt connDim2}, and {\tt connDim3} of parameter type
-! {\tt ESMF\_GridConn}. These can be used
-! to setup different types of connections at the ends of each dimension.
-! Each of these parameters is a two element array. See section 
+! The {\tt ESMF\_GridCreateShape} command has three arguments
+! specifying edge connections. The three 
+! {\tt connDim1}, {\tt connDim2}, and {\tt connDim3} are all of type
+! {\tt ESMF\_GridConn}, and can be used
+! to set different types of connections at the ends of each dimension.
+! Each of these arguments is a two element array. See section 
 ! \ref{sec:opt:gridconn} for a list of valid values of {\tt ESMF\_GridConn}.
 ! The following constructs a sphere with a bipole at either end of dimension 2.
 !EOE
@@ -485,6 +479,26 @@ program ESMF_GridCreateEx
 !EOC
 
 !BOE
+!\subsubsection{Grid Generate}
+!
+! The current ESMF grid interface provides some automatic production
+! of coordinate values. In the future there are plans to add more, but 
+! for now the user may generate coordinates uniformly distributed across
+! an index space. To do this the user specifies the coordinate values
+! which coorespond to the minimum indices {\tt begCoord} and the 
+! maximum indices {\tt endCoord}. The method then calculates the intermediate
+! coordinates and loads them into the appropriate places in the Grid
+! coordinate arrays. The following fills a 3D Grid with coordinates from 
+! (11.0,10.0,100.0) to (100.0,100.0,0.0)
+!
+!EOE
+
+!BOC
+   call ESMF_GridGenCoordsUni(grid, begCoord=(/11.0,10.0,100.0/), &
+          endCoord=(/100.0,100.0,0.0/), rc=rc)
+!EOC
+
+!BOE
 !\subsubsection{Grid Halo}
 !
 ! The Grid halo operation allows users to update the
@@ -515,6 +529,46 @@ program ESMF_GridCreateEx
    call ESMF_GridSetAttribute(grid, "Size", 10, rc=rc)
 !EOC
 
+
+
+!BOE
+! \subsubsection{Example: Creation of Block Distributed 3D Uniform Grid}
+!
+! This example illustrates the creation of a 100x100x100  3D Grid distributed across
+! 5 processors in each dimension. The coordinates in the Grid are uniformly distributed
+! between (0.0, 0.0, 0.0) and (200.0, 200.0, 200.0).
+!
+!EOE
+
+!BOC
+   ! Use ESMF framework module
+   use ESMF_Mod
+   implicit none
+
+   ! Local variables  
+   integer:: rc, finalrc
+   type(ESMF_Grid) :: grid
+!EOC         
+
+      finalrc = ESMF_SUCCESS
+      call ESMF_Initialize(vm=vm, rc=rc)
+      call ESMF_VMGet(vm, localPet=myPet, petCount=npets, rc=rc)
+
+!BOC
+   ! Create the Grid.
+   grid=ESMF_GridCreateShape(maxIndex=(/100,100,100/), blkDecomp=(/5,5,5/), rc=rc)   
+
+   ! Add a center stagger location 
+   call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+
+   ! Put in the coordinates
+   call ESMF_GridGenCoordsUni(grid, begCoord=(/0.0,0.0,0.0/), &
+          endCoord=(/200.0, 200.0, 200.0/), rc=rc)
+ 
+   ! We now have all our coordinates so commit as regrid ready.
+   call ESMF_GridCommit(grid, ESMF_GRIDSTATUS_REGRID_READY, rc=rc)
+
+!EOC
 
 
 !BOE
@@ -760,6 +814,8 @@ program ESMF_GridCreateEx
 
 
 
+
+
 !BOE
 !\subsubsection{Creation: Advanced}
 !
@@ -781,7 +837,7 @@ program ESMF_GridCreateEx
 ! Arrays, or the Grid can be created containing copies of the orignal arrays. 
 !
 !
-!\subsubsection{Creation: Advanced: Size, Shape, and Distribution}
+!\subsubsection{Creation: Advanced: Size, Shape, and Distribution}~\label{sec:usage:adv:create}
 !
 ! Typically the first step in creating a Grid is to describe its
 ! size, topology, and distribution. In the ESMF advanced create

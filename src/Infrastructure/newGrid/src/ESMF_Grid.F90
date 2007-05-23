@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.5 2007/05/21 23:27:14 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.6 2007/05/23 17:51:58 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.5 2007/05/21 23:27:14 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.6 2007/05/23 17:51:58 oehmke Exp $'
 
 
 
@@ -1139,19 +1139,16 @@ piece of tile on our processor from a fortran array.
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridLocalTileSetData"
+#define ESMF_METHOD "ESMF_GridGenCoordUni"
 !BOP
-! !IROUTINE: ESMF_GridLocalTileSetData - set the coordinate data for the particular
-piece of tile on our processor from a fortran array.
+! !IROUTINE: ESMF_GridGenCoordUni - fill coordinate arrays with a uniform spread of values.
 
 ! !INTERFACE:
-      subroutine ESMF_GridGenCoordsUniform(grid, tile, staggerLoc, &
-                                            begCoord, endCoord, rc)
+      subroutine ESMF_GridGenCoordsUni(grid, tile, begCoord, endCoord, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       integer, intent(in),optional :: tile
-      type (ESMF_StaggerLoc), intent(in),optional :: staggerLoc
       real, intent(in), optional :: begCoord(:), endCoord(:)
       integer, intent(out), optional :: rc
 !
@@ -1171,9 +1168,6 @@ piece of tile on our processor from a fortran array.
 !     \item[{[tile]}]
 !          The grid tile to set the information for. If not set, defaults to 
 !          the first tile. 
-!     \item[{staggerLoc}]
-!          The stagger location to set the information for. If not set, defaults
-!          to center. 
 !     \item[{begCoord}]
 !          Array the same rank as the grid. These values correspond to 
 !          the minimum end of the index ranges, and is the starting value
