@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.21 2007/05/23 21:51:14 oehmke Exp $
+% $Id: Grid_desc.tex,v 1.22 2007/05/24 05:11:41 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -29,9 +29,9 @@ Support for 2D, 3D, and higher dimension grids.\\
 Distribution of grids across computational resources for parallel
 operations - users set which grid dimensions are distributed.\\
 Grids can be created already distributed, so that no single
-resource needs global information in the process.\\
-Options to define periodicity and other connectivities implicitly via
-shape shortcuts or specify them explicitly.\\ 
+resource needs global information during the creation process.\\
+Options to define periodicity and other edge connectivities either 
+explicitly or implicitly via shape shortcuts.\\ 
 Options for users to define grid coordinates themselves or call
 prefabricated coordinate generation routines for standard grids.\\
 Options for incremental construction of grids.\\
@@ -61,9 +61,9 @@ have been warped; for example, to place a pole over a land mass so that it
 does not affect the computations performed on an ocean model grid.  Figure
 \ref{fig:LogRectGrids} shows examples of each type of grid.
 
-All of these logically rectangular grid types can be combined through edge
-connections to form a mosaic.  Cubed sphere and yin-yang grids, shown in 
-Figure {not done yet} are examples of mosaic grids.
+Any of these logically rectangular grid types can be combined through edge
+connections to form a mosaic.  Cubed sphere and yin-yang grids are examples
+of mosaic grids.
  
 \begin{figure}
 \scalebox{0.9}{\includegraphics{LogRectGrids}}
@@ -79,33 +79,34 @@ Grid is constructed of one or more logically rectangular {\bf Tiles}.
 A Tile will usually have some physical significance (e.g. the region
 of the world covered by one face of a cubed sphere grid).
 
-The piece of a Tile that resides on one DE is called a {\bf LocalTile}.
-For example, the six faces of a cubed sphere grid are each Tiles, and
-each Tile can be divided across DEs into many LocalTiles. 
+The piece of a Tile that resides on one DE (for simple cases, a DE
+can be thought of as a processor - see section on the DELayout)
+is called a {\bf LocalTile}.  For example, the six faces of a cubed
+sphere grid are each Tiles, and each Tile can be divided across DEs
+into many LocalTiles. 
 
-Every ESMF Grid contains a DistGrid object, which defines the index space,
-topology, distribution, and connectivities for the grid.  It enables
+Every ESMF Grid contains a DistGrid object, which defines the Grid's
+index space, topology, distribution, and connectivities.  It enables
 the user to define the complex edge relationships of tripole and other
 grids.  The DistGrid can be created explicitly and passed into a Grid
 creation routine, or it can be created implicitly if the user takes
-a Grid creation shortcut.
+a Grid creation shortcut.  These are described in subsequent
+sections.
 
 \subsubsection{Shortcuts for Shape Specification and Periodicity}
 \label{sec:ShapeShortcut}
-ESMF has shortcuts for creation of standard Grid {\bf shapes} up
+ESMF has shortcuts for the creation of standard Grid {\bf shapes} up
 to 3D.  In many cases, these enable the user to bypass the step of creating 
 a DistGrid before creating the Grid.  The basic call is 
-ESMF\_GridCreateShape().  With this call, the user can specify for
-each dimension whether it is periodic, is not periodic, is a pole, or
-is a bipole.
+{\tt ESMF\_GridCreateShape()}.  With this call, the user can specify for
+each dimension whether there is no connection, it is periodic, it
+is a pole, or it is a bipole.  Connectivities are specified using the
+ESMF\_GridConn parameter, which has values such as ESMF\_GRIDCONN\_PERIODIC.
 
-The table below shows how standard shapes can be created
-using this call.  Connectivities are specified using the
-ESMF\_GridConn parameter.  Note that the dimensions
-the connections are on is arbitrary. For example, putting the
-settings for specifying a sphere into {\tt connDim2} and
-{\tt connDim3} instead would still result in a sphere, but
-oriented along a different axis.
+The table below shows the ESMF\_GridConn settings used to create 
+standard shapes using the ESMF\_GridCreateShape() call.  Two values
+are specified for each dimension, one for the low end and one for 
+the high end of its index values.
 
 \medskip
 \begin{tabular}{|l|c|c||c|c||}
@@ -120,6 +121,7 @@ oriented along a different axis.
 \hline
 \hline
 \end{tabular}
+\medskip
 
 If the user's grid shape is too complex for an ESMF shortcut routine,
 or involves more than three dimensions, a DistGrid can be created
@@ -128,9 +130,8 @@ into a Grid create call.
 
 \subsubsection{Shortcuts for Specification of Grid Distribution}\label{sec:desc:dist}
 
-The shortcuts for creating standard Grid shapes have options
-for data distribution (also referred to as decomposition).  The
-user specifies which dimensions 
+ESMF Grids have several options for data distribution (also referred to
+as decomposition).  The user specifies which dimensions 
 are to be distributed through a coordinate dependency (coordDep)
 argument.
 
@@ -162,13 +163,13 @@ according to the information needed for the coordinate type.
 Uniform grids are specified with coordinate corner
 points, rectilinear grids with coordinate locations for each dimension,
 and curvilinear grids with coordinates for each grid point.  Hybrid
-grids - for example, a curvilinear horizontal grid with regular spacing
+grids - for example, a curvilinear horizontal grid with uniform spacing
 in the vertical dimension - can be specified as well.  Each of these
 coordinate types can be set for each of the standard grid shapes
 described in section \ref{sec:ShapeShortcut}.  
 
-The table shows how examples of common single Tile grids fall 
-into this shape and coordinate type taxonomy.  Note that any
+The table below shows how examples of common single Tile grids fall 
+into this shape and coordinate taxonomy.  Note that any
 of the grids in the table can have a regular or arbitrary distribution.
 
 \medskip
@@ -178,7 +179,7 @@ of the grids in the table can have a regular or arbitrary distribution.
 \hline
 {\bf Sphere} & Global uniform lat-lon grid & Gaussian grid & Displaced pole grid \\
 \hline
-{\bf Box} & Regional uniform lat-lon grid & Gaussian grid section & Mercator grid \\
+{\bf Rectangle} & Regional uniform lat-lon grid & Gaussian grid section & Mercator grid \\
 \hline
 \end{tabular}
 
@@ -189,8 +190,7 @@ first way is for the user to {\bf set} the coordinates.  The second
 way is to take a shortcut and have the framework {\bf generate}
 the coordinates.  
 
-The only ESMF generation routine now available is for Box-shaped
-uniform grids.
+The only ESMF generation routine currently available is for uniform grids.
 
 See Section~\ref{sec:usage:coordstore} for more description and examples of
 setting Tile coordinates.
@@ -202,12 +202,12 @@ quantities at different locations within a grid cell. This {\bf staggering}
 of the physical variables on the mesh is introduced so that the difference
 of a field is naturally defined at the location of another variable. 
 
-The ESMF Grid class supports a wide variety of stagger locations (including
-those sufficient to specify any of the standard Arakawa staggers). The 
+The ESMF Grid class supports a wide variety of stagger locations, including
+those sufficient to specify any of the standard Arakawa staggers. The 
 Grid supports staggers located at cell centers, corners, edges, 
-faces, and higher dimensional elements. The user may specify
+faces, and in 3D and higher dimensions. The user may specify
 common stagger locations using predefined values, or may construct
-custom ones for cases which the predefines don't cover.
+custom ones for cases that the predefined values don't cover.
 
 As a default the ESMF Grid class provides symmetric staggering, so
 that cell centers are enclosed by cell perimeter (e.g. corner) 
@@ -230,9 +230,9 @@ stage, the Grid has a specific topology and distribution, but
 empty coordinate arrays.  The Grid can be used as the basis for
 allocating a Field.
 \item Specifying the Grid coordinates and any other information
-required for regridding (this can vary depending on the 
-particular regridding method).  At the completion of this
-stage, the Grid can be used in a regridding method.
+required for regridding (this can vary depending on the particular
+regridding method).  At the completion of this stage, the Grid can
+be used in a regridding operation.
 \end{enumerate}
 There are shortcut methods in ESMF for both stages.
 
@@ -240,16 +240,16 @@ Each stage has at least one ESMF call, and depending on
 whether shortcuts are used or not, may have more.
 This gives the user the opportunity to trade off the 
 ease of using a prefabricated grid with the flexibility 
-of specifying details about the grid.  Incremental
+of building a highly customized grid.  Incremental
 construction can also be useful when distributing a grid object
-before setting coordinates or when multiple components
+before setting its coordinates, or when multiple components
 contribute to the definition of a grid. 
 
 \subsubsection{Options for Grid Creation}
 
 The Grid class uses create, set or generate, and 
-commit calls during grid creation.  The following chart
-shows typical sequences.
+commit calls during grid creation.  Commit calls indicate
+that the grid has achieved states of completion or readiness.
 
 There are two simple rules for when commit calls are required:
 \begin{enumerate}
@@ -259,6 +259,10 @@ Grid creation.
 \item An ESMF\_GridCommit() call with an ESMF\_GRIDSTATUS\_REGRID\_READY
 argument is required before using any ESMF Grid in a regridding call.
 \end{enumerate}
+
+The following chart shows typical creation calls and 
+sequences.  Selected arguments are shown where helpful
+to understanding.
 
 \medskip
 \begin{tabular}{|p{2.6in}|p{1in}|p{1in}|p{1.4in}|}
@@ -270,36 +274,35 @@ Command sequence & Missing & Function & ESMF\_GRIDSTATUS\_ \\
 ESMF\_GridCreateEmpty() 
 & Topology information and coordinates, other options undefined
 & A Grid object shell is allocated but space for 
-internal contents is not
+internal objects is not
 & NOT\_READY \\
 \hline
-ESMF\_GridCreate()\newline
+ESMF\_GridCreate(distGrid)\newline
 {\bf or} \newline
 ESMF\_GridCreateEmpty()\newline
-ESMF\_GridSet()\newline
-ESMF\_GridSet()\newline
+ESMF\_GridSet(distGrid)\newline
 ...\newline
 ESMF\_GridCommit(\newline
 \hspace{.1in} ESMF\_GRIDSTATUS\_SHAPE\_READY)\newline
-{\bf or shortcut method, e.g.} \newline
+{\bf or use a shortcut} \newline
 ESMF\_GridCreateShape()\newline
 & Space for coordinates is allocated but coordinate
 values are not set
 & Can be used as the basis for Field allocation
 & SHAPE\_READY\\
 \hline
-ESMF\_GridCreate()\newline
+ESMF\_GridCreate(distGrid)\newline
 ESMF\_GridSetCoordFromArray()\newline
 ESMF\_GridCommit(\newline
 \hspace{.1in} ESMF\_GRIDSTATUS\_REGRID\_READY)\newline
 {\bf or} \newline 
-ESMF\_GridCreate()\newline
-ESMF\_GridGetLocalTile(localTile)\newline
+ESMF\_GridCreate(distGrid)\newline
+ESMF\_GridLocalTileGet(localTile)\newline
 ... user fills in localTile coordinate values
 ESMF\_GridCommit(\newline
 \hspace{.1in} ESMF\_GRIDSTATUS\_REGRID\_READY)\newline
-{\bf or shortcut method, e.g.} \newline
-ESMF\_GridCreateShapeSphere()\newline
+{\bf or use a shortcut} \newline
+ESMF\_GridCreateShape()\newline
 ESMF\_GridGenCoordUni()\newline
 ESMF\_GridCommit(\newline
 ESMF\_GRIDSTATUS\_REGRID\_READY)
