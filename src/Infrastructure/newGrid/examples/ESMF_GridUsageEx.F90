@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.18 2007/05/23 23:06:44 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.19 2007/05/24 05:28:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -79,10 +79,10 @@ program ESMF_GridCreateEx
    call ESMF_GridLocalTileGet(grid2D, coordComp=2, &
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
 
-   ! Get pointers to the X coordinate component storage
+   ! Get pointers to the Y coordinate component storage
    call ESMF_GridLocalTileGetCoord(grid2D, coordComp=2, coordsY, rc=rc)
 
-   ! Calculate and set the X coordinates
+   ! Calculate and set the Y coordinates
    do i=lbnd(1),ubnd(1)
         coordsY(i) = i*10.0
    enddo
