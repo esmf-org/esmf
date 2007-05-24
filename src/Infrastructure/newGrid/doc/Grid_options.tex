@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.5 2007/05/23 17:32:14 cdeluca Exp $
+% $Id: Grid_options.tex,v 1.6 2007/05/24 22:25:43 oehmke Exp $
 
 \subsubsection{ESMF\_GridConn}\label{sec:opt:gridconn}
 {\sf DESCRIPTION:\\}
@@ -17,9 +17,12 @@ connection.
 
 \item [ESMF\_GRIDCONN\_PERIODIC] Periodic connection.
 
-\item [ESMF\_GRIDCONN\_POLE] Pole.
+\item [ESMF\_GRIDCONN\_POLE] This edge is connected to itself. Given that the edge
+is n elements long, then element i is connected to element i+n/2.
 
-\item [ESMF\_GRIDCONN\_BIPOLE] Bipole connection.
+\item [ESMF\_GRIDCONN\_BIPOLE] This edge is connected to itself. Given that the edge
+is n elements long, element i is connected to element n-i-1.
+
 \end{description}
 
 \subsubsection{ESMF\_GridStatus}\label{sec:opt:gridstatus}
