@@ -379,7 +379,7 @@
     ! arguments
     character(len=1), intent(in   ) :: lstring
     integer,          intent(in   ) :: sloc
-    integer,          intent(  out) :: localrc
+    integer,          intent(inout) :: localrc
 
     ! local variables
     integer :: ntemp
@@ -416,7 +416,7 @@
     !------------------------------------------------------------------------
 
     ! arguments
-    character(len=*), intent(in   ) :: lstring
+    character(len=ESMF_MAXSTR), intent(in   ) :: lstring
     integer,          intent(in   ) :: MemBeg, MemEnd
     integer,          intent(in   ) :: MemRank
     integer,          intent(  out) :: MemTopology
@@ -486,7 +486,7 @@
     !------------------------------------------------------------------------
 
     ! arguments
-    character(len=*), intent(in   ) :: lstring
+    character(len=ESMF_MAXSTR), intent(in   ) :: lstring
     integer,          intent(in   ) :: MemBeg, MemEnd
     integer,          intent(  out) :: localrc
 
@@ -524,7 +524,7 @@
     !------------------------------------------------------------------------
 
     ! arguments
-    character(len=*), intent(in   ) :: lstring
+    character(len=ESMF_MAXSTR), intent(in   ) :: lstring
     integer,          intent(in   ) :: MemBeg, MemEnd
     integer,          intent(in   ) :: MemRank
     integer,          intent(  out) :: MemTopology
@@ -594,7 +594,7 @@
     !------------------------------------------------------------------------
 
     ! arguments
-    character(len=*), intent(in   ) :: lstring
+    character(len=ESMF_MAXSTR), intent(in   ) :: lstring
     integer,          intent(in   ) :: MemBeg, MemEnd
     integer,          intent(  out) :: localrc
 
@@ -633,7 +633,7 @@
     !------------------------------------------------------------------------
 
     ! arguments
-    character(len=*), intent(in   ) :: lstring
+    character(len=ESMF_MAXSTR), intent(in   ) :: lstring
     integer,          intent(in   ) :: MemCount
     integer,          intent(in   ) :: MemBeg, MemEnd
     integer,          intent(inout) :: MemLoc(:)
@@ -674,7 +674,7 @@
     !------------------------------------------------------------------------
 
     ! arguments
-    character(len=*), intent(in   ) :: lstring
+    character(len=ESMF_MAXSTR), intent(in   ) :: lstring
     integer,          intent(  out) :: SrcRank,DstRank
     integer,          intent(  out) :: SrcBeg, SrcEnd, DstBeg, DstEnd
     integer,          intent(  out) :: returnrc
@@ -761,7 +761,7 @@
     !------------------------------------------------------------------------
 
     ! arguments
-    character(len=*), intent(in   ) :: lstring
+    character(len=ESMF_MAXSTR), intent(in   ) :: lstring
     integer,          intent(  out) :: localrc
 
     ! local variables
@@ -907,7 +907,7 @@
 
     ! arguments
     character(len=*), intent(in   ) :: lstring
-    character(len=*), intent(inout) :: lname
+    character(len=ESMF_MAXSTR), intent(inout) :: lname
     integer,          intent(inout) :: tag
     integer,          intent(inout) :: location
     integer,          intent(  out) :: returnrc
