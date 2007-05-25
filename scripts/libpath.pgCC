@@ -2,4 +2,7 @@
 # this script expects the pgCC command (or a wrapper to pgCC, e.g. mpiCC)
 # and returns the path of the pgCC system libraries
 # tested for PGI compiler version: 5.2
-$1 -dryrun 2>&1 | grep "\/.pgCCrc" | head -1 | awk '{ print $3} '| sed 's/bin\/.pgCCrc/lib/g'
+LIBPATH=`$1 -dryrun 2>&1 | grep "\/\.pg" | head -1 | awk '{ print $3} '`
+LIBPATH=$LIBPATH"TermX"
+LIBPATH=`echo $LIBPATH | sed 's/bin\/\.pg.*TermX/lib/g'`
+echo $LIBPATH

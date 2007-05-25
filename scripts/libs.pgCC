@@ -2,5 +2,7 @@
 # this script expects the pgCC command (or a wrapper to pgCC, e.g. mpiCC)
 # and returns the required pgCC system libraries
 # tested for PGI compiler version: 5.2
-PGCCEXE=`$1 -dryrun 2>&1 | grep "\/.pgCCrc" | head -1 | awk '{ print $3} '| sed 's/.pgCCrc/pgCC/g'`
+PGCCEXE=`$1 -dryrun 2>&1 | grep "\/\.pg" | head -1 | awk '{ print $3} '`
+PGCCEXE=$PGCCEXE"TermX"
+PGCCEXE=`echo $PGCCEXE | sed 's/\.pg.*TermX/pgCC/g'`
 $PGCCEXE -show 2>&1 | grep DEFSTDLIBS | sed 's/DEFSTDLIBS//g' | sed 's/=//g'
