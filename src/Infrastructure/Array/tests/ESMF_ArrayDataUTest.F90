@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataUTest.F90,v 1.2 2007/04/10 03:35:53 theurich Exp $
+! $Id: ESMF_ArrayDataUTest.F90,v 1.3 2007/05/30 17:46:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayDataUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayDataUTest.F90,v 1.2 2007/04/10 03:35:53 theurich Exp $'
+    '$Id: ESMF_ArrayDataUTest.F90,v 1.3 2007/05/30 17:46:19 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -77,7 +77,7 @@ program ESMF_ArrayDataUTest
   enddo
 
   ! prepare DistGrid
-  distGrid = ESMF_DistGridCreate(minCorner=(/1/), maxCorner=(/7*petCount/), &
+  distGrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/7*petCount/), &
     rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 

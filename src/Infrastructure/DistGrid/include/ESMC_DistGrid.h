@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.14 2007/04/28 04:08:48 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.15 2007/05/30 17:46:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -56,8 +56,8 @@ class ESMC_DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int patchCount;               // number of patches in DistGrid
     int *patchCellCount;          // number of cells for each patch
     int *dePatchList;             // patch index per DE
-    int *minCorner;               // minCorner for all patches
-    int *maxCorner;               // maxCorner for all patches
+    int *minIndex;               // minIndex for all patches
+    int *maxIndex;               // maxIndex for all patches
     int *deCellCount;             // number of cells for each DE
     int *dimContigFlag;           // flag contiguous indices by DE per dim
     int *dimExtent;               // extent of indexList held by DE per dim
@@ -80,7 +80,7 @@ class ESMC_DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
   public:
     // Construct and Destruct
     int ESMC_DistGridConstruct(int dimCount, int patchCount, int *dePatchList,
-      int *minCorner, int *maxCorner, int *dimContigFlag, 
+      int *minIndex, int *maxIndex, int *dimContigFlag, 
       int *dimExtent, int **indexList, ESMC_Logical regDecompFlagArg,
       ESMC_InterfaceInt *connectionList, ESMC_DELayout *delayout, ESMC_VM *vm);
     int ESMC_DistGridDestruct(void);
@@ -96,8 +96,8 @@ class ESMC_DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
       ESMC_InterfaceInt *localIndexList=NULL);
     int ESMC_DistGridGetSequenceIndex(int de, int *index);
     int ESMC_DistGridGetSequenceDe(int seqindex);
-    int ESMC_DistGridGetPatchMinMaxCorner(int patch, int *minCorner, int
-      *maxCorner);
+    int ESMC_DistGridGetPatchMinmaxIndex(int patch, int *minIndex, int
+      *maxIndex);
     // IO and validation
     int ESMC_DistGridPrint(void);
     int ESMC_DistGridSerialize(char *buffer, int *length, int *offset);
@@ -106,28 +106,28 @@ class ESMC_DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
 
 
 // external methods:
-ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceInt *minCorner,
-  ESMC_InterfaceInt *maxCorner, ESMC_InterfaceInt *regDecomp, 
+ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceInt *minIndex,
+  ESMC_InterfaceInt *maxIndex, ESMC_InterfaceInt *regDecomp, 
   ESMC_DecompFlag *decompflag, int decompflagCount,
   ESMC_InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
   ESMC_InterfaceInt *connectionList,
   ESMC_InterfaceInt *connectionTransformList, 
   ESMC_DELayout *delayout=NULL, ESMC_VM *vm=NULL, int *rc=NULL);
-ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceInt *minCorner,
-  ESMC_InterfaceInt *maxCorner, ESMC_InterfaceInt *deBlockList, 
+ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceInt *minIndex,
+  ESMC_InterfaceInt *maxIndex, ESMC_InterfaceInt *deBlockList, 
   ESMC_InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
   ESMC_InterfaceInt *connectionList,
   ESMC_InterfaceInt *connectionTransformList, 
   ESMC_DELayout *delayout=NULL, ESMC_VM *vm=NULL, int *rc=NULL);
-ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceInt *minCorner,
-  ESMC_InterfaceInt *maxCorner, ESMC_InterfaceInt *regDecomp, 
+ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceInt *minIndex,
+  ESMC_InterfaceInt *maxIndex, ESMC_InterfaceInt *regDecomp, 
   ESMC_DecompFlag *decompflag, int decompflagCount,
   ESMC_InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
   ESMC_InterfaceInt *connectionList,
   ESMC_InterfaceInt *connectionTransformList, 
   int fastAxis, ESMC_VM *vm=NULL, int *rc=NULL);
-ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceInt *minCorner,
-  ESMC_InterfaceInt *maxCorner, ESMC_InterfaceInt *regDecomp, 
+ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceInt *minIndex,
+  ESMC_InterfaceInt *maxIndex, ESMC_InterfaceInt *regDecomp, 
   ESMC_DecompFlag *decompflag, int decompflagCount1, int decompflagCount2,
   ESMC_InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
   ESMC_InterfaceInt *connectionList,

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.7 2007/04/19 19:46:41 svasquez Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.8 2007/05/30 17:46:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.7 2007/04/19 19:46:41 svasquez Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.8 2007/05/30 17:46:19 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -94,7 +94,7 @@ program ESMF_ArrayCreateGetUTest
   ! preparations
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/15,23/), &
     regDecomp=(/2,2/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
@@ -137,7 +137,7 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "DistGrid create DistGrid Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  distgrid2 = ESMF_DistGridCreate(minCorner=(/1/), maxCorner=(/40/), rc=rc)
+  distgrid2 = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/40/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -163,7 +163,7 @@ program ESMF_ArrayCreateGetUTest
 
   !------------------------------------------------------------------------
   ! preparations
-  distgrid = ESMF_DistGridCreate(minCorner=(/1/), maxCorner=(/40/), rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/40/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
   !------------------------------------------------------------------------
@@ -201,7 +201,7 @@ program ESMF_ArrayCreateGetUTest
   
   !------------------------------------------------------------------------
   ! preparations
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/40,10/), rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/40,10/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
   !------------------------------------------------------------------------
@@ -239,7 +239,7 @@ program ESMF_ArrayCreateGetUTest
   
   !------------------------------------------------------------------------
   ! preparations
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1,1/), maxCorner=(/40,10,10/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1/), maxIndex=(/40,10,10/), &
     rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
@@ -271,8 +271,8 @@ program ESMF_ArrayCreateGetUTest
   
   !------------------------------------------------------------------------
   ! preparations
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1,1,1/), &
-    maxCorner=(/40,10,10,10/), rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1/), &
+    maxIndex=(/40,10,10,10/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
   !------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.4 2007/03/31 05:50:46 cdeluca Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.5 2007/05/30 17:46:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -130,11 +130,11 @@ program ESMF_ArrayFarrayEx
 !BOE
 ! In order to create an Array object a DistGrid must first be created that 
 ! describes the total index space and how it is decomposed and distributed.
-! In the simplest case only the {\tt minCorner} and {\tt maxCorner} of the 
+! In the simplest case only the {\tt minIndex} and {\tt maxIndex} of the 
 ! total space must be provided.
 !EOE
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/40,10/), rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/40,10/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
@@ -150,7 +150,7 @@ program ESMF_ArrayFarrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !call ESMF_ArrayPrint(array)
 !BOE
-! The 40 x 10 index space defined by the {\tt minCorner} and {\tt maxCorner} 
+! The 40 x 10 index space defined by the {\tt minIndex} and {\tt maxIndex} 
 ! arguments paired with the default decomposition will result in the following
 ! distributed Array.
 !

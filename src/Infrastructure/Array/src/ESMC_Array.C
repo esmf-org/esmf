@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.79 2007/05/08 23:39:59 theurich Exp $
+// $Id: ESMC_Array.C,v 1.80 2007/05/30 17:46:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMC_Array.C,v 1.79 2007/05/08 23:39:59 theurich Exp $";
+  static const char *const version = "$Id: ESMC_Array.C,v 1.80 2007/05/30 17:46:19 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2208,11 +2208,11 @@ int ESMC_Array::ESMC_ArrayScatter(
   }
 
   // check consistency of input information: shape = (typekind, rank, extents)
-  int *minCorner, *maxCorner;
-  minCorner = new int[dimCount];
-  maxCorner = new int[dimCount];
-  status = distgrid->ESMC_DistGridGetPatchMinMaxCorner(patch, minCorner,
-    maxCorner);
+  int *minIndex, *maxIndex;
+  minIndex = new int[dimCount];
+  maxIndex = new int[dimCount];
+  status = distgrid->ESMC_DistGridGetPatchMinmaxIndex(patch, minIndex,
+    maxIndex);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
     return localrc;
   if (localPet == rootPet){
@@ -2232,7 +2232,7 @@ int ESMC_Array::ESMC_ArrayScatter(
       if (j){
         // decomposed dimension
         --j;  // shift to basis 0
-        if (counts[i] != maxCorner[j] - minCorner[j] + 1){
+        if (counts[i] != maxIndex[j] - minIndex[j] + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", rc);
           return localrc;
@@ -2327,7 +2327,7 @@ int ESMC_Array::ESMC_ArrayScatter(
                 ESMF_ERR_PASSTHRU, rc)) return localrc;
               // shift basis 1 -> basis 0
               for (int k=0; k<dimExtent[de*dimCount+j]; k++)
-                indexList[jj][k] -= minCorner[j];
+                indexList[jj][k] -= minIndex[j];
               // clean-up
               delete indexListArg;
             }
@@ -2446,7 +2446,7 @@ int ESMC_Array::ESMC_ArrayScatter(
               ESMF_ERR_PASSTHRU, rc)) return localrc;
             // shift basis 1 -> basis 0
             for (int k=0; k<dimExtent[de*dimCount+j]; k++)
-              indexList[jj][k] -= minCorner[j];
+              indexList[jj][k] -= minIndex[j];
             // clean-up
             delete indexListArg;
             // send indexList of local DE to rootPet
@@ -2600,8 +2600,8 @@ int ESMC_Array::ESMC_ArrayScatter(
   } // i -> de
     
   // garbage collection
-  delete [] minCorner;
-  delete [] maxCorner;
+  delete [] minIndex;
+  delete [] maxIndex;
   delete [] recvBuffer;
   delete [] dePatchList;
   delete [] dimExtent;

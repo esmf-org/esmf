@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.4 2007/03/31 05:50:46 cdeluca Exp $
+! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.5 2007/05/30 17:46:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -72,7 +72,7 @@ program ESMF_ArrayFarrayHaloEx
 !
 !EOE
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/40,10/), rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/40,10/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE

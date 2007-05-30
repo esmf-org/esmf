@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.9 2007/04/02 23:00:33 theurich Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.10 2007/05/30 17:46:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -27,7 +27,7 @@ program ESMF_DistGridEx
   type(ESMF_DELayout):: delayout
   type(ESMF_DistGrid):: distgrid, distgrid3D, distgrid2D
   integer, allocatable:: dimExtent(:,:), indexList(:), regDecompDeCoord(:)
-  integer, allocatable:: minCorner(:,:), maxCorner(:,:), regDecomp(:,:)
+  integer, allocatable:: minIndex(:,:), maxIndex(:,:), regDecomp(:,:)
   integer, allocatable:: deBlockList(:,:,:), connectionList(:,:), connectionTransformList(:,:)
   integer, allocatable:: deNeighborList(:), deNeighborInterface(:,:)
   integer, allocatable:: localDeList(:), linkList(:,:)
@@ -54,7 +54,7 @@ program ESMF_DistGridEx
 !EOE
 
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=(/1/), maxCorner=(/1000/), rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/1000/), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !  call ESMF_DistGridPrint(distgrid, rc=rc)
@@ -81,7 +81,7 @@ program ESMF_DistGridEx
 !EOE
 
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !  call ESMF_DistGridPrint(distgrid, rc=rc)
@@ -110,7 +110,7 @@ program ESMF_DistGridEx
 !EOE
 
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -153,7 +153,7 @@ program ESMF_DistGridEx
 ! are 3 DEs along this index space axis.
 !EOE
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), decompflag=(/ESMF_DECOMP_DEFAULT,ESMF_DECOMP_RESTLAST/),&
     rc=rc)
 !EOC  
@@ -217,7 +217,7 @@ program ESMF_DistGridEx
 !EOE
 
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), decompflag=(/ESMF_DECOMP_CYCLIC,ESMF_DECOMP_RESTLAST/),&
     rc=rc)
 !EOC  
@@ -257,7 +257,7 @@ program ESMF_DistGridEx
 ! context. Assuming 6 PETs in the VM
 !EOE
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -315,7 +315,7 @@ program ESMF_DistGridEx
 ! indicate which axis should have faster communication characteristics:
 !EOE
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), fastAxis=1, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -332,7 +332,7 @@ program ESMF_DistGridEx
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), delayout=delayout, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -365,7 +365,7 @@ program ESMF_DistGridEx
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), deLabelList=(/0,3,1,4,2,5/), delayout=delayout, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -399,7 +399,7 @@ program ESMF_DistGridEx
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), delayout=delayout, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -460,7 +460,7 @@ program ESMF_DistGridEx
 !EOCI  
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOCI
-!  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/64,128/), &
+!  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/64,128/), &
 !    regDecomp=(/16,32/), delayout=delayout, rc=rc)
 !EOCI  
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -496,7 +496,7 @@ program ESMF_DistGridEx
 ! DELayout in the decomposition of the global domain according to
 !EOEI
 !BOCI
-!  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/64,128/), &
+!  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/64,128/), &
 !    regDecomp=(/nodeCount,32/), delayout=delayout, rc=rc)
 !EOCI
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -530,10 +530,10 @@ program ESMF_DistGridEx
 ! 
 !BOC
   allocate(deBlockList(2, 2, 6))  ! (dimCount, 3, deCount)
-  deBlockList(:,1,1) = (/1,1/)  ! minCorner
-  deBlockList(:,2,1) = (/3,2/)  ! maxCorner
-  deBlockList(:,1,2) = (/4,1/)  ! minCorner
-  deBlockList(:,2,2) = (/5,2/)  ! maxCorner
+  deBlockList(:,1,1) = (/1,1/)  ! minIndex
+  deBlockList(:,2,1) = (/3,2/)  ! maxIndex
+  deBlockList(:,1,2) = (/4,1/)  ! minIndex
+  deBlockList(:,2,2) = (/5,2/)  ! maxIndex
   deBlockList(:,1,3) = (/1,3/)
   deBlockList(:,2,3) = (/2,4/)
   deBlockList(:,1,4) = (/3,3/)
@@ -544,7 +544,7 @@ program ESMF_DistGridEx
   deBlockList(:,2,6) = (/5,5/)
 !EOC
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     deBlockList=deBlockList, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -604,7 +604,7 @@ program ESMF_DistGridEx
 ! The {\tt connectionList} can now be used to create a {\tt DistGrid} object with the
 ! desired boundary conditions.
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     deBlockList=deBlockList, connectionList=connectionList, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -658,17 +658,17 @@ program ESMF_DistGridEx
 ! \end{verbatim}
 !
 ! The first step in creating a patchwork global domain is to construct the
-! {\tt minCorner} and {\tt maxCorner} arrays.
+! {\tt minIndex} and {\tt maxIndex} arrays.
 !EOE
 !BOC
-  allocate(minCorner(2,3))    ! (dimCount, number of patches)
-  allocate(maxCorner(2,3))    ! (dimCount, number of patches)
-  minCorner(:,1) = (/11,1/)
-  maxCorner(:,1) = (/20,10/)
-  minCorner(:,2) = (/11,11/)
-  maxCorner(:,2) = (/20,20/)
-  minCorner(:,3) = (/1,11/)
-  maxCorner(:,3) = (/10,20/)
+  allocate(minIndex(2,3))    ! (dimCount, number of patches)
+  allocate(maxIndex(2,3))    ! (dimCount, number of patches)
+  minIndex(:,1) = (/11,1/)
+  maxIndex(:,1) = (/20,10/)
+  minIndex(:,2) = (/11,11/)
+  maxIndex(:,2) = (/20,20/)
+  minIndex(:,3) = (/1,11/)
+  maxIndex(:,3) = (/10,20/)
 !EOC  
 !BOE
 ! Next the regular decomposition for each patch is set up in the
@@ -685,7 +685,7 @@ program ESMF_DistGridEx
 ! Finally the DistGrid can be created by calling
 !EOE
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=minCorner, maxCorner=maxCorner, &
+  distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
     regDecomp=regDecomp, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -715,7 +715,7 @@ program ESMF_DistGridEx
   regDecomp(:,2) = (/1,3/)    ! 3 DEs
   regDecomp(:,3) = (/2,1/)    ! 2 DEs
   
-  distgrid = ESMF_DistGridCreate(minCorner=minCorner, maxCorner=maxCorner, &
+  distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
     regDecomp=regDecomp, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -759,7 +759,7 @@ program ESMF_DistGridEx
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 !!!! UNTIL FURTHER IMPLEMENTATION SKIP THE REST OF THE EXAMPLE >>>>>>>>>>>>>>>>>
-#ifdef NOSKIP   
+#ifdef NOSKIP
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -857,7 +857,7 @@ program ESMF_DistGridEx
 ! arguments in the following way:
 !EOEI
 !BOCI
-  distgrid = ESMF_DistGridCreate(minCorner=minCorner, maxCorner=maxCorner, &
+  distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
     regDecomp=regDecomp, connectionList=connectionList, &
     connectionTransformList=connectionTransformList, rc=rc)
 !EOCI  
@@ -954,7 +954,7 @@ program ESMF_DistGridEx
 ! now without explicit connections:
 !EOEI
 !BOCI
-  distgrid = ESMF_DistGridCreate(minCorner=minCorner, maxCorner=maxCorner, &
+  distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
     regDecomp=regDecomp, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
 !EOCI  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -989,7 +989,7 @@ program ESMF_DistGridEx
 !EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOCI
-  distgrid = ESMF_DistGridCreate(minCorner=minCorner, maxCorner=maxCorner, &
+  distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
     regDecomp=regDecomp, indexflag=ESMF_INDEX_GLOBAL, &
     connectionList=connectionList, rc=rc)
 !EOCI  
@@ -1024,8 +1024,8 @@ program ESMF_DistGridEx
 ! single LR domain to show the similarity to the 2D case.
 !EOEI
 !BOCI
-  distgrid = ESMF_DistGridCreate(minCorner=(/-10,1,5/), &
-    maxCorner=(/10,10,15/), regDecomp=(/3,2,2/), rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndex=(/-10,1,5/), &
+    maxIndex=(/10,10,15/), regDecomp=(/3,2,2/), rc=rc)
 !EOCI  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DistGridDestroy(distgrid, rc=rc)
@@ -1054,8 +1054,8 @@ program ESMF_DistGridEx
 ! is destroyed. The order of lines is critical!
 !
 !BOCI
-  distgrid3D = ESMF_DistGridCreate(minCorner=(/-10,1,5/), &
-    maxCorner=(/10,10,15/), regDecomp=(/3,2,2/), rc=rc)
+  distgrid3D = ESMF_DistGridCreate(minIndex=(/-10,1,5/), &
+    maxIndex=(/10,10,15/), regDecomp=(/3,2,2/), rc=rc)
 !EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOCI
@@ -1063,7 +1063,7 @@ program ESMF_DistGridEx
 !EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOCI
-  distgrid2D = ESMF_DistGridCreate(minCorner=(/1,5/), maxCorner=(/10,15/), &
+  distgrid2D = ESMF_DistGridCreate(minIndex=(/1,5/), maxIndex=(/10,15/), &
     regDecomp=(/2,2/), deLabelList=(/1, 4, 7, 10/), delayout=delayout, rc=rc)
 !EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1095,7 +1095,7 @@ program ESMF_DistGridEx
 ! demonstrate how this coordinate information can be obtained by querying 
 ! a DistGrid object.
 !EOEI
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOCI
@@ -1128,7 +1128,7 @@ program ESMF_DistGridEx
 ! explicitly specify the number of DEs during the create call.
 !EOEI
 !BOCI
-!  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
+!  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
 !    deCount=6, rc=rc)
 !EOCI
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1140,11 +1140,11 @@ program ESMF_DistGridEx
 ! {\tt connectionList} are available and behave as expected.
 !
 ! The above call can be extended to define a patchwork of domains. The following
-! call uses the {\tt minCorner} and {\tt maxCorner} variables defined in a
+! call uses the {\tt minIndex} and {\tt maxIndex} variables defined in a
 ! previous example.
 !EOEI
 !BOCI
-!  distgrid = ESMF_DistGridCreate(minCorner=minCorner, maxCorner=maxCorner, &
+!  distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
 !    deCount=6, rc=rc)
 !EOCI
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1173,7 +1173,7 @@ program ESMF_DistGridEx
 !EOCI
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOCI
-!  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
+!  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
 !    delayout=delayout, rc=rc)
 !EOCI
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1183,11 +1183,11 @@ program ESMF_DistGridEx
 ! is identical to the first example of the previous section.
 !
 ! The extension to the patchwork case is straight forward. Using the
-! {\tt delayout} from above and the previously defined {\tt minCorner} 
-! and {\tt maxCorner} variables the corresponding example looks like this:
+! {\tt delayout} from above and the previously defined {\tt minIndex} 
+! and {\tt maxIndex} variables the corresponding example looks like this:
 !EOEI
 !BOCI 
-!  distgrid = ESMF_DistGridCreate(minCorner=minCorner, maxCorner=maxCorner, &
+!  distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
 !    delayout=delayout, rc=rc)
 !EOCI
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1195,7 +1195,7 @@ program ESMF_DistGridEx
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !  call ESMF_DELayoutDestroy(delayout, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!  deallocate(minCorner, maxCorner)
+!  deallocate(minIndex, maxIndex)
 
 !BOEI
 ! \subsubsection{Default DistGrid from DE-local patches}
@@ -1209,21 +1209,21 @@ program ESMF_DistGridEx
 ! domains.
 !EOEI
 !BOCI
-!  allocate(minCorner(2,3))    ! (dimCount, number of patches)
-!  allocate(maxCorner(2,3))    ! (dimCount, number of patches)
-!  minCorner(:,1) = (/1,2/)
-!  maxCorner(:,1) = (/5,5/)
-!  minCorner(:,2) = (/6,2/)
-!  maxCorner(:,2) = (/10,5/)
-!  minCorner(:,3) = (/1,6/)
-!  maxCorner(:,3) = (/10,8/)
-!  distgrid = ESMF_DistGridCreate(minCorner=minCorner, maxCorner=maxCorner, &
+!  allocate(minIndex(2,3))    ! (dimCount, number of patches)
+!  allocate(maxIndex(2,3))    ! (dimCount, number of patches)
+!  minIndex(:,1) = (/1,2/)
+!  maxIndex(:,1) = (/5,5/)
+!  minIndex(:,2) = (/6,2/)
+!  maxIndex(:,2) = (/10,5/)
+!  minIndex(:,3) = (/1,6/)
+!  maxIndex(:,3) = (/10,8/)
+!  distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
 !    rc=rc)
 !EOCI
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !  call ESMF_DistGridDestroy(distgrid, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!  deallocate(minCorner, maxCorner)
+!  deallocate(minIndex, maxIndex)
 !BOEI
 ! The resulting global domain decomposition into DEs looks like this:
 ! \begin{verbatim}

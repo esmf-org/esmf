@@ -1,4 +1,4 @@
-!$Id: ESMF_DistGrid.F90,v 1.13 2007/05/01 21:07:57 rosalind Exp $
+!$Id: ESMF_DistGrid.F90,v 1.14 2007/05/30 17:46:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.13 2007/05/01 21:07:57 rosalind Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.14 2007/05/30 17:46:20 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -184,13 +184,13 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
   
-  function ESMF_DistGridCreateRD(minCorner, maxCorner, regDecomp, &
+  function ESMF_DistGridCreateRD(minIndex, maxIndex, regDecomp, &
     decompflag, deLabelList, indexflag, connectionList, connectionTransformList, &
     delayout, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: minCorner(:)
-    integer,                      intent(in)            :: maxCorner(:)
+    integer,                      intent(in)            :: minIndex(:)
+    integer,                      intent(in)            :: maxIndex(:)
     integer, target,              intent(in), optional  :: regDecomp(:)
     type(ESMF_DecompFlag), target,intent(in), optional  :: decompflag(:)
     integer, target,              intent(in), optional  :: deLabelList(:)
@@ -213,9 +213,9 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[minCorner]
+!     \item[minIndex]
 !          Global coordinate tuple of the lower corner of the global domain.
-!     \item[maxCorner]
+!     \item[maxIndex]
 !          Global coordinate tuple of the upper corner of the global domain.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The default decomposition will
@@ -233,8 +233,8 @@ contains
 !          sequence is given by the column major order of the {\tt regDecomp}
 !          argument.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minCorner} and
-!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          Indicates whether the indices provided by the {\tt minIndex} and
+!          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
@@ -251,7 +251,7 @@ contains
 !          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
 !                index of the two connected patches respectively,
 !          \item {\tt positionVector} is the vector that points from patch A's
-!                minCorner to patch B's minCorner.
+!                minIndex to patch B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of patch A
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
@@ -301,8 +301,8 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: status     ! local error status
     type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt):: minCornerArg ! helper variable
-    type(ESMF_InterfaceInt):: maxCornerArg ! helper variable
+    type(ESMF_InterfaceInt):: minIndexArg ! helper variable
+    type(ESMF_InterfaceInt):: maxIndexArg ! helper variable
     type(ESMF_InterfaceInt):: regDecompArg ! helper variable
     type(ESMF_DecompFlag), target:: dummyDf(0)  ! used to satisfy the C interf.
     type(ESMF_DecompFlag), pointer::  opt_decompflag(:) ! optional arg helper
@@ -320,10 +320,10 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with (optional) array arguments
-    minCornerArg = ESMF_InterfaceIntCreate(minCorner, rc=status)
+    minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxCornerArg = ESMF_InterfaceIntCreate(maxCorner, rc=status)
+    maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     regDecompArg = ESMF_InterfaceIntCreate(regDecomp, rc=status)
@@ -352,17 +352,17 @@ contains
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateRD(distgrid, minCornerArg, maxCornerArg, &
+    call c_ESMC_DistGridCreateRD(distgrid, minIndexArg, maxIndexArg, &
       regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
       connectionListArg, connectionTransformListArg, delayout, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(minCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(minIndexArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(regDecompArg, rc=status)
@@ -400,13 +400,13 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
   
-  function ESMF_DistGridCreateDB(minCorner, maxCorner, deBlockList, &
+  function ESMF_DistGridCreateDB(minIndex, maxIndex, deBlockList, &
     deLabelList, indexflag, connectionList, connectionTransformList, delayout, &
     vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: minCorner(:)
-    integer,                      intent(in)            :: maxCorner(:)
+    integer,                      intent(in)            :: minIndex(:)
+    integer,                      intent(in)            :: maxIndex(:)
     integer,                      intent(in)            :: deBlockList(:,:,:)
     integer,                      intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
@@ -425,9 +425,9 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[minCorner]
+!     \item[minIndex]
 !          Global coordinate tuple of the lower corner of the global domain.
-!     \item[maxCorner]
+!     \item[maxIndex]
 !          Global coordinate tuple of the upper corner of the global domain.
 !     \item[deBlockList]
 !          List of DE-local LR blocks. The third index of {\tt deBlockList}
@@ -438,9 +438,9 @@ contains
 !          \begin{verbatim}
 !                   +---------------------------------------> 2nd index
 !                   |    1               2           
-!                   | 1  minCorner(1)    maxCorner(1)
-!                   | 2  minCorner(2)    maxCorner(2)
-!                   | .  minCorner(.)    maxCorner(.)
+!                   | 1  minIndex(1)    maxIndex(1)
+!                   | 2  minIndex(2)    maxIndex(2)
+!                   | .  minIndex(.)    maxIndex(.)
 !                   | .
 !                   v
 !                  1st index
@@ -452,8 +452,8 @@ contains
 !          sequence is given by the column major order of the {\tt regDecomp}
 !          argument.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minCorner} and
-!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          Indicates whether the indices provided by the {\tt minIndex} and
+!          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
@@ -470,7 +470,7 @@ contains
 !          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
 !                index of the two connected patches respectively,
 !          \item {\tt positionVector} is the vector that points from patch A's
-!                minCorner to patch B's minCorner.
+!                minIndex to patch B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of patch A
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
@@ -520,8 +520,8 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: status     ! local error status
     type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt):: minCornerArg ! helper variable
-    type(ESMF_InterfaceInt):: maxCornerArg ! helper variable
+    type(ESMF_InterfaceInt):: minIndexArg ! helper variable
+    type(ESMF_InterfaceInt):: maxIndexArg ! helper variable
     type(ESMF_InterfaceInt):: deBlockListArg ! helper variable
     type(ESMF_InterfaceInt):: deLabelListArg ! helper variable
     type(ESMF_InterfaceInt):: connectionListArg ! helper variable
@@ -536,10 +536,10 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with (optional) array arguments
-    minCornerArg = ESMF_InterfaceIntCreate(minCorner, rc=status)
+    minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxCornerArg = ESMF_InterfaceIntCreate(maxCorner, rc=status)
+    maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     deBlockListArg = ESMF_InterfaceIntCreate(farray3D=deBlockList, rc=status)
@@ -561,17 +561,17 @@ contains
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateDB(distgrid, minCornerArg, maxCornerArg, &
+    call c_ESMC_DistGridCreateDB(distgrid, minIndexArg, maxIndexArg, &
       deBlockListArg, deLabelListArg, indexflag, &
       connectionListArg, connectionTransformListArg, delayout, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(minCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(minIndexArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(deBlockListArg, rc=status)
@@ -608,13 +608,13 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateRDFA(minCorner, maxCorner, &
+  function ESMF_DistGridCreateRDFA(minIndex, maxIndex, &
     regDecomp, decompflag, deLabelList, indexflag, connectionList, &
     connectionTransformList, fastAxis, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: minCorner(:)
-    integer,                      intent(in)            :: maxCorner(:)
+    integer,                      intent(in)            :: minIndex(:)
+    integer,                      intent(in)            :: maxIndex(:)
     integer,                      intent(in), optional  :: regDecomp(:)
     type(ESMF_DecompFlag),target, intent(in), optional  :: decompflag(:)
     integer,                      intent(in), optional  :: deLabelList(:)
@@ -638,9 +638,9 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[minCorner]
+!     \item[minIndex]
 !          Global coordinate tuple of the lower corner of the global domain.
-!     \item[maxCorner]
+!     \item[maxIndex]
 !          Global coordinate tuple of the upper corner of the global domain.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The default decomposition will
@@ -658,8 +658,8 @@ contains
 !          sequence is given by the column major order of the {\tt regDecomp}
 !          argument.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minCorner} and
-!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          Indicates whether the indices provided by the {\tt minIndex} and
+!          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
@@ -676,7 +676,7 @@ contains
 !          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
 !                index of the two connected patches respectively,
 !          \item {\tt positionVector} is the vector that points from patch A's
-!                minCorner to patch B's minCorner.
+!                minIndex to patch B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of patch A
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
@@ -724,8 +724,8 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: status     ! local error status
     type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt):: minCornerArg ! helper variable
-    type(ESMF_InterfaceInt):: maxCornerArg ! helper variable
+    type(ESMF_InterfaceInt):: minIndexArg ! helper variable
+    type(ESMF_InterfaceInt):: maxIndexArg ! helper variable
     type(ESMF_InterfaceInt):: regDecompArg ! helper variable
     type(ESMF_DecompFlag), target:: dummyDf(0)  ! used to satisfy the C interf.
     type(ESMF_DecompFlag), pointer::  opt_decompflag(:) ! optional arg helper
@@ -742,10 +742,10 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with (optional) array arguments
-    minCornerArg = ESMF_InterfaceIntCreate(minCorner, rc=status)
+    minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxCornerArg = ESMF_InterfaceIntCreate(maxCorner, rc=status)
+    maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     regDecompArg = ESMF_InterfaceIntCreate(regDecomp, rc=status)
@@ -774,17 +774,17 @@ contains
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateRDFA(distgrid, minCornerArg, maxCornerArg, &
+    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
       regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
       connectionListArg, connectionTransformListArg, fastAxis, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(minCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(minIndexArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(regDecompArg, rc=status)
@@ -821,13 +821,13 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDBFA(minCorner, maxCorner, &
+  function ESMF_DistGridCreateDBFA(minIndex, maxIndex, &
     deBlockList, deLabelList, indexflag, connectionList, &
     connectionTransformList, fastAxis, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: minCorner(:)
-    integer,                      intent(in)            :: maxCorner(:)
+    integer,                      intent(in)            :: minIndex(:)
+    integer,                      intent(in)            :: maxIndex(:)
     integer,                      intent(in)            :: deBlockList(:,:,:)
     integer,                      intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
@@ -846,9 +846,9 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[minCorner]
+!     \item[minIndex]
 !          Global coordinate tuple of the lower corner of the global domain.
-!     \item[maxCorner]
+!     \item[maxIndex]
 !          Global coordinate tuple of the upper corner of the global domain.
 !     \item[deBlockList]
 !          List of DE-local LR blocks. The third index of {\tt deBlockList}
@@ -859,9 +859,9 @@ contains
 !          \begin{verbatim}
 !                   +---------------------------------------> 2nd index
 !                   |    1               2              3
-!                   | 1  minCorner(1)    maxCorner(1)   patchID
-!                   | 2  minCorner(2)    maxCorner(2)   (not used)
-!                   | .  minCorner(.)    maxCorner(.)   (not used)
+!                   | 1  minIndex(1)    maxIndex(1)   patchID
+!                   | 2  minIndex(2)    maxIndex(2)   (not used)
+!                   | .  minIndex(.)    maxIndex(.)   (not used)
 !                   | .
 !                   v
 !                  1st index
@@ -873,8 +873,8 @@ contains
 !          sequence is given by the column major order of the {\tt regDecomp}
 !          argument.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minCorner} and
-!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          Indicates whether the indices provided by the {\tt minIndex} and
+!          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
@@ -891,7 +891,7 @@ contains
 !          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
 !                index of the two connected patches respectively,
 !          \item {\tt positionVector} is the vector that points from patch A's
-!                minCorner to patch B's minCorner.
+!                minIndex to patch B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of patch A
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
@@ -982,13 +982,13 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateRDP(minCorner, maxCorner, regDecomp,&
+  function ESMF_DistGridCreateRDP(minIndex, maxIndex, regDecomp,&
     decompflag, deLabelList, indexflag, connectionList, connectionTransformList,&
     delayout, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: minCorner(:,:)
-    integer,                      intent(in)            :: maxCorner(:,:)
+    integer,                      intent(in)            :: minIndex(:,:)
+    integer,                      intent(in)            :: maxIndex(:,:)
     integer,                      intent(in), optional  :: regDecomp(:,:)
     type(ESMF_DecompFlag),target, intent(in), optional  :: decompflag(:,:)
     integer,                      intent(in), optional  :: deLabelList(:)
@@ -1014,11 +1014,11 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[minCorner]
+!     \item[minIndex]
 !          The first index provides the global coordinate tuple of the lower 
 !          corner of a global domain patch. The second index indicates the 
 !          patch number.
-!     \item[maxCorner]
+!     \item[maxIndex]
 !          The first index provides the global coordinate tuple of the upper
 !          corner of a global domain patch. The second index indicates the 
 !          patch number.
@@ -1040,8 +1040,8 @@ contains
 !          sequence is given by the column major order of the {\tt regDecomp}
 !          elements in the sequence as they appear following the patch index.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minCorner} and
-!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          Indicates whether the indices provided by the {\tt minIndex} and
+!          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
@@ -1058,7 +1058,7 @@ contains
 !          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
 !                index of the two connected patches respectively,
 !          \item {\tt positionVector} is the vector that points from patch A's
-!                minCorner to patch B's minCorner.
+!                minIndex to patch B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of patch A
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
@@ -1108,8 +1108,8 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: status     ! local error status
     type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt):: minCornerArg ! helper variable
-    type(ESMF_InterfaceInt):: maxCornerArg ! helper variable
+    type(ESMF_InterfaceInt):: minIndexArg ! helper variable
+    type(ESMF_InterfaceInt):: maxIndexArg ! helper variable
     type(ESMF_InterfaceInt):: regDecompArg ! helper variable
     type(ESMF_DecompFlag), target:: dummyDf(0,0)  ! used to satisfy the C interf.
     type(ESMF_DecompFlag), pointer::  opt_decompflag(:,:) ! optional arg helper
@@ -1128,10 +1128,10 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with (optional) array arguments
-    minCornerArg = ESMF_InterfaceIntCreate(farray2D=minCorner, rc=status)
+    minIndexArg = ESMF_InterfaceIntCreate(farray2D=minIndex, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxCornerArg = ESMF_InterfaceIntCreate(farray2D=maxCorner, rc=status)
+    maxIndexArg = ESMF_InterfaceIntCreate(farray2D=maxIndex, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     regDecompArg = ESMF_InterfaceIntCreate(farray2D=regDecomp, rc=status)
@@ -1162,18 +1162,18 @@ contains
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateRDP(distgrid, minCornerArg, &
-      maxCornerArg, regDecompArg, opt_decompflag, len1_decompflag, &
+    call c_ESMC_DistGridCreateRDP(distgrid, minIndexArg, &
+      maxIndexArg, regDecompArg, opt_decompflag, len1_decompflag, &
       len2_decompflag, deLabelListArg, indexflag, &
       connectionListArg, connectionTransformListArg, delayout, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(minCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(minIndexArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(regDecompArg, rc=status)
@@ -1210,13 +1210,13 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDBP(minCorner, maxCorner, &
+  function ESMF_DistGridCreateDBP(minIndex, maxIndex, &
     deBlockList, deLabelList, indexflag, connectionList, &
     connectionTransformList, delayout, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: minCorner(:,:)
-    integer,                      intent(in)            :: maxCorner(:,:)
+    integer,                      intent(in)            :: minIndex(:,:)
+    integer,                      intent(in)            :: maxIndex(:,:)
     integer,                      intent(in)            :: deBlockList(:,:,:)
     integer,                      intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
@@ -1241,11 +1241,11 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[minCorner]
+!     \item[minIndex]
 !          The first index provides the global coordinate tuple of the lower 
 !          corner of a global domain patch. The second index indicates the 
 !          patch number.
-!     \item[maxCorner]
+!     \item[maxIndex]
 !          The first index provides the global coordinate tuple of the upper
 !          corner of a global domain patch. The second index indicates the 
 !          patch number.
@@ -1258,9 +1258,9 @@ contains
 !          \begin{verbatim}
 !                   +---------------------------------------> 2nd index
 !                   |    1               2              3
-!                   | 1  minCorner(1)    maxCorner(1)   patchID
-!                   | 2  minCorner(2)    maxCorner(2)   (not used)
-!                   | .  minCorner(.)    maxCorner(.)   (not used)
+!                   | 1  minIndex(1)    maxIndex(1)   patchID
+!                   | 2  minIndex(2)    maxIndex(2)   (not used)
+!                   | .  minIndex(.)    maxIndex(.)   (not used)
 !                   | .
 !                   v
 !                  1st index
@@ -1272,8 +1272,8 @@ contains
 !          sequence is given by the column major order of the {\tt regDecomp}
 !          elements in the sequence as they appear following the patch index.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minCorner} and
-!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          Indicates whether the indices provided by the {\tt minIndex} and
+!          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
@@ -1290,7 +1290,7 @@ contains
 !          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
 !                index of the two connected patches respectively,
 !          \item {\tt positionVector} is the vector that points from patch A's
-!                minCorner to patch B's minCorner.
+!                minIndex to patch B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of patch A
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
@@ -1384,13 +1384,13 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateRDPFA(minCorner, maxCorner, &
+  function ESMF_DistGridCreateRDPFA(minIndex, maxIndex, &
     regDecomp, decompflag, deLabelList, indexflag, connectionList, &
     connectionTransformList, fastAxis, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: minCorner(:,:)
-    integer,                      intent(in)            :: maxCorner(:,:)
+    integer,                      intent(in)            :: minIndex(:,:)
+    integer,                      intent(in)            :: maxIndex(:,:)
     integer,                      intent(in), optional  :: regDecomp(:,:)
     type(ESMF_DecompFlag),target, intent(in), optional  :: decompflag(:,:)
     integer,                      intent(in), optional  :: deLabelList(:)
@@ -1416,11 +1416,11 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[minCorner]
+!     \item[minIndex]
 !          The first index provides the global coordinate tuple of the lower 
 !          corner of a global domain patch. The second index indicates the 
 !          patch number.
-!     \item[maxCorner]
+!     \item[maxIndex]
 !          The first index provides the global coordinate tuple of the upper
 !          corner of a global domain patch. The second index indicates the 
 !          patch number.
@@ -1442,8 +1442,8 @@ contains
 !          sequence is given by the column major order of the {\tt regDecomp}
 !          elements in the sequence as they appear following the patch index.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minCorner} and
-!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          Indicates whether the indices provided by the {\tt minIndex} and
+!          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
@@ -1460,7 +1460,7 @@ contains
 !          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
 !                index of the two connected patches respectively,
 !          \item {\tt positionVector} is the vector that points from patch A's
-!                minCorner to patch B's minCorner.
+!                minIndex to patch B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of patch A
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
@@ -1551,13 +1551,13 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDBPFA(minCorner, maxCorner, &
+  function ESMF_DistGridCreateDBPFA(minIndex, maxIndex, &
     deBlockList, deLabelList, indexflag, connectionList, &
     connectionTransformList, fastAxis, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: minCorner(:,:)
-    integer,                      intent(in)            :: maxCorner(:,:)
+    integer,                      intent(in)            :: minIndex(:,:)
+    integer,                      intent(in)            :: maxIndex(:,:)
     integer,                      intent(in)            :: deBlockList(:,:,:)
     integer,                      intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
@@ -1576,11 +1576,11 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[minCorner]
+!     \item[minIndex]
 !          The first index provides the global coordinate tuple of the lower 
 !          corner of a global domain patch. The second index indicates the 
 !          patch number.
-!     \item[maxCorner]
+!     \item[maxIndex]
 !          The first index provides the global coordinate tuple of the upper
 !          corner of a global domain patch. The second index indicates the 
 !          patch number.
@@ -1593,9 +1593,9 @@ contains
 !          \begin{verbatim}
 !                   +---------------------------------------> 2nd index
 !                   |    1               2              3
-!                   | 1  minCorner(1)    maxCorner(1)   patchID
-!                   | 2  minCorner(2)    maxCorner(2)   (not used)
-!                   | .  minCorner(.)    maxCorner(.)   (not used)
+!                   | 1  minIndex(1)    maxIndex(1)   patchID
+!                   | 2  minIndex(2)    maxIndex(2)   (not used)
+!                   | .  minIndex(.)    maxIndex(.)   (not used)
 !                   | .
 !                   v
 !                  1st index
@@ -1607,8 +1607,8 @@ contains
 !          sequence is given by the column major order of the {\tt regDecomp}
 !          elements in the sequence as they appear following the patch index.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minCorner} and
-!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          Indicates whether the indices provided by the {\tt minIndex} and
+!          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
@@ -1625,7 +1625,7 @@ contains
 !          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
 !                index of the two connected patches respectively,
 !          \item {\tt positionVector} is the vector that points from patch A's
-!                minCorner to patch B's minCorner.
+!                minIndex to patch B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of patch A
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
@@ -2036,7 +2036,7 @@ contains
 !        index of {\tt linkList} steps through the link elements which are
 !        defined by the first index. The first index must be of size
 !        {\tt 5*dimCount + 2} and provides the link element information in the 
-!        format {\tt (/minCorner, maxCorner, partnerDe, partnerStaggerLoc, 
+!        format {\tt (/minIndex, maxIndex, partnerDe, partnerStaggerLoc, 
 !        partnerStartCorner, partnerEndCorner, partnerIndexOrder, 
 !        signChangeVector/)}.
 !     \item[{[rc]}] 
@@ -2283,7 +2283,7 @@ contains
 !     \item[patchIndexB] 
 !        Index of one of the two patches that are to be connected.
 !     \item[positionVector] 
-!        Position of patch B's minCorner with respect to patch A's minCorner.
+!        Position of patch B's minIndex with respect to patch A's minIndex.
 !     \item[{[orientationVector]}]
 !        Associates each dimension of patch A with a dimension in patch B's 
 !        index space. Negative index values may be used to indicate a 

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.14 2007/04/04 03:03:38 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.15 2007/05/30 17:46:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@ program ESMF_ArrayEx
   real(ESMF_KIND_R8):: dummySum
   type(ESMF_IndexFlag):: indexflag
   integer, allocatable:: dimExtent(:,:), indexList(:), regDecompDeCoord(:)
-  integer, allocatable:: minCorner(:,:), maxCorner(:,:), regDecomp(:,:)
+  integer, allocatable:: minIndex(:,:), maxIndex(:,:), regDecomp(:,:)
   integer, allocatable:: deBlockList(:,:), connectionList(:,:), connectionTransformList(:,:)
   integer, allocatable:: deNeighborList(:), deNeighborInterface(:,:)
   integer, allocatable:: localDeList(:), linkList(:,:), inverseDimmap(:)
@@ -97,7 +97,7 @@ program ESMF_ArrayEx
 ! that is decomposed into 2 x 3 = 6 DEs.
 !EOE
 !BOC
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1031,7 +1031,7 @@ program ESMF_ArrayEx
 ! 
 !EOE
 !BOC
-  distgrid1 = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
+  distgrid1 = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), rc=rc)
   array1 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid1, rc=rc)
 !EOC  
@@ -1046,7 +1046,7 @@ program ESMF_ArrayEx
   enddo
   deallocate(larrayList)
 !BOC
-  distgrid2 = ESMF_DistGridCreate(minCorner=(/-4,1/), maxCorner=(/2,3/), rc=rc)
+  distgrid2 = ESMF_DistGridCreate(minIndex=(/-4,1/), maxIndex=(/2,3/), rc=rc)
   array2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid2, &
     totalLWidth=(/1,1/), totalUWidth=(/1,1/), rc=rc)
 !EOC  
@@ -1306,7 +1306,7 @@ program ESMF_ArrayEx
     patchIndexA=1, patchIndexB=1, &
     positionVector=(/0, 100/), orientationVector=(/1, 2/), rc=rc)
   call ESMF_VMGet(vm, petCount=petCount, rc=rc)
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/20,100/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/20,100/), &
     regDecomp=(/1,2*petCount/), connectionList=connectionList, rc=rc)
 !EOCI
 !BOEI
@@ -1529,7 +1529,7 @@ program ESMF_ArrayEx
   call ESMF_ConnectionTransformElementConstruct(connectionTransformList(:,1), &
     connectionIndex=1, direction=0, staggerSrc=2, staggerDst=1, &
     indexOffsetVector=(/0,0/), signChangeVector=(/+1,+1/), rc=rc)
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/20,100/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/20,100/), &
     regDecomp=(/1,2*petCount/), connectionList=connectionList, &
     connectionTransformList=connectionTransformList, rc=rc)
   array1 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
@@ -1606,7 +1606,7 @@ program ESMF_ArrayEx
 ! decomposed into as many DEs as there are PETs in the current context.
 !EOE
 !BOC
-  distgrid1D = ESMF_DistGridCreate(minCorner=(/-10/), maxCorner=(/5/), &
+  distgrid1D = ESMF_DistGridCreate(minIndex=(/-10/), maxIndex=(/5/), &
     regDecomp=(/petCount/), rc=rc)
 !EOC
 !BOE
@@ -1627,7 +1627,7 @@ program ESMF_ArrayEx
 ! and an appropriate 3D DistGrid object must be created
 !EOE
 !BOC
-  distgrid3D = ESMF_DistGridCreate(minCorner=(/1,1,1/), maxCorner=(/16,16,16/), &
+  distgrid3D = ESMF_DistGridCreate(minIndex=(/1,1,1/), maxIndex=(/16,16,16/), &
     regDecomp=(/4,4,4/), rc=rc)
 !EOC
 !BOE
@@ -1657,7 +1657,7 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_ArrayDestroy(array3D, rc=rc)
   call ESMF_DistGridDestroy(distgrid3D, rc=rc)
-  distgrid3D = ESMF_DistGridCreate(minCorner=(/1,1,1/), maxCorner=(/16,16,16/), &
+  distgrid3D = ESMF_DistGridCreate(minIndex=(/1,1,1/), maxIndex=(/16,16,16/), &
     regDecomp=(/1,4,4/), rc=rc)
   array3D = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid3D, rc=rc)
 !EOC
@@ -1682,7 +1682,7 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   call ESMF_DistGridGet(distgrid3D, delayout=delayout, rc=rc) ! get DELayout
-  distgrid2D = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/16,16/), &
+  distgrid2D = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/16,16/), &
     regDecomp=(/4,4/), delayout=delayout, rc=rc)
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
   array2D = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid2D, rc=rc)
@@ -1955,18 +1955,18 @@ program ESMF_ArrayEx
 ! With this {\tt connectionList} and {\tt connectionTransformList} it is now
 ! possible to define a DistGrid object that captures the index space topology
 ! for a bipolar grid. The DistGrid consists of two patches which need to be
-! provided in {\tt minCorner} and {\tt maxCorner} list arguments.
+! provided in {\tt minIndex} and {\tt maxIndex} list arguments.
 !EOEI
 !BOCI
-  allocate(minCorner(2,2), maxCorner(2,2), regDecomp(2,2))
-  minCorner(:,1) = (/1,1/)              ! first patch
-  maxCorner(:,1) = (/180,50/)           ! first patch
+  allocate(minIndex(2,2), maxIndex(2,2), regDecomp(2,2))
+  minIndex(:,1) = (/1,1/)              ! first patch
+  maxIndex(:,1) = (/180,50/)           ! first patch
   regDecomp(:,1) = (/petCount/2, 1/)    ! first patch
-  minCorner(:,2) = (/1,1/)              ! second patch
-  maxCorner(:,2) = (/180,50/)           ! second patch
+  minIndex(:,2) = (/1,1/)              ! second patch
+  maxIndex(:,2) = (/180,50/)           ! second patch
   regDecomp(:,2) = (/petCount/2, 1/)    ! second patch
   
-  distgrid = ESMF_DistGridCreate(minCorner=minCorner, maxCorner=maxCorner, &
+  distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
     regDecomp=regDecomp, connectionList=connectionList, &
     connectionTransformList=connectionTransformList, rc=rc)
 !EOCI  

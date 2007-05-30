@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.14 2007/05/01 21:07:57 rosalind Exp $
+// $Id: ESMC_DistGrid.C,v 1.15 2007/05/30 17:46:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DistGrid.C,v 1.14 2007/05/01 21:07:57 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_DistGrid.C,v 1.15 2007/05/30 17:46:20 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -76,8 +76,8 @@ ESMC_DistGrid *ESMC_DistGridCreate(
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceInt *minCorner,          // (in)
-  ESMC_InterfaceInt *maxCorner,          // (in)
+  ESMC_InterfaceInt *minIndex,          // (in)
+  ESMC_InterfaceInt *maxIndex,          // (in)
   ESMC_InterfaceInt *regDecomp,          // (in)
   ESMC_DecompFlag *decompflag,                // (in)
   int decompflagCount,                        // (in)
@@ -113,38 +113,38 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
 
   // check the input and get the information together to call DistGridConstruct
-  if (minCorner == NULL){
+  if (minIndex == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to minCorner array", rc);
+      "- Not a valid pointer to minIndex array", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  if (maxCorner == NULL){
+  if (maxIndex == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to maxCorner array", rc);
+      "- Not a valid pointer to maxIndex array", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  if (minCorner->dimCount != 1){
+  if (minIndex->dimCount != 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-      "- minCorner array must be of rank 1", rc);
+      "- minIndex array must be of rank 1", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  if (maxCorner->dimCount != 1){
+  if (maxIndex->dimCount != 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-      "- maxCorner array must be of rank 1", rc);
+      "- maxIndex array must be of rank 1", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  int dimCount = minCorner->extent[0];
-  if (maxCorner->extent[0] != dimCount){
+  int dimCount = minIndex->extent[0];
+  if (maxIndex->extent[0] != dimCount){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-      "- minCorner and maxCorner array mismatch", rc);
+      "- minIndex and maxIndex array mismatch", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
@@ -236,7 +236,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
   if (decompflagCount != dimCount){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-      "- decompflag array mismatches minCorner and maxCorner arrays", rc);
+      "- decompflag array mismatches minIndex and maxIndex arrays", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
@@ -282,7 +282,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   int *dimContigFlag = new int[dimCount*deCount];
   int deDivider = 1;  // reset
   for (int i=0; i<dimCount; i++){
-    int dimLength = maxCorner->array[i] - minCorner->array[i] + 1;
+    int dimLength = maxIndex->array[i] - minIndex->array[i] + 1;
     int chunkLength = dimLength/regDecomp->array[i];  // basic chunk size
     int chunkRest = dimLength%regDecomp->array[i];    // left over points
     int de, decompChunk, extentIndex;
@@ -297,7 +297,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
           if (decompChunk < chunkRest) ++dimExtent[extentIndex]; // distr. rest
           indexList[extentIndex] = new int[dimExtent[extentIndex]];
           // fill the indexList for this dimension and DE
-          int indexStart = minCorner->array[i] + decompChunk * chunkLength;
+          int indexStart = minIndex->array[i] + decompChunk * chunkLength;
           if (decompChunk < chunkRest) indexStart += decompChunk;
           else indexStart += chunkRest;
           for (int k=0; k<dimExtent[extentIndex]; k++){
@@ -316,7 +316,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
             dimExtent[extentIndex] += chunkRest; // add rest to last chunk
           indexList[extentIndex] = new int[dimExtent[extentIndex]];
           // fill the indexList for this dimension and DE
-          int indexStart = minCorner->array[i] + decompChunk * chunkLength;
+          int indexStart = minIndex->array[i] + decompChunk * chunkLength;
           for (int k=0; k<dimExtent[extentIndex]; k++){
             indexList[extentIndex][k] = indexStart + k; // block structure
           }
@@ -333,7 +333,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
             dimExtent[extentIndex] += chunkRest; // add rest to first chunk
           indexList[extentIndex] = new int[dimExtent[extentIndex]];
           // fill the indexList for this dimension and DE
-          int indexStart = minCorner->array[i] + decompChunk * chunkLength;
+          int indexStart = minIndex->array[i] + decompChunk * chunkLength;
           if (decompChunk > 0) indexStart += chunkRest;
           for (int k=0; k<dimExtent[extentIndex]; k++){
             indexList[extentIndex][k] = indexStart + k; // block structure
@@ -350,7 +350,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
           if (decompChunk < chunkRest) ++dimExtent[extentIndex]; // distr. rest
           indexList[extentIndex] = new int[dimExtent[extentIndex]];
           // fill the indexList for this dimension and DE
-          int indexStart = minCorner->array[i] + decompChunk;
+          int indexStart = minIndex->array[i] + decompChunk;
           for (int k=0; k<dimExtent[extentIndex]; k++){
             // cyclic
             indexList[extentIndex][k] = indexStart + k * regDecomp->array[i];
@@ -375,7 +375,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   
   // call into DistGridConstruct
   status = distgrid->ESMC_DistGridConstruct(dimCount, 1, dePatchList,
-    minCorner->array, maxCorner->array, dimContigFlag, dimExtent, indexList,
+    minIndex->array, maxIndex->array, dimContigFlag, dimExtent, indexList,
     ESMF_TRUE, connectionList, delayout, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
@@ -423,8 +423,8 @@ ESMC_DistGrid *ESMC_DistGridCreate(
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceInt *minCorner,          // (in)
-  ESMC_InterfaceInt *maxCorner,          // (in)
+  ESMC_InterfaceInt *minIndex,          // (in)
+  ESMC_InterfaceInt *maxIndex,          // (in)
   ESMC_InterfaceInt *deBlockList,        // (in)
   ESMC_InterfaceInt *deLabelList,        // (in)
   ESMC_IndexFlag *indexflag,                  // (in)
@@ -458,38 +458,38 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
 
   // check the input and get the information together to call DistGridConstruct
-  if (minCorner == NULL){
+  if (minIndex == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to minCorner array", rc);
+      "- Not a valid pointer to minIndex array", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  if (maxCorner == NULL){
+  if (maxIndex == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to maxCorner array", rc);
+      "- Not a valid pointer to maxIndex array", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  if (minCorner->dimCount != 1){
+  if (minIndex->dimCount != 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-      "- minCorner array must be of rank 1", rc);
+      "- minIndex array must be of rank 1", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  if (maxCorner->dimCount != 1){
+  if (maxIndex->dimCount != 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-      "- maxCorner array must be of rank 1", rc);
+      "- maxIndex array must be of rank 1", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  int dimCount = minCorner->extent[0];
-  if (maxCorner->extent[0] != dimCount){
+  int dimCount = minIndex->extent[0];
+  if (maxIndex->extent[0] != dimCount){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-      "- minCorner and maxCorner array mismatch", rc);
+      "- minIndex and maxIndex array mismatch", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
@@ -599,7 +599,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   int **indexList = new int*[dimCount*deCount];
   int *dimContigFlag = new int[dimCount*deCount];
   for (int i=0; i<dimCount; i++){
-    int dimLength = maxCorner->array[i] - minCorner->array[i] + 1;
+    int dimLength = maxIndex->array[i] - minIndex->array[i] + 1;
     int de, extentIndex, deBlockIndexMin, deBlockIndexMax;
     for (int j=0; j<deCount; j++){
       de = deLabelList->array[j];
@@ -622,7 +622,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   // todo: check for overlapping deBlocks!!
   // call into DistGridConstruct
   status = distgrid->ESMC_DistGridConstruct(dimCount, 1, dePatchList, 
-    minCorner->array, maxCorner->array, dimContigFlag, dimExtent, indexList,
+    minIndex->array, maxIndex->array, dimContigFlag, dimExtent, indexList,
     ESMF_FALSE, connectionList, delayout, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
@@ -663,8 +663,8 @@ ESMC_DistGrid *ESMC_DistGridCreate(
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceInt *minCorner,          // (in)
-  ESMC_InterfaceInt *maxCorner,          // (in)
+  ESMC_InterfaceInt *minIndex,          // (in)
+  ESMC_InterfaceInt *maxIndex,          // (in)
   ESMC_InterfaceInt *regDecomp,          // (in)
   ESMC_DecompFlag *decompflag,                // (in)
   int decompflagCount,                        // (in)
@@ -697,7 +697,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   
   // use DistGridCreate() with DELayout to create a suitable DistGrid object
   ESMC_DistGrid *distgrid = 
-    ESMC_DistGridCreate(minCorner, maxCorner, regDecomp, decompflag,
+    ESMC_DistGridCreate(minIndex, maxIndex, regDecomp, decompflag,
       decompflagCount, deLabelList, indexflag, connectionList,
       connectionTransformList, delayout, vm, &status);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
@@ -724,8 +724,8 @@ ESMC_DistGrid *ESMC_DistGridCreate(
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceInt *minCorner,          // (in)
-  ESMC_InterfaceInt *maxCorner,          // (in)
+  ESMC_InterfaceInt *minIndex,          // (in)
+  ESMC_InterfaceInt *maxIndex,          // (in)
   ESMC_InterfaceInt *regDecomp,          // (in)
   ESMC_DecompFlag *decompflag,                // (in)
   int decompflagCount1,                       // (in)
@@ -762,46 +762,46 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
 
   // check the input and get the information together to call DistGridConstruct
-  if (minCorner == NULL){
+  if (minIndex == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to minCorner array", rc);
+      "- Not a valid pointer to minIndex array", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  if (maxCorner == NULL){
+  if (maxIndex == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to maxCorner array", rc);
+      "- Not a valid pointer to maxIndex array", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  if (minCorner->dimCount != 2){
+  if (minIndex->dimCount != 2){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-      "- minCorner array must be of rank 2", rc);
+      "- minIndex array must be of rank 2", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  if (maxCorner->dimCount != 2){
+  if (maxIndex->dimCount != 2){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-      "- maxCorner array must be of rank 2", rc);
+      "- maxIndex array must be of rank 2", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  int dimCount = minCorner->extent[0];
-  if (maxCorner->extent[0] != dimCount){
+  int dimCount = minIndex->extent[0];
+  if (maxIndex->extent[0] != dimCount){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-      "- minCorner and maxCorner array mismatch in dimCount", rc);
+      "- minIndex and maxIndex array mismatch in dimCount", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  int patchCount = minCorner->extent[1];
-  if (maxCorner->extent[1] != patchCount){
+  int patchCount = minIndex->extent[1];
+  if (maxIndex->extent[1] != patchCount){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-      "- minCorner and maxCorner array mismatch in patchCount", rc);
+      "- minIndex and maxIndex array mismatch in patchCount", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
@@ -912,14 +912,14 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
   if (decompflagCount1 != dimCount){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-      "- decompflag array mismatches minCorner and maxCorner arrays", rc);
+      "- decompflag array mismatches minIndex and maxIndex arrays", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
   if (decompflagCount2 != patchCount){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-      "- decompflag array mismatches minCorner and maxCorner arrays", rc);
+      "- decompflag array mismatches minIndex and maxIndex arrays", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
@@ -973,7 +973,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     int deDivider = 1;  // reset
     for (int ii=0; ii<dimCount; ii++){
       int i = patch*dimCount + ii;  // work in the current patch
-      int dimLength = maxCorner->array[i] - minCorner->array[i] + 1;
+      int dimLength = maxIndex->array[i] - minIndex->array[i] + 1;
       int chunkLength = dimLength/regDecomp->array[i];  // basic chunk size
       int chunkRest = dimLength%regDecomp->array[i];    // left over points
       int de, decompChunk, extentIndex;
@@ -989,7 +989,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
             if (decompChunk < chunkRest) ++dimExtent[extentIndex]; //distr. rest
             indexList[extentIndex] = new int[dimExtent[extentIndex]];
             // fill the indexList for this dimension and DE
-            int indexStart = minCorner->array[i] + decompChunk * chunkLength;
+            int indexStart = minIndex->array[i] + decompChunk * chunkLength;
             if (decompChunk < chunkRest) indexStart += decompChunk;
             else indexStart += chunkRest;
             for (int k=0; k<dimExtent[extentIndex]; k++){
@@ -1009,7 +1009,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
               dimExtent[extentIndex] += chunkRest; // add rest to last chunk
             indexList[extentIndex] = new int[dimExtent[extentIndex]];
             // fill the indexList for this dimension and DE
-            int indexStart = minCorner->array[i] + decompChunk * chunkLength;
+            int indexStart = minIndex->array[i] + decompChunk * chunkLength;
             for (int k=0; k<dimExtent[extentIndex]; k++){
               indexList[extentIndex][k] = indexStart + k; // block structure
             }
@@ -1027,7 +1027,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
               dimExtent[extentIndex] += chunkRest; // add rest to first chunk
             indexList[extentIndex] = new int[dimExtent[extentIndex]];
             // fill the indexList for this dimension and DE
-            int indexStart = minCorner->array[i] + decompChunk * chunkLength;
+            int indexStart = minIndex->array[i] + decompChunk * chunkLength;
             if (decompChunk > 0) indexStart += chunkRest;
             for (int k=0; k<dimExtent[extentIndex]; k++){
               indexList[extentIndex][k] = indexStart + k; // block structure
@@ -1045,7 +1045,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
             if (decompChunk < chunkRest) ++dimExtent[extentIndex]; //distr. rest
             indexList[extentIndex] = new int[dimExtent[extentIndex]];
             // fill the indexList for this dimension and DE
-            int indexStart = minCorner->array[i] + decompChunk;
+            int indexStart = minIndex->array[i] + decompChunk;
             for (int k=0; k<dimExtent[extentIndex]; k++){
               // cyclic
               indexList[extentIndex][k] = indexStart + k * regDecomp->array[i];
@@ -1079,7 +1079,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
 
   // call into DistGridConstruct
   status = distgrid->ESMC_DistGridConstruct(dimCount, patchCount, dePatchList,
-    minCorner->array, maxCorner->array, dimContigFlag, dimExtent, indexList,
+    minIndex->array, maxIndex->array, dimContigFlag, dimExtent, indexList,
     ESMF_TRUE, connectionList, delayout, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
@@ -1187,8 +1187,8 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
   int dimCountArg,              // (in)
   int patchCountArg,            // (in)
   int *dePatchListArg,          // (in)
-  int *minCornerArg,            // (in)
-  int *maxCornerArg,            // (in)
+  int *minIndexArg,            // (in)
+  int *maxIndexArg,            // (in)
   int *dimContigFlagArg,        // (in)
   int *dimExtentArg,            // (in)
   int **indexListArg,           // (in)
@@ -1261,10 +1261,10 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
     return localrc;
   }
   // fill in the rest
-  minCorner = new int[dimCount*patchCount];
-  memcpy(minCorner, minCornerArg, sizeof(int)*dimCount*patchCount);
-  maxCorner = new int[dimCount*patchCount];
-  memcpy(maxCorner, maxCornerArg, sizeof(int)*dimCount*patchCount);
+  minIndex = new int[dimCount*patchCount];
+  memcpy(minIndex, minIndexArg, sizeof(int)*dimCount*patchCount);
+  maxIndex = new int[dimCount*patchCount];
+  memcpy(maxIndex, maxIndexArg, sizeof(int)*dimCount*patchCount);
   dimContigFlag = new int[dimCount*deCount];
   memcpy(dimContigFlag, dimContigFlagArg, sizeof(int)*dimCount*deCount);
   dimExtent = new int[dimCount*deCount];
@@ -1290,7 +1290,7 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
     patchCellCount[i] = 1;  // reset
     for (int j=0; j<dimCount; j++)
       patchCellCount[i] *=
-        (maxCorner[i*dimCount+j] - minCorner[i*dimCount+j] + 1);
+        (maxIndex[i*dimCount+j] - minIndex[i*dimCount+j] + 1);
   }
   dePatchList = new int[deCount];
   memcpy(dePatchList, dePatchListArg, sizeof(int)*deCount);
@@ -1339,8 +1339,8 @@ int ESMC_DistGrid::ESMC_DistGridDestruct(void){
   
   // garbage collection
   delete [] dimExtent;
-  delete [] minCorner;
-  delete [] maxCorner;
+  delete [] minIndex;
+  delete [] maxIndex;
   delete [] patchCellCount;
   delete [] dePatchList;
   delete [] deCellCount;
@@ -1752,13 +1752,13 @@ int ESMC_DistGrid::ESMC_DistGridGetSequenceIndex(
   // determine the sequentialized index
   int patch = dePatchList[de];  // patches are basis 1 !!!!
   int seqindex = indexList[de*dimCount+(dimCount-1)][index[dimCount-1]]
-    - minCorner[(patch-1)*dimCount+(dimCount-1)]; // initialize
+    - minIndex[(patch-1)*dimCount+(dimCount-1)]; // initialize
   for (int i=dimCount-2; i>=0; i--){
     // add cells in the patch in which DE is located
-    seqindex *= maxCorner[(patch-1)*dimCount+i] 
-      - minCorner[(patch-1)*dimCount+i] + 1;
+    seqindex *= maxIndex[(patch-1)*dimCount+i] 
+      - minIndex[(patch-1)*dimCount+i] + 1;
     seqindex += indexList[de*dimCount+i][index[i]] 
-      - minCorner[(patch-1)*dimCount+i];
+      - minIndex[(patch-1)*dimCount+i];
   }
   for (int i=0; i<dePatchList[de]-2; i++)
     seqindex += patchCellCount[i];  // add all the cells of previous patches
@@ -1819,13 +1819,13 @@ int ESMC_DistGrid::ESMC_DistGridGetSequenceDe(
   for (int i=dimCount-1; i>=0; i--){
     int delta = 1; // reset
     for (int j=0; j<i; j++)
-      delta *= maxCorner[p*dimCount+j] - minCorner[p*dimCount+j] + 1;
+      delta *= maxIndex[p*dimCount+j] - minIndex[p*dimCount+j] + 1;
     ii[i] = seqindex / delta;
     seqindex = seqindex % delta;
   }
   // shift origin of ii[] onto patch origin
   for (int i=0; i<dimCount; i++)
-    ii[i] += minCorner[p*dimCount+i];
+    ii[i] += minIndex[p*dimCount+i];
   // find the DE that covers this patch-local index tuple
   int de;
   for (de=0; de<deCount; de++){
@@ -1856,12 +1856,12 @@ int ESMC_DistGrid::ESMC_DistGridGetSequenceDe(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridGetPatchMinMaxCorner()"
+#define ESMC_METHOD "ESMC_DistGridGetPatchMinmaxIndex()"
 //BOP
-// !IROUTINE:  ESMC_DistGridGetPatchMinMaxCorner
+// !IROUTINE:  ESMC_DistGridGetPatchMinmaxIndex
 //
 // !INTERFACE:
-int ESMC_DistGrid::ESMC_DistGridGetPatchMinMaxCorner(
+int ESMC_DistGrid::ESMC_DistGridGetPatchMinmaxIndex(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1869,8 +1869,8 @@ int ESMC_DistGrid::ESMC_DistGridGetPatchMinMaxCorner(
 // !ARGUMENTS:
 //
   int patch,                            // in  - DE   = {1, ..., patchCount}
-  int *minCornerArg,                    // out
-  int *maxCornerArg                     // out
+  int *minIndexArg,                    // out
+  int *maxIndexArg                     // out
   ){    
 //
 // !DESCRIPTION:
@@ -1895,10 +1895,10 @@ int ESMC_DistGrid::ESMC_DistGridGetPatchMinMaxCorner(
   }
 
   //
-  if (minCornerArg)
-    memcpy(minCornerArg, &minCorner[(patch-1)*dimCount], dimCount*sizeof(int));
-  if (maxCornerArg)
-    memcpy(maxCornerArg, &maxCorner[(patch-1)*dimCount], dimCount*sizeof(int));
+  if (minIndexArg)
+    memcpy(minIndexArg, &minIndex[(patch-1)*dimCount], dimCount*sizeof(int));
+  if (maxIndexArg)
+    memcpy(maxIndexArg, &maxIndex[(patch-1)*dimCount], dimCount*sizeof(int));
   
   // return successfully
   return ESMF_SUCCESS;
@@ -1988,9 +1988,9 @@ int ESMC_DistGrid::ESMC_DistGridSerialize(
     for (int i=0; i<deCount; i++)
       *ip++ = dePatchList[i];
     for (int i=0; i<dimCount*patchCount; i++)
-      *ip++ = minCorner[i];
+      *ip++ = minIndex[i];
     for (int i=0; i<dimCount*patchCount; i++)
-      *ip++ = maxCorner[i];
+      *ip++ = maxIndex[i];
     for (int i=0; i<dimCount*deCount; i++)
       *ip++ = dimExtent[i];
     for (int i=0; i<dimCount*deCount; i++)
@@ -2069,12 +2069,12 @@ ESMC_DistGrid *ESMC_DistGridDeserialize(
     a->dePatchList = new int[a->deCount];
     for (int i=0; i<a->deCount; i++)
       a->dePatchList[i] = *ip++;
-    a->minCorner = new int[a->dimCount*a->patchCount];
+    a->minIndex = new int[a->dimCount*a->patchCount];
     for (int i=0; i<a->dimCount*a->patchCount; i++)
-      a->minCorner[i] = *ip++;
-    a->maxCorner = new int[a->dimCount*a->patchCount];
+      a->minIndex[i] = *ip++;
+    a->maxIndex = new int[a->dimCount*a->patchCount];
     for (int i=0; i<a->dimCount*a->patchCount; i++)
-      a->maxCorner[i] = *ip++;
+      a->maxIndex[i] = *ip++;
     a->dimExtent = new int[a->dimCount*a->deCount];
     for (int i=0; i<a->dimCount*a->deCount; i++)
       a->dimExtent[i] = *ip++;
