@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.48 2007/04/26 21:02:01 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.49 2007/06/01 04:55:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.48 2007/04/26 21:02:01 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.49 2007/06/01 04:55:33 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -429,7 +429,7 @@
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, &
     rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/15,23/), &
     regDecomp=(/2,2/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
