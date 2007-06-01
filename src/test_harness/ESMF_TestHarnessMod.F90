@@ -377,7 +377,7 @@
     !------------------------------------------------------------------------
 
     ! arguments
-    character(len=1), intent(in   ) :: lstring
+    character(len=*), intent(in   ) :: lstring
     integer,          intent(in   ) :: sloc
     integer,          intent(inout) :: localrc
 
