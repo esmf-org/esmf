@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.11 2007/06/07 06:34:23 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.12 2007/06/07 18:14:44 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.11 2007/06/07 06:34:23 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.12 2007/06/07 18:14:44 oehmke Exp $'
 
 
 
@@ -274,20 +274,21 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCalcStaggerLocCoord"
 !BOP
-! !IROUTINE: ESMF_GridCalcStaggerLocCoord - Calculates the coordinates of a stagger location from another stagger locations coordinates .
+! !IROUTINE: ESMF_GridCalcStaggerLocCoord - Calculates the coordinates of a set of stagger locations from another stagger location's coordinates .
 
 ! !INTERFACE:
-      subroutine ESMF_GridCalcStaggerLocCoord(grid, srcStaggerLoc, dstStaggerLoc, &
+      subroutine ESMF_GridCalcStaggerLocCoord(grid, srcStaggerLoc, dstStaggerLocs, &
                              method, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_StaggerLoc), intent(in)  :: srcStaggerLoc,dstStaggerLoc
+      type (ESMF_StaggerLoc), intent(in)  :: srcStaggerLoc
+      type (ESMF_StaggerLoc), intent(in),optional  :: dstStaggerLocs(:)
       integer, intent(in) :: method
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Calculate the coordinates for the destination stagger location from the source
+!     Calculate the coordinates for the destination stagger locations from the source
 !     stagger location using the method.
 !
 !     The arguments are:
@@ -295,10 +296,12 @@
 !     \item[{srcStaggerLoc}]
 !          The stagger location from which to get the coordinate info to 
 !           calculate the desination's coordinates.
-!     \item[{dstStaggerLoc}]
-!          The stagger location for which to calculate the coordinates.
+!     \item[{dstStaggerLocs}]
+!          The array of stagger locations for which to calculate the coordinates.
+!          If not present, defaults to every stagger location containing coordiantes. 
 !     \item[{method}]
 !           A flag indicating the method to use to do the calculations.
+!           Not yet implemented, defaults to averaging. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

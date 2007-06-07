@@ -1,4 +1,4 @@
-% $Id: Grid_refdoc.ctex,v 1.8 2007/05/23 23:06:44 oehmke Exp $
+% $Id: Grid_refdoc.ctex,v 1.9 2007/06/07 18:14:43 oehmke Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -20,7 +20,7 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{\bf Grid Design (Draft 6)}
+\newcommand{\mytitle}{\bf Grid Design (Draft 7)}
 \newcommand{\myauthors}{\it Bob Oehmke, Don Stark and Cecelia DeLuca}
 #endif
 

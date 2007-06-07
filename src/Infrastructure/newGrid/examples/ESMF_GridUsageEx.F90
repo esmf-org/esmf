@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.21 2007/06/07 06:34:23 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.22 2007/06/07 18:14:43 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -50,7 +50,7 @@ program ESMF_GridCreateEx
 ! pieces of size 7,7 and 6.  The grid is created with
 ! global indices to make it easier to generate the coordinates. 
 ! After grid creation the local bounds and f90 arrays are retrieved
-! and the coordinates set.
+! and the coordinates set. The metric "Area" is also added to the grid. 
 !
 !EOE
 
@@ -87,8 +87,8 @@ program ESMF_GridCreateEx
         coordsY(i) = i*10.0
    enddo
 
-   ! Set the cell area from array cellArea into the newly created Grid
-   call ESMF_GridSetMetricFromArray(grid2D, "Area", &
+   ! Add the cell area from array cellArea into the newly created Grid
+   call ESMF_GridAddMetric(grid2D, "Area", &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
           array=cellArea, rc=rc)
 
@@ -388,10 +388,11 @@ program ESMF_GridCreateEx
 !BOE
 !
 ! If a bipole connection is specified, the position of the poles
-! may be needed to precisely describe the connection. The three optional arguments
+! may be needed to correctly describe the connection. The three optional arguments
 ! {\tt bipolePos1}, {\tt bipolePos2}, and {\tt bipolePos3}
-! let the user set the position of one of the poles. The second is halfway around
-! from the set position. The following illustrates setting the pole position to 1.
+! let the user set the position of one of the poles. The position of the 
+! second  pole is implied by the position of the first and is halfway around
+! the periodic dimesnion from the first pole. The following illustrates setting the pole position to 1.
 !EOE
 
 !BOC
@@ -601,6 +602,23 @@ program ESMF_GridCreateEx
 !EOC
 
 !BOE
+!\subsubsection{Calculate Coordinates}
+!
+! In addition to the grid generate option specified above to set coordinates, 
+! ESMF also provides a method to calculate coordinates based on those
+! already in given a stagger location. This method current uses averaging to 
+! calculate the coordianates, but in the future other methods may be added. 
+! If the user doesn't specify a list of destination staggers locations, this 
+! method fills in all the coordinate arrays currently allocated in the grid. 
+! The following call sets the whole grid's coordinates based on the corner stagger
+! location's coordinates. 
+!EOE
+
+!BOC
+   call ESMF_GridCalcStaggerLocCoord(grid, srcStaggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
+!EOC
+
+!BOE
 !\subsubsection{Grid Halo}
 !
 ! The Grid halo operation allows users to update the
@@ -625,14 +643,17 @@ program ESMF_GridCreateEx
 !
 ! There are several options for adding metric data to 
 ! a Grid. The first of these allows the user to 
-! allocate storage for the metric in the Grid. 
+! allocate storage for the metric in the Grid without setting 
+! values. The user can then use the metric data access routines
+! to set the desired values. 
 ! The following call adds metric "Area" to the 
 ! grid at the center stagger location. The metric is 
 ! a 4 byte real.  
-! EOE
+!EOE
 
 !BOC
-   call ESMF_GridAddMetric(grid, name="Area", metricTypeKind=ESMF_TYPEKIND_R4, &
+   call ESMF_GridAddMetricNoSet(grid, name="Area", &
+          metricTypeKind=ESMF_TYPEKIND_R4, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, rc)
 !EOC
 
@@ -672,14 +693,13 @@ program ESMF_GridCreateEx
 ! to use the {\tt ESMF\_Array} class to set or get metric data 
 ! across the whole Grid. {\tt ESMF\_GridSetMetricFromArray} allows the user to set metric
 ! data from an Array. For example, the following sets the 
-! cell area at the center stagger location to 
-! those in the array Area.
+! metric "CellArea" from the array Area.
 !EOE
 
 
 !BOC
    call ESMF_GridSetMetricFromArray(grid, name="CellArea", &
-          array=area, rc=rc)
+          array=Area, rc=rc)
 !EOC
 
 
@@ -1167,7 +1187,7 @@ program ESMF_GridCreateEx
 !\subsubsection{Stagger Location: Advanced}~\label{sec:usage:staggerloc:adv}
 !
 ! This section discusses some of the more advanced options available during 
-! the addition of coordinates to a particular stagger locations in a Grid. The first of these is
+! the addition of data (coordinates or metrics) to a particular stagger locations in a Grid. The first of these is
 ! the construction of custom stagger locations. 
 ! To construct a custom stagger (method described further in Section~\ref{ref:stagger})
 ! the users uses the subroutine {\it ESMF\_StaggerLocSet()} to
@@ -1230,7 +1250,7 @@ program ESMF_GridCreateEx
 ! on the positive side, and to only add this padding where needed 
 ! (e.g. no padding for the center, padding
 ! on both dimensions for the corner, in only one dimension for the 
-! edge in 2D.)  To change these defaults the {\tt coordLocWidth} arguments 
+! edge in 2D.)  To change these defaults the {\tt coordWidth} arguments 
 ! can be used to adjust the width and placement of the padding for each
 ! stagger location. 
 !

@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.24 2007/06/07 13:48:44 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.25 2007/06/07 18:14:42 oehmke Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -263,46 +263,40 @@ sequences.
 \hline
 \multicolumn{4}{|l|}{{\bf Options for Grid Creation}} \\
 \hline
-Command sequence & Missing & Function & ESMF\_GRIDSTATUS\_ \\ 
+Command sequence & Missing & Function & Grid Status \\ 
 \hline
 ESMF\_GridCreateEmpty() 
 & Topology information and coordinates, other options undefined
 & A Grid object shell is allocated but space for 
 internal objects is not
-& NOT\_READY \\
+& NOT READY \\
 \hline
 ESMF\_GridCreate(distGrid)\newline
 {\bf or} \newline
 ESMF\_GridCreateEmpty()\newline
 ESMF\_GridSet(distGrid)\newline
 ...\newline
-ESMF\_GridCommit(\newline
-\hspace{.1in} ESMF\_GRIDSTATUS\_SHAPE\_READY)\newline
 {\bf or use a shortcut} \newline
 ESMF\_GridCreateShape()\newline
-& Space for coordinates is allocated but coordinate
-values are not set
+& Index space and distribution are defined, but coordinate 
+ values are not set
 & Can be used as the basis for Field allocation
-& SHAPE\_READY\\
+& SHAPE READY\\
 \hline
 ESMF\_GridCreate(distGrid)\newline
-ESMF\_GridSetCoordFromArray()\newline
+ESMF\_GridAddCoordFromArray()\newline
 ESMF\_GridCommit(\newline
-\hspace{.1in} ESMF\_GRIDSTATUS\_REGRID\_READY)\newline
 {\bf or} \newline 
 ESMF\_GridCreate(distGrid)\newline
+ESMF\_GridAddCoordNoSet()\newline
 ESMF\_GridLocalTileGet(localTile)\newline
 ... user fills in localTile coordinate values
-ESMF\_GridCommit(\newline
-\hspace{.1in} ESMF\_GRIDSTATUS\_REGRID\_READY)\newline
 {\bf or use a shortcut} \newline
 ESMF\_GridCreateShape()\newline
 ESMF\_GridGenCoordUni()\newline
-ESMF\_GridCommit(\newline
-ESMF\_GRIDSTATUS\_REGRID\_READY)
 & Nothing; Grid is complete
 & Can be used in regrid methods
-& REGRID\_READY\\
+& REGRID READY\\
 \hline
 \end{tabular}
 
