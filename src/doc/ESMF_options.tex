@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.21 2007/03/31 05:18:30 cdeluca Exp $
+% $Id: ESMF_options.tex,v 1.22 2007/06/07 17:58:31 theurich Exp $
 
 \section{Global Options and Parameters}
 
@@ -46,12 +46,27 @@ Valid values are:
          {\em Communication calls:} The called method will not block but 
          returns immediately after initiating the requested operation. It is
          unsafe to modify or use participating local data before all local
-         operations have completed.
+         operations have completed. Use the {\tt ESMF\_VMCommWait()} or
+         {\tt ESMF\_VMCommQueueWait()} method to block the local PET until
+         local data access is safe again. 
 
-         {\em Component calls:} The called method will not block but 
-         returns immediately after initiating the requested operation. It is
-         unsafe to modify or use participating local data before all local
-         operations have completed.
+         {\em Component calls:} For ESMF-threaded components the calling PETs
+         of the parent component will not be blocked but return immediately
+         after initiating the requested child component operation. In this
+         scenario parent and child components will run concurrently in
+         overlapping VASs. It is unsafe to modify or use VAS local data that
+         may be accessed by concurrently running components until the child
+         component method has completed. Use the appropriate
+         {\tt ESMF\_GridCompWait()} or {\tt ESMF\_CplCompWait()} method to
+         block the local parent PET until the child component method has
+         completed in the local VAS.
+         
+         For non-threaded ESMF components (i.e. pure MPI-components -- the
+         ESMF default) calling component methods with {\tt ESMF\_NONBLOCKING}
+         is identical to calling them with {\tt ESMF\_VASBLOCKING}. However,
+         a call to {\tt ESMF\_GridCompWait()} or {\tt ESMF\_CplCompWait()} is
+         still required in the first case in order to deallocate memory
+         internally allocated for the {\tt ESMF\_NONBLOCKING} mode.
 
 \end{description}
 
