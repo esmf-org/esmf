@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateTripoleEx.F90,v 1.4 2007/05/23 19:56:56 oehmke Exp $
+! $Id: ESMF_GridCreateTripoleEx.F90,v 1.5 2007/06/07 06:34:23 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -175,7 +175,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-     staggerlocs(1)=ESMF_STAGGERLOC_2D_CENTER
+     staggerlocs(1)=ESMF_STAGGERLOC_CENTER
      gridCoordArrays(1,1)=gridCntrCoordArrayLon     
      gridCoordArrays(2,1)=gridCntrCoordArrayLat     
 !EOC

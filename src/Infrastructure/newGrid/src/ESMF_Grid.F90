@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.10 2007/06/07 00:22:50 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.11 2007/06/07 06:34:23 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.10 2007/06/07 00:22:50 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.11 2007/06/07 06:34:23 oehmke Exp $'
 
 
 
@@ -75,20 +75,20 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAddCoord"
 !BOP
-! !IROUTINE: ESMF_GridAddCoord - Add stagger location information to a partially created grid. 
+! !IROUTINE: ESMF_GridAddCoord - Add coord information to a partially created grid. 
 
 ! !INTERFACE:
  ! Private name; call using ESMF_GridAddCoord()
      function ESMF_GridAddCoordNoSet(grid, staggerLoc, &
-                        staggerLocLWidth, staggerLocUWidth, &
-                        staggerLocAlign, rc)
+                        coordLWidth, coordUWidth, &
+                        coordAlign, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),       intent(in)              :: grid 
       type (ESMF_StaggerLoc), intent(in)             :: staggerLoc
-      integer,               intent(in),   optional  :: staggerLocLWidth(:)
-      integer,               intent(in),   optional  :: staggerLocUWidth(:)
-      integer,               intent(in),   optional  :: staggerLocAlign(:)
+      integer,               intent(in),   optional  :: coordLWidth(:)
+      integer,               intent(in),   optional  :: coordUWidth(:)
+      integer,               intent(in),   optional  :: coordAlign(:)
       integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -100,19 +100,19 @@
 !          Partially created Grid to set information into.
 ! \item[{[staggerLoc]}]
 !        The stagger location to add.
-! \item[{[staggerLocLWidth]}] 
+! \item[{[coordLWidth]}] 
 !      This array should be the same rank as the grid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[staggerLocUWidth]}] 
+! \item[{[coordUWidth]}] 
 !      This array should be the same rank as the grid. It specifies the upper corner of the computational
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[staggerLocAlign]}] 
+! \item[{[coordAlign]}] 
 !      This array is of size  grid rank.
 !      For this stagger location, it specifies which element
 !      has the same index value as the center. For example, 
 !      for a 2D cell with corner stagger it specifies which 
 !      of the 4 corners has the same index as the center. 
-!      If this is set and staggerLocUWidth is not,
+!      If this is set and coordUWidth is not,
 !      this determines the default array padding for a stagger. 
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
@@ -137,17 +137,17 @@
  ! Private name; call using ESMF_GridAddCoord()
      function ESMF_GridAddCoordFptr(grid, staggerLoc, &
                         coord1, coord2, coord3, &
-                        staggerLocLWidth, staggerLocUWidth, &
-                        staggerLocAlign, rc)
+                        coordLWidth, coordUWidth, &
+                        coordAlign, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),       intent(in)             :: grid 
       type (ESMF_StaggerLoc), intent(in)       :: staggerLoc
       real (ESMF_KIND_R8), intent(in)            :: coord1(:), coord2(:)
       real (ESMF_KIND_R8), intent(in)            :: coord3(:)
-      integer,               intent(in),   optional  :: staggerLocLWidth(:)
-      integer,               intent(in),   optional  :: staggerLocUWidth(:)
-      integer,               intent(in),   optional  :: staggerLocAlign(:)
+      integer,               intent(in),   optional  :: coordLWidth(:)
+      integer,               intent(in),   optional  :: coordUWidth(:)
+      integer,               intent(in),   optional  :: coordAlign(:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer,               intent(out),  optional  :: rc
 !
@@ -168,19 +168,19 @@
 !        The F90 pointer to coordinate data for the second coordinate component (e.g. y).
 ! \item[{[coord3]}]
 !        The F90 pointer to coordinate data for the third coordinate component (e.g. z).
-! \item[{[staggerLocLWidth]}] 
+! \item[{[coordLWidth]}] 
 !      This array should be the same rank as the grid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[staggerLocUWidth]}] 
+! \item[{[coordUWidth]}] 
 !      This array should be the same rank as the grid. It specifies the upper corner of the computational
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[staggerLocAlign]}] 
+! \item[{[coordAlign]}] 
 !      This array is of size  grid rank.
 !      For this stagger location, it specifies which element
 !      has the same index value as the center. For example, 
 !      for a 2D cell with corner stagger it specifies which 
 !      of the 4 corners has the same index as the center. 
-!      If this is set and staggerLocUWidth is not,
+!      If this is set and coordUWidth is not,
 !      this determines the default array padding for a stagger. 
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
@@ -209,17 +209,17 @@
  ! Private name; call using ESMF_GridAddCoord()
      function ESMF_GridAddCoordArray(grid, staggerLoc, &
                         coord1, coord2, coord3, &
-                        staggerLocLWidth, staggerLocUWidth, &
-                        staggerLocAlign, rc)
+                        coordLWidth, coordUWidth, &
+                        coordAlign, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),       intent(in)             :: grid 
       type (ESMF_StaggerLoc), intent(in)       :: staggerLoc
       type(ESMF_ARRAY), intent(in)            :: coord1(:), coord2(:)
       type(ESMF_ARRAY), intent(in)            :: coord3(:)
-      integer,               intent(in),   optional  :: staggerLocLWidth(:)
-      integer,               intent(in),   optional  :: staggerLocUWidth(:)
-      integer,               intent(in),   optional  :: staggerLocAlign(:)
+      integer,               intent(in),   optional  :: coordLWidth(:)
+      integer,               intent(in),   optional  :: coordUWidth(:)
+      integer,               intent(in),   optional  :: coordAlign(:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer,               intent(out),  optional  :: rc
 !
@@ -240,19 +240,19 @@
 !         ESMF Array holding coordinate data for the second coordinate component (e.g. y).
 ! \item[{[coord3]}]
 !         ESMF Array holding coordinate data for the third coordinate component (e.g. z).
-! \item[{[staggerLocLWidth]}] 
+! \item[{[coordLWidth]}] 
 !      This array should be the same rank as the grid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[staggerLocUWidth]}] 
+! \item[{[coordUWidth]}] 
 !      This array should be the same rank as the grid. It specifies the upper corner of the computational
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[staggerLocAlign]}] 
+! \item[{[coordAlign]}] 
 !      This array is of size  grid rank.
 !      For this stagger location, it specifies which element
 !      has the same index value as the center. For example, 
 !      for a 2D cell with corner stagger it specifies which 
 !      of the 4 corners has the same index as the center. 
-!      If this is set and staggerLocUWidth is not,
+!      If this is set and coordUWidth is not,
 !      this determines the default array padding for a stagger. 
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
@@ -317,8 +317,9 @@
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAddMetric()
-      subroutine ESMF_GridAddMetricNoSet(grid, name, metricTag, metricTypeKind, staggerLoc, metricDep, &
-                   lbounds, ubounds, &
+      subroutine ESMF_GridAddMetricNoSet(grid, name, metricTag, metricTypeKind, 
+                   staggerLoc, metricDep, lbounds, ubounds, &                         
+                   metricLWidth, metricUWidth, metricAlign, &
                    computationalLWidth, computationalUWidth, rc)
 !
 ! !ARGUMENTS:
@@ -330,6 +331,9 @@
       integer,               intent(in),   optional  :: metricDep(:)
       integer,               intent(in),   optional  :: lbounds(:)
       integer,               intent(in),   optional  :: ubounds(:)
+      integer,               intent(in),   optional  :: metricLWidth(:)
+      integer,               intent(in),   optional  :: metricUWidth(:)
+      integer,               intent(in),   optional  :: metricAlign(:)
       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
       integer,               intent(in),   optional  :: computationalLWidth(:)
       integer,               intent(in),   optional  :: computationalUWidth(:)
@@ -364,17 +368,34 @@
 !          Lower bounds for tensor array dimensions.
 !     \item[{[ubounds]}] 
 !          Upper bounds for tensor array dimensions.
+! \item[{[metricLWidth]}] 
+!      This array should be the same rank as the grid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[metricUWidth]}] 
+!      This array should be the same rank as the grid. It specifies the upper corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[metricAlign]}] 
+!      This array is of size  grid rank.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and metricUWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
 !     \item[{[indexflag]}]
 !          Flag that indicates how the DE-local indices are to be defined.
 !     \item[{[computationalLWidth]}]
 !          Array of the same size as the {\tt distGrid} dimcount. 
 !          Sets the size of the computational padding around the exclusive
-!          regions on each DE. If {\tt staggerLocLWidth} is also set
+!          regions on each DE. If {\tt metricLWidth} is also set
 !          the actual value for any edge is the maximum between the two. 
 !     \item[{[computationalUWidth]}]
 !          Array of the same size as the {\tt distGrid} dimcount. 
 !          Sets the size of the computational padding around the exclusive
-!          regions on each DE. If {\tt staggerLocUWidth} is also set
+!          regions on each DE. If {\tt metricUWidth} is also set
 !          the actual value for any edge is the maximum between the two. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -393,9 +414,9 @@
 ! !IROUTINE: ESMF_GridAddMetricFromArray - Add a new metric from an Array.
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridSetMetric()
+  ! Private name; call using ESMF_GridAddMetric()
       subroutine ESMF_GridSetMetricFromArray(grid, name, metricTag, staggerLoc, &
-                            array, doCopy, rc)
+                            array, metricDep, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -403,7 +424,7 @@
       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
       type(ESMF_Array), intent(in) :: array
-      integer,               intent(in),   optional  :: coordDep1(:)
+      integer,               intent(in),   optional  :: metricDep(:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -424,6 +445,13 @@
 !          defaults to center. 
 !     \item[{array}]
 !          An array to set the grid metric information from.
+!     \item[{metricDep}]
+!          This array specifies the dependence of the metric dimensions 
+!          on the grid index dimensions. The size of the 
+!          array specifies the number of dimensions of the metric.
+!          The values specify which of the grid index dimensions the corresponding
+!           map to. If a value is 0, then that dimension doesn't correspond to 
+!          a grid dimension. If not present the default is (/1,2,3,.../). 
 !     \item[{[doCopy]}]
 !          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
 !          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
@@ -445,8 +473,8 @@
 ! !IROUTINE: ESMF_GridSetMetricFromFptr - Sets metric data from a Fortran pointer.
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridSetMetric()
-      subroutine ESMF_GridSetMetricFromFptr(grid, name, metricTag, staggerLoc, dep, &
+  ! Private name; call using ESMF_GridAddMetric()
+      subroutine ESMF_GridSetMetricFromFptr(grid, name, metricTag, staggerLoc, metricDep, &
                             fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
@@ -455,7 +483,7 @@
        type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
       real, intent(in), pointer :: fptr
-      integer,               intent(in),   optional  :: dep(:)
+      integer,               intent(in),   optional  :: metricDep(:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -477,7 +505,7 @@
 !     \item[{[staggerLoc]}]
 !          The stagger location into which to copy the arrays. If not set,
 !          defaults to center. 
-!     \item[{dep}]
+!     \item[{metricDep}]
 !          This array specifies the dependence of the metric dimensions 
 !          on the grid index dimensions. The size of the 
 !          array specifies the number of dimensions of the metric.
@@ -496,6 +524,117 @@
 ! !REQUIREMENTS:  TODO
 
       end subroutine ESMF_GridAddMetricFromFptr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAddMetricSub"
+!BOP
+! !IROUTINE: ESMF_GridAddMetricSub - Add a subroutine interface to generate metric data.
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridAddMetric()
+      subroutine ESMF_GridAddMetricSub(grid, name, metricTag, metricTypeKind, 
+                   staggerLoc, metricDep, lbounds, ubounds, &                         
+                   metricLWidth, metricUWidth, metricAlign, &
+                   computationalLWidth, computationalUWidth,&
+                   sub, userDataR4, userDataR8, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name
+       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
+       type(ESMF_TypeKind),  intent(in),    optional  :: metricTypeKind
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
+      integer,               intent(in),   optional  :: metricDep(:)
+      integer,               intent(in),   optional  :: lbounds(:)
+      integer,               intent(in),   optional  :: ubounds(:)
+      integer,               intent(in),   optional  :: metricLWidth(:)
+      integer,               intent(in),   optional  :: metricUWidth(:)
+      integer,               intent(in),   optional  :: metricAlign(:)
+      type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+      integer,               intent(in),   optional  :: computationalLWidth(:)
+      integer,               intent(in),   optional  :: computationalUWidth(:)
+      subroutine             intent(in),             :: sub
+      real(ESMF_KIND_R4),    intent(in),   optional  :: userDataR4(:)
+      real(ESMF_KIND_R4),    intent(in),   optional  :: userDataR8(:)
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Sets a subroutine to generate metric data from. The user may 
+!    also pass user data through to the subroutine to use in computation. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          The grid to set the metric in.
+!     \item [name]
+!           The name of the attribute to set.           
+!      \item[{[metricTag]}] 
+!           Identifies the type of metric to ESMF. If not present, defaults
+!           to ESMF\_METRICTAG\_NONE. 
+!      \item[{[metricTypeKind]}] 
+!           The type/kind of the grid coordinate data. 
+!           If not specified then the type/kind will be 8 byte reals. 
+!     \item[{[staggerLoc]}]
+!          The stagger location into which to copy the arrays. If not set,
+!          defaults to center. 
+!     \item[{metricDep}]
+!          This array specifies the dependence of the metric dimensions 
+!          on the grid index dimensions. The size of the 
+!          array specifies the number of dimensions of the metric.
+!          The values specify which of the grid index dimensions the corresponding
+!           map to. If a value is 0, then that dimension doesn't correspond to 
+!          a grid dimension. If not present the default is (/1,2,3,.../). 
+!     \item[{[lbounds]}] 
+!          Lower bounds for tensor array dimensions.
+!     \item[{[ubounds]}] 
+!          Upper bounds for tensor array dimensions.
+! \item[{[metricLWidth]}] 
+!      This array should be the same rank as the grid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[metricUWidth]}] 
+!      This array should be the same rank as the grid. It specifies the upper corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[metricAlign]}] 
+!      This array is of size  grid rank.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and metricUWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+!     \item[{[indexflag]}]
+!          Flag that indicates how the DE-local indices are to be defined.
+!     \item[{[computationalLWidth]}]
+!          Array of the same size as the {\tt distGrid} dimcount. 
+!          Sets the size of the computational padding around the exclusive
+!          regions on each DE. If {\tt metricLWidth} is also set
+!          the actual value for any edge is the maximum between the two. 
+!     \item[{[computationalUWidth]}]
+!          Array of the same size as the {\tt distGrid} dimcount. 
+!          Sets the size of the computational padding around the exclusive
+!          regions on each DE. If {\tt metricUWidth} is also set
+!          the actual value for any edge is the maximum between the two. 
+!     \item[{sub}]
+!          The subroutine to generate the metric data.
+!     \item[{sub}]
+!          The subroutine to generate the metric data.
+!     \item[{userDataR4}]
+!          User data to pass to the subroutine.
+!     \item[{userDataR8}]
+!          User data to pass to the subroutine.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+      end subroutine ESMF_GridAddMetricSub
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1100,7 +1239,7 @@
 ! !IROUTINE: ESMF_GridLocalTileGet - get various types of information about the part of a grid tile which lies on this DE.
 
 ! !INTERFACE:
-      subroutine ESMF_GridLocalTileGet(grid,tile,localDE,staggerLoc, &
+      subroutine ESMF_GridLocalTileGet(grid, tile, coord, localDE, staggerLoc, &
           exclusiveLBound, exclusiveUBound, computationalLBound, &
           computationalUBound, totalLBound, totalUBound, &
           computationalLWidth, computationalUWidth, &
@@ -1139,7 +1278,7 @@
 !          The local DE from which to get the information.  If not set, defaults to 
 !          the first DE on this processor. 
 !     \item[{coord}]
-!          The coordinate component to put the data in (e.g. 1=x). Defaults to 1. 
+!          The coordinate component to get the information for (e.g. 1=x). Defaults to 1. 
 !     \item[{staggerLoc}]
 !          The stagger location to get the information for. If not set, defaults
 !          to center.  
@@ -1345,6 +1484,95 @@
       end subroutine ESMF_GridLocalTileGetMetric
 
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLocalTileMetricGet"
+!BOP
+! !IROUTINE: ESMF_GridLocalTileMetricGet - get various types of information about the part of some metric data which lies on this DE.
+
+! !INTERFACE:
+      subroutine ESMF_GridLocalTileMetricGet(grid, name, tile, coord, localDE, staggerLoc, &
+          exclusiveLBound, exclusiveUBound, computationalLBound, &
+          computationalUBound, totalLBound, totalUBound, &
+          computationalLWidth, computationalUWidth, &
+          totalLWidth, totalUWidth,rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in),optional :: tile
+      character (len=*), intent(in):: name
+     integer, intent(in),optional :: localDE
+      integer, intent(in),  optional :: coord
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
+      integer,      intent(out), optional :: exclusiveLBound(:)
+      integer,      intent(out), optional :: exclusiveUBound(:)
+      integer,      intent(out), optional :: computationalLBound(:)
+      integer,      intent(out), optional :: computationalUBound(:)
+      integer,      intent(out), optional :: totalLBound(:)
+      integer,      intent(out), optional :: totalUBound(:)
+      integer,      intent(out), optional :: computationalLWidth(:)
+      integer,      intent(out), optional :: computationalUWidth(:)
+      integer,      intent(out), optional :: totalLWidth(:)
+      integer,      intent(out), optional :: totalUWidth(:)
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    Gets various types of information about the part of a grid tile which lies on this DE. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item [name]
+!           The name of the metric to get information for.
+!     \item[{[tile]}]
+!          The grid tile to get the information for. If not set, defaults to 
+!          the first tile. 
+!     \item[{[localDE]}]
+!          The local DE from which to get the information.  If not set, defaults to 
+!          the first DE on this processor. 
+!     \item[{staggerLoc}]
+!          The stagger location to get the information for. If not set, defaults
+!          to center.  
+!     \item[{[exclusiveLBound]}]
+!        Upon return this holds the lower bounds of the exclusive region.
+!        {\tt exclusiveLBound} must be allocated to be of size dimCount.
+!     \item[{[exclusiveUBound]}]
+!        Upon return this holds the upper bounds of the exclusive region.
+!        {\tt exclusiveUBound} must be allocated to be of size dimCount.
+!     \item[{[computationalLBound]}]
+!        Upon return this holds the lower bounds of the computational region. 
+!       {\tt computationalLBound} must be allocated to be of size dimCount.
+!     \item[{[computationalUBound]}]
+!        Upon return this holds the upper bounds of the computational region.
+!        {\tt computationalUBound} must be allocated to be of size dimCount.
+!     \item[{[totalLBound]}]
+!        Upon return this holds the lower bounds of the total region.
+!        {\tt totalLBound} must be allocated to be of size dimCount.
+!     \item[{[totalUBound]}]
+!        Upon return this holds the upper bounds of the total region.
+!        {\tt totalUBound} must be allocated to be of size dimCount.
+!     \item[{[computationalLWidth]}]
+!        Upon return this holds the lower width of the computational region.
+!        {\tt computationalLWidth} must be allocated to be of size dimCount.
+!     \item[{[computationalUWidth]}]
+!        Upon return this holds the upper width of the computational region.
+!        {\tt computationalUWidth} must be allocated to be of size dimCount.
+!     \item[{[totalLWidth]}]
+!        Upon return this holds the lower width of the total memory region.
+!        {\tt computationalUWidth} must be allocated to be of size dimCount.
+!     \item[{[totalUWidth]}]
+!        Upon return this holds the upper width of the total memory region.
+!        {\tt totalUWidth} must be allocated to be of size dimCount.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+      end subroutine ESMF_GridLocalTileMetricGet
 
 
 !------------------------------------------------------------------------------

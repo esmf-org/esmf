@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.20 2007/06/07 00:22:49 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.21 2007/06/07 06:34:23 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@ program ESMF_GridCreateEx
 ! The following is a simple example of creating a grid and
 ! loading in a set of coordinates. This code creates a 10x20
 ! rectilinear 2D grid with the coordinates varying from (10,10) to (100,200).
-! The grid is partitioned using regular distribution. In the first dimension
+! The grid is partitioned using irregular distribution. In the first dimension
 ! it is divided into two pieces both
 ! of size 5. The grid is divided in the second dimension into 3
 ! pieces of size 7,7 and 6.  The grid is created with
@@ -61,7 +61,7 @@ program ESMF_GridCreateEx
             rc=rc)
 
    ! Add a stagger location
-   call ESMF_GridAddStaggerLoc(grid2D, ESMF_STAGGERLOC_CENTER, rc=rc)
+   call ESMF_GridAddCoord(grid2D, ESMF_STAGGERLOC_CENTER, rc=rc)
 
    ! Get the X coordinate bounds
    call ESMF_GridLocalTileGet(grid2D, coord=1, &
@@ -116,20 +116,20 @@ program ESMF_GridCreateEx
 ! the partition of the index space, these methods also 
 ! simultaneously describe its size and rank. 
 !
-! One supported type of distribution is block distribution. 
+! One supported type of distribution is regular distribution. 
 ! To use this type the user specifies the 
 ! global minimum and maximum ranges of the index space
 ! ({\tt minIndex} and {\tt maxIndex}) and the number
-! of pieces to break each dimension into (via {\tt blockDecomp}).
+! of pieces to break each dimension into (via {\tt regDecomp}).
 ! ESMF then breaks the index space as evenly as possible 
 ! into the specified number of pieces. If {\tt minIndex} is 
 ! not specified, then the bottom of the index range is assumed
-! to be (1,1,...,1). If {\tt blockDecomp} is not specified, then
+! to be (1,1,...,1). If {\tt regDecomp} is not specified, then
 ! by default ESMF creates an NPx1x1...1 distribution where 
 ! NP is the number of processors. (i.e. The first index dimension
 ! is evenly divided across the processors, the rest are not divided.)
 ! The rank of the Grid is the size of {\tt maxIndex}. To create
-! an undistributed dimension set that entry in {\tt blockDecomp}
+! an undistributed dimension set that entry in {\tt regDecomp}
 ! to 1. The following is an example of creating a 10x20x30 3D grid
 ! where the first dimensions is broken into 2 pieces, the second
 ! is broken into 4 pieces, and the third is undistributed. 
@@ -137,11 +137,11 @@ program ESMF_GridCreateEx
 
 !BOC
    grid=ESMF_GridCreateShape(maxIndex=(/10,20,30/), &
-          blockDecomp=(/2,4,1/), rc=rc)   
+          regDecomp=(/2,4,1/), rc=rc)   
 !EOC
 
 !BOE
-! A second supported type of distribution is regular distribution. 
+! A second supported type of distribution is irregular distribution. 
 ! In this type the user specifies the exact number of cells per
 ! DE in each dimension. For the {\tt ESMF\_GridCreateShape} call
 ! the {\tt countsPerDEDim1,2,3}
@@ -190,7 +190,7 @@ program ESMF_GridCreateEx
 
 !BOE
 !
-! For the previous two types of distribution (block and regular), the 
+! For the previous two types of distribution (regular and irregular), the 
 ! {\tt petMap} parameter may be used to specify which PETs 
 ! the DEs in the Grid are assigned to. The {\tt petMap} 
 ! array is the same size in each dimension as the number of DEs in
@@ -368,6 +368,43 @@ program ESMF_GridCreateEx
 !EOC
 
 !BOE
+!
+! If a pole connection is specified, the stagger location of the pole
+! may be needed to precisely describe the connection. The three optional arguments
+! {\tt poleStaggerLoc1}, {\tt poleStaggerLoc2}, and {\tt poleStaggerLoc3}
+! let the user set the stagger location of the pole. The following
+! illustrates setting the pole location to the center.
+!EOE
+
+!BOC
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
+           countsPerDEDim2=(/7,7,6/), &
+           connDim1=(/ESMF_GRIDCONN_PERIODIC, ESMF_GRIDCONN_PERIODIC/), &
+           connDim2=(/ESMF_GRIDCONN_BIPOLE, ESMF_GRIDCONN_BIPOLE/), &
+           poleStaggerLoc2=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CENTER/), &
+           rc=rc)   
+!EOC
+
+!BOE
+!
+! If a bipole connection is specified, the position of the poles
+! may be needed to precisely describe the connection. The three optional arguments
+! {\tt bipolePos1}, {\tt bipolePos2}, and {\tt bipolePos3}
+! let the user set the position of one of the poles. The second is halfway around
+! from the set position. The following illustrates setting the pole position to 1.
+!EOE
+
+!BOC
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
+           countsPerDEDim2=(/7,7,6/), &
+           connDim1=(/ESMF_GRIDCONN_PERIODIC, ESMF_GRIDCONN_PERIODIC/), &
+           connDim2=(/ESMF_GRIDCONN_BIPOLE, ESMF_GRIDCONN_BIPOLE/), &
+           bipolePos2=(/1,1/), &
+           rc=rc)   
+!EOC
+
+
+!BOE
 !\subsubsection{Creation: Empty/Set}\label{sec:usage:setcommit}
 ! 
 !  As an alternative to the monolithic one call create, ESMF provides
@@ -395,10 +432,10 @@ program ESMF_GridCreateEx
           countsPerDEDim1=(/7,7,6/), rc=rc)
 
    ! Create the Grid and then add a Center Stagger Location
-   call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
    ! Add Corner Stagger Location
-   call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
+   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
 !EOC
 
 
@@ -426,7 +463,7 @@ program ESMF_GridCreateEx
 ! in specifying a Grid's stagger locations.  
 !
 ! To set which stagger locations in a Grid have coordinate data, the subroutine
-! {\tt ESMF\_GridAddStaggerLoc} is used. The following example
+! {\tt ESMF\_GridAddCoord} is used. The following example
 ! adds coordinate storage to the corner stagger location in {\tt grid}.
 !EOE
 
@@ -704,7 +741,7 @@ program ESMF_GridCreateEx
 
 
 !BOE
-! \subsubsection{Example: Creation of Block Distributed 3D Uniform Grid}
+! \subsubsection{Example: Creation of Regular Distributed 3D Uniform Grid}
 !
 ! This example illustrates the creation of a 100x100x100  3D Grid distributed across
 ! 5 processors in each dimension. The coordinates in the Grid are uniformly distributed
@@ -731,7 +768,7 @@ program ESMF_GridCreateEx
    grid=ESMF_GridCreateShape(maxIndex=(/100,100,100/), blkDecomp=(/5,5,5/), rc=rc)   
 
    ! Add a center stagger location 
-   call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
    ! Put in the coordinates
    call ESMF_GridGenCoordsUni(grid, begCoord=(/0.0,0.0,0.0/), &
@@ -815,7 +852,7 @@ program ESMF_GridCreateEx
 
    ! Add a center stagger location and at the same time set {\tt grid} to 
    ! reference the coordinate arrays. 
-   call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
                   coord1=fptrX, coord2=fptrY, rc=rc)
  
 !EOC
@@ -870,7 +907,7 @@ program ESMF_GridCreateEx
 
   ! Create the grid and add a center stagger location and at the same time set {\tt grid} to 
   ! reference the coordinate arrays. 
-  call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+  call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
                   coord1=fptrX, coord2=fptrY, rc=rc)
 
 !EOC
@@ -926,8 +963,8 @@ program ESMF_GridCreateEx
 
 
   ! Add the center and corner stagger locations. 
-  call ESMF_GridAddStaggerLoc(grid2D1,staggerLoc=ESMF_STAGGERLOC_CENTER,rc=rc)
-  call ESMF_GridAddStaggerLoc(grid2D1,staggerLoc=ESMF_STAGGERLOC_CORNER,rc=rc)
+  call ESMF_GridAddCoord(grid2D1,staggerLoc=ESMF_STAGGERLOC_CENTER,rc=rc)
+  call ESMF_GridAddCoord(grid2D1,staggerLoc=ESMF_STAGGERLOC_CORNER,rc=rc)
 
 
   ! Set the horizontal coordinates by using the non-ESMF functions
@@ -1130,7 +1167,7 @@ program ESMF_GridCreateEx
 !\subsubsection{Stagger Location: Advanced}~\label{sec:usage:staggerloc:adv}
 !
 ! This section discusses some of the more advanced options available during 
-! the addition of stagger locations to a Grid. The first of these is
+! the addition of coordinates to a particular stagger locations in a Grid. The first of these is
 ! the construction of custom stagger locations. 
 ! To construct a custom stagger (method described further in Section~\ref{ref:stagger})
 ! the users uses the subroutine {\it ESMF\_StaggerLocSet()} to
@@ -1146,16 +1183,16 @@ program ESMF_GridCreateEx
 
    ! Set Center
    call ESMF_StaggerLocSet(staggerLoc,where=(/0,0,0,0/),rc=rc)
-   call ESMF_GridAddStaggerLoc(grid, staggerLoc=staggerLoc, rc=rc)
+   call ESMF_GridAddCoord(grid, staggerLoc=staggerLoc, rc=rc)
 
    ! Set Corner
    call ESMF_StaggerLocSet(staggerLoc,where=(/1,1,1,1/),rc=rc)
-   call ESMF_GridAddStaggerLoc(grid, staggerLoc=staggerLoc, rc=rc)
+   call ESMF_GridAddCoord(grid, staggerLoc=staggerLoc, rc=rc)
 !EOC
   
 !BOE
 !
-!There is an added complication with stagger locations in 
+!There is an added complication with the data (e.g. coordinates) stored at stagger locations in 
 !that they can require different amounts of storage depending
 !on the underlying Grid type. 
 !
@@ -1193,15 +1230,15 @@ program ESMF_GridCreateEx
 ! on the positive side, and to only add this padding where needed 
 ! (e.g. no padding for the center, padding
 ! on both dimensions for the corner, in only one dimension for the 
-! edge in 2D.)  To change these defaults the {\tt staggerLocWidth} arguments 
+! edge in 2D.)  To change these defaults the {\tt coordLocWidth} arguments 
 ! can be used to adjust the width and placement of the padding for each
 ! stagger location. 
 !
 !EOE
 
 !BOE
-The {\tt staggerLocLWidth} and 
-{\tt staggerLocUWidth} arguments are both 1D arrays of the
+The {\tt coordLWidth} and 
+{\tt coordUWidth} arguments are both 1D arrays of the
 same size as the Grid rank. The entries in the arrays
 give the extra offset from the outer boundary of
 the tile exclusive region for
@@ -1213,26 +1250,26 @@ the negative side and none on the positive.
 !EOE
 
 !BOC 
-   call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-          staggerLocLWidth=(/0,0/), staggerLocUWidth=(/0,0/), rc=rc)
+   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+          coordLWidth=(/0,0/), coordUWidth=(/0,0/), rc=rc)
 
-   call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-          staggerLocLWidth=(/1,1/), staggerLocUWidth=(/0,0/), rc=rc)
+   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+          coordLWidth=(/1,1/), coordUWidth=(/0,0/), rc=rc)
 
 !EOC  
 
 !BOE
-To indicate how the stagger locations aligned with the 
-cell center the optional {\tt staggerLocAlign} parameter 
-may be used. This parameter indicates which stagger element 
+To indicate how the data at a particular stagger location is aligned with the 
+cell center the optional {\tt coordAlign} parameter 
+may be used. This parameter indicates which stagger elements 
 in a cell shares the same index values as the cell center. 
 For example, in a 2D cell, it would indicate which of the four corners has
-the same index value as the center. To set {\tt staggerLocAlign},  
+the same index value as the center. To set {\tt coordAlign},  
 the values -1,+1 are used to indicate the alignment in
 each dimension. If a stagger location is 
 centered in a dimension (e.g. an edge in 2D), then that
 dimension is ignored in the alignment. This parameter is mostly 
-informational, however, if the {\tt staggerLocWidth} parameters 
+informational, however, if the {\tt coordWidth} parameters 
 are not set then its value determines where the default padding
 is placed. If not specified, then the default is to align all 
 staggers to the most negative, so the padding is on the positive side. 
@@ -1240,8 +1277,8 @@ The following code illustrates aligning the positive corner with the center.
 !EOE
 
 !BOC 
-   call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-          staggerLocAlign=(/+1,+1/), rc=rc)
+   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+          coordAlign=(/+1,+1/), rc=rc)
 !EOC  
 
 

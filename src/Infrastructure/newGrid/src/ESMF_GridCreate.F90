@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreate.F90,v 1.9 2007/06/07 00:22:50 oehmke Exp $
+! $Id: ESMF_GridCreate.F90,v 1.10 2007/06/07 06:34:23 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridCreate.F90,v 1.9 2007/06/07 00:22:50 oehmke Exp $'
+      '$Id: ESMF_GridCreate.F90,v 1.10 2007/06/07 06:34:23 oehmke Exp $'
 
 
 
@@ -944,6 +944,8 @@
       function ESMF_GridCreateShapeArb(name,coordTypeKind,  &
                         minIndex, maxIndex, localIndices, &
                         connDim1, connDim2, connDim3, &
+                        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
+                        bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
                         indexflag, gridType, haloDepth, petMap, rc)
 !
@@ -959,6 +961,12 @@
        type(ESMF_GridConn),   intent(in),   optional  :: connDim1(2)
        type(ESMF_GridConn),   intent(in),   optional  :: connDim2(2)
        type(ESMF_GridConn),   intent(in),   optional  :: connDim3(2)
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2)
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2)
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2)
+       integer,               intent(in),   optional  :: bipolePos1(2)
+       integer,               intent(in),   optional  :: bipolePos2(2)
+       integer,               intent(in),   optional  :: bipolePos3(2)
        integer,               intent(in),   optional  :: coordDep1(:)
        integer,               intent(in),   optional  :: coordDep2(:)
        integer,               intent(in),   optional  :: coordDep3(:)
@@ -1009,6 +1017,42 @@
 !      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
 !       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
 !       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+! \item[{[poleStaggerLoc1]}] 
+!     Two element array describing the index dimension 1 connections.
+!      The first element represents the minimum end of dimension 1.
+!      The second element represents the minimum end of dimension 1.
+!      If a pole, this describes which staggerlocation is at the pole at each end.
+!      If not present, the default is the edge.
+! \item[{[poleStaggerLoc2]}] 
+!     Two element array describing the index dimension 2 connections.
+!      The first element represents the minimum end of dimension 2.
+!      The second element represents the minimum end of dimension 2.
+!      If a pole, this describes which staggerlocation is at the pole at each end.
+!      If not present, the default is the edge.
+! \item[{[poleStaggerLoc3]}] 
+!     Two element array describing the index dimension 3 connections.
+!      The first element represents the minimum end of dimension 3.
+!      The second element represents the minimum end of dimension 3.
+!      If a pole, this describes which staggerlocation is at the pole at each end.
+!      If not present, the default is the edge.
+! \item[{[bipolePos1]}] 
+!     Two element array describing the index dimension 1 connections.
+!      The first element represents the minimum end of dimension 1.
+!      The second element represents the minimum end of dimension 1.
+!      If a bipole, this gives the index position of one of the poles.
+!      The other is half way around. If not present, the default is 1.
+! \item[{[bipolePos2]}] 
+!     Two element array describing the index dimension 2 connections.
+!      The first element represents the minimum end of dimension 2.
+!      The second element represents the minimum end of dimension 2.
+!      If a bipole, this gives the index position of one of the poles.
+!      The other is half way around. If not present, the default is 1.
+! \item[{[bipolePos3]}] 
+!     Two element array describing the index dimension 3 connections.
+!      The first element represents the minimum end of dimension 3.
+!      The second element represents the minimum end of dimension 3.
+!      If a bipole, this gives the index position of one of the poles.
+!      The other is half way around. If not present, the default is 1.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[coordDep1]}] 
@@ -1065,6 +1109,8 @@
       function ESMF_GridCreateShapeBlk(name,coordTypeKind,  &
                         minIndex, maxIndex, blockDecomp, &
                         connDim1, connDim2, connDim3, &
+                        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
+                        bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
                         indexflag, gridType, haloDepth, petMap, rc)
 !
@@ -1080,6 +1126,12 @@
        type(ESMF_GridConn),   intent(in),   optional  :: connDim1(2)
        type(ESMF_GridConn),   intent(in),   optional  :: connDim2(2)
        type(ESMF_GridConn),   intent(in),   optional  :: connDim3(2)
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2)
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2)
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2)
+       integer,               intent(in),   optional  :: bipolePos1(2)
+       integer,               intent(in),   optional  :: bipolePos2(2)
+       integer,               intent(in),   optional  :: bipolePos3(2)
        integer,               intent(in),   optional  :: coordDep1(:)
        integer,               intent(in),   optional  :: coordDep2(:)
        integer,               intent(in),   optional  :: coordDep3(:)
@@ -1129,6 +1181,42 @@
 !      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
 !       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
 !       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+! \item[{[poleStaggerLoc1]}] 
+!     Two element array describing the index dimension 1 connections.
+!      The first element represents the minimum end of dimension 1.
+!      The second element represents the minimum end of dimension 1.
+!      If a pole, this describes which staggerlocation is at the pole at each end.
+!      If not present, the default is the edge.
+! \item[{[poleStaggerLoc2]}] 
+!     Two element array describing the index dimension 2 connections.
+!      The first element represents the minimum end of dimension 2.
+!      The second element represents the minimum end of dimension 2.
+!      If a pole, this describes which staggerlocation is at the pole at each end.
+!      If not present, the default is the edge.
+! \item[{[poleStaggerLoc3]}] 
+!     Two element array describing the index dimension 3 connections.
+!      The first element represents the minimum end of dimension 3.
+!      The second element represents the minimum end of dimension 3.
+!      If a pole, this describes which staggerlocation is at the pole at each end.
+!      If not present, the default is the edge.
+! \item[{[bipolePos1]}] 
+!     Two element array describing the index dimension 1 connections.
+!      The first element represents the minimum end of dimension 1.
+!      The second element represents the minimum end of dimension 1.
+!      If a bipole, this gives the index position of one of the poles.
+!      The other is half way around. If not present, the default is 1.
+! \item[{[bipolePos2]}] 
+!     Two element array describing the index dimension 2 connections.
+!      The first element represents the minimum end of dimension 2.
+!      The second element represents the minimum end of dimension 2.
+!      If a bipole, this gives the index position of one of the poles.
+!      The other is half way around. If not present, the default is 1.
+! \item[{[bipolePos3]}] 
+!     Two element array describing the index dimension 3 connections.
+!      The first element represents the minimum end of dimension 3.
+!      The second element represents the minimum end of dimension 3.
+!      If a bipole, this gives the index position of one of the poles.
+!      The other is half way around. If not present, the default is 1.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[coordDep1]}] 
@@ -1185,6 +1273,8 @@
       function ESMF_GridCreateShapeReg(name,coordTypeKind, minIndex,  &
                         countsPerDEDim1,countsPerDeDim2, countsPerDEDim3, &
                         connDim1, connDim2, connDim3, &
+                        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
+                        bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
                         indexflag, gridType, haloDepth, petMap, rc)
 !
@@ -1201,6 +1291,12 @@
        type(ESMF_GridConn),   intent(in),   optional  :: connDim1(2)
        type(ESMF_GridConn),   intent(in),   optional  :: connDim2(2)
        type(ESMF_GridConn),   intent(in),   optional  :: connDim3(2)
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2)
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2)
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2)
+       integer,               intent(in),   optional  :: bipolePos1(2)
+       integer,               intent(in),   optional  :: bipolePos2(2)
+       integer,               intent(in),   optional  :: bipolePos3(2)
        integer,               intent(in),   optional  :: coordDep1(:)
        integer,               intent(in),   optional  :: coordDep2(:)
        integer,               intent(in),   optional  :: coordDep3(:)
@@ -1256,7 +1352,43 @@
 !      The second element represents the minimum end of dimension 3.
 !      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
 !       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
-!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be.
+! \item[{[poleStaggerLoc1]}] 
+!     Two element array describing the index dimension 1 connections.
+!      The first element represents the minimum end of dimension 1.
+!      The second element represents the minimum end of dimension 1.
+!      If a pole, this describes which staggerlocation is at the pole at each end.
+!      If not present, the default is the edge.
+! \item[{[poleStaggerLoc2]}] 
+!     Two element array describing the index dimension 2 connections.
+!      The first element represents the minimum end of dimension 2.
+!      The second element represents the minimum end of dimension 2.
+!      If a pole, this describes which staggerlocation is at the pole at each end.
+!      If not present, the default is the edge.
+! \item[{[poleStaggerLoc3]}] 
+!     Two element array describing the index dimension 3 connections.
+!      The first element represents the minimum end of dimension 3.
+!      The second element represents the minimum end of dimension 3.
+!      If a pole, this describes which staggerlocation is at the pole at each end.
+!      If not present, the default is the edge.
+! \item[{[bipolePos1]}] 
+!     Two element array describing the index dimension 1 connections.
+!      The first element represents the minimum end of dimension 1.
+!      The second element represents the minimum end of dimension 1.
+!      If a bipole, this gives the index position of one of the poles.
+!      The other is half way around. If not present, the default is 1.
+! \item[{[bipolePos2]}] 
+!     Two element array describing the index dimension 2 connections.
+!      The first element represents the minimum end of dimension 2.
+!      The second element represents the minimum end of dimension 2.
+!      If a bipole, this gives the index position of one of the poles.
+!      The other is half way around. If not present, the default is 1.
+! \item[{[bipolePos3]}] 
+!     Two element array describing the index dimension 3 connections.
+!      The first element represents the minimum end of dimension 3.
+!      The second element represents the minimum end of dimension 3.
+!      If a bipole, this gives the index position of one of the poles.
+!      The other is half way around. If not present, the default is 1. 
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[coordDep1]}] 
