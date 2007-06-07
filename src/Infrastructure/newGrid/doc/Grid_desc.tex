@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.23 2007/05/24 05:21:37 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.24 2007/06/07 13:48:44 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -9,8 +9,9 @@
 % Licensed under the University of Illinois-NCSA License.
 
 The ESMF Grid class is used to describe the geometry and discretization
-of a structured physical grid.  It also contains the description of the
-grid's underlying topology and the decomposition of the physical grid
+of logically rectangular physical grids.  It also contains the
+description of the grid's underlying topology and the decomposition
+of the physical grid
 across the available computational resources.  The most frequent 
 use of the Grid class is to describe physical grids in user
 code so that sufficient information is available to perform ESMF
@@ -21,11 +22,11 @@ methods such as regridding.
 \hline
 \vspace{.01in}
 {\bf Key Features} \\[.01in]
-Representation of structured grids, including uniform and
-rectilinear grids (e.g. lat-lon grids), curvilinear grids (e.g. displaced pole grids), 
-and grids formed by connected logically rectangular regions (e.g. cubed
-sphere grids).\\
-Support for 2D, 3D, and higher dimension grids.\\ 
+Representation of grid formed by logically rectangular regions,
+including uniform and rectilinear grids (e.g. lat-lon grids),
+curvilinear grids (e.g. displaced pole grids), and grids formed
+by connected logically rectangular regions (e.g. cubed sphere grids).\\
+Support for 1D, 2D, 3D, and higher dimension grids.\\ 
 Distribution of grids across computational resources for parallel
 operations - users set which grid dimensions are distributed.\\
 Grids can be created already distributed, so that no single
@@ -40,39 +41,13 @@ custom stagger locations.\\ [.03in] \hline
 \end{tabular}
 \end{center}
 
-\subsubsection{Supported Grids}
-
-The ESMF Grid class is based on the concepts described in {\it A Standard Descriptor 
-of Grids Used in Earth System Models} [Balaji 2006].  In this document
-Balaji introduces the mosaic concept as a means of describing a wide variety of
-Earth system model grids.  A mosaic is composed of logically rectangular
-grid tiles connected at their edges.  Mosaic grids includes simple,
-single tile grids as a special case.
-
-Grid tiles can have uniform, rectilinear, or curvilinear
-coordinates.  The coordinates of {\bf uniform} grids are equally spaced along their
-axes, and can be fully specified by the coordinates of the two opposing points
-that define the grid's physical span.  The coordinates of {\bf rectilinear} grids
-are unequally spaced along their axes, and can be fully specified by giving
-the spacing of grid points along each axis.  The coordinates of {\bf curvilinear 
-grids} must be specified by giving the explicit set of coordinates for each
-grid point.  Curvilinear grids are often uniform or rectangular grids that 
-have been warped; for example, to place a pole over a land mass so that it
-does not affect the computations performed on an ocean model grid.  Figure
-\ref{fig:LogRectGrids} shows examples of each type of grid.
-
-Any of these logically rectangular grid types can be combined through edge
-connections to form a mosaic.  Cubed sphere and yin-yang grids are examples
-of mosaic grids.
- 
-\begin{figure}
-\scalebox{0.9}{\includegraphics{LogRectGrids}}
-\caption{Types of logically rectangular grid tiles.  Red circles show the
-values needed to specify grid coordinates for each type.}
-\label{fig:LogRectGrids}
-\end{figure}
-
 \subsubsection{Grid Representation in ESMF}
+
+ESMF Grids are based on the concepts described in {\it A Standard Descriptor of Grids Used in Earth System Models} [Balaji 2006].  In this document
+Balaji introduces the mosaic concept as a means of describing
+a wide variety of Earth system model grids.  A {\bf mosaic} is
+composed of grid tiles connected at their edges.  Mosaic grids
+includes simple, single tile grids as a special case.  
 
 The ESMF Grid class is a representation of a mosaic grid.  Each ESMF
 Grid is constructed of one or more logically rectangular {\bf Tiles}.
@@ -82,21 +57,36 @@ of the world covered by one face of a cubed sphere grid).
 The piece of a Tile that resides on one DE (for simple cases, a DE
 can be thought of as a processor - see section on the DELayout)
 is called a {\bf LocalTile}.  For example, the six faces of a cubed
-sphere grid are each Tiles, and each Tile can be divided across DEs
-into many LocalTiles. 
+sphere grid are each Tiles, and each Tile can be divided into many
+LocalTiles.  
 
 Every ESMF Grid contains a DistGrid object, which defines the Grid's
 index space, topology, distribution, and connectivities.  It enables
 the user to define the complex edge relationships of tripole and other
 grids.  The DistGrid can be created explicitly and passed into a Grid
 creation routine, or it can be created implicitly if the user takes
-a Grid creation shortcut.  These are described in subsequent
-sections.
+a Grid creation shortcut.  Options for grid creation are described in 
+more detail in section \ref{sec:gridcreateoptions}
 
-\subsubsection{Shortcuts for Shape Specification and Periodicity}
+\subsubsection{Supported Grids}
+
+The range of supported grids in ESMF can be defined by:
+\begin{itemize}
+\item Types of topologies and shapes supported.  ESMF supports one or
+more logically rectangular grid Tiles with connectivities specified
+between cells.  For more details see section \ref{sec:ShapeShortcut}.
+\item Types of distributions supported.  ESMF supports  regular,
+irregular, or arbitrary distributions of data.  For more details see section 
+\ref{sec:desc:dist}.
+\item Types of coordinates supported.  ESMF supports uniform, rectilinear,
+and curvilinear coordinates.  For more details see section \ref{sec:coordspec}.
+\end{itemize}
+
+\subsubsection{Grid Topologies and Periodicity}
 \label{sec:ShapeShortcut}
-ESMF has shortcuts for the creation of standard Grid {\bf shapes} up
-to 3D.  In many cases, these enable the user to bypass the step of creating 
+ESMF has shortcuts for the creation of standard Grid topologies 
+or{\bf shapes} up to 3D.  In many cases, these enable the user to
+bypass the step of creating 
 a DistGrid before creating the Grid.  The basic call is 
 {\tt ESMF\_GridCreateShape()}.  With this call, the user can specify for
 each dimension whether there is no connection, it is periodic, it
@@ -128,7 +118,8 @@ or involves more than three dimensions, a DistGrid can be created
 to specify the shape in detail.  This DistGrid is then passed
 into a Grid create call.
 
-\subsubsection{Shortcuts for Specification of Grid Distribution}\label{sec:desc:dist}
+\subsubsection{Grid Distribution}
+\label{sec:desc:dist}
 
 ESMF Grids have several options for data distribution (also referred to
 as decomposition).  The user specifies which dimensions 
@@ -156,16 +147,31 @@ a 6x6 matrix {\bf a}, and an arbitrary decomposition for a 6x3 matrix {\bf b}.}
 A distribution can also be specified using the DistGrid.  This
 DistGrid is then passed into a Grid create call.
 
-\subsubsection{Coordinate Specification}
+\subsubsection{Grid Coordinates}
+\label{sec:coordspec}
+Grid Tiles can have uniform, rectilinear, or curvilinear
+coordinates.  The coordinates of {\bf uniform} grids are equally spaced along their axes, and can be fully specified by the coordinates of the two opposing points
+that define the grid's physical span.  The coordinates of {\bf rectilinear} grids
+are unequally spaced along their axes, and can be fully specified by giving
+the spacing of grid points along each axis.  The coordinates of {\bf curvilinear 
+grids} must be specified by giving the explicit set of coordinates for each
+grid point.  Curvilinear grids are often uniform or rectangular grids that 
+have been warped; for example, to place a pole over a land mass so that it
+does not affect the computations performed on an ocean model grid.  Figure
+\ref{fig:LogRectGrids} shows examples of each type of grid.
 
-Grid Tile coordinates are specified
-according to the information needed for the coordinate type.
-Uniform grids are specified with coordinate corner
-points, rectilinear grids with coordinate locations for each dimension,
-and curvilinear grids with coordinates for each grid point.  Hybrid
-grids - for example, a curvilinear horizontal grid with uniform spacing
-in the vertical dimension - can be specified as well.  Each of these
-coordinate types can be set for each of the standard grid shapes
+Any of these logically rectangular grid types can be combined through edge
+connections to form a mosaic.  Cubed sphere and yin-yang grids are examples
+of mosaic grids.
+ 
+\begin{figure}
+\scalebox{0.9}{\includegraphics{LogRectGrids}}
+\caption{Types of logically rectangular grid tiles.  Red circles show the
+values needed to specify grid coordinates for each type.}
+\label{fig:LogRectGrids}
+\end{figure}
+
+Each of these coordinate types can be set for each of the standard grid shapes
 described in section \ref{sec:ShapeShortcut}.  
 
 The table below shows how examples of common single Tile grids fall 
@@ -179,11 +185,11 @@ of the grids in the table can have a regular or arbitrary distribution.
 \hline
 {\bf Sphere} & Global uniform lat-lon grid & Gaussian grid & Displaced pole grid \\
 \hline
-{\bf Rectangle} & Regional uniform lat-lon grid & Gaussian grid section & Mercator grid section\\
+{\bf Rectangle} & Regional uniform lat-lon grid & Gaussian grid section & Polar stereographic grid section\\
 \hline
 \end{tabular}
 
-\subsubsection{Shortcuts for Coordinate Specification and Grid Generation}
+\subsubsection{Coordinate Specification and Generation}
 
 There are two ways of specifying coordinates in ESMF.  The
 first way is for the user to {\bf set} the coordinates.  The second 
@@ -193,7 +199,7 @@ the coordinates.
 The only ESMF generation routine currently available is for uniform grids.
 
 See Section~\ref{sec:usage:coordstore} for more description and examples of
-setting Tile coordinates.
+setting coordinates.
 
 \subsubsection{Staggering}
 
@@ -222,6 +228,7 @@ For examples and a full description of the stagger interface
 please see Section~\ref{sec:usage:staggerloc}. 
 
 \subsubsection{Stages in Grid Creation} 
+\label{sec:gridcreatestages}
 
 In ESMF there are two stages to Grid creation.
 \begin{enumerate}
@@ -246,23 +253,10 @@ before setting its coordinates, or when multiple components
 contribute to the definition of a grid. 
 
 \subsubsection{Options for Grid Creation}
-
-The Grid class uses create, set or generate, and 
-commit calls during grid creation.  Commit calls indicate
-that the grid has achieved states of completion or readiness.
-
-There are two simple rules for when commit calls are required:
-\begin{enumerate}
-\item An ESMF\_GridCommit() call with an ESMF\_GRIDSTATUS\_SHAPE\_READY
-argument is required when ESMF\_GridCreateEmpty() is used to initiate
-Grid creation.
-\item An ESMF\_GridCommit() call with an ESMF\_GRIDSTATUS\_REGRID\_READY
-argument is required before using any ESMF Grid in a regridding call.
-\end{enumerate}
+\label{gridcreateoptions}
 
 The following chart shows typical creation calls and 
-sequences.  Selected arguments are shown where helpful
-to understanding.
+sequences.  
 
 \medskip
 \begin{tabular}{|p{2.6in}|p{1in}|p{1in}|p{1.4in}|}
