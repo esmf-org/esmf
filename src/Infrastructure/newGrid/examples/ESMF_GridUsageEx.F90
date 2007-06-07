@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.19 2007/05/24 05:28:25 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.20 2007/06/07 00:22:49 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-   ! Create the empty grid
+   ! Create the grid
    grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/),     &
             countsPerDEDim2=(/7,7,6/), indexflag=ESMF_GLOBAL, &
             rc=rc)
@@ -64,11 +64,11 @@ program ESMF_GridCreateEx
    call ESMF_GridAddStaggerLoc(grid2D, ESMF_STAGGERLOC_CENTER, rc=rc)
 
    ! Get the X coordinate bounds
-   call ESMF_GridLocalTileGet(grid2D, coordComp=1, &
+   call ESMF_GridLocalTileGet(grid2D, coord=1, &
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
 
    ! Get pointers to the X coordinate component storage
-   call ESMF_GridLocalTileGetCoord(grid2D, coordComp=1, coordsX, rc=rc)
+   call ESMF_GridLocalTileGetCoord(grid2D, coord=1, coordsX, rc=rc)
 
    ! Calculate and set the X coordinates
    do i=lbnd(1),ubnd(1)
@@ -76,19 +76,21 @@ program ESMF_GridCreateEx
    enddo
 
    ! Get the Y coordinate bounds
-   call ESMF_GridLocalTileGet(grid2D, coordComp=2, &
+   call ESMF_GridLocalTileGet(grid2D, coord=2, &
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
 
-   ! Get pointers to the Y coordinate component storage
-   call ESMF_GridLocalTileGetCoord(grid2D, coordComp=2, coordsY, rc=rc)
+   ! Get pointers to the X coordinate component storage
+   call ESMF_GridLocalTileGetCoord(grid2D, coord=2, coordsY, rc=rc)
 
    ! Calculate and set the Y coordinates
    do i=lbnd(1),ubnd(1)
         coordsY(i) = i*10.0
    enddo
 
-   ! We now have all our coordinates so commit as regrid ready.
-   call ESMF_GridCommit(grid2D, ESMF_GRIDSTATUS_REGRID_READY, rc=rc)
+   ! Set the cell area from array cellArea into the newly created Grid
+   call ESMF_GridSetMetricFromArray(grid2D, "Area", &
+          staggerLoc=ESMF_STAGGERLOC_CENTER, &
+          array=cellArea, rc=rc)
 
 !EOC
 
@@ -242,17 +244,17 @@ program ESMF_GridCreateEx
 !\subsubsection{Creation: Coordinate Specification And Index Space Dependency}
 !
 ! To specify how the coordinate arrays are mapped to the 
-! index dimensions the arguments {\tt coordCompDep1,2,3}
+! index dimensions the arguments {\tt coordDep1,2,3}
 ! are used. The size of the arrays specify the rank
 ! of the cooresponding coordinate component array.
-! (e.g. size(coordCompDep1)=2 means that coordinate
+! (e.g. size(coordDep1)=2 means that coordinate
 ! component 1 (e.g. x) is 2D) The entries in
-! {\tt coordCompDep} specify which index dimension
+! {\tt coordDep} specify which index dimension
 ! the cooresponding coordinate component dimension
-! maps to.  (e.g. coordCompDep1=(/1,2/) means that
+! maps to.  (e.g. coordDep1=(/1,2/) means that
 ! the first dimension of component 1 maps to index dimension
 ! 1 and the second maps to index dimension 2.) If not set,
-! then {\tt coordCompDepX} defaults to (/X/), in other
+! then {\tt coordDepX} defaults to (/X/), in other
 ! words rectilinear.  
 ! 
 ! The following call demonstrates the creation of a
@@ -265,8 +267,8 @@ program ESMF_GridCreateEx
 
 !BOC
    grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-          countsPerDEDim2=(/7,7,6/), coordCompDep1=(/2/), &
-          coordCompDep2=(/1/), rc=rc)   
+          countsPerDEDim2=(/7,7,6/), coordDep1=(/2/), &
+          coordDep2=(/1/), rc=rc)   
 !EOC 
 
 !BOE
@@ -277,8 +279,8 @@ program ESMF_GridCreateEx
 
 !BOC
    grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-          countsPerDEDim2=(/7,7,6/), coordCompDep1=(/1,2/), &
-          coordCompDep2=(/1,2/), rc=rc)   
+          countsPerDEDim2=(/7,7,6/), coordDep1=(/1,2/), &
+          coordDep2=(/1,2/), rc=rc)   
 !EOC 
 
 !BOE
@@ -292,8 +294,8 @@ program ESMF_GridCreateEx
 !BOC
    grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
           countsPerDEDim2=(/7,7,6/), countsPerDEDim1=(/30/), &
-          coordCompDep1=(/1,2/), coordCompDep2=(/1,2/), &
-          coordCompDep3=(/3/), rc=rc)   
+          coordDep1=(/1,2/), coordDep2=(/1,2/), &
+          coordDep3=(/3/), rc=rc)   
 !EOC 
 
 !BOE
@@ -366,17 +368,19 @@ program ESMF_GridCreateEx
 !EOC
 
 !BOE
-!\subsubsection{Creation: Set/Commit}\label{sec:usage:setcommit}
+!\subsubsection{Creation: Empty/Set}\label{sec:usage:setcommit}
 ! 
 !  As an alternative to the monolithic one call create, ESMF provides
-! a set/commit paradigm for grid creation which allows the user
+! an incremental paradigm for grid creation which allows the user
 ! to break up creation for clarity or convenience. 
 ! To do this, the user first creates an empty grid. Next, a series of 
 ! set calls are used to fill in the details of the grid. Note that, 
 ! a series of sets identical to the shortcut shape create calls
 ! has been provided for the user's convenience in using this
-! paradigm.  Finally after the sets, a commit
-! call is used to validate and create the final, usable, grid.
+! paradigm.  Finally after the sets, any other grid call 
+! will internally validate and create the final, usable, grid.
+! For consistencies sake, the initial create empty call must occur on the 
+! same set of processors as the finally grid create call. 
 ! The following is an example illustrating this technique.  
 ! It creates a rectangular 10x20 grid with the center and corner stagger locations. 
 !EOE
@@ -390,10 +394,7 @@ program ESMF_GridCreateEx
    call ESMF_GridSetShapeBox(grid, countsPerDEDim1=(/5,5/), &
           countsPerDEDim1=(/7,7,6/), rc=rc)
 
-   ! Turn grid into a usable ESMF Grid
-   call ESMF_GridCommit(grid, ESMF_GRIDSTATUS_SHAPE_READY, rc=rc)
-
-   ! Add Center Stagger Location
+   ! Create the Grid and then add a Center Stagger Location
    call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
    ! Add Corner Stagger Location
@@ -407,9 +408,12 @@ program ESMF_GridCreateEx
 ! In this document, stagger location refers to the places in a Grid
 ! cell that can contain data. For example, data can be located
 ! at the cell center,  at the cell corner, at the cell face, and so on into
-! higher dimensions. The ESMF Grid class
-! allows the specification of multiple stagger locations per
-! Grid.  When setting or retrieving
+! higher dimensions. After Grid creation the user can create a field at any of the stagger
+! locations in a Grid. However, the user must specifically add coordinates
+! to a stagger location if they want them. Coordinates in a Grid 
+! mau be neccesary for some ESMF functionality (e.g. regrid). The ESMF Grid class
+! allows the user to put coordianates at multiple stagger locations per
+! Grid.  When adding, or accessing
 ! coordinate data the stagger location is specified to tell the Grid method 
 ! from where in the cell to get the data. There are predefined stagger locations
 ! (see Section~\ref{sec:opt:staggerloc}), however, 
@@ -423,30 +427,30 @@ program ESMF_GridCreateEx
 !
 ! To set which stagger locations in a Grid have coordinate data, the subroutine
 ! {\tt ESMF\_GridAddStaggerLoc} is used. The following example
-! adds the corner stagger location to {\tt grid}.
+! adds coordinate storage to the corner stagger location in {\tt grid}.
 !EOE
 
 !BOC 
-   call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGER_CORNER, rc=rc)
+   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGER_CORNER, rc=rc)
 !EOC  
 
 !BOE
-! The user may also add coordinate data at the same time as adding
-! the stagger locations.  The following example
-! adds the corner stagger location to {\tt grid}, plus associated 
-! coordinate data. Note, the input coordinate arrays (CoordX, CoordY) may be either
-! F90 or ESMF Array's (The F90 arrays are restricted to single DE to PET mappings).
-! They also need to be of the proper size and rank to coorespond to the Grid. 
+! The user may also set the coordinate data at the same time as adding
+! the coordinate storage.  The following example
+! adds coordinate storage to the corner stagger location in {\tt grid}, plus sets
+! the associated coordinate data. Note, the input coordinate arrays (CoordX, CoordY)
+! may be either F90 or ESMF Array's (The F90 arrays are restricted to single DE to
+! PET mappings). They also need to be of the proper size and rank to coorespond to the Grid. 
 !EOE
 
 !BOC 
-   call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGER_CORNER, &
-          comp1=CoordX, comp2=CoordY, rc=rc)
+   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGER_CORNER, &
+          coord1=CoordX, coord2=CoordY, rc=rc)
 !EOC  
 
 
 !BOE
-!\subsubsection{Data Access}
+!\subsubsection{Coordinate Data Access}
 !
 ! Once a Grid has been created the user has several options to access
 ! the Grid coordinate data. The first pair of these allow the user
@@ -461,7 +465,7 @@ program ESMF_GridCreateEx
 !BOC
    call ESMF_GridSetCoordFromArray(grid, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
-          coordComp=1, array=xCoord, rc=rc)
+          coord=1, array=xCoord, rc=rc)
 !EOC
 
 !BOE
@@ -475,7 +479,7 @@ program ESMF_GridCreateEx
 
 !BOC
    call ESMF_GridGetCoordIntoArray(grid, &
-          staggerLoc=ESMF_STAGGERLOC_CORNER,coordComp=2, &
+          staggerLoc=ESMF_STAGGERLOC_CORNER,coord=2, &
           array=copyOfY, docopy=ESMF_DATA_COPY, rc=rc)
 !EOC
 
@@ -493,7 +497,7 @@ program ESMF_GridCreateEx
 !BOC
    call ESMF_GridLocalTileSetCoord(grid, tile=2, &
           staggerLoc=ESMF_STAGGERLOC_CORNER,    &
-          coordComp=1, fptr, &
+          coord=1, fptr, &
           doCopy=ESMF_DATA_REF, rc=rc)
 !EOC
 
@@ -507,7 +511,7 @@ program ESMF_GridCreateEx
 
 !BOC
    call ESMF_GridLocalTileGetCoord(grid, tile=1, localDE=2, &
-          coordComp=3, fptr, doCopy=ESMF_DO_COPY, rc=rc)
+          coord=3, fptr, doCopy=ESMF_DO_COPY, rc=rc)
 
 !EOC
 
@@ -578,6 +582,113 @@ program ESMF_GridCreateEx
    call ESMF_GridHalo(grid, rc=rc)
 !EOC
 
+
+!BOE
+!\subsubsection{Metric Creation}
+!
+! There are several options for adding metric data to 
+! a Grid. The first of these allows the user to 
+! allocate storage for the metric in the Grid. 
+! The following call adds metric "Area" to the 
+! grid at the center stagger location. The metric is 
+! a 4 byte real.  
+! EOE
+
+!BOC
+   call ESMF_GridAddMetric(grid, name="Area", metricTypeKind=ESMF_TYPEKIND_R4, &
+          staggerLoc=ESMF_STAGGERLOC_CENTER, rc)
+!EOC
+
+!BOE
+! The next option allows the user to add an array
+! as a metric.  The following call adds metric "Length" to the 
+! grid at the edge stagger location.  
+!EOE
+
+!BOC
+   call ESMF_GridAddMetricFromArray(grid, "Length", &
+          staggerLoc=ESMF_STAGGERLOC_EDGE1, &
+          array=length, rc=rc)
+!EOC
+
+!BOE
+! The final option allows the user to add a metric constructed
+! out of a series of fortran arrays. Note that this option is restricted
+! to situations where there is a 1-to-1 DE to PET mapping. 
+! The following call adds metric "Length" to the 
+! grid at the edge stagger location. It does this from 
+! fortran array length.   
+!EOE
+
+!BOC
+   call ESMF_GridAddMetricFromFptr(grid, "Length", &
+          staggerLoc=ESMF_STAGGERLOC_EDGE1, &
+          fptr=length, rc=rc)
+!EOC
+
+
+!BOE
+!\subsubsection{Metric Data Access}
+!
+! Once a Grid has been created the user has several options to access metric
+! data. The first pair of these allow the user
+! to use the {\tt ESMF\_Array} class to set or get metric data 
+! across the whole Grid. {\tt ESMF\_GridSetMetricFromArray} allows the user to set metric
+! data from an Array. For example, the following sets the 
+! cell area at the center stagger location to 
+! those in the array Area.
+!EOE
+
+
+!BOC
+   call ESMF_GridSetMetricFromArray(grid, name="CellArea", &
+          array=area, rc=rc)
+!EOC
+
+
+!BOE
+! {\tt ESMF\_GridGetMetricIntoArray}, allows the user
+! to get the Array (a direct reference or a copy) which
+! contains the metric data on a Grid. The user
+! can then employ any of the standard {\tt ESMF\_Array} tools to operate
+! on the data. The following copies the area from the grid
+! and puts it into Array copyOfArea. 
+! EOE
+
+!BOC
+   call ESMF_GridGetMetricIntoArray(grid, &
+          name="Area", array=copyOfY, docopy=ESMF_DATA_COPY, rc=rc)
+!EOC
+
+!BOE
+! The second pair of methods enable the user to set or get metric data using
+! a fortran pointer. These methods only work with the local piece of the 
+! Grid on the DE. {\tt ESMF\_GridLocalTileSetMetric} enables the user
+! to set data into the local piece of the metric residing on the DE.
+! The following call gets a pointer (fptr) to the fortran array holding the 
+! area for the piece of tile 2 which is on this processor. It
+! defaults to the first DE because it isn't specified. 
+!EOE
+
+!BOC
+   call ESMF_GridLocalTileSetMetric(grid, name="Area", tile=2, &
+          fptr, doCopy=ESMF_DATA_REF, rc=rc)
+!EOC
+
+!BOE
+! The call {\tt ESMF\_GridLocalTileGetMetric} gets a fortran pointer to 
+! the metric data. The user can then operate on this array in the usual
+! manner. The following call allocates an array (fptr) and
+! makes copy of the part of tile 1's area which
+! lies on the second DE. 
+!EOE
+
+!BOC
+   call ESMF_GridLocalTileGetMetric(grid, name="Area", tile=1, localDE=2, &
+          fptr, doCopy=ESMF_DO_COPY, rc=rc)
+
+!EOC
+
 !BOE
 !\subsubsection{Grid Attributes}
 !
@@ -626,9 +737,6 @@ program ESMF_GridCreateEx
    call ESMF_GridGenCoordsUni(grid, begCoord=(/0.0,0.0,0.0/), &
           endCoord=(/200.0, 200.0, 200.0/), rc=rc)
  
-   ! We now have all our coordinates so commit as regrid ready.
-   call ESMF_GridCommit(grid, ESMF_GRIDSTATUS_REGRID_READY, rc=rc)
-
 !EOC
 
 
@@ -699,8 +807,8 @@ program ESMF_GridCreateEx
    grid=ESMF_GridCreateShape(coordTypeKind=ESMF_TYPEKIND_R4, &
                            countsPerDEDim1=(/10,10/), &
                            countsPerDEDim2=(/10,10/), &
-                           coordCompDep1=(/1,2/), &
-                           coordCompDep2=(/1,2/), &
+                           coordDep1=(/1,2/), &
+                           coordDep2=(/1,2/), &
                            petMap=petMap, &
                            rc=rc)   
 
@@ -708,18 +816,15 @@ program ESMF_GridCreateEx
    ! Add a center stagger location and at the same time set {\tt grid} to 
    ! reference the coordinate arrays. 
    call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                  coordComp1=fptrX, coordComp2=fptrY, rc=rc)
+                  coord1=fptrX, coord2=fptrY, rc=rc)
  
-   ! We now have all our coordinates so commit as regrid ready.
-   call ESMF_GridCommit(grid, ESMF_GRIDSTATUS_REGRID_READY, rc=rc)
-
 !EOC
 
 
 !BOE
-! \subsubsection{Example: Grid Creation from Existing F90 Arrays Using CreateEmpty/Set/Commit}
+! \subsubsection{Example: Grid Creation from Existing F90 Arrays Using CreateEmpty/Set}
 !
-!  This example illustrates the use of the CreateEmpty/Set/Commit paradigm.
+!  This example illustrates the use of the CreateEmpty/Set paradigm.
 !  It repeats the above example using this grid creation technique.
 !EOE
 
@@ -760,20 +865,13 @@ program ESMF_GridCreateEx
           countsPerDEDim2=(/10,10/), petMap=petMap, rc=rc)   
 
    ! Set the grid coordinate array index dependency
-   grid=ESMF_GridSetShape(coordCompDep1=(/1,2/), coordCompDep2=(/1,2/), &
+   grid=ESMF_GridSetShape(coordDep1=(/1,2/), coordDep2=(/1,2/), &
           rc=rc)   
 
-  ! We now have all our information set in the grid so commit the shape.
-  call ESMF_GridCommit(grid2D1, ESMF_GRIDSTATUS_SHAPE_READY, rc=rc)
-
-
-  ! Add a center stagger location and at the same time set {\tt grid} to 
+  ! Create the grid and add a center stagger location and at the same time set {\tt grid} to 
   ! reference the coordinate arrays. 
   call ESMF_GridAddStaggerLoc(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                  coordComp1=fptrX, coordComp2=fptrY, rc=rc)
- 
-  ! We now have all our coordinate data so commit as regrid ready.
-  call ESMF_GridCommit(grid2D1, ESMF_GRIDSTATUS_REGRID_READY, rc=rc)
+                  coord1=fptrX, coord2=fptrY, rc=rc)
 
 !EOC
 
@@ -819,9 +917,9 @@ program ESMF_GridCreateEx
                               countsPerDEDim3=(/gridVertSize/), &
                               connDim1=(/ESMF_GRIDCONN_POLE,ESMF_GRIDCONN_POLE/), & 
                               connDim2=(/ESMF_GRIDCONN_PERIODIC,ESMF_GRIDCONN_PERIODIC/), &
-                              coordCompDep1=(/1,2/), &
-                              coordCompDep2=(/1,2/), &
-                              coordCompDep3=(/3/), &
+                              coordDep1=(/1,2/), &
+                              coordDep2=(/1,2/), &
+                              coordDep3=(/3/), &
                               indexflag=ESMF_GLOBAL, &
                               rc=rc)   
 
@@ -834,13 +932,13 @@ program ESMF_GridCreateEx
 
   ! Set the horizontal coordinates by using the non-ESMF functions
   ! CalcHorzLat, CalcHorzLon to calculate them from the global indices. 
-   call ESMF_GridLocalTileGet(grid2D1, coordComp=1, &
+   call ESMF_GridLocalTileGet(grid2D1, coord=1, &
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
 
 
    ! Get pointers to the coordinate component storage
-   call ESMF_GridLocalTileGetCoord(grid2D1, coordComp=1, coordsLon, rc=rc)
-   call ESMF_GridLocalTileGetCoord(grid2D1, coordComp=2, coordsLat, rc=rc)
+   call ESMF_GridLocalTileGetCoord(grid2D1, coord=1, coordsLon, rc=rc)
+   call ESMF_GridLocalTileGetCoord(grid2D1, coord=2, coordsLat, rc=rc)
 
    ! Set the coordinates
    do j=lbnd(2),ubnd(2)
@@ -855,20 +953,17 @@ program ESMF_GridCreateEx
    ! CalcVert.
 
    ! We actually know teh bounds already, but go through the exercise anyway.
-   call ESMF_GridLocalTileGet(grid2D1, coordComp=3, &
+   call ESMF_GridLocalTileGet(grid2D1, coord=3, &
           computationalLBound=lbndV, computationalUBound=ubndV, rc=rc)
 
    ! Get pointers to the coordinate component storage
-   call ESMF_GridLocalTileGetCoord(grid2D1, coordComp=3, coordsVert, rc=rc)
+   call ESMF_GridLocalTileGetCoord(grid2D1, coord=3, coordsVert, rc=rc)
 
    ! Set the vertical coordinates
    do i=lbndV(1),ubndV(1)
         coordsVert(i) = CalcVert(i)
    enddo
 
-
-   ! We now have all our coordinates so commit as regrid ready.
-   call ESMF_GridCommit(grid2D1, ESMF_GRIDSTATUS_READY, rc=rc)
 !EOC
 
 
@@ -961,20 +1056,20 @@ program ESMF_GridCreateEx
 ! by the fact that the component arrays don't need to be the same dimension as
 ! each other or as the Grid. For example, for the 3D case, all 3 ESMF
 ! Arrays could be 1D, or x and y could be 2D while z is 1D.
-! The parameters {\tt coordCompRanks} and {\tt coordCompDimMap}
+! The parameters {\tt coordRanks} and {\tt coordDimMap}
 ! can be used to specify the factorization of the coordinate arrays. 
 !
 ! The default Grid has coordinate arrays the same rank as the Grid.
-! To alter this, the {\tt coordCompRanks} parameter can be used
+! To alter this, the {\tt coordRanks} parameter can be used
 ! to set the rank of the coordinate arrays.  The size of the parameter  
-! is the rank of the Grid. Each entry of {\tt coordCompRanks}  is the rank of 
+! is the rank of the Grid. Each entry of {\tt coordRanks}  is the rank of 
 ! the associated coordinate array. The following creates a 10x20
 ! 2D Grid where both the x and y coordinates are stored in 1D arrays. 
 !EOE
 
 !BOC 
    Grid2D=ESMF_GridCreate(maxIndex=(/10,20/), &
-            coordCompRanks=(/1,1/) , rc=rc)
+            coordRanks=(/1,1/) , rc=rc)
 !EOC  
 
 !BOE
@@ -991,11 +1086,11 @@ program ESMF_GridCreateEx
 ! and the 1D array is mapped to the other dimension. For all other cases, 
 ! the component arrays are just mapped in order starting from the first Grid dimension. 
 !
-! To alter the default mapping, the {\tt coordCompDimMap} argument can be used. 
+! To alter the default mapping, the {\tt coordDimMap} argument can be used. 
 ! The parameter is a 2D array where each dimension is the rank of the Grid.
 ! The first dimension indicates the component (e.g. x=1). The second dimension
 ! is an entry for each dimension of the coordinate array.  Each entry of 
-! {\tt coordCompDimMap}  tells which Grid dimension the corresponding
+! {\tt coordDimMap}  tells which Grid dimension the corresponding
 ! dimension maps to.  The following creates a 2D Grid where
 ! the single dimension of the x coordinate array is mapped to the second
 ! Grid dimension (i.e. 20) and the single dimension of the y coordinate array is
@@ -1003,10 +1098,10 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC 
-   coordCompDimMap(1,1)=2      ! Map X (i.e. 1) to second Grid dimension 
-   coordCompDimMap(2,1)=1      ! Map Y (i.e. 2) to first Grid dimension 
-   Grid2D=ESMF_GridCreate(maxIndex=(/10,20/), coordCompRanks=(/1,1/) , &
-               coordCompDimMap=coordCompDimMap, rc=rc)
+   coordDimMap(1,1)=2      ! Map X (i.e. 1) to second Grid dimension 
+   coordDimMap(2,1)=1      ! Map Y (i.e. 2) to first Grid dimension 
+   Grid2D=ESMF_GridCreate(maxIndex=(/10,20/), coordRanks=(/1,1/) , &
+               coordDimMap=coordDimMap, rc=rc)
 !EOC  
 
 !BOE
