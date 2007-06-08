@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.22 2007/06/07 18:14:43 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.23 2007/06/08 19:51:10 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,80 +36,104 @@ program ESMF_GridCreateEx
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, rc=rc)
 
-
-
 !BOE
-!\subsubsection{Example: Create 2D, Single-Tile, Uniform Grid}
+!\subsubsection{Simple Examples of Grid Creation and Use}
+!
+! This section starts with a few simple examples intended to 
+! get users familiar with basic Grid creation methods.
+!
+!\subsubsubsection{Create 2D Irregularly Distributed Grid
+!                  With Uniformly Spaced Coordinates}
 !
 ! The following is a simple example of creating a grid and
-! loading in a set of coordinates. This code creates a 10x20
-! rectilinear 2D grid with the coordinates varying from (10,10) to (100,200).
+! loading in a set of coordinates.  This code creates a 10x20
+! 2D grid with uniformly spaced coordinates varying from (10,10) to (100,200).
 ! The grid is partitioned using irregular distribution. In the first dimension
-! it is divided into two pieces both
-! of size 5. The grid is divided in the second dimension into 3
-! pieces of size 7,7 and 6.  The grid is created with
-! global indices to make it easier to generate the coordinates. 
-! After grid creation the local bounds and f90 arrays are retrieved
-! and the coordinates set. The metric "Area" is also added to the grid. 
+! it is divided into two pieces, the first with 3 grid cells per
+! DE and the second with 7 grid cells per DE. In the second dimension
+! the Grid is divided into 3 pieces, with 5, 9, and 6 cells per DE.
+! The Grid is created with global indices. After grid creation the
+! local bounds and native Fortran arrays are retrieved and the
+! coordinates are set by the user. 
 !
 !EOE
 
 !BOC
-   ! Create the grid
-   grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/),     &
-            countsPerDEDim2=(/7,7,6/), indexflag=ESMF_GLOBAL, &
+   !-------------------------------------------------------------------
+   ! Create the Grid:  Allocate space for the Grid object, define the
+   ! topology and distribution of the grid, and specify that it 
+   ! will have global coordinates.  Note that aperiodic bounds are
+   ! specified by default - if periodic bounds were desired they
+   ! would need to be specified using an additional gridConn argument.
+   !-------------------------------------------------------------------
+   grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/3,7/),     &
+            countsPerDEDim2=(/4,7,6/), indexflag=ESMF_GLOBAL, &
             rc=rc)
 
-   ! Add a stagger location
+   !-------------------------------------------------------------------
+   ! Allocate coordinate storage and associate it with the center
+   ! stagger location.  Since no coordinate values are specified in
+   ! this call no coordinate values are set yet.
+   !-------------------------------------------------------------------
+
    call ESMF_GridAddCoord(grid2D, ESMF_STAGGERLOC_CENTER, rc=rc)
 
-   ! Get the X coordinate bounds
+   !-------------------------------------------------------------------
+   ! Get the bounds of the first coordinate array on the local DE.
+   !-------------------------------------------------------------------
    call ESMF_GridLocalTileGet(grid2D, coord=1, &
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
 
-   ! Get pointers to the X coordinate component storage
+   !-------------------------------------------------------------------
+   ! Get the pointer to the first coordinate array from inside
+   ! the Grid object.
+   !-------------------------------------------------------------------
    call ESMF_GridLocalTileGetCoord(grid2D, coord=1, coordsX, rc=rc)
 
-   ! Calculate and set the X coordinates
+   !-------------------------------------------------------------------
+   ! Calculate and set coordinates in the first dimension.
+   !-------------------------------------------------------------------
    do i=lbnd(1),ubnd(1)
         coordsX(i,j) = i*10.0
    enddo
 
-   ! Get the Y coordinate bounds
+   !-------------------------------------------------------------------
+   ! Get the bounds of the second coordinate array on the local DE.
+   !-------------------------------------------------------------------
    call ESMF_GridLocalTileGet(grid2D, coord=2, &
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
 
-   ! Get pointers to the X coordinate component storage
+   !-------------------------------------------------------------------
+   ! Get the pointer to the second coordinate array from inside
+   ! the Grid object.
+   !-------------------------------------------------------------------
    call ESMF_GridLocalTileGetCoord(grid2D, coord=2, coordsY, rc=rc)
 
-   ! Calculate and set the Y coordinates
+   !-------------------------------------------------------------------
+   ! Calcuate and set coordinates in the second dimension.
+   !-------------------------------------------------------------------
    do i=lbnd(1),ubnd(1)
         coordsY(i) = i*10.0
    enddo
-
-   ! Add the cell area from array cellArea into the newly created Grid
-   call ESMF_GridAddMetric(grid2D, "Area", &
-          staggerLoc=ESMF_STAGGERLOC_CENTER, &
-          array=cellArea, rc=rc)
-
 !EOC
 
 !BOE
-!\subsubsection{Creation: Shapes}
+!\subsubsection{Basic Methods: Grid Creation}
 !
-! There are several methods of creating an ESMF Grid. The first
-! of these is designed to easily allow the user to create
-! the most common grid shapes. The method {\tt ESMF\_GridCreateShape}
-! creates a single tile logically rectangular grid and 
-! allows the user to specify the connections for each 
-! edge in each of three dimensions. By employing this method 
-! the user should be able to create most of the common grid shapes,
-! for example, rectangle, bipole sphere, tripole sphere, etc. 
-! For more complex shapes the user may define them via DistGrid
-! and create them using the more general Grid create, see Section~\ref{sec:usage:adv:create}
-! for a description of this process.
+!\subsubsubsection{Defining Topologies using Shapes}
 !
-!\subsubsection{Creation: Size, Rank, and Distribution of Index Space}
+! The method {\tt ESMF\_GridCreateShape()} is a shortcut
+! for specifying single tile logically rectangular grids.
+! It allows the user to specify the connections for each 
+! edge for grids up to three dimensions. By employing this method 
+! the user can create many common grid shapes, including
+! rectangle, bipole (lat-lon) sphere, and tripole sphere. 
+! The user can define more complex topologies by creating
+! a DistGrid object and using a more general Grid create
+! interface. See Section~\ref{sec:usage:adv:create}
+! for more details.
+!
+!\subsubsubsection{Creation: Size, Rank, and Distribution of Index Space}
 !
 ! The shortcut grid creation method supports three types of
 ! distribution (see Section~\ref{sec:desc:dist}). In addition to describing
@@ -241,7 +265,7 @@ program ESMF_GridCreateEx
 
 !BOE
 !
-!\subsubsection{Creation: Coordinate Specification And Index Space Dependency}
+!\subsubsection{Coordinate Specification And Index Space Dependency}
 !
 ! To specify how the coordinate arrays are mapped to the 
 ! index dimensions the arguments {\tt coordDep1,2,3}
