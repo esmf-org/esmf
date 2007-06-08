@@ -1,4 +1,4 @@
-// $Id: ESMC_SparseMsg.C,v 1.3 2007/05/01 21:14:11 dneckels Exp $
+// $Id: ESMC_SparseMsg.C,v 1.4 2007/06/08 22:42:42 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -21,6 +21,7 @@
 // insert any higher level, 3rd party or system includes here
 #include <algorithm>
 #include <iostream>
+#include <iterator>
 
 // associated class definition file
 #include <GridUtil/include/ESMC_SparseMsg.h>
@@ -32,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_SparseMsg.C,v 1.3 2007/05/01 21:14:11 dneckels Exp $";
+            "$Id: ESMC_SparseMsg.C,v 1.4 2007/06/08 22:42:42 dneckels Exp $";
 //-----------------------------------------------------------------------------
 
 //
