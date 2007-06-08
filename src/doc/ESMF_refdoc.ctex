@@ -1,11 +1,11 @@
-% $Id: ESMF_refdoc.ctex,v 1.70 2007/06/08 12:40:01 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.71 2007/06/08 16:10:25 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
 \usepackage{supertabular}
 \usepackage{html}
 \usepackage{times}
-\usepacakage{subsections}
+\usepackage{subsections}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage[T1]{fontenc}
