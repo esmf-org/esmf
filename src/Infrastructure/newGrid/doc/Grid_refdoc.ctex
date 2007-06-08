@@ -1,4 +1,4 @@
-% $Id: Grid_refdoc.ctex,v 1.9 2007/06/07 18:14:43 oehmke Exp $
+% $Id: Grid_refdoc.ctex,v 1.10 2007/06/08 13:01:27 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -14,6 +14,7 @@
 \usepackage{epsf}
 \usepackage{html}
 \usepackage{times}
+\usepackage{subsections}
 \usepackage[T1]{fontenc}
 \usepackage[dvips]{graphics,color}
 

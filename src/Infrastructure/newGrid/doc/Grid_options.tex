@@ -1,6 +1,7 @@
-% $Id: Grid_options.tex,v 1.6 2007/05/24 22:25:43 oehmke Exp $
+% $Id: Grid_options.tex,v 1.7 2007/06/08 13:01:27 cdeluca Exp $
 
-\subsubsection{ESMF\_GridConn}\label{sec:opt:gridconn}
+\subsubsection{ESMF\_GridConn}
+\label{sec:opt:gridconn}
 {\sf DESCRIPTION:\\}
 The {\tt ESMF\_GridCreateShape} command has three specific arguments
 {\tt connDim1}, {\tt connDim2}, and {\tt connDim3}. These can be used
@@ -17,11 +18,12 @@ connection.
 
 \item [ESMF\_GRIDCONN\_PERIODIC] Periodic connection.
 
-\item [ESMF\_GRIDCONN\_POLE] This edge is connected to itself. Given that the edge
-is n elements long, then element i is connected to element i+n/2.
+\item [ESMF\_GRIDCONN\_POLE] This edge is connected to itself. Given
+that the edge is n elements long, then element i is connected to
+element i+n/2.
 
-\item [ESMF\_GRIDCONN\_BIPOLE] This edge is connected to itself. Given that the edge
-is n elements long, element i is connected to element n-i-1.
+\item [ESMF\_GRIDCONN\_BIPOLE] This edge is connected to itself. Given
+that the edge is n elements long, element i is connected to element n-i-1.
 
 \end{description}
 
