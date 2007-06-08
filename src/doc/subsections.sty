@@ -1,0 +1,19 @@
+\newcounter{subsubsubsection}[subsubsection]
+\def\subsubsubsectionmark#1{}
+\def\thesubsubsubsection {\thesubsubsection
+   .\arabic{subsubsubsection}}
+\def\subsubsubsection{\@startsection
+    {subsubsubsection}{4}{\z@}{-3.25ex plus -1
+    ex minus -.2ex}{1.5ex plus .2ex}{\normalsize\bf}}
+\def\l@subsubsubsection{\@dottedtocline{4}{4.8em}
+    {4.2em}}
+
+\newcounter{subsubsubsubsection}[subsubsubsection]
+\def\subsubsubsubsectionmark#1{}
+\def\thesubsubsubsubsection {\thesubsubsubsection
+   .\arabic{subsubsubsubsection}}
+\def\subsubsubsubsection{\@startsection
+    {subsubsubsubsection}{5}{\z@}{-3.25ex plus -1
+    ex minus -.2ex}{1.5ex plus .2ex}{\normalsize\bf}}
+\def\l@subsubsubsubsection{\@dottedtocline{5}{5.8em}
+    {5.2em}}
