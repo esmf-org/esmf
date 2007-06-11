@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.170 2007/05/05 03:05:47 rosalind Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.171 2007/06/11 23:16:12 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -94,7 +94,6 @@
     public ESMF_LRGridAddPhysGridArb
     public ESMF_LRGridAddVertPhysGrid
     public ESMF_LRGridGetCoord
-    public ESMF_LRGridSetCoord
     public ESMF_LRGridGetDELocalInfo   ! access InternDG from above
     public ESMF_LRGridGetAllAxisIndex  ! access InternDG from above
     public ESMF_LRGridGetAIsAllDEs     ! access InternDG from above
@@ -106,12 +105,9 @@
     public ESMF_LRGridSet
     public ESMF_LRGridGetCellMask
     public ESMF_LRGridSetCellMask
-    !public ESMF_LRGridGetMask
-    public ESMF_LRGridSetMask
-    !public ESMF_LRGridGetMetric
-    public ESMF_LRGridSetMetric
     public ESMF_LRGridSetBoundBoxesBlock
     public ESMF_LRGridSetBoundBoxesArb
+    public ESMF_LRGridSetCoord
     public ESMF_LRGridValidate
     public ESMF_LRGridBoxIntersectRecv
     public ESMF_LRGridBoxIntersectSend
@@ -129,7 +125,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.170 2007/05/05 03:05:47 rosalind Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.171 2007/06/11 23:16:12 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -189,33 +185,12 @@
       interface ESMF_LRGridSetCoord
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_LRGridSetCoordFromArray
-         module procedure ESMF_LRGridSetCoordFromBuffer
          module procedure ESMF_LRGridSetCoordComputeBlock
          module procedure ESMF_LRGridSetCoordComputeArb
-         module procedure ESMF_LRGridSetCoordCopy
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
 !     coordinates as part of a {\tt ESMF\_Grid}.
-
-!EOPI
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-      interface ESMF_LRGridSetMask
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_LRGridSetMaskFromArray
-         module procedure ESMF_LRGridSetMaskFromBuffer
-         module procedure ESMF_LRGridSetMaskFromMask
-         module procedure ESMF_LRGridSetMaskCopy
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that set
-!     logical masks as part of a {\tt ESMF\_Grid}.
 
 !EOPI
       end interface
@@ -232,24 +207,6 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
 !     cell masks as part of a {\tt ESMF\_Grid}.
-
-!EOPI
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-      interface ESMF_LRGridSetMetric
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_LRGridSetMetricFromArray
-         module procedure ESMF_LRGridSetMetricFromBuffer
-         module procedure ESMF_LRGridSetMetricCompute
-         module procedure ESMF_LRGridSetMetricCopy
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that set
-!     metrics as part of an {\tt ESMF\_Grid}.
 
 !EOPI
       end interface
@@ -4962,57 +4919,6 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridSetCoordFromArray"
-!BOPI
-! !IROUTINE: ESMF_LRGridSetCoordFromArray - Set the coordinates of a Grid from an existing ESMF array
-
-! !INTERFACE:
-      subroutine ESMF_LRGridSetCoordFromArray(Grid, array, id, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_LocalArray), intent(in) :: array
-      integer, intent(in) :: id
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set assumes the coordinates exist already and are being
-!     passed in through an {\tt ESMF\_LocalArray}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[array]
-!          ESMF LocalArray of data.
-!     \item[{[id]}]
-!          Identifier for which set of coordinates are being set:
-!             1  center\_x
-!             2  center\_y
-!             3  corner\_x
-!             4  corner\_y
-!             5  face\_x
-!             6  face\_y 
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOPI
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,array,rc)
-!
-!  code goes here
-!
-      end subroutine ESMF_LRGridSetCoordFromArray
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRGridGetDELocalInfo"
 !BOPI
 ! !IROUTINE: ESMF_LRGridGetDELocalInfo - Get DE (local) information for a Grid
@@ -6570,57 +6476,6 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridSetCoordFromBuffer"
-!BOPI
-! !IROUTINE: ESMF_LRGridSetCoordFromBuffer - Set the coordinates of a Grid from an existing data buffer
-
-! !INTERFACE:
-      subroutine ESMF_LRGridSetCoordFromBuffer(Grid, buffer, id, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      real(ESMF_KIND_R8), dimension (:), pointer :: buffer
-      integer, intent(in) :: id
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set assumes the coordinates exist already and are being
-!     passed in as a raw data buffer.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[buffer]
-!          Raw data buffer.
-!     \item[id]
-!          Identifier for which set of coordinates are being set:
-!             1  center\_x
-!             2  center\_y
-!             3  corner\_x
-!             4  corner\_y
-!             5  face\_x
-!             6  face\_y 
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOPI
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-!
-!  code goes here
-!
-      end subroutine ESMF_LRGridSetCoordFromBuffer
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRGridSetCoordComputeBlock"
 !BOPI
 ! !IROUTINE: ESMF_LRGridSetCoord - Compute coordinates for a Grid with block storage
@@ -7459,59 +7314,6 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridSetCoordCopy"
-!BOPI
-! !IROUTINE: ESMF_LRGridSetCoord - Copies coordinates from one grid to another
-
-! !INTERFACE:
-      ! Private name; call using ESMF_LRGridSetCoord()
-      subroutine ESMF_LRGridSetCoordCopy(grid, gridIn, id, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Grid), intent(in) :: gridIn
-      integer, intent(in) :: id
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set copies the coordinates of a {\tt ESMF\_Grid} from
-!     another Grid.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[gridIn]
-!          Pointer to a {\tt ESMF\_Grid} whose coordinates are to be copied.
-!     \item[id]
-!          Identifier for which set of coordinates are being set:
-!             1  center\_x
-!             2  center\_y
-!             3  corner\_x
-!             4  corner\_y
-!             5  face\_x
-!             6  face\_y 
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOPI
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
-
-!
-!  code goes here
-!
-      end subroutine ESMF_LRGridSetCoordCopy
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRGridGet"
 !BOPI
 ! !IROUTINE: ESMF_LRGridGet - Gets a variety of information about the grid
@@ -8253,367 +8055,6 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridSetCellMaskArb
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridSetMaskFromArray"
-!BOPI
-! !IROUTINE: ESMF_LRGridSetMaskFromArray - Set a mask in a Grid from an existing ESMF array
-
-! !INTERFACE:
-      subroutine ESMF_LRGridSetMaskFromArray(grid, array, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_LocalArray), intent(in) :: array
-      character (len=*), intent(in), optional :: name
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set assumes the mask data exists already and is
-!     being passed in through an {\tt ESMF\_LocalArray}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[array]
-!          ESMF LocalArray of data.
-!     \item [{[name]}]
-!           {\tt Mask} name.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOPI
-
-!
-!  code goes here
-!
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      end subroutine ESMF_LRGridSetMaskFromArray
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridSetMaskFromBuffer"
-!BOPI
-! !IROUTINE: ESMF_LRGridSetMaskFromBuffer - Set a mask in a Grid from an existing data buffer
-
-! !INTERFACE:
-      subroutine ESMF_LRGridSetMaskFromBuffer(grid, buffer, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      real(ESMF_KIND_R8), dimension (:), pointer :: buffer
-      character (len=*), intent(in), optional :: name
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set assumes the mask data exists already and is
-!     being passed in as a raw data buffer.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[buffer]
-!          Raw data buffer.
-!     \item [{[name]}]
-!           {\tt ESMF\_Mask} name.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOPI
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-!
-!  code goes here
-!
-      end subroutine ESMF_LRGridSetMaskFromBuffer
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridSetMaskFromMask"
-!BOPI
-! !IROUTINE: ESMF_LRGridSetMaskFromMask - Set a mask in a Grid from an existing  mask of different type
-
-! !INTERFACE:
-      subroutine ESMF_LRGridSetMaskFromMask(grid, mask, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: mask
-      character (len=*), intent(in), optional :: name
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set assumes the mask data will be created from an existing
-!     mask of a different type.  If the types are the same, call MaskCopy.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[mask]
-!          Mask identifier.
-!     \item [{[name]}]
-!           {\tt ESMF\_LMask} name.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOPI
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-!
-!  code goes here
-!
-      end subroutine ESMF_LRGridSetMaskFromMask
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridSetMaskCopy"
-!BOPI
-! !IROUTINE: ESMF_LRGridSetMaskCopy - Copies a mask from one grid to another.
-
-! !INTERFACE:
-      subroutine ESMF_LRGridSetMaskCopy(grid, gridIn, name, nameIn, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Grid), intent(in) :: gridIn
-      character (len=*), intent(in), optional :: name
-      character (len=*), intent(in), optional :: nameIn
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set copies a mask for a {\tt ESMF\_Grid} from another {\tt ESMF\_Grid}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[gridIn]
-!          Pointer to a {\tt ESMF\_Grid} whose coordinates are to be copied.
-!     \item [{[name]}]
-!           {\tt ESMF\_Mask} name to be set.
-!     \item [{[nameIn]}]
-!           {\tt ESMF\_Mask} name to be copied.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOPI
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
- 
-!
-!  code goes here
-!
-      end subroutine ESMF_LRGridSetMaskCopy
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridSetMetricFromArray"
-!BOPI
-! !IROUTINE: ESMF_LRGridSetMetricFromArray - Set a metric for a Grid from an existing ESMF array
-
-! !INTERFACE:
-      subroutine ESMF_LRGridSetMetricFromArray(grid, array, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_LocalArray), intent(in) :: array
-      character (len=*), intent(in), optional :: name
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set assumes the metric data exists already and is being
-!     passed in through an {\tt ESMF\_LocalArray}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[array]
-!          ESMF LocalArray of data.
-!     \item [{[name]}]
-!           {\tt ESMF\_Metric} name.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOPI
-
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit,array,rc)
-
-!
-!  code goes here
-!
-      end subroutine ESMF_LRGridSetMetricFromArray
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridSetMetricFromBuffer"
-!BOPI
-! !IROUTINE: ESMF_LRGridSetMetricFromBuffer - Set a metric for a Grid from an existing data buffer
-
-! !INTERFACE:
-      subroutine ESMF_LRGridSetMetricFromBuffer(grid, buffer, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      real(ESMF_KIND_R8), dimension (:), pointer :: buffer
-      character (len=*), intent(in), optional :: name
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set assumes the metric data exists already and is being
-!     passed in as a raw data buffer.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[buffer]
-!          Raw data buffer.
-!     \item [{[name]}]
-!           {\tt ESMF\_Metric} name.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOPI
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-!
-!  code goes here
-!
-      end subroutine ESMF_LRGridSetMetricFromBuffer
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridSetMetricCompute"
-!BOPI
-! !IROUTINE: ESMF_LRGridSetMetricCompute - Compute a metric for a Grid
-
-! !INTERFACE:
-      subroutine ESMF_LRGridSetMetricCompute(grid, name, id, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: id
-      character (len=*), intent(in), optional :: name
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set internally computes a metric for a {\tt ESMF\_Grid} via a
-!     prescribed method.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[id]
-!          Identifier for predescribed metrics.  TODO: make list
-!     \item [{[name]}]
-!           {\tt ESMF\_Metric} name.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOPI
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-!
-!  code goes here
-!
-      end subroutine ESMF_LRGridSetMetricCompute
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridSetMetricCopy"
-!BOPI
-! !IROUTINE: ESMF_LRGridSetMetricCopy - Copies a metric from one grid to another
-
-! !INTERFACE:
-      subroutine ESMF_LRGridSetMetricCopy(grid, name, gridIn, nameIn, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name  ! TODO: optional?
-      type(ESMF_Grid), intent(in) :: gridIn
-      character (len=*), intent(in) :: nameIn  ! TODO: optional?
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of set copies a metric for a {\tt ESMF\_Grid} from another {\tt ESMF\_Grid}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item [name]
-!           {\tt ESMF\_Metric} name to be set.
-!     \item[gridIn]
-!          Pointer to a {\tt ESMF\_Grid} whose coordinates are to be copied.
-!     \item [nameIn]
-!           {\tt ESMF\_Metric} name to be copied.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOPI
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,gridIn,rc)
-!
-!  code goes here
-!
-!     ! Remove next statement when routine is fully implemented
-!     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      end subroutine ESMF_LRGridSetMetricCopy
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
