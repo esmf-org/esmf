@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.23 2007/06/08 19:51:10 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.24 2007/06/11 21:36:18 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -76,7 +76,7 @@ program ESMF_GridCreateEx
    ! this call no coordinate values are set yet.
    !-------------------------------------------------------------------
 
-   call ESMF_GridAddCoord(grid2D, ESMF_STAGGERLOC_CENTER, rc=rc)
+   call ESMF_GridSetCoord(grid2D, ESMF_STAGGERLOC_CENTER, rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the bounds of the first coordinate array on the local DE.
@@ -457,10 +457,10 @@ program ESMF_GridCreateEx
           countsPerDEDim1=(/7,7,6/), rc=rc)
 
    ! Create the Grid and then add a Center Stagger Location
-   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
    ! Add Corner Stagger Location
-   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
+   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
 !EOC
 
 
@@ -488,12 +488,12 @@ program ESMF_GridCreateEx
 ! in specifying a Grid's stagger locations.  
 !
 ! To set which stagger locations in a Grid have coordinate data, the subroutine
-! {\tt ESMF\_GridAddCoord} is used. The following example
+! {\tt ESMF\_GridSetCoord} is used. The following example
 ! adds coordinate storage to the corner stagger location in {\tt grid}.
 !EOE
 
 !BOC 
-   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGER_CORNER, rc=rc)
+   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGER_CORNER, rc=rc)
 !EOC  
 
 !BOE
@@ -506,7 +506,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC 
-   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGER_CORNER, &
+   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGER_CORNER, &
           coord1=CoordX, coord2=CoordY, rc=rc)
 !EOC  
 
@@ -625,7 +625,7 @@ program ESMF_GridCreateEx
           endCoord=(/100.0,100.0,0.0/), rc=rc)
 !EOC
 
-!BOE
+!removeBOE
 !\subsubsection{Calculate Coordinates}
 !
 ! In addition to the grid generate option specified above to set coordinates, 
@@ -636,13 +636,13 @@ program ESMF_GridCreateEx
 ! method fills in all the coordinate arrays currently allocated in the grid. 
 ! The following call sets the whole grid's coordinates based on the corner stagger
 ! location's coordinates. 
-!EOE
+!removeEOE
 
-!BOC
+!removeBOC
    call ESMF_GridCalcStaggerLocCoord(grid, srcStaggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
-!EOC
+!removeEOC
 
-!BOE
+!removeBOE
 !\subsubsection{Grid Halo}
 !
 ! The Grid halo operation allows users to update the
@@ -655,14 +655,14 @@ program ESMF_GridCreateEx
 ! grid creation. The method {\tt ESMF\_GridHalo} is called to 
 ! perform this operation. The following call fills the computational region of the grid 
 ! with the coordinate values from neighboring DEs.
-!EOE
+!removeEOE
 
-!BOC
+!removeBOC
    call ESMF_GridHalo(grid, rc=rc)
-!EOC
+!removeEOC
 
 
-!BOE
+!removeBOE
 !\subsubsection{Metric Creation}
 !
 ! There are several options for adding metric data to 
@@ -673,43 +673,43 @@ program ESMF_GridCreateEx
 ! The following call adds metric "Area" to the 
 ! grid at the center stagger location. The metric is 
 ! a 4 byte real.  
-!EOE
+!removeEOE
 
-!BOC
+!removeBOC
    call ESMF_GridAddMetricNoSet(grid, name="Area", &
           metricTypeKind=ESMF_TYPEKIND_R4, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, rc)
-!EOC
+!removeEOC
 
-!BOE
+!removeBOE
 ! The next option allows the user to add an array
 ! as a metric.  The following call adds metric "Length" to the 
 ! grid at the edge stagger location.  
-!EOE
+!removeEOE
 
-!BOC
+!removeBOC
    call ESMF_GridAddMetricFromArray(grid, "Length", &
           staggerLoc=ESMF_STAGGERLOC_EDGE1, &
           array=length, rc=rc)
-!EOC
+!removeEOC
 
-!BOE
+!removeBOE
 ! The final option allows the user to add a metric constructed
 ! out of a series of fortran arrays. Note that this option is restricted
 ! to situations where there is a 1-to-1 DE to PET mapping. 
 ! The following call adds metric "Length" to the 
 ! grid at the edge stagger location. It does this from 
 ! fortran array length.   
-!EOE
+!removeEOE
 
-!BOC
+!removeBOC
    call ESMF_GridAddMetricFromFptr(grid, "Length", &
           staggerLoc=ESMF_STAGGERLOC_EDGE1, &
           fptr=length, rc=rc)
-!EOC
+!removeEOC
 
 
-!BOE
+!removeBOE
 !\subsubsection{Metric Data Access}
 !
 ! Once a Grid has been created the user has several options to access metric
@@ -718,30 +718,30 @@ program ESMF_GridCreateEx
 ! across the whole Grid. {\tt ESMF\_GridSetMetricFromArray} allows the user to set metric
 ! data from an Array. For example, the following sets the 
 ! metric "CellArea" from the array Area.
-!EOE
+!removeEOE
 
 
-!BOC
+!removeBOC
    call ESMF_GridSetMetricFromArray(grid, name="CellArea", &
           array=Area, rc=rc)
-!EOC
+!removeEOC
 
 
-!BOE
+!removeBOE
 ! {\tt ESMF\_GridGetMetricIntoArray}, allows the user
 ! to get the Array (a direct reference or a copy) which
 ! contains the metric data on a Grid. The user
 ! can then employ any of the standard {\tt ESMF\_Array} tools to operate
 ! on the data. The following copies the area from the grid
 ! and puts it into Array copyOfArea. 
-! EOE
+!removeEOE
 
-!BOC
+!removeBOC
    call ESMF_GridGetMetricIntoArray(grid, &
           name="Area", array=copyOfY, docopy=ESMF_DATA_COPY, rc=rc)
-!EOC
+!removeEOC
 
-!BOE
+!removeBOE
 ! The second pair of methods enable the user to set or get metric data using
 ! a fortran pointer. These methods only work with the local piece of the 
 ! Grid on the DE. {\tt ESMF\_GridLocalTileSetMetric} enables the user
@@ -749,38 +749,38 @@ program ESMF_GridCreateEx
 ! The following call gets a pointer (fptr) to the fortran array holding the 
 ! area for the piece of tile 2 which is on this processor. It
 ! defaults to the first DE because it isn't specified. 
-!EOE
+!removeEOE
 
-!BOC
+!removeBOC
    call ESMF_GridLocalTileSetMetric(grid, name="Area", tile=2, &
           fptr, doCopy=ESMF_DATA_REF, rc=rc)
-!EOC
+!removeEOC
 
-!BOE
+!removeBOE
 ! The call {\tt ESMF\_GridLocalTileGetMetric} gets a fortran pointer to 
 ! the metric data. The user can then operate on this array in the usual
 ! manner. The following call allocates an array (fptr) and
 ! makes copy of the part of tile 1's area which
 ! lies on the second DE. 
-!EOE
+!removeEOE
 
-!BOC
+!removeBOC
    call ESMF_GridLocalTileGetMetric(grid, name="Area", tile=1, localDE=2, &
           fptr, doCopy=ESMF_DO_COPY, rc=rc)
 
-!EOC
+!removeEOC
 
-!BOE
+!removeBOE
 !\subsubsection{Grid Attributes}
 !
 ! As is typical for ESMF classes, the Grid class allows
 ! the user to attach name-value pairs to a Grid object. 
 ! The following adds the attribute "Size" with the value 10. 
-!EOE
+!removeEOE
 
-!BOC
+!removeBOC
    call ESMF_GridSetAttribute(grid, "Size", 10, rc=rc)
-!EOC
+!removeEOC
 
 
 
@@ -812,7 +812,7 @@ program ESMF_GridCreateEx
    grid=ESMF_GridCreateShape(maxIndex=(/100,100,100/), blkDecomp=(/5,5,5/), rc=rc)   
 
    ! Add a center stagger location 
-   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
    ! Put in the coordinates
    call ESMF_GridGenCoordsUni(grid, begCoord=(/0.0,0.0,0.0/), &
@@ -896,7 +896,7 @@ program ESMF_GridCreateEx
 
    ! Add a center stagger location and at the same time set {\tt grid} to 
    ! reference the coordinate arrays. 
-   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
                   coord1=fptrX, coord2=fptrY, rc=rc)
  
 !EOC
@@ -951,7 +951,7 @@ program ESMF_GridCreateEx
 
   ! Create the grid and add a center stagger location and at the same time set {\tt grid} to 
   ! reference the coordinate arrays. 
-  call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+  call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
                   coord1=fptrX, coord2=fptrY, rc=rc)
 
 !EOC
@@ -1007,8 +1007,8 @@ program ESMF_GridCreateEx
 
 
   ! Add the center and corner stagger locations. 
-  call ESMF_GridAddCoord(grid2D1,staggerLoc=ESMF_STAGGERLOC_CENTER,rc=rc)
-  call ESMF_GridAddCoord(grid2D1,staggerLoc=ESMF_STAGGERLOC_CORNER,rc=rc)
+  call ESMF_GridSetCoord(grid2D1,staggerLoc=ESMF_STAGGERLOC_CENTER,rc=rc)
+  call ESMF_GridSetCoord(grid2D1,staggerLoc=ESMF_STAGGERLOC_CORNER,rc=rc)
 
 
   ! Set the horizontal coordinates by using the non-ESMF functions
@@ -1033,7 +1033,7 @@ program ESMF_GridCreateEx
    ! Set the vertical  coordinates by using the non-ESMF function
    ! CalcVert.
 
-   ! We actually know teh bounds already, but go through the exercise anyway.
+   ! We actually know the bounds already, but go through the exercise anyway.
    call ESMF_GridLocalTileGet(grid2D1, coord=3, &
           computationalLBound=lbndV, computationalUBound=ubndV, rc=rc)
 
@@ -1227,11 +1227,11 @@ program ESMF_GridCreateEx
 
    ! Set Center
    call ESMF_StaggerLocSet(staggerLoc,where=(/0,0,0,0/),rc=rc)
-   call ESMF_GridAddCoord(grid, staggerLoc=staggerLoc, rc=rc)
+   call ESMF_GridSetCoord(grid, staggerLoc=staggerLoc, rc=rc)
 
    ! Set Corner
    call ESMF_StaggerLocSet(staggerLoc,where=(/1,1,1,1/),rc=rc)
-   call ESMF_GridAddCoord(grid, staggerLoc=staggerLoc, rc=rc)
+   call ESMF_GridSetCoord(grid, staggerLoc=staggerLoc, rc=rc)
 !EOC
   
 !BOE
@@ -1294,10 +1294,10 @@ the negative side and none on the positive.
 !EOE
 
 !BOC 
-   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, &
           coordLWidth=(/0,0/), coordUWidth=(/0,0/), rc=rc)
 
-   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
           coordLWidth=(/1,1/), coordUWidth=(/0,0/), rc=rc)
 
 !EOC  
@@ -1321,7 +1321,7 @@ The following code illustrates aligning the positive corner with the center.
 !EOE
 
 !BOC 
-   call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, &
           coordAlign=(/+1,+1/), rc=rc)
 !EOC  
 

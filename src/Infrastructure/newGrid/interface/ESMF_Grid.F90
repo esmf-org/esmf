@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.12 2007/06/07 18:14:44 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.1 2007/06/11 21:36:19 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.12 2007/06/07 18:14:44 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.1 2007/06/11 21:36:19 cdeluca Exp $'
 
 
 
