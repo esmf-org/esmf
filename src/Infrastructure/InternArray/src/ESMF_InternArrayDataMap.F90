@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayDataMap.F90,v 1.8 2007/05/05 03:05:48 rosalind Exp $
+! $Id: ESMF_InternArrayDataMap.F90,v 1.9 2007/06/11 23:54:33 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -196,9 +196,6 @@ module ESMF_InternArrayDataMapMod
 
   public ESMF_ArrayDataMapGet, ESMF_ArrayDataMapSet
 
-  public ESMF_ArrayDataMapWriteRestart, ESMF_ArrayDataMapReadRestart
-  public ESMF_ArrayDataMapWrite, ESMF_ArrayDataMapRead 
-
   public ESMF_ArrayDataMapValidate
   public ESMF_ArrayDataMapPrint
 
@@ -217,7 +214,7 @@ module ESMF_InternArrayDataMapMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version =  &
-    '$Id: ESMF_InternArrayDataMap.F90,v 1.8 2007/05/05 03:05:48 rosalind Exp $'
+    '$Id: ESMF_InternArrayDataMap.F90,v 1.9 2007/06/11 23:54:33 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -924,186 +921,6 @@ end function
         if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_ArrayDataMapValidate
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayDataMapWriteRestart"
-!BOPI
-! !INTERFACE:
-      subroutine ESMF_ArrayDataMapWriteRestart(datamap, iospec, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_InternArrayDataMap), intent(inout) :: datamap
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Used to save all data to disk as quickly as possible.  
-!      (see Read/Write for other options).  Internally this routine uses the
-!      same I/O interface as Read/Write, but the default options are to
-!      select the fastest way to save data to disk.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [datamap]
-!           {\tt ESMF\_ArrayDataMap} to save.
-!     \item [{[iospec]}]
-!           File specification.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
-!
-!
-!EOPI
-
-!	BOP/EOP changed to BOPI/EOPI until code is added.
-!
-! TODO: code goes here
-!
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
-
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-        end subroutine ESMF_ArrayDataMapWriteRestart
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayDataMapReadRestart"
-!BOPI
-! !IROUTINE: ESMF_ArrayDataMapReadRestart - Reinitialize a ArrayDataMap type
-!
-! !INTERFACE:
-      function ESMF_ArrayDataMapReadRestart(name, iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_InternArrayDataMap) :: ESMF_ArrayDataMapReadRestart
-!
-!
-! !ARGUMENTS:
-      character (len = *), intent(in) :: name
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Used to reinitialize
-!      all data associated with a {\tt ESMF\_ArrayDataMap} 
-!      from the last call to WriteRestart.
-!
-!      The arguments are:
-!     \begin{description}
-!     \item [name]
-!           Name of data to reinitialize.
-!     \item [{[iospec]}]
-!           File specification.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
-!
-!EOPI
-
-!	Changed BOP/EOP to BOPI/EOPI until code is added.
-!
-! TODO: code goes here
-!
- 
-        ESMF_ArrayDataMapReadRestart%status = ESMF_STATUS_UNINIT
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-        end function ESMF_ArrayDataMapReadRestart
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayDataMapWrite"
-!BOPI
-! !IROUTINE: ESMF_ArrayDataMapWrite - Store a ArrayDataMap type
-!
-! !INTERFACE:
-      subroutine ESMF_ArrayDataMapWrite(datamap, iospec, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_InternArrayDataMap), intent(inout) :: datamap
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Used to write data to persistent storage in a variety of formats.  
-!      (see WriteRestart/ReadRestart for quick data dumps.)  Details of I/O 
-!      options specified in the IOSpec derived type. 
-!
-!      The arguments are:
-!     \begin{description}
-!     \item [datamap]
-!           {\tt ESMF\_ArrayDataMap} to save.
-!     \item [{[iospec]}]
-!           File specification.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
-!
-!
-!
-!EOPI
-
-!
-!	Changed BOP/EOP to BOPI/EOPI until code is added.
-! TODO: code goes here
-!
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArrayDataMapGetInit, ESMF_ArrayDataMapInit, datamap)
-
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-        end subroutine ESMF_ArrayDataMapWrite
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayDataMapRead"
-!BOPI
-! !IROUTINE: ESMF_ArrayDataMapRead - Read a stored ArrayDataMap type
-!
-! !INTERFACE:
-      function ESMF_ArrayDataMapRead(name, iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_InternArrayDataMap) :: ESMF_ArrayDataMapRead
-!
-! !ARGUMENTS:
-      character (len = *), intent(in) :: name
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Used to read data from persistent storage in a variety of formats.
-!
-!      The arguments are:
-!     \begin{description}
-!     \item [name]
-!           Name of data to read.
-!     \item [{[iospec]}]
-!           File specification.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
-!
-!
-!EOPI
-
-!
-!	Changed BOP/EOP to BOPI/EOPI until code is added.
-! TODO: code goes here
-!
-        ! Initialize return code; assume routine not implemented
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-        ESMF_ArrayDataMapRead%status = ESMF_STATUS_UNINIT
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        end function ESMF_ArrayDataMapRead
-
 
 ! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
