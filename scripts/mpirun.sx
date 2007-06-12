@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.sx,v 1.1 2007/06/12 18:33:19 svasquez Exp $
+# $Id: mpirun.sx,v 1.2 2007/06/12 22:42:52 svasquez Exp $
 # This script provides an interface such that the simple command mpirun -np #
 # runs # copies of the program in parallel.
 
@@ -21,7 +21,7 @@ cat > $ESMF_DIR/scripts/esmf_script << THE_END_OF_BATCH_SCRIPT
 #PBS -S /bin/sh
 #PBS $ESMF_BATCHOPTIONS
 #PBS -o $prog.stdout
-#PBS -e error.file
+#PBS -e $prog.error
 #PBS -Z
 cd $working_dir
 rm -f $prog.stdout
@@ -41,12 +41,8 @@ echo $proc_id
 
 qwait -f $proc_id
 
-# move job output file to stdout.
-cat error.file >> $prog.stdout
-
 
 # Clean up
 rm -f $ESMF_DIR/scripts/esmf_script
-rm -f $working_dir/error.file
 
 
