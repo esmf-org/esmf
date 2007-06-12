@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.1 2007/06/11 21:36:19 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.2 2007/06/12 16:35:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,582 +62,13 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.1 2007/06/11 21:36:19 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.2 2007/06/12 16:35:30 cdeluca Exp $'
 
 
 
 !==============================================================================
 
       contains
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridAddCoord"
-!BOP
-! !IROUTINE: ESMF_GridAddCoord - Add coord information to a partially created grid. 
-
-! !INTERFACE:
- ! Private name; call using ESMF_GridAddCoord()
-     function ESMF_GridAddCoordNoSet(grid, staggerLoc, &
-                        coordLWidth, coordUWidth, &
-                        coordAlign, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid),       intent(in)              :: grid 
-      type (ESMF_StaggerLoc), intent(in)             :: staggerLoc
-      integer,               intent(in),   optional  :: coordLWidth(:)
-      integer,               intent(in),   optional  :: coordUWidth(:)
-      integer,               intent(in),   optional  :: coordAlign(:)
-      integer,               intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!  Add a stagger location to a grid.
-!
-! The arguments are:
-! \begin{description}
-!     \item[{grid}]
-!          Partially created Grid to set information into.
-! \item[{[staggerLoc]}]
-!        The stagger location to add.
-! \item[{[coordLWidth]}] 
-!      This array should be the same rank as the grid. It specifies the lower corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[coordUWidth]}] 
-!      This array should be the same rank as the grid. It specifies the upper corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[coordAlign]}] 
-!      This array is of size  grid rank.
-!      For this stagger location, it specifies which element
-!      has the same index value as the center. For example, 
-!      for a 2D cell with corner stagger it specifies which 
-!      of the 4 corners has the same index as the center. 
-!      If this is set and coordUWidth is not,
-!      this determines the default array padding for a stagger. 
-!      If not set, then this defaults to all negative. (e.g. 
-!      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
-! \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end function ESMF_GridAddCoordNoSet
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridAddCoord"
-!BOP
-! !IROUTINE: ESMF_GridAddCoord - Add stagger location information to a grid. 
-
-! !INTERFACE:
- ! Private name; call using ESMF_GridAddCoord()
-     function ESMF_GridAddCoordFptr(grid, staggerLoc, &
-                        coord1, coord2, coord3, &
-                        coordLWidth, coordUWidth, &
-                        coordAlign, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid),       intent(in)             :: grid 
-      type (ESMF_StaggerLoc), intent(in)       :: staggerLoc
-      real (ESMF_KIND_R8), intent(in)            :: coord1(:), coord2(:)
-      real (ESMF_KIND_R8), intent(in)            :: coord3(:)
-      integer,               intent(in),   optional  :: coordLWidth(:)
-      integer,               intent(in),   optional  :: coordUWidth(:)
-      integer,               intent(in),   optional  :: coordAlign(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
-      integer,               intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!  Add a stagger location to a grid. This subroutine lets the user add a
-! stagger location and set the coordinates from F90 pointers at the same
-! time. (This subroutine is only usable for grids up to 4D). 
-!
-! The arguments are:
-! \begin{description}
-!     \item[{grid}]
-!          Partially created Grid to set information into.
-! \item[{[staggerLoc]}]
-!        The stagger location to add.
-! \item[{[coord1]}]
-!        The F90 pointer to coordinate data for the first coordinate component (e.g. x).
-! \item[{[coord2]}]
-!        The F90 pointer to coordinate data for the second coordinate component (e.g. y).
-! \item[{[coord3]}]
-!        The F90 pointer to coordinate data for the third coordinate component (e.g. z).
-! \item[{[coordLWidth]}] 
-!      This array should be the same rank as the grid. It specifies the lower corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[coordUWidth]}] 
-!      This array should be the same rank as the grid. It specifies the upper corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[coordAlign]}] 
-!      This array is of size  grid rank.
-!      For this stagger location, it specifies which element
-!      has the same index value as the center. For example, 
-!      for a 2D cell with corner stagger it specifies which 
-!      of the 4 corners has the same index as the center. 
-!      If this is set and coordUWidth is not,
-!      this determines the default array padding for a stagger. 
-!      If not set, then this defaults to all negative. (e.g. 
-!      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
-!\item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
-!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
-!          of the array.
-! \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end function ESMF_GridAddCoordFptr
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridAddCoord"
-!BOP
-! !IROUTINE: ESMF_GridAddCoord - Add stagger location information to a grid. 
-
-! !INTERFACE:
- ! Private name; call using ESMF_GridAddCoord()
-     function ESMF_GridAddCoordArray(grid, staggerLoc, &
-                        coord1, coord2, coord3, &
-                        coordLWidth, coordUWidth, &
-                        coordAlign, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid),       intent(in)             :: grid 
-      type (ESMF_StaggerLoc), intent(in)       :: staggerLoc
-      type(ESMF_ARRAY), intent(in)            :: coord1(:), coord2(:)
-      type(ESMF_ARRAY), intent(in)            :: coord3(:)
-      integer,               intent(in),   optional  :: coordLWidth(:)
-      integer,               intent(in),   optional  :: coordUWidth(:)
-      integer,               intent(in),   optional  :: coordAlign(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
-      integer,               intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!  Add a stagger location to a grid. This subroutine lets the user add a
-! stagger location and set the coordinates from F90 pointers at the same
-! time. (This subroutine is only usable for grids up to 4D). 
-!
-! The arguments are:
-! \begin{description}
-!     \item[{grid}]
-!          Partially created Grid to set information into.
-! \item[{[staggerLoc]}]
-!        The stagger location to add.
-! \item[{[coord1]}]
-!        ESMF Array holding coordinate data for the first coordinate component (e.g. x).
-! \item[{[coord2]}]
-!         ESMF Array holding coordinate data for the second coordinate component (e.g. y).
-! \item[{[coord3]}]
-!         ESMF Array holding coordinate data for the third coordinate component (e.g. z).
-! \item[{[coordLWidth]}] 
-!      This array should be the same rank as the grid. It specifies the lower corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[coordUWidth]}] 
-!      This array should be the same rank as the grid. It specifies the upper corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[coordAlign]}] 
-!      This array is of size  grid rank.
-!      For this stagger location, it specifies which element
-!      has the same index value as the center. For example, 
-!      for a 2D cell with corner stagger it specifies which 
-!      of the 4 corners has the same index as the center. 
-!      If this is set and coordUWidth is not,
-!      this determines the default array padding for a stagger. 
-!      If not set, then this defaults to all negative. (e.g. 
-!      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
-!\item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
-!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
-!          of the array.
-! \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end function ESMF_GridAddCoordArray
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCalcStaggerLocCoord"
-!BOP
-! !IROUTINE: ESMF_GridCalcStaggerLocCoord - Calculates the coordinates of a set of stagger locations from another stagger location's coordinates .
-
-! !INTERFACE:
-      subroutine ESMF_GridCalcStaggerLocCoord(grid, srcStaggerLoc, dstStaggerLocs, &
-                             method, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_StaggerLoc), intent(in)  :: srcStaggerLoc
-      type (ESMF_StaggerLoc), intent(in),optional  :: dstStaggerLocs(:)
-      integer, intent(in) :: method
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Calculate the coordinates for the destination stagger locations from the source
-!     stagger location using the method.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{srcStaggerLoc}]
-!          The stagger location from which to get the coordinate info to 
-!           calculate the desination's coordinates.
-!     \item[{dstStaggerLocs}]
-!          The array of stagger locations for which to calculate the coordinates.
-!          If not present, defaults to every stagger location containing coordiantes. 
-!     \item[{method}]
-!           A flag indicating the method to use to do the calculations.
-!           Not yet implemented, defaults to averaging. 
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end subroutine ESMF_GridCalcStaggerLocCoord
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridAddMetricNoSet"
-!BOP
-! !IROUTINE: ESMF_GridAddMetricNoSet - Allocates space for metric, but doesn't set data.
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridAddMetric()
-      subroutine ESMF_GridAddMetricNoSet(grid, name, metricTag, metricTypeKind, 
-                   staggerLoc, metricDep, lbounds, ubounds, &                         
-                   metricLWidth, metricUWidth, metricAlign, &
-                   computationalLWidth, computationalUWidth, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name
-       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
-       type(ESMF_TypeKind),  intent(in),    optional  :: metricTypeKind
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
-      integer,               intent(in),   optional  :: metricDep(:)
-      integer,               intent(in),   optional  :: lbounds(:)
-      integer,               intent(in),   optional  :: ubounds(:)
-      integer,               intent(in),   optional  :: metricLWidth(:)
-      integer,               intent(in),   optional  :: metricUWidth(:)
-      integer,               intent(in),   optional  :: metricAlign(:)
-      type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-      integer,               intent(in),   optional  :: computationalLWidth(:)
-      integer,               intent(in),   optional  :: computationalUWidth(:)
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Builds storage for a metric, but doesn't set its data. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{grid}]
-!          The grid to set the metric in.
-!     \item [name]
-!           The name of the attribute to set.           
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE. 
-!      \item[{[metricTypeKind]}] 
-!           The type/kind of the grid coordinate data. 
-!           If not specified then the type/kind will be 8 byte reals. 
-!     \item[{[staggerLoc]}]
-!          The stagger location into which to copy the arrays. If not set,
-!          defaults to center. 
-!     \item[{metricDep}]
-!          This array specifies the dependence of the metric dimensions 
-!          on the grid index dimensions. The size of the 
-!          array specifies the number of dimensions of the metric.
-!          The values specify which of the grid index dimensions the corresponding
-!           map to. If a value is 0, then that dimension doesn't correspond to 
-!          a grid dimension. If not present the default is (/1,2,3,.../). 
-!     \item[{[lbounds]}] 
-!          Lower bounds for tensor array dimensions.
-!     \item[{[ubounds]}] 
-!          Upper bounds for tensor array dimensions.
-! \item[{[metricLWidth]}] 
-!      This array should be the same rank as the grid. It specifies the lower corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[metricUWidth]}] 
-!      This array should be the same rank as the grid. It specifies the upper corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[metricAlign]}] 
-!      This array is of size  grid rank.
-!      For this stagger location, it specifies which element
-!      has the same index value as the center. For example, 
-!      for a 2D cell with corner stagger it specifies which 
-!      of the 4 corners has the same index as the center. 
-!      If this is set and metricUWidth is not,
-!      this determines the default array padding for a stagger. 
-!      If not set, then this defaults to all negative. (e.g. 
-!      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
-!     \item[{[indexflag]}]
-!          Flag that indicates how the DE-local indices are to be defined.
-!     \item[{[computationalLWidth]}]
-!          Array of the same size as the {\tt distGrid} dimcount. 
-!          Sets the size of the computational padding around the exclusive
-!          regions on each DE. If {\tt metricLWidth} is also set
-!          the actual value for any edge is the maximum between the two. 
-!     \item[{[computationalUWidth]}]
-!          Array of the same size as the {\tt distGrid} dimcount. 
-!          Sets the size of the computational padding around the exclusive
-!          regions on each DE. If {\tt metricUWidth} is also set
-!          the actual value for any edge is the maximum between the two. 
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end subroutine ESMF_GridAddMetricNoSet
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridAddMetricFromArray"
-!BOP
-! !IROUTINE: ESMF_GridAddMetricFromArray - Add a new metric from an Array.
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridAddMetric()
-      subroutine ESMF_GridSetMetricFromArray(grid, name, metricTag, staggerLoc, &
-                            array, metricDep, doCopy, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name
-      type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
-      type(ESMF_Array), intent(in) :: array
-      integer,               intent(in),   optional  :: metricDep(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!    Adds a grid metric from an array. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{grid}]
-!          The grid to set the metric in.
-!     \item [name]
-!           The name of the attribute to set.
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE.            
-!     \item[{[staggerLoc]}]
-!          The stagger location into which to copy the arrays. If not set,
-!          defaults to center. 
-!     \item[{array}]
-!          An array to set the grid metric information from.
-!     \item[{metricDep}]
-!          This array specifies the dependence of the metric dimensions 
-!          on the grid index dimensions. The size of the 
-!          array specifies the number of dimensions of the metric.
-!          The values specify which of the grid index dimensions the corresponding
-!           map to. If a value is 0, then that dimension doesn't correspond to 
-!          a grid dimension. If not present the default is (/1,2,3,.../). 
-!     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
-!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
-!          of the array.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end subroutine ESMF_GridAddMetricFromArray
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridAddMetricFromFptr"
-!BOP
-! !IROUTINE: ESMF_GridSetMetricFromFptr - Sets metric data from a Fortran pointer.
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridAddMetric()
-      subroutine ESMF_GridSetMetricFromFptr(grid, name, metricTag, staggerLoc, metricDep, &
-                            fptr, doCopy, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name
-       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
-      real, intent(in), pointer :: fptr
-      integer,               intent(in),   optional  :: metricDep(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!    Adds a grid metric from a Fortran pointer. This subroutine only
-!    works when there's a 1-to-1 DE to PET match. If not, then
-!    use Array to set the metric data. This subroutine also needs to 
-!    be overloaded to cover the full range of type/kinds.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{grid}]
-!          The grid to set the metric in.
-!     \item [name]
-!           The name of the attribute to set.
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE.            
-!     \item[{[staggerLoc]}]
-!          The stagger location into which to copy the arrays. If not set,
-!          defaults to center. 
-!     \item[{metricDep}]
-!          This array specifies the dependence of the metric dimensions 
-!          on the grid index dimensions. The size of the 
-!          array specifies the number of dimensions of the metric.
-!          The values specify which of the grid index dimensions the corresponding
-!           map to. If a value is 0, then that dimension doesn't correspond to 
-!          a grid dimension. If not present the default is (/1,2,3,.../). 
-!     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
-!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
-!          of the array.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end subroutine ESMF_GridAddMetricFromFptr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridAddMetricSub"
-!BOP
-! !IROUTINE: ESMF_GridAddMetricSub - Add a subroutine interface to generate metric data.
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridAddMetric()
-      subroutine ESMF_GridAddMetricSub(grid, name, metricTag, metricTypeKind, 
-                   staggerLoc, metricDep, lbounds, ubounds, &                         
-                   metricLWidth, metricUWidth, metricAlign, &
-                   computationalLWidth, computationalUWidth,&
-                   sub, userDataR4, userDataR8, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name
-       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
-       type(ESMF_TypeKind),  intent(in),    optional  :: metricTypeKind
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
-      integer,               intent(in),   optional  :: metricDep(:)
-      integer,               intent(in),   optional  :: lbounds(:)
-      integer,               intent(in),   optional  :: ubounds(:)
-      integer,               intent(in),   optional  :: metricLWidth(:)
-      integer,               intent(in),   optional  :: metricUWidth(:)
-      integer,               intent(in),   optional  :: metricAlign(:)
-      type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-      integer,               intent(in),   optional  :: computationalLWidth(:)
-      integer,               intent(in),   optional  :: computationalUWidth(:)
-      subroutine             intent(in),             :: sub
-      real(ESMF_KIND_R4),    intent(in),   optional  :: userDataR4(:)
-      real(ESMF_KIND_R4),    intent(in),   optional  :: userDataR8(:)
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Sets a subroutine to generate metric data from. The user may 
-!    also pass user data through to the subroutine to use in computation. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{grid}]
-!          The grid to set the metric in.
-!     \item [name]
-!           The name of the attribute to set.           
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE. 
-!      \item[{[metricTypeKind]}] 
-!           The type/kind of the grid coordinate data. 
-!           If not specified then the type/kind will be 8 byte reals. 
-!     \item[{[staggerLoc]}]
-!          The stagger location into which to copy the arrays. If not set,
-!          defaults to center. 
-!     \item[{metricDep}]
-!          This array specifies the dependence of the metric dimensions 
-!          on the grid index dimensions. The size of the 
-!          array specifies the number of dimensions of the metric.
-!          The values specify which of the grid index dimensions the corresponding
-!           map to. If a value is 0, then that dimension doesn't correspond to 
-!          a grid dimension. If not present the default is (/1,2,3,.../). 
-!     \item[{[lbounds]}] 
-!          Lower bounds for tensor array dimensions.
-!     \item[{[ubounds]}] 
-!          Upper bounds for tensor array dimensions.
-! \item[{[metricLWidth]}] 
-!      This array should be the same rank as the grid. It specifies the lower corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[metricUWidth]}] 
-!      This array should be the same rank as the grid. It specifies the upper corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[metricAlign]}] 
-!      This array is of size  grid rank.
-!      For this stagger location, it specifies which element
-!      has the same index value as the center. For example, 
-!      for a 2D cell with corner stagger it specifies which 
-!      of the 4 corners has the same index as the center. 
-!      If this is set and metricUWidth is not,
-!      this determines the default array padding for a stagger. 
-!      If not set, then this defaults to all negative. (e.g. 
-!      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
-!     \item[{[indexflag]}]
-!          Flag that indicates how the DE-local indices are to be defined.
-!     \item[{[computationalLWidth]}]
-!          Array of the same size as the {\tt distGrid} dimcount. 
-!          Sets the size of the computational padding around the exclusive
-!          regions on each DE. If {\tt metricLWidth} is also set
-!          the actual value for any edge is the maximum between the two. 
-!     \item[{[computationalUWidth]}]
-!          Array of the same size as the {\tt distGrid} dimcount. 
-!          Sets the size of the computational padding around the exclusive
-!          regions on each DE. If {\tt metricUWidth} is also set
-!          the actual value for any edge is the maximum between the two. 
-!     \item[{sub}]
-!          The subroutine to generate the metric data.
-!     \item[{sub}]
-!          The subroutine to generate the metric data.
-!     \item[{userDataR4}]
-!          User data to pass to the subroutine.
-!     \item[{userDataR8}]
-!          User data to pass to the subroutine.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end subroutine ESMF_GridAddMetricSub
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -650,8 +81,9 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout)     :: grid
-      type(ESMF_GridStatus)                 :: status 
-      integer, intent(out), optional       :: rc
+      type(ESMF_GridStatus)              :: status
+      type(ESMF_DefaultFlag)             :: defaultFlag
+      integer, intent(out), optional     :: rc
 !
 ! !DESCRIPTION:
 !    Turns a partially created grid into usable grid. This subroutine also performs checks
@@ -664,12 +96,14 @@
 !          Grid object to perform commit on.
 !     \item[{[status]}]
 !          Grid status to commit to.
+!     \item[{[defaultFlag]}]
+!          Indicates whether to use default values to get to the desired
+!          grid status.  For valid values see section \ref{opt:defaultflag}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  TODO
 
       end subroutine ESMF_GridCommit
 
@@ -698,18 +132,17 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
       end subroutine ESMF_GridDestroy
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGenCoordUni"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGenCoordUni - fill coordinate arrays with a uniform spread of values.
 
 ! !INTERFACE:
-      subroutine ESMF_GridGenCoordsUni(grid, tile, begCoord, endCoord, rc)
+      subroutine ESMF_GridGenCoordUni(grid, tile, begCoord, endCoord, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -745,10 +178,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
-! !REQUIREMENTS:  TODO
+!EOPI
 
-      end subroutine ESMF_GridGenCoordsUniform
+      end subroutine ESMF_GridGenCoordUni
 
 
 !------------------------------------------------------------------------------
@@ -861,61 +293,15 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:  TODO
 
       end subroutine ESMF_GridGet
 
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridGetAttribute  - Retrieve an attribute
-!
-! !INTERFACE:
-!      subroutine ESMF_GridGetAttribute(grid, name, <value argument>, rc)
-!
-! !ARGUMENTS:
-!      type(ESMF_Grid), intent(in) :: grid
-!      character (len = *), intent(in) :: name
-!      <value argument>, see below for supported values
-!      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Returns an attribute from the {\tt grid}.
-!      Supported values for <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(out) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(out) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
-!     \item type(ESMF\_Logical), intent(out) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
-!     \item character (len = *), intent(out), value
-!     \end{description}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [grid]
-!           An {\tt ESMF\_Grid} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [<value argument>]
-!           The value of the named attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-
-
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordIntoArray"
-!BOP
-! !IROUTINE: ESMF_GridGetCoord  - Puts  the coordinates of a stagger location into an Array
+!BOPI
+! !IROUTINE: ESMF_GridGetCoord - Puts  the coordinates of a stagger location into an Array
 
 ! !INTERFACE:
       subroutine ESMF_GridGetCoordIntoArray(grid, staggerLoc,coord, array, &
@@ -951,289 +337,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
-! !REQUIREMENTS:  TODO
+!EOPI
 
       end subroutine ESMF_GridGetCoordIntoArray
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridGetInternalState - Get private data block pointer
-!
-! !INTERFACE:
-!      subroutine ESMF_GridGetInternalState(gridcomp, dataPointer, rc)
-!
-! !ARGUMENTS:
-!      type(ESMF_Grid), intent(inout) :: gridcomp
-!      type(any), pointer, intent(in) :: dataPointer
-!      integer, intent(out) :: rc
-!
-! !DESCRIPTION:
-!  Get a pointer to a user defined object from ESMF.  A corresponding 
-!  {\tt ESMF\_GridSetInternalState} call sets the pointer, and this call
-!  retrieves the pointer. Note that the {\tt dataPointer} argument needs to be a derived type
-!  which contains only a pointer of the type of the data block defined
-!  by the user.  When making this call the pointer needs to be unassociated.
-!  When the call returns the pointer will now reference the original
-!  data block which was set during the previous call to
-!  {\tt ESMF\_GridSetInternalState}.
-
-!    
-!  The arguments are:
-!  \begin{description}
-!   \item[grid]
-!    An {\tt ESMF\_Grid} object.
-!   \item[dataPointer]
-!    A derived type, containing only an unassociated pointer 
-!    to the private data block.
-!    The framework will fill in the pointer. When this call returns the
-!    pointer is set to the same address set during 
-!    {\tt ESMF\_GridSetInternalState}.
-!    This level of indirection is needed to reliably set and retrieve 
-!    the data block no matter which architecture or compiler is used.  
-!   \item[rc] 
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!    Note: unlike most other ESMF routines, this argument is not optional
-!    because of implementation considerations.
-!   \end{description}
-!
-!EOP
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridGetMetricIntoArray"
-!BOP
-! !IROUTINE: ESMF_GridGetMetricIntoArray - Gets metric data from a grid and puts it into an Array.
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridGetMetric()
-      subroutine ESMF_GridGetMetricIntoArray(grid, name, metricTag, staggerLoc, &
-                            array, doCopy, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name
-       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
-      type (ESMF_StaggerLoc), intent(out), optional  :: staggerLoc
-      type(ESMF_Array), intent(inout) :: array
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!    Sets a grid metric from an array. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{grid}]
-!          The grid to get the metric from.
-!     \item [name]
-!           The name of the attribute to get.
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE.            
-!     \item[{[staggerLoc]}]
-!          The stagger location where the metric is located. 
-!     \item[{array}]
-!          An array to set the grid metric information from.
-!     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
-!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
-!          of the array.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end subroutine ESMF_GridGetMetricIntoArray
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridGetMetricIntoFptr"
-!BOP
-! !IROUTINE: ESMF_GridGetMetricIntoFptr -  Gets metric data from a grid and puts it into a Fortran pointer.
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridGetMetric()
-      subroutine ESMF_GridGetMetricIntoFptr(grid, name, metricTag, staggerLoc, dep, &
-                            fptr, doCopy, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name
-      type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
-      type (ESMF_StaggerLoc), intent(out), optional  :: staggerLoc
-      real, intent(in), pointer :: fptr
-      integer,               intent(out),   optional  :: dep(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!    Gets a grid metric into a Fortran pointer. This subroutine only
-!    works when there's a 1-to-1 DE to PET match. If not, then
-!    use Array to get the metric data. This subroutine also needs to 
-!    be overloaded to cover the full range of type/kinds.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{grid}]
-!          The grid to get the metric from.
-!     \item [name]
-!           The name of the metric to get.
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE. 
-!     \item[{[staggerLoc]}]
-!          The stagger location where the metric is located.            
-!     \item[{[dep]}]
-!          This array specifies the dependence of the metric dimensions 
-!          on the grid index dimensions. The size of the 
-!          array specifies the number of dimensions of the metric.
-!          The values specify which of the grid index dimensions the corresponding
-!           map to. If a value is 0, then that dimension doesn't correspond to 
-!          a grid dimension. If not present the default is (/1,2,3,.../). 
-!     \item[{fptr}]
-!          The pointer to the metric data. 
-!     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
-!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
-!          of the array.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end subroutine ESMF_GridGetMetricIntoFptr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridHalo"
-!BOP
-! !IROUTINE: ESMF_GridHalo - Do a halo operation on the coordinate arrays in a grid.
-
-! !INTERFACE:
-      subroutine ESMF_GridHalo(grid, regionFlag, haloLDepth, haloUDepth, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Grid) :: ESMF_GridHalo
-      type(ESMF_RegionFlag), intent(in), optional :: regionFlag
-      integer, intent(in), optional :: haloLDepth(:),haloUDepth(:)
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Do a halo operation on a grid to update the coordinate info which is shared
-!      with another DE.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{grid}]
-!          Grid structure to perform the halo operation on.
-!     \item[{[regionFlag]}]
-!          Specifies the reference for halo width arguments: {\tt ESMF\_REGION\_EXCLUSIVE} or {\tt ESMF\_REGION\_COMPUTATIONAL}.
-!     \item[{[haloLDepth]}]
-!           A vector the same size as the dimension of the distGrid. It specifies
-!           the lower corner of the halo with respect to the lower corner of either
-!            the computational region or the exclusive region (depending
-!            on {\tt regionFlag}).  If not specified, uses the computational region,
-!            lower bounds.  
-!     \item[{[haloUDepth]}]
-!           A vector the same size as the dimension of the distGrid. It specifies
-!           the upper corner of the halo with respect to the lower corner of either
-!           the computational region or the exclusive region (depending
-!           on {\tt regionFlag}).  If not specified, uses the computational region,
-!            upper bounds.    
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-
-      end function ESMF_GridHalo
-
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridLocalTileCalcBnds"
-!BOP
-! !IROUTINE: ESMF_GridLocalTileCalcBnds - Given 
-
-! !INTERFACE:
-     subroutine ESMF_GridLocalTileCalcBnds(grid, tile, localDE, coord, staggerLoc, &
-                        staggerLocLWidth, staggerLocUWidth, &
-                        staggerAlign, lBounds, uBounds, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid 
-      integer,               intent(in), optional :: tile 
-      integer,               intent(in), optional :: localDE
-      integer, intent(in),  optional :: coord
-      type (ESMF_StaggerLoc), intent(in)  :: staggerLoc
-      integer,               intent(in),   optional  :: staggerLocLWidth(:)
-      integer,               intent(in),   optional  :: staggerLocUWidth(:)
-      integer,               intent(in),   optional  :: staggerAlign(:)
-      integer,               intent(out)                 :: lBounds(:),uBounds(:)
-      integer,               intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!  Given a tile and stagger location information this subroutine calculates
-!  what the bounds of the array on this tile and localDE would be 
-!  if that stagger location were added. This is useful for preallocating
-!  coordinate arrays to be used in {\tt ESMF\_GridStaggerLocAdd}.
-!
-! The arguments are:
-! \begin{description}
-!\item[{grid}]
-!          Grid to get information from.
-!\item[{[tile]}]
-!          The grid tile to get the information for. If not set, defaults to 
-!          the first tile. 
-!\item[{[localDE]}]
-!          The local DE from which to get the information.  If not set, defaults to 
-!          the first DE on this processor. 
-!\item[{coord}]
-!          The coordinate component to put the data in (e.g. 1=x). Defaults to 1. 
-! \item[{staggerLoc}]
-!        The stagger location to add.
-! \item[{[staggerLocLWidth]}] 
-!      This array should be the same rank as the grid. It specifies the lower corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[staggerLocUWidth]}] 
-!      This array should be the same rank as the grid. It specifies the upper corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[staggerAlign]}] 
-!      This array is of size  grid rank.
-!      For this stagger location, it specifies which element
-!      has the same index value as the center. For example, 
-!      for a 2D cell with corner stagger it specifies which 
-!      of the 4 corners has the same index as the center. 
-!      If this is set and staggerLocUWidth is not,
-!      this determines the default array padding for a stagger. 
-!      If not set, then this defaults to all negative. (e.g. 
-!      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
-! \item[{lBounds}] 
-!      This array should have size=rank of the specified coord. comp. 
-!      It specifies the lower bounds
-!       of the array for the given tile, DE, staggerLoc, and coord.
-! \item[{uBounds}] 
-!      This array should have size=rank of the coord. comp. It specifies the upper bounds
-!       of the array for the given tile, DE, staggerLoc, and coord.
-! \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end function ESMF_GridLocalTileCalcBnds
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1320,7 +426,6 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:  TODO
 
       end subroutine ESMF_GridLocalTileGet
 
@@ -1370,7 +475,6 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:  TODO
 
       end subroutine ESMF_GridLocalTileGetCoord
 
@@ -1425,157 +529,9 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:  TODO
 
       end subroutine ESMF_GridLocalTileGetCoord
 
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridLocalTileGetMetric"
-!BOP
-! !IROUTINE: ESMF_GridLocalTileGetMetric - get the fortran data pointer for the piece of  metic data on this tile on this DE.
-
-! !INTERFACE:
-      subroutine ESMF_GridLocalTileGetMetric(grid, name, metricTag, tile, localDE, &
-                                      fptr, doCopy, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name
-       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
-      integer, intent(in),optional :: tile
-      integer, intent(in),optional :: localDE
-      real, intent(out), optional :: fptr(:,:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!    Gets a fortran pointer to the metric data for the piece of tile on a local DE. 
-!    This routine will need to be overloaded to cover the full range of ranks, types, 
-!    and kinds. 
-
-!     The arguments are:
-!     \begin{description}
-!     \item[{grid}]
-!          Grid to get the information from.
-!     \item [name]
-!           The name of the metric to get.
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE. 
-!     \item[{[tile]}]
-!          The grid tile to get the information for. If not set, defaults to 
-!          the first tile. 
-!     \item[{[localDE]}]
-!          The local DE to get the information for. If not set, defaults to 
-!          the first DE on this processor. 
-!     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_COPY},  copys the array. 
-!          If set to {\tt ESMF\_DATA\_REF}, fptr is a reference to the data in the 
-!          grid arrays. 
-!     \item[{fptr}]
-!          The pointer to the coordinate data.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end subroutine ESMF_GridLocalTileGetMetric
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridLocalTileMetricGet"
-!BOP
-! !IROUTINE: ESMF_GridLocalTileMetricGet - get various types of information about the part of some metric data which lies on this DE.
-
-! !INTERFACE:
-      subroutine ESMF_GridLocalTileMetricGet(grid, name, tile, coord, localDE, staggerLoc, &
-          exclusiveLBound, exclusiveUBound, computationalLBound, &
-          computationalUBound, totalLBound, totalUBound, &
-          computationalLWidth, computationalUWidth, &
-          totalLWidth, totalUWidth,rc)
-
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in),optional :: tile
-      character (len=*), intent(in):: name
-     integer, intent(in),optional :: localDE
-      integer, intent(in),  optional :: coord
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
-      integer,      intent(out), optional :: exclusiveLBound(:)
-      integer,      intent(out), optional :: exclusiveUBound(:)
-      integer,      intent(out), optional :: computationalLBound(:)
-      integer,      intent(out), optional :: computationalUBound(:)
-      integer,      intent(out), optional :: totalLBound(:)
-      integer,      intent(out), optional :: totalUBound(:)
-      integer,      intent(out), optional :: computationalLWidth(:)
-      integer,      intent(out), optional :: computationalUWidth(:)
-      integer,      intent(out), optional :: totalLWidth(:)
-      integer,      intent(out), optional :: totalUWidth(:)
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!    Gets various types of information about the part of a grid tile which lies on this DE. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{grid}]
-!          Grid to get the information from.
-!     \item [name]
-!           The name of the metric to get information for.
-!     \item[{[tile]}]
-!          The grid tile to get the information for. If not set, defaults to 
-!          the first tile. 
-!     \item[{[localDE]}]
-!          The local DE from which to get the information.  If not set, defaults to 
-!          the first DE on this processor. 
-!     \item[{staggerLoc}]
-!          The stagger location to get the information for. If not set, defaults
-!          to center.  
-!     \item[{[exclusiveLBound]}]
-!        Upon return this holds the lower bounds of the exclusive region.
-!        {\tt exclusiveLBound} must be allocated to be of size dimCount.
-!     \item[{[exclusiveUBound]}]
-!        Upon return this holds the upper bounds of the exclusive region.
-!        {\tt exclusiveUBound} must be allocated to be of size dimCount.
-!     \item[{[computationalLBound]}]
-!        Upon return this holds the lower bounds of the computational region. 
-!       {\tt computationalLBound} must be allocated to be of size dimCount.
-!     \item[{[computationalUBound]}]
-!        Upon return this holds the upper bounds of the computational region.
-!        {\tt computationalUBound} must be allocated to be of size dimCount.
-!     \item[{[totalLBound]}]
-!        Upon return this holds the lower bounds of the total region.
-!        {\tt totalLBound} must be allocated to be of size dimCount.
-!     \item[{[totalUBound]}]
-!        Upon return this holds the upper bounds of the total region.
-!        {\tt totalUBound} must be allocated to be of size dimCount.
-!     \item[{[computationalLWidth]}]
-!        Upon return this holds the lower width of the computational region.
-!        {\tt computationalLWidth} must be allocated to be of size dimCount.
-!     \item[{[computationalUWidth]}]
-!        Upon return this holds the upper width of the computational region.
-!        {\tt computationalUWidth} must be allocated to be of size dimCount.
-!     \item[{[totalLWidth]}]
-!        Upon return this holds the lower width of the total memory region.
-!        {\tt computationalUWidth} must be allocated to be of size dimCount.
-!     \item[{[totalUWidth]}]
-!        Upon return this holds the upper width of the total memory region.
-!        {\tt totalUWidth} must be allocated to be of size dimCount.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end subroutine ESMF_GridLocalTileMetricGet
 
 
 !------------------------------------------------------------------------------
@@ -1623,7 +579,6 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:  TODO
 
       end subroutine ESMF_GridLocalTileSetCoord
 
@@ -1680,131 +635,9 @@ piece of tile on our processor from a fortran array.
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:  TODO
 
 
       end subroutine ESMF_GridLocalTileSetCoord
-
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridLocalTileSetMetric"
-!BOP
-! !IROUTINE: ESMF_GridLocalTileSetMetric - set the metic data on this tile on this DE using a fortran pointer.
-
-! !INTERFACE:
-      subroutine ESMF_GridLocalTileSetMetric(grid, name, metricTag, tile, localDE, &
-                                      fptr, doCopy, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name
-      type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
-      integer, intent(in),optional :: tile
-      integer, intent(in),optional :: localDE
-      real, intent(out), optional :: fptr(:,:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!    Sets a fortran pointer to the metric data for the piece of tile on a local DE. 
-!    This routine will need to be overloaded to cover the full range of ranks, types, 
-!    and kinds. 
-
-!     The arguments are:
-!     \begin{description}
-!     \item[{grid}]
-!          Grid to get the information from.
-!     \item [name]
-!           The name of the metric to set.
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE. 
-!     \item[{[tile]}]
-!          The grid tile to set the information in. If not set, defaults to 
-!          the first tile. 
-!     \item[{[localDE]}]
-!          The local DE to set the information in. If not set, defaults to 
-!          the first DE on this processor. 
-!     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_COPY},  copys the array. 
-!          If set to {\tt ESMF\_DATA\_REF}, fptr is a reference to the data in the 
-!          grid arrays. 
-!     \item[{fptr}]
-!          The pointer to the metric data.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end subroutine ESMF_GridLocalTileSetMetric
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMetricGet"
-!BOP
-! !IROUTINE: ESMF_GridMetricGet - Get information about a particular metric. 
-
-! !INTERFACE:
-     subroutine ESMF_GridMetricGet(grid, name, metricTag, staggerLoc, &
-                        metricLWidth, metricUWidth, &
-                        metricAlign, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid 
-      character (len=*), intent(in) :: name
-      type (ESMF_StaggerLoc), intent(out), optional  :: staggerLoc
-      type(ESMF_MetricTag),  intent(out),   optional  :: metricTag
-      integer,               intent(out),   optional  :: metricLWidth(:)
-      integer,               intent(out),   optional  :: metricUWidth(:)
-      integer,               intent(out),   optional  :: metricAlign(:)
-      integer,               intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!  Get information about a particular stagger location.
-!
-! The arguments are:
-!\begin{description}
-!\item[{grid}]
-!          Grid to get information from.
-!\item [name]
-!           The name of the metric to set.
-!\item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. 
-!\item[{staggerLoc}]
-!        The stagger location at which the metric is located.
-!\item[{[metricLWidth]}] 
-!        This array should be the same rank as the grid. It specifies the lower corner of the computational
-!        region with respect to the lower corner of the exclusive region.
-!\item[{[metricUWidth]}] 
-!        This array should be the same rank as the grid. It specifies the upper corner of the computational
-!       region with respect to the lower corner of the exclusive region.
-!\item[{[metricAlign]}] 
-!      This array is of size  grid rank.
-!      For this stagger location, it specifies which element
-!      has the same index value as the center. For example, 
-!      for a 2D cell with corner stagger it specifies which 
-!      of the 4 corners has the same index as the center. 
-!      If this is set and metricUWidth is not,
-!      this determines the default array padding for a stagger. 
-!      If not set, then this defaults to all negative. (e.g. 
-!      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
-! \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end function ESMF_GridMetricGet
-
-!------------------------------------------------------------------------------
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1943,56 +776,208 @@ piece of tile on our processor from a fortran array.
 ! \end{description}
 !
 !EOP
-! !REQUIREMENTS:  TODO
 
       end function ESMF_GridSet
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetCoordArray"
+
 !BOP
-! !IROUTINE: ESMF_GridSetAttribute - Set an attribute
-!
+! !IROUTINE: ESMF_GridSetCoord - Set coordinate values from ESMF Arrays.
+
 ! !INTERFACE:
-!      subroutine ESMF_GridSetAttribute(grid, name, <value argument>, rc)
+  ! Private name; call using ESMF_GridSetCoord()
+     function ESMF_GridSetCoordArray(grid, staggerLoc, &
+                        coord1, coord2, coord3, &
+                        coordLWidth, coordUWidth, &
+                        coordAlign, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_Grid), intent(inout) :: grid
-!      character (len = *), intent(in) :: name
-!      <value argument>, see below for supported values    
-!      integer, intent(out), optional :: rc
+      type(ESMF_Grid),       intent(in)             :: grid 
+      type (ESMF_StaggerLoc), intent(in)       :: staggerLoc
+      type(ESMF_ARRAY), intent(in)            :: coord1(:), coord2(:)
+      type(ESMF_ARRAY), intent(in)            :: coord3(:)
+      integer,               intent(in),   optional  :: coordLWidth(:)
+      integer,               intent(in),   optional  :: coordUWidth(:)
+      integer,               intent(in),   optional  :: coordAlign(:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!     Attaches an attribute to the {\tt grid}.
-!     The attribute has a {\tt name} and either a {\tt value} or a
-!     {\tt valueList}.
-!     Supported values for the <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(in) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(in) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
-!     \item type(ESMF\_Logical), intent(in) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
-!     \item character (len = *), intent(in), value
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [grid]
-!           An {\tt ESMF\_Grid} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [<value argument>]
-!           The value of the attribute to set.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!  Add a stagger location to a grid. This subroutine lets the user add a
+! stagger location and set the coordinates from F90 pointers at the same
+! time. This subroutine is only usable for grids up to 4D.  [Are arrays 
+! referenced or copied?]
+!
+! The arguments are:
+! \begin{description}
+!     \item[{grid}]
+!      Partially created Grid to set information into.
+! \item[{[staggerLoc]}]
+!        The stagger location to add.
+! \item[{[coord1]}]
+!        ESMF Array holding coordinate data for the first coordinate component (e.g. x).
+! \item[{[coord2]}]
+!         ESMF Array holding coordinate data for the second coordinate component (e.g. y).
+! \item[{[coord3]}]
+!         ESMF Array holding coordinate data for the third coordinate component (e.g. z).
+! \item[{[coordLWidth]}] 
+!      This array should be the same rank as the grid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[coordUWidth]}] 
+!      This array should be the same rank as the grid. It specifies the upper corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[coordAlign]}] 
+!      This array is of size  grid rank.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and coordUWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+!\item[{[doCopy]}]
+!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
+!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
+!          of the array.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
 !
 !EOP
+
+      end function ESMF_GridSetCoordArray
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetCoordFptr"
+!BOPI
+! !IROUTINE: ESMF_GridSetCoord - Set coordinate values from R8 Fortran arrays. 
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridSetCoord()
+     function ESMF_GridSetCoordFptr(grid, staggerLoc, &
+                        coord1, coord2, coord3, &
+                        coordLWidth, coordUWidth, &
+                        coordAlign, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),       intent(in)             :: grid 
+      type (ESMF_StaggerLoc), intent(in)       :: staggerLoc
+      real (ESMF_KIND_R8), intent(in)            :: coord1(:), coord2(:)
+      real (ESMF_KIND_R8), intent(in)            :: coord3(:)
+      integer,               intent(in),   optional  :: coordLWidth(:)
+      integer,               intent(in),   optional  :: coordUWidth(:)
+      integer,               intent(in),   optional  :: coordAlign(:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!  Add a stagger location to a grid. This subroutine lets the user add a
+! stagger location and set the coordinates from F90 pointers at the same
+! time. (This subroutine is only usable for grids up to 4D). [Are
+! arrays referenced or copied?]
+!
+! The arguments are:
+! \begin{description}
+!     \item[{grid}]
+!          Partially created Grid to set information into.
+! \item[{[staggerLoc]}]
+!        The stagger location to add.
+! \item[{[coord1]}]
+!        The F90 pointer to coordinate data for the first coordinate component (e.g. x).
+! \item[{[coord2]}]
+!        The F90 pointer to coordinate data for the second coordinate component (e.g. y).
+! \item[{[coord3]}]
+!        The F90 pointer to coordinate data for the third coordinate component (e.g. z).
+! \item[{[coordLWidth]}] 
+!      This array should be the same rank as the grid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[coordUWidth]}] 
+!      This array should be the same rank as the grid. It specifies the upper corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[coordAlign]}] 
+!      This array is of size  grid rank.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and coordUWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+!\item[{[doCopy]}]
+!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
+!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
+!          of the array.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+
+      end function ESMF_GridSetCoordFptr
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetCoordNoValues"
+
+!BOP
+! !IROUTINE: ESMF_GridSetCoord - Allocate coordinate arrays but don't set values. 
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridSetCoord()
+     function ESMF_GridSetCoordNoValues(grid, staggerLoc, &
+                        coordLWidth, coordUWidth, &
+                        coordAlign, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),       intent(in)              :: grid 
+      type (ESMF_StaggerLoc), intent(in)             :: staggerLoc
+      integer,               intent(in),   optional  :: coordLWidth(:)
+      integer,               intent(in),   optional  :: coordUWidth(:)
+      integer,               intent(in),   optional  :: coordAlign(:)
+      integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!  Add a stagger location to a grid.
+!
+! The arguments are:
+! \begin{description}
+!     \item[{grid}]
+!          Partially created Grid to set information into.
+! \item[{[staggerLoc]}]
+!        The stagger location to add.
+! \item[{[coordLWidth]}] 
+!      This array should be the same rank as the grid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[coordUWidth]}] 
+!      This array should be the same rank as the grid. It specifies the upper corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[coordAlign]}] 
+!      This array is of size  grid rank.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and coordUWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+
+      end function ESMF_GridSetCoordNoValues
 
 
 !------------------------------------------------------------------------------
@@ -2034,92 +1019,8 @@ piece of tile on our processor from a fortran array.
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:  TODO
 
       end subroutine ESMF_GridSetCoordFromArray
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridSetInternalState"
-!BOP
-! !IROUTINE: ESMF_GridSetInternalState - Set private data block pointer
-!
-! !INTERFACE:
-!      subroutine ESMF_GridSetInternalState(gridcomp, dataPointer, rc)
-!
-! !ARGUMENTS:
-!      type(ESMF_Grid), intent(inout) :: gridcomp
-!      type(any), pointer, intent(in) :: dataPointer
-!      integer, intent(out) :: rc
-!
-! !DESCRIPTION:
-!  Registers a pointer to a user defined structure in ESMF. A corresponding 
-!  {\tt ESMF\_GridGetInternalState} call retrieves the data pointer.
-!    
-!  The arguments are:
-!  \begin{description}
-!   \item[grid]
-!    An {\tt ESMF\_Grid} object.
-!   \item[dataPointer]
-!    A pointer to the private data block, wrapped in a derived type which
-!    contains only a pointer to the block.  This level of indirection is
-!    needed to reliably set and retrieve the data block no matter which
-!    architecture or compiler is used.  
-!   \item[rc] 
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!    Note: unlike most other ESMF routines, this argument is not optional
-!    because of implementation considerations.
-!   \end{description}
-!
-!EOP
- 
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridSetMetricFromArray"
-!BOP
-! !IROUTINE: ESMF_GridSetMetricFromArray - Add a new metric from an Array.
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridSetMetric()
-      subroutine ESMF_GridSetMetricFromArray(grid, name, metricTag, &
-                            array, doCopy, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name
-      type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
-      type(ESMF_Array), intent(in) :: array
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!    Sets a grid metric from an array. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{grid}]
-!          The grid to set the metric in.
-!     \item [name]
-!           The name of the attribute to set.
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE.            
-!     \item[{array}]
-!          An array to set the grid metric information from.
-!     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
-!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
-!          of the array.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      end subroutine ESMF_GridSetMetricFromArray
-
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2171,14 +1072,1087 @@ piece of tile on our processor from a fortran array.
 ! \end{description}
 !
 !EOP
-! !REQUIREMENTS:  TODO
 
       end function ESMF_GridStaggerLocGet
 
 !------------------------------------------------------------------------------
 
+!==============================================================================
+! UNREVIEWED AND UNIMPLEMENTED METHODS
+!==============================================================================
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAddMetricFromArray"
+!BOPI
+! !IROUTINE: ESMF_GridAddMetricFromArray - Add a new metric from an Array.
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridAddMetric()
+      subroutine ESMF_GridSetMetricFromArray(grid, name, metricTag, staggerLoc, &
+                            array, metricDep, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name
+      type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
+      type(ESMF_Array), intent(in) :: array
+      integer,               intent(in),   optional  :: metricDep(:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    Adds a grid metric from an array. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          The grid to set the metric in.
+!     \item [name]
+!           The name of the attribute to set.
+!      \item[{[metricTag]}] 
+!           Identifies the type of metric to ESMF. If not present, defaults
+!           to ESMF\_METRICTAG\_NONE.            
+!     \item[{[staggerLoc]}]
+!          The stagger location into which to copy the arrays. If not set,
+!          defaults to center. 
+!     \item[{array}]
+!          An array to set the grid metric information from.
+!     \item[{metricDep}]
+!          This array specifies the dependence of the metric dimensions 
+!          on the grid index dimensions. The size of the 
+!          array specifies the number of dimensions of the metric.
+!          The values specify which of the grid index dimensions the corresponding
+!           map to. If a value is 0, then that dimension doesn't correspond to 
+!          a grid dimension. If not present the default is (/1,2,3,.../). 
+!     \item[{[doCopy]}]
+!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
+!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
+!          of the array.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+      end subroutine ESMF_GridAddMetricFromArray
 
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAddMetricFromFptr"
+!BOPI
+! !IROUTINE: ESMF_GridSetMetricFromFptr - Sets metric data from a Fortran pointer.
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridAddMetric()
+      subroutine ESMF_GridSetMetricFromFptr(grid, name, metricTag, staggerLoc, metricDep, &
+                            fptr, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name
+       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
+      real, intent(in), pointer :: fptr
+      integer,               intent(in),   optional  :: metricDep(:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    Adds a grid metric from a Fortran pointer. This subroutine only
+!    works when there's a 1-to-1 DE to PET match. If not, then
+!    use Array to set the metric data. This subroutine also needs to 
+!    be overloaded to cover the full range of type/kinds.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          The grid to set the metric in.
+!     \item [name]
+!           The name of the attribute to set.
+!      \item[{[metricTag]}] 
+!           Identifies the type of metric to ESMF. If not present, defaults
+!           to ESMF\_METRICTAG\_NONE.            
+!     \item[{[staggerLoc]}]
+!          The stagger location into which to copy the arrays. If not set,
+!          defaults to center. 
+!     \item[{metricDep}]
+!          This array specifies the dependence of the metric dimensions 
+!          on the grid index dimensions. The size of the 
+!          array specifies the number of dimensions of the metric.
+!          The values specify which of the grid index dimensions the corresponding
+!           map to. If a value is 0, then that dimension doesn't correspond to 
+!          a grid dimension. If not present the default is (/1,2,3,.../). 
+!     \item[{[doCopy]}]
+!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
+!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
+!          of the array.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+      end subroutine ESMF_GridAddMetricFromFptr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAddMetricNoValues"
+!BOPI
+! !IROUTINE: ESMF_GridAddMetricNoValues - Allocates space for metric, but doesn't set data.
+
+! !INTERFACE:
+! Private name; call using ESMF_GridAddMetric()
+      subroutine ESMF_GridAddMetricNoSet(grid, name, metricTag, metricTypeKind, 
+                   staggerLoc, metricDep, lbounds, ubounds, &                         
+                   metricLWidth, metricUWidth, metricAlign, &
+                   computationalLWidth, computationalUWidth, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name
+       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
+       type(ESMF_TypeKind),  intent(in),    optional  :: metricTypeKind
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
+      integer,               intent(in),   optional  :: metricDep(:)
+      integer,               intent(in),   optional  :: lbounds(:)
+      integer,               intent(in),   optional  :: ubounds(:)
+      integer,               intent(in),   optional  :: metricLWidth(:)
+      integer,               intent(in),   optional  :: metricUWidth(:)
+      integer,               intent(in),   optional  :: metricAlign(:)
+      type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+      integer,               intent(in),   optional  :: computationalLWidth(:)
+      integer,               intent(in),   optional  :: computationalUWidth(:)
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Builds storage for a metric, but doesn't set its data. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          The grid to set the metric in.
+!     \item [name]
+!           The name of the attribute to set.           
+!      \item[{[metricTag]}] 
+!           Identifies the type of metric to ESMF. If not present, defaults
+!           to ESMF\_METRICTAG\_NONE. 
+!      \item[{[metricTypeKind]}] 
+!           The type/kind of the grid coordinate data. 
+!           If not specified then the type/kind will be 8 byte reals. 
+!     \item[{[staggerLoc]}]
+!          The stagger location into which to copy the arrays. If not set,
+!          defaults to center. 
+!     \item[{metricDep}]
+!          This array specifies the dependence of the metric dimensions 
+!          on the grid index dimensions. The size of the 
+!          array specifies the number of dimensions of the metric.
+!          The values specify which of the grid index dimensions the corresponding
+!           map to. If a value is 0, then that dimension doesn't correspond to 
+!          a grid dimension. If not present the default is (/1,2,3,.../). 
+!     \item[{[lbounds]}] 
+!          Lower bounds for tensor array dimensions.
+!     \item[{[ubounds]}] 
+!          Upper bounds for tensor array dimensions.
+! \item[{[metricLWidth]}] 
+!      This array should be the same rank as the grid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[metricUWidth]}] 
+!      This array should be the same rank as the grid. It specifies the upper corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[metricAlign]}] 
+!      This array is of size  grid rank.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and metricUWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+!     \item[{[indexflag]}]
+!          Flag that indicates how the DE-local indices are to be defined.
+!     \item[{[computationalLWidth]}]
+!          Array of the same size as the {\tt distGrid} dimcount. 
+!          Sets the size of the computational padding around the exclusive
+!          regions on each DE. If {\tt metricLWidth} is also set
+!          the actual value for any edge is the maximum between the two. 
+!     \item[{[computationalUWidth]}]
+!          Array of the same size as the {\tt distGrid} dimcount. 
+!          Sets the size of the computational padding around the exclusive
+!          regions on each DE. If {\tt metricUWidth} is also set
+!          the actual value for any edge is the maximum between the two. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+      end subroutine ESMF_GridAddMetricNoValues
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAddMetricSub"
+!BOPI
+! !IROUTINE: ESMF_GridAddMetricSub - Add a subroutine interface to generate metric data.
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridAddMetric()
+      subroutine ESMF_GridAddMetricSub(grid, name, metricTag, metricTypeKind, 
+                   staggerLoc, metricDep, lbounds, ubounds, &                         
+                   metricLWidth, metricUWidth, metricAlign, &
+                   computationalLWidth, computationalUWidth,&
+                   sub, userDataR4, userDataR8, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name
+       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
+       type(ESMF_TypeKind),  intent(in),    optional  :: metricTypeKind
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
+      integer,               intent(in),   optional  :: metricDep(:)
+      integer,               intent(in),   optional  :: lbounds(:)
+      integer,               intent(in),   optional  :: ubounds(:)
+      integer,               intent(in),   optional  :: metricLWidth(:)
+      integer,               intent(in),   optional  :: metricUWidth(:)
+      integer,               intent(in),   optional  :: metricAlign(:)
+      type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+      integer,               intent(in),   optional  :: computationalLWidth(:)
+      integer,               intent(in),   optional  :: computationalUWidth(:)
+      subroutine             intent(in),             :: sub
+      real(ESMF_KIND_R4),    intent(in),   optional  :: userDataR4(:)
+      real(ESMF_KIND_R4),    intent(in),   optional  :: userDataR8(:)
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Sets a subroutine to generate metric data from. The user may 
+!    also pass user data through to the subroutine to use in computation. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          The grid to set the metric in.
+!     \item [name]
+!           The name of the attribute to set.           
+!      \item[{[metricTag]}] 
+!           Identifies the type of metric to ESMF. If not present, defaults
+!           to ESMF\_METRICTAG\_NONE. 
+!      \item[{[metricTypeKind]}] 
+!           The type/kind of the grid coordinate data. 
+!           If not specified then the type/kind will be 8 byte reals. 
+!     \item[{[staggerLoc]}]
+!          The stagger location into which to copy the arrays. If not set,
+!          defaults to center. 
+!     \item[{metricDep}]
+!          This array specifies the dependence of the metric dimensions 
+!          on the grid index dimensions. The size of the 
+!          array specifies the number of dimensions of the metric.
+!          The values specify which of the grid index dimensions the corresponding
+!           map to. If a value is 0, then that dimension doesn't correspond to 
+!          a grid dimension. If not present the default is (/1,2,3,.../). 
+!     \item[{[lbounds]}] 
+!          Lower bounds for tensor array dimensions.
+!     \item[{[ubounds]}] 
+!          Upper bounds for tensor array dimensions.
+! \item[{[metricLWidth]}] 
+!      This array should be the same rank as the grid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[metricUWidth]}] 
+!      This array should be the same rank as the grid. It specifies the upper corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[metricAlign]}] 
+!      This array is of size  grid rank.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and metricUWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+!     \item[{[indexflag]}]
+!          Flag that indicates how the DE-local indices are to be defined.
+!     \item[{[computationalLWidth]}]
+!          Array of the same size as the {\tt distGrid} dimcount. 
+!          Sets the size of the computational padding around the exclusive
+!          regions on each DE. If {\tt metricLWidth} is also set
+!          the actual value for any edge is the maximum between the two. 
+!     \item[{[computationalUWidth]}]
+!          Array of the same size as the {\tt distGrid} dimcount. 
+!          Sets the size of the computational padding around the exclusive
+!          regions on each DE. If {\tt metricUWidth} is also set
+!          the actual value for any edge is the maximum between the two. 
+!     \item[{sub}]
+!          The subroutine to generate the metric data.
+!     \item[{sub}]
+!          The subroutine to generate the metric data.
+!     \item[{userDataR4}]
+!          User data to pass to the subroutine.
+!     \item[{userDataR8}]
+!          User data to pass to the subroutine.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+      end subroutine ESMF_GridAddMetricSub
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCalcStaggerLocCoord"
+!BOPI
+! !IROUTINE: ESMF_GridCalcStaggerLocCoord - Calculates the coordinates of a set of stagger locations from another stagger location's coordinates .
+
+! !INTERFACE:
+      subroutine ESMF_GridCalcStaggerLocCoord(grid, srcStaggerLoc, dstStaggerLocs, &
+                             method, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type (ESMF_StaggerLoc), intent(in)  :: srcStaggerLoc
+      type (ESMF_StaggerLoc), intent(in),optional  :: dstStaggerLocs(:)
+      integer, intent(in) :: method
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Calculate the coordinates for the destination stagger locations from the source
+!     stagger location using the method.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{srcStaggerLoc}]
+!          The stagger location from which to get the coordinate info to 
+!           calculate the desination's coordinates.
+!     \item[{dstStaggerLocs}]
+!          The array of stagger locations for which to calculate the coordinates.
+!          If not present, defaults to every stagger location containing coordiantes. 
+!     \item[{method}]
+!           A flag indicating the method to use to do the calculations.
+!           Not yet implemented, defaults to averaging. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+      end subroutine ESMF_GridCalcStaggerLocCoord
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridGetAttribute  - Retrieve an attribute
+!
+! !INTERFACE:
+!      subroutine ESMF_GridGetAttribute(grid, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_Grid), intent(in) :: grid
+!      character (len = *), intent(in) :: name
+!      <value argument>, see below for supported values
+!      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Returns an attribute from the {\tt grid}.
+!      Supported values for <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(out) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(out) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
+!     \item type(ESMF\_Logical), intent(out) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
+!     \item character (len = *), intent(out), value
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [<value argument>]
+!           The value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridGetInternalState - Get private data block pointer
+!
+! !INTERFACE:
+!      subroutine ESMF_GridGetInternalState(gridcomp, dataPointer, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_Grid), intent(inout) :: gridcomp
+!      type(any), pointer, intent(in) :: dataPointer
+!      integer, intent(out) :: rc
+!
+! !DESCRIPTION:
+!  Get a pointer to a user defined object from ESMF.  A corresponding 
+!  {\tt ESMF\_GridSetInternalState} call sets the pointer, and this call
+!  retrieves the pointer. Note that the {\tt dataPointer} argument needs to be a derived type
+!  which contains only a pointer of the type of the data block defined
+!  by the user.  When making this call the pointer needs to be unassociated.
+!  When the call returns the pointer will now reference the original
+!  data block which was set during the previous call to
+!  {\tt ESMF\_GridSetInternalState}.
+
+!    
+!  The arguments are:
+!  \begin{description}
+!   \item[grid]
+!    An {\tt ESMF\_Grid} object.
+!   \item[dataPointer]
+!    A derived type, containing only an unassociated pointer 
+!    to the private data block.
+!    The framework will fill in the pointer. When this call returns the
+!    pointer is set to the same address set during 
+!    {\tt ESMF\_GridSetInternalState}.
+!    This level of indirection is needed to reliably set and retrieve 
+!    the data block no matter which architecture or compiler is used.  
+!   \item[rc] 
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!    Note: unlike most other ESMF routines, this argument is not optional
+!    because of implementation considerations.
+!   \end{description}
+!
+!EOP
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetMetricIntoFptr"
+!BOP
+! !IROUTINE: ESMF_GridGetMetricIntoFptr -  Gets metric data from a grid and puts it into a Fortran pointer.
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetMetric()
+      subroutine ESMF_GridGetMetricIntoFptr(grid, name, metricTag, staggerLoc, dep, &
+                            fptr, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name
+      type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
+      type (ESMF_StaggerLoc), intent(out), optional  :: staggerLoc
+      real, intent(in), pointer :: fptr
+      integer,               intent(out),   optional  :: dep(:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    Gets a grid metric into a Fortran pointer. This subroutine only
+!    works when there's a 1-to-1 DE to PET match. If not, then
+!    use Array to get the metric data. This subroutine also needs to 
+!    be overloaded to cover the full range of type/kinds.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          The grid to get the metric from.
+!     \item [name]
+!           The name of the metric to get.
+!      \item[{[metricTag]}] 
+!           Identifies the type of metric to ESMF. If not present, defaults
+!           to ESMF\_METRICTAG\_NONE. 
+!     \item[{[staggerLoc]}]
+!          The stagger location where the metric is located.            
+!     \item[{[dep]}]
+!          This array specifies the dependence of the metric dimensions 
+!          on the grid index dimensions. The size of the 
+!          array specifies the number of dimensions of the metric.
+!          The values specify which of the grid index dimensions the corresponding
+!           map to. If a value is 0, then that dimension doesn't correspond to 
+!          a grid dimension. If not present the default is (/1,2,3,.../). 
+!     \item[{fptr}]
+!          The pointer to the metric data. 
+!     \item[{[doCopy]}]
+!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
+!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
+!          of the array.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+      end subroutine ESMF_GridGetMetricIntoFptr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridHalo"
+!BOPI
+! !IROUTINE: ESMF_GridHalo - Do a halo operation on the coordinate arrays in a grid.
+
+! !INTERFACE:
+      subroutine ESMF_GridHalo(grid, regionFlag, haloLDepth, haloUDepth, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Grid) :: ESMF_GridHalo
+      type(ESMF_RegionFlag), intent(in), optional :: regionFlag
+      integer, intent(in), optional :: haloLDepth(:),haloUDepth(:)
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Do a halo operation on a grid to update the coordinate info which is shared
+!      with another DE.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid structure to perform the halo operation on.
+!     \item[{[regionFlag]}]
+!          Specifies the reference for halo width arguments: {\tt ESMF\_REGION\_EXCLUSIVE} or {\tt ESMF\_REGION\_COMPUTATIONAL}.
+!     \item[{[haloLDepth]}]
+!           A vector the same size as the dimension of the distGrid. It specifies
+!           the lower corner of the halo with respect to the lower corner of either
+!            the computational region or the exclusive region (depending
+!            on {\tt regionFlag}).  If not specified, uses the computational region,
+!            lower bounds.  
+!     \item[{[haloUDepth]}]
+!           A vector the same size as the dimension of the distGrid. It specifies
+!           the upper corner of the halo with respect to the lower corner of either
+!           the computational region or the exclusive region (depending
+!           on {\tt regionFlag}).  If not specified, uses the computational region,
+!            upper bounds.    
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+
+      end function ESMF_GridHalo
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLocalTileCalcBnds"
+!BOP
+! !IROUTINE: ESMF_GridLocalTileCalcBnds - Given 
+
+! !INTERFACE:
+     subroutine ESMF_GridLocalTileCalcBnds(grid, tile, localDE, coord, staggerLoc, &
+                        staggerLocLWidth, staggerLocUWidth, &
+                        staggerAlign, lBounds, uBounds, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid 
+      integer,               intent(in), optional :: tile 
+      integer,               intent(in), optional :: localDE
+      integer, intent(in),  optional :: coord
+      type (ESMF_StaggerLoc), intent(in)  :: staggerLoc
+      integer,               intent(in),   optional  :: staggerLocLWidth(:)
+      integer,               intent(in),   optional  :: staggerLocUWidth(:)
+      integer,               intent(in),   optional  :: staggerAlign(:)
+      integer,               intent(out)                 :: lBounds(:),uBounds(:)
+      integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!  Given a tile and stagger location information this subroutine calculates
+!  what the bounds of the array on this tile and localDE would be 
+!  if that stagger location were added. This is useful for preallocating
+!  coordinate arrays to be used in {\tt ESMF\_GridStaggerLocAdd}.
+!
+! The arguments are:
+! \begin{description}
+!\item[{grid}]
+!          Grid to get information from.
+!\item[{[tile]}]
+!          The grid tile to get the information for. If not set, defaults to 
+!          the first tile. 
+!\item[{[localDE]}]
+!          The local DE from which to get the information.  If not set, defaults to 
+!          the first DE on this processor. 
+!\item[{coord}]
+!          The coordinate component to put the data in (e.g. 1=x). Defaults to 1. 
+! \item[{staggerLoc}]
+!        The stagger location to add.
+! \item[{[staggerLocLWidth]}] 
+!      This array should be the same rank as the grid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[staggerLocUWidth]}] 
+!      This array should be the same rank as the grid. It specifies the upper corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[staggerAlign]}] 
+!      This array is of size  grid rank.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and staggerLocUWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+! \item[{lBounds}] 
+!      This array should have size=rank of the specified coord. comp. 
+!      It specifies the lower bounds
+!       of the array for the given tile, DE, staggerLoc, and coord.
+! \item[{uBounds}] 
+!      This array should have size=rank of the coord. comp. It specifies the upper bounds
+!       of the array for the given tile, DE, staggerLoc, and coord.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+
+      end function ESMF_GridLocalTileCalcBnds
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLocalTileSetMetric"
+!BOPI
+! !IROUTINE: ESMF_GridLocalTileSetMetric - set the metic data on this tile on this DE using a fortran pointer.
+
+! !INTERFACE:
+      subroutine ESMF_GridLocalTileSetMetric(grid, name, metricTag, tile, localDE, &
+                                      fptr, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name
+      type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
+      integer, intent(in),optional :: tile
+      integer, intent(in),optional :: localDE
+      real, intent(out), optional :: fptr(:,:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    Sets a fortran pointer to the metric data for the piece of tile on a local DE. 
+!    This routine will need to be overloaded to cover the full range of ranks, types, 
+!    and kinds. 
+
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item [name]
+!           The name of the metric to set.
+!      \item[{[metricTag]}] 
+!           Identifies the type of metric to ESMF. If not present, defaults
+!           to ESMF\_METRICTAG\_NONE. 
+!     \item[{[tile]}]
+!          The grid tile to set the information in. If not set, defaults to 
+!          the first tile. 
+!     \item[{[localDE]}]
+!          The local DE to set the information in. If not set, defaults to 
+!          the first DE on this processor. 
+!     \item[{[doCopy]}]
+!          Default to {\tt ESMF\_DATA\_COPY},  copys the array. 
+!          If set to {\tt ESMF\_DATA\_REF}, fptr is a reference to the data in the 
+!          grid arrays. 
+!     \item[{fptr}]
+!          The pointer to the metric data.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+      end subroutine ESMF_GridLocalTileSetMetric
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLocalTileGetMetric"
+!BOP
+! !IROUTINE: ESMF_GridLocalTileGetMetric - get the fortran data pointer for the piece of  metic data on this tile on this DE.
+
+! !INTERFACE:
+      subroutine ESMF_GridLocalTileGetMetric(grid, name, metricTag, tile, localDE, &
+                                      fptr, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name
+       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
+      integer, intent(in),optional :: tile
+      integer, intent(in),optional :: localDE
+      real, intent(out), optional :: fptr(:,:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    Gets a fortran pointer to the metric data for the piece of tile on a local DE. 
+!    This routine will need to be overloaded to cover the full range of ranks, types, 
+!    and kinds. 
+
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item [name]
+!           The name of the metric to get.
+!      \item[{[metricTag]}] 
+!           Identifies the type of metric to ESMF. If not present, defaults
+!           to ESMF\_METRICTAG\_NONE. 
+!     \item[{[tile]}]
+!          The grid tile to get the information for. If not set, defaults to 
+!          the first tile. 
+!     \item[{[localDE]}]
+!          The local DE to get the information for. If not set, defaults to 
+!          the first DE on this processor. 
+!     \item[{[doCopy]}]
+!          Default to {\tt ESMF\_DATA\_COPY},  copys the array. 
+!          If set to {\tt ESMF\_DATA\_REF}, fptr is a reference to the data in the 
+!          grid arrays. 
+!     \item[{fptr}]
+!          The pointer to the coordinate data.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+      end subroutine ESMF_GridLocalTileGetMetric
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMetricGet"
+!BOPI
+! !IROUTINE: ESMF_GridMetricGet - Get information about a particular metric. 
+
+! !INTERFACE:
+     subroutine ESMF_GridMetricGet(grid, name, metricTag, staggerLoc, &
+                        metricLWidth, metricUWidth, &
+                        metricAlign, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid 
+      character (len=*), intent(in) :: name
+      type (ESMF_StaggerLoc), intent(out), optional  :: staggerLoc
+      type(ESMF_MetricTag),  intent(out),   optional  :: metricTag
+      integer,               intent(out),   optional  :: metricLWidth(:)
+      integer,               intent(out),   optional  :: metricUWidth(:)
+      integer,               intent(out),   optional  :: metricAlign(:)
+      integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!  Get information about a particular stagger location.
+!
+! The arguments are:
+!\begin{description}
+!\item[{grid}]
+!          Grid to get information from.
+!\item [name]
+!           The name of the metric to set.
+!\item[{[metricTag]}] 
+!           Identifies the type of metric to ESMF. 
+!\item[{staggerLoc}]
+!        The stagger location at which the metric is located.
+!\item[{[metricLWidth]}] 
+!        This array should be the same rank as the grid. It specifies the lower corner of the computational
+!        region with respect to the lower corner of the exclusive region.
+!\item[{[metricUWidth]}] 
+!        This array should be the same rank as the grid. It specifies the upper corner of the computational
+!       region with respect to the lower corner of the exclusive region.
+!\item[{[metricAlign]}] 
+!      This array is of size  grid rank.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and metricUWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+
+      end function ESMF_GridMetricGet
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetMetricIntoArray"
+!BOP
+! !IROUTINE: ESMF_GridGetMetricIntoArray - Gets metric data from a grid and puts it into an Array.
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetMetric()
+      subroutine ESMF_GridGetMetricIntoArray(grid, name, metricTag, staggerLoc, &
+                            array, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name
+       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
+      type (ESMF_StaggerLoc), intent(out), optional  :: staggerLoc
+      type(ESMF_Array), intent(inout) :: array
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    Sets a grid metric from an array. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          The grid to get the metric from.
+!     \item [name]
+!           The name of the attribute to get.
+!      \item[{[metricTag]}] 
+!           Identifies the type of metric to ESMF. If not present, defaults
+!           to ESMF\_METRICTAG\_NONE.            
+!     \item[{[staggerLoc]}]
+!          The stagger location where the metric is located. 
+!     \item[{array}]
+!          An array to set the grid metric information from.
+!     \item[{[doCopy]}]
+!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
+!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
+!          of the array.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+      end subroutine ESMF_GridGetMetricIntoArray
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLocalTileMetricGet"
+!BOP
+! !IROUTINE: ESMF_GridLocalTileMetricGet - get various types of information about the part of some metric data which lies on this DE.
+
+! !INTERFACE:
+      subroutine ESMF_GridLocalTileMetricGet(grid, name, tile, coord, localDE, staggerLoc, &
+          exclusiveLBound, exclusiveUBound, computationalLBound, &
+          computationalUBound, totalLBound, totalUBound, &
+          computationalLWidth, computationalUWidth, &
+          totalLWidth, totalUWidth,rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in),optional :: tile
+      character (len=*), intent(in):: name
+     integer, intent(in),optional :: localDE
+      integer, intent(in),  optional :: coord
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
+      integer,      intent(out), optional :: exclusiveLBound(:)
+      integer,      intent(out), optional :: exclusiveUBound(:)
+      integer,      intent(out), optional :: computationalLBound(:)
+      integer,      intent(out), optional :: computationalUBound(:)
+      integer,      intent(out), optional :: totalLBound(:)
+      integer,      intent(out), optional :: totalUBound(:)
+      integer,      intent(out), optional :: computationalLWidth(:)
+      integer,      intent(out), optional :: computationalUWidth(:)
+      integer,      intent(out), optional :: totalLWidth(:)
+      integer,      intent(out), optional :: totalUWidth(:)
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    Gets various types of information about the part of a grid tile which lies on this DE. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item [name]
+!           The name of the metric to get information for.
+!     \item[{[tile]}]
+!          The grid tile to get the information for. If not set, defaults to 
+!          the first tile. 
+!     \item[{[localDE]}]
+!          The local DE from which to get the information.  If not set, defaults to 
+!          the first DE on this processor. 
+!     \item[{staggerLoc}]
+!          The stagger location to get the information for. If not set, defaults
+!          to center.  
+!     \item[{[exclusiveLBound]}]
+!        Upon return this holds the lower bounds of the exclusive region.
+!        {\tt exclusiveLBound} must be allocated to be of size dimCount.
+!     \item[{[exclusiveUBound]}]
+!        Upon return this holds the upper bounds of the exclusive region.
+!        {\tt exclusiveUBound} must be allocated to be of size dimCount.
+!     \item[{[computationalLBound]}]
+!        Upon return this holds the lower bounds of the computational region. 
+!       {\tt computationalLBound} must be allocated to be of size dimCount.
+!     \item[{[computationalUBound]}]
+!        Upon return this holds the upper bounds of the computational region.
+!        {\tt computationalUBound} must be allocated to be of size dimCount.
+!     \item[{[totalLBound]}]
+!        Upon return this holds the lower bounds of the total region.
+!        {\tt totalLBound} must be allocated to be of size dimCount.
+!     \item[{[totalUBound]}]
+!        Upon return this holds the upper bounds of the total region.
+!        {\tt totalUBound} must be allocated to be of size dimCount.
+!     \item[{[computationalLWidth]}]
+!        Upon return this holds the lower width of the computational region.
+!        {\tt computationalLWidth} must be allocated to be of size dimCount.
+!     \item[{[computationalUWidth]}]
+!        Upon return this holds the upper width of the computational region.
+!        {\tt computationalUWidth} must be allocated to be of size dimCount.
+!     \item[{[totalLWidth]}]
+!        Upon return this holds the lower width of the total memory region.
+!        {\tt computationalUWidth} must be allocated to be of size dimCount.
+!     \item[{[totalUWidth]}]
+!        Upon return this holds the upper width of the total memory region.
+!        {\tt totalUWidth} must be allocated to be of size dimCount.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+      end subroutine ESMF_GridLocalTileMetricGet
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridSetAttribute - Set an attribute
+!
+! !INTERFACE:
+!      subroutine ESMF_GridSetAttribute(grid, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_Grid), intent(inout) :: grid
+!      character (len = *), intent(in) :: name
+!      <value argument>, see below for supported values    
+!      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attaches an attribute to the {\tt grid}.
+!     The attribute has a {\tt name} and either a {\tt value} or a
+!     {\tt valueList}.
+!     Supported values for the <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(in) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(in) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
+!     \item type(ESMF\_Logical), intent(in) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
+!     \item character (len = *), intent(in), value
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [<value argument>]
+!           The value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+!------------------------------------------------------------------------------
+
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetInternalState"
+!BOPI
+! !IROUTINE: ESMF_GridSetInternalState - Set private data block pointer
+!
+! !INTERFACE:
+!      subroutine ESMF_GridSetInternalState(gridcomp, dataPointer, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_Grid), intent(inout) :: gridcomp
+!      type(any), pointer, intent(in) :: dataPointer
+!      integer, intent(out) :: rc
+!
+! !DESCRIPTION:
+!  Registers a pointer to a user defined structure in ESMF. A corresponding 
+!  {\tt ESMF\_GridGetInternalState} call retrieves the data pointer.
+!    
+!  The arguments are:
+!  \begin{description}
+!   \item[grid]
+!    An {\tt ESMF\_Grid} object.
+!   \item[dataPointer]
+!    A pointer to the private data block, wrapped in a derived type which
+!    contains only a pointer to the block.  This level of indirection is
+!    needed to reliably set and retrieve the data block no matter which
+!    architecture or compiler is used.  
+!   \item[rc] 
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!    Note: unlike most other ESMF routines, this argument is not optional
+!    because of implementation considerations.
+!   \end{description}
+!
+!EOPI
+ 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetMetricFromArray"
+!BOPI
+! !IROUTINE: ESMF_GridSetMetricFromArray - Add a new metric from an Array.
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridSetMetric()
+      subroutine ESMF_GridSetMetricFromArray(grid, name, metricTag, &
+                            array, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name
+      type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
+      type(ESMF_Array), intent(in) :: array
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    Sets a grid metric from an array. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          The grid to set the metric in.
+!     \item [name]
+!           The name of the attribute to set.
+!      \item[{[metricTag]}] 
+!           Identifies the type of metric to ESMF. If not present, defaults
+!           to ESMF\_METRICTAG\_NONE.            
+!     \item[{array}]
+!          An array to set the grid metric information from.
+!     \item[{[doCopy]}]
+!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
+!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
+!          of the array.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+      end subroutine ESMF_GridSetMetricFromArray
+
+!------------------------------------------------------------------------------
 
 
       end module ESMF_GridMod

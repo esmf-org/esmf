@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.24 2007/06/11 21:36:18 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.25 2007/06/12 16:35:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@ program ESMF_GridCreateEx
 ! This section starts with a few simple examples intended to 
 ! get users familiar with basic Grid creation methods.
 !
-!\subsubsubsection{Create 2D Irregularly Distributed Grid
+!\paragraph{Create 2D Irregularly Distributed Grid
 !                  With Uniformly Spaced Coordinates}
 !
 ! The following is a simple example of creating a grid and
@@ -120,7 +120,7 @@ program ESMF_GridCreateEx
 !BOE
 !\subsubsection{Basic Methods: Grid Creation}
 !
-!\subsubsubsection{Defining Topologies using Shapes}
+!\paragraph{Defining Topologies using Shapes}
 !
 ! The method {\tt ESMF\_GridCreateShape()} is a shortcut
 ! for specifying single tile logically rectangular grids.
@@ -133,7 +133,7 @@ program ESMF_GridCreateEx
 ! interface. See Section~\ref{sec:usage:adv:create}
 ! for more details.
 !
-!\subsubsubsection{Creation: Size, Rank, and Distribution of Index Space}
+!\paragraph{Creation: Size, Rank, and Distribution of Index Space}
 !
 ! The shortcut grid creation method supports three types of
 ! distribution (see Section~\ref{sec:desc:dist}). In addition to describing
