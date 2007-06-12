@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.190 2007/06/12 05:37:57 cdeluca Exp $
+#  $Id: common.mk,v 1.191 2007/06/12 20:14:16 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2269,7 +2269,7 @@ ifeq ($(origin ESMF_CPPRULES),undefined)
 
 
 .cppF90.F90:
-	cp $< $<.cpp; $(ESMF_CPP) -E -P -I$(ESMF_INCDIR) $(FPPDEFS) $<.cpp | tr "@^|" "\n#'" | $(ESMF_SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@); rm -f $<.cpp
+	cp $< $<.cpp; $(ESMF_CPP) -E -P -I$(ESMF_INCDIR) $<.cpp | tr "@^|" "\n#'" | $(ESMF_SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@); rm -f $<.cpp
 
 
 endif
