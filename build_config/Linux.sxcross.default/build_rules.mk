@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.11 2007/06/12 21:01:34 theurich Exp $
+# $Id: build_rules.mk,v 1.12 2007/06/12 22:24:44 svasquez Exp $
 #
 # Linux.sxcross.default
 #
@@ -29,7 +29,10 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
-ESMF_MPIRUNDEFAULT      = mpirun.sx
+MPI_INCLUDE     = -DESMC_HAVE_INT_MPI_COMM
+MPIRUN          = ${ESMC_MPIRUN}
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.sx
+MPIRUN      = ${ESMF_DIR}/scripts/mpirun.sx
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
