@@ -1,0 +1,52 @@
+#!/bin/ksh
+# $Id: mpirun.sx,v 1.1 2007/06/12 18:33:19 svasquez Exp $
+# This script provides an interface such that the simple command mpirun -np #
+# runs # copies of the program in parallel.
+
+if [ "$1" != "-np" ]
+then
+        echo "Usage: mpirun -np #"
+        exit 1
+fi
+
+export num_procs=$2
+shift 2
+export prog=$*
+
+echo "In mpirun.sx"
+export working_dir=`pwd`
+
+# Extract batch run script
+cat > $ESMF_DIR/scripts/esmf_script << THE_END_OF_BATCH_SCRIPT
+#PBS -S /bin/sh
+#PBS $ESMF_BATCHOPTIONS
+#PBS -o $prog.stdout
+#PBS -e error.file
+#PBS -Z
+cd $working_dir
+rm -f $prog.stdout
+mpirun -np $num_procs $prog
+
+THE_END_OF_BATCH_SCRIPT
+
+chmod a+x $ESMF_DIR/scripts/esmf_script
+
+echo " qsub  $ESMF_DIR/scripts/esmf_script"
+
+proc_id=`qsub  $ESMF_DIR/scripts/esmf_script `
+
+echo $proc_id
+
+# wait for job to complete.
+
+qwait -f $proc_id
+
+# move job output file to stdout.
+cat error.file >> $prog.stdout
+
+
+# Clean up
+rm -f $ESMF_DIR/scripts/esmf_script
+rm -f $working_dir/error.file
+
+
