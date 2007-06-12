@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.93 2007/05/11 20:26:22 oehmke Exp $
+// $Id: ESMC_VMKernel.C,v 1.94 2007/06/12 20:19:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -236,11 +236,7 @@ void ESMC_VMK::vmk_init(MPI_Comm mpiCommunicator){
   // initialize the physical machine and a default (all MPI) virtual machine
   // initialize signal handling -> this MUST happen before MPI_Init is called!!
   struct sigaction action;
-#ifdef _SX
-  action.sa_handler = (void (*)())SIG_DFL;
-#else
   action.sa_handler = SIG_DFL;
-#endif
   sigemptyset (&(action.sa_mask));
   sigaction(VM_SIG1, &action, NULL);  // restore default handle for VM_SIG1
   sigset_t sigs_to_block;
