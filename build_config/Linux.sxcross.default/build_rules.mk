@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.9 2007/06/12 20:17:00 theurich Exp $
+# $Id: build_rules.mk,v 1.10 2007/06/12 20:59:56 theurich Exp $
 #
 # Linux.sxcross.default
 #
@@ -86,10 +86,10 @@ endif
 ############################################################
 # NEC SX hardcoded paths to system libs
 #
-ESMF_CXXLINKPATHS   += /SX/usr/lib
-ESMF_CXXLINKRPATHS  += /SX/usr/lib
-ESMF_F90LINKPATHS   += /SX/usr/lib
-ESMF_F90LINKRPATHS  += /SX/usr/lib
+ESMF_CXXLINKPATHS   += -L/SX/usr/lib
+ESMF_CXXLINKRPATHS  += -L/SX/usr/lib
+ESMF_F90LINKPATHS   += -L/SX/usr/lib
+ESMF_F90LINKRPATHS  += -L/SX/usr/lib
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
