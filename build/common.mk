@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.189 2007/06/12 04:55:20 cdeluca Exp $
+#  $Id: common.mk,v 1.190 2007/06/12 05:37:57 cdeluca Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1922,7 +1922,7 @@ build_demos: reqfile_libesmf reqdir_lib chkdir_tests
 
 tree_build_demos: $(DEMOS_BUILD) 
 
-$(ESMF_TESTDIR)/%App : %Demos.o $(DEMOS_OBJ) $(ESMFLIB)
+$(ESMF_TESTDIR)/%App : %Demo.o $(DEMOS_OBJ) $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(DEMOS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
 	$(ESMF_RM) -f *.o *.mod
 
