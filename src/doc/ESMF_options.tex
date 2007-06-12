@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.22 2007/06/07 17:58:31 theurich Exp $
+% $Id: ESMF_options.tex,v 1.23 2007/06/12 17:52:18 cdeluca Exp $
 
 \section{Global Options and Parameters}
 
@@ -105,6 +105,19 @@ Valid values are:
       Copy the data item to another buffer.
 \item [ESMF\_DATA\_REF]
       Reference the data item.
+\end{description}
+
+\subsubsection{ESMF\_DefaultFlag}
+\label{opt:defaultflag}
+{\sf DESCRIPTION:\\}
+Indicates whether to reference a data item or make a copy of it.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_USE\_DEFAULTS]
+      Use default values where possible.
+\item [ESMF\_NO\_DEFAULTS]
+      Don't use any default values.
 \end{description}
 
 \subsubsection{ESMF\_IndexFlag}
