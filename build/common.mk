@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.188 2007/05/09 04:56:14 theurich Exp $
+#  $Id: common.mk,v 1.189 2007/06/12 04:55:20 cdeluca Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1901,13 +1901,13 @@ demos: build_libs chkdir_tests
 	  echo "" ; \
 	  $(MAKE) err ; \
 	fi
-	@if [ -d src/demo ] ; then cd src/demo; fi; \
+	@if [ -d src/demos ] ; then cd src/demos; fi; \
 	$(MAKE) ACTION=tree_demos tree
 
 tree_demos: tree_build_demos tree_run_demos
 
 demos_uni: build_libs chkdir_tests
-	@if [ -d src/demo ] ; then cd src/demo; fi; \
+	@if [ -d src/demos ] ; then cd src/demos; fi; \
 	$(MAKE) ACTION=tree_demos_uni tree
 
 tree_demos_uni: tree_build_demos tree_run_demos_uni
@@ -1916,13 +1916,13 @@ tree_demos_uni: tree_build_demos tree_run_demos_uni
 # build_demos
 #
 build_demos: reqfile_libesmf reqdir_lib chkdir_tests
-	@if [ -d src/demo ] ; then cd src/demo; fi; \
+	@if [ -d src/demos ] ; then cd src/demos; fi; \
 	$(MAKE) ACTION=tree_build_demos tree
 	@echo "ESMF demos built successfully."
 
 tree_build_demos: $(DEMOS_BUILD) 
 
-$(ESMF_TESTDIR)/%App : %Demo.o $(DEMOS_OBJ) $(ESMFLIB)
+$(ESMF_TESTDIR)/%App : %Demos.o $(DEMOS_OBJ) $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(DEMOS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
 	$(ESMF_RM) -f *.o *.mod
 
@@ -1937,13 +1937,13 @@ run_demos:  reqdir_tests
 	  echo "" ; \
 	  $(MAKE) err ; \
 	fi
-	@if [ -d src/demo ] ; then cd src/demo; fi; \
+	@if [ -d src/demos ] ; then cd src/demos; fi; \
 	$(MAKE) ACTION=tree_run_demos tree
 
 tree_run_demos: $(DEMOS_RUN) 
 
 run_demos_uni:  reqdir_tests
-	@if [ -d src/demo ] ; then cd src/demo; fi; \
+	@if [ -d src/demos ] ; then cd src/demos; fi; \
 	$(MAKE) ACTION=tree_run_demos_uni tree
 
 tree_run_demos_uni: $(DEMOS_RUN_UNI) 
@@ -1953,7 +1953,7 @@ tree_run_demos_uni: $(DEMOS_RUN_UNI)
 #
 clean_demos:
 	$(ESMF_RM) $(ESMF_TESTDIR)/*App 
-	@if [ -d src/demo ] ; then cd src/demo; fi; \
+	@if [ -d src/demos ] ; then cd src/demos; fi; \
 	$(MAKE) clean
 	
 
@@ -2393,7 +2393,7 @@ shared:
 # \input and \includegraphics LaTeX commands.
 #
 
-TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/demo/coupled_flow:"
+TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/demos/coupled_flow:"
 export TEXINPUTS_VALUE
 
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2006/09/22 23:55:43 theurich Exp $
+# $Id: makefile,v 1.1 2007/06/12 04:54:26 cdeluca Exp $
 
 ALL: tree_build_demos
 
@@ -13,7 +13,7 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/demo/coupled_flow/src
+LOCDIR	  = src/demos/coupled_flow/src
 
 
 DEMOS_BUILD    = $(ESMF_TESTDIR)/CoupledFlowApp

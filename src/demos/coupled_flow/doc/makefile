@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2006/01/26 21:39:08 nscollins Exp $
+# $Id: makefile,v 1.1 2007/06/12 04:54:25 cdeluca Exp $
 
 ALL: onedoc 
 
@@ -11,7 +11,7 @@ OBJSC     =
 OBJSF     = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/demo/coupled_flow/doc
+LOCDIR	  = src/demos/coupled_flow/doc
 
 DVIFILES  = 	CoupledFlow_usrdoc.dvi
 
