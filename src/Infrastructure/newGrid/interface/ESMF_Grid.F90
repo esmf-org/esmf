@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.4 2007/06/12 22:19:01 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.5 2007/06/12 23:37:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.4 2007/06/12 22:19:01 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.5 2007/06/12 23:37:39 cdeluca Exp $'
 
 
 
@@ -114,7 +114,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreate"
 !BOP
-! !IROUTINE: ESMF_GridCreate - General Grid creation using a DistGrid
+! !IROUTINE: ESMF_GridCreate - Create a Grid using a DistGrid
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
@@ -216,7 +216,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFromArrays"
 !BOP
-! !IROUTINE: ESMF_GridCreate - Create a new Grid from a set of Arrays
+! !IROUTINE: ESMF_GridCreate - Create a Grid from a set of Arrays
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
@@ -289,7 +289,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateEmpty"
 !BOP
-! !IROUTINE: ESMF_GridCreateEmpty - Create a new grid 
+! !IROUTINE: ESMF_GridCreateEmpty - Create a Grid that has no contents
 
 ! !INTERFACE:
      function ESMF_GridCreateEmpty(rc)
@@ -323,7 +323,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateShapeArb"
 !BOP
-! !IROUTINE: ESMF_GridCreateShape - Create a new rectangular Grid
+! !IROUTINE: ESMF_GridCreateShape - Create a Grid with an arbitrary distribution
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreateShape()
@@ -487,7 +487,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateShapeReg"
 !BOP
-! !IROUTINE: ESMF_GridCreateShape - Create a Grid with irregular decomposition 
+! !IROUTINE: ESMF_GridCreateShape - Create a Grid with a regular distribution
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreateShape()
@@ -650,7 +650,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateShapeIrreg"
 !BOP
-! !IROUTINE: ESMF_GridCreateShape - Create a Grid with irregular distribution
+! !IROUTINE: ESMF_GridCreateShape - Create a Grid with an irregular distribution
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreateShape()
@@ -849,7 +849,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGenCoordUni"
 !BOP
-! !IROUTINE: ESMF_GridGenCoordUni - fill coordinate arrays with a uniform spread of values.
+! !IROUTINE: ESMF_GridGenCoordUni - Fill coordinates with uniformly spaced values
 
 ! !INTERFACE:
       subroutine ESMF_GridGenCoordUni(grid, tile, begCoord, endCoord, rc)
@@ -897,7 +897,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGet"
 !BOP
-! !IROUTINE: ESMF_GridGet - get various types of information about a grid
+! !IROUTINE: ESMF_GridGet - Get information about a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridGet(grid, name, rank, type, kind,  &
@@ -1011,7 +1011,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordIntoArray"
 !BOP
-! !IROUTINE: ESMF_GridGetCoord - Puts  the coordinates of a stagger location into an Array
+! !IROUTINE: ESMF_GridGetCoord - Get coordinates and put in an ESMF\_Array
 
 ! !INTERFACE:
       subroutine ESMF_GridGetCoordIntoArray(grid, staggerLoc,coord, array, &
@@ -1055,7 +1055,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridLocalTileGet"
 !BOP
-! !IROUTINE: ESMF_GridLocalTileGet - get various types of information about the part of a grid tile which lies on this DE.
+! !IROUTINE: ESMF_GridLocalTileGet - Get information about a local tile
 
 ! !INTERFACE:
       subroutine ESMF_GridLocalTileGet(grid, tile, coord, localDE, staggerLoc, &
@@ -1144,7 +1144,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridLocalTileGetCoord"
 !BOP
-! !IROUTINE: ESMF_GridLocalTileGetCoord - Gets  the coordinates of a particular location in a tile.
+! !IROUTINE: ESMF_GridLocalTileGetCoord - Get coordinates of a local tile
 
 ! !INTERFACE:
       subroutine ESMF_GridLocalTileGetCoord(grid, staggerLoc, tile, localDE, &
@@ -1193,7 +1193,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridLocalTileGetCoord"
 !BOP
-! !IROUTINE: ESMF_GridLocalTileGetCoord - get the fortran data pointer for the piece of  a tile on this DE.
+! !IROUTINE: ESMF_GridLocalTileGetCoord - Get pointer to coordinates of a local tile
 
 ! !INTERFACE:
       subroutine ESMF_GridLocalTileGetCoord(grid, tile, localDE, &
@@ -1248,7 +1248,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridLocalTileSetCoord"
 !BOP
-! !IROUTINE: ESMF_GridLocalTileSetCoord - Sets  the coordinates of a particular location in a tile.
+! !IROUTINE: ESMF_GridLocalTileSetCoord - Set the coordinates of a local tile
 
 ! !INTERFACE:
       subroutine ESMF_GridLocalTileSetCoord(grid, staggerLoc, tile, localDE, &
@@ -1353,7 +1353,7 @@ piece of tile on our processor from a fortran array.
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSet"
 !BOP
-! !IROUTINE: ESMF_GridSet - Set values in a Grid in preparation for committing and creating the grid. 
+! !IROUTINE: ESMF_GridSet - Set grid information 
 
 ! !INTERFACE:
      function ESMF_GridSet(grid, name, arrayspec, minIndex,maxIndex, distgrid, dimmap, &
@@ -1495,7 +1495,7 @@ piece of tile on our processor from a fortran array.
 #define ESMF_METHOD "ESMF_GridSetCoordArray"
 
 !BOP
-! !IROUTINE: ESMF_GridSetCoord - Set coordinate values from ESMF Arrays.
+! !IROUTINE: ESMF_GridSetCoord - Set coordinate values from ESMF Arrays
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSetCoord()
@@ -1566,7 +1566,7 @@ piece of tile on our processor from a fortran array.
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetCoordFptr"
 !BOPI
-! !IROUTINE: ESMF_GridSetCoord - Set coordinate values from R8 Fortran arrays. 
+! !IROUTINE: ESMF_GridSetCoord - Set coordinate values from R8 Fortran arrays 
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSetCoord()
@@ -1639,7 +1639,7 @@ piece of tile on our processor from a fortran array.
 #define ESMF_METHOD "ESMF_GridSetCoordNoValues"
 
 !BOP
-! !IROUTINE: ESMF_GridSetCoord - Allocate coordinate arrays but don't set values. 
+! !IROUTINE: ESMF_GridSetCoord - Allocate coordinate arrays but don't set their values
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSetCoord()
@@ -1694,7 +1694,7 @@ piece of tile on our processor from a fortran array.
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetCoordFromArray"
 !BOP
-! !IROUTINE: ESMF_GridSetCoord - Sets  the coordinates of a stagger location from an  Array.
+! !IROUTINE: ESMF_GridSetCoord - Set coordinates using ESMF Arrays
 
 ! !INTERFACE:
       subroutine ESMF_GridSetCoordFromArray(grid, staggerLoc,coord, &
@@ -1736,7 +1736,7 @@ piece of tile on our processor from a fortran array.
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridStaggerLocGet"
 !BOP
-! !IROUTINE: ESMF_GridStaggerLocGet - Add stagger location information to a partially created grid. 
+! !IROUTINE: ESMF_GridStaggerLocGet - Get information about a stagger location 
 
 ! !INTERFACE:
      subroutine ESMF_GridStaggerLocGet(grid, staggerLoc, &
