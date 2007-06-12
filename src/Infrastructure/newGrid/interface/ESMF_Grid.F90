@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.3 2007/06/12 17:52:17 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.4 2007/06/12 22:19:01 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.3 2007/06/12 17:52:17 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.4 2007/06/12 22:19:01 cdeluca Exp $'
 
 
 
@@ -2159,7 +2159,7 @@ piece of tile on our processor from a fortran array.
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateArb"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCreate - Create a new grid 
 
 ! !INTERFACE:
@@ -2312,7 +2312,7 @@ piece of tile on our processor from a fortran array.
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 
       end function ESMF_GridCreateArb
 
@@ -2320,7 +2320,7 @@ piece of tile on our processor from a fortran array.
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateReg"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCreate - Create a Grid with a regular decomposition
 
 ! !INTERFACE:
@@ -2470,7 +2470,7 @@ piece of tile on our processor from a fortran array.
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 
       end function ESMF_GridCreateReg
 
@@ -2478,7 +2478,7 @@ piece of tile on our processor from a fortran array.
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateIrreg"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCreate - Create a Grid with an irregular decomposition
 
 ! !INTERFACE:
@@ -2633,7 +2633,7 @@ piece of tile on our processor from a fortran array.
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 
       end function ESMF_GridCreateIrreg
 
@@ -2641,7 +2641,7 @@ piece of tile on our processor from a fortran array.
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreate"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCreate - Create a new grid 
 
 ! !INTERFACE:
@@ -2796,7 +2796,7 @@ piece of tile on our processor from a fortran array.
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 
       end function ESMF_GridCreateRegP
 
