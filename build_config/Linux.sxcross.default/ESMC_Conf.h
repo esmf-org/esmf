@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.4 2007/03/31 05:50:43 cdeluca Exp $"
+"$Id: ESMC_Conf.h,v 1.5 2007/06/12 20:17:00 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -16,7 +16,7 @@ Licensed under the University of Illinois-NCSA License.
 #if !defined(INCLUDED_CONF_H)
 #define INCLUDED_CONF_H
  
-#define PARCH_IRIX64 
+#define PARCH_NECSX
 
 #define FTN(func) func##_
 
