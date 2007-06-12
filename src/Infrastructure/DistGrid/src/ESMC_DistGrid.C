@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.15 2007/05/30 17:46:20 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.16 2007/06/12 21:30:01 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DistGrid.C,v 1.15 2007/05/30 17:46:20 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DistGrid.C,v 1.16 2007/06/12 21:30:01 dneckels Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -629,6 +629,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
+
     
   // garbage collection
   delete [] dimContigFlag;
@@ -1302,6 +1303,10 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
     // mark in dePatchList DEs that have no cells as not being part of any patch
     if (deCellCount[i]==0) dePatchList[i]=0;
   }
+
+  // By default there are no arbitrary indices
+  arbIdxCount = 0;
+  localArbIndices = NULL;
   
   // return successfully
   return ESMF_SUCCESS;
@@ -2207,6 +2212,45 @@ int ESMC_Connection(
   }
   
   // return successfully
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGrid::SetArbIdx()"
+//BOP
+// !IROUTINE:  ESMC_Connection
+//
+// !INTERFACE:
+//
+int ESMC_DistGrid::SetArbIdx(
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  ESMC_InterfaceInt *arbIndices // in
+  )
+//
+// !DESCRIPTION:
+//    Set the array of arbitrary indicies
+//
+//EOP
+//-----------------------------------------------------------------------------
+{
+  int localrc;
+  int *rc = &localrc;
+  
+  if (arbIndices->dimCount != 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- arbIndices array must be of rank 1", rc);
+    return *rc;
+  }
+
+  arbIdxCount = arbIndices->extent[0];
+  localArbIndices = arbIndices->array;
+  
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------

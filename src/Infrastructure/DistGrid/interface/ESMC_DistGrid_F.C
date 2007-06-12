@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.13 2007/05/30 17:46:20 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.14 2007/06/12 21:29:42 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -233,6 +233,23 @@ extern "C" {
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
+
+  void FTN(c_esmc_distgrid_storeabidx)(
+    ESMC_DistGrid **dptr,
+    ESMC_InterfaceInt **abidx, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_distgrid_storeabidx()"
+
+    if (rc!=NULL)
+      *rc = ESMC_RC_NOT_IMPL;
+    // :)
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*dptr)->ESMC_DistGrid::SetArbIdx(*abidx),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  
+#undef  ESMC_METHOD
   
   
 #undef  ESMC_METHOD

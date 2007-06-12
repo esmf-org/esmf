@@ -1,4 +1,4 @@
-!$Id: ESMF_DistGrid.F90,v 1.14 2007/05/30 17:46:20 theurich Exp $
+!stG$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.14 2007/05/30 17:46:20 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.15 2007/06/12 21:29:42 dneckels Exp $'
 
 !==============================================================================
 ! 
@@ -135,6 +135,7 @@ module ESMF_DistGridMod
     module procedure ESMF_DistGridCreateDBP
     module procedure ESMF_DistGridCreateRDPFA
     module procedure ESMF_DistGridCreateDBPFA
+    module procedure ESMF_DistGridCreateDBAI
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -1705,6 +1706,135 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateDBPFA
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateDBAI()"
+!BOPI
+! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from users arbitray index
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateDBAI(indices, vm, rc)
+!
+! !ARGUMENTS:
+    integer,                      intent(in)            :: indices(:)
+    type(ESMF_VM),                intent(in)            :: vm
+    integer,                      intent(out),optional  :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI
+!
+! !DESCRIPTION:
+!     Create a 1D {\tt ESMF\_DistGrid} from a list of (global) indices that
+!     live on the current pet.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{[indices]}]
+!          List of (global) indices that reside on the current pet.  These
+!          may be a partition of the global index space, or may overlap.
+!     \item[{[vm]}]
+!          Required {\tt ESMF\_VM} object of the current context. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer                 :: status          ! local error status
+    type(ESMF_DistGrid)     :: distgrid        ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterfaceInt) :: indicesArg      ! index helper
+    integer                 :: localSize(2)    ! number of local indices
+    integer, allocatable    :: globalSizes(:)  ! array of all sizes
+    integer                 :: petCount        ! num pets
+    integer, allocatable    :: deblock(:,:,:)  ! Array of sizes
+    integer                 :: imin, imax      ! min and max indicies,this pet
+    integer                 :: i, csum         ! loop variable
+    integer                 :: minC(1), maxC(1)! min/max corner
+
+    ! initialize return code; assume routine not implemented
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    call ESMF_VMGet(vm, petCount=petCount, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! min/max of local indices
+    localSize(1) = size(indices)
+    imax = -huge(imax)
+    imin = huge(imin)
+    do i=1,localSize(1)
+      if (indices(i) .le. imin) imin = indices(i)
+      if (indices(i) .ge. imax) imax = indices(i)
+    enddo
+
+    allocate(globalSizes(2*petCount))
+
+
+    ! Gather the sizes locally
+    call ESMF_VMAllGather(vm, localSize, globalSizes, 1, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Now set up the deblocks
+    allocate(deblock(1,2,petCount))
+
+
+    csum = 0
+    do i=1,petCount
+      deblock(1,1,i) = csum + 1
+      csum = csum + globalSizes(i)
+      deblock(1,2,i) = csum
+    enddo
+
+
+    ! And now a global reduction to find min/max corners over all pets
+    localSize(1) = imin
+    call ESMF_VMAllReduce(vm, localSize, globalSizes, 1, &
+     ESMF_MIN, rc=status)
+    imin = globalSizes(1)
+    localSize(1) = imax
+    call ESMF_VMAllReduce(vm, localSize, globalSizes, 1, &
+     ESMF_MAX, rc=status)
+    imax = globalSizes(1)
+
+    minC(1) = imin
+    maxC(1) = imax
+    distgrid = ESMF_DistGridCreateDB(minC, maxC, &
+               deBlockList=deblock, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    deallocate(deblock)
+    deallocate(globalSizes)
+    
+    ! Set return value
+    ESMF_DistGridCreateDBAI = distgrid 
+
+    indicesArg = ESMF_InterfaceIntCreate(farray1D=indices, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_ESMC_DistGrid_StoreAbIdx(distgrid, indicesArg, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBAI)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_DistGridCreateDBAI
 !------------------------------------------------------------------------------
 
 
