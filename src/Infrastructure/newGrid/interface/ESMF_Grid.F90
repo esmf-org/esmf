@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.6 2007/06/13 03:25:40 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.7 2007/06/13 18:51:12 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.6 2007/06/13 03:25:40 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.7 2007/06/13 18:51:12 cdeluca Exp $'
 
 
 
@@ -351,7 +351,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateShapeArb"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCreateShape - Create a Grid with an arbitrary distribution
 
 ! !INTERFACE:
@@ -508,14 +508,14 @@
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 
       end function ESMF_GridCreateShapeArb
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateShapeReg"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCreateShape - Create a Grid with a regular distribution
 
 ! !INTERFACE:
@@ -671,9 +671,9 @@
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 
-      end function ESMF_GridCreateShapeBlk
+      end function ESMF_GridCreateShapeReg
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1058,7 +1058,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordIntoArray"
 !BOP
-! !IROUTINE: ESMF_GridGetCoord - Get coordinates and put in an ESMF\_Array
+! !IROUTINE: ESMF_GridGetCoord - Get coordinates and put in an ESMF Array
 
 ! !INTERFACE:
       subroutine ESMF_GridGetCoordIntoArray(grid, staggerLoc,coord, array, &
