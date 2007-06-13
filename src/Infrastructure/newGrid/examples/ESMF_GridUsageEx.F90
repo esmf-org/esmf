@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.27 2007/06/13 20:30:21 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.28 2007/06/13 22:18:26 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -114,15 +114,16 @@ program ESMF_GridCreateEx
 !EOC
 
 !BOE
-!\subsubsection{Create a 3D Spherical Grid with Curvilinear Coordinates,
-!               Regular Distribution, and an Undistributed Dimension
+!\subsubsection{Create a Grid with Regular Distribution, 
+                Horizontal Curvilinear Coordinates,
+!               and an Undistributed Vertical Dimension}
 ! \label{example:CurviGridWithUndistDim}
 !
 ! This example demonstrates how a user can build a curvilinear 
 ! horizontal grid with an undistributed vertical dimension.  This
 ! might be, for example, a displaced pole grid used in ocean modeling
 ! (the north pole is moved over a land mass so it can be ignored during
-! computation), with some depth in the vertical.  Since the grid is
+! computation), with depth in the vertical.  Since the grid is
 ! likely to be much greater in size in the horizontal, only the 
 ! horizontal dimension is distributed.
 !
