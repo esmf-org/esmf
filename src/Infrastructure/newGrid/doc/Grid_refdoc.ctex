@@ -1,4 +1,4 @@
-% $Id: Grid_refdoc.ctex,v 1.13 2007/06/12 22:04:51 cdeluca Exp $
+% $Id: Grid_refdoc.ctex,v 1.14 2007/06/13 18:31:39 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/newGrid/doc/Grid_usage}
 \input{../Infrastructure/newGrid/doc/ESMF_GridUsageEx_fapi}
-\input{../Infrastructure/newGrid/doc/ESMF_GridCreateCartEx_fapi}
+\input{../Infrastructure/newGrid/doc/ESMF_GridCreateRegFromDGEx_fapi}
 \input{../Infrastructure/newGrid/doc/ESMF_GridCreateTripoleEx_fapi}
 %\input{../Infrastructure/newGrid/doc/ESMF_GridCreateSph2Dplus1Ex_fapi}
 %\input{../Infrastructure/newGrid/doc/ESMF_GridCreateFromF90ArraysEx_fapi}
