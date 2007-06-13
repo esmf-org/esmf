@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.80 2007/04/26 19:18:56 rosalind Exp $
+// $Id: ESMC_Base.C,v 1.81 2007/06/13 23:43:09 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.80 2007/04/26 19:18:56 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.81 2007/06/13 23:43:09 samsoncheung Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -60,7 +60,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       char *ESMC_Base::ESMC_BaseGetClassName(
 //
 // !ARGUMENTS:
-      void) const {
+      void)  const {
 // 
 // !RETURN VALUE:
 //    Character pointer to class name.
@@ -70,7 +70,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOPI
 
-  return (char * const)className;
+  return (char * ) className;
 
 }  // end ESMC_BaseGetClassName
 
@@ -220,7 +220,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOPI
 
-  return (char * const)baseName;
+  return (char * )baseName;
 
 }  // end ESMC_BaseGetName
 
@@ -245,7 +245,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOPI
 
-  return (char * const)baseNameF90;
+  return (char * )baseNameF90;
 
 }  // end ESMC_BaseGetF90Name
 
