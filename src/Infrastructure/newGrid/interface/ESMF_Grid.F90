@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.5 2007/06/12 23:37:39 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.6 2007/06/13 03:25:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.5 2007/06/12 23:37:39 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.6 2007/06/13 03:25:40 cdeluca Exp $'
 
 
 
@@ -77,7 +77,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCommit"
 !BOP
-! !IROUTINE: ESMF_GridCommit - Turn a partially created Grid into usable grid 
+! !IROUTINE: ESMF_GridCommit - Commit a Grid to a specified completion level
 
 ! !INTERFACE:
       subroutine ESMF_GridCommit(grid, status, rc)
@@ -85,23 +85,51 @@
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout)     :: grid
       type(ESMF_GridStatus)              :: status
-      type(ESMF_DefaultFlag)             :: defaultFlag
+      type(ESMF_DefaultFlag), optional   :: defaultflag
       integer, intent(out), optional     :: rc
 !
 ! !DESCRIPTION:
-!    Turns a partially created grid into usable grid. This subroutine also performs checks
-!    to ensure that the values in the grid are consistant before setting the grid as 
-!    finally created.
+!    This call is used to complete the {\tt grid} so that it is usable at
+!    the level indicated by the {\tt status} flag.  For example, once committed
+!    with a {\tt status} value of {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}, the 
+!    {\tt grid} has sufficient size, rank, and distribution information to be
+!    used as the basis for allocating Field data.  
+!
+!    It is necessary to call the {\tt ESMF\_GridCommit()} method after
+!    creating a Grid object using the {\tt ESMF\_GridCreateEmpty()} method
+!    and incrementally filling it in with {\tt ESMF\_GridSet()} calls.  The
+!    {\tt EMF\_GridCommit()} call is a signal to the Grid that it can combine
+!    the pieces of information that it's received and finish building any
+!    necessary internal structures.  For example, an {\tt ESMF\_GridCommit()}
+!    call with the {\tt status} flag set to 
+!    {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY} will trigger the {\tt grid} to 
+!    build an internal DistGrid object that contains topology and distribution 
+!    information.
+!
+!    It's possible using the {\tt ESMF\_GridCreateEmpty()/ESMF\_GridSet()}
+!    approach that not all information is present when the {\tt ESMF\_GridCommit}
+!    call is made.  If this is the case and the {\tt defaultflag} is set to
+!    {\tt ESMF\_USE\_DEFAULTS} the Grid will attempt to build any internal
+!    objects necessary to get to the desired {\tt status} by using reasonable
+!    defaults.  If the {\tt defaultflag} is set to {\tt ESMF\_NO\_DEFAULTS} and
+!    any information is missing, the {\tt ESMF\_GridCommit} call will fail.
+!    If the {\tt defaultflag} argument is not passed in, {\it no} defaults
+!    are used.
+!
+!    This subroutine calls {\tt ESMF\_GridValidate} internally 
+!    to ensure that the values in the grid are consistent before returning.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{grid}]
-!          Grid object to perform commit on.
-!     \item[{[status]}]
-!          Grid status to commit to.  
+!          Grid object to commit.
+!     \item[{status}]
+!          Grid status to commit to.  For valid values see section
+!          \ref{sec:opt:gridstatus}.  
 !     \item[{[defaultFlag]}]
-!          Indicates whether to use default values to get to the desired
+!          Indicates whether to use default values to achieve the desired
 !          grid status.  For valid values see section \ref{opt:defaultflag}.
+!          The default value is {\tt ESMF\_NO\_DEFAULTS}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -144,8 +172,9 @@
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Grid} object. This subroutine constructs a 
-! grid as specified by a distGrid. Optional {\tt lbound} and {\tt ubound}
+! This is the most general form of creation for an {\tt ESMF\_Grid}
+! object. This subroutine constructs a 
+! grid as specified by a {\tt distgrid}. Optional {\tt lbound} and {\tt ubound}
 ! arguments can be used to specify extra tensor dimensions. 
 ! The grid will contain a set of stagger locations  as defined by the parameter
 ! {\tt staggerLocs}.  
@@ -690,8 +719,26 @@
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Grid} object. This subroutine constructs a single tile rectangular
-! grid. 
+!
+! This method creates a single tile, irregularly distributed grid 
+! (see Figure \ref{fig:GridDecomps}).
+! To specify the irregular distribution, the user passes in an array 
+! for each grid dimension, where the length of the array is the number
+! of DEs in the dimension.   Up to three dimensions can be specified, 
+! using the countsPerDEDim1, countsPerDEDim2, countsPerDEDim3 arguments.
+! The index of each array element corresponds to a DE number.  The 
+! array value at the index is the number of grid cells on the DE in 
+! that dimension.  The rank of the grid is equal to the number of 
+! countsPerDEDim<> arrays that are specified. 
+!
+! To specify an undistributed dimension, the array in that dimension
+! should have only one element, and its value should be the number of
+! grid cells in that dimension.
+!
+! Section \ref{example:2DIrregUniGrid} shows an example
+! of using this method to create a 2D Grid with uniformly spaced 
+! coordinates.  This creation method can also be used as the basis for
+! grids with rectilinear coordinates or curvilinear coordinates.
 !
 ! The arguments are:
 ! \begin{description}

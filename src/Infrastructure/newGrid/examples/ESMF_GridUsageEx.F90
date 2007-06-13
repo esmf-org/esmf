@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.25 2007/06/12 16:35:30 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.26 2007/06/13 03:25:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,13 +37,9 @@ program ESMF_GridCreateEx
       call ESMF_Initialize(vm=vm, rc=rc)
 
 !BOE
-!\subsubsection{Simple Examples of Grid Creation and Use}
-!
-! This section starts with a few simple examples intended to 
-! get users familiar with basic Grid creation methods.
-!
-!\paragraph{Create 2D Irregularly Distributed Grid
+!\subsubsection{Create 2D Irregularly Distributed Grid
 !                  With Uniformly Spaced Coordinates}
+! \label{example:2DIrregUniGrid}
 !
 ! The following is a simple example of creating a grid and
 ! loading in a set of coordinates.  This code creates a 10x20
@@ -165,25 +161,25 @@ program ESMF_GridCreateEx
 !EOC
 
 !BOE
-! A second supported type of distribution is irregular distribution. 
-! In this type the user specifies the exact number of cells per
-! DE in each dimension. For the {\tt ESMF\_GridCreateShape} call
+! A second supported type of distribution is irregular distribution.
+! In this type the user specified the exact number of cells per
+! DE in each dimension.  For the {\tt ESMF\_GridCreateShape} call
 ! the {\tt countsPerDEDim1,2,3}
-! arguments are used. These specify a rectangular
+! arguments are used.  These specify a rectangular 
 ! distribution containing size(countsPerDEDim1) by
 ! size(countsPerDEDim2) by size(countsPerDEDim3)
-! DEs. The entries in each of these arrays specify 
-! the size of the DEs in that dimension for that row or column.
-! The rank of the grid is determined by the presence of 
-! {\tt countsPerDEDim3}. If it's present the Grid
-! will be 3D, if just {\tt countsPerDEDim1} and
-! {\tt countsPerDEDim2} are specified the Grid
-! will be 2D. If any of these arrays has size
-! 1 then that index dimension is undistributed. 
+! DEs.  The entries in each of these arrays specify
+! he size of the DEs in that dimension for that row or column.
+! The rank of the grid is determined by the presence of
+! {\tt countsPerDEDim3}.  If it's present the Grid
+! will be 3D, if just {\tt countsPerDEDim1} and 
+! {\tt countsPerDEDim2} are specified the Grid 
+! will be 2D.  If any of these arrays has size
+! 1 then that index dimension is undistributed.
 !
 ! The following call illustrates the creation of
 ! a 10x20 2D rectangular Grid distributed across six processors
-! in two groups of 5 in the first dimension and
+! in two groups of 5 in the first dimension and 
 ! three groups of 7,7,6 in the second dimension.
 !EOE
 
@@ -202,8 +198,7 @@ program ESMF_GridCreateEx
           countsPerDEDim2=(/7,7,6/), countsPerDEDim1=(/15,15/), rc=rc)   
 !EOC
 
-!BOE
-! If the third dimension were undistributed then the call
+!BOC! If the third dimension were undistributed then the call
 ! would look like the following. 
 !EOE
 
@@ -262,6 +257,42 @@ program ESMF_GridCreateEx
    grid=ESMF_GridCreateShape(maxIndex=(/5,5/), &
           localIndices=localIndices, rc=rc)   
 !EOC
+
+
+!BOE
+!\subsubsection{Creation: Empty/Set}\label{sec:usage:setcommit}
+! 
+!  As an alternative to the monolithic one call create, ESMF provides
+! an incremental paradigm for grid creation which allows the user
+! to break up creation for clarity or convenience. 
+! To do this, the user first creates an empty grid. Next, a series of 
+! set calls are used to fill in the details of the grid. Note that, 
+! a series of sets identical to the shortcut shape create calls
+! has been provided for the user's convenience in using this
+! paradigm.  Finally after the sets, any other grid call 
+! will internally validate and create the final, usable, grid.
+! For consistencies sake, the initial create empty call must occur on the 
+! same set of processors as the finally grid create call. 
+! The following is an example illustrating this technique.  
+! It creates a rectangular 10x20 grid with the center and corner stagger locations. 
+!EOE
+
+!BOC
+   
+   ! Create empty grid
+   grid=ESMF_GridCreateEmpty(rc=rc)
+
+   ! Set grid size
+   call ESMF_GridSetShapeBox(grid, countsPerDEDim1=(/5,5/), &
+          countsPerDEDim1=(/7,7,6/), rc=rc)
+
+   ! Create the Grid and then add a Center Stagger Location
+   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+
+   ! Add Corner Stagger Location
+   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
+!EOC
+
 
 !BOE
 !
@@ -428,40 +459,6 @@ program ESMF_GridCreateEx
            rc=rc)   
 !EOC
 
-
-!BOE
-!\subsubsection{Creation: Empty/Set}\label{sec:usage:setcommit}
-! 
-!  As an alternative to the monolithic one call create, ESMF provides
-! an incremental paradigm for grid creation which allows the user
-! to break up creation for clarity or convenience. 
-! To do this, the user first creates an empty grid. Next, a series of 
-! set calls are used to fill in the details of the grid. Note that, 
-! a series of sets identical to the shortcut shape create calls
-! has been provided for the user's convenience in using this
-! paradigm.  Finally after the sets, any other grid call 
-! will internally validate and create the final, usable, grid.
-! For consistencies sake, the initial create empty call must occur on the 
-! same set of processors as the finally grid create call. 
-! The following is an example illustrating this technique.  
-! It creates a rectangular 10x20 grid with the center and corner stagger locations. 
-!EOE
-
-!BOC
-   
-   ! Create empty grid
-   grid=ESMF_GridCreateEmpty(rc=rc)
-
-   ! Set grid size
-   call ESMF_GridSetShapeBox(grid, countsPerDEDim1=(/5,5/), &
-          countsPerDEDim1=(/7,7,6/), rc=rc)
-
-   ! Create the Grid and then add a Center Stagger Location
-   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
-
-   ! Add Corner Stagger Location
-   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
-!EOC
 
 
 !BOE
