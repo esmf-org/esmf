@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.7 2007/06/13 18:51:12 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.8 2007/06/13 20:30:22 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.7 2007/06/13 18:51:12 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.8 2007/06/13 20:30:22 cdeluca Exp $'
 
 
 
@@ -1339,62 +1339,6 @@
 
       end subroutine ESMF_GridLocalTileSetCoord
 
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridLocalTileSetCoord"
-!BOP
-! !IROUTINE: ESMF_GridLocalTileSetCoord - set the coordinate data for the particular
-piece of tile on our processor from a fortran array.
-
-! !INTERFACE:
-      subroutine ESMF_GridLocalTileSetCoord(grid, tile, localDE, staggerLoc, &
-                            coord, fptr, doCopy, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in),optional :: tile
-      integer, intent(in),optional :: localDE
-      type (ESMF_StaggerLoc), intent(in),optional :: staggerLoc
-      integer, intent(in),  :: coord
-      real, intent(out), optional :: fptr(:,:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!    Sets the coordinate data for the piece of tile on a local DE from a fortran pointer.
-!     This routine will need to be overloaded to cover the full range of ranks, types, 
-!      and kinds. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{grid}]
-!          Grid to get the information from.
-!     \item[{[tile]}]
-!          The grid tile to set the information for. If not set, defaults to 
-!          the first tile. 
-!     \item[{[localDE]}]
-!          The local DE to set the information for. If not set, defaults to 
-!          the first DE on this processor. 
-!     \item[{staggerLoc}]
-!          The stagger location to set the information for. If not set, defaults
-!          to center. 
-!     \item[{coord}]
-!          The coordinate component to get the data from (e.g. 1=x).
-!     \item[{fptr}]
-!          The pointer to the coordinate data.
-!     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_REF}, makes the  grid reference the passed
-!          in arrays. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
-!          of the arrays.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-
-
-      end subroutine ESMF_GridLocalTileSetCoord
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -3175,6 +3119,61 @@ piece of tile on our processor from a fortran array.
 
       end subroutine ESMF_GridLocalTileGetMetric
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLocalTileSetCoord"
+!BOPI
+! !IROUTINE: ESMF_GridLocalTileSetCoord - Set the coordinates for a local tile from a Fortran array
+
+! !INTERFACE:
+      subroutine ESMF_GridLocalTileSetCoord(grid, tile, localDE, staggerLoc, &
+                            coord, fptr, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in),optional :: tile
+      integer, intent(in),optional :: localDE
+      type (ESMF_StaggerLoc), intent(in),optional :: staggerLoc
+      integer, intent(in),  :: coord
+      real, intent(out), optional :: fptr(:,:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    Sets the coordinate data for the piece of tile on a local DE from a fortran pointer.
+!     This routine will need to be overloaded to cover the full range of ranks, types, 
+!      and kinds. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item[{[tile]}]
+!          The grid tile to set the information for. If not set, defaults to 
+!          the first tile. 
+!     \item[{[localDE]}]
+!          The local DE to set the information for. If not set, defaults to 
+!          the first DE on this processor. 
+!     \item[{staggerLoc}]
+!          The stagger location to set the information for. If not set, defaults
+!          to center. 
+!     \item[{coord}]
+!          The coordinate component to get the data from (e.g. 1=x).
+!     \item[{fptr}]
+!          The pointer to the coordinate data.
+!     \item[{[doCopy]}]
+!          Default to {\tt ESMF\_DATA\_REF}, makes the  grid reference the passed
+!          in arrays. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
+!          of the arrays.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+
+      end subroutine ESMF_GridLocalTileSetCoord
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
