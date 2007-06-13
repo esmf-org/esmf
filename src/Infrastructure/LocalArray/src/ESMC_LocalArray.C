@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.25 2007/05/09 02:47:50 rosalind Exp $
+// $Id: ESMC_LocalArray.C,v 1.26 2007/06/13 23:10:07 samsoncheung Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -40,7 +40,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.25 2007/05/09 02:47:50 rosalind Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.26 2007/06/13 23:10:07 samsoncheung Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1815,7 +1815,7 @@
 
     fprintf(ffile, "ArrayWrite: Array at address 0x%08lx:  ", 
                            (ESMC_POINTER)this);
-    fprintf(ffile, "rank = %d, type = %d, kind = %d\n", 
+    fprintf(ffile, "rank = %d, type_kind = %d\n", 
                              this->rank, this->kind);
     for (i=0; i<this->rank; i++) 
         fprintf(ffile, " dim[%d] = %d  ", i, this->counts[i]);
