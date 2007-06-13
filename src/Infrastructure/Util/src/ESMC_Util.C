@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.23 2007/05/11 02:40:14 rosalind Exp $
+// $Id: ESMC_Util.C,v 1.24 2007/06/13 22:36:30 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.23 2007/05/11 02:40:14 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.24 2007/06/13 22:36:30 samsoncheung Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -926,7 +926,7 @@ extern "C" {
     // we cannot return good values if n is not correct.
     if (sizeof(n) != *n) {
         printf("error: fortran pointer size does not match C pointer size\n");
-        printf("  fortran is sending %d bytes, C expects %d bytes\n", 
+        printf("  fortran is sending %d bytes, C expects %ld bytes\n", 
                   *n, sizeof(n));
         *len = 0;
         return;
@@ -934,7 +934,7 @@ extern "C" {
 
     if (sizeof(n) != sizeof(ESMC_POINTER)) {
         printf("error: C pointer size does not match include file value\n");
-        printf("  C pointer is %d bytes, ESMC_POINTER is %d bytes\n",  
+        printf("  C pointer is %ld bytes, ESMC_POINTER is %ld bytes\n",  
                    sizeof(n), sizeof(ESMC_POINTER));
         *len = 0;
         return;
@@ -975,7 +975,7 @@ extern "C" {
     // we cannot return good values if n is not correct.
     if (sizeof(n) != *n) {
         printf("error: fortran pointer size does not match C pointer size\n");
-        printf("  fortran is sending %d bytes, C expects %d bytes\n", 
+        printf("  fortran is sending %d bytes, C expects %ld bytes\n", 
                   *n, sizeof(n));
         *len = 0;
         return;
@@ -983,7 +983,7 @@ extern "C" {
 
     if (sizeof(n) != sizeof(ESMC_POINTER)) {
         printf("error: C pointer size does not match include file value\n");
-        printf("  C pointer is %d bytes, ESMC_POINTER is %d bytes\n",  
+        printf("  C pointer is %ld bytes, ESMC_POINTER is %ld bytes\n",  
                    sizeof(n), sizeof(ESMC_POINTER));
         *len = 0;
         return;
