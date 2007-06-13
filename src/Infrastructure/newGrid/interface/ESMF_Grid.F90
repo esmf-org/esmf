@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.8 2007/06/13 20:30:22 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.9 2007/06/13 22:07:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.8 2007/06/13 20:30:22 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.9 2007/06/13 22:07:37 cdeluca Exp $'
 
 
 
@@ -239,80 +239,7 @@
 !EOP
 
 
-      end function ESMF_GridCreateFromExtents
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateFromArrays"
-!BOP
-! !IROUTINE: ESMF_GridCreate - Create a Grid from a set of Arrays
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridCreate()
-      function ESMF_GridCreateFromArrays(name, arrays, staggerLocs, &
-          staggerLocAligns, coordDimMap, doCopy, gridType, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateFromArrays
-!
-! !ARGUMENTS:
-      character (len=*),     intent(in), optional :: name
-      type (ESMF_Array),     intent(in)           :: arrays(:,:)
-      type (ESMF_StaggerLoc), intent(in)          :: staggerLocs(:)
-      integer,               intent(in), optional :: staggerLocAligns(:,:)
-      integer,               intent(in), optional :: coordDimMap(:,:)
-      integer,               intent(in), optional :: gridType 
-      type(ESMF_CopyFlag),   intent(in), optional :: docopy
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Creates a new grid from a set of arrays. The arrays define the 
-!      coordinates of each stagger location. The arrays should have the
-!      proper size and dimension to represent the stagger locations and 
-!      a coherent grid. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{[name]}]
-!          {\tt ESMF\_Grid} name.
-!     \item[{arrays}]
-!          Two dimensional array where the first dimension is of size grid rank and
-!          the second is the size of the number of stagger locations. This array
-!          contains an ESMF Array for each grid component dimension and stagger location.
-!     \item[{[staggerLocs]}]
-!          The stagger locations of the arrays.
-!    \item[{[staggerLocAligns]}] 
-!      This array is of size  grid rank by size(staggerLocs).
-!      For each stagger location, it specifies which element
-!      has the same index value as the center. For example, 
-!      for a 2D cell with corner stagger it specifies which 
-!      of the 4 corners has the same index as the center. 
-!      If this is set and staggerLocUWidth is not,
-!      this determines the default array padding for a stagger. 
-!      If not set, then this defaults to all negative. (e.g. 
-!      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
-!     \item[{[coordDimMap]}]
-!      2D list of size grid rank x grid rank. This array describes the
-!      map of each component array's dimensions onto the grids
-!      dimensions. 
-!     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_REF}, makes the new grid reference the passed
-!          in arrays. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
-!          of the arrays.
-!    \item[{[gridType]}]
-!      Flag that indicates the type of the grid. If not given, defaults
-!       to ESMF\_GRIDTYPE\_UNKNOWN.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-
-
-      end function ESMF_GridCreateFromArrays
-
-
+      end function ESMF_GridCreateFromDistGrid
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -350,172 +277,8 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateShapeArb"
-!BOPI
-! !IROUTINE: ESMF_GridCreateShape - Create a Grid with an arbitrary distribution
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridCreateShape()
-      function ESMF_GridCreateShapeArb(name,coordTypeKind,  &
-                        minIndex, maxIndex, localIndices, &
-                        connDim1, connDim2, connDim3, &
-                        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
-                        bipolePos1, bipolePos2, bipolePos3, &
-                        coordDep1, coordDep2, coordDep3, &
-                        indexflag, gridType, haloDepth, petMap, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateShapeArb
-!
-! !ARGUMENTS:
-      character (len=*), intent(in), optional :: name 
-       type(ESMF_TypeKind),  intent(in),    optional  :: coordTypeKind
-       integer,               intent(in),   optional  :: minIndex(:)
-       integer,               intent(in),             :: maxIndex(:)
-       integer,               intent(in),             :: localIndices(:,:)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim1(2)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim2(2)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim3(2)
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2)
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2)
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2)
-       integer,               intent(in),   optional  :: bipolePos1(2)
-       integer,               intent(in),   optional  :: bipolePos2(2)
-       integer,               intent(in),   optional  :: bipolePos3(2)
-       integer,               intent(in),   optional  :: coordDep1(:)
-       integer,               intent(in),   optional  :: coordDep2(:)
-       integer,               intent(in),   optional  :: coordDep3(:)
-       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       integer,               intent(in),   optional  :: haloDepth
-       integer,               intent(in),   optional  :: petMap(:,:,:)
-       integer,               intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-! Create an {\tt ESMF\_Grid} object. This subroutine constructs a single tile rectangular
-! grid. 
-!
-! The arguments are:
-! \begin{description}
-! \item[{[name]}]
-!          {\tt ESMF\_Grid} name.
-! \item[{[coordTypeKind]}] 
-!     The type/kind of the grid coordinate data. 
-!     If not specified then the type/kind will be 8 byte reals. 
-! \item[{[minIndex]}] 
-!      The bottom extent of the grid array. If not given then the value defaults
-!       to (1,1,1...).
-! \item[{maxIndex}] 
-!        The upper extent of the grid array.
-! \item[{[localIndices]}] 
-!      2D array whose first dimension is the same rank as the distGrid, and whose
-!      second dimension is the size of the number of grid locations distributed
-!      to this grid. {\tt localIndices} contains a list of all the glocal index tuples
-!      which should reside on this processor. 
-! \item[{[connDim1]}] 
-!     Two element array describing the index dimension 1 connections.
-!      The first element represents the minimum end of dimension 1.
-!      The second element represents the minimum end of dimension 1.
-!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
-!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
-!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
-! \item[{[connDim2]}] 
-!     Two element array describing the index dimension 2 connections.
-!      The first element represents the minimum end of dimension 2.
-!      The second element represents the minimum end of dimension 2.
-!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
-!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
-!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
-! \item[{[connDim3]}] 
-!     Two element array describing the index dimension 3 connections.
-!      The first element represents the minimum end of dimension 3.
-!      The second element represents the minimum end of dimension 3.
-!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
-!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
-!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
-! \item[{[poleStaggerLoc1]}] 
-!     Two element array describing the index dimension 1 connections.
-!      The first element represents the minimum end of dimension 1.
-!      The second element represents the minimum end of dimension 1.
-!      If a pole, this describes which staggerlocation is at the pole at each end.
-!      If not present, the default is the edge.
-! \item[{[poleStaggerLoc2]}] 
-!     Two element array describing the index dimension 2 connections.
-!      The first element represents the minimum end of dimension 2.
-!      The second element represents the minimum end of dimension 2.
-!      If a pole, this describes which staggerlocation is at the pole at each end.
-!      If not present, the default is the edge.
-! \item[{[poleStaggerLoc3]}] 
-!     Two element array describing the index dimension 3 connections.
-!      The first element represents the minimum end of dimension 3.
-!      The second element represents the minimum end of dimension 3.
-!      If a pole, this describes which staggerlocation is at the pole at each end.
-!      If not present, the default is the edge.
-! \item[{[bipolePos1]}] 
-!     Two element array describing the index dimension 1 connections.
-!      The first element represents the minimum end of dimension 1.
-!      The second element represents the minimum end of dimension 1.
-!      If a bipole, this gives the index position of one of the poles.
-!      The other is half way around. If not present, the default is 1.
-! \item[{[bipolePos2]}] 
-!     Two element array describing the index dimension 2 connections.
-!      The first element represents the minimum end of dimension 2.
-!      The second element represents the minimum end of dimension 2.
-!      If a bipole, this gives the index position of one of the poles.
-!      The other is half way around. If not present, the default is 1.
-! \item[{[bipolePos3]}] 
-!     Two element array describing the index dimension 3 connections.
-!      The first element represents the minimum end of dimension 3.
-!      The second element represents the minimum end of dimension 3.
-!      If a bipole, this gives the index position of one of the poles.
-!      The other is half way around. If not present, the default is 1.
-! \item[{[indexflag]}]
-!      Flag that indicates how the DE-local indices are to be defined.
-! \item[{[coordDep1]}] 
-!     This array specifies the dependence of the first 
-!     coordinate component on the three index dimensions
-!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
-!     array specifies the number of dimensions of the first
-!     coordinate component array. The values specify which
-!     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/1/). 
-! \item[{[coordDep2]}] 
-!     This array specifies the dependence of the second 
-!     coordinate component on the three index dimensions
-!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
-!     array specifies the number of dimensions of the second
-!     coordinate component array. The values specify which
-!     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/2/). 
-! \item[{[coordDep3]}] 
-!     This array specifies the dependence of the third 
-!     coordinate component on the three index dimensions
-!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
-!     array specifies the number of dimensions of the third
-!     coordinate component array. The values specify which
-!     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/3/). 
-! \item[{[haloDepth}]
-!       Sets the depth of the computational padding around the exclusive
-!       regions on each DE.  The actual value for any edge is the maximum
-!       between the halo and stagger location padding. If not specified 
-!       this is set to 0.
-! \item[{[petMap]}]
-!       Sets the mapping of pets to the created DEs. This 3D
-!       should be of size size(countsPerDEDim1)xsize(countsPerDEDim2)x
-!       size(countsPerDEDim3). If countsPerDEDim3 isn't present, then
-!       the last dimension is of size 1.   
-! \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOPI
-
-      end function ESMF_GridCreateShapeArb
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateShapeReg"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_GridCreateShape - Create a Grid with a regular distribution
 
 ! !INTERFACE:
@@ -671,7 +434,7 @@
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
+!EOP
 
       end function ESMF_GridCreateShapeReg
 
@@ -1061,6 +824,7 @@
 ! !IROUTINE: ESMF_GridGetCoord - Get coordinates and put in an ESMF Array
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoordIntoArray(grid, staggerLoc,coord, array, &
                             docopy, rc)
 !
@@ -1191,55 +955,6 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridLocalTileGetCoord"
 !BOP
-! !IROUTINE: ESMF_GridLocalTileGetCoord - Get coordinates of a local tile
-
-! !INTERFACE:
-      subroutine ESMF_GridLocalTileGetCoord(grid, staggerLoc, tile, localDE, &
-                            indices, coords, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
-      integer, intent(in),optional :: tile
-      integer, intent(in),optional :: localDE
-      integer, intent(in) :: indices(:)
-      real, intent(out) :: coords(:)
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Given stagger location, tile and a set of indices, returns the coordinates
-!     of the position represented by the indices in the tile. This subroutine would
-!     need to be type overloaded for the coordinates. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{staggerLoc}]
-!          The stagger location from which to get the arrays. If not specified, 
-!          defaults to the center. 
-!     \item[{[tile]}]
-!          The grid tile to get the information for. If not set, defaults to 
-!          the first tile. 
-!     \item[{[localDE]}]
-!          The local DE to get the information for. If not set, defaults to 
-!          the first DE on this processor. 
-!     \item[{indices}]
-!           Integer array containing the index coordinates in the tile for which to 
-!           calculate the coordinates.
-!     \item[{coords}]
-!           Coordinates returned by subroutine. 
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-
-      end subroutine ESMF_GridLocalTileGetCoord
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridLocalTileGetCoord"
-!BOP
 ! !IROUTINE: ESMF_GridLocalTileGetCoord - Get pointer to coordinates of a local tile
 
 ! !INTERFACE:
@@ -1289,55 +1004,6 @@
 
       end subroutine ESMF_GridLocalTileGetCoord
 
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridLocalTileSetCoord"
-!BOP
-! !IROUTINE: ESMF_GridLocalTileSetCoord - Set the coordinates of a local tile
-
-! !INTERFACE:
-      subroutine ESMF_GridLocalTileSetCoord(grid, staggerLoc, tile, localDE, &
-                            indices, coords, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
-      integer, intent(in),optional :: tile
-      integer, intent(in),optional :: localDE
-      integer, intent(in) :: indices(:)
-      real, intent(in) :: coords(:)
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Given a stagger location, tile and a set of indices, sets the coordinates
-!     of the position represented by the indices in the tile to the value in coords.
-!     This subroutine would need to be type overloaded for the coordinates. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{staggerLoc}]
-!          The stagger location from which to get the arrays. If not specified, 
-!          defaults to the center. 
-!     \item[{[tile]}]
-!          The grid tile to get the information for. If not set, defaults to 
-!          the first tile. 
-!     \item[{[localDE]}]
-!          The local DE to get the information for. If not set, defaults to 
-!          the first DE on this processor. 
-!     \item[{indices}]
-!           Integer array containing the index coordinates in the tile for which to 
-!           calculate the coordinates.
-!     \item[{coords}]
-!           The location described by the indices will be set to {\it coords} . 
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-
-      end subroutine ESMF_GridLocalTileSetCoord
 
 
 !------------------------------------------------------------------------------
@@ -1503,14 +1169,13 @@
       integer,               intent(in),   optional  :: coordLWidth(:)
       integer,               intent(in),   optional  :: coordUWidth(:)
       integer,               intent(in),   optional  :: coordAlign(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_CopyFlag),   intent(in), optional :: docopy
       integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !  Add a stagger location to a grid. This subroutine lets the user add a
 ! stagger location and set the coordinates from F90 pointers at the same
-! time. This subroutine is only usable for grids up to 4D.  [Are arrays 
-! referenced or copied?]
+! time. This subroutine is only usable for grids up to 4D. 
 !
 ! The arguments are:
 ! \begin{description}
@@ -1552,78 +1217,6 @@
 !EOP
 
       end function ESMF_GridSetCoordArray
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridSetCoordFptr"
-!BOPI
-! !IROUTINE: ESMF_GridSetCoord - Set coordinate values from R8 Fortran arrays 
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridSetCoord()
-     function ESMF_GridSetCoordFptr(grid, staggerLoc, &
-                        coord1, coord2, coord3, &
-                        coordLWidth, coordUWidth, &
-                        coordAlign, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid),       intent(in)             :: grid 
-      type (ESMF_StaggerLoc), intent(in)       :: staggerLoc
-      real (ESMF_KIND_R8), intent(in)            :: coord1(:), coord2(:)
-      real (ESMF_KIND_R8), intent(in)            :: coord3(:)
-      integer,               intent(in),   optional  :: coordLWidth(:)
-      integer,               intent(in),   optional  :: coordUWidth(:)
-      integer,               intent(in),   optional  :: coordAlign(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
-      integer,               intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!  Add a stagger location to a grid. This subroutine lets the user add a
-! stagger location and set the coordinates from F90 pointers at the same
-! time. (This subroutine is only usable for grids up to 4D). [Are
-! arrays referenced or copied?]
-!
-! The arguments are:
-! \begin{description}
-!     \item[{grid}]
-!          Partially created Grid to set information into.
-! \item[{[staggerLoc]}]
-!        The stagger location to add.
-! \item[{[coord1]}]
-!        The F90 pointer to coordinate data for the first coordinate component (e.g. x).
-! \item[{[coord2]}]
-!        The F90 pointer to coordinate data for the second coordinate component (e.g. y).
-! \item[{[coord3]}]
-!        The F90 pointer to coordinate data for the third coordinate component (e.g. z).
-! \item[{[coordLWidth]}] 
-!      This array should be the same rank as the grid. It specifies the lower corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[coordUWidth]}] 
-!      This array should be the same rank as the grid. It specifies the upper corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[coordAlign]}] 
-!      This array is of size  grid rank.
-!      For this stagger location, it specifies which element
-!      has the same index value as the center. For example, 
-!      for a 2D cell with corner stagger it specifies which 
-!      of the 4 corners has the same index as the center. 
-!      If this is set and coordUWidth is not,
-!      this determines the default array padding for a stagger. 
-!      If not set, then this defaults to all negative. (e.g. 
-!      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
-!\item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
-!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
-!          of the array.
-! \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOPI
-
-      end function ESMF_GridSetCoordFptr
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2310,6 +1903,79 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateFromArrays"
+!BOPI
+! !IROUTINE: ESMF_GridCreate - Create a Grid from a set of Arrays
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridCreate()
+      function ESMF_GridCreateFromArrays(name, arrays, staggerLocs, &
+          staggerLocAligns, coordDimMap, doCopy, gridType, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateFromArrays
+!
+! !ARGUMENTS:
+      character (len=*),     intent(in), optional :: name
+      type (ESMF_Array),     intent(in)           :: arrays(:,:)
+      type (ESMF_StaggerLoc), intent(in)          :: staggerLocs(:)
+      integer,               intent(in), optional :: staggerLocAligns(:,:)
+      integer,               intent(in), optional :: coordDimMap(:,:)
+      integer,               intent(in), optional :: gridType 
+      type(ESMF_CopyFlag),   intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Creates a new grid from a set of arrays. The arrays define the 
+!      coordinates of each stagger location. The arrays should have the
+!      proper size and dimension to represent the stagger locations and 
+!      a coherent grid. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+!     \item[{arrays}]
+!          Two dimensional array where the first dimension is of size grid rank and
+!          the second is the size of the number of stagger locations. This array
+!          contains an ESMF Array for each grid component dimension and stagger location.
+!     \item[{[staggerLocs]}]
+!          The stagger locations of the arrays.
+!    \item[{[staggerLocAligns]}] 
+!      This array is of size  grid rank by size(staggerLocs).
+!      For each stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and staggerLocUWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+!     \item[{[coordDimMap]}]
+!      2D list of size grid rank x grid rank. This array describes the
+!      map of each component array's dimensions onto the grids
+!      dimensions. 
+!     \item[{[doCopy]}]
+!          Default to {\tt ESMF\_DATA\_REF}, makes the new grid reference the passed
+!          in arrays. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
+!          of the arrays.
+!    \item[{[gridType]}]
+!      Flag that indicates the type of the grid. If not given, defaults
+!       to ESMF\_GRIDTYPE\_UNKNOWN.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+
+      end function ESMF_GridCreateFromArrays
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateReg"
 !BOPI
 ! !IROUTINE: ESMF_GridCreate - Create a Grid with a regular decomposition
@@ -2794,6 +2460,170 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateShapeArb"
+!BOPI
+! !IROUTINE: ESMF_GridCreateShape - Create a Grid with an arbitrary distribution
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridCreateShape()
+      function ESMF_GridCreateShapeArb(name,coordTypeKind,  &
+                        minIndex, maxIndex, localIndices, &
+                        connDim1, connDim2, connDim3, &
+                        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
+                        bipolePos1, bipolePos2, bipolePos3, &
+                        coordDep1, coordDep2, coordDep3, &
+                        indexflag, gridType, haloDepth, petMap, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateShapeArb
+!
+! !ARGUMENTS:
+      character (len=*), intent(in), optional :: name 
+       type(ESMF_TypeKind),  intent(in),    optional  :: coordTypeKind
+       integer,               intent(in),   optional  :: minIndex(:)
+       integer,               intent(in),             :: maxIndex(:)
+       integer,               intent(in),             :: localIndices(:,:)
+       type(ESMF_GridConn),   intent(in),   optional  :: connDim1(2)
+       type(ESMF_GridConn),   intent(in),   optional  :: connDim2(2)
+       type(ESMF_GridConn),   intent(in),   optional  :: connDim3(2)
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2)
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2)
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2)
+       integer,               intent(in),   optional  :: bipolePos1(2)
+       integer,               intent(in),   optional  :: bipolePos2(2)
+       integer,               intent(in),   optional  :: bipolePos3(2)
+       integer,               intent(in),   optional  :: coordDep1(:)
+       integer,               intent(in),   optional  :: coordDep2(:)
+       integer,               intent(in),   optional  :: coordDep3(:)
+       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       integer,               intent(in),   optional  :: haloDepth
+       integer,               intent(in),   optional  :: petMap(:,:,:)
+       integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_Grid} object. This subroutine constructs a single tile rectangular
+! grid. 
+!
+! The arguments are:
+! \begin{description}
+! \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+! \item[{[coordTypeKind]}] 
+!     The type/kind of the grid coordinate data. 
+!     If not specified then the type/kind will be 8 byte reals. 
+! \item[{[minIndex]}] 
+!      The bottom extent of the grid array. If not given then the value defaults
+!       to (1,1,1...).
+! \item[{maxIndex}] 
+!        The upper extent of the grid array.
+! \item[{[localIndices]}] 
+!      2D array whose first dimension is the same rank as the distGrid, and whose
+!      second dimension is the size of the number of grid locations distributed
+!      to this grid. {\tt localIndices} contains a list of all the glocal index tuples
+!      which should reside on this processor. 
+! \item[{[connDim1]}] 
+!     Two element array describing the index dimension 1 connections.
+!      The first element represents the minimum end of dimension 1.
+!      The second element represents the minimum end of dimension 1.
+!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
+!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
+!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+! \item[{[connDim2]}] 
+!     Two element array describing the index dimension 2 connections.
+!      The first element represents the minimum end of dimension 2.
+!      The second element represents the minimum end of dimension 2.
+!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
+!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
+!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+! \item[{[connDim3]}] 
+!     Two element array describing the index dimension 3 connections.
+!      The first element represents the minimum end of dimension 3.
+!      The second element represents the minimum end of dimension 3.
+!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
+!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
+!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+! \item[{[poleStaggerLoc1]}] 
+!     Two element array describing the index dimension 1 connections.
+!      The first element represents the minimum end of dimension 1.
+!      The second element represents the minimum end of dimension 1.
+!      If a pole, this describes which staggerlocation is at the pole at each end.
+!      If not present, the default is the edge.
+! \item[{[poleStaggerLoc2]}] 
+!     Two element array describing the index dimension 2 connections.
+!      The first element represents the minimum end of dimension 2.
+!      The second element represents the minimum end of dimension 2.
+!      If a pole, this describes which staggerlocation is at the pole at each end.
+!      If not present, the default is the edge.
+! \item[{[poleStaggerLoc3]}] 
+!     Two element array describing the index dimension 3 connections.
+!      The first element represents the minimum end of dimension 3.
+!      The second element represents the minimum end of dimension 3.
+!      If a pole, this describes which staggerlocation is at the pole at each end.
+!      If not present, the default is the edge.
+! \item[{[bipolePos1]}] 
+!     Two element array describing the index dimension 1 connections.
+!      The first element represents the minimum end of dimension 1.
+!      The second element represents the minimum end of dimension 1.
+!      If a bipole, this gives the index position of one of the poles.
+!      The other is half way around. If not present, the default is 1.
+! \item[{[bipolePos2]}] 
+!     Two element array describing the index dimension 2 connections.
+!      The first element represents the minimum end of dimension 2.
+!      The second element represents the minimum end of dimension 2.
+!      If a bipole, this gives the index position of one of the poles.
+!      The other is half way around. If not present, the default is 1.
+! \item[{[bipolePos3]}] 
+!     Two element array describing the index dimension 3 connections.
+!      The first element represents the minimum end of dimension 3.
+!      The second element represents the minimum end of dimension 3.
+!      If a bipole, this gives the index position of one of the poles.
+!      The other is half way around. If not present, the default is 1.
+! \item[{[indexflag]}]
+!      Flag that indicates how the DE-local indices are to be defined.
+! \item[{[coordDep1]}] 
+!     This array specifies the dependence of the first 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the first
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/1/). 
+! \item[{[coordDep2]}] 
+!     This array specifies the dependence of the second 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the second
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/2/). 
+! \item[{[coordDep3]}] 
+!     This array specifies the dependence of the third 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the third
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/3/). 
+! \item[{[haloDepth}]
+!       Sets the depth of the computational padding around the exclusive
+!       regions on each DE.  The actual value for any edge is the maximum
+!       between the halo and stagger location padding. If not specified 
+!       this is set to 0.
+! \item[{[petMap]}]
+!       Sets the mapping of pets to the created DEs. This 3D
+!       should be of size size(countsPerDEDim1)xsize(countsPerDEDim2)x
+!       size(countsPerDEDim3). If countsPerDEDim3 isn't present, then
+!       the last dimension is of size 1.   
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+
+      end function ESMF_GridCreateShapeArb
+
+!------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_GridGetAttribute  - Retrieve an attribute
 !
@@ -3067,6 +2897,55 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLocalTileGetCoord"
+!BOPI
+! !IROUTINE: ESMF_GridLocalTileGetCoord - Get coordinates of a local tile given indices
+
+! !INTERFACE:
+      subroutine ESMF_GridLocalTileGetCoordIntoArray(grid, staggerLoc, &
+                 tile, localDE, indices, coords, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
+      integer, intent(in),optional :: tile
+      integer, intent(in),optional :: localDE
+      integer, intent(in) :: indices(:)
+      real, intent(out) :: coords(:)
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Given stagger location, tile and a set of indices, returns the coordinates
+!     of the position represented by the indices in the tile. This subroutine would
+!     need to be type overloaded for the coordinates. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{staggerLoc}]
+!          The stagger location from which to get the arrays. If not specified, 
+!          defaults to the center. 
+!     \item[{[tile]}]
+!          The grid tile to get the information for. If not set, defaults to 
+!          the first tile. 
+!     \item[{[localDE]}]
+!          The local DE to get the information for. If not set, defaults to 
+!          the first DE on this processor. 
+!     \item[{indices}]
+!           Integer array containing the index coordinates in the tile for which to 
+!           calculate the coordinates.
+!     \item[{coords}]
+!           Coordinates returned by subroutine. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+      end subroutine ESMF_GridLocalTileGetCoord
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridLocalTileGetMetric"
 !BOPI
 ! !IROUTINE: ESMF_GridLocalTileGetMetric - get the fortran data pointer for the piece of  metic data on this tile on this DE.
@@ -3118,6 +2997,55 @@
 !EOPI
 
       end subroutine ESMF_GridLocalTileGetMetric
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLocalTileSetCoord"
+!BOPI
+! !IROUTINE: ESMF_GridLocalTileSetCoord - Set the coordinates of a local tile given indices
+
+! !INTERFACE:
+      subroutine ESMF_GridLocalTileSetCoord(grid, staggerLoc, tile, localDE, &
+                            indices, coords, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
+      integer, intent(in),optional :: tile
+      integer, intent(in),optional :: localDE
+      integer, intent(in) :: indices(:)
+      real, intent(in) :: coords(:)
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Given a stagger location, tile and a set of indices, sets the coordinates
+!     of the position represented by the indices in the tile to the value in coords.
+!     This subroutine would need to be type overloaded for the coordinates. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{staggerLoc}]
+!          The stagger location from which to get the arrays. If not specified, 
+!          defaults to the center. 
+!     \item[{[tile]}]
+!          The grid tile to get the information for. If not set, defaults to 
+!          the first tile. 
+!     \item[{[localDE]}]
+!          The local DE to get the information for. If not set, defaults to 
+!          the first DE on this processor. 
+!     \item[{indices}]
+!           Integer array containing the index coordinates in the tile for which to 
+!           calculate the coordinates.
+!     \item[{coords}]
+!           The location described by the indices will be set to {\it coords} . 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+      end subroutine ESMF_GridLocalTileSetCoord
 
 
 !------------------------------------------------------------------------------
@@ -3472,6 +3400,77 @@
 !     \end{description}
 !
 !EOPI
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetCoordFptr"
+!BOPI
+! !IROUTINE: ESMF_GridSetCoord - Set coordinate values from R8 Fortran arrays 
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridSetCoord()
+     function ESMF_GridSetCoordFptr(grid, staggerLoc, &
+                        coord1, coord2, coord3, &
+                        coordLWidth, coordUWidth, &
+                        coordAlign, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),       intent(in)             :: grid 
+      type (ESMF_StaggerLoc), intent(in)       :: staggerLoc
+      real (ESMF_KIND_R8), intent(in)            :: coord1(:), coord2(:)
+      real (ESMF_KIND_R8), intent(in)            :: coord3(:)
+      integer,               intent(in),   optional  :: coordLWidth(:)
+      integer,               intent(in),   optional  :: coordUWidth(:)
+      integer,               intent(in),   optional  :: coordAlign(:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!  Add a stagger location to a grid. This subroutine lets the user add a
+! stagger location and set the coordinates from F90 pointers at the same
+! time. (This subroutine is only usable for grids up to 4D). 
+!
+! The arguments are:
+! \begin{description}
+!     \item[{grid}]
+!          Partially created Grid to set information into.
+! \item[{[staggerLoc]}]
+!        The stagger location to add.
+! \item[{[coord1]}]
+!        The F90 pointer to coordinate data for the first coordinate component (e.g. x).
+! \item[{[coord2]}]
+!        The F90 pointer to coordinate data for the second coordinate component (e.g. y).
+! \item[{[coord3]}]
+!        The F90 pointer to coordinate data for the third coordinate component (e.g. z).
+! \item[{[coordLWidth]}] 
+!      This array should be the same rank as the grid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[coordUWidth]}] 
+!      This array should be the same rank as the grid. It specifies the upper corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[coordAlign]}] 
+!      This array is of size  grid rank.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and coordUWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+!\item[{[doCopy]}]
+!          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
+!          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
+!          of the array.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+
+      end function ESMF_GridSetCoordFptr
+
 
 !------------------------------------------------------------------------------
 
