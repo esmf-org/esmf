@@ -1,5 +1,5 @@
 
-! $Id: ESMF_GridCreateCartEx.F90,v 1.6 2007/06/13 03:25:40 cdeluca Exp $
+! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.1 2007/06/13 18:23:52 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -18,11 +18,12 @@ program ESMF_GridCreateEx
 !==============================================================================
 
 !BOE
-! \subsubsection{Example: 2D Cartesian Grid Creation From DistGrid}~\label{sec:usage:ex:adv:cart}
+! \subsubsection{Example: Create 2D Grid with Regular Distribution from a DistGrid}~\label{sec:usage:ex:adv:reg}
 !
-! This example illustrates the creation of a simple 2D Cartesian Grid using a distgrid.
-! The size of the Grid is gridSize(1) by gridSize(2) elements. 
-!  It only contains data in the center stagger location (i.e. Its an Arakawa A-Grid).
+! This example illustrates the creation of a single tile 2D Grid
+! with a regular distribution from a DistGrid.  The size of the Grid is
+! gridSize(1) by gridSize(2) elements. It only contains data
+! in the center stagger location (i.e. Arakawa A-Grid).
 !EOE
 
 
@@ -44,6 +45,7 @@ program ESMF_GridCreateEx
       type(ESMF_DistGrid) :: distgrid2D
       real(ESMF_KIND_R8), pointer :: coordsX(:,:),coordsY(:,:)
       integer :: gridSize(2)
+
 !EOC         
 
       ! initialize ESMF
@@ -51,13 +53,14 @@ program ESMF_GridCreateEx
       call ESMF_Initialize(vm=vm, rc=rc)
 
 !BOE
-! First construct a single patch Cartesian distgrid of the appropriate size.
+! First construct a single tile distgrid with regular distribution of the
+! appropriate size.
 !EOE
 !BOC
 
       distgrid2D = ESMF_DistGridCreate( minCorner=(/1,1/),      &
                           maxCorner=(/gridSize(1),gridSize(2)/),     &
-                           rc=rc)  
+                          rc=rc)  
 !EOC
 
 !BOE
@@ -65,7 +68,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC 
-      Grid2D=ESMF_GridCreate(name="Simple 2D Cartesian", &
+     Grid2D=ESMF_GridCreate(name="Simple 2D Regular", &
                distgrid=distgrid2D, staggerLocs, rc=rc)
 !EOC  
 
@@ -73,7 +76,7 @@ program ESMF_GridCreateEx
 ! Set the one stagger location as center. 
 !EOE
 !BOC
-   call ESMF_GridAddCoord(Grid2D, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+   call ESMF_GridSetCoord(Grid2D, staggerLoc=ESMF_STAGGERLOC_CENTER, &
           rc=rc)
 !EOC
 
