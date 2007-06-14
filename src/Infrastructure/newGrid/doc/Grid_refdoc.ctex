@@ -1,4 +1,4 @@
-% $Id: Grid_refdoc.ctex,v 1.14 2007/06/13 18:31:39 cdeluca Exp $
+% $Id: Grid_refdoc.ctex,v 1.15 2007/06/14 05:05:43 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -67,15 +67,15 @@
 #ifdef STANDALONE
 \input{Grid_usage}
 \input{ESMF_GridUsageEx_fapi}
-\input{ESMF_GridCreateCartEx_fapi}
-\input{ESMF_GridCreateTripoleEx_fapi}
+\input{ESMF_GridCreateRegFromDGEx_fapi}
+%\input{ESMF_GridCreateTripoleEx_fapi}
 %\input{ESMF_GridCreateSph2Dplus1Ex_fapi}
 %\input{ESMF_GridCreateFromF90ArraysEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/newGrid/doc/Grid_usage}
 \input{../Infrastructure/newGrid/doc/ESMF_GridUsageEx_fapi}
 \input{../Infrastructure/newGrid/doc/ESMF_GridCreateRegFromDGEx_fapi}
-\input{../Infrastructure/newGrid/doc/ESMF_GridCreateTripoleEx_fapi}
+%\input{../Infrastructure/newGrid/doc/ESMF_GridCreateTripoleEx_fapi}
 %\input{../Infrastructure/newGrid/doc/ESMF_GridCreateSph2Dplus1Ex_fapi}
 %\input{../Infrastructure/newGrid/doc/ESMF_GridCreateFromF90ArraysEx_fapi}
 #endif

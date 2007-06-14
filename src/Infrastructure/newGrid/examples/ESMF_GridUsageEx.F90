@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.28 2007/06/13 22:18:26 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.29 2007/06/14 05:05:43 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_GridCreateEx
       call ESMF_Initialize(vm=vm, rc=rc)
 
 !BOE
-!\subsubsection{Create 2D Irregularly Distributed Grid
+!\subsubsection{Create a 2D Irregularly Distributed Grid
 !                  With Uniformly Spaced Coordinates}
 ! \label{example:2DIrregUniGrid}
 !
@@ -189,9 +189,63 @@ program ESMF_GridCreateEx
    enddo
 !EOC
 
+
+!BOE
+!\subsubsection{Create an Empty Grid in a Parent Component and
+!    Complete it in a Child Component Using Set Calls}\label{sec:usage:setcommit}
+! 
+! ESMF Grids can be created using an incremental paradigm.
+! To do this, the user first calls ESMF\_GridCreateEmpty to 
+! allocate the shell of a Grid. Next, a series of
+{\tt ESMF\_GridSet()} calls are used to fill in the
+! details of the grid.  Here we use a convenient {\tt ESMF\_GridSetShape()}
+! call that fills in the Grid via an interface much like the
+! {\tt ESMF\_GridCreateShape()} call.  Finally, after the sets,
+! any other grid call 
+! will internally validate and create the final, usable, grid.
+! For consistency's sake the initial {\tt ESMF\_GridCreateEmpty}
+! call must occur on the same or a superset of the processors as
+! the {\tt ESMF\_GridSet()} calls. 
+! The following example uses the incremental technique to create
+! a rectangular 10x20 grid with coordinates at the center and
+! corner stagger locations. 
+!EOE
+
+!BOC
+   
+!---------------------------------------------------------------------------
+! IN THE PARENT COMPONENT:
+! Create an empty grid in the parent component for use in a child component.
+! The parent may be defined on more PETs than the child component.  
+! The child's [vm or pet list] is passed into the create call so that
+! the Grid is defined on the appropriate subset of the parent's PETs. 
+!---------------------------------------------------------------------------
+   grid=ESMF_GridCreateEmpty(rc=rc, vm=childVm)
+
+
+!---------------------------------------------------------------------------
+! IN THE CHILD COMPONENT:
+! Set the grid topology.  Here we define an irregularly distributed 
+! rectangular Grid.
+!---------------------------------------------------------------------------
+
+   call ESMF_GridSetShape(grid, countsPerDEDim1=(/5,5/), &
+          countsPerDEDim2=(/7,7,6/), rc=rc)
+
+!---------------------------------------------------------------------------
+! Set Grid coordinates at the cell center location.
+!---------------------------------------------------------------------------
+   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+
+!---------------------------------------------------------------------------
+! Set Grid coordinates at the corner stagger location.
+!---------------------------------------------------------------------------
+   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
+!EOC
+
 !BOE
 !
-!\subsubsection{Creation: Size, Rank, and Distribution of Index Space}
+!\subsubsection{Specifying Grid Size, Rank, and Distribution}
 
 ! The method {\tt ESMF\_GridCreateShape()} is a shortcut
 ! for specifying single tile logically rectangular grids.
@@ -268,7 +322,7 @@ program ESMF_GridCreateEx
 
 !BOC
    grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-          countsPerDEDim2=(/7,7,6/), countsPerDEDim1=(/15,15/), rc=rc)   
+          countsPerDEDim2=(/7,7,6/), countsPerDEDim3=(/15,15/), rc=rc)   
 !EOC
 
 !BOC! If the third dimension were undistributed then the call
@@ -298,14 +352,11 @@ program ESMF_GridCreateEx
    petMap(:,3,1) = (/1,0/)
 
    grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-           countsPerDEDim2=(/7,7,6/), petMap=petMap, rc=rc)   
-!EOC
-
-
+           countsPerDEDim2=(/7,7,6/), petMap=petMap, rc=rc)   !EOC
 
 !BOE
-! A third supported type of distribution is arbitrary distribution. 
-! To use this type the user specifies the 
+! Arbitrary distribution has not yet been implemented.
+! When it is, the user will specify the 
 ! global minimum and maximum ranges of the index space
 ! ({\tt minIndex} and {\tt maxIndex}) and the set of
 ! index space locations residing on the local processor (via {\tt localIndices}).
@@ -316,7 +367,7 @@ program ESMF_GridCreateEx
 ! with the diagonal (i.e. indices (i,i) where i goes from 1 to 5)
 ! on this processor (The rest of the processors would have to declare
 ! the remainder of the Grid locations.)
-!EOE
+!removeEOE
 
 !BOC
    ! Set local indices
@@ -333,150 +384,8 @@ program ESMF_GridCreateEx
 
 
 !BOE
-!\subsubsection{Creation: Empty/Set}\label{sec:usage:setcommit}
-! 
-! As an alternative to the monolithic one call create, ESMF provides
-! an incremental paradigm for grid creation which allows the user
-! to break up creation for clarity or convenience. 
-! To do this, the user first creates an empty grid. Next, a series of 
-! set calls are used to fill in the details of the grid. Note that, 
-! a series of sets identical to the shortcut shape create calls
-! has been provided for the user's convenience in using this
-! paradigm.  Finally after the sets, any other grid call 
-! will internally validate and create the final, usable, grid.
-! For consistencies sake, the initial create empty call must occur on the 
-! same set of processors as the finally grid create call. 
-! The following is an example illustrating this technique.  
-! It creates a rectangular 10x20 grid with the center and corner stagger locations. 
-!EOE
-
-!BOC
-   
-   ! Create empty grid
-   grid=ESMF_GridCreateEmpty(rc=rc)
-
-   ! Set grid size
-   call ESMF_GridSetShapeBox(grid, countsPerDEDim1=(/5,5/), &
-          countsPerDEDim1=(/7,7,6/), rc=rc)
-
-   ! Create the Grid and then add a Center Stagger Location
-   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
-
-   ! Add Corner Stagger Location
-   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
-!EOC
-
-
-!BOE
 !
-!\subsubsection{Coordinate Specification And Index Space Dependency}
-!
-! To specify how the coordinate arrays are mapped to the 
-! index dimensions the arguments {\tt coordDep1,2,3}
-! are used. The size of the arrays specify the rank
-! of the cooresponding coordinate component array.
-! (e.g. size(coordDep1)=2 means that coordinate
-! component 1 (e.g. x) is 2D) The entries in
-! {\tt coordDep} specify which index dimension
-! the cooresponding coordinate component dimension
-! maps to.  (e.g. coordDep1=(/1,2/) means that
-! the first dimension of component 1 maps to index dimension
-! 1 and the second maps to index dimension 2.) If not set,
-! then {\tt coordDepX} defaults to (/X/), in other
-! words rectilinear.  
-! 
-! The following call demonstrates the creation of a
-! 10x20 2D rectilinear grid where the first coordinate
-! component is mapped to the second index dimension
-! (i.e. is of size 10) and the second coordinate component
-! is mapped to the second index dimension (i.e. is of size
-!  20).
-!EOE
-
-!BOC
-   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-          countsPerDEDim2=(/7,7,6/), coordDep1=(/2/), &
-          coordDep2=(/1/), rc=rc)   
-!EOC 
-
-!BOE
-! The following call demonstrates the creation of a
-! 10x20 2D curvilinear grid where where both
-! coordinate component arrays are 10x20 also. 
-!EOE
-
-!BOC
-   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-          countsPerDEDim2=(/7,7,6/), coordDep1=(/1,2/), &
-          coordDep2=(/1,2/), rc=rc)   
-!EOC 
-
-!BOE
-! The following call demonstrates the creation of a
-! 10x20x30 2D plus 1 curvilinear grid where 
-! coordinate component 1 and 2 are still 10x20, but
-! coordinate component 3 is mapped just to the 
-! undistributed third index dimension.
-!EOE
-
-!BOC
-   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-          countsPerDEDim2=(/7,7,6/), countsPerDEDim1=(/30/), &
-          coordDep1=(/1,2/), coordDep2=(/1,2/), &
-          coordDep3=(/3/), rc=rc)   
-!EOC 
-
-!BOE
-!
-! By default the local piece of the array on each processor starts at 
-! (1,1,..), however, the indexing for each grid coordinate array  
-! on each DE may be shifted to the global indices by using the {\tt indexflag}.
-! For example, the following call switches the grid to use global indices. 
-!EOE
-
-!BOC
-   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-           countsPerDEDim2=(/7,7,6/), indexflag=ESMF_GLOBAL, rc=rc)   
-!EOC
-
-
-!BOE
-!
-!\subsubsection{Creation: Type and Kind}
-!
-! The default type and kind for a Grid is ESMF\_R8. 
-!  To control the data type and kind more precisely the optional 
-!  {\tt coordTypeKind} parameter may be used. The following illustrates
-! the creation of a Grid with 4 byte Integer coordinates. 
-!EOE
-
-!BOC 
-   grid=ESMF_GridCreateShape(coordTypeKind=ESMF_TYPEKIND_I4, &
-          countsPerDEDim1=(/5,5/), countsPerDEDim2=(/7,7,6/), rc=rc)   
-!EOC  
-
-!BOE
-!
-!\subsubsection{Creation: Halo Depth}
-!
-! The default halo depth for a Grid is 0. 
-! The shortcut Grid shape creation methods allow the user
-! to set the halo, but it needs to be the same depth in all dimensions.
-! (The haloDepth may be controlled more precisely by using the
-!  more general grid create call.) The parameter {\tt haloDepth} 
-!  may be used to set the coordinate halo depth. The following
-!  is an example of setting the halo depth to 1.
-!EOE
-
-!BOC 
-   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-           countsPerDEDim2=(/7,7,6/), haloDepth=1, rc=rc)   
-!EOC  
-
-
-!BOE
-!
-!\subsubsection{Creation: Tile Edge Connections}
+!\subsubsection{Specify Tile Edge Connections}
 ! The {\tt ESMF\_GridCreateShape} command has three arguments
 ! specifying edge connections. The three 
 ! {\tt connDim1}, {\tt connDim2}, and {\tt connDim3} are all of type
@@ -533,9 +442,97 @@ program ESMF_GridCreateEx
 !EOC
 
 
+!BOE
+!
+!\subsubsection{Specify Coordinate Arrays and Their Relation to
+Index Space Dimensions}
+!
+! To specify how the coordinate arrays are mapped to the 
+! index dimensions the arguments {\tt coordDep1,2,3}
+! are used. The size of the arrays specify the rank
+! of the cooresponding coordinate component array.
+! (e.g. size(coordDep1)=2 means that coordinate
+! component 1 (e.g. x) is 2D) The entries in
+! {\tt coordDep} specify which index dimension
+! the cooresponding coordinate component dimension
+! maps to.  (e.g. coordDep1=(/1,2/) means that
+! the first dimension of component 1 maps to index dimension
+! 1 and the second maps to index dimension 2.) If not set,
+! then {\tt coordDepX} defaults to (/X/), in other
+! words rectilinear.  
+! 
+! The following call demonstrates the creation of a
+! 10x20 2D rectilinear grid where the first coordinate
+! component is mapped to the second index dimension
+! (i.e. is of size 10) and the second coordinate component
+! is mapped to the first index dimension (i.e. is of size
+!  20).  [Check this]
+!EOE
+
+!BOC
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
+          countsPerDEDim2=(/7,7,6/), coordDep1=(/2/), &
+          coordDep2=(/1/), rc=rc)   
+!EOC 
 
 !BOE
-!\subsubsection{Stagger Location}\label{sec:usage:staggerloc}
+! The following call demonstrates the creation of a
+! 10x20 2D curvilinear grid where where both
+! coordinate component arrays are 10x20 also. 
+!EOE
+
+!BOC
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
+          countsPerDEDim2=(/7,7,6/), coordDep1=(/1,2/), &
+          coordDep2=(/1,2/), rc=rc)   
+!EOC 
+
+!BOE
+! The following call demonstrates the creation of a
+! 10x20x30 2D plus 1 curvilinear grid where 
+! coordinate component 1 and 2 are still 10x20, but
+! coordinate component 3 is mapped just to the 
+! undistributed third index dimension.
+!EOE
+
+!BOC
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
+          countsPerDEDim2=(/7,7,6/), countsPerDEDim1=(/30/), &
+          coordDep1=(/1,2/), coordDep2=(/1,2/), &
+          coordDep3=(/3/), rc=rc)   
+!EOC 
+
+!BOE
+!
+! By default the local piece of the array on each processor starts at 
+! (1,1,..), however, the indexing for each grid coordinate array  
+! on each DE may be shifted to the global indices by using the {\tt indexflag}.
+! For example, the following call switches the grid to use global indices. 
+!EOE
+
+!BOC
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
+           countsPerDEDim2=(/7,7,6/), indexflag=ESMF_GLOBAL, rc=rc)   
+!EOC
+
+
+!BOE
+!
+!\subsubsection{Specify Coordinate Type and Kind}
+!
+! The default type and kind for Grid coordinates is ESMF\_R8. 
+!  To control the data type and kind more precisely the optional 
+!  {\tt coordTypeKind} parameter may be used. The following illustrates
+! the creation of a Grid with 4 byte integer coordinates. 
+!EOE
+
+!BOC 
+   grid=ESMF_GridCreateShape(coordTypeKind=ESMF_TYPEKIND_I4, &
+          countsPerDEDim1=(/5,5/), countsPerDEDim2=(/7,7,6/), rc=rc)   
+!EOC  
+
+!BOE
+!\subsubsection{Associate Coordinates with Stagger Location}\label{sec:usage:staggerloc}
 !
 ! In this document, stagger location refers to the places in a Grid
 ! cell that can contain data. For example, data can be located
@@ -580,9 +577,8 @@ program ESMF_GridCreateEx
           coord1=CoordX, coord2=CoordY, rc=rc)
 !EOC  
 
-
 !BOE
-!\subsubsection{Coordinate Data Access}
+!\subsubsection{Access Grid Coordinates}
 !
 ! Once a Grid has been created the user has several options to access
 ! the Grid coordinate data. The first pair of these allow the user
@@ -675,8 +671,28 @@ program ESMF_GridCreateEx
           indices=(/1,1,1/), coords=outCoords, rc=rc)
 !EOC
 
+
 !BOE
-!\subsubsection{Grid Generate}
+!
+!\subsubsection{Specify Halo Width}
+!
+! The default halo depth for a Grid is 0. 
+! The shortcut Grid shape creation methods allow the user
+! to set the halo, but it needs to be the same depth in all dimensions.
+! The haloDepth may be defined asymmetrically by using the
+!  more general grid create call. The parameter {\tt haloDepth} 
+!  may be used to set the coordinate halo depth. The following
+!  is an example of setting the halo depth to 1.
+!EOE
+
+!BOC 
+   grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
+           countsPerDEDim2=(/7,7,6/), haloDepth=1, rc=rc)   
+!EOC  
+
+
+!BOE
+!\subsubsection{Generate Grid Coordinates}
 !
 ! The current ESMF grid interface provides some automatic production
 ! of coordinate values. In the future there are plans to add more, but 
@@ -696,7 +712,7 @@ program ESMF_GridCreateEx
 !EOC
 
 !removeBOE
-!\subsubsection{Calculate Coordinates}
+!\subsubsection{Calculate Grid Coordinates}
 !
 ! In addition to the grid generate option specified above to set coordinates, 
 ! ESMF also provides a method to calculate coordinates based on those
@@ -853,9 +869,8 @@ program ESMF_GridCreateEx
 !removeEOC
 
 
-
 !BOE
-! \subsubsection{Example: Creation of Regular Distributed 3D Uniform Grid}
+! \subsubsection{Create a Regularly Distributed 3D Uniform Grid}
 !
 ! This example illustrates the creation of a 100x100x100  3D Grid distributed across
 ! 5 processors in each dimension. The coordinates in the Grid are uniformly distributed
@@ -879,13 +894,13 @@ program ESMF_GridCreateEx
 
 !BOC
    ! Create the Grid.
-   grid=ESMF_GridCreateShape(maxIndex=(/100,100,100/), blkDecomp=(/5,5,5/), rc=rc)   
+   grid=ESMF_GridCreateShape(maxIndex=(/100,100,100/), regDecomp=(/5,5,5/), rc=rc)   
 
    ! Add a center stagger location 
    call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
    ! Put in the coordinates
-   call ESMF_GridGenCoordsUni(grid, begCoord=(/0.0,0.0,0.0/), &
+   call ESMF_GridGenCoordUni(grid, begCoord=(/0.0,0.0,0.0/), &
           endCoord=(/200.0, 200.0, 200.0/), rc=rc)
  
 !EOC
