@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.29 2007/06/14 05:05:43 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.30 2007/06/15 16:30:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_GridCreateEx
       call ESMF_Initialize(vm=vm, rc=rc)
 
 !BOE
-!\subsubsection{Create a 2D Irregularly Distributed Grid
+!\subsubsection{Creating a 2D Irregularly Distributed Grid
 !                  With Uniformly Spaced Coordinates}
 ! \label{example:2DIrregUniGrid}
 !
@@ -114,7 +114,7 @@ program ESMF_GridCreateEx
 !EOC
 
 !BOE
-!\subsubsection{Create a Grid with Regular Distribution, 
+!\subsubsection{Creating a Grid with Regular Distribution, 
                 Horizontal Curvilinear Coordinates,
 !               and an Undistributed Vertical Dimension}
 ! \label{example:CurviGridWithUndistDim}
@@ -191,8 +191,99 @@ program ESMF_GridCreateEx
 
 
 !BOE
-!\subsubsection{Create an Empty Grid in a Parent Component and
-!    Complete it in a Child Component Using Set Calls}\label{sec:usage:setcommit}
+! \subsubsection{Creating a Spherical 2D Grid with a Third Undistributed Dimension}
+!
+! This example  illustrates the creation of a 2D spherical Grid with a
+! 3rd undistributed dimension.  
+! The Grid contains both the center stagger location and a corner
+! (i.e. Arakawa B-Grid). The 2D horizontal grid is distributed across
+! the processors according to  gridDist1 and gridDist2. The number
+! of vertical levels is gridVertSize.
+!EOE
+
+!BOC
+   ! Use ESMF framework module
+   use ESMF_Mod
+   implicit none
+
+   ! Local variables  
+   integer:: rc, finalrc
+   integer:: myPet, npets, rootPet
+   type(ESMF_VM):: vm
+   type(ESMF_Grid) :: grid2D1
+   integer :: gridDist1(:),gridDist2(:) gridVertSize
+   integer :: lbnd(2),ubnd(2)
+   integer :: lbndV(1),ubndV(1)
+   real(ESMF_TYPEKIND_R8), pointer :: coordsLat(:,:),coordsLon(:,:)
+   real(ESMF_TYPEKIND_R8), pointer :: coordsVert(:)
+!EOC         
+
+      finalrc = ESMF_SUCCESS
+      call ESMF_Initialize(vm=vm, rc=rc)
+
+!BOC
+   ! Construct a 2D spherical grid with an undistributed third dimension. Using
+   ! the 2D distribution specified in gridDist1 and gridDist2, and the vertical
+   ! count specified in gridVertSize.  
+
+   ! Create Grid
+   grid2D1=ESMF_GridCreateShape(countsPerDEDim1=gridDist1, &
+                              countsPerDEDim2=gridDist2, &
+                              countsPerDEDim3=(/gridVertSize/), &
+                              connDim1=(/ESMF_GRIDCONN_POLE,ESMF_GRIDCONN_POLE/), & 
+                              connDim2=(/ESMF_GRIDCONN_PERIODIC,ESMF_GRIDCONN_PERIODIC/), &
+                              coordDep1=(/1,2/), &
+                              coordDep2=(/1,2/), &
+                              coordDep3=(/3/), &
+                              indexflag=ESMF_GLOBAL, &
+                              rc=rc)   
+
+
+
+  ! Add the center and corner stagger locations. 
+  call ESMF_GridSetCoord(grid2D1,staggerLoc=ESMF_STAGGERLOC_CENTER,rc=rc)
+  call ESMF_GridSetCoord(grid2D1,staggerLoc=ESMF_STAGGERLOC_CORNER,rc=rc)
+
+
+  ! Set the horizontal coordinates by using the non-ESMF functions
+  ! CalcHorzLat, CalcHorzLon to calculate them from the global indices. 
+   call ESMF_GridLocalTileGet(grid2D1, coord=1, &
+          computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
+
+
+   ! Get pointers to the coordinate component storage
+   call ESMF_GridLocalTileGetCoord(grid2D1, coord=1, coordsLon, rc=rc)
+   call ESMF_GridLocalTileGetCoord(grid2D1, coord=2, coordsLat, rc=rc)
+
+   ! Set the coordinates
+   do j=lbnd(2),ubnd(2)
+   do i=lbnd(1),ubnd(1)
+        coordsLon(i,j) = CalcHorzLon(i,j)
+        coordsLat(i,j) = CalcHorzLat(i,j)
+   enddo
+   enddo
+
+
+   ! Set the vertical  coordinates by using the non-ESMF function
+   ! CalcVert.
+
+   ! We actually know the bounds already, but go through the exercise anyway.
+   call ESMF_GridLocalTileGet(grid2D1, coord=3, &
+          computationalLBound=lbndV, computationalUBound=ubndV, rc=rc)
+
+   ! Get pointers to the coordinate component storage
+   call ESMF_GridLocalTileGetCoord(grid2D1, coord=3, coordsVert, rc=rc)
+
+   ! Set the vertical coordinates
+   do i=lbndV(1),ubndV(1)
+        coordsVert(i) = CalcVert(i)
+   enddo
+
+!EOC
+
+!BOE
+!\subsubsection{Creating an Empty Grid in a Parent Component 
+! for Completion in a Child Component}\label{sec:usage:setcommit}
 ! 
 ! ESMF Grids can be created using an incremental paradigm.
 ! To do this, the user first calls ESMF\_GridCreateEmpty to 
@@ -385,7 +476,7 @@ program ESMF_GridCreateEx
 
 !BOE
 !
-!\subsubsection{Specify Tile Edge Connections}
+!\subsubsection{Specifying Tile Edge Connections}
 ! The {\tt ESMF\_GridCreateShape} command has three arguments
 ! specifying edge connections. The three 
 ! {\tt connDim1}, {\tt connDim2}, and {\tt connDim3} are all of type
@@ -444,7 +535,7 @@ program ESMF_GridCreateEx
 
 !BOE
 !
-!\subsubsection{Specify Coordinate Arrays and Their Relation to
+!\subsubsection{Specifying Coordinate Arrays and Their Relation to
 Index Space Dimensions}
 !
 ! To specify how the coordinate arrays are mapped to the 
@@ -518,7 +609,7 @@ Index Space Dimensions}
 
 !BOE
 !
-!\subsubsection{Specify Coordinate Type and Kind}
+!\subsubsection{Specifying Coordinate Type and Kind}
 !
 ! The default type and kind for Grid coordinates is ESMF\_R8. 
 !  To control the data type and kind more precisely the optional 
@@ -532,7 +623,7 @@ Index Space Dimensions}
 !EOC  
 
 !BOE
-!\subsubsection{Associate Coordinates with Stagger Location}\label{sec:usage:staggerloc}
+!\subsubsection{Associating Coordinates with Stagger Locations}\label{sec:usage:staggerloc}
 !
 ! In this document, stagger location refers to the places in a Grid
 ! cell that can contain data. For example, data can be located
@@ -578,7 +669,7 @@ Index Space Dimensions}
 !EOC  
 
 !BOE
-!\subsubsection{Access Grid Coordinates}
+!\subsubsection{Accessing Grid Coordinates}
 !
 ! Once a Grid has been created the user has several options to access
 ! the Grid coordinate data. The first pair of these allow the user
@@ -674,25 +765,25 @@ Index Space Dimensions}
 
 !BOE
 !
-!\subsubsection{Specify Halo Width}
+!\subsubsection{Specifying Halo Width}
 !
-! The default halo depth for a Grid is 0. 
+! The default halo width for a Grid is 0. 
 ! The shortcut Grid shape creation methods allow the user
 ! to set the halo, but it needs to be the same depth in all dimensions.
-! The haloDepth may be defined asymmetrically by using the
-!  more general grid create call. The parameter {\tt haloDepth} 
-!  may be used to set the coordinate halo depth. The following
-!  is an example of setting the halo depth to 1.
+! The haloWidth may be defined asymmetrically by using the
+!  more general grid create call. The parameter {\tt haloWidth} 
+!  may be used to set the coordinate halo width. The following
+!  is an example of setting the halo width to 1.
 !EOE
 
 !BOC 
    grid=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-           countsPerDEDim2=(/7,7,6/), haloDepth=1, rc=rc)   
+           countsPerDEDim2=(/7,7,6/), haloWidth=1, rc=rc)   
 !EOC  
 
 
 !BOE
-!\subsubsection{Generate Grid Coordinates}
+!\subsubsection{Generating Grid Coordinates}
 !
 ! The current ESMF grid interface provides some automatic production
 ! of coordinate values. In the future there are plans to add more, but 
@@ -712,7 +803,7 @@ Index Space Dimensions}
 !EOC
 
 !removeBOE
-!\subsubsection{Calculate Grid Coordinates}
+!\subsubsection{Calculating Grid Coordinates}
 !
 ! In addition to the grid generate option specified above to set coordinates, 
 ! ESMF also provides a method to calculate coordinates based on those
@@ -870,7 +961,7 @@ Index Space Dimensions}
 
 
 !BOE
-! \subsubsection{Create a Regularly Distributed 3D Uniform Grid}
+! \subsubsection{Creating a Regularly Distributed 3D Grid with Generated Coordinates
 !
 ! This example illustrates the creation of a 100x100x100  3D Grid distributed across
 ! 5 processors in each dimension. The coordinates in the Grid are uniformly distributed
@@ -907,7 +998,7 @@ Index Space Dimensions}
 
 
 !BOE
-! \subsubsection{Example: Grid Creation from Existing F90 Arrays}~\label{sec:example5}
+! \subsubsection{Creating a Grid from Existing F90 Arrays}~\label{sec:example5}
 !
 ! This example illustrates the creation of a simple 2D Grid from coordinate data
 !  contained in 4 byte real fortan arrays.  The new Grid contains just the center stagger location.
@@ -1041,97 +1132,6 @@ Index Space Dimensions}
 
 !EOC
 
-
-!BOE
-! \subsubsection{Create a Spherical 2D Grid with a Third Undistributed Dimension}
-!
-! This example  illustrates the creation of a 2D spherical Grid with a
-! 3rd undistributed dimension.  
-! The Grid contains both the center stagger location and a corner
-! (i.e. Arakawa B-Grid). The 2D horizontal grid is distributed across
-! the processors according to  gridDist1 and gridDist2. The number
-! of vertical levels is gridVertSize.
-!EOE
-
-!BOC
-   ! Use ESMF framework module
-   use ESMF_Mod
-   implicit none
-
-   ! Local variables  
-   integer:: rc, finalrc
-   integer:: myPet, npets, rootPet
-   type(ESMF_VM):: vm
-   type(ESMF_Grid) :: grid2D1
-   integer :: gridDist1(:),gridDist2(:) gridVertSize
-   integer :: lbnd(2),ubnd(2)
-   integer :: lbndV(1),ubndV(1)
-   real(ESMF_TYPEKIND_R8), pointer :: coordsLat(:,:),coordsLon(:,:)
-   real(ESMF_TYPEKIND_R8), pointer :: coordsVert(:)
-!EOC         
-
-      finalrc = ESMF_SUCCESS
-      call ESMF_Initialize(vm=vm, rc=rc)
-
-!BOC
-   ! Construct a 2D spherical grid with an undistributed third dimension. Using
-   ! the 2D distribution specified in gridDist1 and gridDist2, and the vertical
-   ! count specified in gridVertSize.  
-
-   ! Create Grid
-   grid2D1=ESMF_GridCreateShape(countsPerDEDim1=gridDist1, &
-                              countsPerDEDim2=gridDist2, &
-                              countsPerDEDim3=(/gridVertSize/), &
-                              connDim1=(/ESMF_GRIDCONN_POLE,ESMF_GRIDCONN_POLE/), & 
-                              connDim2=(/ESMF_GRIDCONN_PERIODIC,ESMF_GRIDCONN_PERIODIC/), &
-                              coordDep1=(/1,2/), &
-                              coordDep2=(/1,2/), &
-                              coordDep3=(/3/), &
-                              indexflag=ESMF_GLOBAL, &
-                              rc=rc)   
-
-
-
-  ! Add the center and corner stagger locations. 
-  call ESMF_GridSetCoord(grid2D1,staggerLoc=ESMF_STAGGERLOC_CENTER,rc=rc)
-  call ESMF_GridSetCoord(grid2D1,staggerLoc=ESMF_STAGGERLOC_CORNER,rc=rc)
-
-
-  ! Set the horizontal coordinates by using the non-ESMF functions
-  ! CalcHorzLat, CalcHorzLon to calculate them from the global indices. 
-   call ESMF_GridLocalTileGet(grid2D1, coord=1, &
-          computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
-
-
-   ! Get pointers to the coordinate component storage
-   call ESMF_GridLocalTileGetCoord(grid2D1, coord=1, coordsLon, rc=rc)
-   call ESMF_GridLocalTileGetCoord(grid2D1, coord=2, coordsLat, rc=rc)
-
-   ! Set the coordinates
-   do j=lbnd(2),ubnd(2)
-   do i=lbnd(1),ubnd(1)
-        coordsLon(i,j) = CalcHorzLon(i,j)
-        coordsLat(i,j) = CalcHorzLat(i,j)
-   enddo
-   enddo
-
-
-   ! Set the vertical  coordinates by using the non-ESMF function
-   ! CalcVert.
-
-   ! We actually know the bounds already, but go through the exercise anyway.
-   call ESMF_GridLocalTileGet(grid2D1, coord=3, &
-          computationalLBound=lbndV, computationalUBound=ubndV, rc=rc)
-
-   ! Get pointers to the coordinate component storage
-   call ESMF_GridLocalTileGetCoord(grid2D1, coord=3, coordsVert, rc=rc)
-
-   ! Set the vertical coordinates
-   do i=lbndV(1),ubndV(1)
-        coordsVert(i) = CalcVert(i)
-   enddo
-
-!EOC
 
 
 !BOE
