@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.20 2006/09/22 23:55:38 theurich Exp $
+# $Id: build_rules.mk,v 1.21 2007/06/19 06:33:47 theurich Exp $
 #
 # Darwin.absoft.default
 #
@@ -73,14 +73,32 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER}
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
 
 ############################################################
+# Fortran symbol convention
+#
+ifeq ($(ESMF_FORTRANSYMBOLS),default)
+ESMF_F90COMPILEOPTS       += -YEXT_NAMES=LCS -YEXT_SFX=_
+ESMF_F90LINKOPTS          += -YEXT_NAMES=LCS -YEXT_SFX=_
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+else
+ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_singleunderscore)
+ESMF_F90COMPILEOPTS       += -YEXT_NAMES=LCS -YEXT_SFX=_
+ESMF_F90LINKOPTS          += -YEXT_NAMES=LCS -YEXT_SFX=_
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+else
+ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_doubleunderscore)
+ESMF_F90COMPILEOPTS       += -YEXT_NAMES=LCS -YEXT_SFX=__
+ESMF_F90LINKOPTS          += -YEXT_NAMES=LCS -YEXT_SFX=__
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
+else
+$(error "ESMF_FORTRANSYMBOLS = $(ESMF_FORTRANSYMBOLS)" not supported by ESMF and/or this platform)
+endif
+endif
+endif
+
+############################################################
 # How to specify module directories
 #
 ESMF_F90IMOD        = -p
-
-############################################################
-# Force Fortran symbols lower case with trailing underscore
-#
-ESMF_F90COMPILEOPTS += -YEXT_NAMES=LCS -YEXT_SFX=_
 
 ############################################################
 # Blank out variables to prevent rpath encoding
