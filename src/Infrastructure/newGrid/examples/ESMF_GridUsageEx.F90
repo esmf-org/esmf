@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.31 2007/06/19 21:23:39 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.32 2007/06/19 23:16:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -77,14 +77,14 @@ program ESMF_GridCreateEx
    !-------------------------------------------------------------------
    ! Get the bounds of the first coordinate array on the local DE.
    !-------------------------------------------------------------------
-   call ESMF_GridLocalTileGet(grid2D, coord=1, &
+   call ESMF_GridGetLocalTileInfo(grid2D, coord=1, &
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the pointer to the first coordinate array from inside
    ! the Grid object.
    !-------------------------------------------------------------------
-   call ESMF_GridLocalTileGetCoord(grid2D, coord=1, coordsX, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid2D, coord=1, coordsX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension.
@@ -96,14 +96,14 @@ program ESMF_GridCreateEx
    !-------------------------------------------------------------------
    ! Get the bounds of the second coordinate array on the local DE.
    !-------------------------------------------------------------------
-   call ESMF_GridLocalTileGet(grid2D, coord=2, &
+   call ESMF_GridGetLocalTileInfo(grid2D, coord=2, &
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the pointer to the second coordinate array from inside
    ! the Grid object.
    !-------------------------------------------------------------------
-   call ESMF_GridLocalTileGetCoord(grid2D, coord=2, coordsY, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid2D, coord=2, coordsY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calcuate and set coordinates in the second dimension.
@@ -153,14 +153,14 @@ program ESMF_GridCreateEx
    !-------------------------------------------------------------------
    ! Get the bounds of the first coordinate array on the local DE.
    !-------------------------------------------------------------------
-   call ESMF_GridLocalTileGet(grid2D, coord=1, &
+   call ESMF_GridGetLocalTileInfo(grid2D, coord=1, &
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the pointer to the first coordinate array from inside
    ! the Grid object.
    !-------------------------------------------------------------------
-   call ESMF_GridLocalTileGetCoord(grid2D, coord=1, coordsX, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid2D, coord=1, coordsX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension.
@@ -172,7 +172,7 @@ program ESMF_GridCreateEx
    !-------------------------------------------------------------------
    ! Get the bounds of the second coordinate array on the local DE.
    !-------------------------------------------------------------------
-   call ESMF_GridLocalTileGet(grid2D, coord=2, &
+   call ESMF_GridGetLocalTileInfo(grid2D, coord=2, &
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
 
    !-------------------------------------------------------------------
@@ -247,13 +247,13 @@ program ESMF_GridCreateEx
 
   ! Set the horizontal coordinates by using the non-ESMF functions
   ! CalcHorzLat, CalcHorzLon to calculate them from the global indices. 
-   call ESMF_GridLocalTileGet(grid2D1, coord=1, &
+   call ESMF_GridGetLocalTileInfo(grid2D1, coord=1, &
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
 
 
    ! Get pointers to the coordinate component storage
-   call ESMF_GridLocalTileGetCoord(grid2D1, coord=1, coordsLon, rc=rc)
-   call ESMF_GridLocalTileGetCoord(grid2D1, coord=2, coordsLat, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid2D1, coord=1, coordsLon, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid2D1, coord=2, coordsLat, rc=rc)
 
    ! Set the coordinates
    do j=lbnd(2),ubnd(2)
@@ -268,11 +268,11 @@ program ESMF_GridCreateEx
    ! CalcVert.
 
    ! We actually know the bounds already, but go through the exercise anyway.
-   call ESMF_GridLocalTileGet(grid2D1, coord=3, &
+   call ESMF_GridGetLocalTileInfo(grid2D1, coord=3, &
           computationalLBound=lbndV, computationalUBound=ubndV, rc=rc)
 
    ! Get pointers to the coordinate component storage
-   call ESMF_GridLocalTileGetCoord(grid2D1, coord=3, coordsVert, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid2D1, coord=3, coordsVert, rc=rc)
 
    ! Set the vertical coordinates
    do i=lbndV(1),ubndV(1)
@@ -311,7 +311,7 @@ program ESMF_GridCreateEx
 ! The child's [vm or pet list] is passed into the create call so that
 ! the Grid is defined on the appropriate subset of the parent's PETs. 
 !---------------------------------------------------------------------------
-   grid=ESMF_GridCreateEmpty(rc=rc, vm=childVm)
+   grid=ESMF_GridCreateEmpty(petList=/1,2,3,4/, rc=rc)
 
 
 !---------------------------------------------------------------------------
@@ -555,9 +555,9 @@ Index Space Dimensions}
 ! The following call demonstrates the creation of a
 ! 10x20 2D rectilinear grid where the first coordinate
 ! component is mapped to the second index dimension
-! (i.e. is of size 10) and the second coordinate component
+! (i.e. is of size 20) and the second coordinate component
 ! is mapped to the first index dimension (i.e. is of size
-!  20).  [Check this]
+! 10).
 !EOE
 
 !BOC
@@ -682,13 +682,13 @@ Index Space Dimensions}
 ! EOE
 
 !BOC
-   call ESMF_GridSetCoordFromArray(grid, &
+   call ESMF_GridSetCoord(grid, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
           coord=1, array=xCoord, rc=rc)
 !EOC
 
 !BOE
-! {\tt ESMF\_GridGetCoordIntoArray}, allows the user
+! {\tt ESMF\_GridGetCoord()}, allows the user
 ! to get the Array (a direct reference or a copy) which
 ! contains the coordinate data for a stagger location on a Grid. The user
 ! can then employ any of the standard {\tt ESMF\_Array} tools to operate
@@ -697,7 +697,7 @@ Index Space Dimensions}
 ! EOE
 
 !BOC
-   call ESMF_GridGetCoordIntoArray(grid, &
+   call ESMF_GridGetCoord(grid, &
           staggerLoc=ESMF_STAGGERLOC_CORNER,coord=2, &
           array=copyOfY, docopy=ESMF_DATA_COPY, rc=rc)
 !EOC
@@ -714,7 +714,7 @@ Index Space Dimensions}
 !EOE
 
 !BOC
-   call ESMF_GridLocalTileSetCoord(grid, tile=2, &
+   call ESMF_GridSetLocalTileCoord(grid, tile=2, &
           staggerLoc=ESMF_STAGGERLOC_CORNER,    &
           coord=1, fptr, &
           doCopy=ESMF_DATA_REF, rc=rc)
@@ -729,7 +729,7 @@ Index Space Dimensions}
 !EOE
 
 !BOC
-   call ESMF_GridLocalTileGetCoord(grid, tile=1, localDE=2, &
+   call ESMF_GridGetLocalTileCoord(grid, tile=1, localDE=2, &
           coord=3, fptr, doCopy=ESMF_DO_COPY, rc=rc)
 
 !EOC
@@ -997,7 +997,7 @@ Index Space Dimensions}
 !EOC
 
 
-!BOE
+!removeBOE
 ! \subsubsection{Creating a Grid from Existing F90 Arrays}~\label{sec:example5}
 !
 ! This example illustrates the creation of a simple 2D Grid from coordinate data
@@ -1032,9 +1032,9 @@ Index Space Dimensions}
 !   global index space. The arrays on processor 2 hold piece (11,1)-(20,10). The arrays on 
 !   processor 3 hold piece (1,11)-(10,20), and the arrays on processor 4 hold piece (11,11)-(20,20).
 !
-!EOE
+!removeEOE
 
-!BOC
+!removeBOC
    ! Use ESMF framework module
    use ESMF_Mod
    implicit none
@@ -1046,13 +1046,13 @@ Index Space Dimensions}
    type(ESMF_Grid) :: grid
    real(ESMF_KIND_R4), pointer :: fptrX(:,:),fptrY(:,:)
    integer :: petMap(2,2,1)
-!EOC         
+!removeEOC         
 
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, rc=rc)
       call ESMF_VMGet(vm, localPet=myPet, petCount=npets, rc=rc)
 
-!BOC
+!removeBOC
    ! Create a grid with the correct size, shape, and distribution to
    ! hold the data. 
 
@@ -1075,17 +1075,17 @@ Index Space Dimensions}
    call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
                   coord1=fptrX, coord2=fptrY, rc=rc)
  
-!EOC
+!removeEOC
 
 
-!BOE
+!removeBOE
 ! \subsubsection{Example: Grid Creation from Existing F90 Arrays Using CreateEmpty/Set}
 !
 !  This example illustrates the use of the CreateEmpty/Set paradigm.
 !  It repeats the above example using this grid creation technique.
-!EOE
+!removeEOE
 
-!BOC
+!removeBOC
    ! Use ESMF framework module
    use ESMF_Mod
    implicit none
@@ -1097,13 +1097,13 @@ Index Space Dimensions}
    type(ESMF_Grid) :: grid
    real(ESMF_KIND_R4), pointer :: fptrX(:,:),fptrY(:,:)
    integer :: petMap(2,2,1)
-!EOC         
+!removeEOC         
 
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, rc=rc)
       call ESMF_VMGet(vm, localPet=myPet, petCount=npets, rc=rc)
 
-!BOC
+!removeBOC
    ! Create an empty grid
    grid=ESMF_GridCreateEmpty(rc=rc)
 
@@ -1130,7 +1130,7 @@ Index Space Dimensions}
   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
                   coord1=fptrX, coord2=fptrY, rc=rc)
 
-!EOC
+!removeEOC
 
 
 
@@ -1271,7 +1271,7 @@ Index Space Dimensions}
                coordDimMap=coordDimMap, rc=rc)
 !EOC  
 
-!BOE
+!removeBOE
 !\subsubsection{Creation: Advanced: Miscellaneous}
 !
 ! There are also a couple of other grid arguments which don't
@@ -1289,7 +1289,7 @@ Index Space Dimensions}
 ! could employ this option if they wanted to set their own
 ! coordinate arrays in the grid after the create. 
 ! This option is currently unimplemented. 
-!EOE
+!removeEOE
 
 
 
