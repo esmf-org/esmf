@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.8 2007/06/14 05:05:43 cdeluca Exp $
+% $Id: Grid_options.tex,v 1.9 2007/06/19 21:23:39 cdeluca Exp $
 
 \subsubsection{ESMF\_GridConn}
 \label{sec:opt:gridconn}
@@ -37,16 +37,16 @@ are the valid values of ESMF\_GRIDSTATUS.
 
 \medskip
 \begin{description}
-\item [ESMF\_GRIDSTATUS\_NOT\_READY:] Status after a grid has been created with 
-      {\tt ESMF\_GridCreateEmpty}. The only action which may be performed on a
-      grid in this state is the setting grid parameters or a commit to move 
-      to the next status. 
-\item [ESMF\_GRIDSTATUS\_SHAPE\_READY:] Status after a grid has been created with 
-      a non-empty create. The grid is complete except that it contains no coordinate
-      information. Most actions may be performed on a grid in this state
-      except those requiring coordinate values (e.g. regrid).
+\item [ESMF\_GRIDSTATUS\_NOT\_READY:] Status after a Grid has been created with 
+      {\tt ESMF\_GridCreateEmpty}.  A Grid object container is allocated but
+      space for internal objects is not.  Topology information and coordinate
+      information is incomplete.  This object can be used in {\tt ESMF\_GridSet()}
+      methods in which additional information is added to the Grid.
+\item [ESMF\_GRIDSTATUS\_SHAPE\_READY:] The Grid has a specific topology and
+      distribution, but incomplete coordinate arrays.  The Grid can be used
+      as the basis for allocating a Field.
 \item [ESMF\_GRIDSTATUS\_REGRID\_READY:] The grid contains valid coordinate
-      values and is now ready to be used in regrid. 
+      values and is ready to be used in regrid. 
 \end{description}
 
 

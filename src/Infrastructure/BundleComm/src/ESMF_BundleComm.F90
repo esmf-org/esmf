@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.69 2007/05/02 02:25:47 rosalind Exp $
+! $Id: ESMF_BundleComm.F90,v 1.70 2007/06/19 21:23:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.69 2007/05/02 02:25:47 rosalind Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.70 2007/06/19 21:23:39 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -340,7 +340,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleHalo"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleHalo - Execute a halo operation on each Field in a Bundle
 
 ! !INTERFACE:
@@ -513,7 +513,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleHaloRelease"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleHaloRelease - Release resources associated w/ handle
 
 ! !INTERFACE:
@@ -536,7 +536,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -548,7 +548,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleHaloStore"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleHaloStore - Precompute a data halo operation on a Bundle
 
 ! !INTERFACE:
@@ -602,7 +602,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status

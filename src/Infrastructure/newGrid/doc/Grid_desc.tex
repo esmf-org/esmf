@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.28 2007/06/13 03:25:40 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.29 2007/06/19 21:23:39 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -21,7 +21,7 @@ methods such as regridding.
 \hline
 \vspace{.01in}
 {\bf Key Features} \\[.01in]
-Representation of grid formed by logically rectangular regions,
+Representation of grids formed by logically rectangular regions,
 including uniform and rectilinear grids (e.g. lat-lon grids),
 curvilinear grids (e.g. displaced pole grids), and grids formed
 by connected logically rectangular regions (e.g. cubed sphere grids).\\
@@ -150,7 +150,8 @@ DistGrid is then passed into a Grid create call.
 \subsubsection{Grid Coordinates}
 \label{sec:coordspec}
 Grid Tiles can have uniform, rectilinear, or curvilinear
-coordinates.  The coordinates of {\bf uniform} grids are equally spaced along their axes, and can be fully specified by the coordinates of the two opposing points
+coordinates.  The coordinates of {\bf uniform} grids are equally spaced along
+their axes, and can be fully specified by the coordinates of the two opposing points
 that define the grid's physical span.  The coordinates of {\bf rectilinear} grids
 are unequally spaced along their axes, and can be fully specified by giving
 the spacing of grid points along each axis.  The coordinates of {\bf curvilinear 
@@ -203,17 +204,16 @@ setting coordinates.
 
 \subsubsection{Staggering}
 
-A useful finite difference technique is to place different physical
-quantities at different locations within a grid cell. This {\bf staggering}
-of the physical variables on the mesh is introduced so that the difference
-of a field is naturally defined at the location of another variable. 
+{\bf Staggering} is a finite difference technique in which the values 
+of different physical quantities are placed at different locations
+within a grid cell. 
 
-The ESMF Grid class supports a wide variety of stagger locations, including
-those sufficient to specify any of the standard Arakawa staggers. The 
-Grid supports staggers located at cell centers, corners, edges, 
-faces, and in 3D and higher dimensions. The user may specify
-common stagger locations using predefined values, or may construct
-custom ones for cases that the predefined values don't cover.
+The ESMF Grid class supports a variety of stagger locations, including
+cell centers, corners, and edge centers.  Combinations of these are
+sufficient to specify any of the Arakawa staggers.  ESMF also supports
+staggering in 3D and higher dimensions.  There are shortcuts for 
+standard staggers, and interfaces through which users can create custom
+staggers.
 
 As a default the ESMF Grid class provides symmetric staggering, so
 that cell centers are enclosed by cell perimeter (e.g. corner) 
@@ -225,89 +225,71 @@ or eliminate this padding by using the appropriate options when adding
 coordinates to a Grid. 
  
 For examples and a full description of the stagger interface 
-please see Section~\ref{sec:usage:staggerloc}. 
+see Section~\ref{sec:usage:staggerloc}. 
 
-\subsubsection{Grid Creation} 
+\subsubsection{Options for Building Grids} 
 
-ESMF Grid objects must represent a wide range of grid types, options,
-and use cases, some of them quite complex.  As a result, multiple ways to 
-build Grid objects are required.  This section describes the two
-main stages in Grid creation, and the major alternatives with 
-respect to calling sequences.
+ESMF Grid objects must represent a wide range of grid types 
+and use cases, some of them quite complex.  As a result, multiple
+ways to build Grid objects are required.  This section describes
+the stages to building Grids, the options for each stage, and 
+typical calling sequences.
 
-\paragraph{Stages in Grid Creation}
-\label{sec:gridcreatestages}
+In ESMF there are two main stages to building Grids.  The
+{\tt ESMF\_GridStatus} value stored within the Grid object reflects
+the stage the Grid has attained (see Section \ref{sec:opt:gridstatus}).
+These stages are:
 
-In ESMF there are two stages to Grid creation.
 \begin{enumerate}
-\item Creation of the Grid shape.  At the completion of this
+\item Create the Grid topology or shape.  At the completion of this
 stage, the Grid has a specific topology and distribution, but
 empty coordinate arrays.  The Grid can be used as the basis for
-allocating a Field.
-\item Specifying the Grid coordinates and any other information
+allocating a Field.  Its {\tt ESMF\_GridStatus} parameter has 
+a value of {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}.  
+
+The options for specifying the Grid shape are:
+\begin{itemize}
+\item Use the {\tt ESMF\_GridCreateShape()} shortcut method to 
+specify the Grid size and rank, and to select from a limited set
+of edge connectivities.   
+\item Create a DistGrid using the {\tt ESMF\_DistGridCreate()}
+method.  This enables the user to specify connectivities in 
+greater detail than using {\tt ESMF\_GridCreateShape()}.  Then
+pass the DistGrid into a general {\tt ESMF\_GridCreate()} method.
+\end{itemize}
+
+\item Specify the Grid coordinates and any other information
 required for regridding (this can vary depending on the particular
 regridding method).  At the completion of this stage, the Grid can
-be used in a regridding operation.
+be used in a regridding operation.  Its {\tt ESMF\_GridStatus}
+has a value of {\tt ESMF\_GRIDSTATUS\_REGRID\_READY}.
 \end{enumerate}
-There are shortcut methods in ESMF for both stages.
 
-Each stage has at least one ESMF call, and depending on 
-whether shortcuts are used or not, may have more.
-This gives the user the opportunity to trade off the 
-ease of using a prefabricated grid with the flexibility 
-of building a highly customized grid.  Incremental
-construction can also be useful when distributing a grid object
-before setting its coordinates, or when multiple components
-contribute to the definition of a grid. 
+When creating the Grid shape and specifying the Grid coordinates,
+the user can either specify all required information at once,
+or can provide information incrementally.  The call
+{\tt ESMF\_GridCreateEmpty()} builds a Grid object
+container that can be filled in with subsequent calls to 
+{\tt ESMF\_GridSet()} methods.  A Grid that is empty
+has the {\tt ESMF\_GridStatus} value
+{\tt ESMF_GRIDSTATUS\_NOT\_READY}
 
-\paragraph{Options for Grid Creation}
-\label{sec:gridcreateoptions}
+The following table summarizes possible call sequences
+for building Grids.
 
-The following chart shows typical creation calls and 
-sequences.  
-
-\medskip
-\begin{tabular}{|p{2.6in}|p{1in}|p{1in}|p{1.4in}|}
+\begin{tabular}{|l|}
 \hline
-\multicolumn{4}{|l|}{{\bf Options for Grid Creation}} \\
+{\bf Create Shape} \\
+{\it From shape shortcut} \\
+{\tt grid = ESMF\_GridCreateShape(...)} \\
+{\it Using DistGrid with general create interface} \\
+{\tt distgrid = ESMF\_DistGridCreate(...)} \\
+{\tt grid = ESMF\_GridCreate(distgrid, ...)} \\
+{\it Incremental} \\
+{\tt grid = ESMF\_GridCreateEmpty(...)} \\
+{\tt call ESMF\_GridSetShape(grid, ...)} \\
 \hline
-Command sequence & Missing & Function & Grid Status \\ 
-\hline
-ESMF\_GridCreateEmpty() 
-& Topology information and coordinates, other options undefined
-& A Grid object shell is allocated but space for 
-internal objects is not
-& NOT READY \\
-\hline
-ESMF\_GridCreate(distGrid)\newline
-{\bf or} \newline
-ESMF\_GridCreateEmpty()\newline
-ESMF\_GridSet(add x dim)\newline
-ESMF\_GridSet(add y dim)\newline
-...\newline
-{\bf or use a shortcut} \newline
-ESMF\_GridCreateShape()\newline
-& Index space and distribution are defined, but coordinate 
- values are not set
-& Can be used as the basis for Field allocation
-& SHAPE READY\\
-\hline
-ESMF\_GridCreate(distGrid)\newline
-ESMF\_GridAddCoord(coordArray)\newline
-ESMF\_GridCommit(\newline
-{\bf or} \newline 
-ESMF\_GridCreate(distGrid)\newline
-ESMF\_GridAddCoord(<no coordinate values>)\newline
-ESMF\_GridLocalTileGet(localTile)\newline
-... user fills in localTile coordinate values
-{\bf or use a shortcut} \newline
-ESMF\_GridCreateShape()\newline
-ESMF\_GridGenCoordUni()\newline
-& Nothing; Grid is complete
-& Can be used in regrid methods
-& REGRID READY\\
+{\bf Set Coordinates} \\
+{\tt call ESMF\_GridSetCoord(...)} \\
 \hline
 \end{tabular}
-
-
-

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.30 2007/06/15 16:30:45 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.31 2007/06/19 21:23:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -961,7 +961,7 @@ Index Space Dimensions}
 
 
 !BOE
-! \subsubsection{Creating a Regularly Distributed 3D Grid with Generated Coordinates
+! \subsubsection{Creating a Regularly Distributed 3D Grid with Generated Coordinates}
 !
 ! This example illustrates the creation of a 100x100x100  3D Grid distributed across
 ! 5 processors in each dimension. The coordinates in the Grid are uniformly distributed

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.91 2007/05/03 21:52:49 rosalind Exp $
+! $Id: ESMF_FieldComm.F90,v 1.92 2007/06/19 21:23:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.91 2007/05/03 21:52:49 rosalind Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.92 2007/06/19 21:23:39 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -365,7 +365,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldHaloRun"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldHalo - Execute a halo operation on a Field
 
 ! !INTERFACE:
@@ -426,7 +426,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
@@ -494,7 +494,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldHaloRelease"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldHaloRelease - Release resources associated w/ handle
 
 ! !INTERFACE:
@@ -517,7 +517,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -529,7 +529,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldHaloStore"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldHaloStore - Precompute a halo operation on a Field
 
 ! !INTERFACE:
@@ -580,7 +580,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
@@ -629,7 +629,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldHaloValidate"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldHaloValidate - Do extensive error checking on Halo
 
 ! !INTERFACE:
@@ -670,7 +670,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
