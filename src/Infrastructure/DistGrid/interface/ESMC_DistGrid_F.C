@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.14 2007/06/12 21:29:42 dneckels Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.15 2007/06/20 01:29:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,17 +42,17 @@ extern "C" {
 
   // - ESMF-public methods:
         
-  void FTN(c_esmc_distgridcreaterd)(ESMC_DistGrid **ptr, 
-    ESMC_InterfaceInt **minIndex, ESMC_InterfaceInt **maxIndex,
-    ESMC_InterfaceInt **regDecomp,
-    ESMC_DecompFlag *decompflag, int *decompflagCount, 
-    ESMC_InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMC_InterfaceInt **connectionList,
-    ESMC_InterfaceInt **connectionTransformList,
-    ESMC_DELayout **delayout, ESMC_VM **vm, int *rc){
+  void FTN(c_esmc_distgridcreaterd)(ESMCI::DistGrid **ptr, 
+    ESMCI::InterfaceInt **minIndex, ESMCI::InterfaceInt **maxIndex,
+    ESMCI::InterfaceInt **regDecomp,
+    ESMCI::DecompFlag *decompflag, int *decompflagCount, 
+    ESMCI::InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMCI::InterfaceInt **connectionList,
+    ESMCI::InterfaceInt **connectionTransformList,
+    ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
     int localrc;
-    ESMC_DELayout *opt_delayout;
-    ESMC_VM *opt_vm;
+    ESMCI::DELayout *opt_delayout;
+    ESMCI::VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterd()"
   if (rc!=NULL)
@@ -64,7 +64,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // call into C++
-    *ptr = ESMC_DistGridCreate(*minIndex, *maxIndex, *regDecomp,
+    *ptr = ESMCI::DistGrid::create(*minIndex, *maxIndex, *regDecomp,
       decompflag, *decompflagCount, *deLabelList, 
       ESMC_NOT_PRESENT_FILTER(indexflag),
       *connectionList, *connectionTransformList, opt_delayout, opt_vm,
@@ -73,16 +73,16 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_distgridcreatedb)(ESMC_DistGrid **ptr, 
-    ESMC_InterfaceInt **minIndex, ESMC_InterfaceInt **maxIndex,
-    ESMC_InterfaceInt **deBlockList,
-    ESMC_InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMC_InterfaceInt **connectionList,
-    ESMC_InterfaceInt **connectionTransformList,
-    ESMC_DELayout **delayout, ESMC_VM **vm, int *rc){
+  void FTN(c_esmc_distgridcreatedb)(ESMCI::DistGrid **ptr, 
+    ESMCI::InterfaceInt **minIndex, ESMCI::InterfaceInt **maxIndex,
+    ESMCI::InterfaceInt **deBlockList,
+    ESMCI::InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMCI::InterfaceInt **connectionList,
+    ESMCI::InterfaceInt **connectionTransformList,
+    ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
     int localrc;
-    ESMC_DELayout *opt_delayout;
-    ESMC_VM *opt_vm;
+    ESMCI::DELayout *opt_delayout;
+    ESMCI::VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreatedb()"
   if (rc!=NULL)
@@ -94,7 +94,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // call into C++
-    *ptr = ESMC_DistGridCreate(*minIndex, *maxIndex, *deBlockList,
+    *ptr = ESMCI::DistGrid::create(*minIndex, *maxIndex, *deBlockList,
       *deLabelList, 
       ESMC_NOT_PRESENT_FILTER(indexflag),
       *connectionList, *connectionTransformList, opt_delayout, opt_vm,
@@ -103,16 +103,16 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_distgridcreaterdfa)(ESMC_DistGrid **ptr, 
-    ESMC_InterfaceInt **minIndex, ESMC_InterfaceInt **maxIndex,
-    ESMC_InterfaceInt **regDecomp,
-    ESMC_DecompFlag *decompflag, int *decompflagCount, 
-    ESMC_InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMC_InterfaceInt **connectionList,
-    ESMC_InterfaceInt **connectionTransformList,
-    int *fastAxis, ESMC_VM **vm, int *rc){
+  void FTN(c_esmc_distgridcreaterdfa)(ESMCI::DistGrid **ptr, 
+    ESMCI::InterfaceInt **minIndex, ESMCI::InterfaceInt **maxIndex,
+    ESMCI::InterfaceInt **regDecomp,
+    ESMCI::DecompFlag *decompflag, int *decompflagCount, 
+    ESMCI::InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMCI::InterfaceInt **connectionList,
+    ESMCI::InterfaceInt **connectionTransformList,
+    int *fastAxis, ESMCI::VM **vm, int *rc){
     int localrc;
-    ESMC_VM *opt_vm;
+    ESMCI::VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterdfa()"
   if (rc!=NULL)
@@ -121,7 +121,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // call into C++
-    *ptr = ESMC_DistGridCreate(*minIndex, *maxIndex, *regDecomp,
+    *ptr = ESMCI::DistGrid::create(*minIndex, *maxIndex, *regDecomp,
       decompflag, *decompflagCount, *deLabelList,
       ESMC_NOT_PRESENT_FILTER(indexflag),
       *connectionList, *connectionTransformList, *fastAxis, opt_vm,
@@ -129,18 +129,18 @@ extern "C" {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
-  
-  void FTN(c_esmc_distgridcreaterdp)(ESMC_DistGrid **ptr, 
-    ESMC_InterfaceInt **minIndex, ESMC_InterfaceInt **maxIndex,
-    ESMC_InterfaceInt **regDecomp,
-    ESMC_DecompFlag *decompflag, int *decompflagCount1, int *decompflagCount2, 
-    ESMC_InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMC_InterfaceInt **connectionList,
-    ESMC_InterfaceInt **connectionTransformList,
-    ESMC_DELayout **delayout, ESMC_VM **vm, int *rc){
+
+  void FTN(c_esmc_distgridcreaterdp)(ESMCI::DistGrid **ptr, 
+    ESMCI::InterfaceInt **minIndex, ESMCI::InterfaceInt **maxIndex,
+    ESMCI::InterfaceInt **regDecomp,
+    ESMCI::DecompFlag *decompflag, int *decompflagCount1, int *decompflagCount2,
+    ESMCI::InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMCI::InterfaceInt **connectionList,
+    ESMCI::InterfaceInt **connectionTransformList,
+    ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
     int localrc;
-    ESMC_DELayout *opt_delayout;
-    ESMC_VM *opt_vm;
+    ESMCI::DELayout *opt_delayout;
+    ESMCI::VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterdp()"
   if (rc!=NULL)
@@ -152,7 +152,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // call into C++
-    *ptr = ESMC_DistGridCreate(*minIndex, *maxIndex, *regDecomp,
+    *ptr = ESMCI::DistGrid::create(*minIndex, *maxIndex, *regDecomp,
       decompflag, *decompflagCount1, *decompflagCount2, *deLabelList, 
       ESMC_NOT_PRESENT_FILTER(indexflag),
       *connectionList, *connectionTransformList, opt_delayout, opt_vm,
@@ -161,21 +161,23 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_distgriddestroy)(ESMC_DistGrid **ptr, int *rc){
+  void FTN(c_esmc_distgriddestroy)(ESMCI::DistGrid **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgriddestroy()"
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
     // call into C++
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_DistGridDestroy(ptr),
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::DistGrid::destroy(ptr),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_distgridget)(ESMC_DistGrid **ptr, ESMC_DELayout **delayout,
-    int *patchCount, ESMC_InterfaceInt **patchList, int *dimCount,
-    ESMC_InterfaceInt **dimExtent, ESMC_Logical *regDecompFlag, int *rc){
-    ESMC_DELayout **opt_delayout;
+  void FTN(c_esmc_distgridget)(ESMCI::DistGrid **ptr,
+    ESMCI::DELayout **delayout, int *patchCount,
+    ESMCI::InterfaceInt **patchList, int *dimCount,
+    ESMCI::InterfaceInt **dimExtent, ESMC_Logical *regDecompFlag,
+    int *rc){
+    ESMCI::DELayout **opt_delayout;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridget()"
   if (rc!=NULL)
@@ -185,7 +187,7 @@ extern "C" {
       opt_delayout = NULL;
     else opt_delayout = delayout;
     // call into C++, dealing with optional arguments 
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DistGridGet(
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->get(
       opt_delayout, ESMC_NOT_PRESENT_FILTER(patchCount), *patchList,
       ESMC_NOT_PRESENT_FILTER(dimCount),
       *dimExtent,
@@ -194,63 +196,60 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_distgridgetpdepdim)(ESMC_DistGrid **ptr, int *de, int *dim,
-    ESMC_InterfaceInt **indexList, int *rc){
+  void FTN(c_esmc_distgridgetpdepdim)(ESMCI::DistGrid **ptr, int *de, int *dim,
+    ESMCI::InterfaceInt **indexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetpdepdim()"
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
     // call into C++, dealing with optional arguments 
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DistGridGet(
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->get(
       *de, *dim, *indexList), 
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_distgridprint)(ESMC_DistGrid **ptr, int *rc){
+  void FTN(c_esmc_distgridprint)(ESMCI::DistGrid **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridprint()"
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DistGridPrint(),
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->print(),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
   void FTN(c_esmc_connection)(
-    ESMC_InterfaceInt **connection, int *patchIndexA,
-    int *patchIndexB, ESMC_InterfaceInt **positionVector,
-    ESMC_InterfaceInt **orientationVector, int *rc){
+    ESMCI::InterfaceInt **connection, int *patchIndexA,
+    int *patchIndexB, ESMCI::InterfaceInt **positionVector,
+    ESMCI::InterfaceInt **orientationVector, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_connection()"
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
     // call into C++
     ESMC_LogDefault.ESMC_LogMsgFoundError(
-      ESMC_Connection(*connection, *patchIndexA,
+      ESMCI::DistGrid::connection(*connection, *patchIndexA,
       *patchIndexB, *positionVector, *orientationVector), 
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN(c_esmc_distgrid_storeabidx)(
-    ESMC_DistGrid **dptr,
-    ESMC_InterfaceInt **abidx, int *rc){
+    ESMCI::DistGrid **dptr,
+    ESMCI::InterfaceInt **abidx, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgrid_storeabidx()"
-
+    
     if (rc!=NULL)
       *rc = ESMC_RC_NOT_IMPL;
-    // :)
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*dptr)->ESMC_DistGrid::SetArbIdx(*abidx),
+      
+    ESMC_LogDefault.ESMC_LogMsgFoundError(
+      (*dptr)->setArbIdx(*abidx),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
-  
-  
-#undef  ESMC_METHOD
-  
   
 #undef  ESMC_METHOD
 

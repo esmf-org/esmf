@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.C,v 1.15 2007/03/31 05:51:21 cdeluca Exp $
+// $Id: ESMC_RHandle.C,v 1.16 2007/06/20 01:29:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-       "$Id: ESMC_RHandle.C,v 1.15 2007/03/31 05:51:21 cdeluca Exp $";
+       "$Id: ESMC_RHandle.C,v 1.16 2007/06/20 01:29:23 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -176,7 +176,7 @@
     // call into the respective distributed data class to release route handle
     switch (htype){
       case ESMC_ARRAYSPARSEMATMULHANDLE:
-        ESMC_ArraySparseMatMulRelease(this);
+        ESMCI::Array::sparseMatMulRelease(this);
         if (routes != NULL) delete [] routes;
         break;
       default:

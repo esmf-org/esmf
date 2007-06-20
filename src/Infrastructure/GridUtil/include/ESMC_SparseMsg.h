@@ -1,4 +1,4 @@
-// $Id: ESMC_SparseMsg.h,v 1.1 2007/04/26 21:47:33 dneckels Exp $
+// $Id: ESMC_SparseMsg.h,v 1.2 2007/06/20 01:29:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@ namespace ESMC {
 //-----------------------------------------------------------------------------
 class SparseMsg {
 public:
- SparseMsg(ESMC_VM &vm);
+ SparseMsg(ESMCI::VM &vm);
  ~SparseMsg();
 
 //-----------------------------------------------------------------------------
@@ -191,7 +191,7 @@ public:
 
  SparseMsg(const SparseMsg &); // disallow copying
  SparseMsg &operator=(const SparseMsg&); // disallow assignment
- ESMC_VM &vm; // reference since one should not change the VM
+ ESMCI::VM &vm; // reference since one should not change the VM
               // Not const since VM is not written to enforce const.
  std::vector<buffer> outBuffers;
  std::vector<buffer> inBuffers;

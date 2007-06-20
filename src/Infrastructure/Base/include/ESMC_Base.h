@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.75 2007/05/01 21:15:34 dneckels Exp $
+// $Id: ESMC_Base.h,v 1.76 2007/06/20 01:29:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -96,7 +96,7 @@ class ESMC_Base
 {
   protected:
     int           ID;           // unique ID for any object in this VM context
-    ESMC_VMId     *vmID;        // unique vmID for any VM in the system
+    ESMCI::VMId   *vmID;        // unique vmID for any VM in the system
     int           refCount;     // number of references to this instance
     int           classID;      // unique ID relative to this class
     ESMC_Status   baseStatus;   // status of an instance of Base derived class
@@ -123,8 +123,8 @@ class ESMC_Base
     int  ESMC_BaseGetID(void) const;
 
     // accessors to object's vmID    
-    void ESMC_BaseSetVMId(ESMC_VMId *vmID);
-    ESMC_VMId *ESMC_BaseGetVMId(void) const;
+    void ESMC_BaseSetVMId(ESMCI::VMId *vmID);
+    ESMCI::VMId *ESMC_BaseGetVMId(void) const;
     
     // accessors to reference count
     void ESMC_BaseSetRefCount(int count);

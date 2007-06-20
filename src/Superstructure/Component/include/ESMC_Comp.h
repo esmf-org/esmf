@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.27 2007/04/17 21:29:16 tjcnrl Exp $
+// $Id: ESMC_Comp.h,v 1.28 2007/06/20 01:29:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -131,9 +131,9 @@ extern const char *ESMC_SetReadRestart;
 // prototypes for fortran interface routines
 extern "C" {
    void FTN(f_esmf_compsetvminfo)(ESMC_Comp *compp, void *vm_info, int *rc);
-   void FTN(f_esmf_compgetvmparent)(ESMC_Comp *compp, ESMC_VM **vmparent, 
+   void FTN(f_esmf_compgetvmparent)(ESMC_Comp *compp, ESMCI::VM **vmparent, 
      int *rc);
-   void FTN(f_esmf_compgetvmplan)(ESMC_Comp *compp, ESMC_VMPlan **vmplan, 
+   void FTN(f_esmf_compgetvmplan)(ESMC_Comp *compp, ESMCI::VMPlan **vmplan, 
      int *rc);
    void FTN(f_esmf_compinsertvm)(ESMC_Comp *compp, void *vm, int *rc);
    void FTN(f_esmf_compget)(ESMC_Comp *compp, ESMC_CompType *ctype, int *rc);

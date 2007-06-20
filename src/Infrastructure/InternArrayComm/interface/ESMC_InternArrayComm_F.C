@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArrayComm_F.C,v 1.4 2007/03/31 05:51:13 cdeluca Exp $
+// $Id: ESMC_InternArrayComm_F.C,v 1.5 2007/06/20 01:29:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-     void FTN(c_esmc_iarrayredist)(ESMC_InternArray **ptr, ESMC_DELayout **delayout,
+     void FTN(c_esmc_iarrayredist)(ESMC_InternArray **ptr, ESMCI::DELayout **delayout,
                                   int *global_start, int *global_dimlengths, 
                                   int *rank_trans, int *size_rank_trans, 
                                   int *olddecompids, int *decompids,  int *size_decomp,
@@ -47,7 +47,7 @@ extern "C" {
                                   *size_decomp, *RedistArray);
      }
 
-     void FTN(c_esmc_iarrayhalo)(ESMC_InternArray **ptr, ESMC_DELayout **delayout,
+     void FTN(c_esmc_iarrayhalo)(ESMC_InternArray **ptr, ESMCI::DELayout **delayout,
                                 ESMC_AxisIndex *ai_global, 
                                 int *global_dimlengths,
                                 int *decompids,  int *size_decomp, 
@@ -58,7 +58,7 @@ extern "C" {
      }
 
 
-     void FTN(c_esmc_iarraygather)(ESMC_InternArray **ptr, ESMC_DELayout **delayout,
+     void FTN(c_esmc_iarraygather)(ESMC_InternArray **ptr, ESMCI::DELayout **delayout,
                                   int *decompids,  int *size_decomp,
                                   int *local_axislengths, int *global_dimlengths, 
                                   int *local_maxlengths, int *deid,
@@ -68,7 +68,7 @@ extern "C" {
                                              local_maxlengths, *deid, Array_out);
      }
 
-     void FTN(c_esmc_iarrayscatter)(ESMC_InternArray **ptr, ESMC_DELayout **delayout,
+     void FTN(c_esmc_iarrayscatter)(ESMC_InternArray **ptr, ESMCI::DELayout **delayout,
                                    int *decompids,  int *size_decomp, int *deid,
                                    ESMC_InternArray **Array_out, int *status) {
           *status = (*ptr)->ESMC_ArrayScatter(*delayout, decompids, *size_decomp,

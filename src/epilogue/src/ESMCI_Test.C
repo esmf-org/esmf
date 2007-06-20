@@ -1,4 +1,4 @@
-// $Id: ESMCI_Test.C,v 1.1 2007/04/12 23:16:16 theurich Exp $
+// $Id: ESMCI_Test.C,v 1.2 2007/06/20 01:29:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,    
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Test.C,v 1.1 2007/04/12 23:16:16 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_Test.C,v 1.2 2007/06/20 01:29:31 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -195,7 +195,7 @@
 //EOP
 
  int rc;
- ESMC_VM *globalVM;
+ ESMCI::VM *globalVM;
  char msgbuf[ESMF_MAXSTR], failMsg[ESMF_MAXSTR];
  int numPETs;
  ESMC_Log *whichLog;
@@ -212,7 +212,7 @@
    return (false);
  }
 
- globalVM = ESMC_VMGetGlobal(&rc);
+ globalVM = ESMCI::VM::getGlobal(&rc);
  if ((globalVM == NULL) || (rc != ESMF_SUCCESS)) {
    sprintf(msgbuf, "FAIL  rc=%d, %s, line %d, Unable to get GlobalVM\n", 
                     rc, file, line);
@@ -224,7 +224,7 @@
    return (false);
  }
 
- rc = globalVM->ESMC_VMGet(NULL, &numPETs, NULL, NULL, NULL);
+ rc = globalVM->get(NULL, &numPETs, NULL, NULL, NULL);
  if (rc != ESMF_SUCCESS) {
    sprintf(msgbuf, 
    "FAIL rc=%d, %s, line %d, Unable to get number of PETs\n", 
@@ -276,7 +276,7 @@
 //EOP
 
  int rc;
- ESMC_VM *globalVM;
+ ESMCI::VM *globalVM;
  char msgbuf[ESMF_MAXSTR], failMsg[ESMF_MAXSTR];
  int numPETs;
  ESMC_Log *whichLog;
@@ -293,7 +293,7 @@
    return (false);
  }
 
- globalVM = ESMC_VMGetGlobal(&rc);
+ globalVM = ESMCI::VM::getGlobal(&rc);
  if ((globalVM == NULL) || (rc != ESMF_SUCCESS)) {
    sprintf(msgbuf, "FAIL  rc=%d, %s, line %d, Unable to get GlobalVM\n", 
                     rc, file, line);
@@ -305,7 +305,7 @@
    return (false);
  }
 
- rc = globalVM->ESMC_VMGet(NULL, &numPETs, NULL, NULL, NULL);
+ rc = globalVM->get(NULL, &numPETs, NULL, NULL, NULL);
  if (rc != ESMF_SUCCESS) {
    sprintf(msgbuf, 
    "FAIL rc=%d, %s, line %d, Unable to get number of PETs\n", 
@@ -358,7 +358,7 @@
 
 
  int rc;
- ESMC_VM *globalVM;
+ ESMCI::VM *globalVM;
  char msgbuf[ESMF_MAXSTR], failMsg[ESMF_MAXSTR];
  int numPETs;
  ESMC_Log *whichLog;
@@ -375,7 +375,7 @@
    return (false);
  }
 
- globalVM = ESMC_VMGetGlobal(&rc);
+ globalVM = ESMCI::VM::getGlobal(&rc);
  if ((globalVM == NULL) || (rc != ESMF_SUCCESS)) {
    sprintf(msgbuf, "FAIL  rc=%d, %s, line %d, Unable to get GlobalVM\n", 
                     rc, file, line);
@@ -387,7 +387,7 @@
    return (false);
  }
 
- rc = globalVM->ESMC_VMGet(NULL, &numPETs, NULL, NULL, NULL);
+ rc = globalVM->get(NULL, &numPETs, NULL, NULL, NULL);
  if (rc != ESMF_SUCCESS) {
    sprintf(msgbuf, 
    "FAIL rc=%d, %s, line %d, Unable to get number of PETs\n", 
@@ -440,7 +440,7 @@
 //EOP
 
  int rc;
- ESMC_VM *globalVM;
+ ESMCI::VM *globalVM;
  char msgbuf[ESMF_MAXSTR], failMsg[ESMF_MAXSTR];
  int numPETs;
  ESMC_Log *whichLog;
@@ -470,7 +470,7 @@
    return(rc);
  }
 
- globalVM = ESMC_VMGetGlobal(&rc);
+ globalVM = ESMCI::VM::getGlobal(&rc);
  if ((globalVM == NULL) || (rc != ESMF_SUCCESS)) {
    sprintf(msgbuf, "FAIL  rc=%d, %s, line %d, Unable to get GlobalVM\n", 
                     rc, file, line);
@@ -482,7 +482,7 @@
    return (false);
  }
 
- rc = globalVM->ESMC_VMGet(NULL, &numPETs, NULL, NULL, NULL);
+ rc = globalVM->get(NULL, &numPETs, NULL, NULL, NULL);
  if (rc != ESMF_SUCCESS) {
    sprintf(msgbuf, "FAIL  rc=%d, %s, line %d, Unable to get number of PETs\n", 
                     rc, file, line);

@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.161 2007/04/26 16:13:57 rosalind Exp $
+//$Id: ESMC_Route.C,v 1.162 2007/06/20 01:29:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.161 2007/04/26 16:13:57 rosalind Exp $";
+               "$Id: ESMC_Route.C,v 1.162 2007/06/20 01:29:23 theurich Exp $";
 //-----------------------------------------------------------------------------
 class permuteLocal {
 public:
@@ -84,7 +84,7 @@ int compare2(const void *item1, const void *item2) {
 //     pointer to newly allocated ESMC_Route
 //
 // !ARGUMENTS:
-      ESMC_VM *vm,
+      ESMCI::VM *vm,
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -157,7 +157,7 @@ int compare2(const void *item1, const void *item2) {
 //  int error return code 
 //
 // !ARGUMENTS:
-    ESMC_VM *vm) {          // in
+    ESMCI::VM *vm) {          // in
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
@@ -176,8 +176,8 @@ int compare2(const void *item1, const void *item2) {
     int mypet;          // pet id of this pet
 
     this->vm = vm;
-    npets = vm->vmk_npets();
-    mypet = vm->vmk_mypet();
+    npets = vm->getNpets();
+    mypet = vm->getMypet();
     
     // communications strategy: sync/async, pack by pet, xp, none, etc
     options = ESMC_ROUTE_OPTION_DEFAULT;
@@ -714,7 +714,7 @@ int compare2(const void *item1, const void *item2) {
     if (useOptions & ESMC_ROUTE_OPTION_SYNC) {
       maxReqCount = 1;
 
-      myPET = vm->vmk_mypet();
+      myPET = vm->getMypet();
       rc = ct->ESMC_CommTableGetCount(&commCount);
     
       // loop over each destination in the comm table
@@ -1185,7 +1185,7 @@ int compare2(const void *item1, const void *item2) {
       // and loop again, waiting for the communication to be confirmed as
       // complete, and unpack if needed.
 
-      myPET = vm->vmk_mypet();
+      myPET = vm->getMypet();
       rc = ct->ESMC_CommTableGetCount(&commCount);
 
       sendXPCount = 0;
@@ -1694,7 +1694,7 @@ int compare2(const void *item1, const void *item2) {
           // copy - nothing to wait for.  otherwise, call the wait routine 
           // to be sure the communication has completed.
           if (myPET != theirPET) {
-            vm->vmk_commwait(&handle[req]);
+            vm->commwait(&handle[req]);
           }
           // uncomment for profiling
           // vmk_wtime(&time);
@@ -1758,7 +1758,7 @@ int compare2(const void *item1, const void *item2) {
             // (if the pet numbers were the same, we did an immediate copy and
             // didn't start an async communication, so nothing to wait for.)
             if (myPET != theirPET) {
-              vm->vmk_commwait(&handle[req]);
+              vm->commwait(&handle[req]);
             }
            
             // if the receive buffer is not contig, we still need to unpack
@@ -1846,7 +1846,7 @@ int compare2(const void *item1, const void *item2) {
               // only necessary if myPET != theirPET, because for same-PET
               // transfers we do an immediate operation and not async.
               if (myPET != theirPET) 
-                vm->vmk_commwait(&handle[req]);
+                vm->commwait(&handle[req]);
 
               req++;
 
@@ -1911,7 +1911,7 @@ int compare2(const void *item1, const void *item2) {
                                    //       DE's in the DELayout
       int *global_count,           // in  - array of global stride information
                                    //       in each dimension
-      ESMC_DELayout *delayout,       // in  - pointer to the DELayout 
+      ESMCI::DELayout *delayout,   // in  - pointer to the DELayout 
       ESMC_Logical *periodic) {    // in  - array of flags, one per dim
 //
 // !DESCRIPTION:
@@ -1937,8 +1937,8 @@ int compare2(const void *item1, const void *item2) {
 
     // Calculate the sending table.  If this DE is not part of the sending
     // TODO: this assumes a 2D layout?  (certainly < 3D)
-    delayout->ESMC_DELayoutGetDeprecated(&decount, NULL, NULL, NULL, 0, NULL,
-                                      NULL, NULL, nde, ESMF_MAXGRIDDIM);
+    delayout->getDeprecated(&decount, NULL, NULL, NULL, 0, NULL, NULL, NULL,
+      nde, ESMF_MAXGRIDDIM);
 
     // Calculate the sending table.
  
@@ -1962,12 +1962,12 @@ int compare2(const void *item1, const void *item2) {
     // already obtained "decount" during last call
     for (k=0; k<decount; k++) {
       their_de = k;
-      delayout->ESMC_DELayoutGetDELocalInfo(their_de, DEpos,
-                  ESMF_MAXGRIDDIM, NULL, 0, NULL, 0, NULL, NULL);
+      delayout->getDELocalInfo(their_de, DEpos, ESMF_MAXGRIDDIM, NULL, 0, NULL,
+        0, NULL, NULL);
 
       // get the actual pet number for use later on.
-      delayout->ESMC_DELayoutGetDEMatchPET(their_de, *vm, NULL,
-                                                  &theirMatchingPET, 1);
+      delayout->getDEMatchPET(their_de, *vm, NULL, &theirMatchingPET, 1);
+      
       // get "their" AI out of the AI_tot array
       for (j=0; j<rank; j++) {
         their_AI[j] = AI_tot[their_de + j*AI_count];
@@ -2032,8 +2032,8 @@ int compare2(const void *item1, const void *item2) {
     // Calculate the receiving table.
  
     // figure out my boundary array
-    delayout->ESMC_DELayoutGetDELocalInfo(my_DE, DEpos, ESMF_MAXGRIDDIM, NULL,
-                                          0, NULL, 0, NULL, NULL);
+    delayout->getDELocalInfo(my_DE, DEpos, ESMF_MAXGRIDDIM, NULL, 0, NULL, 0,
+      NULL, NULL);
     for (j=0; j<rank; j++) {
       boundary[j][0] = ESMF_FALSE;
       boundary[j][1] = ESMF_FALSE;
@@ -2075,8 +2075,8 @@ int compare2(const void *item1, const void *item2) {
       their_de = k;
 
       // get actual PET number to put into route table
-      delayout->ESMC_DELayoutGetDEMatchPET(their_de, *vm, NULL,
-                                                  &theirMatchingPET, 1);
+      delayout->getDEMatchPET(their_de, *vm, NULL, &theirMatchingPET, 1);
+      
       // get "their" AI out of the AI_exc array
       for (j=0; j<rank; j++) {
         their_AI[j] = AI_exc[their_de + j*AI_count];
@@ -2139,7 +2139,7 @@ int compare2(const void *item1, const void *item2) {
     int rank,                   // in  - rank of data in both Fields
 
     ESMC_Logical  hasSrcData,   // in  - has source data on this DE?
-    ESMC_DELayout *srcDELayout, // in  - pointer to the source DELayout
+    ESMCI::DELayout *srcDELayout, // in  - pointer to the source DELayout
     int mySrcDE,                // in  - DE identifier in the source
     int srcDECount,             // in  - number of DEs in source
     ESMC_AxisIndex *srcGlobalCompAIperDEperRank,  // in  - per DE, per rank
@@ -2147,7 +2147,7 @@ int compare2(const void *item1, const void *item2) {
     //! TODO: this must be mySrcGlobalAllocAIperRank!!
 
     ESMC_Logical  hasDstData,   // in  - has destination data on this DE?
-    ESMC_DELayout *dstDELayout, // in  - pointer to the receive DELayout
+    ESMCI::DELayout *dstDELayout, // in  - pointer to the receive DELayout
     int myDstDE,                // in  - DE identifier in the destination
     int dstDECount,             // in  - number of DEs in destination
     ESMC_AxisIndex *dstGlobalCompAIperDEperRank,  // in  - per DE, per rank
@@ -2229,8 +2229,8 @@ int compare2(const void *item1, const void *item2) {
             // get the parent PET identifier for this DE in the recv layout
             // this code is in DE-space but the matching PET is used in the
             // routetable, which is by PETs
-            dstDELayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, NULL,
-                                                    &theirMatchingPET, 1);
+            dstDELayout->getDEMatchPET(theirDE, *vm, NULL,
+              &theirMatchingPET, 1);
   
             // get "their" AI out of the dstAI array
             for (k=0; k<rank; k++) {
@@ -2300,8 +2300,8 @@ int compare2(const void *item1, const void *item2) {
             // get the parent PET identifier for this DE in the send layout
             // this code is in DE-space but the matching PET is used in the
             // routetable, which is by PETs
-            srcDELayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, NULL,
-                                                    &theirMatchingPET, 1);
+            srcDELayout->getDEMatchPET(theirDE, *vm, NULL, &theirMatchingPET,
+              1);
 
             // get "their" AI out of the dstAI array
             for (k=0; k<rank; k++) {
@@ -2387,7 +2387,7 @@ int compare2(const void *item1, const void *item2) {
       int dstGSCount,             // in -  number of sets of global counts
       int *dstGlobalCount,        // in  - array of global strides for each
                                   //       direction for the receiving Field
-      ESMC_DELayout *dstdeLayout, // in  - pointer to the rcv DELayout
+      ESMCI::DELayout *dstdeLayout, // in  - pointer to the rcv DELayout
       ESMC_Logical  hasSrcData,   // in  - has source data on this DE?
       int srcMyDE,                // in  - DE identifier in the DELayout of
                                   //       the source Field
@@ -2412,7 +2412,7 @@ int compare2(const void *item1, const void *item2) {
       int srcGSCount,             // in -  number of sets of global counts
       int *srcGlobalCount,        // in  - array of global strides for each
                                   //       direction for the source Field
-      ESMC_DELayout *srcdeLayout) { // in  - pointer to the src DELayout
+      ESMCI::DELayout *srcdeLayout) { // in  - pointer to the src DELayout
 //
 // !DESCRIPTION:
 //      Initializes a Route with send and receive RouteTables.
@@ -2447,14 +2447,14 @@ int compare2(const void *item1, const void *item2) {
     if (hasSrcData == ESMF_TRUE) {
 
       // get the number of destination DEs 
-      dstdeLayout->ESMC_DELayoutGetDeprecated(&theirDECount, NULL, NULL, NULL, 0,  
-                                    NULL, NULL, NULL, NULL, 0); 
+      dstdeLayout->getDeprecated(&theirDECount, NULL, NULL, NULL, 0, NULL, NULL,
+        NULL, NULL, 0); 
 
       theirMatchingPET = new int[theirDECount];
       for (i=0; i<theirDECount; i++) {
 	// get the parent DE identifier for this DE in the src layout
-	dstdeLayout->ESMC_DELayoutGetDEMatchPET(i, *vm, NULL,
-						&theirMatchingPET[i], 1);
+	dstdeLayout->getDEMatchPET(i, *vm, NULL, &theirMatchingPET[i], 1);
+        
 	if (theirMatchingPET[i] != i)
 	  printf("theirDE = %d, parentDE = %d\n", i, theirMatchingPET[i]);
       }
@@ -2544,15 +2544,15 @@ int compare2(const void *item1, const void *item2) {
     if (hasDstData == ESMF_TRUE) {
 
       // get the number of source DEs
-      srcdeLayout->ESMC_DELayoutGetDeprecated(&theirDECount, NULL, NULL, NULL, 0, 
-                                    NULL, NULL, NULL, NULL, 0);
+      srcdeLayout->getDeprecated(&theirDECount, NULL, NULL, NULL, 0, NULL, NULL,
+        NULL, NULL, 0);
 
       theirMatchingPET = new int[theirDECount];
 
       for (i=0; i<theirDECount; i++) {
 	// get the parent DE identifier for this DE in the src layout
-	srcdeLayout->ESMC_DELayoutGetDEMatchPET(i, *vm, NULL,
-						&theirMatchingPET[i], 1);
+	srcdeLayout->getDEMatchPET(i, *vm, NULL, &theirMatchingPET[i], 1);
+        
 	if (theirMatchingPET[i] != i)
 	  printf("theirDE = %d, parentDE = %d\n", i, theirMatchingPET[i]);
       }
@@ -2671,7 +2671,7 @@ int compare2(const void *item1, const void *item2) {
       int dstGSCount,             // in -  number of sets of global counts
       int *dstGlobalCount,        // in  - array of global strides for each
                                   //       direction for the receiving Field
-      ESMC_DELayout *dstdeLayout, // in  - pointer to the rcv DELayout
+      ESMCI::DELayout *dstdeLayout, // in  - pointer to the rcv DELayout
       ESMC_Logical  hasSrcData,   // in  - has source data on this DE?
       int srcMyDE,                // in  - DE identifier in the DELayout of
                                   //       the source Field
@@ -2690,7 +2690,7 @@ int compare2(const void *item1, const void *item2) {
       int srcGSCount,             // in -  number of sets of global counts
       int *srcGlobalCount,        // in  - array of global strides for each
                                   //       direction for the source Field
-      ESMC_DELayout *srcdeLayout) { // in  - pointer to the src DELayout
+      ESMCI::DELayout *srcdeLayout) { // in  - pointer to the src DELayout
 
 //
 // !DESCRIPTION:
@@ -2727,14 +2727,14 @@ int compare2(const void *item1, const void *item2) {
     if (hasSrcData == ESMF_TRUE) {
 
       // get the number of destination DEs
-      dstdeLayout->ESMC_DELayoutGetDeprecated(&theirDECount, NULL, NULL, NULL,
-        0, NULL, NULL, NULL, NULL, 0);
+      dstdeLayout->getDeprecated(&theirDECount, NULL, NULL, NULL, 0, NULL, NULL,
+        NULL, NULL, 0);
 
       theirMatchingPET = new int[theirDECount];
       for (i=0; i<theirDECount; i++) {
         // get the parent DE identifier for this DE in the src layout
-        dstdeLayout->ESMC_DELayoutGetDEMatchPET(i, *vm, NULL,
-                                                &theirMatchingPET[i], 1);
+        dstdeLayout->getDEMatchPET(i, *vm, NULL, &theirMatchingPET[i], 1);
+        
         if (theirMatchingPET[i] != i)
           printf("theirDE = %d, parentDE = %d\n", i, theirMatchingPET[i]);
       }
@@ -2818,15 +2818,15 @@ int compare2(const void *item1, const void *item2) {
     if (hasDstData == ESMF_TRUE) {
 
       // get the number of source DEs
-      srcdeLayout->ESMC_DELayoutGetDeprecated(&theirDECount, NULL, NULL, NULL,
-        0, NULL, NULL, NULL, NULL, 0);
+      srcdeLayout->getDeprecated(&theirDECount, NULL, NULL, NULL, 0, NULL, NULL,
+        NULL, NULL, 0);
 
       theirMatchingPET = new int[theirDECount];
 
       for (i=0; i<theirDECount; i++) {
         // get the parent DE identifier for this DE in the src layout
-        srcdeLayout->ESMC_DELayoutGetDEMatchPET(i, *vm, NULL,
-                                                &theirMatchingPET[i], 1);
+        srcdeLayout->getDEMatchPET(i, *vm, NULL, &theirMatchingPET[i], 1);
+        
         if (theirMatchingPET[i] != i)
           printf("theirDE = %d, parentDE = %d\n", i, theirMatchingPET[i]);
       }
@@ -2938,7 +2938,7 @@ int compare2(const void *item1, const void *item2) {
                                    //       Field
       int *global_count_rcv,       // in  - array of global strides for each
                                    //       direction for the receiving Field
-      ESMC_DELayout *delayout_rcv,   // in  - pointer to the rcv DELayout
+      ESMCI::DELayout *delayout_rcv,   // in  - pointer to the rcv DELayout
       int my_DE_snd,               // in  - DE identifier in the DELayout of
                                    //       the sending Field
       ESMC_AxisIndex *AI_snd_exc,  // in  - array of axis indices for all DE's
@@ -2956,7 +2956,7 @@ int compare2(const void *item1, const void *item2) {
                                    //       Field
       int *global_count_snd,       // in  - array of global strides for each
                                    //       direction for the sending Field
-      ESMC_DELayout *delayout_snd) { // in  - pointer to the snd DELayout 
+      ESMCI::DELayout *delayout_snd) { // in  - pointer to the snd DELayout 
 //
 // !DESCRIPTION:
 //      Initializes a Route with send and receive RouteTables.
@@ -3004,14 +3004,16 @@ int compare2(const void *item1, const void *item2) {
                                      NULL, &my_XP, &my_XPcount);
 
       // loop over DE's from receiving layout to calculate send table
-      delayout_rcv->ESMC_DELayoutGetDeprecated(&their_decount, NULL, NULL, NULL, 0,
-                                        NULL, NULL, NULL, NULL, 0);
+      delayout_rcv->getDeprecated(&their_decount, NULL, NULL, NULL, 0, NULL,
+        NULL, NULL, NULL, 0);
+      
       for (i=0; i<their_decount; i++) {
           their_de = i;
 
           // get the parent PET identifier for this DE in the rcv layout
-          delayout_rcv->ESMC_DELayoutGetDEMatchPET(their_de, *vm, NULL,
-                                                   &their_matching_pet, 1);
+          delayout_rcv->getDEMatchPET(their_de, *vm, NULL, &their_matching_pet,
+            1);
+          
  //         printf("Match1: %d, %d\n", their_de, their_matching_pet);
           //their_matching_pet = their_de;     // temporarily
           if (their_matching_pet != their_de) 
@@ -3077,8 +3079,9 @@ int compare2(const void *item1, const void *item2) {
           their_de = i;
 
           // get the parent PET identifier for this DE in the snd layout
-          delayout_snd->ESMC_DELayoutGetDEMatchPET(their_de, *vm, NULL,
-                                                   &their_matching_pet, 1);
+          delayout_snd->getDEMatchPET(their_de, *vm, NULL, &their_matching_pet,
+            1);
+          
   //        printf("Match2: %d, %d\n", their_de, their_matching_pet);
           //their_matching_pet = their_de;     // temporarily
           if (their_matching_pet != their_de) 
@@ -3145,8 +3148,8 @@ int compare2(const void *item1, const void *item2) {
 //
 // !ARGUMENTS:
       int rank,                       // in - rank of data
-      ESMC_DELayout *srcDELayout,     // in - Source DELayout
-      ESMC_DELayout *dstDELayout,     // in - Destination DELayout
+      ESMCI::DELayout *srcDELayout,     // in - Source DELayout
+      ESMCI::DELayout *dstDELayout,     // in - Destination DELayout
       ESMC_DomainList *srcDomainList, // in - array of axis indices for all DEs
                                       //      in the DELayout for the receiving
                                       //      Field
@@ -3193,8 +3196,8 @@ int compare2(const void *item1, const void *item2) {
                                        &myXP, &myXPcount);
       
         // get PET from DE here.  Single DE per PET.  TODO: fix this
-        dstDELayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, &nmatch, theirPET, 1);
-
+        dstDELayout->getDEMatchPET(theirDE, *vm, &nmatch, theirPET, 1);
+        
         // load the XPacket into the sending RTable
         sendRT->ESMC_RTableSetEntry(*theirPET, myXP);
         ct->ESMC_CommTableSetPartner(*theirPET);
@@ -3231,8 +3234,8 @@ int compare2(const void *item1, const void *item2) {
         offset += count;
 
         // get PET from DE here.  Single DE per PET.  TODO: fix this
-        srcDELayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, &nmatch, theirPET, 1);
-
+        srcDELayout->getDEMatchPET(theirDE, *vm, &nmatch, theirPET, 1);
+        
         // load the XPacket into the sending RTable
         recvRT->ESMC_RTableSetEntry(*theirPET, theirXP);
         ct->ESMC_CommTableSetPartner(*theirPET);
@@ -3408,7 +3411,7 @@ int compare2(const void *item1, const void *item2) {
     //printf(msgbuf);
     //vm->VMPrint("");
     { int myid, petcount;
-      vm->ESMC_VMGet(&myid, &petcount, NULL, NULL, NULL);
+      vm->get(&myid, &petcount, NULL, NULL, NULL);
       sprintf(msgbuf, "VM: my pet = %d of %d\n", myid, petcount);
       //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       printf(msgbuf);

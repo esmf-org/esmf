@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.47 2007/05/02 15:24:54 dneckels Exp $
+// $Id: ESMC_VMKernel.h,v 1.48 2007/06/20 01:29:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -7,11 +7,6 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-
-//-----------------------------------------------------------------------------
-//
-// !DESCRIPTION:
-//
 //
 //-----------------------------------------------------------------------------
 
@@ -152,27 +147,31 @@ typedef struct{
 }comminfo;
 
 
-class ESMC_VMK{
+
+
+namespace ESMCI {
+
+class VMK{
   // members
   protected:
     int mypet;          // PET id of this instance
     pthread_t mypthid;  // my pthread id
     // pet -> core mapping
-    int npets;      // number of PETs in this ESMC_VMK
+    int npets;      // number of PETs in this VMK
     int *lpid;      // local pid (equal to rank in local MPI context)
     int *pid;       // pid (equal to rank in MPI_COMM_WORLD)
     int *tid;       // thread index
     int *ncpet;     // number of cores this pet references
     int **cid;      // core id of the cores this pet references
-    // general information about this ESMC_VMK
+    // general information about this VMK
     int mpionly;    // 0: there is multi-threading, 1: MPI-only
     int nothreadsflag; // 0-threaded VM, 1-non-threaded VM
-    // MPI communication handles for MPI processes associated with this ESMC_VMK
+    // MPI communication handles for MPI processes associated with this VMK
     MPI_Group mpi_g;
     MPI_Comm mpi_c;
     // Shared mutex and thread_finish variables. These are pointers that will be
     // pointing to shared memory variables between different thread-instances of
-    // the ESMC_VMK object.
+    // the VMK object.
     pthread_mutex_t *pth_mutex2;
     pthread_mutex_t *pth_mutex;
     int *pth_finish_count;
@@ -198,7 +197,7 @@ class ESMC_VMK{
   public:
     // Declaration of static data members - Definitions are in the header of
     // source file ESMF_VMKernel.C
-    // static MPI info, Group and Comm of the default ESMC_VMK
+    // static MPI info, Group and Comm of the default VMK
     // and the thread level that the MPI implementation supports.
     static MPI_Group default_mpi_g;
     static MPI_Comm default_mpi_c;
@@ -226,43 +225,43 @@ class ESMC_VMK{
 
   // methods
   private:
-    void vmk_obtain_args(void);
-    void vmk_commqueueitem_link(vmk_commhandle *commhandle);
-    int vmk_commqueueitem_unlink(vmk_commhandle *commhandle);
+    void obtain_args(void);
+    void commqueueitem_link(vmk_commhandle *commhandle);
+    int  commqueueitem_unlink(vmk_commhandle *commhandle);
   public:
-    void vmk_init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD);
+    void init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD);
       // initialize the physical machine and a default (all MPI) virtual machine
-    void vmk_finalize(int finalizeMpi=1);
+    void finalize(int finalizeMpi=1);
       // finalize default (all MPI) virtual machine
-    void vmk_abort(void);
+    void abort(void);
       // abort default (all MPI) virtual machine
 
-    void vmk_construct(void *sarg);
-      // fill an already existing ESMC_VMK object with info
-    void vmk_destruct(void);
-      // free allocations within an existing ESMC_VMK object
+    void construct(void *sarg);
+      // fill an already existing VMK object with info
+    void destruct(void);
+      // free allocations within an existing VMK object
 
-    void *vmk_startup(class ESMC_VMKPlan *vmp, void *(fctp)(void *, void *),
+    void *startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
       void *cargo, int *rc);
-      // enter a vm derived from current vm according to the ESMC_VMKPlan
-    void vmk_enter(class ESMC_VMKPlan *vmp, void *arg, void *argvmkt);
-    void vmk_exit(class ESMC_VMKPlan *vmp, void *arg);
-    void vmk_shutdown(class ESMC_VMKPlan *vmp, void *arg);
-      // exit a vm derived from current vm according to the ESMC_VMKPlan
+      // enter a vm derived from current vm according to the VMKPlan
+    void enter(class VMKPlan *vmp, void *arg, void *argvmkt);
+    void exit(class VMKPlan *vmp, void *arg);
+    void shutdown(class VMKPlan *vmp, void *arg);
+      // exit a vm derived from current vm according to the VMKPlan
   
-    void vmk_print(void);
+    void print(void);
     
-    // info calls
-    int vmk_npets(void);           // return npets
-    int vmk_mypet(void);           // return mypet
-    pthread_t vmk_mypthid(void);   // return mypthid
-    int vmk_ncpet(int i);          // return ncpet
-    int vmk_ssiid(int i);          // return ssiid
-    MPI_Comm vmk_mpi_comm(void);   // return mpi_c
-    int vmk_nthreads(int i);       // return number of threads in group PET
-    int vmk_tid(int i);            // return tid for PET
-    int vmk_vas(int i);            // return vas for PET
-    int vmk_lpid(int i);           // return lpid for PET
+    // get() calls
+    int getNpets(void);            // return npets
+    int getMypet(void);            // return mypet
+    pthread_t getMypthid(void);    // return mypthid
+    int getNcpet(int i);           // return ncpet
+    int getSsiid(int i);           // return ssiid
+    MPI_Comm getMpi_c(void);       // return mpi_c
+    int getNthreads(int i);        // return number of threads in group PET
+    int getTid(int i);             // return tid for PET
+    int getVas(int i);             // return vas for PET
+    int getLpid(int i);            // return lpid for PET
     
     
     // p2p communication calls
@@ -323,10 +322,10 @@ class ESMC_VMK{
       vmk_commhandle **commhandle);
     
     // non-blocking service calls
-    int vmk_commwait(vmk_commhandle **commhandle, vmk_status *status=NULL,
+    int commwait(vmk_commhandle **commhandle, vmk_status *status=NULL,
       int nanopause=0);
-    void vmk_commqueuewait(void);
-    void vmk_commcancel(vmk_commhandle **commhandle);
+    void commqueuewait(void);
+    void commcancel(vmk_commhandle **commhandle);
     
     // IntraProcessSharedMemoryAllocation Table Methods
     void *vmk_ipshmallocate(int bytes, int *firstFlag=NULL);
@@ -337,16 +336,18 @@ class ESMC_VMK{
     void vmk_ipmutexdeallocate(vmk_ipmutex *ipmutex);
     int vmk_ipmutexlock(vmk_ipmutex *ipmutex);
     int vmk_ipmutexunlock(vmk_ipmutex *ipmutex);
+    
+    
+    static void wtime(double *time);
+    static void wtimeprec(double *prec);
+    static void wtimedelay(double delay);
 
   // friend classes
-  friend class ESMC_VMKPlan;
+  friend class VMKPlan;
 };
 
-void vmk_wtime(double *time);
-void vmk_wtimeprec(double *prec);
-void vmk_wtimedelay(double delay);
 
-class ESMC_VMKPlan{
+class VMKPlan{
   public:
     int npets;
     int nplist;       // number of PETs in petlist that participate
@@ -356,9 +357,9 @@ class ESMC_VMKPlan{
     int *spawnflag;   // for each pet: 0-don't spawn, >=1-spawn threads
     int *contribute;  // pet id to which non-spawning pet contributes its cores
     int *cspawnid;    // idication to which one of spawned pets to contribute to
-    // ESMC_VMK references for this PET (as many entries as this PET spawns)
+    // VMK references for this PET (as many entries as this PET spawns)
     int nspawn;       // number of PETs this PET will spwan
-    ESMC_VMK **myvms; // this array holds pointers to heap ESMC_VMK instances
+    VMK **myvms; // this array holds pointers to heap VMK instances
     // Communication preferences
     // These preferences will be satisfied if the architecture supports it, 
     // otherwise the default communication setting is chosen instead.
@@ -373,71 +374,73 @@ class ESMC_VMKPlan{
     int groupfreeflag;  // flag to indicate which PETs must free MPIgroup
         
   public:
-    ESMC_VMKPlan(void);
+    VMKPlan(void);
       // native constructor (sets communication preferences to defaults)
-    ~ESMC_VMKPlan(void);
+    ~VMKPlan(void);
       // native destructor
     void vmkplan_garbage(void);
-      // perform garbage collection within a ESMC_VMKPlan object
+      // perform garbage collection within a VMKPlan object
     int vmkplan_nspawn(void);
       // return number of PETs that are being spawned out of current PET
-    void vmkplan_myvms(ESMC_VMK **myvms);
+    void vmkplan_myvms(ESMCI::VMK **myvms);
       // set the internal myvms pointer array
-    void vmkplan_mpi_c_part(ESMC_VMK &vm);
+    void vmkplan_mpi_c_part(VMK &vm);
       // set the mpi communicator for participating PETs
-    void vmkplan_useparentvm(ESMC_VMK &vm);
+    void vmkplan_useparentvm(VMK &vm);
       // use the parent VM, don't create new context
-    void vmkplan_maxthreads(ESMC_VMK &vm);  
-      // set up a ESMC_VMKPlan that will maximize the number of thread-pets
-    void vmkplan_maxthreads(ESMC_VMK &vm, int max);  
-      // set up a ESMC_VMKPlan that will max. number of thread-pets up to max
-    void vmkplan_maxthreads(ESMC_VMK &vm, int max, 
+    void vmkplan_maxthreads(VMK &vm);  
+      // set up a VMKPlan that will maximize the number of thread-pets
+    void vmkplan_maxthreads(VMK &vm, int max);  
+      // set up a VMKPlan that will max. number of thread-pets up to max
+    void vmkplan_maxthreads(VMK &vm, int max, 
       int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi);
-      // set up a ESMC_VMKPlan that will max. number of thread-pets up to max
-    void vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist, int nplist);  
-      // set up a ESMC_VMKPlan that will max. number of thread-pets up to max
+      // set up a VMKPlan that will max. number of thread-pets up to max
+    void vmkplan_maxthreads(VMK &vm, int max, int *plist, int nplist);  
+      // set up a VMKPlan that will max. number of thread-pets up to max
       // but only allow PETs listed in plist to participate
-    int vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist, int nplist,
+    int vmkplan_maxthreads(VMK &vm, int max, int *plist, int nplist,
       int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi); 
-      // set up a ESMC_VMKPlan that will max. number of thread-pets up to max
+      // set up a VMKPlan that will max. number of thread-pets up to max
       // but only allow PETs listed in plist to participate
-    void vmkplan_minthreads(ESMC_VMK &vm);
-      // set up a ESMC_VMKPlan that will only have single threaded pet
+    void vmkplan_minthreads(VMK &vm);
+      // set up a VMKPlan that will only have single threaded pet
       // instantiations and claim all cores of pets that don't make it through
-    void vmkplan_minthreads(ESMC_VMK &vm, int max);
-      // set up a ESMC_VMKPlan that will only have single threaded pet
+    void vmkplan_minthreads(VMK &vm, int max);
+      // set up a VMKPlan that will only have single threaded pet
       // instantiations and claim all cores of pets that don't make it through,
       // up to max cores per pet
-    void vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist, int nplist);
-      // set up a ESMC_VMKPlan that will only have single threaded pet
+    void vmkplan_minthreads(VMK &vm, int max, int *plist, int nplist);
+      // set up a VMKPlan that will only have single threaded pet
       // instantiations and claim all cores of pets that don't make it through,
       // up to max cores per pet but only allow PETs listed in plist to
       // participate
-    int vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist, int nplist,
+    int vmkplan_minthreads(VMK &vm, int max, int *plist, int nplist,
       int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi); 
-      // set up a ESMC_VMKPlan that will only have single threaded pet
+      // set up a VMKPlan that will only have single threaded pet
       // instantiations and claim all cores of pets that don't make it through,
       // up to max cores per pet but only allow PETs listed in plist to
       // participate
-    void vmkplan_maxcores(ESMC_VMK &vm);
-      // set up a ESMC_VMKPlan that will have pets with the maximum number of
+    void vmkplan_maxcores(VMK &vm);
+      // set up a VMKPlan that will have pets with the maximum number of
       // cores available
-    void vmkplan_maxcores(ESMC_VMK &vm, int max);
-      // set up a ESMC_VMKPlan that will have pets with the maximum number of
+    void vmkplan_maxcores(VMK &vm, int max);
+      // set up a VMKPlan that will have pets with the maximum number of
       // cores available, but not more than max
-    void vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist, int nplist);
-      // set up a ESMC_VMKPlan that will have pets with the maximum number of
+    void vmkplan_maxcores(VMK &vm, int max, int *plist, int nplist);
+      // set up a VMKPlan that will have pets with the maximum number of
       // cores available, but not more than max and only use PETs listed in
       // plist
-    int vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist, int nplist,
+    int vmkplan_maxcores(VMK &vm, int max, int *plist, int nplist,
       int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi); 
-      // set up a ESMC_VMKPlan that will have pets with the maximum number of
+      // set up a VMKPlan that will have pets with the maximum number of
       // cores available, but not more than max and only use PETs listed in
       // plist
     void vmkplan_print(void);  
 
-  friend class ESMC_VMK;
+  friend class VMK;
   
 };
+
+} // namespace ESMCI
 
 #endif  // ESMC_VMKERNEL_H

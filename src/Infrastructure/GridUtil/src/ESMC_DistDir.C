@@ -1,4 +1,4 @@
-// $Id: ESMC_DistDir.C,v 1.2 2007/05/01 21:14:11 dneckels Exp $
+// $Id: ESMC_DistDir.C,v 1.3 2007/06/20 01:29:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistDir.C,v 1.2 2007/05/01 21:14:11 dneckels Exp $";
+static const char *const version = "$Id: ESMC_DistDir.C,v 1.3 2007/06/20 01:29:21 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -54,7 +54,7 @@ DistDir<id_type,hash>::DistDir(
 //    
 //
 // !ARGUMENTS:
-ESMC_VM &_vm,           // Virtual machine for this object
+ESMCI::VM &_vm,           // Virtual machine for this object
 UInt ngid,              // number of global id's to register
 const id_type gid[],    // array of the global id's
 const id_type lid[])    // local id's corresponding to the registered gid's
@@ -76,7 +76,7 @@ my_managed()
 
   {
     int npet_i, rank_i; // signed to unsigned helpers
-    vm.ESMC_VMGet(&rank_i, &npet_i, NULL, NULL, NULL);
+    vm.get(&rank_i, &npet_i, NULL, NULL, NULL);
     npet = npet_i; rank = rank_i;
   }
   

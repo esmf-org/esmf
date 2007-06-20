@@ -1,4 +1,4 @@
-// $Id: ESMCI_F90Interface.C,v 1.1 2007/04/20 18:40:35 theurich Exp $
+// $Id: ESMCI_F90Interface.C,v 1.2 2007/06/20 01:29:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -12,18 +12,25 @@
 #define ESMC_FILENAME "ESMCI_F90Interface.C"
 //==============================================================================
 
-#include "ESMC_Start.h"
-#include "ESMC_LogErr.h"                  // for LogErr
+//-----------------------------------------------------------------------------
+
 #include "ESMCI_F90Interface.h"
 
-ESMC_InterfaceInt::ESMC_InterfaceInt(void){
+
+#include "ESMC_Start.h"
+#include "ESMC_LogErr.h"                  // for LogErr
+
+//-----------------------------------------------------------------------------
+
+namespace ESMCI {
+
+InterfaceInt::InterfaceInt(void){
   // native constructor
   array = NULL;
   dimCount = 0;
 }
 
-ESMC_InterfaceInt::ESMC_InterfaceInt(int *arrayArg, int dimArg,
-  int *lenArg){
+InterfaceInt::InterfaceInt(int *arrayArg, int dimArg, int *lenArg){
   // native constructor
   array = arrayArg;
   dimCount = dimArg;
@@ -31,8 +38,10 @@ ESMC_InterfaceInt::ESMC_InterfaceInt(int *arrayArg, int dimArg,
     extent[i]=lenArg[i];
 }
 
-ESMC_InterfaceInt::~ESMC_InterfaceInt(void){
+InterfaceInt::~InterfaceInt(void){
   // native destructor
   array = NULL;
   dimCount = 0;
 }
+
+} // namespace ESMCI

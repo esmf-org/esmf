@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// $Id: cdistdir_test.C,v 1.1 2007/04/26 21:47:34 dneckels Exp $
+// $Id: cdistdir_test.C,v 1.2 2007/06/20 01:29:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -33,11 +33,11 @@ using ESMC::Ex;
 
 extern "C" {
 
-void FTN(cdistdir_test)(ESMC_VM **vmpp, int*rc) {
-  ESMC_VM *vm = *vmpp;
+void FTN(cdistdir_test)(ESMCI::VM **vmpp, int*rc) {
+  ESMCI::VM *vm = *vmpp;
 
   int localPet, petCount;
-  vm->ESMC_VMGet(&localPet, &petCount, NULL, NULL, NULL);
+  vm->get(&localPet, &petCount, NULL, NULL, NULL);
 
   try {
 

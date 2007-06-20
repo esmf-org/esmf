@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.31 2007/05/01 15:35:36 rosalind Exp $
+// $Id: ESMC_DELayout_F.C,v 1.32 2007/06/20 01:29:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -41,10 +41,10 @@ extern "C" {
 
   // - ESMF-public methods:
 
-  void FTN(c_esmc_delayoutcreatefrompetmap)(ESMC_DELayout **ptr, int *petMap, 
-    int *petMapCount, ESMC_DePinFlag *dePinFlag, ESMC_VM **vm, int *rc){
+  void FTN(c_esmc_delayoutcreatefrompetmap)(ESMCI::DELayout **ptr, int *petMap, 
+    int *petMapCount, ESMC_DePinFlag *dePinFlag, ESMCI::VM **vm, int *rc){
     int localrc;
-    ESMC_VM *opt_vm;
+    ESMCI::VM *opt_vm;
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     localrc = ESMC_RC_NOT_IMPL;
@@ -54,18 +54,18 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // call into C++
-    *ptr = ESMC_DELayoutCreate(petMap, *petMapCount,
+    *ptr = ESMCI::DELayout::create(petMap, *petMapCount,
       ESMC_NOT_PRESENT_FILTER(dePinFlag), 
       opt_vm, &localrc);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_delayoutcreatedefault)(ESMC_DELayout **ptr, int *deCount,
-    ESMC_InterfaceInt **deGrouping, ESMC_DePinFlag *dePinFlag, 
-    ESMC_InterfaceInt **petList, ESMC_VM **vm, int *rc){
+  void FTN(c_esmc_delayoutcreatedefault)(ESMCI::DELayout **ptr, int *deCount,
+    ESMCI::InterfaceInt **deGrouping, ESMC_DePinFlag *dePinFlag, 
+    ESMCI::InterfaceInt **petList, ESMCI::VM **vm, int *rc){
     int localrc;
-    ESMC_VM *opt_vm;
+    ESMCI::VM *opt_vm;
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     localrc = ESMC_RC_NOT_IMPL;
@@ -75,7 +75,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // call into C++
-    *ptr = ESMC_DELayoutCreate(
+    *ptr = ESMCI::DELayout::create(
       ESMC_NOT_PRESENT_FILTER(deCount), 
       *deGrouping, 
       ESMC_NOT_PRESENT_FILTER(dePinFlag),
@@ -84,7 +84,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_delayoutcreatend)(ESMC_DELayout **ptr, ESMC_VM **vm,
+  void FTN(c_esmc_delayoutcreatend)(ESMCI::DELayout **ptr, ESMCI::VM **vm,
     int *deCountList, int *deCountListCount, int *petList, int *petListCount,
     int *rc){
     int localrc;
@@ -95,30 +95,30 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutcreatend()"
     // call into C++
-    *ptr = ESMC_DELayoutCreate(**vm, deCountList, *deCountListCount, petList,
-      *petListCount, &cyclic, &localrc);
+    *ptr = ESMCI::DELayout::create(**vm, deCountList, *deCountListCount,
+      petList, *petListCount, &cyclic, &localrc);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_delayoutdestroy)(ESMC_DELayout **ptr, int *rc){
+  void FTN(c_esmc_delayoutdestroy)(ESMCI::DELayout **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutdestroy()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_DELayoutDestroy(ptr),
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::DELayout::destroy(ptr),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_delayoutget)(ESMC_DELayout **ptr, ESMC_VM **vm,
+  void FTN(c_esmc_delayoutget)(ESMCI::DELayout **ptr, ESMCI::VM **vm,
     int *deCount, int *petMap, int *petMapCount, int *vasMap,
     int *vasMapCount, ESMC_Logical *oneToOneFlag, ESMC_DePinFlag *dePinFlag,
     int *localDeCount, int *localDeList, int *localDeListCount,
     int *vasLocalDeCount, int *vasLocalDeList, int *vasLocalDeListCount, 
     int *rc){
-    ESMC_VM **opt_vm;
+    ESMCI::VM **opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutget()"
     // Initialize return code; assume routine not implemented
@@ -127,7 +127,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = vm;
     // call into C++, dealing with optional arguments 
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGet(
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->get(
       opt_vm,
       ESMC_NOT_PRESENT_FILTER(deCount),
       petMap, *petMapCount, vasMap, *vasMapCount,
@@ -141,7 +141,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_delayoutgetdeprecated)(ESMC_DELayout **ptr,
+  void FTN(c_esmc_delayoutgetdeprecated)(ESMCI::DELayout **ptr,
     int *deCount, int *dimCount, int *localDeCount, int *localDeList,
     int *len_localDeList, int *localDe, ESMC_Logical *oneToOneFlag, 
     ESMC_Logical *logRectFlag, int *deCountPerDim, int *len_deCountPerDim,
@@ -151,7 +151,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetDeprecated(
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->getDeprecated(
       ESMC_NOT_PRESENT_FILTER(deCount), 
       ESMC_NOT_PRESENT_FILTER(dimCount), 
       ESMC_NOT_PRESENT_FILTER(localDeCount),
@@ -164,19 +164,20 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_delayoutgetvm)(ESMC_DELayout **ptr, ESMC_VM **vm, int *rc){
+  void FTN(c_esmc_delayoutgetvm)(ESMCI::DELayout **ptr, ESMCI::VM **vm,
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutgetvm()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetVM(
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->getVM(
       vm),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));  
   }
 
-  void FTN(c_esmc_delayoutgetdelocalinfo)(ESMC_DELayout **ptr,
+  void FTN(c_esmc_delayoutgetdelocalinfo)(ESMCI::DELayout **ptr,
     int *DEid, int *DEcoord, int *len_coord, int *DEcde, int *len_cde, 
     int *DEcw, int *len_cw, int *nDEc, int *pid, int *rc){
 #undef  ESMC_METHOD
@@ -184,7 +185,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetDELocalInfo(
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->getDELocalInfo(
       *DEid, DEcoord, *len_coord, DEcde, *len_cde, DEcw, *len_cw,
       ESMC_NOT_PRESENT_FILTER(nDEc),
       ESMC_NOT_PRESENT_FILTER(pid)), 
@@ -192,15 +193,15 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_delayoutgetdematchde)(ESMC_DELayout **ptr,
-    int *DEid, ESMC_DELayout **ptrMatch, int *deMatchCount, int *deMatchList,
+  void FTN(c_esmc_delayoutgetdematchde)(ESMCI::DELayout **ptr,
+    int *DEid, ESMCI::DELayout **ptrMatch, int *deMatchCount, int *deMatchList,
     int *len_deMatchList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutgetdematchde()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetDEMatchDE(
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->getDEMatchDE(
       *DEid, **ptrMatch, 
       ESMC_NOT_PRESENT_FILTER(deMatchCount),
       deMatchList, *len_deMatchList),
@@ -208,15 +209,15 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_delayoutgetdematchpet)(ESMC_DELayout **ptr,
-    int *DEid, ESMC_VM **ptrMatch, int *petMatchCount, int *petMatchList,
+  void FTN(c_esmc_delayoutgetdematchpet)(ESMCI::DELayout **ptr,
+    int *DEid, ESMCI::VM **ptrMatch, int *petMatchCount, int *petMatchList,
     int *len_petMatchList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutgetdematchpet()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetDEMatchPET(
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->getDEMatchPET(
       *DEid, **ptrMatch, 
       ESMC_NOT_PRESENT_FILTER(petMatchCount),
       petMatchList, *len_petMatchList),
@@ -224,33 +225,31 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_delayoutprint)(ESMC_DELayout **ptr, int *rc){
+  void FTN(c_esmc_delayoutprint)(ESMCI::DELayout **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutprint()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutPrint(),
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->print(),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_delayoutvalidate)(ESMC_DELayout **ptr, int *rc){
+  void FTN(c_esmc_delayoutvalidate)(ESMCI::DELayout **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutvalidate()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutValidate(),
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->validate(),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   
-
-  
-  void FTN(c_esmc_delayoutserviceoffer)(ESMC_DELayout **ptr, int *de,
-    ESMC_DELayoutServiceReply *reply, int *rc){
+  void FTN(c_esmc_delayoutserviceoffer)(ESMCI::DELayout **ptr, int *de,
+    ESMCI::DELayoutServiceReply *reply, int *rc){
     int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutserviceoffer()"
@@ -258,23 +257,22 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     localrc = ESMC_RC_NOT_IMPL;
     // call into C++
-    *reply = (*ptr)->ESMC_DELayoutServiceOffer(*de, &localrc);
+    *reply = (*ptr)->serviceOffer(*de, &localrc);
 //TODO: enable LogErr once it is thread-safe
     *rc=localrc;  
 //    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
 //      ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-
-  void FTN(c_esmc_delayoutservicecomplete)(ESMC_DELayout **ptr, int *de,
+  
+  void FTN(c_esmc_delayoutservicecomplete)(ESMCI::DELayout **ptr, int *de,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutservicecomplete()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutServiceComplete(
-      *de),
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->serviceComplete(*de),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -300,7 +298,7 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_DELayout **delayout,       // in/out - delayout object
+      ESMCI::DELayout **delayout,       // in/out - delayout object
       char *buf,                // in/out - really a byte stream
       int *length,              // in/out - number of allocated bytes
       int *offset,              // in/out - current offset in the stream
@@ -316,7 +314,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError(
-      (*delayout)->ESMC_DELayoutSerialize(buf, length, offset),
+      (*delayout)->serialize(buf, length, offset),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -336,7 +334,7 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_DELayout **delayout,       // in/out - delayout object
+      ESMCI::DELayout **delayout,       // in/out - delayout object
       char *buf,                // in/out - really a byte stream
       int *offset,              // in/out - current offset in the stream
       int *rc) {                // out - return code
@@ -351,7 +349,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     localrc = ESMC_RC_NOT_IMPL;
 
-    (*delayout) = ESMC_DELayoutDeserialize(buf, offset);
+    (*delayout) = ESMCI::DELayout::deserialize(buf, offset);
     if (*delayout == NULL) 
         localrc = ESMF_FAILURE;
     else

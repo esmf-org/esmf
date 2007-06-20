@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.81 2007/06/13 23:43:09 samsoncheung Exp $
+// $Id: ESMC_Base.C,v 1.82 2007/06/20 01:29:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.81 2007/06/13 23:43:09 samsoncheung Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.82 2007/06/20 01:29:19 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -133,7 +133,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !IROUTINE:  ESMC_BaseGetVMId - Get Base class VMId
 //  
 // !INTERFACE:
-      ESMC_VMId *ESMC_Base::ESMC_BaseGetVMId(
+      ESMCI::VMId *ESMC_Base::ESMC_BaseGetVMId(
 // 
 // !ARGUMENTS:
       void) const {
@@ -160,7 +160,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       void ESMC_Base::ESMC_BaseSetVMId(
 // 
 // !ARGUMENTS:
-      ESMC_VMId *vmID) {
+      ESMCI::VMId *vmID) {
 //  
 //  
 // !DESCRIPTION:
@@ -169,9 +169,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //EOPI
   int localrc;
   
-  this->vmID = new ESMC_VMId;               // allocate space for this VMId
-  *(this->vmID) = ESMC_VMIdCreate(&localrc);// allocate space f VMId's internals
-  ESMC_VMIdCopy(this->vmID, vmID);        // copy content of vmID to this->vmID.
+  this->vmID = new ESMCI::VMId;             // allocate space for this VMId
+  *(this->vmID) = ESMCI::VMIdCreate(&localrc);// allocate internal VMId memory
+  ESMCI::VMIdCopy(this->vmID, vmID);  // copy content of vmID to this->vmID.
 
 } // end ESMC_BaseSetVMId
 
@@ -3000,8 +3000,8 @@ if (count) {
 //EOPI
   int rc;
   
-  vmID = ESMC_VMGetCurrentID(&rc);  // get the vmID of the current VM context
-//  ESMC_VMIdPrint(vmID);
+  vmID = ESMCI::VM::getCurrentID(&rc);  // get vmID of current VM context
+//  ESMCI::VMIdPrint(vmID);
   ID = ++globalCount;
   refCount = 1;
   strcpy(className, "global");
@@ -3038,8 +3038,8 @@ if (count) {
 //EOPI
   int rc;
   
-  vmID = ESMC_VMGetCurrentID(&rc);  // get the vmID of the current VM context
-//  ESMC_VMIdPrint(vmID);
+  vmID = ESMCI::VM::getCurrentID(&rc);  // get vmID of current VM context
+//  ESMCI::VMIdPrint(vmID);
   ID = ++globalCount;
   refCount = 1;
   strcpy(className, superclass ? superclass : "global");

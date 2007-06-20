@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.94 2007/06/12 20:19:00 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.95 2007/06/20 01:29:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -7,13 +7,10 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
+//
+//-----------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
-//
-// !DESCRIPTION:
-//
-//
-//-----------------------------------------------------------------------------
+#include "ESMC_VMKernel.h"
 
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
@@ -69,8 +66,6 @@
 #endif
 #include <mpi.h>
 
-#include "ESMC_VMKernel.h"
-
 // macros used within this source file
 #define VERBOSITY             (0)       // 0: off, 10: max
 #define VM_TID_MPI_TAG        (10)      // mpi tag used to send/recv TID
@@ -81,23 +76,25 @@
 // Note that SIGUSR1 interferes with MPICH's CH_P4 device!
 #endif
 
+namespace ESMCI {
 
 // Definition of class static data members
-MPI_Group ESMC_VMK::default_mpi_g;
-MPI_Comm ESMC_VMK::default_mpi_c;
-int ESMC_VMK::mpi_thread_level;
-int ESMC_VMK::ncores;
-int *ESMC_VMK::cpuid;
-int *ESMC_VMK::ssiid;
+MPI_Group VMK::default_mpi_g;
+MPI_Comm VMK::default_mpi_c;
+int VMK::mpi_thread_level;
+int VMK::ncores;
+int *VMK::cpuid;
+int *VMK::ssiid;
 // Static data members to support command line arguments
-int ESMC_VMK::argc;
-char *ESMC_VMK::argv_store[100];
-char **ESMC_VMK::argv = &(argv_store[0]);
+int VMK::argc;
+char *VMK::argv_store[100];
+char **VMK::argv = &(argv_store[0]);
 // Second set of command line argument variables to support MPICH1.2
-int ESMC_VMK::argc_mpich;
-char *ESMC_VMK::argv_mpich_store[100];
-char **ESMC_VMK::argv_mpich = &(argv_mpich_store[0]);
+int VMK::argc_mpich;
+char *VMK::argv_mpich_store[100];
+char **VMK::argv_mpich = &(argv_mpich_store[0]);
 
+} // namespace ESMCI
 
 // -----------------------------------------------------------------------------
 // vmkt encapsulation: begin
@@ -162,7 +159,9 @@ int vmkt_join(vmkt_t *vmkt){
 // -----------------------------------------------------------------------------
 
 
-void ESMC_VMK::vmk_obtain_args(void){
+namespace ESMCI {
+
+void VMK::obtain_args(void){
   // obtain command line args for this process
 #ifndef ESMF_NO_SYSTEMCALL
   int mypid = getpid();
@@ -232,7 +231,7 @@ void ESMC_VMK::vmk_obtain_args(void){
 }
 
 
-void ESMC_VMK::vmk_init(MPI_Comm mpiCommunicator){
+void VMK::init(MPI_Comm mpiCommunicator){
   // initialize the physical machine and a default (all MPI) virtual machine
   // initialize signal handling -> this MUST happen before MPI_Init is called!!
   struct sigaction action;
@@ -249,7 +248,7 @@ void ESMC_VMK::vmk_init(MPI_Comm mpiCommunicator){
     argv[k] = new char[1600];
 #ifdef ESMF_MPICH
   // currently only obtain arguments for MPICH because it needs it!!!
-  vmk_obtain_args();
+  obtain_args();
 #endif
   // next check is whether MPI has been initialized yet
   // actually we need to indicate an error if MPI has been initialized before
@@ -260,7 +259,7 @@ void ESMC_VMK::vmk_init(MPI_Comm mpiCommunicator){
 #ifdef ESMF_MPICH   
     // MPICH1.2 is not standard compliant and needs valid args
     // make copy of argc and argv for MPICH because it modifies them and
-    // the original values are needed to delete the memory during vmk_finalize
+    // the original values are needed to delete the memory during finalize()
     argc_mpich = argc;
     for (int k=0; k<100; k++)
       argv_mpich[k] = argv[k];
@@ -271,7 +270,7 @@ void ESMC_VMK::vmk_init(MPI_Comm mpiCommunicator){
 #endif
   }
   // so now MPI is for sure initialized...
-  // TODO: now it should be safe to call vmk_obtain_args() for all MPI impl.
+  // TODO: now it should be safe to call obtain_args() for all MPI impl.
   // Obtain MPI variables
   int rank, size;
   MPI_Comm_rank(mpiCommunicator, &rank);
@@ -387,7 +386,7 @@ void ESMC_VMK::vmk_init(MPI_Comm mpiCommunicator){
 }
 
 
-void ESMC_VMK::vmk_finalize(int finalizeMpi){
+void VMK::finalize(int finalizeMpi){
   // finalize default (all MPI) virtual machine
   for (int k=0; k<100; k++)
     delete [] argv[k];
@@ -402,7 +401,7 @@ void ESMC_VMK::vmk_finalize(int finalizeMpi){
 }
 
 
-void ESMC_VMK::vmk_abort(void){
+void VMK::abort(void){
   // abort default (all MPI) virtual machine
   int finalized;
   MPI_Finalized(&finalized);
@@ -414,7 +413,7 @@ void ESMC_VMK::vmk_abort(void){
 struct contrib_id{
   pthread_t blocker_tid;    // POSIX thread id of blocker thread
   vmkt_t *blocker_vmkt;     // pointer to blocker's vmkt structure
-  int mpi_pid;              // MPI rank in the context of the default ESMC_VMK
+  int mpi_pid;              // MPI rank in the context of the default VMK
   pid_t pid;                // POSIX process id
   pthread_t tid;            // POSIX thread id
 };
@@ -422,7 +421,7 @@ struct contrib_id{
 
 struct vmk_spawn_arg{
   // members which are different for each new pet
-  ESMC_VMK *myvm;             // pointer to vm instance on heap
+  VMK *myvm;                  // pointer to vm instance on heap
   pthread_t pthid;            // pthread id of the spawned thread
   int mypet;                  // new mypet 
   int *ncontributors;         // number of pets that contributed cores 
@@ -431,7 +430,7 @@ struct vmk_spawn_arg{
   vmkt_t vmkt_extra;          // extra vmkt for this pet (sigcatcher)
   // members which are identical for all new pets
   void *(*fctp)(void *, void *);  // pointer to the user function
-  // 1st (void *) points to the provided object (child of ESMC_VMK class)
+  // 1st (void *) points to the provided object (child of VMK class)
   // 2nd (void *) points to data that shall be passed to the user function
   int npets;                  // new number of pets
   int *lpid;
@@ -458,7 +457,7 @@ struct vmk_spawn_arg{
 };
 
     
-void ESMC_VMK::vmk_construct(void *ssarg){
+void VMK::construct(void *ssarg){
   vmk_spawn_arg *sarg = (vmk_spawn_arg *)ssarg;
   int npets = sarg->npets;
   int *lpid = sarg->lpid;
@@ -474,7 +473,7 @@ void ESMC_VMK::vmk_construct(void *ssarg){
   comminfo **commarray = sarg->commarray;
   int pref_intra_ssi = sarg->pref_intra_ssi;
   int nothreadsflag = sarg->nothreadsflag;
-  // fill an already existing ESMC_VMK object with info
+  // fill an already existing VMK object with info
   mypet=sarg->mypet;
   mypthid=sarg->pthid;
   this->npets=npets;
@@ -524,7 +523,7 @@ void ESMC_VMK::vmk_construct(void *ssarg){
     // that run within the same SSI but different PID
     for (int i=0; i<npets; i++){
       // looping over all pets
-      if (vmk_ssiid(i) == vmk_ssiid(mypet)){
+      if (getSsiid(i) == getSsiid(mypet)){
         // found a pet under same SSI ...
         if (pid[i] != pid[mypet]){
           // ... and with different PID (which also excludes mypet!)
@@ -586,8 +585,8 @@ void ESMC_VMK::vmk_construct(void *ssarg){
   // don't set mpionly flag so that comm call check for commtype
   this->mpionly=0;
 #else
-  // determine whether we are dealing with an MPI-only ESMC_VMK
-  this->mpionly=1;  // assume this is MPI-only ESMC_VMK until found otherwise
+  // determine whether we are dealing with an MPI-only VMK
+  this->mpionly=1;  // assume this is MPI-only VMK until found otherwise
   for (int i=0; i<npets; i++)
     if (this->tid[i]>0) this->mpionly=0;    // found multi-threading PET
 #endif
@@ -597,7 +596,7 @@ void ESMC_VMK::vmk_construct(void *ssarg){
 }
 
 
-void ESMC_VMK::vmk_destruct(void){
+void VMK::destruct(void){
   // determine how many pets are of the same pid as mypet is
   int num_same_pid=0;
   for (int i=0; i<npets; i++)
@@ -706,9 +705,9 @@ static void *vmk_spawn(void *arg){
   // fill in the tid for this thread
   sarg->pthid = sarg->vmkt.tid;
   // obtain reference to the vm instance on heap
-  ESMC_VMK *vm = sarg->myvm;
+  VMK *vm = sarg->myvm;
   // setup the pet section in this vm instance
-  vm->vmk_construct((void *)sarg);
+  vm->construct((void *)sarg);
   // note: The VM above must be constructed _before_ back-sync'ing #2 to
   //       vmkt_create in order to assure that the entries in the VM are valid!
   // now use vmkt features to prepare for catch/release loop (back-sync)
@@ -734,7 +733,7 @@ static void *vmk_spawn(void *arg){
 
     //vm.vmk_barrier();
     
-    // call the function pointer with the new ESMC_VMK as its argument
+    // call the function pointer with the new VMK as its argument
     // this is where we finally enter the user code again...
     if (vmkt->arg==NULL)
       sarg->fctp((void *)vm, sarg->cargo);
@@ -765,7 +764,7 @@ static void *vmk_spawn(void *arg){
     pthread_mutex_unlock(&(vmkt->mut0)); // release the mutex lock for parent
   }
   // wrap-up...
-  vm->vmk_destruct();
+  vm->destruct();
   // when returning from this procedure this pet will terminate
   return NULL;
 }
@@ -803,7 +802,7 @@ static void *vmk_sigcatcher(void *arg){
   sigaddset(&sigs_to_catch, VM_SIG1);
   int caught;
   MPI_Status mpi_s;
-  ESMC_VMK vm;  // need a handle to access the MPI_Comm of default ESMC_VMK
+  VMK vm;  // need a handle to access the MPI_Comm of default VMK
   // now use vmkt features to prepare for catch/release loop (back-sync)
   // - part 2
   pthread_mutex_lock(&(vmkt->mut_extra2));    // back-sync #2 ...
@@ -956,12 +955,12 @@ static void *vmk_block(void *arg){
 }
 
 
-void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp, 
+void *VMK::startup(class VMKPlan *vmp, 
   void *(fctp)(void *, void *), void *cargo, int *rc){
 #if (VERBOSITY > 9)
   vmp->vmkplan_print();
 #endif
-  // enter a vm derived from current vm according to the ESMC_VMKPlan
+  // enter a vm derived from current vm according to the VMKPlan
   // need as many spawn_args as there are threads to be spawned from this pet
   // this is so that each spawned thread does not have to be worried about this
   // info to disappear while still accessing it
@@ -981,7 +980,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   // now:
   //    sarg[] has as many elements as mypet spawns threads, but at least one
   // next, allocate as many vm objects off the heap as there will be spawned
-  // next, set pointers in sarg to the ESMC_VMK instances on the heap
+  // next, set pointers in sarg to the VMK instances on the heap
   for (int i=0; i<vmp->spawnflag[mypet]; i++){
     if (vmp->myvms == NULL){
       fprintf(stderr, "VM_ERROR: No vm objects provided.\n");
@@ -1002,7 +1001,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
     }
   }
   // now:
-  //    new_npets is equal to the total number of pets in the new ESMC_VMK
+  //    new_npets is equal to the total number of pets in the new VMK
   //    new_mypet_base is the index of the first new pet that mypet will spawn
   // next, allocate temporary arrays ...
   int *new_lpid = new int[new_npets];
@@ -1013,10 +1012,10 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   int **new_cid = new int*[new_npets];
   contrib_id **new_contributors = new contrib_id*[new_npets];
   // important note for the new_commarray:
-  // every PET that enters vmk_startup (which are all of the current ESMC_VMK)
+  // every PET that enters startup() (which are all of the current VMK)
   // will get a new_commarray allocated. However, only those PETs that actually
-  // spawn will really use it and free it during vmk_destruct. The 
-  // superficial allocations need to be dealt with in vmk_startup still to
+  // spawn will really use it and free it during destruct(). The 
+  // superficial allocations need to be dealt with in startup() still to
   // prevent memory leaks.
   comminfo **new_commarray = new comminfo*[new_npets];
   for (int i=0; i<new_npets; i++){
@@ -1036,11 +1035,11 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   pthread_mutex_t *new_ipshmMutex;
   pthread_mutex_t *new_ipSetupMutex;
   // utility variables that will be used beyond the next i-loop
-  int num_diff_pids=0;  // total number of different pids/lpids in new ESMC_VMK
+  int num_diff_pids=0;  // total number of different pids/lpids in new VMK
   // utility arrays and variables used only during the next i-loop
   int *keep_max_tid = new int[npets]; // sum of threads that will be spawned
   int new_petid=0;      // used for keeping track of new_petid in loop
-  // next, run through all current pets and check the ESMC_VMKPlan ...
+  // next, run through all current pets and check the VMKPlan ...
   // inside the following loop pet "i" will be refered to as "this pet"
   for (int ii=0; ii<npets; ii++){
     int i = vmp->petlist[ii];   // indirection to preserve petlist order
@@ -1185,7 +1184,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
         }
       }
       // advance to the next new thread (j) spawned by current pet (i)
-      // which will become pet (new_petid) in new ESMC_VMK
+      // which will become pet (new_petid) in new VMK
       ++new_petid;
       ++local_tid;
     }
@@ -1202,13 +1201,13 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   //    new_ncontributors[new_petid] is valid number of contributor pets
   //    new_cid[new_petid][] holds valid core indices
   //    new_contributors[new_petid][] holds valid contrib_id's for pairs
-  //    num_diff_pids is the total number of different pids in new ESMC_VMK
+  //    num_diff_pids is the total number of different pids in new VMK
 #if (VERBOSITY > 9)
-  printf(">>>>>>>>> num_diff_pids for new ESMC_VMK = %d\n", num_diff_pids);
+  printf(">>>>>>>>> num_diff_pids for new VMK = %d\n", num_diff_pids);
 #endif
   //
   // next, set up temporary arrays lpid_list and pet_list to facititate 
-  // MPI_Comm creation and shared memory allocation for new ESMC_VMK
+  // MPI_Comm creation and shared memory allocation for new VMK
   int **lpid_list = new int*[2];
   lpid_list[0] = new int[num_diff_pids]; // this dimension holds lpids
   lpid_list[1] = new int[num_diff_pids]; // this dimension holds number of pets
@@ -1258,8 +1257,8 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
 
   // setting up MPI communicators is a collective MPI communication call
   // thus it requires that exactly one pet of each process running in the 
-  // current ESMC_VMK makes that call, even if this process will not participate
-  // in the new ESMC_VMK...
+  // current VMK makes that call, even if this process will not participate
+  // in the new VMK...
   MPI_Comm new_mpi_c;
   
   int foundfirstflag=0;
@@ -1301,18 +1300,18 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
 #endif
 
   // now:
-  //    new_mpi_g is the valid MPI_Group for the new ESMC_VMK
-  //    new_mpi_c is the valid MPI_Comm for the new ESMC_VMK
+  //    new_mpi_g is the valid MPI_Group for the new VMK
+  //    new_mpi_c is the valid MPI_Comm for the new VMK
   //
   // Next, setting up intra-process shared memory connection between
-  // qualifying pets of the new ESMC_VMK. Only one of the current pets that
+  // qualifying pets of the new VMK. Only one of the current pets that
   // spawn for a certain lpid must allocate memory for the shared variables 
   // and then send this info to all the associated intra- or inter-process pets
-  // of the current ESMC_VMK which also spawn threads.
+  // of the current VMK which also spawn threads.
   for (int i=0; i<num_diff_pids; i++){
-    // consider all of the different lpids of current ESMC_VMK
+    // consider all of the different lpids of current VMK
     if (lpid_list[0][i]>-1){
-      // at least one pet of the current ESMC_VMK with this lpid will spawn
+      // at least one pet of the current VMK with this lpid will spawn
 #if (VERBOSITY > 9)
       printf("setting up shared memory variables for lpid=%d\n", 
         lpid_list[0][i]);
@@ -1468,10 +1467,10 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
     if (vmp->nothreadflag){
       // for a VM that is not thread-based the VM can already be constructed
       // obtain reference to the vm instance on heap
-      ESMC_VMK &vm = *(sarg[0].myvm);
+      VMK &vm = *(sarg[0].myvm);
       // setup the pet section in this vm instance
       sarg[0].pthid = pthread_self();
-      vm.vmk_construct((void *)&sarg[0]);
+      vm.construct((void *)&sarg[0]);
     }else{
       // if this is a thread-based VM then...
       // ...finally spawn threads from this pet...
@@ -1505,13 +1504,13 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
       delete [] new_commarray[ii];
     delete [] new_commarray;
   }
-  // return info that is associated with the new ESMC_VMK...
+  // return info that is associated with the new VMK...
   return sarg;
 }
 
 
-void ESMC_VMK::vmk_enter(class ESMC_VMKPlan *vmp, void *arg, void *argvmkt){
-  // Enter into ESMC_VMK by its registered function, i.e. release vmkt
+void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
+  // Enter into VMK by its registered function, i.e. release vmkt
   // First need to cast arg into its correct type
   vmk_spawn_arg *sarg = (vmk_spawn_arg *)arg;
   // simple case is that where the child runs in the parent VM, then all this
@@ -1549,7 +1548,7 @@ void ESMC_VMK::vmk_enter(class ESMC_VMKPlan *vmp, void *arg, void *argvmkt){
     // now all contributors are in, pets that spawn need to release their vmkts
     for (int i=0; i<vmp->spawnflag[mypet]; i++){
 #if (VERBOSITY > 9)
-      fprintf(stderr, "gjt in vmk_enter: release &(sarg[%d].vmkt)=%d\n", i,
+      fprintf(stderr, "gjt in VMK::enter(): release &(sarg[%d].vmkt)=%d\n", i,
         &(sarg[i].vmkt));
 #endif
       vmkt_release(&(sarg[i].vmkt), argvmkt);
@@ -1558,8 +1557,8 @@ void ESMC_VMK::vmk_enter(class ESMC_VMKPlan *vmp, void *arg, void *argvmkt){
 }
 
 
-void ESMC_VMK::vmk_exit(class ESMC_VMKPlan *vmp, void *arg){
-  // Exit from ESMC_VMK's registered function, i.e. catch the vmkts
+void VMK::exit(class VMKPlan *vmp, void *arg){
+  // Exit from VMK's registered function, i.e. catch the vmkts
   // First need to cast arg into its correct type
   vmk_spawn_arg *sarg = (vmk_spawn_arg *)arg;
   // simple case is that where the child runs in the parent VM, then there is
@@ -1583,13 +1582,13 @@ void ESMC_VMK::vmk_exit(class ESMC_VMKPlan *vmp, void *arg){
 }
 
 
-void ESMC_VMK::vmk_shutdown(class ESMC_VMKPlan *vmp, void *arg){
-  // Block all pets of the current ESMC_VMK until their individual resources,
+void VMK::shutdown(class VMKPlan *vmp, void *arg){
+  // Block all pets of the current VMK until their individual resources,
   // i.e. cores, become available. This means:
-  //  1) pets which did not spawn nor contribute in the ESMC_VMKPlan are not
+  //  1) pets which did not spawn nor contribute in the VMKPlan are not
   //     blocked
-  //  2) pets which did not spawn but contributed in the ESMC_VMKPlan block
-  //     until their cores have been returned by spwawned ESMC_VMK
+  //  2) pets which did not spawn but contributed in the VMKPlan block
+  //     until their cores have been returned by spwawned VMK
   //  3) pets that spwan will be blocked until _all_ of _their_ spawned threads
   //     exit in order to delete allocated info structure
   // First need to cast arg into its correct type
@@ -1603,9 +1602,9 @@ void ESMC_VMK::vmk_shutdown(class ESMC_VMKPlan *vmp, void *arg){
   for (int i=0; i<vmp->spawnflag[mypet]; i++){
     if (vmp->nothreadflag){
       // obtain reference to the vm instance on heap
-      ESMC_VMK &vm = *(sarg[0].myvm);
+      VMK &vm = *(sarg[0].myvm);
       // destroy this vm instance
-      vm.vmk_destruct();
+      vm.destruct();
     }else{
       // thread-based VM pets must be joined
       vmkt_join(&(sarg[i].vmkt));
@@ -1623,7 +1622,7 @@ void ESMC_VMK::vmk_shutdown(class ESMC_VMKPlan *vmp, void *arg){
     delete [] sarg[i].cid;
     delete [] sarg[i].contributors;
   }
-  // need to block pets that did not spawn but contributed in the ESMC_VMKPlan
+  // need to block pets that did not spawn but contributed in the VMKPlan
   if (vmp->spawnflag[mypet]==0 && vmp->contribute[mypet]>-1){
     // wait for the blocker thread to return, maybe already is done...
 #if (VERBOSITY > 9)
@@ -1643,9 +1642,9 @@ void ESMC_VMK::vmk_shutdown(class ESMC_VMKPlan *vmp, void *arg){
 }
 
 
-void ESMC_VMK::vmk_print(void){
-  // print info about the ESMC_VMK object
-  printf("--- vmk_print start ---\n");
+void VMK::print(void){
+  // print info about the VMK object
+  printf("--- VMK::print() start ---\n");
   printf("vm located at: %p\n", this);
   printf("npets = %d, mypet=%d\n", npets, mypet);
   printf("  pth_mutex =\t\t %p\n"
@@ -1675,41 +1674,41 @@ void ESMC_VMK::vmk_print(void){
   printf("ncores = %d\n", ncores);
   for (int i=0; i<ncores; i++)
     printf("  cpuid[%d]=%d, ssiid[%d]=%d\n", i, cpuid[i], i, ssiid[i]);
-  printf("--- vmk_print end ---\n");
+  printf("--- VMK::print() end ---\n");
 }
 
 
-int ESMC_VMK::vmk_npets(void){
+int VMK::getNpets(void){
   return npets;
 }
 
 
-int ESMC_VMK::vmk_mypet(void){
+int VMK::getMypet(void){
   return mypet;
 }
 
 
-pthread_t ESMC_VMK::vmk_mypthid(void){
+pthread_t VMK::getMypthid(void){
   return mypthid;
 }
 
 
-int ESMC_VMK::vmk_ncpet(int i){
+int VMK::getNcpet(int i){
   return ncpet[i];
 }
 
 
-int ESMC_VMK::vmk_ssiid(int i){
+int VMK::getSsiid(int i){
   return ssiid[cid[i][0]];
 }
 
 
-MPI_Comm ESMC_VMK::vmk_mpi_comm(void){
+MPI_Comm VMK::getMpi_c(void){
   return mpi_c;
 }
 
 
-int ESMC_VMK::vmk_nthreads(int i){
+int VMK::getNthreads(int i){
   int n=0;
   for (int j=0; j<npets; j++)
     if (pid[j]==pid[i]) ++n;
@@ -1717,22 +1716,22 @@ int ESMC_VMK::vmk_nthreads(int i){
 }
 
 
-int ESMC_VMK::vmk_tid(int i){
+int VMK::getTid(int i){
   return tid[i];
 }
 
-int ESMC_VMK::vmk_vas(int i){
+int VMK::getVas(int i){
   return pid[i];
 }
 
-int ESMC_VMK::vmk_lpid(int i){
+int VMK::getLpid(int i){
   return lpid[i];
 }
 
-// --- ESMC_VMKPlan methods ---
+// --- VMKPlan methods ---
 
 
-ESMC_VMKPlan::ESMC_VMKPlan(void){
+VMKPlan::VMKPlan(void){
   // native constructor
   nothreadflag = 1; // by default use non-threaded VMs
   parentVMflag = 0; // default is to create a new VM for every child
@@ -1740,7 +1739,7 @@ ESMC_VMKPlan::ESMC_VMKPlan(void){
   spawnflag = NULL;
   contribute = NULL;
   cspawnid = NULL;
-  // invalidate the ESMC_VMK pointer array
+  // invalidate the VMK pointer array
   myvms = NULL;
   // set the default communication preferences
   pref_intra_process = PREF_INTRA_PROCESS_SHMHACK;
@@ -1753,7 +1752,7 @@ ESMC_VMKPlan::ESMC_VMKPlan(void){
 }
 
 
-ESMC_VMKPlan::~ESMC_VMKPlan(void){
+VMKPlan::~VMKPlan(void){
   // native destructor
   vmkplan_garbage();
   if (lpid_mpi_g_part_map != NULL){
@@ -1771,8 +1770,8 @@ ESMC_VMKPlan::~ESMC_VMKPlan(void){
 }
 
   
-void ESMC_VMKPlan::vmkplan_garbage(void){
-  // perform garbage collection within a ESMC_VMKPlan object
+void VMKPlan::vmkplan_garbage(void){
+  // perform garbage collection within a VMKPlan object
   if (spawnflag != NULL){
     delete [] spawnflag;
     delete [] contribute;
@@ -1787,26 +1786,26 @@ void ESMC_VMKPlan::vmkplan_garbage(void){
 }
 
 
-int ESMC_VMKPlan::vmkplan_nspawn(void){
+int VMKPlan::vmkplan_nspawn(void){
   // return number of PETs that are being spawned out of current PET
   return nspawn;
 }
 
 
-void ESMC_VMKPlan::vmkplan_myvms(ESMC_VMK **myvms){
+void VMKPlan::vmkplan_myvms(VMK **myvms){
   // set the internal myvms pointer array
   this->myvms = myvms;
 }
 
 
-void ESMC_VMKPlan::vmkplan_mpi_c_part(ESMC_VMK &vm){
+void VMKPlan::vmkplan_mpi_c_part(VMK &vm){
   // set up the communicator of participating PETs
   int *grouplist = new int[nplist];     // that's big enough
   int *grouppetlist = new int[nplist];  // associated list of pets
   int n=0;  // counter
   for (int i=0; i<nplist; i++){
     int pet = petlist[i];
-    int lpid = vm.vmk_lpid(pet);
+    int lpid = vm.getLpid(pet);
     int j;
     for (j=0; j<n; j++)
       if (grouplist[j] == lpid) break;
@@ -1822,8 +1821,8 @@ void ESMC_VMKPlan::vmkplan_mpi_c_part(ESMC_VMK &vm){
   MPI_Group_incl(vm.mpi_g, n, grouplist, &mpi_g_part);
  
   // all master PETs of the current vm must create the communicator
-  int mypet = vm.vmk_mypet();
-  if (vm.vmk_tid(mypet) == 0){
+  int mypet = vm.getMypet();
+  if (vm.getTid(mypet) == 0){
     // master PET in this VAS
     MPI_Comm_create(vm.mpi_c, mpi_g_part, &mpi_c_part);
     commfreeflag = 1;   // this PET is responsible for freeing the communicator
@@ -1838,7 +1837,7 @@ void ESMC_VMKPlan::vmkplan_mpi_c_part(ESMC_VMK &vm){
   if (j == n)
     commfreeflag = 0;
 
-  lpid_mpi_g_part_map = new int[vm.vmk_npets()];
+  lpid_mpi_g_part_map = new int[vm.getNpets()];
   for (int i=0; i<n; i++){
     lpid_mpi_g_part_map[grouplist[i]] = i;
   }
@@ -1848,8 +1847,8 @@ void ESMC_VMKPlan::vmkplan_mpi_c_part(ESMC_VMK &vm){
 }
 
 
-void ESMC_VMKPlan::vmkplan_useparentvm(ESMC_VMK &vm){
-  // set up a ESMC_VMKPlan that will run inside of parent VM
+void VMKPlan::vmkplan_useparentvm(VMK &vm){
+  // set up a VMKPlan that will run inside of parent VM
   parentVMflag = 1;
   npets = vm.npets;
   spawnflag = new int[npets];
@@ -1865,29 +1864,29 @@ void ESMC_VMKPlan::vmkplan_useparentvm(ESMC_VMK &vm){
 }
 
 
-void ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm){
-  // set up a ESMC_VMKPlan that will maximize the number of thread-pets
+void VMKPlan::vmkplan_maxthreads(VMK &vm){
+  // set up a VMKPlan that will maximize the number of thread-pets
   vmkplan_maxthreads(vm, 0);
 }
 
 
-void ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm, int max){
-  // set up a ESMC_VMKPlan that will max. the number of thread-pets up to max
+void VMKPlan::vmkplan_maxthreads(VMK &vm, int max){
+  // set up a VMKPlan that will max. the number of thread-pets up to max
   vmkplan_maxthreads(vm, max, NULL, 0);
 }
 
 
-void ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm, int max,
+void VMKPlan::vmkplan_maxthreads(VMK &vm, int max,
   int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi){
-  // set up a ESMC_VMKPlan that will max. the number of thread-pets up to max
+  // set up a VMKPlan that will max. the number of thread-pets up to max
   vmkplan_maxthreads(vm, max, NULL, 0, 
     pref_intra_process, pref_intra_ssi, pref_inter_ssi);
 }
 
 
-void ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist, 
+void VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist, 
   int nplist){
-  // set up a ESMC_VMKPlan that will max. the number of thread-pets up to max
+  // set up a VMKPlan that will max. the number of thread-pets up to max
   // but only allow PETs listed in plist to participate
   // first do garbage collection on current object
   vmkplan_garbage();
@@ -1931,7 +1930,7 @@ void ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist,
       for (j=0; j<nplist; j++)
         if (plist[j]==i) break;
       if (j==nplist){
-        spawnflag[i]=0;     // this PET is not spawn into new ESMC_VMK
+        spawnflag[i]=0;     // this PET is not spawn into new VMK
         contribute[i]=-1;   // don't contribute any cores
         cspawnid[i]=-1;     // invalidate
         continue;
@@ -1976,7 +1975,7 @@ void ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist,
           cspawnid[i]=-1;     // invalidate
         }else{
           // pet on same SSI but under new process -> make this process master
-          spawnflag[i]=1;     // spawn at least one thread in new ESMC_VMK
+          spawnflag[i]=1;     // spawn at least one thread in new VMK
           contribute[i]=i;    // contribute cores to itself
           cspawnid[i]=0;      // contribute cores to itself
           issiid[vm.ssiid[vm.cid[i][0]]]=i;   // need this pets id for later
@@ -1992,7 +1991,7 @@ void ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist,
 }
 
 
-int ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist, 
+int VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist, 
   int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi){
   // set the communication preferences
   if (pref_intra_process >= 0)
@@ -2009,24 +2008,24 @@ int ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist,
 }
 
 
-void ESMC_VMKPlan::vmkplan_minthreads(ESMC_VMK &vm){
-  // set up a ESMC_VMKPlan that will only have single threaded pet
+void VMKPlan::vmkplan_minthreads(VMK &vm){
+  // set up a VMKPlan that will only have single threaded pet
   // instantiations and claim all cores of pets that don't make it through
   vmkplan_minthreads(vm, 0);
 }
 
 
-void ESMC_VMKPlan::vmkplan_minthreads(ESMC_VMK &vm, int max){
-  // set up a ESMC_VMKPlan that will only have single threaded pet
+void VMKPlan::vmkplan_minthreads(VMK &vm, int max){
+  // set up a VMKPlan that will only have single threaded pet
   // instantiations and claim all cores of pets that don't make it through, up
   // to max cores/pet
   vmkplan_minthreads(vm, max, NULL, 0);
 }
 
 
-void ESMC_VMKPlan::vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist, 
+void VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist, 
   int nplist){
-  // set up a ESMC_VMKPlan that will only have single threaded pet
+  // set up a VMKPlan that will only have single threaded pet
   // instantiations and claim all cores of pets that don't make it through, up
   // to max cores/pet but only allow PETs listed in plist to participate
   // first do garbage collection on current object
@@ -2069,7 +2068,7 @@ void ESMC_VMKPlan::vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist,
       for (j=0; j<nplist; j++)
         if (plist[j]==i) break;
       if (j==nplist){
-        spawnflag[i]=0;     // this PET is not spawn into new ESMC_VMK
+        spawnflag[i]=0;     // this PET is not spawn into new VMK
         contribute[i]=-1;   // don't contribute any cores
         cspawnid[i]=-1;     // invalidate
         continue;
@@ -2106,7 +2105,7 @@ void ESMC_VMKPlan::vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist,
 }
 
 
-int ESMC_VMKPlan::vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist,
+int VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist,
   int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi){
   // set the communication preferences
   if (pref_intra_process >= 0)
@@ -2123,23 +2122,23 @@ int ESMC_VMKPlan::vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist,
 }
 
 
-void ESMC_VMKPlan::vmkplan_maxcores(ESMC_VMK &vm){
-  // set up a ESMC_VMKPlan that will have pets with the maximum number of cores
+void VMKPlan::vmkplan_maxcores(VMK &vm){
+  // set up a VMKPlan that will have pets with the maximum number of cores
   // available
   vmkplan_maxcores(vm, 0);
 }
 
 
-void ESMC_VMKPlan::vmkplan_maxcores(ESMC_VMK &vm, int max){
-  // set up a ESMC_VMKPlan that will have pets with the maximum number of cores
+void VMKPlan::vmkplan_maxcores(VMK &vm, int max){
+  // set up a VMKPlan that will have pets with the maximum number of cores
   // available, but not more than max
   vmkplan_maxcores(vm, max, NULL, 0);
 }
 
 
-void ESMC_VMKPlan::vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist,
+void VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist,
   int nplist){
-  // set up a ESMC_VMKPlan that will have pets with the maximum number of cores
+  // set up a VMKPlan that will have pets with the maximum number of cores
   // available, but not more than max and only use PETs listed in plist
   // first do garbage collection on current object
   vmkplan_garbage();
@@ -2183,7 +2182,7 @@ void ESMC_VMKPlan::vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist,
       for (j=0; j<nplist; j++)
         if (plist[j]==i) break;
       if (j==nplist){
-        spawnflag[i]=0;     // this PET is not spawn into new ESMC_VMK
+        spawnflag[i]=0;     // this PET is not spawn into new VMK
         contribute[i]=-1;   // don't contribute any cores
         cspawnid[i]=-1;     // invalidate
         continue;
@@ -2224,7 +2223,7 @@ void ESMC_VMKPlan::vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist,
 }
 
 
-int ESMC_VMKPlan::vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist, 
+int VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist, 
   int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi){
   // set the communication preferences
   if (pref_intra_process >= 0)
@@ -2241,8 +2240,8 @@ int ESMC_VMKPlan::vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist,
 }
 
 
-void ESMC_VMKPlan::vmkplan_print(void){
-  // print info about the ESMC_VMKPlan object
+void VMKPlan::vmkplan_print(void){
+  // print info about the VMKPlan object
   printf("--- vmkplan_print start ---\n");
   printf("nothreadflag = %d\n", nothreadflag);
   printf("parentVMflag = %d\n", parentVMflag);
@@ -2264,7 +2263,7 @@ void ESMC_VMKPlan::vmkplan_print(void){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-void ESMC_VMK::vmk_commqueueitem_link(vmk_commhandle *commhandle){
+void VMK::commqueueitem_link(vmk_commhandle *commhandle){
   vmk_commhandle *handle;
   pthread_mutex_lock(pth_mutex2);
   if (nhandles==0){
@@ -2283,7 +2282,7 @@ void ESMC_VMK::vmk_commqueueitem_link(vmk_commhandle *commhandle){
   pthread_mutex_unlock(pth_mutex2);
 }
 
-int ESMC_VMK::vmk_commqueueitem_unlink(vmk_commhandle *commhandle){
+int VMK::commqueueitem_unlink(vmk_commhandle *commhandle){
   vmk_commhandle *handle;
   int found = 0; // reset
   pthread_mutex_lock(pth_mutex2);
@@ -2315,21 +2314,21 @@ int ESMC_VMK::vmk_commqueueitem_unlink(vmk_commhandle *commhandle){
 }
 
 
-int ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, vmk_status *status,
+int VMK::commwait(vmk_commhandle **commhandle, vmk_status *status,
   int nanopause){
   // wait for all of the communications pointed to by *commhandle to complete
   // and delete all of the inside contents of *commhandle (even if it is a tree)
   // finally unlink the *commhandle container from the commqueue and delete the
   // container (only) if the *commhandle was part of the commqueue!
-//fprintf(stderr, "vmk_commwait: nhandles=%d\n", nhandles);
-//fprintf(stderr, "vmk_commwait: *commhandle=%p\n", *commhandle);
+//fprintf(stderr, "VMK::commwait: nhandles=%d\n", nhandles);
+//fprintf(stderr, "VMK::commwait: *commhandle=%p\n", *commhandle);
   int localrc=0;
   if ((commhandle!=NULL) && ((*commhandle)!=NULL)){
     // wait for all non-blocking requests in commhandle to complete
     if ((*commhandle)->type==0){
       // this is a commhandle container
       for (int i=0; i<(*commhandle)->nelements; i++){
-        localrc = vmk_commwait(&((*commhandle)->handles[i]));  // recursive call
+        localrc = commwait(&((*commhandle)->handles[i]));  // recursive call
         delete (*commhandle)->handles[i];
       }
       delete [] (*commhandle)->handles;
@@ -2399,11 +2398,11 @@ int ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, vmk_status *status,
     }else if ((*commhandle)->type==-1){
       // this is a dummy commhandle and there is nothing to wait for...
     }else{
-      printf("ESMC_VMK: only MPI non-blocking implemented\n");
+      printf("VMK: only MPI non-blocking implemented\n");
       localrc = VMK_ERROR;
     }
     // if this *commhandle is in the request queue x-> unlink and delete
-    if (vmk_commqueueitem_unlink(*commhandle)){ 
+    if (commqueueitem_unlink(*commhandle)){ 
       delete *commhandle; // delete the container commhandle that was linked
       *commhandle = NULL; // ensure this container will not point to anything
     }
@@ -2412,27 +2411,27 @@ int ESMC_VMK::vmk_commwait(vmk_commhandle **commhandle, vmk_status *status,
 }
 
 
-void ESMC_VMK::vmk_commqueuewait(void){
+void VMK::commqueuewait(void){
   int n=nhandles;
   vmk_commhandle *fh;
   for (int i=0; i<n; i++){
-//    printf("vmk_commqueuewait: %d\n", nhandles);
+//    printf("VMK::commqueuewait: %d\n", nhandles);
     fh = firsthandle;
-    vmk_commwait(&fh);
+    commwait(&fh);
   }
-//  printf("vmk_commqueuewait: %d\n", nhandles);
+//  printf("VMK::commqueuewait: %d\n", nhandles);
 }
 
 
-void ESMC_VMK::vmk_commcancel(vmk_commhandle **commhandle){
-//fprintf(stderr, "vmk_commcancel: nhandles=%d\n", nhandles);
-//fprintf(stderr, "vmk_commcancel: commhandle=%p\n", (*commhandle));
+void VMK::commcancel(vmk_commhandle **commhandle){
+//fprintf(stderr, "VMK::commcancel: nhandles=%d\n", nhandles);
+//fprintf(stderr, "VMK::commcancel: commhandle=%p\n", (*commhandle));
   if ((*commhandle)!=NULL){
     // cancel all non-blocking requests in commhandle to complete
     if ((*commhandle)->type==0){
       // this is a commhandle container
       for (int i=0; i<(*commhandle)->nelements; i++){
-        vmk_commcancel(&((*commhandle)->handles[i]));  // recursive call
+        commcancel(&((*commhandle)->handles[i]));  // recursive call
       }
     }else if ((*commhandle)->type==1){
       // this commhandle contains MPI_Requests
@@ -2445,7 +2444,7 @@ void ESMC_VMK::vmk_commcancel(vmk_commhandle **commhandle){
           pthread_mutex_unlock(pth_mutex);
       }
     }else{
-      printf("ESMC_VMK: only MPI non-blocking implemented\n");
+      printf("VMK: only MPI non-blocking implemented\n");
     }
   }
 }
@@ -2458,7 +2457,7 @@ void ESMC_VMK::vmk_commcancel(vmk_commhandle **commhandle){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-int ESMC_VMK::vmk_send(void *message, int size, int dest, int tag){
+int VMK::vmk_send(void *message, int size, int dest, int tag){
   // p2p send
 #if (VERBOSITY > 9)
   printf("sending to: %d, %d\n", dest, lpid[dest]);
@@ -2596,7 +2595,7 @@ int ESMC_VMK::vmk_send(void *message, int size, int dest, int tag){
 }
 
 
-int ESMC_VMK::vmk_send(void *message, int size, int dest, 
+int VMK::vmk_send(void *message, int size, int dest, 
   vmk_commhandle **commhandle, int tag){
   // p2p send
 //fprintf(stderr, "vmk_send: commhandle=%p\n", *commhandle);
@@ -2614,7 +2613,7 @@ int ESMC_VMK::vmk_send(void *message, int size, int dest,
   // check if this needs a new entry in the request queue
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
-    vmk_commqueueitem_link(*commhandle);
+    commqueueitem_link(*commhandle);
   }
   // switch into the appropriate implementation
   switch(commarray[mypet][dest].comm_type){
@@ -2676,7 +2675,7 @@ int ESMC_VMK::vmk_send(void *message, int size, int dest,
 }
 
 
-int ESMC_VMK::vmk_recv(void *message, int size, int source, int tag,
+int VMK::vmk_recv(void *message, int size, int source, int tag,
   vmk_status *status){
   // p2p recv
 #if (VERBOSITY > 9)
@@ -2848,7 +2847,7 @@ int ESMC_VMK::vmk_recv(void *message, int size, int source, int tag,
 }
 
 
-int ESMC_VMK::vmk_recv(void *message, int size, int source,
+int VMK::vmk_recv(void *message, int size, int source,
   vmk_commhandle **commhandle, int tag){
   // p2p recv
 //fprintf(stderr, "vmk_recv: commhandle=%p\n", *commhandle);
@@ -2866,7 +2865,7 @@ int ESMC_VMK::vmk_recv(void *message, int size, int source,
   // check if this needs a new entry in the request queue
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
-    vmk_commqueueitem_link(*commhandle);
+    commqueueitem_link(*commhandle);
   }
   int comm_type;
   if (source == VM_ANY_SRC){
@@ -2940,7 +2939,7 @@ int ESMC_VMK::vmk_recv(void *message, int size, int source,
 }
 
 
-int ESMC_VMK::vmk_vassend(void *message, int size, int destVAS,
+int VMK::vmk_vassend(void *message, int size, int destVAS,
   vmk_commhandle **commhandle, int tag){
   // non-blocking send where the destination is a VAS, _not_ a PET
   // todo: currently this is just a stub that uses the PET-based 
@@ -2956,7 +2955,7 @@ int ESMC_VMK::vmk_vassend(void *message, int size, int destVAS,
 }
 
 
-int ESMC_VMK::vmk_vasrecv(void *message, int size, int srcVAS,
+int VMK::vmk_vasrecv(void *message, int size, int srcVAS,
   vmk_commhandle **commhandle, int tag){
   // non-blocking recv where the source is a VAS, _not_ a PET
   // todo: currently this is just a stub that uses the PET-based 
@@ -2972,7 +2971,7 @@ int ESMC_VMK::vmk_vasrecv(void *message, int size, int srcVAS,
 }
 
   
-int ESMC_VMK::vmk_barrier(void){
+int VMK::vmk_barrier(void){
   // collective barrier over all PETs
   int localrc=0;
   if (mpionly){
@@ -3015,7 +3014,7 @@ int ESMC_VMK::vmk_barrier(void){
 }
 
 
-int ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
+int VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
   void *recvData, int recvSize, int src){
   // p2p sendrecv
   int localrc=0;
@@ -3046,14 +3045,14 @@ int ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
   return localrc;
 }
   
-int ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
+int VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
   void *recvData, int recvSize, int src, vmk_commhandle **commhandle){
   // check if this needs a new entry in the request queue
 //fprintf(stderr, "vmk_sendrecv: commhandle=%p\n", *commhandle);
   int localrc=0;
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
-    vmk_commqueueitem_link(*commhandle);
+    commqueueitem_link(*commhandle);
   }
   // p2p sendrecv non-blocking
   (*commhandle)->nelements = 2; // 2 requests for send/recv
@@ -3085,7 +3084,7 @@ int ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
   return localrc;
 }
   
-int ESMC_VMK::vmk_threadbarrier(void){
+int VMK::vmk_threadbarrier(void){
   int localrc=0;
   if (!mpionly && !nothreadsflag){
     // collective barrier over all PETs in thread group with mypet
@@ -3123,7 +3122,7 @@ int ESMC_VMK::vmk_threadbarrier(void){
 }
 
 
-int ESMC_VMK::vmk_reduce(void *in, void *out, int len, vmType type,
+int VMK::vmk_reduce(void *in, void *out, int len, vmType type,
   vmOp op, int root){
   int localrc=0;
   if (mpionly){
@@ -3328,7 +3327,7 @@ int ESMC_VMK::vmk_reduce(void *in, void *out, int len, vmType type,
 }
 
 
-int ESMC_VMK::vmk_allreduce(void *in, void *out, int len, vmType type,
+int VMK::vmk_allreduce(void *in, void *out, int len, vmType type,
   vmOp op){
   int localrc=0;
   if (mpionly){
@@ -3532,7 +3531,7 @@ int ESMC_VMK::vmk_allreduce(void *in, void *out, int len, vmType type,
 }
 
 
-int ESMC_VMK::vmk_allfullreduce(void *in, void *out, int len, 
+int VMK::vmk_allfullreduce(void *in, void *out, int len, 
   vmType type, vmOp op){
   int localrc=0;
   void *localresult;
@@ -3640,7 +3639,7 @@ int ESMC_VMK::vmk_allfullreduce(void *in, void *out, int len,
 }
 
 
-int ESMC_VMK::vmk_scatter(void *in, void *out, int len, int root){
+int VMK::vmk_scatter(void *in, void *out, int len, int root){
   int localrc=0;
   if (mpionly){
     localrc = MPI_Scatter(in, len, MPI_BYTE, out, len, MPI_BYTE, root, mpi_c);
@@ -3672,7 +3671,7 @@ int ESMC_VMK::vmk_scatter(void *in, void *out, int len, int root){
 }
 
 
-int ESMC_VMK::vmk_reduce_scatter(void *in, void *out, int *outCounts,
+int VMK::vmk_reduce_scatter(void *in, void *out, int *outCounts,
   vmType type, vmOp op){
   int localrc=0;
   if (mpionly){
@@ -3711,13 +3710,13 @@ int ESMC_VMK::vmk_reduce_scatter(void *in, void *out, int *outCounts,
 }
 
     
-int ESMC_VMK::vmk_scatter(void *in, void *out, int len, int root,
+int VMK::vmk_scatter(void *in, void *out, int len, int root,
   vmk_commhandle **commhandle){
   int localrc=0;
   // check if this needs a new entry in the request queue
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
-    vmk_commqueueitem_link(*commhandle);
+    commqueueitem_link(*commhandle);
   }
   // MPI does not offer a non-blocking scatter operation, hence there is no
   // point in checking if the mpionly flag is set in this VM, in either case
@@ -3762,7 +3761,7 @@ int ESMC_VMK::vmk_scatter(void *in, void *out, int len, int root,
 }
 
 
-int ESMC_VMK::vmk_scatterv(void *in, int *inCounts, int *inOffsets, void *out,
+int VMK::vmk_scatterv(void *in, int *inCounts, int *inOffsets, void *out,
   int outCount, vmType type, int root){
   int localrc=0;
   if (mpionly){
@@ -3830,7 +3829,7 @@ int ESMC_VMK::vmk_scatterv(void *in, int *inCounts, int *inOffsets, void *out,
 }
 
 
-int ESMC_VMK::vmk_gather(void *in, void *out, int len, int root){
+int VMK::vmk_gather(void *in, void *out, int len, int root){
   int localrc=0;
   if (mpionly){
     localrc = MPI_Gather(in, len, MPI_BYTE, out, len, MPI_BYTE, root, mpi_c);
@@ -3862,13 +3861,13 @@ int ESMC_VMK::vmk_gather(void *in, void *out, int len, int root){
 }
 
 
-int ESMC_VMK::vmk_gather(void *in, void *out, int len, int root,
+int VMK::vmk_gather(void *in, void *out, int len, int root,
   vmk_commhandle **commhandle){
   int localrc = 0;
   // check if this needs a new entry in the request queue
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
-    vmk_commqueueitem_link(*commhandle);
+    commqueueitem_link(*commhandle);
   }
   // MPI does not offer a non-blocking gather operation, hence there is no
   // point in checking if the mpionly flag is set in this VM, in either case
@@ -3913,7 +3912,7 @@ int ESMC_VMK::vmk_gather(void *in, void *out, int len, int root,
 }
 
 
-int ESMC_VMK::vmk_gatherv(void *in, int inCount, void *out, int *outCounts, 
+int VMK::vmk_gatherv(void *in, int inCount, void *out, int *outCounts, 
   int *outOffsets, vmType type, int root){
   int localrc=0;
   if (mpionly){
@@ -3981,7 +3980,7 @@ int ESMC_VMK::vmk_gatherv(void *in, int inCount, void *out, int *outCounts,
 }
 
 
-int ESMC_VMK::vmk_allgather(void *in, void *out, int len){
+int VMK::vmk_allgather(void *in, void *out, int len){
   int localrc=0;
   if (mpionly){
     localrc = MPI_Allgather(in, len, MPI_BYTE, out, len, MPI_BYTE, mpi_c);
@@ -4017,13 +4016,13 @@ int ESMC_VMK::vmk_allgather(void *in, void *out, int len){
 }
 
 
-int ESMC_VMK::vmk_allgather(void *in, void *out, int len,
+int VMK::vmk_allgather(void *in, void *out, int len,
   vmk_commhandle **commhandle){
   int localrc=0;
   // check if this needs a new entry in the request queue
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
-    vmk_commqueueitem_link(*commhandle);
+    commqueueitem_link(*commhandle);
   }
   // MPI does not offer a non-blocking allgather operation, hence there is no
   // point in checking if the mpionly flag is set in this VM, in either case
@@ -4044,7 +4043,7 @@ int ESMC_VMK::vmk_allgather(void *in, void *out, int len,
 }
 
 
-int ESMC_VMK::vmk_allgatherv(void *in, int inCount, void *out, 
+int VMK::vmk_allgatherv(void *in, int inCount, void *out, 
   int *outCounts, int *outOffsets, vmType type){
   int localrc=0;
   if (mpionly){
@@ -4118,7 +4117,7 @@ int ESMC_VMK::vmk_allgatherv(void *in, int inCount, void *out,
 }
 
 
-int ESMC_VMK::vmk_alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
+int VMK::vmk_alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
   int *outCounts, int *outOffsets, vmType type){
   int localrc=0;
   if (mpionly){
@@ -4184,7 +4183,7 @@ int ESMC_VMK::vmk_alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
 }
 
 
-int ESMC_VMK::vmk_broadcast(void *data, int len, int root){
+int VMK::vmk_broadcast(void *data, int len, int root){
   int localrc=0;
   if (mpionly){
     localrc = MPI_Bcast(data, len, MPI_BYTE, root, mpi_c);
@@ -4206,13 +4205,13 @@ int ESMC_VMK::vmk_broadcast(void *data, int len, int root){
 }
 
 
-int ESMC_VMK::vmk_broadcast(void *data, int len, int root,
+int VMK::vmk_broadcast(void *data, int len, int root,
   vmk_commhandle **commhandle){
   int localrc=0;
   // check if this needs a new entry in the request queue
   if (*commhandle==NULL){
     *commhandle = new vmk_commhandle;
-    vmk_commqueueitem_link(*commhandle);
+    commqueueitem_link(*commhandle);
   }
   // MPI does not offer a non-blocking broadcast operation, hence there is no
   // point in checking if the mpionly flag is set in this VM, in either case
@@ -4258,19 +4257,19 @@ int ESMC_VMK::vmk_broadcast(void *data, int len, int root,
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-void vmk_wtime(double *time){
+void VMK::wtime(double *time){
   *time = MPI_Wtime();
 }
 
 
-void vmk_wtimeprec(double *prec){
+void VMK::wtimeprec(double *prec){
   double temp_prec = 0.;
   double t1, t2, dt;
   for(int i=0; i<10; i++){
-    vmk_wtime(&t1);
+    wtime(&t1);
     t2 = t1;
     while(fabs(t2-t1)<DBL_MIN)
-      vmk_wtime(&t2);
+      wtime(&t2);
     dt = t2 - t1;
     if (dt > temp_prec) temp_prec = dt;
   }  
@@ -4278,12 +4277,12 @@ void vmk_wtimeprec(double *prec){
 }
 
 
-void vmk_wtimedelay(double delay){
+void VMK::wtimedelay(double delay){
   double t1, t2;
-  vmk_wtime(&t1);
+  wtime(&t1);
   t2 = t1;
   while(t2-t1<delay)
-    vmk_wtime(&t2);
+    wtime(&t2);
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4293,7 +4292,7 @@ void vmk_wtimedelay(double delay){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     
-void *ESMC_VMK::vmk_ipshmallocate(int bytes, int *firstFlag){
+void *VMK::vmk_ipshmallocate(int bytes, int *firstFlag){
   if (firstFlag != NULL) *firstFlag = 0; // reset
   ++ipshmAllocCount;  // increment the local count
   if (ipshmAllocCount >= IPSHM_TABLE_SIZE) return NULL;
@@ -4302,7 +4301,7 @@ void *ESMC_VMK::vmk_ipshmallocate(int bytes, int *firstFlag){
     // this is the first thread for this new request to allocate
     if (firstFlag != NULL) *firstFlag = 1; // set
     ipshmTable[*ipshmCount] = (void *)malloc(bytes);
-    ipshmDeallocTable[*ipshmCount] = vmk_nthreads(vmk_mypet()); //reset
+    ipshmDeallocTable[*ipshmCount] = getNthreads(getMypet()); //reset
     ++(*ipshmCount);  // increment the count of allocated segments in table
   }
   void *result = ipshmTable[ipshmAllocCount-1];// pull out the correct alloc
@@ -4311,7 +4310,7 @@ void *ESMC_VMK::vmk_ipshmallocate(int bytes, int *firstFlag){
 }
 
 
-void ESMC_VMK::vmk_ipshmdeallocate(void *pointer){
+void VMK::vmk_ipshmdeallocate(void *pointer){
   int i;
   pthread_mutex_lock(ipshmMutex);
   for (i=0; i<*ipshmCount; i++)
@@ -4335,18 +4334,18 @@ void ESMC_VMK::vmk_ipshmdeallocate(void *pointer){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-vmk_ipmutex *ESMC_VMK::vmk_ipmutexallocate(void){
+vmk_ipmutex *VMK::vmk_ipmutexallocate(void){
   int firstFlag;
   pthread_mutex_lock(ipSetupMutex);
   vmk_ipmutex *ipmutex = (vmk_ipmutex *)
     vmk_ipshmallocate(sizeof(vmk_ipmutex), &firstFlag);
   if (firstFlag) pthread_mutex_init(&(ipmutex->pth_mutex), NULL);
-  ipmutex->lastFlag = vmk_nthreads(vmk_mypet()); //reset
+  ipmutex->lastFlag = getNthreads(getMypet()); //reset
   pthread_mutex_unlock(ipSetupMutex);
   return ipmutex;
 }
 
-void ESMC_VMK::vmk_ipmutexdeallocate(vmk_ipmutex *ipmutex){
+void VMK::vmk_ipmutexdeallocate(vmk_ipmutex *ipmutex){
   pthread_mutex_lock(ipSetupMutex);
   --(ipmutex->lastFlag);  // register this thread
   if (ipmutex->lastFlag == 0) pthread_mutex_destroy(&(ipmutex->pth_mutex));
@@ -4354,13 +4353,17 @@ void ESMC_VMK::vmk_ipmutexdeallocate(vmk_ipmutex *ipmutex){
   pthread_mutex_unlock(ipSetupMutex);
 }
 
-int ESMC_VMK::vmk_ipmutexlock(vmk_ipmutex *ipmutex){
+int VMK::vmk_ipmutexlock(vmk_ipmutex *ipmutex){
   return pthread_mutex_lock(&(ipmutex->pth_mutex));
 }
 
-int ESMC_VMK::vmk_ipmutexunlock(vmk_ipmutex *ipmutex){
+int VMK::vmk_ipmutexunlock(vmk_ipmutex *ipmutex){
   return pthread_mutex_unlock(&(ipmutex->pth_mutex));
 }
+
+
+} // namespace ESMCI
+
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

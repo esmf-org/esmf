@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.16 2007/06/12 21:30:01 dneckels Exp $
+// $Id: ESMC_DistGrid.C,v 1.17 2007/06/20 01:29:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,6 +23,9 @@
 //
 //-----------------------------------------------------------------------------
 
+// include associated header file
+#include "ESMC_DistGrid.h"
+
 // include higher level, 3rd party or system headers
 #include <stdio.h>
 #include <string.h>
@@ -33,66 +36,56 @@
 #include "ESMC_VM.h"
 #include "ESMC_DELayout.h"
 
-// include associated class definition
-#include "ESMC_DistGrid.h"
-
-// LogErr
+// LogErr headers
 #include "ESMC_LogErr.h"
 #include "ESMF_LogMacros.inc"
 
 
 //-----------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DistGrid.C,v 1.16 2007/06/12 21:30:01 dneckels Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.17 2007/06/20 01:29:20 theurich Exp $";
 //-----------------------------------------------------------------------------
 
-
-//-----------------------------------------------------------------------------
-//
-// This section includes all the DistGrid routines
-//
-//-----------------------------------------------------------------------------
-
+namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 //
-// external Create and Destroy functions
+// create() and destroy()
 //
 //-----------------------------------------------------------------------------
-
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridCreate()"
-//BOP
-// !IROUTINE:  ESMC_DistGridCreate
+#define ESMC_METHOD "ESMCI::DistGrid:create()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid:create
 //
 // !INTERFACE:
-ESMC_DistGrid *ESMC_DistGridCreate(
+DistGrid *DistGrid::create(
 //
 // !RETURN VALUE:
-//    ESMC_DistGrid * to newly allocated ESMC_DistGrid
+//    ESMCI::DistGrid * to newly allocated DistGrid
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceInt *minIndex,          // (in)
-  ESMC_InterfaceInt *maxIndex,          // (in)
-  ESMC_InterfaceInt *regDecomp,          // (in)
-  ESMC_DecompFlag *decompflag,                // (in)
-  int decompflagCount,                        // (in)
-  ESMC_InterfaceInt *deLabelList,        // (in)
-  ESMC_IndexFlag *indexflag,                  // (in)
-  ESMC_InterfaceInt *connectionList,     // (in)
-  ESMC_InterfaceInt *connectionTransformList, // (in)
-  ESMC_DELayout *delayout,                    // (in)
-  ESMC_VM *vm,                                // (in)
-  int *rc                                     // (out) return code
+  InterfaceInt *minIndex,                 // (in)
+  InterfaceInt *maxIndex,                 // (in)
+  InterfaceInt *regDecomp,                // (in)
+  DecompFlag *decompflag,                 // (in)
+  int decompflagCount,                    // (in)
+  InterfaceInt *deLabelList,              // (in)
+  ESMC_IndexFlag *indexflag,              // (in)
+  InterfaceInt *connectionList,           // (in)
+  InterfaceInt *connectionTransformList,  // (in)
+  DELayout *delayout,                     // (in)
+  VM *vm,                                 // (in)
+  int *rc                                 // (out) return code
   ){
 //
 // !DESCRIPTION:
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int status;                 // local error status
@@ -103,12 +96,12 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     *rc = ESMC_RC_NOT_IMPL;
   
   // allocate the new DistGrid object
-  ESMC_DistGrid *distgrid;
+  DistGrid *distgrid;
   try{
-    distgrid = new ESMC_DistGrid;
+    distgrid = new DistGrid;
   }catch(...){
      // allocation error
-     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_DistGrid.", rc);  
+     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::DistGrid.", rc);  
      return ESMC_NULL_POINTER;
   }
 
@@ -151,7 +144,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
   if (vm == ESMC_NULL_POINTER){
     // vm was not provided -> get the current VM
-    vm = ESMC_VMGetCurrent(&status);  // get current VM for default
+    vm = VM::getCurrent(&status);  // get current VM for default
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
       delete distgrid;
       distgrid = ESMC_NULL_POINTER;
@@ -159,7 +152,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     }
   }
   int petCount;
-  status=vm->ESMC_VMGet(NULL, &petCount, NULL, NULL, NULL);
+  status=vm->get(NULL, &petCount, NULL, NULL, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
@@ -190,7 +183,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
   if (delayout == ESMC_NULL_POINTER){
     // delayout was not provided -> create default DELayout with deCount DEs
-    delayout = ESMC_DELayoutCreate(&deCount, NULL, NULL, NULL, vm, &status);
+    delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, &status);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
       delete distgrid;
       distgrid = ESMC_NULL_POINTER;
@@ -198,7 +191,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     }
   }else{
     // delayout was provided -> check deCount
-    status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, NULL, NULL, NULL,
+    status=delayout->get(NULL, &deCount, NULL, NULL, NULL, NULL,
       NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
       delete distgrid;
@@ -216,7 +209,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     dummy[0] = deCount;
     for (int i=1; i<dimCount; i++)
       dummy[i] = 1;
-    regDecomp = new ESMC_InterfaceInt(dummy, 1, &dimCount);
+    regDecomp = new InterfaceInt(dummy, 1, &dimCount);
   }
   if (regDecomp->dimCount != 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
@@ -230,9 +223,9 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     // decompflag was not provided -> set up default decompflag
     decompflagDeleteFlag = 1; // set
     decompflagCount = dimCount;
-    decompflag = new ESMC_DecompFlag[dimCount];
+    decompflag = new DecompFlag[dimCount];
     for (int i=0; i<dimCount; i++)
-      decompflag[i] = ESMF_DECOMP_DEFAULT;
+      decompflag[i] = DECOMP_DEFAULT;
   }
   if (decompflagCount != dimCount){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
@@ -249,7 +242,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     // set default sequence
     for (int i=0; i<deCount; i++)
       dummy[i] = i;
-    deLabelList = new ESMC_InterfaceInt(dummy, 1, &deCount);
+    deLabelList = new InterfaceInt(dummy, 1, &deCount);
   }
   if (deLabelList->dimCount != 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
@@ -287,8 +280,8 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     int chunkRest = dimLength%regDecomp->array[i];    // left over points
     int de, decompChunk, extentIndex;
     switch (decompflag[i]){
-      case ESMF_DECOMP_DEFAULT:
-      case ESMF_DECOMP_HOMOGEN:
+      case DECOMP_DEFAULT:
+      case DECOMP_HOMOGEN:
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
           extentIndex = de*dimCount+i;  // index into temp. arrays
@@ -306,7 +299,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
           dimContigFlag[extentIndex] = 1; // flag contiguous dimension
         }
         break;
-      case ESMF_DECOMP_RESTLAST:
+      case DECOMP_RESTLAST:
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
           extentIndex = de*dimCount+i;  // index into temp. arrays
@@ -323,7 +316,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
           dimContigFlag[extentIndex] = 1; // flag contiguous dimension
         }
         break;
-      case ESMF_DECOMP_RESTFIRST:
+      case DECOMP_RESTFIRST:
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
           extentIndex = de*dimCount+i;  // index into temp. arrays
@@ -341,7 +334,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
           dimContigFlag[extentIndex] = 1; // flag contiguous dimension
         }
         break;
-      case ESMF_DECOMP_CYCLIC:
+      case DECOMP_CYCLIC:
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
           extentIndex = de*dimCount+i;  // index into temp. arrays
@@ -373,8 +366,8 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   for (int i=0; i<deCount; i++)
     dePatchList[i] = 1;
   
-  // call into DistGridConstruct
-  status = distgrid->ESMC_DistGridConstruct(dimCount, 1, dePatchList,
+  // call into construct()
+  status = distgrid->construct(dimCount, 1, dePatchList,
     minIndex->array, maxIndex->array, dimContigFlag, dimExtent, indexList,
     ESMF_TRUE, connectionList, delayout, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
@@ -411,33 +404,33 @@ ESMC_DistGrid *ESMC_DistGridCreate(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridCreate()"
-//BOP
-// !IROUTINE:  ESMC_DistGridCreate
+#define ESMC_METHOD "ESMCI::DistGrid:create()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid:create
 //
 // !INTERFACE:
-ESMC_DistGrid *ESMC_DistGridCreate(
+DistGrid *DistGrid::create(
 //
 // !RETURN VALUE:
-//    ESMC_DistGrid * to newly allocated ESMC_DistGrid
+//    DistGrid * to newly allocated DistGrid
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceInt *minIndex,          // (in)
-  ESMC_InterfaceInt *maxIndex,          // (in)
-  ESMC_InterfaceInt *deBlockList,        // (in)
-  ESMC_InterfaceInt *deLabelList,        // (in)
-  ESMC_IndexFlag *indexflag,                  // (in)
-  ESMC_InterfaceInt *connectionList,     // (in)
-  ESMC_InterfaceInt *connectionTransformList, // (in)
-  ESMC_DELayout *delayout,                    // (in)
-  ESMC_VM *vm,                                // (in)
-  int *rc                                     // (out) return code
+  InterfaceInt *minIndex,                 // (in)
+  InterfaceInt *maxIndex,                 // (in)
+  InterfaceInt *deBlockList,              // (in)
+  InterfaceInt *deLabelList,              // (in)
+  ESMC_IndexFlag *indexflag,              // (in)
+  InterfaceInt *connectionList,           // (in)
+  InterfaceInt *connectionTransformList,  // (in)
+  DELayout *delayout,                     // (in)
+  VM *vm,                                 // (in)
+  int *rc                                 // (out) return code
   ){
 //
 // !DESCRIPTION:
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int status;                 // local error status
@@ -448,12 +441,12 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     *rc = ESMC_RC_NOT_IMPL;
   
   // allocate the new DistGrid object
-  ESMC_DistGrid *distgrid;
+  DistGrid *distgrid;
   try{
-    distgrid = new ESMC_DistGrid;
+    distgrid = new DistGrid;
   }catch(...){
      // allocation error
-     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_DistGrid.", rc);  
+     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::DistGrid.", rc);  
      return ESMC_NULL_POINTER;
   }
 
@@ -496,7 +489,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
   if (vm == ESMC_NULL_POINTER){
     // vm was not provided -> get the current VM
-    vm = ESMC_VMGetCurrent(&status);  // get current VM for default
+    vm = VM::getCurrent(&status);  // get current VM for default
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
       delete distgrid;
       distgrid = ESMC_NULL_POINTER;
@@ -504,7 +497,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     }
   }
   int petCount;
-  status=vm->ESMC_VMGet(NULL, &petCount, NULL, NULL, NULL);
+  status=vm->get(NULL, &petCount, NULL, NULL, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
@@ -542,7 +535,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   int deCount = deBlockList->extent[2]; // the 3rd dimension runs through DEs
   if (delayout == ESMC_NULL_POINTER){
     // delayout was not provided -> create default DELayout with deCount DEs
-    delayout = ESMC_DELayoutCreate(&deCount, NULL, NULL, NULL, vm, &status);
+    delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, &status);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
       delete distgrid;
       distgrid = ESMC_NULL_POINTER;
@@ -550,7 +543,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     }
   }else{
     // delayout was provided -> check deCount
-    status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, NULL, NULL, NULL,
+    status=delayout->get(NULL, &deCount, NULL, NULL, NULL, NULL,
       NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
       delete distgrid;
@@ -567,7 +560,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     // set default sequence
     for (int i=0; i<deCount; i++)
       dummy[i] = i;
-    deLabelList = new ESMC_InterfaceInt(dummy, 1, &deCount);
+    deLabelList = new InterfaceInt(dummy, 1, &deCount);
   }
   if (deLabelList->dimCount != 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
@@ -620,8 +613,8 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     dePatchList[i] = 1;
 
   // todo: check for overlapping deBlocks!!
-  // call into DistGridConstruct
-  status = distgrid->ESMC_DistGridConstruct(dimCount, 1, dePatchList, 
+  // call into construct()
+  status = distgrid->construct(dimCount, 1, dePatchList, 
     minIndex->array, maxIndex->array, dimContigFlag, dimExtent, indexList,
     ESMF_FALSE, connectionList, delayout, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
@@ -652,35 +645,35 @@ ESMC_DistGrid *ESMC_DistGridCreate(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridCreate()"
-//BOP
-// !IROUTINE:  ESMC_DistGridCreate
+#define ESMC_METHOD "ESMCI::DistGrid:create()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid:create
 //
 // !INTERFACE:
-ESMC_DistGrid *ESMC_DistGridCreate(
+DistGrid *DistGrid::create(
 //
 // !RETURN VALUE:
-//    ESMC_DistGrid * to newly allocated ESMC_DistGrid
+//    DistGrid * to newly allocated DistGrid
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceInt *minIndex,          // (in)
-  ESMC_InterfaceInt *maxIndex,          // (in)
-  ESMC_InterfaceInt *regDecomp,          // (in)
-  ESMC_DecompFlag *decompflag,                // (in)
-  int decompflagCount,                        // (in)
-  ESMC_InterfaceInt *deLabelList,        // (in)
-  ESMC_IndexFlag *indexflag,                  // (in)
-  ESMC_InterfaceInt *connectionList,     // (in)
-  ESMC_InterfaceInt *connectionTransformList, // (in)
-  int fastAxis,                               // (in)
-  ESMC_VM *vm,                                // (in)
-  int *rc                                     // (out) return code
+  InterfaceInt *minIndex,                 // (in)
+  InterfaceInt *maxIndex,                 // (in)
+  InterfaceInt *regDecomp,                // (in)
+  DecompFlag *decompflag,                 // (in)
+  int decompflagCount,                    // (in)
+  InterfaceInt *deLabelList,              // (in)
+  ESMC_IndexFlag *indexflag,              // (in)
+  InterfaceInt *connectionList,           // (in)
+  InterfaceInt *connectionTransformList,  // (in)
+  int fastAxis,                           // (in)
+  VM *vm,                                 // (in)
+  int *rc                                 // (out) return code
   ){
 //
 // !DESCRIPTION:
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int status;                 // local error status
@@ -694,11 +687,11 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   // todo: once DELayout functions exist to determine communication capabilities
   // this is the place to use it to create a DELayout according to fastAxis. For
   // now indicate that a default DELayout is to be created in the following call
-  ESMC_DELayout *delayout = NULL;
+  DELayout *delayout = NULL;
   
-  // use DistGridCreate() with DELayout to create a suitable DistGrid object
-  ESMC_DistGrid *distgrid = 
-    ESMC_DistGridCreate(minIndex, maxIndex, regDecomp, decompflag,
+  // use DistGrid::create() with DELayout to create a suitable DistGrid object
+  DistGrid *distgrid = 
+    create(minIndex, maxIndex, regDecomp, decompflag,
       decompflagCount, deLabelList, indexflag, connectionList,
       connectionTransformList, delayout, vm, &status);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
@@ -713,36 +706,36 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridCreate()"
-//BOP
-// !IROUTINE:  ESMC_DistGridCreate
+#define ESMC_METHOD "ESMCI::DistGrid:create()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid:create
 //
 // !INTERFACE:
-ESMC_DistGrid *ESMC_DistGridCreate(
+DistGrid *DistGrid::create(
 //
 // !RETURN VALUE:
-//    ESMC_DistGrid * to newly allocated ESMC_DistGrid
+//    DistGrid * to newly allocated DistGrid
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceInt *minIndex,          // (in)
-  ESMC_InterfaceInt *maxIndex,          // (in)
-  ESMC_InterfaceInt *regDecomp,          // (in)
-  ESMC_DecompFlag *decompflag,                // (in)
-  int decompflagCount1,                       // (in)
-  int decompflagCount2,                       // (in)
-  ESMC_InterfaceInt *deLabelList,        // (in)
-  ESMC_IndexFlag *indexflag,                  // (in)
-  ESMC_InterfaceInt *connectionList,     // (in)
-  ESMC_InterfaceInt *connectionTransformList, // (in)
-  ESMC_DELayout *delayout,                    // (in)
-  ESMC_VM *vm,                                // (in)
-  int *rc                                     // (out) return code
+  InterfaceInt *minIndex,                 // (in)
+  InterfaceInt *maxIndex,                 // (in)
+  InterfaceInt *regDecomp,                // (in)
+  DecompFlag *decompflag,                 // (in)
+  int decompflagCount1,                   // (in)
+  int decompflagCount2,                   // (in)
+  InterfaceInt *deLabelList,              // (in)
+  ESMC_IndexFlag *indexflag,              // (in)
+  InterfaceInt *connectionList,           // (in)
+  InterfaceInt *connectionTransformList,  // (in)
+  DELayout *delayout,                     // (in)
+  VM *vm,                                 // (in)
+  int *rc                                 // (out) return code
   ){
 //
 // !DESCRIPTION:
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int status;                 // local error status
@@ -753,12 +746,12 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     *rc = ESMC_RC_NOT_IMPL;
   
   // allocate the new DistGrid object
-  ESMC_DistGrid *distgrid;
+  DistGrid *distgrid;
   try{
-    distgrid = new ESMC_DistGrid;
+    distgrid = new DistGrid;
   }catch(...){
      // allocation error
-     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_DistGrid.", rc);  
+     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::DistGrid.", rc);  
      return ESMC_NULL_POINTER;
   }
 
@@ -809,7 +802,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
   if (vm == ESMC_NULL_POINTER){
     // vm was not provided -> get the current VM
-    vm = ESMC_VMGetCurrent(&status);  // get current VM for default
+    vm = VM::getCurrent(&status);  // get current VM for default
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
       delete distgrid;
       distgrid = ESMC_NULL_POINTER;
@@ -817,7 +810,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     }
   }
   int petCount;
-  status=vm->ESMC_VMGet(NULL, &petCount, NULL, NULL, NULL);
+  status=vm->get(NULL, &petCount, NULL, NULL, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
@@ -865,7 +858,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   }
   if (delayout == ESMC_NULL_POINTER){
     // delayout was not provided -> create default DELayout with deCount DEs
-    delayout = ESMC_DELayoutCreate(&deCount, NULL, NULL, NULL, vm, &status);
+    delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, &status);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
       delete distgrid;
       distgrid = ESMC_NULL_POINTER;
@@ -873,7 +866,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     }
   }else{
     // delayout was provided -> check deCount
-    status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, NULL, NULL, NULL,
+    status=delayout->get(NULL, &deCount, NULL, NULL, NULL, NULL,
       NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
       delete distgrid;
@@ -892,7 +885,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
       dummy[i] = 1;
     dummyLen[0] = dimCount;
     dummyLen[1] = patchCount;
-    regDecomp = new ESMC_InterfaceInt(dummy, 2, dummyLen);
+    regDecomp = new InterfaceInt(dummy, 2, dummyLen);
   }
   if (regDecomp->dimCount != 2){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
@@ -907,9 +900,9 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     decompflagDeleteFlag = 1; // set
     decompflagCount1 = dimCount;
     decompflagCount2 = patchCount;
-    decompflag = new ESMC_DecompFlag[dimCount*patchCount];
+    decompflag = new DecompFlag[dimCount*patchCount];
     for (int i=0; i<dimCount*patchCount; i++)
-      decompflag[i] = ESMF_DECOMP_DEFAULT;
+      decompflag[i] = DECOMP_DEFAULT;
   }
   if (decompflagCount1 != dimCount){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
@@ -933,7 +926,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     // set default sequence
     for (int i=0; i<deCount; i++)
       dummy[i] = i;
-    deLabelList = new ESMC_InterfaceInt(dummy, 1, &deCount);
+    deLabelList = new InterfaceInt(dummy, 1, &deCount);
   }
   if (deLabelList->dimCount != 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
@@ -979,8 +972,8 @@ ESMC_DistGrid *ESMC_DistGridCreate(
       int chunkRest = dimLength%regDecomp->array[i];    // left over points
       int de, decompChunk, extentIndex;
       switch (decompflag[i]){
-        case ESMF_DECOMP_DEFAULT:
-        case ESMF_DECOMP_HOMOGEN:
+        case DECOMP_DEFAULT:
+        case DECOMP_HOMOGEN:
           for (int jj=0; jj<deCountPPatch[patch]; jj++){
             int j = dePatchStart + jj;
             de = deLabelList->array[j];
@@ -999,7 +992,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
             dimContigFlag[extentIndex] = 1; // flag contiguous dimension
           }
           break;
-        case ESMF_DECOMP_RESTLAST:
+        case DECOMP_RESTLAST:
           for (int jj=0; jj<deCountPPatch[patch]; jj++){
             int j = dePatchStart + jj;
             de = deLabelList->array[j];
@@ -1017,7 +1010,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
             dimContigFlag[extentIndex] = 1; // flag contiguous dimension
           }
           break;
-        case ESMF_DECOMP_RESTFIRST:
+        case DECOMP_RESTFIRST:
           for (int jj=0; jj<deCountPPatch[patch]; jj++){
             int j = dePatchStart + jj;
             de = deLabelList->array[j];
@@ -1036,7 +1029,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
             dimContigFlag[extentIndex] = 1; // flag contiguous dimension
           }
           break;
-        case ESMF_DECOMP_CYCLIC:
+        case DECOMP_CYCLIC:
           for (int jj=0; jj<deCountPPatch[patch]; jj++){
             int j = dePatchStart + jj;
             de = deLabelList->array[j];
@@ -1078,8 +1071,8 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     dePatchStart += deCountPPatch[patch];
   }
 
-  // call into DistGridConstruct
-  status = distgrid->ESMC_DistGridConstruct(dimCount, patchCount, dePatchList,
+  // call into construct()
+  status = distgrid->construct(dimCount, patchCount, dePatchList,
     minIndex->array, maxIndex->array, dimContigFlag, dimExtent, indexList,
     ESMF_TRUE, connectionList, delayout, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
@@ -1116,23 +1109,23 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   
   //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridDestroy()"
-//BOP
-// !IROUTINE:  ESMC_DistGridDestroy
+#define ESMC_METHOD "ESMCI:DistGrid::destroy()"
+//BOPI
+// !IROUTINE:  ESMCI:DistGrid::destroy
 //
 // !INTERFACE:
-int ESMC_DistGridDestroy(
+int DistGrid::destroy(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
 //
-  ESMC_DistGrid **distgrid){  // in - ESMC_DistGrid to destroy
+  DistGrid **distgrid){  // in - DistGrid to destroy
 //
 // !DESCRIPTION:
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // automatic variable for local return code
@@ -1151,8 +1144,8 @@ int ESMC_DistGridDestroy(
     return localrc;
   }
 
-  // destruct and delete DistGrid object
-  status = (*distgrid)->ESMC_DistGridDestruct();
+  // destruct() and delete DistGrid object
+  status = (*distgrid)->destruct();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
     return localrc;
   delete *distgrid;
@@ -1166,43 +1159,43 @@ int ESMC_DistGridDestroy(
 
 //-----------------------------------------------------------------------------
 //
-// Construct and Destruct class methods
+// construct() and destruct()
 //
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridConstruct()"
-//BOP
-// !IROUTINE:  ESMC_DistGridConstruct
+#define ESMC_METHOD "ESMCI::DistGrid::construct()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::construct
 //
 // !INTERFACE:
-int ESMC_DistGrid::ESMC_DistGridConstruct(
+int DistGrid::construct(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
 //
-  int dimCountArg,              // (in)
-  int patchCountArg,            // (in)
-  int *dePatchListArg,          // (in)
-  int *minIndexArg,            // (in)
-  int *maxIndexArg,            // (in)
-  int *dimContigFlagArg,        // (in)
-  int *dimExtentArg,            // (in)
-  int **indexListArg,           // (in)
-  ESMC_Logical regDecompFlagArg,// (in)
-  ESMC_InterfaceInt *connectionListArg,     // (in)
-  ESMC_DELayout *delayoutArg,   // (in) DELayout
-  ESMC_VM *vmArg                // (in) VM context
+  int dimCountArg,                      // (in)
+  int patchCountArg,                    // (in)
+  int *dePatchListArg,                  // (in)
+  int *minIndexArg,                     // (in)
+  int *maxIndexArg,                     // (in)
+  int *dimContigFlagArg,                // (in)
+  int *dimExtentArg,                    // (in)
+  int **indexListArg,                   // (in)
+  ESMC_Logical regDecompFlagArg,        // (in)
+  InterfaceInt *connectionListArg,      // (in)
+  DELayout *delayoutArg,                // (in) DELayout
+  VM *vmArg                             // (in) VM context
   ){
 //
 // !DESCRIPTION:
-//    Construct the internal information structure of an ESMC\_DistGrid object.
+//    Construct the internal information structure of an ESMCI::DistGrid object.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // automatic variable for local return code
@@ -1248,16 +1241,16 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
   delayout = delayoutArg;
   vm = vmArg;
   // fill in cached values
-  status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, 0, NULL, 0,
+  status=delayout->get(NULL, &deCount, NULL, 0, NULL, 0,
     NULL, NULL, &localDeCount, NULL, 0, NULL, NULL, 0);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
     return localrc;
   localDeList = new int[localDeCount];
-  status=delayout->ESMC_DELayoutGet(NULL, NULL, NULL, 0, NULL, 0,
+  status=delayout->get(NULL, NULL, NULL, 0, NULL, 0,
     NULL, NULL, NULL, localDeList, localDeCount, NULL, NULL, 0);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
     return localrc;
-  status=vm->ESMC_VMGet(&localPet, &petCount, NULL, NULL, NULL);
+  status=vm->get(&localPet, &petCount, NULL, NULL, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     return localrc;
   }
@@ -1275,7 +1268,8 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
     indexList[i] = new int[dimExtent[i]];
     memcpy(indexList[i], indexListArg[i], sizeof(int)*dimExtent[i]);
   }
-  // TODO: eventually get localIndexList from DistGridCreate() routines directly
+  // TODO: eventually get localIndexList from DistGrid::create() routines
+  // directly
   localIndexList = new int*[dimCount*localDeCount];
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
@@ -1316,21 +1310,21 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridDestruct()"
-//BOP
-// !IROUTINE:  ESMC_DistGridDestruct
+#define ESMC_METHOD "ESMCI::DistGrid::destruct()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::destruct
 //
 // !INTERFACE:
-int ESMC_DistGrid::ESMC_DistGridDestruct(void){
+int DistGrid::destruct(void){
 //
 // !RETURN VALUE:
 //    int error return code
 //
 //
 // !DESCRIPTION:
-//    Destruct the internal information structure of an ESMC\_DistGrid object.
+//    Destruct the internal information structure of an ESMCI::DistGrid object.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // automatic variable for local return code
@@ -1376,12 +1370,12 @@ int ESMC_DistGrid::ESMC_DistGridDestruct(void){
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridPrint()"
-//BOP
-// !IROUTINE:  ESMC_DistGridPrint
+#define ESMC_METHOD "ESMCI::DistGrid::print()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::print
 //
 // !INTERFACE:
-int ESMC_DistGrid::ESMC_DistGridPrint(){
+int DistGrid::print(){
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1390,7 +1384,7 @@ int ESMC_DistGrid::ESMC_DistGridPrint(){
 // !DESCRIPTION:
 //    Print details of DistGrid object 
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // automatic variable for local return code
@@ -1409,7 +1403,7 @@ int ESMC_DistGrid::ESMC_DistGridPrint(){
   }
 
   // print info about the ESMC_DistGrid object
-  printf("--- ESMC_DistGridPrint start ---\n");
+  printf("--- ESMCI::DistGrid::print start ---\n");
   printf("dimCount = %d\n", dimCount);
   printf("patchCount = %d\n", patchCount);
   printf("patchCellCount: ");
@@ -1443,7 +1437,7 @@ int ESMC_DistGrid::ESMC_DistGridPrint(){
   printf("deCount = %d\n", deCount);
   printf("localPet = %d\n", localPet);
   printf("petCount = %d\n", petCount);
-  printf("--- ESMC_DistGridPrint end ---\n");
+  printf("--- ESMCI::DistGrid::print end ---\n");
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -1458,30 +1452,30 @@ int ESMC_DistGrid::ESMC_DistGridPrint(){
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridGet()"
-//BOP
-// !IROUTINE:  ESMC_DistGridGet
+#define ESMC_METHOD "ESMCI::DistGrid::get()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::get
 //
 // !INTERFACE:
-int ESMC_DistGrid::ESMC_DistGridGet(
+int DistGrid::get(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
 //
-  ESMC_DELayout **delayoutArg,     // out - DELayout object
-  int  *patchCountArg,             // out - number of patches in DistGrid
-  ESMC_InterfaceInt *patchList,    // out - list of patch ID numbers
-  int  *dimCountArg,               // out - DistGrid rank
-  ESMC_InterfaceInt *dimExtentArg, // out - extents per dim per DE
-  ESMC_Logical *regDecompFlagArg   // out - flag indicating regular decomp.
+  DELayout **delayoutArg,           // out - DELayout object
+  int  *patchCountArg,              // out - number of patches in DistGrid
+  InterfaceInt *patchList,          // out - list of patch ID numbers
+  int  *dimCountArg,                // out - DistGrid rank
+  InterfaceInt *dimExtentArg,       // out - extents per dim per DE
+  ESMC_Logical *regDecompFlagArg    // out - flag indicating regular decomp.
   ){    
 //
 // !DESCRIPTION:
 //    Get information about a DistGrid object
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // automatic variable for local return code
@@ -1555,12 +1549,12 @@ int ESMC_DistGrid::ESMC_DistGridGet(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridGet()"
-//BOP
-// !IROUTINE:  ESMC_DistGridGet
+#define ESMC_METHOD "ESMCI::DistGrid::get()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::get
 //
 // !INTERFACE:
-int ESMC_DistGrid::ESMC_DistGridGet(
+int DistGrid::get(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1569,14 +1563,14 @@ int ESMC_DistGrid::ESMC_DistGridGet(
 //
   int de,                           // in  - DE   = {0, ..., deCount-1}
   int dim,                          // in  - dim  = {1, ..., dimCount}
-  ESMC_InterfaceInt *indexListArg,  // out - list of indices per DE per dim
+  InterfaceInt *indexListArg,       // out - list of indices per DE per dim
   int *contigFlag                   // out - contigFlag for this (de, dim)
   ){    
 //
 // !DESCRIPTION:
 //    Get information about a DistGrid object
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // automatic variable for local return code
@@ -1617,12 +1611,12 @@ int ESMC_DistGrid::ESMC_DistGridGet(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridGet()"
-//BOP
-// !IROUTINE:  ESMC_DistGridGet
+#define ESMC_METHOD "ESMCI::DistGrid::get()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::get
 //
 // !INTERFACE:
-int ESMC_DistGrid::ESMC_DistGridGet(
+int DistGrid::get(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1636,7 +1630,7 @@ int ESMC_DistGrid::ESMC_DistGridGet(
 // !DESCRIPTION:
 //    Get information about a DistGrid object
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // automatic variable for local return code
@@ -1662,12 +1656,12 @@ int ESMC_DistGrid::ESMC_DistGridGet(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridGetLocal()"
-//BOP
-// !IROUTINE:  ESMC_DistGridGetLocal
+#define ESMC_METHOD "ESMCI::DistGrid::getLocal()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::getLocal
 //
 // !INTERFACE:
-int ESMC_DistGrid::ESMC_DistGridGetLocal(
+int DistGrid::getLocal(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1676,14 +1670,14 @@ int ESMC_DistGrid::ESMC_DistGridGetLocal(
 //
   int de,                           // in  - local DE = {0, ..., localDeCount-1}
   int dim,                          // in  - dim  = {1, ..., dimCount}
-  ESMC_InterfaceInt *localIndexListArg    // out - list of indices per local DE
-                                          // per dim
+  InterfaceInt *localIndexListArg   // out - list of indices per local DE
+                                    // per dim
   ){    
 //
 // !DESCRIPTION:
 //    Get information about a DistGrid object
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // automatic variable for local return code
@@ -1722,12 +1716,12 @@ int ESMC_DistGrid::ESMC_DistGridGetLocal(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridGetSequenceIndex()"
-//BOP
-// !IROUTINE:  ESMC_DistGridGetSequenceIndex
+#define ESMC_METHOD "ESMCI::DistGrid::getSequenceIndex()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::getSequenceIndex
 //
 // !INTERFACE:
-int ESMC_DistGrid::ESMC_DistGridGetSequenceIndex(
+int DistGrid::getSequenceIndex(
 //
 // !RETURN VALUE:
 //    int sequence index
@@ -1742,7 +1736,7 @@ int ESMC_DistGrid::ESMC_DistGridGetSequenceIndex(
 // !DESCRIPTION:
 //    Get sequential index
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // automatic variable for local return code
@@ -1775,12 +1769,12 @@ int ESMC_DistGrid::ESMC_DistGridGetSequenceIndex(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridGetSequenceDe()"
-//BOP
-// !IROUTINE:  ESMC_DistGridGetSequenceDe
+#define ESMC_METHOD "ESMCI::DistGrid::getSequenceDe()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::getSequenceDe
 //
 // !INTERFACE:
-int ESMC_DistGrid::ESMC_DistGridGetSequenceDe(
+int DistGrid::getSequenceDe(
 //
 // !RETURN VALUE:
 //    int DE that covers sequential index
@@ -1793,7 +1787,7 @@ int ESMC_DistGrid::ESMC_DistGridGetSequenceDe(
 // !DESCRIPTION:
 //    Get DE that covers sequential index
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // automatic variable for local return code
@@ -1861,12 +1855,12 @@ int ESMC_DistGrid::ESMC_DistGridGetSequenceDe(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridGetPatchMinmaxIndex()"
-//BOP
-// !IROUTINE:  ESMC_DistGridGetPatchMinmaxIndex
+#define ESMC_METHOD "ESMCI::DistGrid::getPatchMinMaxIndex()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::getPatchMinMaxIndex
 //
 // !INTERFACE:
-int ESMC_DistGrid::ESMC_DistGridGetPatchMinmaxIndex(
+int DistGrid::getPatchMinMaxIndex(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1874,14 +1868,14 @@ int ESMC_DistGrid::ESMC_DistGridGetPatchMinmaxIndex(
 // !ARGUMENTS:
 //
   int patch,                            // in  - DE   = {1, ..., patchCount}
-  int *minIndexArg,                    // out
-  int *maxIndexArg                     // out
+  int *minIndexArg,                     // out
+  int *maxIndexArg                      // out
   ){    
 //
 // !DESCRIPTION:
 //    Get information about a DistGrid object
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // automatic variable for local return code
@@ -1920,12 +1914,12 @@ int ESMC_DistGrid::ESMC_DistGridGetPatchMinmaxIndex(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridSerialize"
+#define ESMC_METHOD "ESMCI::DistGrid::serialize()"
 //BOPI
-// !IROUTINE:  ESMC_DistGridSerialize - Turn distgrid information into a byte stream
+// !IROUTINE:  ESMC::DistGrid::serialize - Turn distgrid into a byte stream
 //
 // !INTERFACE:
-int ESMC_DistGrid::ESMC_DistGridSerialize(
+int DistGrid::serialize(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1946,7 +1940,7 @@ int ESMC_DistGrid::ESMC_DistGridSerialize(
     char *cp;
     int *ip;
     ESMC_Logical *lp;
-    ESMC_VM **vp;
+    VM **vp;
     ESMC_DePinFlag *dp;
     de_type *dep;
 
@@ -1956,14 +1950,14 @@ int ESMC_DistGrid::ESMC_DistGridSerialize(
     //  allocated on the f90 side.  change the code to make the allocate
     //  happen in C++; then this will be fine.  (for now make sure buffer
     //  is always big enough so realloc is not needed.)
-    fixedpart = sizeof(ESMC_DistGrid);
+    fixedpart = sizeof(DistGrid);
     if ((*length - *offset) < fixedpart) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
                              "Buffer too short to add a DistGrid object", &rc);
         return ESMF_FAILURE; 
     }
 
-    // fixedpart = sizeof(ESMC_DELayout);
+    // fixedpart = sizeof(DELayout);
     // if ((*length - *offset) < fixedpart) {
     //     buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
     //     *length += 2 * fixedpart;
@@ -1972,7 +1966,7 @@ int ESMC_DistGrid::ESMC_DistGridSerialize(
     // first set the base part of the object
     rc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset);
     // serialize the DELayout
-    rc = delayout->ESMC_DELayoutSerialize(buffer, length, offset);
+    rc = delayout->serialize(buffer, length, offset);
     
     // figure current position in buffer
     cp = (char *)(buffer + *offset);
@@ -2013,12 +2007,12 @@ int ESMC_DistGrid::ESMC_DistGridSerialize(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridDeserialize"
+#define ESMC_METHOD "ESMCI::DistGrid::deserialize()"
 //BOPI
-// !IROUTINE:  ESMC_DistGridDeserialize - Turn a byte stream into an object
+// !IROUTINE:  ESMCI::DistGrid::deserialize - Turn a byte stream into an object
 //
 // !INTERFACE:
-ESMC_DistGrid *ESMC_DistGridDeserialize(
+DistGrid *DistGrid::deserialize(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2033,13 +2027,13 @@ ESMC_DistGrid *ESMC_DistGridDeserialize(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-    ESMC_DistGrid *a = new ESMC_DistGrid;
+    DistGrid *a = new DistGrid;
     int fixedpart, nbytes, rc;
     int i, j;
     char *cp;
     int *ip;
     ESMC_Logical *lp;
-    ESMC_VM **vp;
+    VM **vp;
     ESMC_DePinFlag *dp;
     de_type *dep;
 
@@ -2047,7 +2041,7 @@ ESMC_DistGrid *ESMC_DistGridDeserialize(
     rc = ESMC_RC_NOT_IMPL;
     // first get the base part of the object
     rc = a->ESMC_Base::ESMC_Deserialize(buffer, offset);
-    a->delayout = ESMC_DELayoutDeserialize(buffer, offset);
+    a->delayout = DELayout::deserialize(buffer, offset);
     a->vm = NULL; // VM must be reset
 
     // now the rest
@@ -2097,11 +2091,6 @@ ESMC_DistGrid *ESMC_DistGridDeserialize(
 }
 //-----------------------------------------------------------------------------
 
-
-
-
-
-
 //-----------------------------------------------------------------------------
 //
 // Connection functions
@@ -2110,29 +2099,29 @@ ESMC_DistGrid *ESMC_DistGridDeserialize(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Connection()"
-//BOP
-// !IROUTINE:  ESMC_Connection
+#define ESMC_METHOD "ESMCI::DistGrid::connection()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::connection
 //
 // !INTERFACE:
-int ESMC_Connection(
+int DistGrid::connection(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceInt *connection,  // out -
-  int patchIndexA,                            // in  -
-  int patchIndexB,                            // in  -
-  ESMC_InterfaceInt *positionVector,     // in -
-  ESMC_InterfaceInt *orientationVector   // in -
+  InterfaceInt *connection,         // out -
+  int patchIndexA,                  // in  -
+  int patchIndexB,                  // in  -
+  InterfaceInt *positionVector,     // in -
+  InterfaceInt *orientationVector   // in -
   ){    
 //
 // !DESCRIPTION:
 //    Construct a connection element
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // automatic variable for local return code
@@ -2216,27 +2205,28 @@ int ESMC_Connection(
 }
 //-----------------------------------------------------------------------------
 
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGrid::SetArbIdx()"
-//BOP
-// !IROUTINE:  ESMC_Connection
+#define ESMC_METHOD "ESMCI::DistGrid::setArbIdx()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::setArbIdx
 //
 // !INTERFACE:
 //
-int ESMC_DistGrid::SetArbIdx(
+int DistGrid::setArbIdx(
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceInt *arbIndices // in
+  InterfaceInt *arbIndices // in
   )
 //
 // !DESCRIPTION:
 //    Set the array of arbitrary indicies
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
 {
   int localrc;
@@ -2254,3 +2244,5 @@ int ESMC_DistGrid::SetArbIdx(
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
+
+} // namespace ESMCI

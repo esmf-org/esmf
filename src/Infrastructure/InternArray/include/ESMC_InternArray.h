@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray.h,v 1.6 2007/03/31 05:51:12 cdeluca Exp $
+// $Id: ESMC_InternArray.h,v 1.7 2007/06/20 01:29:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@ class ESMC_InternArray : public ESMC_LocalArray { // inherit from LocalArray cls
                                struct ESMC_AxisIndex *index);
 
 // obsolete?
-//    int ESMC_ArrayComputeAxisIndex(struct ESMC_DELayout *delayout, 
+//    int ESMC_ArrayComputeAxisIndex(struct ESMCI::DELayout *delayout, 
 //                                   int *decompids, int dlen);
 
 // not at right level; should move to arraycomm
@@ -176,19 +176,19 @@ class ESMC_InternArray : public ESMC_LocalArray { // inherit from LocalArray cls
     char *ESMC_ArrayGetName(void) { return ESMC_BaseGetName(); }
 
     // most important array methods
-    int ESMC_ArrayRedist(ESMC_DELayout *delayout, int global_start[], 
+    int ESMC_ArrayRedist(ESMCI::DELayout *delayout, int global_start[], 
                          int global_dimlengths[], int rank_trans[], 
                          int size_rank_trans, int olddecompids[], 
                          int decompids[], int size_decomp,
                           ESMC_InternArray *RedistArray);
-    int ESMC_ArrayHalo(ESMC_DELayout *delayout,
+    int ESMC_ArrayHalo(ESMCI::DELayout *delayout,
                        ESMC_AxisIndex *ai_global, int global_dimlengths[],
                        int decompids[], int size_decomp, ESMC_Logical periodic[]);
-    int ESMC_ArrayGather(ESMC_DELayout *delayout, int decompids[], 
+    int ESMC_ArrayGather(ESMCI::DELayout *delayout, int decompids[], 
                          int size_decomp, int local_axislengths[],
                          int global_dimlengths[], int local_maxlength[],
                          int deid, ESMC_InternArray **Array_out);
-    int ESMC_ArrayScatter(ESMC_DELayout *delayout,
+    int ESMC_ArrayScatter(ESMCI::DELayout *delayout,
                           int decompids[], int size_decomp,
                           int deid, ESMC_InternArray **Array_out);
     

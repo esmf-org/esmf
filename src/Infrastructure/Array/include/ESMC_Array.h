@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.53 2007/04/28 04:05:28 theurich Exp $
+// $Id: ESMC_Array.h,v 1.54 2007/06/20 01:29:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -7,9 +7,8 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-
-// ESMC DELayout include file for C++
-
+//
+//-------------------------------------------------------------------------
 // (all lines below between the !BOP and !EOP markers will be included in
 //  the automated document processing.)
 //-------------------------------------------------------------------------
@@ -17,11 +16,11 @@
 // ends up being included multiple times
 
 #ifndef ESMC_Array_H
-#define ESMC_newArray_H
+#define ESMC_Array_H
 
 //-------------------------------------------------------------------------
-//BOP
-// !CLASS: ESMC_Array - Array
+//BOPI
+// !CLASS: ESMCI::Array - Array
 //
 // !DESCRIPTION:
 //
@@ -29,12 +28,12 @@
 // signatures (prototypes).  The companion file {\tt ESMC\_Array.C}
 // contains the full code (bodies) for the {\tt Array} methods.
 //
-///EOP
+//EOPI
 //-------------------------------------------------------------------------
 
 #include "ESMF_Pthread.h"
 
-#include "ESMC_Base.h"
+#include "ESMC_Base.h"      // Base is superclass to Array
 #include "ESMC_VM.h"
 #include "ESMC_DELayout.h"
 #include "ESMC_DistGrid.h"
@@ -42,11 +41,17 @@
 #include "ESMC_LocalArray.h"
 #include "ESMC_RHandle.h"
 
+//-------------------------------------------------------------------------
 
-class ESMC_Array;
+namespace ESMCI {
+
+// classes
+
+class Array;
 
 // class definition
-class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
+class Array : public ESMC_Base {    // inherits from ESMC_Base class
+  
   private:
     // global information
     ESMC_TypeKind typekind;
@@ -76,8 +81,8 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     int *contiguousFlag;
     int *deCellCount;
     // lower level objects
-    ESMC_DistGrid *distgrid;
-    ESMC_DELayout *delayout;
+    DistGrid *distgrid;
+    DELayout *delayout;
     // cached values from LocalArray
     // cached values from DistGrid
     int dimCount;
@@ -88,78 +93,79 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     // derived from DELayout
     int *deList;  // localDE index for DE or -1 if not local
     
-  public:
-    // Construct and Destruct
-    int ESMC_ArrayConstruct(ESMC_TypeKind typekind, int rank,
+  private:
+    // construct() and destruct()
+    int construct(ESMC_TypeKind typekind, int rank,
       ESMC_LocalArray **larrayList,
-      ESMC_DistGrid *distgrid, int *exclusiveLBound, int *exclusiveUBound, 
+      DistGrid *distgrid, int *exclusiveLBound, int *exclusiveUBound, 
       int *computationalLBound, int *computationalUBound, 
       int *totalLBound, int *totalUBound, int tensorCount,
       int *lboundsArray, int *uboundsArray, int *staggerLoc, int *vectorDim,
       int *dimmapArray, int *inverseDimmapArray, ESMC_IndexFlag indexflagArg);
-    int ESMC_ArrayDestruct(void);
-    // Get, Set
-    int ESMC_ArraySet(char *name){
-      return ESMC_BaseSetName(name, "Array");
-    }
-    char *ESMC_ArrayGet(void){
+    int destruct(void);
+    
+  public:
+    // create() and destroy()
+    static Array *create(ESMC_ArraySpec *arrayspec, DistGrid *distgrid,
+      InterfaceInt *dimmap, InterfaceInt *computationalLWidthArg,
+      InterfaceInt *computationalUWidthArg,
+      InterfaceInt *totalLWidthArg, InterfaceInt *totalUWidthArg,
+      ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim,
+      InterfaceInt *lboundsArg, InterfaceInt *uboundsArg, int *rc);
+    static Array *create(ESMC_LocalArray **larrayList, int larrayCount,
+      DistGrid *distgrid, InterfaceInt *dimmap,
+      InterfaceInt *computationalLWidthArg,
+      InterfaceInt *computationalUWidthArg,
+      InterfaceInt *totalLWidthArg, InterfaceInt *totalUWidthArg,
+      ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim,
+      InterfaceInt *lboundsArg, InterfaceInt *uboundsArg, int *rc);
+    static int destroy(Array **array);
+    // get() and set()
+    char *get(void){
       return ESMC_BaseGetName();
     }
-    int ESMC_ArrayGet(ESMC_TypeKind *typekind, int *rank,
+    int get(ESMC_TypeKind *typekind, int *rank,
       ESMC_LocalArray **localArrayList, int localArrayListCount,
-      ESMC_DistGrid **distgridArg, ESMC_DELayout **delayoutArg,
-      ESMC_IndexFlag *indexflag, ESMC_InterfaceInt *dimmapArg,
-      ESMC_InterfaceInt *inverseDimmapArg,
-      ESMC_InterfaceInt *exclusiveLBoundArg,
-      ESMC_InterfaceInt *exclusiveUBoundArg,
-      ESMC_InterfaceInt *computationalLBoundArg,
-      ESMC_InterfaceInt *computationalUBoundArg,
-      ESMC_InterfaceInt *totalLBoundArg, ESMC_InterfaceInt *totalUBoundArg,
-      ESMC_InterfaceInt *computationalLWidthArg,
-      ESMC_InterfaceInt *computationalUWidthArg,
-      ESMC_InterfaceInt *totalLWidthArg, ESMC_InterfaceInt *totalUWidthArg);
-    int ESMC_ArrayGetLinearIndexExclusive(int localDe, int *index);
-    // IO and validation
-    int ESMC_ArrayPrint(void);
-    // serialize/deserialize
-    int ESMC_ArraySerialize(char *buffer, int *length, int *offset) const;
-    int ESMC_ArrayDeserialize(char *buffer, int *offset);
-    
-    // comm methods
-    int ESMC_ArrayScatter(void *array, ESMC_TypeKind typekind, int rank,
-      int *counts, int *patch, int rootPet, ESMC_VM *vm);
-    
-    // external friend functions
-    friend int ESMC_ArraySparseMatMulStore(ESMC_Array *srcArray, 
-      ESMC_Array *dstArray, ESMC_R8 *factorList, int factorListCount,
-      ESMC_InterfaceInt *factorIndexList, int rootPet, 
+      DistGrid **distgridArg, DELayout **delayoutArg,
+      ESMC_IndexFlag *indexflag, InterfaceInt *dimmapArg,
+      InterfaceInt *inverseDimmapArg,
+      InterfaceInt *exclusiveLBoundArg,
+      InterfaceInt *exclusiveUBoundArg,
+      InterfaceInt *computationalLBoundArg,
+      InterfaceInt *computationalUBoundArg,
+      InterfaceInt *totalLBoundArg, InterfaceInt *totalUBoundArg,
+      InterfaceInt *computationalLWidthArg,
+      InterfaceInt *computationalUWidthArg,
+      InterfaceInt *totalLWidthArg, InterfaceInt *totalUWidthArg);
+    int getLinearIndexExclusive(int localDe, int *index);
+    int set(char *name){
+      return ESMC_BaseSetName(name, "Array");
+    }
+    // misc.
+    int print(void);
+    int serialize(char *buffer, int *length, int *offset) const;
+    int deserialize(char *buffer, int *offset);
+    // comms
+    int scatter(void *array, ESMC_TypeKind typekind, int rank,
+      int *counts, int *patch, int rootPet, VM *vm);
+    static int sparseMatMulStore(Array *srcArray, Array *dstArray,
+      ESMC_R8 *factorList, int factorListCount,
+      InterfaceInt *factorIndexList, int rootPet, 
       ESMC_RouteHandle **routehandle);
-    friend int ESMC_ArraySparseMatMul(ESMC_Array *srcArray, 
-      ESMC_Array *dstArray, ESMC_RouteHandle **routehandle);
+    static int sparseMatMul(Array *srcArray, Array *dstArray,
+      ESMC_RouteHandle **routehandle);
+    static int sparseMatMulRelease(ESMC_RouteHandle *routehandle);
     
-};  // end class ESMC_Array
+};  // class Array
+
+} // namespace ESMCI
 
 
-// external methods:  
 
-ESMC_Array *ESMC_ArrayCreate(ESMC_ArraySpec *arrayspec, ESMC_DistGrid *distgrid,
-  ESMC_InterfaceInt *dimmap, ESMC_InterfaceInt *computationalLWidthArg,
-  ESMC_InterfaceInt *computationalUWidthArg, ESMC_InterfaceInt *totalLWidthArg,
-  ESMC_InterfaceInt *totalUWidthArg, ESMC_IndexFlag *indexflag, int *staggerLoc,
-  int *vectorDim, ESMC_InterfaceInt *lboundsArg, ESMC_InterfaceInt *uboundsArg,
-  int *rc);
-
-ESMC_Array *ESMC_ArrayCreate(ESMC_LocalArray **larrayList, int larrayCount, 
-  ESMC_DistGrid *distgrid, ESMC_InterfaceInt *dimmap,
-  ESMC_InterfaceInt *computationalLWidthArg,
-  ESMC_InterfaceInt *computationalUWidthArg, ESMC_InterfaceInt *totalLWidthArg,
-  ESMC_InterfaceInt *totalUWidthArg, ESMC_IndexFlag *indexflag, int *staggerLoc,
-  int *vectorDim, ESMC_InterfaceInt *lboundsArg, ESMC_InterfaceInt *uboundsArg,
-  int *rc);
-
-int ESMC_ArrayDestroy(ESMC_Array **array);
-
-int ESMC_ArraySparseMatMulRelease(ESMC_RouteHandle *routehandle);
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 
 
 //-------------------------------------------------------------------------
@@ -179,7 +185,7 @@ typedef struct{
 
 typedef struct{
   ESMC_newArray *array;     // pointer to calling ESMC_newArray object
-  ESMC_VM *vm;              // pointer to current VM
+  ESMCI::VM *vm;              // pointer to current VM
   int de;                   // DE for DE-based non-blocking operation
   int rootPET;              // root
   void *result;             // result memory location
@@ -200,7 +206,7 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
     int **globalFullLBound;   // fullBox (data + halo) for this DE [de][dim]
     int **globalFullUBound;   // fullBox (data + halo) for this DE [de][dim]
     int **dataOffset;         // offset dataBox vs. fullBox for DE [de][dim]
-    ESMC_DELayout *delayout;        // DELayout on which newArray is defined
+    ESMCI::DELayout *delayout;// DELayout on which newArray is defined
     ESMC_LocalArray **localArrays;  // array of LocalArray pointers [localDe]
     ESMC_newArrayCommHandle *commhArray;  // array of commhandles [localDe]
     ESMC_newArrayThreadArg *thargArray;   // array of thread args [localDe]
@@ -220,14 +226,14 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_newArrayConstruct(  
       ESMC_LocalArray *larray,  // pointer to ESMC_LocalArray object
       int *haloWidth,           // halo width
-      ESMC_DELayout *delayout,  // DELayout
+      ESMCI::DELayout *delayout,  // DELayout
       int rootPET,              // root
-      ESMC_VM *vm=NULL);        // optional VM argument to speed up things
+      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
 
     int ESMC_newArrayDestruct(void);
 
     // Get info
-    int ESMC_newArrayGet(int *rank, ESMC_DELayout **delayout, 
+    int ESMC_newArrayGet(int *rank, ESMCI::DELayout **delayout, 
       ESMC_LocalArray **localArrays, int len_localArrays,
       int *globalFullLBound, int *len_globalFullLBound,
       int *globalFullUBound, int *len_globalFullUBound,
@@ -243,26 +249,26 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_newArrayScatter(
       ESMC_LocalArray *larray,  // pointer to ESMC_LocalArray object
       int rootPET,              // root
-      ESMC_VM *vm=NULL);        // optional VM argument to speed up things
+      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
     
     int ESMC_newArrayScatter(
       ESMC_LocalArray *larray,  // pointer to ESMC_LocalArray object
       int rootPET,              // root
       ESMC_newArrayCommHandle *commh, // commu handle for non-blocking mode
-      ESMC_VM *vm=NULL);        // optional VM argument to speed up things
+      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
 
     int ESMC_newArrayScatter(
       ESMC_LocalArray *larray,  // pointer to ESMC_LocalArray object
       int rootPET,              // root
       int de,                   // DE for DE-based non-blocking scatter
-      ESMC_VM *vm=NULL);        // optional VM argument to speed up things
+      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
 
     int ESMC_newArrayScalarReduce(
       void *result,             // result value (scalar)
       ESMC_TypeKind dtk,        // data type kind
       ESMC_Operation op,        // reduce operation
       int rootPET,              // root
-      ESMC_VM *vm=NULL);        // optional VM argument to speed up things
+      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
 
     int ESMC_newArrayScalarReduce(
       void *result,             // result value (scalar)
@@ -270,7 +276,7 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
       ESMC_Operation op,        // reduce operation
       int rootPET,              // root
       ESMC_newArrayCommHandle *commh, // commu handle for non-blocking mode
-      ESMC_VM *vm=NULL);        // optional VM argument to speed up things
+      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
 
     int ESMC_newArrayScalarReduce(
       void *result,             // result value (scalar)
@@ -278,16 +284,16 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
       ESMC_Operation op,        // reduce operation
       int rootPET,              // root
       int de,                   // DE for DE-based non-blocking reduce
-      ESMC_VM *vm=NULL);        // optional VM argument to speed up things
+      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
 
     int ESMC_newArrayWait(
       int rootPET,              // root
       ESMC_newArrayCommHandle *commh, // commu handle specifying non-block op.
-      ESMC_VM *vm=NULL);        // optional VM argument to speed up things
+      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
 
     int ESMC_newArrayWait(
       int de,                   // DE for which to wait
-      ESMC_VM *vm=NULL);        // optional VM argument to speed up things
+      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
     
     // friend functions that provide thread support for non-blocking comms
     friend void *ESMC_newArrayScatterThread(void *);

@@ -1,4 +1,4 @@
-// $Id: ESMC_DistDir.h,v 1.3 2007/05/01 21:14:11 dneckels Exp $
+// $Id: ESMC_DistDir.h,v 1.4 2007/06/20 01:29:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -121,7 +121,7 @@ public:
 // Create the DDIR.
 // gid = all locally (owned or resident id's)
 // lid = local id's of corresponding gid
-DistDir(ESMC_VM &vm, UInt ngid, const id_type gid[], const id_type lid[]);
+DistDir(ESMCI::VM &vm, UInt ngid, const id_type gid[], const id_type lid[]);
   
 ~DistDir();
 
@@ -172,7 +172,7 @@ public:
     return l.gid < r.gid;
   }
 };
-ESMC_VM &vm;
+ESMCI::VM &vm;
 const hash hash_func;
 UInt gmin, gmax; // global min and max of id's
 UInt npet, rank;

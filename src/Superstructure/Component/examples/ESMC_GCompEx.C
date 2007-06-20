@@ -1,4 +1,4 @@
-// $Id: ESMC_GCompEx.C,v 1.17 2007/05/21 20:06:11 svasquez Exp $
+// $Id: ESMC_GCompEx.C,v 1.18 2007/06/20 01:29:26 theurich Exp $
 //
 // Example/test code which creates a new comp.
 
@@ -32,7 +32,7 @@ main(int argc, char **argv) {
 //   // Local variables
      int x, y, rc, finalrc, mycell;
      char compname[32];
-     ESMC_DELayout *layout;
+     ESMCI::DELayout *layout;
      ESMC_Comp *comp1, *comp2, *comp3, *comp4;
         
 //-------------------------------------------------------------------------

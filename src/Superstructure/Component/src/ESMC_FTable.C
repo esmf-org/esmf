@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.27 2007/05/11 02:46:12 rosalind Exp $
+// $Id: ESMC_FTable.C,v 1.28 2007/06/20 01:29:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.27 2007/05/11 02:46:12 rosalind Exp $";
+           "$Id: ESMC_FTable.C,v 1.28 2007/06/20 01:29:29 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -699,7 +699,7 @@
 //
 // !ARGUMENTS:
       char *name,           // in, function name
-      ESMC_VM *vm_pointer,  // in, pointer to this PET's VM instance
+      ESMCI::VM *vm_pointer,  // in, pointer to this PET's VM instance
       int *rc) {            // out, function return
 //
 // !DESCRIPTION:
@@ -709,8 +709,8 @@
 // !REQUIREMENTS:  
 
     int i, status;
-    ESMC_VM *vmm = vm_pointer;
-    ESMC_VM **vm = &vmm;
+    ESMCI::VM *vmm = vm_pointer;
+    ESMCI::VM **vm = &vmm;
     
     *rc = ESMC_RC_NOT_IMPL;
     status = ESMC_RC_NOT_IMPL;
@@ -797,8 +797,8 @@
             C2SFunc vf = (C2SFunc)funcs[i].funcptr;
             int rrc;
             void *comp;
-            int mypet = vm_pointer->vmk_mypet();
-            if (vm_pointer->vmk_nthreads(mypet) > 1){
+            int mypet = vm_pointer->getMypet();
+            if (vm_pointer->getNthreads(mypet) > 1){
               // mypet is part of a thread group
               ESMC_CompType ctype;
               // Replicate the component object on the heap for this thread

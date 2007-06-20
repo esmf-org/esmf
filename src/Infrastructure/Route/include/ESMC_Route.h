@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.65 2007/03/31 05:51:20 cdeluca Exp $
+// $Id: ESMC_Route.h,v 1.66 2007/06/20 01:29:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@
      // name in base class
      int routeid;           // unique id, used later for cacheing
      ESMC_RouteOptions options; // sync/async, how to pack when communicating
-     ESMC_VM *vm;           // vm on which this route runs
+     ESMCI::VM *vm;         // vm on which this route runs
                             // must include VASs of all src + dst de's
      ESMC_RTable *sendRT;   // send route table
      ESMC_RTable *recvRT;   // receive route table
@@ -88,7 +88,7 @@
   public:
  // ESMC_RouteCreate and ESMC_RouteDestroy are declared below,
  // outside the ESMC_Route declaration
-    int ESMC_RouteConstruct(ESMC_VM *vm);
+    int ESMC_RouteConstruct(ESMCI::VM *vm);
     int ESMC_RouteDestruct(void);
 
  // accessor methods for class members
@@ -111,16 +111,16 @@
     int ESMC_RoutePrecomputeHalo(int rank, int my_DE, ESMC_AxisIndex *AI_exc,
                        ESMC_AxisIndex *AI_tot, int AI_count, 
                        int *global_start, int *global_count,
-                       ESMC_DELayout *delayout,
+                       ESMCI::DELayout *delayout,
                        ESMC_Logical *periodic = NULL);
 
     int ESMC_RoutePrecomputeRedist(int rank, ESMC_Logical hasSrcData, 
-                                   ESMC_DELayout *srcDELayout,
+                                   ESMCI::DELayout *srcDELayout,
                                    int mySrcDE, int srcDECount,
                                    ESMC_AxisIndex *srcGlobalCompAIperDEperRank,
                                    ESMC_AxisIndex *mySrcGlobalTotalAIperRank,
                                    ESMC_Logical  hasDstData,
-                                   ESMC_DELayout *dstDELayout,
+                                   ESMCI::DELayout *dstDELayout,
                                    int myDstDE, int dstDECount,
                                    ESMC_AxisIndex *dstGlobalCompAIperDEperRank,
                                    ESMC_AxisIndex *myDstGlobalTotalAIperRank);
@@ -130,33 +130,33 @@
                        ESMC_AxisIndex *dstCompAI, ESMC_AxisIndex *dstTotalAI,
                        int dstAICount, int *dstAICountPerDE,
                        int *dstGlobalStart, int dstGSCount, int *dstGlobalCount,
-                       ESMC_DELayout *dstdeLayout, ESMC_Logical hasSrcData,
+                       ESMCI::DELayout *dstdeLayout, ESMC_Logical hasSrcData,
                        int srcMyDE, ESMC_Logical srcVector,
                        ESMC_AxisIndex *srcCompAI, ESMC_AxisIndex *srcTotalAI,
                        int srcAICount, int *srcAICountPerDE,
                        int *srcGlobalStart, int srcGSCount, int *srcGlobalCount,
-                       ESMC_DELayout *srcdeLayout);
+                       ESMCI::DELayout *srcdeLayout);
     int ESMC_RoutePrecomputeRedistA2A(int rank, ESMC_Logical hasDstData,
                        int dstMyDE,
                        ESMC_AxisIndex *dstCompAI,
                        int dstAICount, int *dstAICountPerDE,
                        int *dstGlobalStart, int dstGSCount, int *dstGlobalCount,
-                       ESMC_DELayout *dstdeLayout, ESMC_Logical hasSrcData,
+                       ESMCI::DELayout *dstdeLayout, ESMC_Logical hasSrcData,
                        int srcMyDE,
                        ESMC_AxisIndex *srcCompAI,
                        int srcAICount, int *srcAICountPerDE,
                        int *srcGlobalStart, int srcGSCount, int *srcGlobalCount,
-                       ESMC_DELayout *srcdeLayout);
+                       ESMCI::DELayout *srcdeLayout);
     int ESMC_RoutePrecomputeRegrid(int rank, int my_DE_rcv, 
                        ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
                        int AI_rcv_count, int *global_start_rcv,
-                       int *global_count_rcv, ESMC_DELayout *delayout_rcv,
+                       int *global_count_rcv, ESMCI::DELayout *delayout_rcv,
                        int my_DE_snd, 
                        ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot,
                        int AI_snd_count, int *global_start_snd,
-                       int *global_count_snd, ESMC_DELayout *delayout_snd);
-    int ESMC_RoutePrecomputeDomList(int rank, ESMC_DELayout *srcDELayout, 
-                       ESMC_DELayout *dstDELayout,
+                       int *global_count_snd, ESMCI::DELayout *delayout_snd);
+    int ESMC_RoutePrecomputeDomList(int rank, ESMCI::DELayout *srcDELayout, 
+                       ESMCI::DELayout *dstDELayout,
                        ESMC_DomainList *srcDomainList,
                        ESMC_DomainList *dstDomainList,
                        ESMC_Logical *hasSrcData, ESMC_Logical *hasDstData);
@@ -195,7 +195,7 @@
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_Route object.
 
- ESMC_Route *ESMC_RouteCreate( ESMC_VM *vm, int *rc);
+ ESMC_Route *ESMC_RouteCreate(ESMCI::VM *vm, int *rc);
  int ESMC_RouteDestroy(ESMC_Route *route);
 
  #endif  // ESMC_Route_H

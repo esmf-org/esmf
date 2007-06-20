@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArrayComm.C,v 1.8 2007/04/26 16:13:56 rosalind Exp $
+// $Id: ESMC_InternArrayComm.C,v 1.9 2007/06/20 01:29:22 theurich Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArrayComm.C,v 1.8 2007/04/26 16:13:56 rosalind Exp $";
+            "$Id: ESMC_InternArrayComm.C,v 1.9 2007/06/20 01:29:22 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -63,7 +63,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_DELayout *delayout,     // in  - layout (temporarily)
+      ESMCI::DELayout *delayout, // in  - layout (temporarily)
       ESMC_AxisIndex *ai_global, // in  - do we need?  jw
       int global_dimlengths[],   // in
       int decompids[],           // in  - decomposition identifier for each
@@ -104,7 +104,7 @@ static int ESMC_newDELayoutGatherArray(
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_DELayout *delayout,
+      ESMCI::DELayout *delayout,
       int root,
       void *DistArray,           // in  - distributed array
       int global_dimlength[],    // in
@@ -133,7 +133,7 @@ static int ESMC_newDELayoutGatherArray(
   int nx, ny, nde, ncount[2];
 
   // TODO: remove dependency on deprecated DELayout  
-  delayout->ESMC_DELayoutGetDeprecated(&nde, NULL, NULL, NULL, 0, NULL,
+  delayout->getDeprecated(&nde, NULL, NULL, NULL, 0, NULL,
                             NULL, NULL, ncount, 2);
   nx = ncount[0];
   ny = ncount[1];
@@ -342,7 +342,7 @@ static int ESMC_newDELayoutGatherArray(
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_DELayout *delayout,     // in  - layout (temporarily)
+      ESMCI::DELayout *delayout,     // in  - layout (temporarily)
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
@@ -375,7 +375,7 @@ static int ESMC_newDELayoutGatherArray(
     }
 
     // TODO: remove dependency on deprecated DELayout  
-    delayout->ESMC_DELayoutGetDeprecated(NULL, NULL, NULL, NULL, 0, &thisde,
+    delayout->getDeprecated(NULL, NULL, NULL, NULL, 0, &thisde,
                                   NULL, NULL, NULL, 0);
 
     // create array with global data buffer
@@ -424,7 +424,7 @@ static int ESMC_newDELayoutGatherArray(
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_DELayout *delayout,     // in  - layout (temporarily)
+      ESMCI::DELayout *delayout,     // in  - layout (temporarily)
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
@@ -462,7 +462,7 @@ static int ESMC_newDELayoutGatherArray(
     }
 
     // TODO: remove dependency on deprecated DELayout
-    delayout->ESMC_DELayoutGetDeprecated(NULL, NULL, NULL, NULL, 0, &thisde,
+    delayout->getDeprecated(NULL, NULL, NULL, NULL, 0, &thisde,
                                   NULL, NULL, NULL, 0);
 
     // switch based on datatype  TODO: this might be a good place to use templates
@@ -539,7 +539,7 @@ static int ESMC_newDELayoutGatherArray(
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_DELayout *delayout,     // in  - layout (temporarily)
+      ESMCI::DELayout *delayout,     // in  - layout (temporarily)
       int global_start[],        // in  - array of global starting positions
       int global_dimlengths[],   // in  - array of global dimensions
       int rank_trans[],          // in  - translation of old ranks to new

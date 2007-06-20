@@ -1,4 +1,4 @@
-// $Id: ESMC_SparseMsg.C,v 1.4 2007/06/08 22:42:42 dneckels Exp $
+// $Id: ESMC_SparseMsg.C,v 1.5 2007/06/20 01:29:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_SparseMsg.C,v 1.4 2007/06/08 22:42:42 dneckels Exp $";
+            "$Id: ESMC_SparseMsg.C,v 1.5 2007/06/20 01:29:21 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -59,7 +59,7 @@ SparseMsg::SparseMsg(
 
 //
 // !ARGUMENTS:
-     ESMC_VM &_vm)     // Virtual machine to live in
+     ESMCI::VM &_vm)     // Virtual machine to live in
 //
 // !DESCRIPTION:
 //     Constructor.
@@ -81,7 +81,7 @@ SparseMsg::SparseMsg(
   self_idx(0),
   obj_state(BASE)
 {
-  vm.ESMC_VMGet(&rank, &npet, NULL, NULL, NULL);
+  vm.get(&rank, &npet, NULL, NULL, NULL);
 }
 
 //-----------------------------------------------------------------------------
@@ -258,7 +258,7 @@ void SparseMsg::setSizes(
   std::vector<vmk_status> stat(enD);
   if (num_incoming > 0) {
     for (UInt w = 0; w < enD; w++) {
-      vm.vmk_commwait(&commhp[w], &stat[w]);
+      vm.commwait(&commhp[w], &stat[w]);
     }
     //ret = MPI_Waitall(enD, &request[0], &status[0]);
     //if (ret != MPI_SUCCESS) 
@@ -365,7 +365,7 @@ void SparseMsg::communicate()
   }
 
   for (UInt w = 0; w < enD; w++) {
-      vm.vmk_commwait(&commhp[w]);
+      vm.commwait(&commhp[w]);
   }
   //ret = MPI_Waitall(enD, &request[0], &status[0]);
   //if (ret != MPI_SUCCESS) 

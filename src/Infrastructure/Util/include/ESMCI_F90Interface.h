@@ -1,4 +1,4 @@
-// $Id: ESMCI_F90Interface.h,v 1.1 2007/04/20 18:44:31 theurich Exp $
+// $Id: ESMCI_F90Interface.h,v 1.2 2007/06/20 01:29:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -33,16 +33,21 @@
 // Class that helps with [optinal] F90 array arguments on the interface
 //-------------------------------------------------------------------------
 
-class ESMC_InterfaceInt{
+namespace ESMCI {
+
+class InterfaceInt{
   public: // this thin class is public to make it's usage uncomplicated
     int *array;
     int dimCount;
     int extent[7];    // size 7 reflects the Fortran limit
   public:
-    ESMC_InterfaceInt(void);   // native constructor
-    ESMC_InterfaceInt(int *arrayArg, int dimArg, int *lenArg);//n. cnstr.
-    ~ESMC_InterfaceInt(void);  // native destructor
+    InterfaceInt(void);                                   // native constructor
+    InterfaceInt(int *arrayArg, int dimArg, int *lenArg); //native constructor
+    ~InterfaceInt(void);                                  // native destructor
 };
+
+} // namespace ESMCI
+
 
 //-------------------------------------------------------------------------
 // Macros that are used in the C glue code for F90-to-C++
