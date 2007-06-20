@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.48 2007/06/20 01:29:24 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.49 2007/06/20 23:38:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -251,7 +251,7 @@ class VMK{
   
     void print(void);
     
-    // get() calls
+    // get() calls    <-- to be replaced by following new inlined section
     int getNpets(void);            // return npets
     int getMypet(void);            // return mypet
     pthread_t getMypthid(void);    // return mypthid
@@ -263,7 +263,11 @@ class VMK{
     int getVas(int i);             // return vas for PET
     int getLpid(int i);            // return lpid for PET
     
-    
+    // get() calls
+    int getLocalPet() const {return mypet;}
+    int getPetCount() const {return npets;}
+
+       
     // p2p communication calls
     int vmk_send(void *message, int size, int dest, int tag=-1);
     int vmk_send(void *message, int size, int dest,

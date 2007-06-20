@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.17 2007/06/20 01:29:20 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.18 2007/06/20 23:37:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -118,19 +118,32 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
     static int destroy(DistGrid **distgrid);
     // get() and set()
+    int getDimCount()               const {return dimCount;}
+    int getPatchCount()             const {return patchCount;}
+    const int *getPatchCellCount()  const {return patchCellCount;}
+    const int *getDePatchList()     const {return dePatchList;}
+    const int *getMinIndex()        const {return minIndex;}
+    const int *getMinIndex(int patch, int *rc) const;
+    const int *getMaxIndex()        const {return maxIndex;}
+    const int *getMaxIndex(int patch, int *rc) const;
+    const int *getDeCellCount()     const {return deCellCount;}
+    const int *getDimContigFlag()   const {return dimContigFlag;}
+    const int *getDimExtent()       const {return dimExtent;}
+    const int *getLocalIndexList(int de, int dim, int *rc) const;
+
+    
+    
     int get(DELayout **delayoutArg=NULL,
       int *patchCount=NULL, InterfaceInt *patchList=NULL,
       int *dimCountArg=NULL, InterfaceInt *dimExtentArg=NULL, 
-      ESMC_Logical *regDecompFlagArg=NULL);
-    int get(int de, int *cellCount);
+      ESMC_Logical *regDecompFlagArg=NULL) const;
+    int get(int de, int *cellCount) const;
     int get(int de, int dim, InterfaceInt *indexList=NULL,
-      int *contigFlag=NULL);
-    int getLocal(int de, int dim, 
-      InterfaceInt *localIndexList=NULL);
-    int getSequenceIndex(int de, int *index);
-    int getSequenceDe(int seqindex);
-    int getPatchMinMaxIndex(int patch, int *minIndex, int
-      *maxIndex);
+      int *contigFlag=NULL) const;
+    int getLocal(int de, int dim, InterfaceInt *localIndexList=NULL) const;
+    int getSequenceIndex(int de, int *index) const;
+    int getSequenceDe(int seqindex) const;
+    int getPatchMinMaxIndex(int patch, int *minIndex, int *maxIndex) const;
     int setArbIdx(InterfaceInt *argIndices);
     // misc.
     int print(void);
