@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.12 2007/06/22 04:48:41 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.13 2007/06/22 20:51:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.12 2007/06/22 04:48:41 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.13 2007/06/22 20:51:41 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -625,7 +625,19 @@ contains
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     ! Require DELayout to be 1 DE per PET @\
-    if (localDeCount /= 1) then @\
+    if (localDeCount < 0) then @\
+      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & @\
+        "- Negative number of localDeCount prohibits request", & @\
+        ESMF_CONTEXT, rc) @\
+      return @\
+    endif @\
+    if (localDeCount == 0) then @\
+      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & @\
+        "- localDeCount == 0 prohibits request", & @\
+        ESMF_CONTEXT, rc) @\
+      return @\
+    endif @\
+    if (localDeCount > 1) then @\
       call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & @\
         "- Multiple DEs per PET prohibits request", & @\
         ESMF_CONTEXT, rc) @\
