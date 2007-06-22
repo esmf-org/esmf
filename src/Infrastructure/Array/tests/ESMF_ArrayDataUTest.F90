@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataUTest.F90,v 1.3 2007/05/30 17:46:19 theurich Exp $
+! $Id: ESMF_ArrayDataUTest.F90,v 1.4 2007/06/22 04:48:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayDataUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayDataUTest.F90,v 1.3 2007/05/30 17:46:19 theurich Exp $'
+    '$Id: ESMF_ArrayDataUTest.F90,v 1.4 2007/06/22 04:48:41 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -91,7 +91,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Printing Array created from alocated F90 array pointer"
+  write(name, *) "Printing Array created from allocated F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -127,7 +127,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Printing Array created from alocated F90 array pointer"
+  write(name, *) "Printing Array created from allocated F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.26 2007/06/20 01:29:20 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.27 2007/06/22 04:48:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -114,11 +114,16 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
       InterfaceInt *petList=NULL, VM *vm=NULL, int *rc=NULL);
     static int destroy(ESMCI::DELayout **layout);
     // get() and set()
+    int getDeCount()                const {return deCount;}
+    int getLocalDeCount()           const {return localDeCount;}
+    int *getLocalDeList()           const {return localDeList;}
+    
     int get(VM **vmArg, int *deCountArg, int *petMap, 
       int petMapCount, int *vasMap, int vasMapCount, 
       ESMC_Logical *oneToOneFlagArg, ESMC_DePinFlag *dePinFlagArg,
       int *localDeCountArg, int *localDeListArg, int localDeListCount,
-      int *vasLocalDeCountArg, int *vasLocalDeListArg, int vasLocalDeListCount);
+      int *vasLocalDeCountArg, int *vasLocalDeListArg, int vasLocalDeListCount)
+      const;
     // misc.
     int print(void);
     int validate(void);
@@ -140,16 +145,18 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     static DELayout *create(VM &vm, int *nDEs, int ndim, 
       int *DEtoPET, int len, ESMC_Logical *cyclic, int *rc);  // deprecated
     // get()
-    int getVM(VM **vm);
+    int getVM(VM **vm)const;
     int getDeprecated(int *nDEs, int *ndim, int *nmyDEs, 
       int *myDEs, int len_myDEs, int *localDe, ESMC_Logical *oneToOneFlag,
-      ESMC_Logical *logRectFlag, int *deCountPerDim, int len_deCountPerDim);
+      ESMC_Logical *logRectFlag, int *deCountPerDim, int len_deCountPerDim)
+      const;
     int getDELocalInfo(int DEid, int *DEcoord, int len_coord, 
-      int *DEcde, int len_cde, int *DEcw, int len_cw, int *nDEc, int *pid);
+      int *DEcde, int len_cde, int *DEcw, int len_cw, int *nDEc, int *pid)
+      const;
     int getDEMatchDE(int DEid, DELayout &layoutMatch,
-      int *deMatchCount, int *deMatchList, int len_deMatchList);
+      int *deMatchCount, int *deMatchList, int len_deMatchList)const;
     int getDEMatchPET(int DEid, VM &vmMatch,
-      int *petMatchCount, int *petMatchList, int len_petMatchList);
+      int *petMatchCount, int *petMatchList, int len_petMatchList)const;
         
     // ================ don't promote DELayout Comms =================
   private:

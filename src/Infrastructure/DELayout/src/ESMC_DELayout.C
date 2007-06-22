@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.57 2007/06/20 01:29:20 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.58 2007/06/22 04:48:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.57 2007/06/20 01:29:20 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.58 2007/06/22 04:48:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -156,8 +156,8 @@ DELayout *DELayout::create(
   }
 
   // query the VM for localPet and petCount
-  int localPet, petCount;
-  vm->get(&localPet, &petCount, NULL, NULL, NULL);
+  int localPet = vm->getMypet();
+  int petCount = vm->getNpets();    
   
   // check deCount input
   int deCount = petCount; // number of DEs, default
@@ -925,7 +925,7 @@ int DELayout::get(
   int  *vasLocalDeCountArg,   // out - number of vas-local DEs
   int  *vasLocalDeListArg,    // out - list of vas-local DEs
   int  vasLocalDeListCount    // in  - number of elements in vasLocalDeListArg
-  ){    
+  )const{    
 //
 // !DESCRIPTION:
 //    Get information about a DELayout object
@@ -1045,7 +1045,8 @@ int DELayout::getDeprecated(
   ESMC_Logical *oneToOneFlag, // out - 1-to-1 layout flag
   ESMC_Logical *logRectFlag,  // out - logical rectangular layout flag
   int  *deCountPerDim,        // out - list of dimension sizes
-  int  len_deCountPerDim){    // in  - number of elements in deCountPerDim list
+  int  len_deCountPerDim      // in  - number of elements in deCountPerDim list
+  )const{ 
 //
 // !DESCRIPTION:
 //    Get information about a DELayout object
@@ -1148,7 +1149,8 @@ int DELayout::getVM(
 //
 // !ARGUMENTS:
 //
-  VM **vmArg){              // out - VM this layout is defined on
+  VM **vmArg                // out - VM this layout is defined on
+  )const{ 
 //
 // !DESCRIPTION:
 //    Get VM of this DELayout object
@@ -1188,7 +1190,7 @@ int DELayout::getDELocalInfo(
   int  len_cw,            // in  - dimensions in DEcw
   int  *nDEc,             // out - DE's number of connections
   int  *vas               // out - vas for this DE
-  ){              
+  )const{ 
 //
 // !DESCRIPTION:
 //    Get information about a DELayout object
@@ -1250,7 +1252,7 @@ int DELayout::getDEMatchDE(
   int *deMatchCount,            // out - number of matching DEs in layoutMatch
   int *deMatchList,             // out - list of matching DEs in layoutMatch
   int len_deMatchList           // in  - size of deMatchList
-  ){              
+  )const{ 
 //
 // !DESCRIPTION:
 //    Get information about a DELayout object
@@ -1302,7 +1304,7 @@ int DELayout::getDEMatchPET(
   int *petMatchCount,           // out - number of matching PETs in vmMatch
   int *petMatchList,            // out - list of matching PETs in vmMatch
   int len_petMatchList          // in  - size of petMatchList
-  ){              
+  )const{ 
 //
 // !DESCRIPTION:
 //    Match de in the current DELayout object against the PETs in the 
@@ -1742,9 +1744,8 @@ DELayoutServiceReply DELayout::serviceOffer(
   // initialize the reply
   DELayoutServiceReply reply = DELAYOUT_SERVICE_DENY; // reset
 
-  int localPet, localVas;
-  vm->get(&localPet, NULL, NULL, NULL, NULL);
-  localVas = vm->getVas(localPet);
+  int localPet = vm->getMypet();
+  int localVas = vm->getVas(localPet);
   
   // DE to PET pinning is more restrictive -> check first
   if (dePinFlag == ESMF_DE_PIN_PET){
@@ -1832,9 +1833,8 @@ int DELayout::serviceComplete(
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
 
-  int localPet, localVas;
-  vm->get(&localPet, NULL, NULL, NULL, NULL);
-  localVas = vm->getVas(localPet);
+  int localPet = vm->getMypet();
+  int localVas = vm->getVas(localPet);
   
   // DE to PET pinning is more restrictive -> check first
   if (dePinFlag == ESMF_DE_PIN_PET){

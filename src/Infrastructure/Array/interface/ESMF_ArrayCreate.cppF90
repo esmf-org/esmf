@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.11 2007/05/11 18:11:34 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.12 2007/06/22 04:48:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.11 2007/05/11 18:11:34 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.12 2007/06/22 04:48:41 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -265,6 +265,8 @@ contains
 !      Upper bounds for the array dimensions that are not distributed. @\
 !      By default ubound is equal to the extent of the corresponding @\
 !      dimension in {\tt farray}. @\
+! \item[{[name]}] @\
+!      Name of the Array object. @\
 ! \item[{[rc]}] @\
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -278,7 +280,7 @@ contains
 ^define ESMF_METHOD "ESMF_ArrayCreateAssmdShape" @\
   function ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind(farray, & @\
     distgrid, dimmap, computationalLWidth, computationalUWidth, totalLWidth, & @\
-    totalUWidth, indexflag, staggerLoc, vectorDim, lbounds, ubounds, rc) @\
+    totalUWidth, indexflag, staggerLoc, vectorDim, lbounds, ubounds, name, rc) @\
 @\
     type(ESMF_Array) :: ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind @\
 @\
@@ -294,6 +296,7 @@ contains
     integer,               intent(in),   optional  :: vectorDim @\
     integer,               intent(in),   optional  :: lbounds(:) @\
     integer,               intent(in),   optional  :: ubounds(:) @\
+    character (len=*),     intent(in),   optional  :: name @\
     integer,               intent(out),  optional  :: rc @\
 @\
     ! Local variables @\
@@ -320,9 +323,12 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Create the Array object by calling into overloaded ArrayCreate() interf. @\
-    array = ESMF_ArrayCreate(larrayList, distgrid, dimmap, & @\
-      computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, & @\
-      indexflag, staggerLoc, vectorDim, lbounds, ubounds, status) @\
+    array = ESMF_ArrayCreate(larrayList=larrayList, distgrid=distgrid, & @\
+      dimmap=dimmap, computationalLWidth=computationalLWidth, & @\
+      computationalUWidth=computationalUWidth, totalLWidth=totalLWidth, & @\
+      totalUWidth=totalUWidth, indexflag=indexflag, staggerLoc=staggerLoc, & @\
+      vectorDim=vectorDim, lbounds=lbounds, ubounds=ubounds, name=name, & @\
+      rc=status) @\
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
@@ -357,7 +363,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
   ! Private name; call using ESMF_ArrayCreate()
   function ESMF_ArrayCreateLocalArray(larrayList, distgrid, dimmap, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
-    indexflag, staggerLoc, vectorDim, lbounds, ubounds, rc)
+    indexflag, staggerLoc, vectorDim, lbounds, ubounds, name, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_LocalArray), intent(in)              :: larrayList(:)
@@ -372,6 +378,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
        integer,               intent(in),   optional  :: vectorDim
        integer,               intent(in),   optional  :: lbounds(:)
        integer,               intent(in),   optional  :: ubounds(:)
+       character (len=*),     intent(in),   optional  :: name
        integer,               intent(out),  optional  :: rc
 !     
 ! !RETURN VALUE:
@@ -462,6 +469,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      Upper bounds for the array dimensions that are not distributed.
 !      By default ubound is equal to the extent of the corresponding
 !      dimension in {\tt larrayList}.
+! \item[{[name]}]
+!      Name of the Array object.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -480,6 +489,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     type(ESMF_InterfaceInt) :: lboundsArg             ! helper variable
     type(ESMF_InterfaceInt) :: uboundsArg             ! helper variable
     type(ESMF_Pointer), allocatable :: larrayPointerList(:) ! helper variable
+    integer                 :: len_name               ! helper variable
 
     ! Initialize return code; assume failure until success is certain
     status = ESMF_RC_NOT_IMPL
@@ -533,10 +543,20 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     array%this = ESMF_NULL_POINTER
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayCreateLocalArray(array, larrayPointerList, larrayCount, &
-      distgrid, dimmapArg, computationalLWidthArg, computationalUWidthArg, &
-      totalLWidthArg, totalUWidthArg, indexflag, staggerLoc, vectorDim, &
-      lboundsArg, uboundsArg, status)
+    ! Optional name argument requires separate calls into C++
+    if (present(name)) then
+      len_name = len(name)
+      call c_ESMC_ArrayCreateLocalArray(array, larrayPointerList, larrayCount, &
+        distgrid, dimmapArg, computationalLWidthArg, computationalUWidthArg, &
+        totalLWidthArg, totalUWidthArg, indexflag, staggerLoc, vectorDim, &
+        lboundsArg, uboundsArg, name, len_name, status)
+    else
+      len_name = 0
+      call c_ESMC_ArrayCreateLocalArray(array, larrayPointerList, larrayCount, &
+        distgrid, dimmapArg, computationalLWidthArg, computationalUWidthArg, &
+        totalLWidthArg, totalUWidthArg, indexflag, staggerLoc, vectorDim, &
+        lboundsArg, uboundsArg, "", len_name, status)
+    endif    
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -587,7 +607,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
   ! Private name; call using ESMF_ArrayCreate()
   function ESMF_ArrayCreateAllocate(arrayspec, distgrid, dimmap, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
-    indexflag, staggerLoc, vectorDim, lbounds, ubounds, rc)
+    indexflag, staggerLoc, vectorDim, lbounds, ubounds, name, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_ArraySpec),  intent(inout)           :: arrayspec
@@ -602,6 +622,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
        integer,               intent(in),   optional  :: vectorDim
        integer,               intent(in),   optional  :: lbounds(:)
        integer,               intent(in),   optional  :: ubounds(:)
+       character (len=*),     intent(in),   optional  :: name
        integer,               intent(out),  optional  :: rc
 !     
 ! !RETURN VALUE:
@@ -668,6 +689,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      Lower bounds for the array dimensions that are not distributed.
 ! \item[{[ubounds]}]
 !      Upper bounds for the array dimensions that are not distributed.
+! \item[{[name]}]
+!      Name of the Array object.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -684,6 +707,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     type(ESMF_InterfaceInt) :: totalUWidthArg         ! helper variable
     type(ESMF_InterfaceInt) :: lboundsArg             ! helper variable
     type(ESMF_InterfaceInt) :: uboundsArg             ! helper variable
+    integer                 :: len_name               ! helper variable
 
     ! Initialize return code; assume failure until success is certain
     status = ESMF_RC_NOT_IMPL
@@ -717,15 +741,25 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     uboundsArg = ESMF_InterfaceIntCreate(ubounds, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
+      
     ! Mark this Array object as invalid
     array%this = ESMF_NULL_POINTER
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayCreateAllocate(array, arrayspec, distgrid, dimmapArg, &
-      computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
-      totalUWidthArg, indexflag, staggerLoc, vectorDim, lboundsArg, &
-      uboundsArg, status)
+    ! Optional name argument requires separate calls into C++
+    if (present(name)) then
+      len_name = len(name)
+      call c_ESMC_ArrayCreateAllocate(array, arrayspec, distgrid, dimmapArg, &
+        computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
+        totalUWidthArg, indexflag, staggerLoc, vectorDim, lboundsArg, &
+        uboundsArg, name, len_name, status)
+    else
+      len_name = 0
+      call c_ESMC_ArrayCreateAllocate(array, arrayspec, distgrid, dimmapArg, &
+        computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
+        totalUWidthArg, indexflag, staggerLoc, vectorDim, lboundsArg, &
+        uboundsArg, "", len_name, status)
+    endif
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       

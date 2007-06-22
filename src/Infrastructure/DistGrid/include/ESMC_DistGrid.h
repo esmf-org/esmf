@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.18 2007/06/20 23:37:58 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.19 2007/06/22 04:48:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -127,27 +127,21 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     const int *getMaxIndex()        const {return maxIndex;}
     const int *getMaxIndex(int patch, int *rc) const;
     const int *getDeCellCount()     const {return deCellCount;}
+    int getDeCellCount(int de, int *rc) const;
     const int *getDimContigFlag()   const {return dimContigFlag;}
+    int getDimContigFlag(int de, int dim, int *rc) const;
     const int *getDimExtent()       const {return dimExtent;}
     const int *getLocalIndexList(int de, int dim, int *rc) const;
-
-    
-    
-    int get(DELayout **delayoutArg=NULL,
-      int *patchCount=NULL, InterfaceInt *patchList=NULL,
-      int *dimCountArg=NULL, InterfaceInt *dimExtentArg=NULL, 
-      ESMC_Logical *regDecompFlagArg=NULL) const;
-    int get(int de, int *cellCount) const;
-    int get(int de, int dim, InterfaceInt *indexList=NULL,
-      int *contigFlag=NULL) const;
-    int getLocal(int de, int dim, InterfaceInt *localIndexList=NULL) const;
+    DELayout *getDELayout()         const {return delayout;}
+    ESMC_Logical getRegDecompFlag() const {return regDecompFlag;}
     int getSequenceIndex(int de, int *index) const;
     int getSequenceDe(int seqindex) const;
-    int getPatchMinMaxIndex(int patch, int *minIndex, int *maxIndex) const;
+    //TODO: remove the getIndexList() call when DistGrid is free of global index
+    int *const*getIndexList()       const {return indexList;}
     int setArbIdx(InterfaceInt *argIndices);
     // misc.
-    int print(void);
-    int serialize(char *buffer, int *length, int *offset);
+    int print(void) const;
+    int serialize(char *buffer, int *length, int *offset) const;
     static DistGrid *deserialize(char *buffer, int *offset);
     // connections
     static int connection(InterfaceInt *connection, int patchIndexA, 

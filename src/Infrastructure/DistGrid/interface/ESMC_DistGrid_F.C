@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.15 2007/06/20 01:29:20 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.16 2007/06/22 04:48:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -17,6 +17,8 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
+#include <string.h>
+
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_VM.h"
@@ -177,36 +179,94 @@ extern "C" {
     ESMCI::InterfaceInt **patchList, int *dimCount,
     ESMCI::InterfaceInt **dimExtent, ESMC_Logical *regDecompFlag,
     int *rc){
-    ESMCI::DELayout **opt_delayout;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridget()"
-  if (rc!=NULL)
-    *rc = ESMC_RC_NOT_IMPL;
-    // deal with optional arguments
-    if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER)
-      opt_delayout = NULL;
-    else opt_delayout = delayout;
-    // call into C++, dealing with optional arguments 
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->get(
-      opt_delayout, ESMC_NOT_PRESENT_FILTER(patchCount), *patchList,
-      ESMC_NOT_PRESENT_FILTER(dimCount),
-      *dimExtent,
-      ESMC_NOT_PRESENT_FILTER(regDecompFlag)), 
-      ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc));
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // fill simple return values
+    if (ESMC_NOT_PRESENT_FILTER(delayout) != ESMC_NULL_POINTER)
+      *delayout = (*ptr)->getDELayout();
+    if (patchCount != ESMC_NULL_POINTER)
+      *patchCount = (*ptr)->getPatchCount();
+    if (dimCount != ESMC_NULL_POINTER)
+      *dimCount = (*ptr)->getDimCount();
+    if (regDecompFlag != ESMC_NULL_POINTER)
+      *regDecompFlag = (*ptr)->getRegDecompFlag();
+    // fill dimExtent
+    if (*dimExtent != NULL){
+      // dimExtent was provided -> do some error checking
+      if ((*dimExtent)->dimCount != 2){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+          "- dimExtent array must be of rank 2", rc);
+        return;
+      }
+      if ((*dimExtent)->extent[0] < (*ptr)->getDimCount()){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 1st dim of dimExtent array must be of size 'dimCount'", rc);
+        return;
+      }
+      if ((*dimExtent)->extent[1] < (*ptr)->getDELayout()->getDeCount()){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 2nd dim of dimExtent array must be of size 'deCount'", rc);
+        return;
+      }
+      // fill in the values: The interface allows to pass in dimExtent arrays
+      // which are larger than dimCount x deCount. Consequently it is necessary
+      // to memcpy strips of contiguous data since it cannot be assumed that
+      // all data ends up contiguous in the dimExtent array.
+      for (int i=0; i<(*ptr)->getDELayout()->getDeCount(); i++)
+        memcpy(&((*dimExtent)->array[i*((*dimExtent)->extent[0])]),
+          &(((*ptr)->getDimExtent())[i*(*ptr)->getDimCount()]),
+          sizeof(int)*(*ptr)->getDimCount());
+    }
+    // fill patchList
+    if (*patchList != NULL){
+      // patchList was provided -> do some error checking
+      if ((*patchList)->dimCount != 1){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+          "- patchList array must be of rank 1", rc);
+        return;
+      }
+      if ((*patchList)->extent[0] < (*ptr)->getDELayout()->getDeCount()){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 1st dim of patchList array must be of size 'deCount'", rc);
+        return;
+      }
+      // fill in values
+      memcpy((*patchList)->array, (*ptr)->getDePatchList(),
+        sizeof(int)*(*ptr)->getDELayout()->getDeCount());
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN(c_esmc_distgridgetpdepdim)(ESMCI::DistGrid **ptr, int *de, int *dim,
     ESMCI::InterfaceInt **indexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetpdepdim()"
-  if (rc!=NULL)
-    *rc = ESMC_RC_NOT_IMPL;
-    // call into C++, dealing with optional arguments 
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->get(
-      *de, *dim, *indexList), 
-      ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc));
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // fill indexList
+    if (*indexList != NULL){
+      // indexList was provided -> do some error checking
+      if ((*indexList)->dimCount != 1){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+          "- indexList array must be of rank 1", rc);
+        return;
+      }
+      if ((*indexList)->extent[0] <
+        ((*ptr)->getDimExtent())[(*de)*(*ptr)->getDimCount()+(*dim-1)]){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 1st dimension of indexListArg array size insufficiently", rc);
+        return;
+      }
+      // fill in the values
+      memcpy((*indexList)->array,
+        ((*ptr)->getIndexList())[(*de)*(*ptr)->getDimCount()+(*dim-1)],
+        sizeof(int) *
+        ((*ptr)->getDimExtent())[(*de)*(*ptr)->getDimCount()+(*dim-1)]);
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN(c_esmc_distgridprint)(ESMCI::DistGrid **ptr, int *rc){

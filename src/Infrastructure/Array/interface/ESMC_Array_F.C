@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.50 2007/06/20 01:29:19 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.51 2007/06/22 04:48:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@ extern "C" {
     ESMCI::InterfaceInt **totalLWidthArg, ESMCI::InterfaceInt **totalUWidthArg,
     ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim, 
     ESMCI::InterfaceInt **lboundsArg, ESMCI::InterfaceInt **uboundsArg,
-    int *rc){
+    char *name, int *len_name, int *rc){
     int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraycreatealldecomp()"
@@ -63,8 +63,18 @@ extern "C" {
       *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),
       ESMC_NOT_PRESENT_FILTER(staggerLoc), ESMC_NOT_PRESENT_FILTER(vectorDim),
       *lboundsArg, *uboundsArg, &localrc);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc));
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // set the name in the Array object
+    char *cname = ESMC_F90toCstring(name, *len_name);
+    if (cname){
+      (*ptr)->setName(cname);
+      delete [] cname;
+    }else if(*len_name){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+        "- Not a valid string", ESMC_NOT_PRESENT_FILTER(rc));
+      return;
+    }
   }
   
   void FTN(c_esmc_arraycreateallocate)(ESMCI::Array **ptr, 
@@ -74,20 +84,31 @@ extern "C" {
     ESMCI::InterfaceInt **totalLWidthArg, ESMCI::InterfaceInt **totalUWidthArg,
     ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim, 
     ESMCI::InterfaceInt **lboundsArg, ESMCI::InterfaceInt **uboundsArg,
-    int *rc){
+    char *name, int *len_name, int *rc){
     int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraycreatealldecomp()"
     //Initialize return code
     *rc = ESMC_RC_NOT_IMPL;
+    localrc = ESMC_RC_NOT_IMPL;
     // call into C++
     *ptr = ESMCI::Array::create(arrayspec, *distgrid, *dimmap,
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
       *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),
       ESMC_NOT_PRESENT_FILTER(staggerLoc), ESMC_NOT_PRESENT_FILTER(vectorDim),
       *lboundsArg, *uboundsArg, &localrc);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc));
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // set the name in the Array object
+    char *cname = ESMC_F90toCstring(name, *len_name);
+    if (cname){
+      (*ptr)->setName(cname);
+      delete [] cname;
+    }else if(*len_name){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+        "- Not a valid string", ESMC_NOT_PRESENT_FILTER(rc));
+      return;
+    }
   }
   
   void FTN(c_esmc_arraydestroy)(ESMCI::Array **ptr, int *rc){

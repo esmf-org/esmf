@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.54 2007/06/20 01:29:19 theurich Exp $
+// $Id: ESMC_Array.h,v 1.55 2007/06/22 04:48:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -93,18 +93,16 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     // derived from DELayout
     int *deList;  // localDE index for DE or -1 if not local
     
-  private:
-    // construct() and destruct()
-    int construct(ESMC_TypeKind typekind, int rank,
-      ESMC_LocalArray **larrayList,
-      DistGrid *distgrid, int *exclusiveLBound, int *exclusiveUBound, 
-      int *computationalLBound, int *computationalUBound, 
-      int *totalLBound, int *totalUBound, int tensorCount,
-      int *lboundsArray, int *uboundsArray, int *staggerLoc, int *vectorDim,
-      int *dimmapArray, int *inverseDimmapArray, ESMC_IndexFlag indexflagArg);
-    int destruct(void);
-    
   public:
+    // constructor and destructor
+    Array(){}      
+    Array(ESMC_TypeKind typekind, int rank, ESMC_LocalArray **larrayList,
+      DistGrid *distgrid, int *exclusiveLBound, int *exclusiveUBound, 
+      int *computationalLBound, int *computationalUBound, int *totalLBound,
+      int *totalUBound, int tensorCount, int *lboundsArray, int *uboundsArray,
+      int *staggerLoc, int *vectorDim, int *dimmapArray,
+      int *inverseDimmapArray, ESMC_IndexFlag indexflagArg, int *rc);
+    ~Array();
     // create() and destroy()
     static Array *create(ESMC_ArraySpec *arrayspec, DistGrid *distgrid,
       InterfaceInt *dimmap, InterfaceInt *computationalLWidthArg,
@@ -121,9 +119,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       InterfaceInt *lboundsArg, InterfaceInt *uboundsArg, int *rc);
     static int destroy(Array **array);
     // get() and set()
-    char *get(void){
-      return ESMC_BaseGetName();
-    }
+    const char *getName(void)       const {return ESMC_BaseGetName();}
+    int setName(char *name){return ESMC_BaseSetName(name, "Array");}
     int get(ESMC_TypeKind *typekind, int *rank,
       ESMC_LocalArray **localArrayList, int localArrayListCount,
       DistGrid **distgridArg, DELayout **delayoutArg,
@@ -137,12 +134,9 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       InterfaceInt *computationalLWidthArg,
       InterfaceInt *computationalUWidthArg,
       InterfaceInt *totalLWidthArg, InterfaceInt *totalUWidthArg);
-    int getLinearIndexExclusive(int localDe, int *index);
-    int set(char *name){
-      return ESMC_BaseSetName(name, "Array");
-    }
+    int getLinearIndexExclusive(int localDe, int *index) const;
     // misc.
-    int print(void);
+    int print(void) const;
     int serialize(char *buffer, int *length, int *offset) const;
     int deserialize(char *buffer, int *offset);
     // comms

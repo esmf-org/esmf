@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.8 2007/05/30 17:46:19 theurich Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.9 2007/06/22 04:48:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.8 2007/05/30 17:46:19 theurich Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.9 2007/06/22 04:48:41 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -64,6 +64,7 @@ program ESMF_ArrayCreateGetUTest
   real(ESMF_KIND_R8), pointer     :: farrayPtr2D(:,:)
   real(ESMF_KIND_R4), pointer     :: farrayPtr3D(:,:,:)
   integer(ESMF_KIND_I4), pointer  :: farrayPtr4D(:,:,:,:)
+  character (len=80)      :: arrayName
   
 
 !-------------------------------------------------------------------------------
@@ -103,7 +104,22 @@ program ESMF_ArrayCreateGetUTest
   write(name, *) "ArrayCreate Allocate 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+    indexflag=ESMF_INDEX_GLOBAL, name="MyArray", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayPrint 2D ESMF_TYPEKIND_R8 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayPrint(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet name, 2D ESMF_TYPEKIND_R8 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array, name=arrayName, rc=rc)
+  print *, "Array name: ", arrayname
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
