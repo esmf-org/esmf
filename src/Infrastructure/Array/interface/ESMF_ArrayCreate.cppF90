@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.12 2007/06/22 04:48:41 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.13 2007/06/22 16:19:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.12 2007/06/22 04:48:41 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.13 2007/06/22 16:19:36 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -323,12 +323,10 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Create the Array object by calling into overloaded ArrayCreate() interf. @\
-    array = ESMF_ArrayCreate(larrayList=larrayList, distgrid=distgrid, & @\
-      dimmap=dimmap, computationalLWidth=computationalLWidth, & @\
-      computationalUWidth=computationalUWidth, totalLWidth=totalLWidth, & @\
-      totalUWidth=totalUWidth, indexflag=indexflag, staggerLoc=staggerLoc, & @\
-      vectorDim=vectorDim, lbounds=lbounds, ubounds=ubounds, name=name, & @\
-      rc=status) @\
+    array = ESMF_ArrayCreate(larrayList, distgrid, dimmap, & @\
+      computationalLWidth, computationalUWidth, totalLWidth, & @\
+      totalUWidth, indexflag, staggerLoc, vectorDim, lbounds, ubounds, & @\
+      name, status) @\
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
