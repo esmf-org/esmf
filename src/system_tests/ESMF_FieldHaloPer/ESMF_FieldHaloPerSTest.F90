@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.43 2007/04/03 16:36:26 cdeluca Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.44 2007/06/22 23:21:56 cdeluca Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -52,7 +52,7 @@
     external setserv
 
     ! Global variables
-    type(ESMF_GridComp) :: comp1
+    type(ESMF_InternGridComp) :: comp1
     type(ESMF_VM) :: vm
     integer :: pe_id
     character(len=ESMF_MAXSTR) :: cname
@@ -88,21 +88,21 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test FieldHaloPeriodic"
-    comp1 = ESMF_GridCompCreate(name=cname, rc=rc)
+    comp1 = ESMF_InternGridCompCreate(name=cname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (verbose) print *, "Comp Create finished, name = ", trim(cname)
 
-    call ESMF_GridCompSetServices(comp1, setserv, rc)
+    call ESMF_InternGridCompSetServices(comp1, setserv, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
 !
 !-------------------------------------------------------------------------
 !  Init section
 !
-    import = ESMF_StateCreate("gridded comp import", ESMF_STATE_IMPORT, rc=rc)
+    import = ESMF_StateCreate("interngridded comp import", ESMF_STATE_IMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_GridCompInitialize(comp1, importState=import, rc=rc)
+    call ESMF_InternGridCompInitialize(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (verbose) print *, "Comp Init returned"
@@ -112,13 +112,13 @@
 !     Run section
 !
 
-    call ESMF_GridCompRun(comp1, importState=import, rc=rc)
+    call ESMF_InternGridCompRun(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    call ESMF_GridCompRun(comp1, importState=import, rc=rc)
+    call ESMF_InternGridCompRun(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    call ESMF_GridCompRun(comp1, importState=import, rc=rc)
+    call ESMF_InternGridCompRun(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (verbose) print *, "Comp Run returned"
@@ -127,7 +127,7 @@
 !-------------------------------------------------------------------------
 !     Finalize section
 
-    call ESMF_GridCompFinalize(comp1, importState=import, rc=rc)
+    call ESMF_InternGridCompFinalize(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (verbose) print *, "Comp Finalize returned without error"
@@ -137,7 +137,7 @@
 !     Destroy section
 ! 
 
-    call ESMF_GridCompDestroy(comp1, rc)
+    call ESMF_InternGridCompDestroy(comp1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_StateDestroy(import, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -185,18 +185,18 @@
       use ESMF_Mod
       use global_data
 
-      type(ESMF_GridComp) :: comp
+      type(ESMF_InternGridComp) :: comp
       integer :: rc
 
       external myinit, myrun, myfinal
        
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, myinit, &
+      call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETINIT, myinit, &
                                                           ESMF_SINGLEPHASE, rc)
       if (rc .ne. ESMF_SUCCESS) return
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, myrun, &
+      call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETRUN, myrun, &
                                                           ESMF_SINGLEPHASE, rc)
       if (rc .ne. ESMF_SUCCESS) return
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, myfinal, &
+      call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETFINAL, myfinal, &
                                                           ESMF_SINGLEPHASE, rc)
       if (rc .ne. ESMF_SUCCESS) return
   
@@ -206,7 +206,7 @@
         ! your own code development you probably don't want to include the 
         ! following call unless you are interested in exploring ESMF's 
         ! threading features.
-        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+        call ESMF_InternGridCompSetVMMinThreads(comp, rc=rc)
 #endif
 
       rc = ESMF_SUCCESS
@@ -222,7 +222,7 @@
       use ESMF_Mod
       use global_data
 
-      type(ESMF_GridComp) :: comp
+      type(ESMF_InternGridComp) :: comp
       type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
@@ -230,7 +230,7 @@
       ! Local variables
       integer :: i, j
       type(ESMF_Field) :: field(4)
-      type(ESMF_Grid) :: grid(4), thisgrid
+      type(ESMF_InternGrid) :: interngrid(4), thisinterngrid
       type(ESMF_ArraySpec) :: arrayspec
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       integer :: lowerindex(2), upperindex(2)
@@ -238,15 +238,15 @@
       type(ESMF_VM) :: vm
       type(ESMF_DELayout) :: layout1
       integer, dimension(2) :: shape
-      integer, dimension(ESMF_MAXGRIDDIM) :: counts
-      type(ESMF_GridHorzStagger) :: horz_stagger
+      integer, dimension(ESMF_MAXIGRIDDIM) :: counts
+      type(ESMF_InternGridHorzStagger) :: horz_stagger
       real(ESMF_KIND_R8) :: min(2), max(2)
       character(len=ESMF_MAXSTR) :: gname, fname
 
       if (verbose) print *, "Entering Initialization routine"
 
       ! Query component for layout
-      call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+      call ESMF_InternGridCompGet(comp, vm=vm, rc=rc)
       if (verbose) print *, "myinit: getting vm, rc = ", rc
       if (rc .ne. ESMF_SUCCESS) goto 30
 
@@ -294,7 +294,7 @@
       enddo
       print *, ""
   
-      ! The user creates a simple horizontal Grid internally by passing all
+      ! The user creates a simple horizontal InternGrid internally by passing all
       ! necessary information through the CreateInternal argument list.
 
       counts(1) = 30
@@ -303,79 +303,79 @@
       max(1) = 15.0
       min(2) = 0.0
       max(2) = 12.0
-      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
+      horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
 
-      print *, "Grid 1 is Periodic along the 1st dimension"
+      print *, "InternGrid 1 is Periodic along the 1st dimension"
       periodic(1) = ESMF_TRUE
       periodic(2) = ESMF_FALSE
 
-      gname = "test grid 1"
+      gname = "test interngrid 1"
 
-      grid(1) = ESMF_GridCreateHorzXYUni(counts=counts, &
+      interngrid(1) = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                                          minGlobalCoordPerDim=min, &
                                          maxGlobalCoordPerDim=max, &
                                          horzStagger=horz_stagger, &
                                          periodic=periodic, &
                                          name=gname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_GridDistribute(grid(1), delayout=layout1, rc=rc)
+      call ESMF_InternGridDistribute(interngrid(1), delayout=layout1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      if (verbose) print *, "Grid Create returned"
+      if (verbose) print *, "InternGrid Create returned"
 
-      print *, "Grid 2 is Periodic along the 2st dimension"
+      print *, "InternGrid 2 is Periodic along the 2st dimension"
       periodic(1) = ESMF_FALSE
       periodic(2) = ESMF_TRUE
 
-      gname = "test grid 2"
+      gname = "test interngrid 2"
 
-      grid(2) = ESMF_GridCreateHorzXYUni(counts=counts, &
+      interngrid(2) = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                                          minGlobalCoordPerDim=min, &
                                          maxGlobalCoordPerDim=max, &
                                          horzStagger=horz_stagger, &
                                          periodic=periodic, &
                                          name=gname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_GridDistribute(grid(2), delayout=layout1, rc=rc)
+      call ESMF_InternGridDistribute(interngrid(2), delayout=layout1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      if (verbose) print *, "Grid Create returned"
+      if (verbose) print *, "InternGrid Create returned"
 
-      print *, "Grid 3 is Periodic along both dimensions"
+      print *, "InternGrid 3 is Periodic along both dimensions"
       periodic(1) = ESMF_TRUE
       periodic(2) = ESMF_TRUE
 
-      gname = "test grid 3"
+      gname = "test interngrid 3"
 
-      grid(3) = ESMF_GridCreateHorzXYUni(counts=counts, &
+      interngrid(3) = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                                          minGlobalCoordPerDim=min, &
                                          maxGlobalCoordPerDim=max, &
                                          horzStagger=horz_stagger, &
                                          periodic=periodic, &
                                          name=gname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_GridDistribute(grid(3), delayout=layout1, rc=rc)
+      call ESMF_InternGridDistribute(interngrid(3), delayout=layout1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      if (verbose) print *, "Grid Create returned"
+      if (verbose) print *, "InternGrid Create returned"
 
-      print *, "Grid 4 is not Periodic along either dimension"
+      print *, "InternGrid 4 is not Periodic along either dimension"
       periodic(1) = ESMF_FALSE
       periodic(2) = ESMF_FALSE
 
-      gname = "test grid 4"
+      gname = "test interngrid 4"
 
-      grid(4) = ESMF_GridCreateHorzXYUni(counts=counts, &
+      interngrid(4) = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                                          minGlobalCoordPerDim=min, &
                                          maxGlobalCoordPerDim=max, &
                                          horzStagger=horz_stagger, &
                                          periodic=periodic, &
                                          name=gname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_GridDistribute(grid(4), delayout=layout1, rc=rc)
+      call ESMF_InternGridDistribute(interngrid(4), delayout=layout1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      if (verbose) print *, "Grid Create returned"
+      if (verbose) print *, "InternGrid Create returned"
 
       ! Figure out our local processor id to use as data in the Field.
       call ESMF_DELayoutGetDeprecated(layout1, localDe=pe_id, rc=rc)
@@ -385,10 +385,10 @@
       call ESMF_ArraySpecSet(arrayspec, rank=2, &
                              typekind=ESMF_TYPEKIND_I4)
 
-      ! Create 4 Fields using the Grids and ArraySpec created above
+      ! Create 4 Fields using the InternGrids and ArraySpec created above
       fname = "Periodic in X"
-      thisgrid = grid(1)
-      field(1) = ESMF_FieldCreate(thisgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+      thisinterngrid = interngrid(1)
+      field(1) = ESMF_FieldCreate(thisinterngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
@@ -396,8 +396,8 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       fname = "Periodic in Y"
-      thisgrid = grid(2)
-      field(2) = ESMF_FieldCreate(thisgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+      thisinterngrid = interngrid(2)
+      field(2) = ESMF_FieldCreate(thisinterngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
@@ -405,8 +405,8 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       fname = "Periodic in both X and Y"
-      thisgrid = grid(3)
-      field(3) = ESMF_FieldCreate(thisgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+      thisinterngrid = interngrid(3)
+      field(3) = ESMF_FieldCreate(thisinterngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
@@ -414,8 +414,8 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       fname = "Not Periodic"
-      thisgrid = grid(4)
-      field(4) = ESMF_FieldCreate(thisgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+      thisinterngrid = interngrid(4)
+      field(4) = ESMF_FieldCreate(thisinterngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
@@ -477,7 +477,7 @@
       use ESMF_Mod
       use global_data
 
-      type(ESMF_GridComp) :: comp
+      type(ESMF_InternGridComp) :: comp
       type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
@@ -558,7 +558,7 @@
       use ESMF_Mod
       use global_data
 
-      type(ESMF_GridComp) :: comp
+      type(ESMF_InternGridComp) :: comp
       type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
@@ -646,16 +646,16 @@
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       integer :: lowerindex(2), upperindex(2)
       type(ESMF_DELayout) :: layout
-      type(ESMF_Grid) :: grid1
+      type(ESMF_InternGrid) :: interngrid1
       character(len=ESMF_MAXSTR) :: fname
 
       if (verbose) print *, "Entering halo verification routine"
 
-      call ESMF_FieldGet(thisfield, grid=grid1, rc=rc)
-      if (verbose) print *, "grid back from field"
-      call ESMF_GridGetDELayout(grid1, delayout=layout, rc=rc)
-      call ESMF_GridGet(grid1, periodic=pflags, rc=rc)
-      if (verbose) print *, "layout, periodic flags back from grid"
+      call ESMF_FieldGet(thisfield, interngrid=interngrid1, rc=rc)
+      if (verbose) print *, "interngrid back from field"
+      call ESMF_InternGridGetDELayout(interngrid1, delayout=layout, rc=rc)
+      call ESMF_InternGridGet(interngrid1, periodic=pflags, rc=rc)
+      if (verbose) print *, "layout, periodic flags back from interngrid"
 
       call ESMF_FieldGet(thisfield, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 40

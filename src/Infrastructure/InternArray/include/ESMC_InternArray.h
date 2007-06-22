@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray.h,v 1.7 2007/06/20 01:29:22 theurich Exp $
+// $Id: ESMC_InternArray.h,v 1.8 2007/06/22 23:21:32 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !CLASS:  ESMC_InternArray - Distributed Data associated with a regular grid
+// !CLASS:  ESMC_InternArray - Distributed Data associated with a regular interngrid
 //
 // !DESCRIPTION:
 //

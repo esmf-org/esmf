@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridUTest.F90,v 1.21 2007/04/03 16:36:25 cdeluca Exp $
+! $Id: ESMF_RegridUTest.F90,v 1.22 2007/06/22 23:21:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridUTest.F90,v 1.21 2007/04/03 16:36:25 cdeluca Exp $'
+      '$Id: ESMF_RegridUTest.F90,v 1.22 2007/06/22 23:21:40 cdeluca Exp $'
 !------------------------------------------------------------------------------
       type(ESMF_VM):: vm
 
@@ -56,12 +56,12 @@
       type(ESMF_Field) :: humidity1, humidity2
       type(ESMF_DELayout) :: delayout
       type(ESMF_ArraySpec) :: arrayspec
-      type(ESMF_Grid) :: grid1, grid2
+      type(ESMF_InternGrid) :: interngrid1, interngrid2
       real(ESMF_KIND_R8) :: min(2), max(2)
-      integer :: counts(ESMF_MAXGRIDDIM)
+      integer :: counts(ESMF_MAXIGRIDDIM)
       integer :: npets, countsPerDE1(4), countsPerDE2(2)
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
-      type(ESMF_GridHorzStagger) :: horz_stagger
+      type(ESMF_InternGridHorzStagger) :: horz_stagger
       type(ESMF_RouteHandle) :: routehandle
 
 
@@ -102,31 +102,31 @@
       max(1) = 60.0
       min(2) = 0.0
       max(2) = 50.0
-      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
+      horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
 
-      grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
+      interngrid1 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                                   minGlobalCoordPerDim=min, &
                                   maxGlobalCoordPerDim=max, &
                                   horzStagger=horz_stagger, &
-                                  name="source grid", rc=rc)
-      write(failMsg, *) "grid create rc =", rc 
-      write(name, *) "Creating an XY Uniform Grid"
+                                  name="source interngrid", rc=rc)
+      write(failMsg, *) "interngrid create rc =", rc 
+      write(name, *) "Creating an XY Uniform InternGrid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
-      call ESMF_GridDistribute(grid1, delayout=delayout, &
+      call ESMF_InternGridDistribute(interngrid1, delayout=delayout, &
                                  countsPerDEDim1=countsPerDE1, &
                                  countsPerDEDim2=countsPerDE2, &
                                  rc=rc)
-      write(failMsg, *) "grid distribute rc =", rc
-      write(name, *) "Distributing the Grid"
+      write(failMsg, *) "interngrid distribute rc =", rc
+      write(name, *) "Distributing the InternGrid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
       ! Create the field and have it create the array internally
-      humidity1 = ESMF_FieldCreate(grid1, arrayspec, &
+      humidity1 = ESMF_FieldCreate(interngrid1, arrayspec, &
                                    horzRelloc=ESMF_CELL_CENTER, &
                                    haloWidth=0, name="humidity1", rc=rc)
       write(failMsg, *) "field create rc =", rc
@@ -152,31 +152,31 @@
                     1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
       min(1) = 0.0
       min(2) = 0.0
-      horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
+      horz_stagger = ESMF_IGRID_HORZ_STAGGER_D_NE
 
-      grid2 = ESMF_GridCreateHorzXY(minGlobalCoordPerDim=min, &
+      interngrid2 = ESMF_InternGridCreateHorzXY(minGlobalCoordPerDim=min, &
                                       delta1=delta1, delta2=delta2, &
                                       horzStagger=horz_stagger, &
-                                      name="source grid", rc=rc)
-      write(failMsg, *) "grid create rc =", rc
-      write(name, *) "grid create rc =", rc
+                                      name="source interngrid", rc=rc)
+      write(failMsg, *) "interngrid create rc =", rc
+      write(name, *) "interngrid create rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
-      call ESMF_GridDistribute(grid2, delayout=delayout, &
+      call ESMF_InternGridDistribute(interngrid2, delayout=delayout, &
                                  countsPerDEDim1=countsPerDE1, &
                                  countsPerDEDim2=countsPerDE2, &
                                  rc=rc)
-      write(failMsg, *) "grid distribute rc =", rc
-      write(name, *) "grid distribute rc =", rc
+      write(failMsg, *) "interngrid distribute rc =", rc
+      write(name, *) "interngrid distribute rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
       ! Create the field and have it create the array internally
-      humidity2 = ESMF_FieldCreate(grid2, arrayspec, &
+      humidity2 = ESMF_FieldCreate(interngrid2, arrayspec, &
                                      horzRelloc=ESMF_CELL_NFACE, &
                                      haloWidth=0, name="humidity2", rc=rc)
       write(failMsg, *) "field create rc =", rc
@@ -192,7 +192,7 @@
       !------------------------------------------------------------------------
       
       !------------------------------------------------------------------------
-      ! These are fields on different Grids - call RegridStore to set
+      ! These are fields on different InternGrids - call RegridStore to set
       ! up the Regrid structure
 
       !------------------------------------------------------------------------

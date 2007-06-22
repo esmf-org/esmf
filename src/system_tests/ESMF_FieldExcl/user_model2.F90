@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.23 2007/04/26 06:19:44 cdeluca Exp $
+! $Id: user_model2.F90,v 1.24 2007/06/22 23:21:55 cdeluca Exp $
 !
 ! System test for Exclusive Components, user-written component 2.
 
@@ -30,7 +30,7 @@
 !   !   private to the module.
  
     subroutine userm2_register(comp, rc)
-        type(ESMF_GridComp) :: comp
+        type(ESMF_InternGridComp) :: comp
         integer :: rc
 
         integer :: localrc
@@ -39,11 +39,11 @@
 
         ! Register the callback routines.
 
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETINIT, &
                                         user_init, ESMF_SINGLEPHASE, localrc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETRUN, &
                                         user_run, ESMF_SINGLEPHASE, localrc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETFINAL, &
                                        user_final, ESMF_SINGLEPHASE, localrc)
 
         !print *, "Registered Initialize, Run, and Finalize routines"
@@ -54,7 +54,7 @@
         ! your own code development you probably don't want to include the 
         ! following call unless you are interested in exploring ESMF's 
         ! threading features.
-        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+        call ESMF_InternGridCompSetVMMinThreads(comp, rc=rc)
 #endif
 
         rc = localrc
@@ -66,7 +66,7 @@
 !   !   Initialization routine.
  
     subroutine user_init(comp, importState, exportState, clock, rc)
-      type(ESMF_GridComp), intent(inout) :: comp
+      type(ESMF_InternGridComp), intent(inout) :: comp
       type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc
@@ -75,7 +75,7 @@
       type(ESMF_Field) :: humidity2, pressure2
       type(ESMF_VM) :: vm
       type(ESMF_DELayout) :: delayout
-      type(ESMF_Grid) :: grid1, grid2
+      type(ESMF_InternGrid) :: interngrid1, interngrid2
       type(ESMF_ArraySpec) :: arrayspec
       real(ESMF_KIND_R8), dimension(:,:), pointer :: humidityData, &
                                                      pressureData
@@ -83,14 +83,14 @@
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       integer :: countsPerDE1(3), countsPerDE2(1)
       integer :: npets, pet_id, counts(2)
-      type(ESMF_GridHorzStagger) :: horz_stagger
+      type(ESMF_InternGridHorzStagger) :: horz_stagger
       integer :: status
 
-      ! Initially import state contains a field with a grid but no data.
+      ! Initially import state contains a field with a interngrid but no data.
       status = ESMF_FAILURE
 
       ! Query component for VM and create a layout with the right breakdown
-      call ESMF_GridCompGet(comp, vm=vm, rc=status)
+      call ESMF_InternGridCompGet(comp, vm=vm, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
       call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
@@ -117,14 +117,14 @@
                   1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
       min(1) = 0.0
       min(2) = 0.0
-      horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
+      horz_stagger = ESMF_IGRID_HORZ_STAGGER_D_NE
 
-      grid1 = ESMF_GridCreateHorzXY(minGlobalCoordPerDim=min, &
+      interngrid1 = ESMF_InternGridCreateHorzXY(minGlobalCoordPerDim=min, &
                                     delta1=delta1, delta2=delta2, &
                                     horzStagger=horz_stagger, &
-                                    name="source grid", rc=status)
+                                    name="source interngrid", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridDistribute(grid1, delayout=delayout, &
+      call ESMF_InternGridDistribute(interngrid1, delayout=delayout, &
                                countsPerDEDim1=countsPerDE1, &
                                countsPerDEDim2=countsPerDE2, &
                                rc=status)
@@ -136,7 +136,7 @@
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Create the field and have it create the array internally
-      humidity2 = ESMF_FieldCreate(grid1, arrayspec, &
+      humidity2 = ESMF_FieldCreate(interngrid1, arrayspec, &
                                    horzRelloc=ESMF_CELL_NFACE, &
                                    haloWidth=0, name="humidity2", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
@@ -150,26 +150,26 @@
       !   call ESMF_StatePrint(importState, rc=status)
 
 
-      ! create the second grid and field for use in the redist part of the test
+      ! create the second interngrid and field for use in the redist part of the test
       counts(1) = 800
       counts(2) = 40
       min(1) = 0.0
       max(1) = 60.0
       min(2) = 0.0
       max(2) = 50.0
-      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
+      horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
 
-      grid2 = ESMF_GridCreateHorzXYUni(counts=counts, &
+      interngrid2 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                                        minGlobalCoordPerDim=min, &
                                        maxGlobalCoordPerDim=max, &
                                        horzStagger=horz_stagger, &
-                                       name="redist grid", rc=status)
+                                       name="redist interngrid", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridDistribute(grid2, delayout=delayout, &
+      call ESMF_InternGridDistribute(interngrid2, delayout=delayout, &
                                rc=status)
 
       ! Create the field and have it create the array internally
-      pressure2 = ESMF_FieldCreate(grid2, arrayspec, &
+      pressure2 = ESMF_FieldCreate(interngrid2, arrayspec, &
                                    horzRelloc=ESMF_CELL_CENTER, &
                                    haloWidth=2, name="pressure2", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
@@ -200,7 +200,7 @@
 !   !
  
     subroutine user_run(comp, importState, exportState, clock, rc)
-      type(ESMF_GridComp), intent(inout) :: comp
+      type(ESMF_InternGridComp), intent(inout) :: comp
       type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc
@@ -233,7 +233,7 @@
 !   !
  
     subroutine user_final(comp, importState, exportState, clock, rc)
-      type(ESMF_GridComp), intent(inout) :: comp
+      type(ESMF_InternGridComp), intent(inout) :: comp
       type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc
@@ -281,7 +281,7 @@
       ! Local variables
       integer :: status, i, j, myDE, counts(2)
       type(ESMF_RelLoc) :: relloc
-      type(ESMF_Grid) :: grid
+      type(ESMF_InternGrid) :: interngrid
       real(ESMF_KIND_R8) :: pi, error, maxError, maxPerError
       real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
       real(ESMF_KIND_R8), dimension(:,:), pointer :: calc, data, coordX, coordY
@@ -290,15 +290,15 @@
 
       pi = 3.14159
 
-      ! get the grid and coordinates
-      call ESMF_FieldGet(humidity, grid=grid, horzRelloc=relloc, rc=status)
-      call ESMF_GridGetDELocalInfo(grid, myDE=myDE, &
+      ! get the interngrid and coordinates
+      call ESMF_FieldGet(humidity, interngrid=interngrid, horzRelloc=relloc, rc=status)
+      call ESMF_InternGridGetDELocalInfo(interngrid, myDE=myDE, &
                                    localCellCountPerDim=counts, &
                                    horzRelLoc=relloc, rc=status)
       if (counts(1)*counts(2).ne.0) then
-        call ESMF_GridGetCoord(grid, dim=1, horzRelloc=relloc, &
+        call ESMF_InternGridGetCoord(interngrid, dim=1, horzRelloc=relloc, &
                                centerCoord=coordX, rc=status)
-        call ESMF_GridGetCoord(grid, dim=2, horzRelloc=relloc, &
+        call ESMF_InternGridGetCoord(interngrid, dim=2, horzRelloc=relloc, &
                                centerCoord=coordY, rc=status)
       endif
 

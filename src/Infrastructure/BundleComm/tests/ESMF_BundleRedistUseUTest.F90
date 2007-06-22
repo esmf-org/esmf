@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistUseUTest.F90,v 1.11 2007/03/31 05:50:54 cdeluca Exp $
+! $Id: ESMF_BundleRedistUseUTest.F90,v 1.12 2007/06/22 23:21:28 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -24,11 +24,11 @@
 !
 ! The code in this file drives F90 Redist unit tests, using the Route code.
 !
-!  "Redist" is sending data from one field to another, where the grids 
+!  "Redist" is sending data from one field to another, where the interngrids 
 !   themselves are identical, but the decompositions (which subsets of the
-!   grid are located on each processor) are different.  Redist sends data
+!   interngrid are located on each processor) are different.  Redist sends data
 !   from one processor to another with no interpolation.  See Regrid for
-!   routines which do data interpolation from one grid to another.
+!   routines which do data interpolation from one interngrid to another.
 !
 !-----------------------------------------------------------------------------
 ! !USES:
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleRedistUseUTest.F90,v 1.11 2007/03/31 05:50:54 cdeluca Exp $'
+      '$Id: ESMF_BundleRedistUseUTest.F90,v 1.12 2007/06/22 23:21:28 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -59,7 +59,7 @@
 
       ! local args needed to create/construct objects
       type(ESMF_RouteHandle) :: redist_rh
-      type(ESMF_Grid) :: grid(2)
+      type(ESMF_InternGrid) :: interngrid(2)
       type(ESMF_Field) :: sfield(10), dfield(10)
       type(ESMF_Bundle) :: bundle(2)
       type(ESMF_VM) :: vm
@@ -102,11 +102,11 @@
 !---   
 !---   Case 1:
 !---   
-!---   A Bundle with a 3D Grid.  The Grid corresponds to a (long, lat)
-!---   grid which is periodic in X, non-periodic in Y.    The community
-!---   describes grid sizes in (lat, long) order, confusingly enough,
-!---   so a 2 x 2.5 degree grid is 2 degrees in latitude, 2.5 in longitude,
-!---   giving an overall grid size of (144, 90).  There are 72 vertical levels.
+!---   A Bundle with a 3D InternGrid.  The InternGrid corresponds to a (long, lat)
+!---   interngrid which is periodic in X, non-periodic in Y.    The community
+!---   describes interngrid sizes in (lat, long) order, confusingly enough,
+!---   so a 2 x 2.5 degree interngrid is 2 degrees in latitude, 2.5 in longitude,
+!---   giving an overall interngrid size of (144, 90).  There are 72 vertical levels.
 !---   
 !---   The Bundle contains roughly 10 Fields, each with data type Real*8,
 !---   scalar, cell-centered.
@@ -121,13 +121,13 @@
 !---   
 !---   Case 2:
 !---   
-!---   A single Field, 3D Grid, 4D data. The 4D data is Real*8,
+!---   A single Field, 3D InternGrid, 4D data. The 4D data is Real*8,
 !---   cell-centered, and sized: (long, lat, elevation, species), where
 !---   long, lat, and elevation are as above (144, 90, 72), and
 !---   and species is dimensioned 100.
 !---   
-!---   The first 3 dimensions correspond to the grid, and there are
-!---   100 data points per grid cell.  The last fortran dimension is used
+!---   The first 3 dimensions correspond to the interngrid, and there are
+!---   100 data points per interngrid cell.  The last fortran dimension is used
 !---   for the species, so all data values for species 1 are stored together
 !---   in memory, then species 2, etc.  The 2 decompositions are the
 !---   same as described above.
@@ -150,16 +150,16 @@
       
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! create first grid
-      grid(1) = CreateLatLonGrid(nx, ny, nz, m, n, "MxN", rc=rc)
-      write(name, *) "Creating grid 1"
-      write(failMsg, *) "Unable to create grid 1"
+      ! create first interngrid
+      interngrid(1) = CreateLatLonInternGrid(nx, ny, nz, m, n, "MxN", rc=rc)
+      write(name, *) "Creating interngrid 1"
+      write(failMsg, *) "Unable to create interngrid 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields
-      call CreateFields(grid(1), &
+      call CreateFields(interngrid(1), &
                         sfield(1), sfield(2), sfield(3), sfield(4), sfield(5), &
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
 		        vrelloc1=ESMF_CELL_CELL, &
@@ -175,7 +175,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields, cont.
-      call CreateFields(grid(1), &
+      call CreateFields(interngrid(1), &
                         sfield(6), sfield(7), sfield(8), sfield(9), sfield(10),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
 		        vrelloc1=ESMF_CELL_CELL, &
@@ -209,15 +209,15 @@
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !NEX_UTest
-      grid(2) = CreateLatLonGrid(nx, ny, nz, mprime, nprime, "M'xN'", mprime, nprime-1, rc)
-      write(name, *) "Creating grid 2"
-      write(failMsg, *) "Unable to create grid 2"
+      interngrid(2) = CreateLatLonInternGrid(nx, ny, nz, mprime, nprime, "M'xN'", mprime, nprime-1, rc)
+      write(name, *) "Creating interngrid 2"
+      write(failMsg, *) "Unable to create interngrid 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields
-      call CreateFields(grid(2), &
+      call CreateFields(interngrid(2), &
                         dfield(1), dfield(2), dfield(3), dfield(4), dfield(5),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
 		        vrelloc1=ESMF_CELL_CELL, &
@@ -233,7 +233,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields, cont.
-      call CreateFields(grid(2), &
+      call CreateFields(interngrid(2), &
                         dfield(6), dfield(7), dfield(8), dfield(9), dfield(10),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
 		        vrelloc1=ESMF_CELL_CELL, &
@@ -541,9 +541,9 @@
 #if ESMF_EXHAUSTIVE
 
       !------------------------------------------------------------------------
-      ! create a grid with data only on DE (1,1)
+      ! create a interngrid with data only on DE (1,1)
       ! 
-      ! redistribute it to a grid on all DEs
+      ! redistribute it to a interngrid on all DEs
       !
       !
       ! fill source fields with index data  (previous tests used constant data)

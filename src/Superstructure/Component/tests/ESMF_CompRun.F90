@@ -1,4 +1,4 @@
-! $Id: ESMF_CompRun.F90,v 1.10 2005/02/14 04:36:25 theurich Exp $
+! $Id: ESMF_CompRun.F90,v 1.11 2007/06/22 23:21:48 cdeluca Exp $
 !
 ! Test code which creates a new Component.
 
@@ -13,19 +13,19 @@
 !
 !\begin{verbatim}
 
-    program ESMF_GridCompCreateTest
+    program ESMF_InternGridCompCreateTest
     
 !   ! ESMF Framework module
     use ESMF_Mod
 
-    use UserGridCompMod, only: User_SetServices
+    use UserInternGridCompMod, only: User_SetServices
     
     implicit none
     
 !   ! Local variables
     integer :: rc
     character(ESMF_MAXSTR) :: cname
-    type(ESMF_GridComp) :: comp1
+    type(ESMF_InternGridComp) :: comp1
     type(ESMF_Clock) :: clock
         
 !-------------------------------------------------------------------------
@@ -38,38 +38,38 @@
     print *, "Component Test 1:"
 
     cname = "Atmosphere"
-    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
-                                               configFile="grid.rc", rc=rc)  
+    comp1 = ESMF_InternGridCompCreate(name=cname, interngridcompType=ESMF_ATM, &
+                                               configFile="interngrid.rc", rc=rc)  
 
-    print *, "Grid Comp Create returned, name = ", trim(cname)
+    print *, "InternGrid Comp Create returned, name = ", trim(cname)
 
-    call ESMF_GridCompPrint(comp1, rc=rc)
-    print *, "Grid Comp Print returned"
+    call ESMF_InternGridCompPrint(comp1, rc=rc)
+    print *, "InternGrid Comp Print returned"
 
     ! register other entry points
-    call ESMF_GridCompSetServices(comp1, User_SetServices, rc)
+    call ESMF_InternGridCompSetServices(comp1, User_SetServices, rc)
 
-    call ESMF_GridCompInitialize(comp1, rc=rc)
-    print *, "Grid Comp Initialize returned"
+    call ESMF_InternGridCompInitialize(comp1, rc=rc)
+    print *, "InternGrid Comp Initialize returned"
 
-    call ESMF_GridCompRun(comp1, clock=clock, rc=rc)
-    print *, "Grid Comp Run returned"
+    call ESMF_InternGridCompRun(comp1, clock=clock, rc=rc)
+    print *, "InternGrid Comp Run returned"
 
-    call ESMF_GridCompRun(comp1, clock=clock, rc=rc)
-    print *, "Grid Comp Run returned"
+    call ESMF_InternGridCompRun(comp1, clock=clock, rc=rc)
+    print *, "InternGrid Comp Run returned"
 
-    call ESMF_GridCompFinalize(comp1, rc=rc)
-    print *, "Grid Comp Finalize returned"
+    call ESMF_InternGridCompFinalize(comp1, rc=rc)
+    print *, "InternGrid Comp Finalize returned"
 
-    call ESMF_GridCompDestroy(comp1, rc=rc)
-    print *, "Grid Comp Destroy returned"
+    call ESMF_InternGridCompDestroy(comp1, rc=rc)
+    print *, "InternGrid Comp Destroy returned"
 
     print *, "Component Test 1 finished"
 
 
     call ESMF_Finalize(rc=rc)
 
-    end program ESMF_GridCompCreateTest
+    end program ESMF_InternGridCompCreateTest
     
 !\end{verbatim}
     

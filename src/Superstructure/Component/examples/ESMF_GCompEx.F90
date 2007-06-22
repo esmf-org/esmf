@@ -1,16 +1,16 @@
-! $Id: ESMF_GCompEx.F90,v 1.26 2006/02/02 01:59:59 theurich Exp $
+! $Id: ESMF_GCompEx.F90,v 1.27 2007/06/22 23:21:45 cdeluca Exp $
 !
-! Example/test code which shows Gridded Component calls.
+! Example/test code which shows InternGridded Component calls.
 
 !-------------------------------------------------------------------------
 !EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
-! !PROGRAM: ESMF_GCompEx.F90 - Gridded Component example
+! !PROGRAM: ESMF_GCompEx.F90 - InternGridded Component example
 !
 ! !DESCRIPTION:
 !
-!   The skeleton of one of many possible Gridded component models.
+!   The skeleton of one of many possible InternGridded component models.
 !
 !-----------------------------------------------------------------------------
 
@@ -19,10 +19,10 @@
 !BOP
 !\subsubsection{Specifying a User-Code SetServices Routine}
 !
-! Every {\tt ESMF\_GridComp} is required to provide and document
+! Every {\tt ESMF\_InternGridComp} is required to provide and document
 ! a set services routine.  It can have any name, but must
 ! follow the declaration below: a subroutine which takes an
-! {\tt ESMF\_GridComp} as the first argument, and
+! {\tt ESMF\_InternGridComp} as the first argument, and
 ! an integer return code as the second.
 ! Both arguments are required and must {\em not} be declared as 
 ! {\tt optional}. If an intent is specified in the interface it must be 
@@ -30,7 +30,7 @@
 ! second argument.
 !
 ! The set services routine must call the ESMF method 
-! {\tt ESMF\_GridCompSetEntryPoint()} to
+! {\tt ESMF\_InternGridCompSetEntryPoint()} to
 ! register with the framework what user-code subroutines should be called 
 ! to initialize, run, and finalize the component.  There are
 ! additional routines which can be registered as well, for checkpoint
@@ -42,8 +42,8 @@
 !EOP
 
 !BOC
-    ! Example Gridded Component
-    module ESMF_GriddedCompEx
+    ! Example InternGridded Component
+    module ESMF_InternGriddedCompEx
     
     ! ESMF Framework module
     use ESMF_Mod
@@ -53,17 +53,17 @@
     contains
 
     subroutine GComp_SetServices(comp, rc)
-        type(ESMF_GridComp) :: comp
+        type(ESMF_InternGridComp) :: comp
         integer :: rc
 
         ! SetServices the callback routines.
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, GComp_Init, 0, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, GComp_Run, 0, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, GComp_Final, 0, rc)
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETINIT, GComp_Init, 0, rc)
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETRUN, GComp_Run, 0, rc)
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETFINAL, GComp_Final, 0, rc)
 
         ! If desired, this routine can register a private data block
         ! to be passed in to the routines above:
-        ! call ESMF_GridCompSetData(comp, mydatablock, rc)
+        ! call ESMF_InternGridCompSetData(comp, mydatablock, rc)
 
         rc = ESMF_SUCCESS
 
@@ -74,7 +74,7 @@
 !\subsubsection{Specifying a User-Code Initialize Routine}
 !
 ! When a higher level component is ready to begin using an 
-! {\tt ESMF\_GridComp},
+! {\tt ESMF\_InternGridComp},
 ! it will call its initialize routine.  The component writer must
 ! supply a subroutine with the exact calling sequence below; no arguments
 ! can be optional, and the types and order must match.
@@ -89,19 +89,19 @@
     
 !BOC
     subroutine GComp_Init(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp) :: comp
+        type(ESMF_InternGridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer :: rc
 
-        print *, "Gridded Comp Init starting"
+        print *, "InternGridded Comp Init starting"
 
         ! This is where the model specific setup code goes.  
  
         ! If the initial Export state needs to be filled, do it here.
         !call ESMF_StateAddField(exportState, field, rc)
         !call ESMF_StateAddBundle(exportState, bundle, rc)
-        print *, "Gridded Comp Init returning"
+        print *, "InternGridded Comp Init returning"
    
         rc = ESMF_SUCCESS
 
@@ -117,7 +117,7 @@
 ! component, compute new values or process the data,
 ! and produce any output and place it in the {\tt exportState}. 
 ! 
-! When a higher level component is ready to use the {\tt ESMF\_GridComp}
+! When a higher level component is ready to use the {\tt ESMF\_InternGridComp}
 ! it will call its run routine.  The component writer must
 ! supply a subroutine with the exact calling sequence below; 
 ! no arguments can be optional, and the types and order must match.
@@ -131,12 +131,12 @@
         
 !BOC    
     subroutine GComp_Run(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp) :: comp
+        type(ESMF_InternGridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer :: rc
 
-        print *, "Gridded Comp Run starting"
+        print *, "InternGridded Comp Run starting"
         ! call ESMF_StateGetField(), etc to get fields, bundles, arrays
         !  from import state.
 
@@ -144,7 +144,7 @@
 
         ! Fill export state here using ESMF_StateAddField(), etc
 
-        print *, "Gridded Comp Run returning"
+        print *, "InternGridded Comp Run returning"
 
         rc = ESMF_SUCCESS
 
@@ -154,7 +154,7 @@
 !BOP
 !\subsubsection{Specifying a User-Code Finalize Routine}
 !
-! At the end of application execution, each {\tt ESMF\_GridComp} should
+! At the end of application execution, each {\tt ESMF\_InternGridComp} should
 ! deallocate data space, close open files, and flush final results.
 ! These functions should be placed in a finalize routine.
 !
@@ -165,27 +165,27 @@
 
 !BOC
     subroutine GComp_Final(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp) :: comp
+        type(ESMF_InternGridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer :: rc
 
-        print *, "Gridded Comp Final starting"
+        print *, "InternGridded Comp Final starting"
     
         ! Add whatever code here needed
 
-        print *, "Gridded Comp Final returning"
+        print *, "InternGridded Comp Final returning"
    
         rc = ESMF_SUCCESS
 
     end subroutine GComp_Final
 
-    end module ESMF_GriddedCompEx
+    end module ESMF_InternGriddedCompEx
 !EOC
 
 !-------------------------------------------------------------------------
 ! Note - the program below is here only to make this an executable
-! program.  It should not appear in the documentation for a Gridded Component.
+! program.  It should not appear in the documentation for a InternGridded Component.
 !-------------------------------------------------------------------------
 
     program ESMF_AppMainEx
@@ -194,7 +194,7 @@
     use ESMF_Mod
     
     ! User supplied modules
-    use ESMF_GriddedCompEx, only: GComp_SetServices
+    use ESMF_InternGriddedCompEx, only: GComp_SetServices
     implicit none
     
 !   ! Local variables
@@ -207,7 +207,7 @@
     character(ESMF_MAXSTR) :: cname
     type(ESMF_VM) :: vm
     type(ESMF_State) :: importState, exportState
-    type(ESMF_GridComp) :: gcomp
+    type(ESMF_InternGridComp) :: gcomp
     integer :: finalrc
     finalrc = ESMF_SUCCESS
         
@@ -224,15 +224,15 @@
 !   !  Create, Init, Run, Finalize, Destroy Components.
     print *, "Application Example 1:"
     ! Create the top level application component
-    cname = "Atmosphere Model Gridded Component"
-    gcomp = ESMF_GridCompCreate(name=cname, configFile="setup.rc", rc=rc)  
+    cname = "Atmosphere Model InternGridded Component"
+    gcomp = ESMF_InternGridCompCreate(name=cname, configFile="setup.rc", rc=rc)  
 
     if (rc.NE.ESMF_SUCCESS) then
        finalrc = ESMF_FAILURE
      end if
 
     ! This single user-supplied subroutine must be a public entry point.
-    call ESMF_GridCompSetServices(gcomp, GComp_SetServices, rc)
+    call ESMF_InternGridCompSetServices(gcomp, GComp_SetServices, rc)
 
     if (rc.NE.ESMF_SUCCESS) then
        finalrc = ESMF_FAILURE
@@ -299,7 +299,7 @@
      
     ! Call the Init routine.  There is an optional index number
     !  for those components which have multiple entry points.
-    call ESMF_GridCompInitialize(gcomp, importState, exportState, clock=tclock, rc=rc)
+    call ESMF_InternGridCompInitialize(gcomp, importState, exportState, clock=tclock, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
        finalrc = ESMF_FAILURE
@@ -310,7 +310,7 @@
     ! Main run loop.
     finished = .false.
     do while (.not. finished)
-        call ESMF_GridCompRun(gcomp, importState, exportState, clock=tclock, rc=rc)
+        call ESMF_InternGridCompRun(gcomp, importState, exportState, clock=tclock, rc=rc)
 
         if (rc.NE.ESMF_SUCCESS) then
            finalrc = ESMF_FAILURE
@@ -323,7 +323,7 @@
     print *, "Comp Run complete"
 
     ! Give the component a chance to write out final results, clean up.
-    call ESMF_GridCompFinalize(gcomp, importState, exportState, clock=tclock, rc=rc)
+    call ESMF_InternGridCompFinalize(gcomp, importState, exportState, clock=tclock, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
        finalrc = ESMF_FAILURE
@@ -344,7 +344,7 @@
        finalrc = ESMF_FAILURE
      end if
 
-    call ESMF_GridCompDestroy(gcomp, rc)
+    call ESMF_InternGridCompDestroy(gcomp, rc)
 
     if (rc.NE.ESMF_SUCCESS) then
        finalrc = ESMF_FAILURE

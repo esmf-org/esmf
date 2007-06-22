@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridEx.F90,v 1.12 2007/03/31 05:51:19 cdeluca Exp $
+! $Id: ESMF_RegridEx.F90,v 1.13 2007/06/22 23:21:38 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
     ! example documentation because those interfaces are not specific to
     ! Regrid.
     type(ESMF_Field) :: field1, field2
-    type(ESMF_Grid) :: srcgrid, dstgrid
+    type(ESMF_InternGrid) :: srcinterngrid, dstinterngrid
     type(ESMF_RouteHandle) :: regrid_rh
     type(ESMF_DELayout) :: layout1, layout2
     integer :: rc
@@ -54,7 +54,7 @@
 !-------------------------------------------------------------------------
 !   ! Setup:
 !   !
-!   !  Create a source and destination grid with data on it, to use
+!   !  Create a source and destination interngrid with data on it, to use
 !   !  in the Regrid calls below.
  
     call ESMF_Initialize(rc=rc)
@@ -73,18 +73,18 @@
 
     mincoords = (/  0.0,  0.0 /)
     maxcoords = (/ 20.0, 30.0 /)
-    srcgrid = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
+    srcinterngrid = ESMF_InternGridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
-                   horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
-                   name="srcgrid", rc=rc)
-    call ESMF_GridDistribute(srcgrid, delayout=layout1, rc=rc)
+                   horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
+                   name="srcinterngrid", rc=rc)
+    call ESMF_InternGridDistribute(srcinterngrid, delayout=layout1, rc=rc)
 
-    ! same grid coordinates, but different layout
-    dstgrid = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
+    ! same interngrid coordinates, but different layout
+    dstinterngrid = ESMF_InternGridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
-                   horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
-                   name="srcgrid", rc=rc)
-    call ESMF_GridDistribute(dstgrid, delayout=layout2, rc=rc)
+                   horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
+                   name="srcinterngrid", rc=rc)
+    call ESMF_InternGridDistribute(dstinterngrid, delayout=layout2, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -94,7 +94,7 @@
     
     ! allow for a halo width of 3, let field create data space
     halo = 3
-    field1 = ESMF_FieldCreate(srcgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+    field1 = ESMF_FieldCreate(srcinterngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=3, name="src pressure", rc=rc)
                                 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -115,7 +115,7 @@
     enddo
 
 
-    field2 = ESMF_FieldCreate(dstgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+    field2 = ESMF_FieldCreate(dstinterngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                                    name="dst pressure", rc=rc)
 
  
@@ -124,7 +124,7 @@
 
 !BOE
       
-!  The user has already created an {\tt ESMF\_Grid}, an
+!  The user has already created an {\tt ESMF\_InternGrid}, an
 !  {\tt ESMF\_Array} with data, and put them together in an {\tt ESMF\_Field}.
 !  An {\tt ESMF\_RouteHandle} is created by the regrid store call 
 !  and the data movement needed to
@@ -162,10 +162,10 @@
     call ESMF_FieldDestroy(field2, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridDestroy(srcgrid, rc=rc)
+    call ESMF_InternGridDestroy(srcinterngrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridDestroy(dstgrid, rc=rc)
+    call ESMF_InternGridDestroy(dstinterngrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 

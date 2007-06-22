@@ -1,4 +1,4 @@
-! $Id: ESMF_RedistUTest.F90,v 1.9 2007/03/31 05:51:24 cdeluca Exp $
+! $Id: ESMF_RedistUTest.F90,v 1.10 2007/06/22 23:21:41 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -25,11 +25,11 @@
 !
 ! The code in this file drives F90 Redist unit tests, using the Route code.
 !
-!  "Redist" is sending data from one field to another, where the grids 
+!  "Redist" is sending data from one field to another, where the interngrids 
 !   themselves are identical, but the decompositions (which subsets of the
-!   grid are located on each processor) are different.  Redist sends data
+!   interngrid are located on each processor) are different.  Redist sends data
 !   from one processor to another with no interpolation.  See Regrid for
-!   routines which do data interpolation from one grid to another.
+!   routines which do data interpolation from one interngrid to another.
 !
 !-----------------------------------------------------------------------------
 ! !USES:
@@ -41,7 +41,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RedistUTest.F90,v 1.9 2007/03/31 05:51:24 cdeluca Exp $'
+      '$Id: ESMF_RedistUTest.F90,v 1.10 2007/06/22 23:21:41 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldFromUserEx.F90,v 1.7 2007/03/31 05:51:02 cdeluca Exp $
+! $Id: ESMF_FieldFromUserEx.F90,v 1.8 2007/06/22 23:21:29 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@
 !
 ! !DESCRIPTION:
 !
-! This program shows an example of Field creation (and the underlying Grid
+! This program shows an example of Field creation (and the underlying InternGrid
 ! creation) that might occur for a user whose code already manages the
 ! data allocation and distribution, but needs ESMF to correctly interpret
 ! or recognize the code's fields for other reasons (for example, regridding).
@@ -52,7 +52,7 @@
     type(ESMF_DELayout) :: layout
     type(ESMF_Field) :: field1, field2
     type(ESMF_FieldDataMap) :: datamap
-    type(ESMF_Grid) :: grid
+    type(ESMF_InternGrid) :: interngrid
     type(ESMF_VM) :: vm
 !EOC
 
@@ -92,28 +92,28 @@
     call ESMF_DELayoutGetDELocalInfo(layout, de=myPE, coord=myLocation, rc=rc)
 
     ! If any of the user fields are to be used for ESMF regridding or any
-    ! other high-level communication, the ESMF_Grid must exactly match the
-    ! user's grid, both in a physical sense (coordinates) as well as a
+    ! other high-level communication, the ESMF_InternGrid must exactly match the
+    ! user's interngrid, both in a physical sense (coordinates) as well as a
     ! decomposition (or local distribution) sense.  Also, the user must call
-    ! the explicit interface for the appropriate GridType (for example,
-    ! LatLon for a latitude-longitude Grid).  In the future, ESMF should have
-    ! the capability to read in a user grid, but for now the user must specify
-    ! an ESMF_Grid through a Create call.  Please note that the coordiantes
-    ! in this call refer to all the grid coordinates, not just the local (on
+    ! the explicit interface for the appropriate InternGridType (for example,
+    ! LatLon for a latitude-longitude InternGrid).  In the future, ESMF should have
+    ! the capability to read in a user interngrid, but for now the user must specify
+    ! an ESMF_InternGrid through a Create call.  Please note that the coordiantes
+    ! in this call refer to all the interngrid coordinates, not just the local (on
     ! any given processor) ones.
 
-    call UserGetGridCoords(coordX, coordY)
-    grid = ESMF_GridCreateHorzXY(coord1=coordX, coord2=coordY, &
-                                 horzstagger=ESMF_GRID_HORZ_STAGGER_C_SW, &
+    call UserGetInternGridCoords(coordX, coordY)
+    interngrid = ESMF_InternGridCreateHorzXY(coord1=coordX, coord2=coordY, &
+                                 horzstagger=ESMF_IGRID_HORZ_STAGGER_C_SW, &
                                  periodic=(/ ESMF_TRUE, ESMF_FALSE /), &
-                                 name="atmgrid", rc=rc)
+                                 name="atminterngrid", rc=rc)
 
     ! Again, the data distribution ESMF will apply must match the user's.  In
-    ! this call, distX and distY are arrays containing the number of grid cells
+    ! this call, distX and distY are arrays containing the number of interngrid cells
     ! stored locally on the PEs described by the delayout.
 
-    call UserGetGridDistribution(distX, distY)
-    call ESMF_GridDistribute(grid, delayout=layout, &
+    call UserGetInternGridDistribution(distX, distY)
+    call ESMF_InternGridDistribute(interngrid, delayout=layout, &
                              countsPerDEDim1=distX, &
                              countsPerDEDim2=distY, rc=rc)
 
@@ -122,22 +122,22 @@
     ! to ESMF must match the actual user's halo width.  Please note that currently
     ! ESMF requires that the halo width for any given Field be the same in all
     ! directions.  This example of FieldCreate is relatively simple because we
-    ! have assumed the Field axes are completely aligned with the Grid's.
+    ! have assumed the Field axes are completely aligned with the InternGrid's.
 
     call UserGetPointer2D(f90ptr1, myLocation(1), myLocation(2))
     call UserGetHalo(halo)
-    field1 = ESMF_FieldCreate(grid, f90ptr1, ESMF_DATA_REF, &
+    field1 = ESMF_FieldCreate(interngrid, f90ptr1, ESMF_DATA_REF, &
                               horzrelloc=ESMF_CELL_CENTER, &
                               haloWidth=halo, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! This example of FieldCreate is a bit more complicated.  Here we have a 3D
-    ! Field on a 2D Grid, so two of the Field axes can be aligned with the Grid
+    ! Field on a 2D InternGrid, so two of the Field axes can be aligned with the InternGrid
     ! but one is not.  ESMF must know which of the Field axes are aligned with 
-    ! the Grid's.  This is done with a FieldDataMap, which is set and then passed
+    ! the InternGrid's.  This is done with a FieldDataMap, which is set and then passed
     ! in to the FieldCreate routine.  In this case, we will assume the
-    ! second Field axis corresponds to the first Grid axis and the third Field
-    ! axis corresponds to the second Grid axis.
+    ! second Field axis corresponds to the first InternGrid axis and the third Field
+    ! axis corresponds to the second InternGrid axis.
 
     call UserGetPointer3D(f90ptr2, myLocation(1), myLocation(2))
     dataIndexList(1) = 0    
@@ -145,7 +145,7 @@
     dataIndexList(3) = 2
     call ESMF_FieldDataMapSetDefault(datamap, dataRank=3, &
                                      dataIndexList=dataIndexList, rc=rc)
-    field2 = ESMF_FieldCreate(grid, f90ptr2, ESMF_DATA_REF, &
+    field2 = ESMF_FieldCreate(interngrid, f90ptr2, ESMF_DATA_REF, &
                               horzRelloc=ESMF_CELL_CENTER, &
                               datamap=datamap, name="concentration", &
                               haloWidth=halo, rc=rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.93 2007/04/20 19:35:36 rosalind Exp $
+! $Id: ESMF_Route.F90,v 1.94 2007/06/22 23:21:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.93 2007/04/20 19:35:36 rosalind Exp $'
+      '$Id: ESMF_Route.F90,v 1.94 2007/06/22 23:21:40 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -537,9 +537,9 @@ end subroutine rias
 !     \item[rank]
 !          Data rank.
 !     \item[srcDELayout]
-!          The {\tt ESMF\_DELayout} of the source grid.
+!          The {\tt ESMF\_DELayout} of the source interngrid.
 !     \item[dstDELayout]
-!          The {\tt ESMF\_DELayout} of the destination grid.
+!          The {\tt ESMF\_DELayout} of the destination interngrid.
 !     \item[srcDomainList]
 !          An {\tt ESMF\_DomainList} which contains a list of rectangular
 !          regions of a larger rectangular block of memory, to be sent 
@@ -665,7 +665,7 @@ end subroutine rias
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_tot
       integer, intent(in) :: AI_count
       integer, dimension(:,:), intent(in) :: global_start
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: global_count
+      integer, dimension(ESMF_MAXIGRIDDIM), intent(in) :: global_count
       type(ESMF_DELayout), intent(inout) :: delayout
       type(ESMF_Logical), intent(in) :: periodic(:)
       integer, intent(out), optional :: rc
@@ -958,7 +958,7 @@ end subroutine rias
       type(ESMF_AxisIndex), dimension(:,:), pointer :: dstTotalAI
       integer, dimension(:), intent(in) :: dstAICountPerDE
       integer, dimension(:,:), intent(in) :: dstGlobalStart
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dstGlobalCount
+      integer, dimension(ESMF_MAXIGRIDDIM), intent(in) :: dstGlobalCount
       type(ESMF_DELayout), intent(inout) :: dstDElayout
       type(ESMF_Logical), intent(in) :: hasSrcData
       integer, intent(in) :: srcMyDE
@@ -967,7 +967,7 @@ end subroutine rias
       type(ESMF_AxisIndex), dimension(:,:), pointer :: srcTotalAI
       integer, dimension(:), intent(in) :: srcAICountPerDE
       integer, dimension(:,:), intent(in) :: srcGlobalStart
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: srcGlobalCount
+      integer, dimension(ESMF_MAXIGRIDDIM), intent(in) :: srcGlobalCount
       type(ESMF_DELayout), intent(inout) :: srcDElayout
       integer, intent(out), optional :: rc
 
@@ -1146,22 +1146,22 @@ end subroutine rias
       type(ESMF_AxisIndex), dimension(:,:), pointer :: dstCompAI
       integer, dimension(:), intent(in) :: dstAICountPerDE
       integer, dimension(:,:), intent(in) :: dstGlobalStart
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dstGlobalCount
+      integer, dimension(ESMF_MAXIGRIDDIM), intent(in) :: dstGlobalCount
       type(ESMF_DELayout), intent(inout) :: dstDElayout
       type(ESMF_Logical), intent(in) :: hasSrcData
       integer, intent(in) :: srcMyDE
       type(ESMF_AxisIndex), dimension(:,:), pointer :: srcCompAI
       integer, dimension(:), intent(in) :: srcAICountPerDE
       integer, dimension(:,:), intent(in) :: srcGlobalStart
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: srcGlobalCount
+      integer, dimension(ESMF_MAXIGRIDDIM), intent(in) :: srcGlobalCount
       type(ESMF_DELayout), intent(inout) :: srcDElayout
       integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
 !     Precompute the data movement needed to execute a data redistribution
-!     operation from an arbitrarily distributed grid to an arbitrary 
-!     distributed grid
+!     operation from an arbitrarily distributed interngrid to an arbitrary 
+!     distributed interngrid
 !
 !     The arguments are:
 !     \begin{description}
@@ -1298,14 +1298,14 @@ end subroutine rias
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_tot
       integer, intent(in) :: AI_dst_count
       integer, dimension(:,:), intent(in) :: dst_global_start
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dst_global_count
+      integer, dimension(ESMF_MAXIGRIDDIM), intent(in) :: dst_global_count
       type(ESMF_DELayout), intent(inout) :: dstDElayout
       integer, intent(in) :: my_DE_src
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_tot
       integer, intent(in) :: AI_src_count
       integer, dimension(:,:), intent(in) :: src_global_start
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: src_global_count
+      integer, dimension(ESMF_MAXIGRIDDIM), intent(in) :: src_global_count
       type(ESMF_DELayout), intent(inout) :: srcDElayout
       integer, intent(out), optional :: rc
 !

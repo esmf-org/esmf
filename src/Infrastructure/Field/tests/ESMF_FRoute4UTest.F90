@@ -1,4 +1,4 @@
-! $Id: ESMF_FRoute4UTest.F90,v 1.20 2007/03/31 05:51:05 cdeluca Exp $
+! $Id: ESMF_FRoute4UTest.F90,v 1.21 2007/06/22 23:21:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRoute4UTest.F90,v 1.20 2007/03/31 05:51:05 cdeluca Exp $'
+      '$Id: ESMF_FRoute4UTest.F90,v 1.21 2007/06/22 23:21:30 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -49,7 +49,7 @@
       character(ESMF_MAXSTR) :: name
 
 !     !LOCAL VARIABLES:
-      type(ESMF_Grid) :: grid1, grid2, grid3
+      type(ESMF_InternGrid) :: interngrid1, interngrid2, interngrid3
       type(ESMF_ArraySpec) :: arrayspec
       integer, dimension(ESMF_MAXDIM) :: g1_cells, g2_cells
       integer, dimension(:,:), pointer :: f90ptr1, f90ptr2
@@ -63,8 +63,8 @@
       type(ESMF_Field) :: f1, f2
       integer :: half, quart
       real (ESMF_KIND_R8):: min(2), max(2)
-      integer :: counts(ESMF_MAXGRIDDIM)
-      type(ESMF_GridHorzStagger) :: horz_stagger
+      integer :: counts(ESMF_MAXIGRIDDIM)
+      type(ESMF_InternGridHorzStagger) :: horz_stagger
       integer :: status, myde, npets
 
 !------------------------------------------------------------------------------
@@ -143,31 +143,31 @@
       max(1) = 20.0
       min(2) = 0.0
       max(2) = 5.0
-      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
-      gname = "test grid 1"
+      horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
+      gname = "test interngrid 1"
 
-      grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
+      interngrid1 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzStagger=horz_stagger, &
                               name=gname, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCESS"
-      write(name, *) "Creating a source Test Grid"
+      write(name, *) "Creating a source Test InternGrid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Grid distribute Test "
-      call ESMF_GridDistribute(grid1, delayout=layout1, rc=rc)
+      write(name, *) "InternGrid distribute Test "
+      call ESMF_InternGridDistribute(interngrid1, delayout=layout1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
-      ! Destroy Grid Test
+      ! Destroy InternGrid Test
       write(failMsg, *) ""
-      write(name, *) "Destroy Grid Test"
-      call ESMF_GridDestroy(grid1, rc=rc)
+      write(name, *) "Destroy InternGrid Test"
+      call ESMF_InternGridDestroy(interngrid1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -175,40 +175,40 @@
      
       
       !EX_UTest_Multi_Proc_Only
-      grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
+      interngrid1 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzStagger=horz_stagger, &
                               name=gname, rc=status)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating a source Test Grid"
+      write(name, *) "Creating a source Test InternGrid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCESS"
-      write(name, *) "Grid distribute Test "
-      call ESMF_GridDistribute(grid1, delayout=layout1, rc=rc)
+      write(name, *) "InternGrid distribute Test "
+      call ESMF_InternGridDistribute(interngrid1, delayout=layout1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
-      ! Verifing that an uninitialized Grid can be printed
-      call ESMF_GridPrint(grid3, "", rc=rc)
+      ! Verifing that an uninitialized InternGrid can be printed
+      call ESMF_InternGridPrint(interngrid3, "", rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Printing an uninitialized Grid Test"
+      write(name, *) "Printing an uninitialized InternGrid Test"
 !     call 
-      ! Second grid
-      gname = "test grid 2"
-      horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
-      grid2 = ESMF_GridCreateHorzXYUni(counts=counts, &
+      ! Second interngrid
+      gname = "test interngrid 2"
+      horz_stagger = ESMF_IGRID_HORZ_STAGGER_D_NE
+      interngrid2 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzStagger=horz_stagger, &
                               name=gname, rc=status)
-      call ESMF_GridDistribute(grid2, delayout=layout2, rc=rc)
+      call ESMF_InternGridDistribute(interngrid2, delayout=layout2, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating a destination Test Grid"
+      write(name, *) "Creating a destination Test InternGrid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -216,7 +216,7 @@
       ! Verifing that an Array can be created
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Get DE Local Info Test"
-      call ESMF_GridGetDELocalInfo(grid1, localCellCountPerDim=g1_cells, &
+      call ESMF_InternGridGetDELocalInfo(interngrid1, localCellCountPerDim=g1_cells, &
                           horzRelloc=ESMF_CELL_CENTER, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -229,7 +229,7 @@
       ! second array
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Get DE Local Info Test"
-      call ESMF_GridGetDELocalInfo(grid2, localCellCountPerDim=g2_cells, &
+      call ESMF_InternGridGetDELocalInfo(interngrid2, localCellCountPerDim=g2_cells, &
                           horzRelloc=ESMF_CELL_CENTER)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -238,10 +238,10 @@
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       ! Test requirement FLD1.1.1
-      ! Fields may be created by specifying attributes, a grid, data array
+      ! Fields may be created by specifying attributes, a interngrid, data array
       ! dimensions and descriptors, optional masks (e.g. for active cells),
       ! and an optional I/O specification. In this case a field will
-      ! allocate its own data. The grid passed into the argument list
+      ! allocate its own data. The interngrid passed into the argument list
       ! is referenced and not copied.
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
       write(name, *) "Creating an ArraySpec Test "
@@ -249,7 +249,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
-      ! Verifing that a Field can be created with a Grid and Array
+      ! Verifing that a Field can be created with a InternGrid and Array
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field DataMap Set Test"
       call ESMF_FieldDataMapSetDefault(dm, ESMF_INDEX_IJ, rc=rc)
@@ -258,8 +258,8 @@
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating a Field with a Grid and Array Test"
-      f1 = ESMF_FieldCreate(grid1, arrayspec, allocflag=ESMF_ALLOC, &
+      write(name, *) "Creating a Field with a InternGrid and Array Test"
+      f1 = ESMF_FieldCreate(interngrid1, arrayspec, allocflag=ESMF_ALLOC, &
                             horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CELL, &
                             datamap=dm, haloWidth=1, name="Field 0", iospec=ios, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -268,8 +268,8 @@
       !EX_UTest_Multi_Proc_Only
       ! second field
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating a Field with a Grid and Array Test"
-      f2 = ESMF_FieldCreate(grid2, arrayspec, allocflag=ESMF_ALLOC, &
+      write(name, *) "Creating a Field with a InternGrid and Array Test"
+      f2 = ESMF_FieldCreate(interngrid2, arrayspec, allocflag=ESMF_ALLOC, &
                             horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CELL, &
                             datamap=dm, haloWidth=1, name="Field 1", iospec=ios, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -334,15 +334,15 @@
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Grid Destroy Test"
-      call ESMF_GridDestroy(grid1, rc=rc)
+      write(name, *) "InternGrid Destroy Test"
+      call ESMF_InternGridDestroy(interngrid1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Grid Destroy Test"
-      call ESMF_GridDestroy(grid2, rc=rc)
+      write(name, *) "InternGrid Destroy Test"
+      call ESMF_InternGridDestroy(interngrid2, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 

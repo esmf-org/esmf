@@ -1,4 +1,4 @@
-! $Id: ESMF_StateLimitUTest.F90,v 1.6 2007/03/31 05:51:34 cdeluca Exp $
+! $Id: ESMF_StateLimitUTest.F90,v 1.7 2007/06/22 23:21:50 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateLimitUTest.F90,v 1.6 2007/03/31 05:51:34 cdeluca Exp $'
+      '$Id: ESMF_StateLimitUTest.F90,v 1.7 2007/06/22 23:21:50 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -56,7 +56,7 @@
       character(ESMF_MAXSTR) :: print_options = "all"
 
       ! local args needed to create/construct objects
-      type(ESMF_Grid) :: grid(2)
+      type(ESMF_InternGrid) :: interngrid(2)
       type(ESMF_Field) :: sfield(20), dfield(30)
       type(ESMF_Bundle) :: bundle(2)
       type(ESMF_VM) :: vm
@@ -89,16 +89,16 @@
       
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! create first grid
-      grid(1) = CreateLatLonGrid(nx, ny, nz, m, n, "MxN", rc=rc)
-      write(name, *) "Creating grid 1"
-      write(failMsg, *) "Unable to create grid 1"
+      ! create first interngrid
+      interngrid(1) = CreateLatLonInternGrid(nx, ny, nz, m, n, "MxN", rc=rc)
+      write(name, *) "Creating interngrid 1"
+      write(failMsg, *) "Unable to create interngrid 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields
-      call CreateFields(grid(1), &
+      call CreateFields(interngrid(1), &
                         sfield(1), sfield(2), sfield(3), sfield(4), sfield(5), &
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
 		        vrelloc1=ESMF_CELL_CELL, &
@@ -114,7 +114,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields, cont.
-      call CreateFields(grid(1), &
+      call CreateFields(interngrid(1), &
                         sfield(6), sfield(7), sfield(8), sfield(9), sfield(10),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
 		        vrelloc1=ESMF_CELL_CELL, &
@@ -130,7 +130,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields, cont.
-      call CreateFields(grid(1), &
+      call CreateFields(interngrid(1), &
                         sfield(11), sfield(12), sfield(13), sfield(14), sfield(15),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
 		        vrelloc1=ESMF_CELL_CELL, &
@@ -146,7 +146,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields, cont.
-      call CreateFields(grid(1), &
+      call CreateFields(interngrid(1), &
                         sfield(16), sfield(17), sfield(18), sfield(19), sfield(20), &
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
 		        vrelloc1=ESMF_CELL_CELL, &
@@ -198,16 +198,16 @@
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !NEX_UTest
-      !grid(2) = CreateLatLonGrid(nx, ny, nz, mprime, nprime, "M'xN'", 1, 1, rc)
-      grid(2) = CreateLatLonGrid(nx, ny, nz, mprime, nprime, "M'xN'", rc=rc)
-      write(name, *) "Creating grid 2"
-      write(failMsg, *) "Unable to create grid 2"
+      !interngrid(2) = CreateLatLonInternGrid(nx, ny, nz, mprime, nprime, "M'xN'", 1, 1, rc)
+      interngrid(2) = CreateLatLonInternGrid(nx, ny, nz, mprime, nprime, "M'xN'", rc=rc)
+      write(name, *) "Creating interngrid 2"
+      write(failMsg, *) "Unable to create interngrid 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields
-      call CreateFields(grid(2), &
+      call CreateFields(interngrid(2), &
                         dfield(1), dfield(2), dfield(3), dfield(4), dfield(5),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
 		        vrelloc1=ESMF_CELL_CELL, &
@@ -223,7 +223,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields, cont.
-      call CreateFields(grid(2), &
+      call CreateFields(interngrid(2), &
                         dfield(6), dfield(7), dfield(8), dfield(9), dfield(10),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
 		        vrelloc1=ESMF_CELL_CELL, &
@@ -239,7 +239,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields, cont.
-      call CreateFields(grid(2), &
+      call CreateFields(interngrid(2), &
                         dfield(11), dfield(12), dfield(13), dfield(14), dfield(15),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
 		        vrelloc1=ESMF_CELL_CELL, &
@@ -255,7 +255,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields, cont.
-      call CreateFields(grid(2), &
+      call CreateFields(interngrid(2), &
                         dfield(16), dfield(17), dfield(18), dfield(19), dfield(20),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
 		        vrelloc1=ESMF_CELL_CELL, &
@@ -271,7 +271,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields, cont.
-      call CreateFields(grid(2), &
+      call CreateFields(interngrid(2), &
                         dfield(21), dfield(22), dfield(23), dfield(24), dfield(25),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
 		        vrelloc1=ESMF_CELL_CELL, &
@@ -287,7 +287,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields, cont.
-      call CreateFields(grid(2), &
+      call CreateFields(interngrid(2), &
                         dfield(26), dfield(27), dfield(28), dfield(29), dfield(30),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
 		        vrelloc1=ESMF_CELL_CELL, &

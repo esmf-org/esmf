@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.15 2007/05/30 17:46:19 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.16 2007/06/22 23:21:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1130,13 +1130,13 @@ program ESMF_ArrayEx
 ! the sparse matrix need to be provided. In case of an Array to Array 
 ! interpolation the matrix values correspond to the interpolation weights for 
 ! the specific case. A number of different schemes exist to generate the 
-! coefficients from the physical grid information associated with the Arrays. 
-! In ESMF the physical information stored in the Grids is not accessible on 
+! coefficients from the physical interngrid information associated with the Arrays. 
+! In ESMF the physical information stored in the InternGrids is not accessible on 
 ! the index space level on which the Array class is defined. For the Array
 ! an interpolation or regridding is simply a sparse matix multiplication.
 !
 ! It is very common to compute the interpolation weights between two physical
-! grids with an external tool, and then read these values in from file before
+! interngrids with an external tool, and then read these values in from file before
 ! the multiplication is to be performed. The ArraySparseMatMulStore() method 
 ! requires this information in two arguments on the rootPET. The 
 ! {\tt factorList} argument provides the non-zero coefficients as a list of 
@@ -1247,7 +1247,7 @@ program ESMF_ArrayEx
 ! each data element is addressed by a unique index tuple. The interpretation
 ! of where this data element is located physically is either left to the 
 ! application writer, who wants to use the index space layer directly, or to
-! higher layers in the ESMF class structure (Grids and Fields).
+! higher layers in the ESMF class structure (InternGrids and Fields).
 !
 ! There is, however, a special kind of physical information that does affect
 ! the index space and must be considered within the Array and DistGrid classes.
@@ -1279,7 +1279,7 @@ program ESMF_ArrayEx
 ! after creation with {\tt ESMF\_ArraySet()} and can be queried for.
 !
 ! In many practical applications a number of different quantities defined on the
-! same grid will need to be stored and distributed in Array objects. Naturally
+! same interngrid will need to be stored and distributed in Array objects. Naturally
 ! all of these quantities are to be decomposed and distributed in the same manner
 ! across the computational resources in order to ensure good data locality.
 ! There are two ways the ESMF index space layer offers this to be done. First
@@ -1297,7 +1297,7 @@ program ESMF_ArrayEx
 ! be defined on the cylinder surface at different stagger locations. 
 !
 ! First a suitable DistGrid must be created to define the index space and its
-! topology. In this example the index space is a  {\tt 20 x 100} grid with
+! topology. In this example the index space is a  {\tt 20 x 100} interngrid with
 ! the second dimension having a periodic boundary.
 !EOEI
 !BOCI
@@ -1918,8 +1918,8 @@ program ESMF_ArrayEx
 !
 ! \subsubsection{Array for a bipolar DistGrid}
 !
-! The Murray tripolar grid possesses two poles in the arctic region. The 
-! implications of the bipolar grid of the northern hemisphere on the DistGrid
+! The Murray tripolar interngrid possesses two poles in the arctic region. The 
+! implications of the bipolar interngrid of the northern hemisphere on the DistGrid
 ! and Array objects are discussed in this section.
 !
 ! The bipolar region can either be defined as a single patch DistGrid or
@@ -1954,7 +1954,7 @@ program ESMF_ArrayEx
 !BOEI
 ! With this {\tt connectionList} and {\tt connectionTransformList} it is now
 ! possible to define a DistGrid object that captures the index space topology
-! for a bipolar grid. The DistGrid consists of two patches which need to be
+! for a bipolar interngrid. The DistGrid consists of two patches which need to be
 ! provided in {\tt minIndex} and {\tt maxIndex} list arguments.
 !EOEI
 !BOCI

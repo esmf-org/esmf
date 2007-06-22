@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.16 2007/04/03 16:36:27 cdeluca Exp $
+! $Id: user_model1.F90,v 1.17 2007/06/22 23:22:00 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -45,7 +45,7 @@
 !   !   private to the module.
  
     subroutine userm1_register(comp, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
+        type(ESMF_InternGridComp), intent(inout) :: comp
         integer, intent(out) :: rc
 
         ! local variables
@@ -56,11 +56,11 @@
 
         ! Register the callback routines.
 
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETINIT, &
                                                user_init, ESMF_SINGLEPHASE, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETRUN, &
                                                 user_run, ESMF_SINGLEPHASE, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETFINAL, &
                                               user_final, ESMF_SINGLEPHASE, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
@@ -72,7 +72,7 @@
         mydatablock%scale_factor = 0.66
 
         wrap%ptr => mydatablock
-        call ESMF_GridCompSetInternalState(comp, wrap, rc)
+        call ESMF_InternGridCompSetInternalState(comp, wrap, rc)
 
         print *, "Registered Private Data block for Internal State"
 
@@ -82,7 +82,7 @@
         ! your own code development you probably don't want to include the 
         ! following call unless you are interested in exploring ESMF's 
         ! threading features.
-        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+        call ESMF_InternGridCompSetVMMinThreads(comp, rc=rc)
 #endif
 
         rc = ESMF_SUCCESS
@@ -95,7 +95,7 @@
  
     
     subroutine user_init(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
+        type(ESMF_InternGridComp), intent(inout) :: comp
         type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
@@ -104,20 +104,20 @@
         type(ESMF_Field) :: humidity
         type(ESMF_VM) :: vm
         type(ESMF_DELayout) :: layout
-        type(ESMF_Grid) :: grid1
+        type(ESMF_InternGrid) :: interngrid1
         type(ESMF_Array) :: array1
         type(ESMF_ArraySpec) :: arrayspec
         integer, dimension(:,:), pointer :: idata
         real(ESMF_KIND_R8) :: g_min(2), g_max(2)
         integer :: counts(2)
         integer :: npets, de_id
-        type(ESMF_GridHorzStagger) :: horz_stagger
+        type(ESMF_InternGridHorzStagger) :: horz_stagger
         integer :: status
 
         print *, "User Comp Init starting"
 
         ! Query component for VM and create a layout with the right breakdown
-        call ESMF_GridCompGet(comp, vm=vm, rc=status)
+        call ESMF_InternGridCompGet(comp, vm=vm, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_VMGet(vm, petCount=npets, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
@@ -131,15 +131,15 @@
         g_max(1) = 20.0
         g_min(2) = 0.0
         g_max(2) = 5.0
-        horz_stagger = ESMF_GRID_HORZ_STAGGER_A
+        horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
 
-        grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
+        interngrid1 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                                 minGlobalCoordPerDim=g_min, &
                                 maxGlobalCoordPerDim=g_max, &
                                 horzStagger=horz_stagger, &
-                                name="source grid", rc=status)
+                                name="source interngrid", rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_GridDistribute(grid1, delayout=layout, rc=status)
+        call ESMF_InternGridDistribute(interngrid1, delayout=layout, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Figure out our local processor id
@@ -151,7 +151,7 @@
                                typekind=ESMF_TYPEKIND_I4)
 
         ! Create the field and have it create the array internally
-        humidity = ESMF_FieldCreate(grid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+        humidity = ESMF_FieldCreate(interngrid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                     name="humidity", rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 10
 
@@ -182,7 +182,7 @@
 !   !
  
     subroutine user_run(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
+        type(ESMF_InternGridComp), intent(inout) :: comp
         type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
@@ -198,7 +198,7 @@
         print *, "User Comp Run starting"
 
         ! Get our local info
-        call ESMF_GridCompGetInternalState(comp, wrap, status)
+        call ESMF_InternGridCompGetInternalState(comp, wrap, status)
         mydatablock => wrap%ptr
 
         print *, "run, scale_factor = ", mydatablock%scale_factor
@@ -231,7 +231,7 @@
 !   !
  
     subroutine user_final(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
+        type(ESMF_InternGridComp), intent(inout) :: comp
         type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
@@ -246,7 +246,7 @@
         ! Get our local info
         nullify(wrap%ptr)
         mydatablock => wrap%ptr
-        call ESMF_GridCompGetInternalState(comp, wrap, status)
+        call ESMF_InternGridCompGetInternalState(comp, wrap, status)
 
         mydatablock => wrap%ptr
         print *, "before dealloc, runparam1 = ", mydatablock%runparam1

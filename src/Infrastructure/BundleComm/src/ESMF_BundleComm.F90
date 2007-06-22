@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.70 2007/06/19 21:23:39 cdeluca Exp $
+! $Id: ESMF_BundleComm.F90,v 1.71 2007/06/22 23:21:28 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -50,8 +50,8 @@
       use ESMF_RouteMod
       use ESMF_InternArrayCommMod
       use ESMF_InternArrayDataMapMod
-      use ESMF_GridTypesMod
-      use ESMF_GridMod
+      use ESMF_InternGridTypesMod
+      use ESMF_InternGridMod
       use ESMF_FieldDataMapMod
       use ESMF_FieldMod
       use ESMF_FieldCommMod
@@ -83,9 +83,9 @@
    ! These are the recommended entry points; the code itself is in Array:
                              ! Synchronize boundary data between decompositions
    public ESMF_BundleHaloStore, ESMF_BundleHalo, ESMF_BundleHaloRelease 
-                             ! Redistribute existing arrays, matching grids
+                             ! Redistribute existing arrays, matching interngrids
    public ESMF_BundleRedistStore, ESMF_BundleRedist, ESMF_BundleRedistRelease 
-                             ! Regridding and interpolation, different grids
+                             ! Regridding and interpolation, different interngrids
    public ESMF_BundleRegridStore, ESMF_BundleRegrid, ESMF_BundleRegridRelease 
 
    public ESMF_BundleGather   ! Combine 1 decomposed bundle into 1 on 1 DE
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.70 2007/06/19 21:23:39 cdeluca Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.71 2007/06/22 23:21:28 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -167,8 +167,8 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-! Entry points for fuctionality which will happen mostly below at the Grid
-!   level, but needs a Data Pointer as well as grid info to operate.
+! Entry points for fuctionality which will happen mostly below at the InternGrid
+!   level, but needs a Data Pointer as well as interngrid info to operate.
 !   These include Reduction operations, Halo, and Transpose.
 !
 !------------------------------------------------------------------------------
@@ -202,7 +202,7 @@
 !           {\tt ESMF\_Bundle} containing data to be gathered.
 !     \item [array] 
 !           Newly created array containing the collected data.
-!           It is the size of the entire undecomposed grid.
+!           It is the size of the entire undecomposed interngrid.
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
@@ -237,7 +237,7 @@
       btypep => bundle%btypep
 
       ! Call Array method to perform actual work
-      call ESMF_IArrayAllGather(btypep%flist(1)%ftypep%localfield%localdata, btypep%grid, &
+      call ESMF_IArrayAllGather(btypep%flist(1)%ftypep%localfield%localdata, btypep%interngrid, &
                                btypep%flist(1)%ftypep%mapping, array, status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
@@ -286,7 +286,7 @@
 !     \item [arrayList] 
 !           Newly created list of {\tt ESMF\_Array}s, one per {\tt ESMF\_Field}
 !           in the {\tt ESMF\_Bundle}, containing the collected data on the
-!           specified DE.  It is the size of the entire undecomposed grid.
+!           specified DE.  It is the size of the entire undecomposed interngrid.
 !           On all other DEs this argument returns an invalid object.
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
@@ -324,7 +324,7 @@
       do i=1, btypep%field_count
           ! Call Array method to perform actual work
           call ESMF_IArrayGather(btypep%flist(i)%ftypep%localfield%localdata, &
-                                btypep%grid, btypep%flist(i)%ftypep%mapping, &
+                                btypep%interngrid, btypep%flist(i)%ftypep%mapping, &
                                 destinationDE, arrayList(i), status)
           if (ESMF_LogMsgFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
@@ -575,7 +575,7 @@
 !     {\tt ESMF\_RouteHandle} computed during this store call.
 !     Although probably less common with bundles than with fields,
 !     if more than one {\tt ESMF\_Bundle} has an identical 
-!     {\tt ESMF\_Grid} and contains identical {\tt ESMF\_Field}s, then
+!     {\tt ESMF\_InternGrid} and contains identical {\tt ESMF\_Field}s, then
 !     the same {\tt ESMF\_RouteHandle} can be computed once and used
 !     in multiple executions of the halo operation.
 !     In the current version of the code {\tt ESMF\_Bundle}s with
@@ -641,7 +641,7 @@
                                   btypep%flist(1)%ftypep%localfield%localdata, &
                                   btypep%flist(1)%ftypep%localfield%localFlag, &
                                   1, ESMF_ALLTO1HANDLEMAP, 1, &
-                                  btypep%grid, &
+                                  btypep%interngrid, &
                                   btypep%flist(1)%ftypep%mapping, routehandle, &
                                   halodirection, routeOptions, rc=status)
         if (ESMF_LogMsgFoundError(status, &
@@ -656,7 +656,7 @@
                                   btypep%flist(i)%ftypep%localfield%localdata, &
                                   btypep%flist(i)%ftypep%localfield%localFlag, &
                                   i, ESMF_1TO1HANDLEMAP, btypep%field_count, &
-                                  btypep%grid, &
+                                  btypep%interngrid, &
                                   btypep%flist(i)%ftypep%mapping, &
                                   routehandle, &
                                   halodirection, routeOptions, rc=status)
@@ -706,12 +706,12 @@
 !     done only a single time; otherwise computing and reusing a communication
 !     pattern will be more efficient. 
 !     This routine reads the source bundle and leaves 
-!     the data untouched.  It reads the {\tt ESMF\_Grid} and 
+!     the data untouched.  It reads the {\tt ESMF\_InternGrid} and 
 !     {\tt ESMF\_FieldDataMap}
 !     from the destination bundle and updates the array data in the destination.
-!     The {\tt ESMF\_Grid}s may have different decompositions (different
+!     The {\tt ESMF\_InternGrid}s may have different decompositions (different
 !     {\tt ESMF\_DELayout}s) or different data maps, but the source and
-!     destination grids must describe the same set of coordinates.
+!     destination interngrids must describe the same set of coordinates.
 !     Unlike {\tt ESMF\_BundleRegrid} this routine does not do interpolation,
 !     only data movement.
 !
@@ -720,7 +720,7 @@
 !     \item [srcBundle] 
 !           {\tt ESMF\_Bundle} containing source data.
 !     \item [dstBundle] 
-!           {\tt ESMF\_Bundle} containing destination grid.
+!           {\tt ESMF\_Bundle} containing destination interngrid.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Bundle}s,
 !           most commonly the VM of the Coupler if the redistribution is
@@ -819,12 +819,12 @@
 !     Perform a redistribution operation over the data
 !     in an {\tt ESMF\_Bundle}.  
 !     This routine reads the source bundle and leaves 
-!     the data untouched.  It reads the {\tt ESMF\_Grid} and 
+!     the data untouched.  It reads the {\tt ESMF\_InternGrid} and 
 !     {\tt ESMF\_FieldDataMap}
 !     from the destination bundle and updates the array data in the destination.
-!     The {\tt ESMF\_Grid}s may have different decompositions (different
+!     The {\tt ESMF\_InternGrid}s may have different decompositions (different
 !     {\tt ESMF\_DELayout}s) or different data maps, but the source and
-!     destination grids must describe the same set of coordinates.
+!     destination interngrids must describe the same set of coordinates.
 !     Unlike {\tt ESMF\_BundleRegrid} this routine does not do interpolation,
 !     only data movement.
 !
@@ -833,7 +833,7 @@
 !     \item [srcbundle] 
 !           {\tt ESMF\_Bundle} containing source data.
 !     \item [dstbundle] 
-!           {\tt ESMF\_Bundle} containing destination grid.
+!           {\tt ESMF\_Bundle} containing destination interngrid.
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} which was returned by the corresponding
 !           {\tt ESMF\_BundleRedistStore()} call. It is associated with
@@ -1077,9 +1077,9 @@
 !     in that redistribution does no interpolation, only a 1-for-1 movement
 !     of data from one location to another.
 !     Therefore, while 
-!     the {\tt ESMF\_Grid}s for the source and destination may have
+!     the {\tt ESMF\_InternGrid}s for the source and destination may have
 !     different decompositions (different {\tt ESMF\_DELayout}s) 
-!     or different data maps, the source and destination grids 
+!     or different data maps, the source and destination interngrids 
 !     must describe the same set of coordinates.
 !
 !     The arguments are:
@@ -1087,7 +1087,7 @@
 !     \item [srcBundle]
 !           {\tt ESMF\_Bundle} containing source data.
 !     \item [dstBundle]
-!           {\tt ESMF\_Bundle} containing destination grid.
+!           {\tt ESMF\_Bundle} containing destination interngrid.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Bundle}s, 
 !           most commonly the VM
@@ -1162,11 +1162,11 @@
          call ESMF_IArrayRedistStore( &
                                  stypep%flist(1)%ftypep%localfield%localdata, &
                                  stypep%flist(1)%ftypep%localfield%localFlag, &
-                                 stypep%grid, &
+                                 stypep%interngrid, &
                                  stypep%flist(1)%ftypep%mapping, &
                                  dtypep%flist(1)%ftypep%localfield%localdata, &
                                  dtypep%flist(1)%ftypep%localfield%localFlag, &
-                                 dtypep%grid, &
+                                 dtypep%interngrid, &
                                  dtypep%flist(1)%ftypep%mapping, &
                                  1, ESMF_ALLTO1HANDLEMAP, 1, &
                                  parentVM, &
@@ -1182,11 +1182,11 @@
            call ESMF_IArrayRedistStore( &
                                stypep%flist(i)%ftypep%localfield%localdata, &
                                stypep%flist(i)%ftypep%localfield%localFlag, &
-                               stypep%grid, &
+                               stypep%interngrid, &
                                stypep%flist(i)%ftypep%mapping, &
                                dtypep%flist(i)%ftypep%localfield%localdata, &
                                dtypep%flist(i)%ftypep%localfield%localFlag, &
-                               dtypep%grid, &
+                               dtypep%interngrid, &
                                dtypep%flist(i)%ftypep%mapping, &
                                i, ESMF_1TO1HANDLEMAP, stypep%field_count, &
                                parentVM, &
@@ -1258,8 +1258,8 @@
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      ! Call Grid method to perform actual work??  TODO: is this right?
-      !call ESMF_GridReduce(field%btypep%grid, &
+      ! Call InternGrid method to perform actual work??  TODO: is this right?
+      !call ESMF_InternGridReduce(field%btypep%interngrid, &
       !                     field%btypep%flist(1)%ftypep%localfield%localdata, &
       !                     rtype, result, status)
       !if (ESMF_LogMsgFoundError(status, &
@@ -1301,7 +1301,7 @@
 ! !DESCRIPTION:
 !     Perform a regrid operation over the data
 !     in an {\tt ESMF\_Bundle}.  This routine reads the source bundle and 
-!     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
+!     leaves the data untouched.  It uses the {\tt ESMF\_InternGrid} and
 !     {\tt ESMF\_FieldDataMap} information in the destination bundle to
 !     control the transformation of data.  The array data in the 
 !     destination bundle is overwritten by this call.
@@ -1316,7 +1316,7 @@
 !     \item [srcBundle] 
 !           {\tt ESMF\_Bundle} containing source data.
 !     \item [dstBundle] 
-!           {\tt ESMF\_Bundle} containing destination grid.
+!           {\tt ESMF\_Bundle} containing destination interngrid.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Bundle}s, 
 !           most commonly the VM of the Coupler if the regridding is
@@ -1424,7 +1424,7 @@
 ! !DESCRIPTION:
 !     Perform a regrid operation over the data
 !     in an {\tt ESMF\_Bundle}.  This routine reads the source bundle and 
-!     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
+!     leaves the data untouched.  It uses the {\tt ESMF\_InternGrid} and
 !     {\tt ESMF\_FieldDataMap} information in the destination bundle to
 !     control the transformation of data.  The array data in the 
 !     destination bundle is overwritten by this call.
@@ -1434,7 +1434,7 @@
 !     \item [srcbundle] 
 !           {\tt ESMF\_Bundle} containing source data.
 !     \item [dstbundle] 
-!           {\tt ESMF\_Bundle} containing destination grid and data map.
+!           {\tt ESMF\_Bundle} containing destination interngrid and data map.
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} which will be returned after being
 !           associated with the precomputed
@@ -1541,9 +1541,9 @@
           endif
 
           do i = 1, stypep%field_count
-            hasSrcData = ESMF_RegridHasData(stypep%grid, &
+            hasSrcData = ESMF_RegridHasData(stypep%interngrid, &
                                           stypep%flist(i)%ftypep%mapping)
-            hasDstData = ESMF_RegridHasData(dtypep%grid, &
+            hasDstData = ESMF_RegridHasData(dtypep%interngrid, &
                                           dtypep%flist(i)%ftypep%mapping)
 
             call ESMF_IArrayRegrid(stypep%flist(i)%ftypep%localfield%localdata, &
@@ -1583,9 +1583,9 @@
                   dstArrayList(i) = dtypep%flist(i)%ftypep%localfield%localdata
               enddo
         
-              hasSrcData = ESMF_RegridHasData(stypep%grid, &
+              hasSrcData = ESMF_RegridHasData(stypep%interngrid, &
                                               stypep%flist(1)%ftypep%mapping)
-              hasDstData = ESMF_RegridHasData(dtypep%grid, &
+              hasDstData = ESMF_RegridHasData(dtypep%interngrid, &
                                               dtypep%flist(1)%ftypep%mapping)
     
               ! TODO: do the datamaps have to go in as lists as well?
@@ -1606,9 +1606,9 @@
           else
               ! multiple congruent fields, but a single route
               do i = 1, stypep%field_count
-                hasSrcData = ESMF_RegridHasData(stypep%grid, &
+                hasSrcData = ESMF_RegridHasData(stypep%interngrid, &
                                               stypep%flist(i)%ftypep%mapping)
-                hasDstData = ESMF_RegridHasData(dtypep%grid, &
+                hasDstData = ESMF_RegridHasData(dtypep%interngrid, &
                                               dtypep%flist(i)%ftypep%mapping)
 
                 call ESMF_IArrayRegrid( &
@@ -1708,7 +1708,7 @@
 !     \item [srcBundle] 
 !           {\tt ESMF\_Bundle} containing source data.
 !     \item [dstBundle] 
-!           {\tt ESMF\_Bundle} containing destination grid and data map.
+!           {\tt ESMF\_Bundle} containing destination interngrid and data map.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Bundle}s, 
 !           most commonly the VM
@@ -1780,10 +1780,10 @@
       if ((condition .eq. ESMF_BUNDLECOMM_CONGRUENT) .and. bundlepack) then
           call ESMF_IArrayRegridStore( &
                                  stypep%flist(1)%ftypep%localfield%localdata, &
-                                 stypep%grid, &
+                                 stypep%interngrid, &
                                  stypep%flist(1)%ftypep%mapping, &
                                  dtypep%flist(1)%ftypep%localfield%localdata, &
-                                 dtypep%grid, &
+                                 dtypep%interngrid, &
                                  dtypep%flist(1)%ftypep%mapping, &
                                  parentVM, routehandle, &
                                  1, ESMF_ALLTO1HANDLEMAP, 1, &
@@ -1797,10 +1797,10 @@
         do i=1, stypep%field_count
             call ESMF_IArrayRegridStore( &
                                  stypep%flist(i)%ftypep%localfield%localdata, &
-                                 stypep%grid, &
+                                 stypep%interngrid, &
                                  stypep%flist(i)%ftypep%mapping, &
                                  dtypep%flist(i)%ftypep%localfield%localdata, &
-                                 dtypep%grid, &
+                                 dtypep%interngrid, &
                                  dtypep%flist(i)%ftypep%mapping, &
                                  parentVM, routehandle, &
                                  i, ESMF_1TO1HANDLEMAP, stypep%field_count, &
@@ -1851,13 +1851,13 @@
 !   \begin{description}
 !   \item [array] 
 !         Input {\tt ESMF\_Array} containing the collected data.
-!         It must be the size of the entire undecomposed grid.
+!         It must be the size of the entire undecomposed interngrid.
 !   \item [sourceDE]
 !         Integer DE number where the data to be scattered 
 !         is located.  The
 !         {\tt ESMF\_Array} input is ignored on all other DEs.
 !   \item [bundle] 
-!         Empty Bundle containing {\tt ESMF\_Grid} which will correspond to 
+!         Empty Bundle containing {\tt ESMF\_InternGrid} which will correspond to 
 !         the data 
 !         in the array which will be scattered.  When this routine returns
 !         each {\tt ESMF\_Bundle} will contain a valid data array containing 
@@ -1884,14 +1884,14 @@
 
       integer :: status                           ! Error status
       type(ESMF_BundleType) :: btypep             ! bundle type info
-      !type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
+      !type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for InternGrid
       type(ESMF_DELayout) :: delayout          ! layout
       type(ESMF_InternArray) :: dstarray                ! Destination array
       integer :: i, datarank
       !integer :: thisdim, thislength, numDims
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
-      integer :: decomps(ESMF_MAXGRIDDIM), decompids(ESMF_MAXDIM)
+      integer :: decomps(ESMF_MAXIGRIDDIM), decompids(ESMF_MAXDIM)
    
       ! Initialize return code   
       status = ESMF_RC_NOT_IMPL
@@ -1902,18 +1902,18 @@
 
       btypep = bundle%btypep
 
-      ! Query the datamap and set info for grid so it knows how to
-      !  match up the array indices and the grid indices.
+      ! Query the datamap and set info for interngrid so it knows how to
+      !  match up the array indices and the interngrid indices.
       call ESMF_FieldDataMapGet(btypep%flist(1)%ftypep%mapping, &
                            dataIndexList=dimorder, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-!     call ESMF_GridGet(btypep%grid, decomps, rc=status)   !TODO
+!     call ESMF_InternGridGet(btypep%interngrid, decomps, rc=status)   !TODO
       !if (ESMF_LogMsgFoundError(status, &
       !                            ESMF_ERR_PASSTHRU, &
       !                            ESMF_CONTEXT, rc)) return
-      decomps(1) = 1    ! TODO: remove this once the grid call is created
+      decomps(1) = 1    ! TODO: remove this once the interngrid call is created
       decomps(2) = 2
 
       ! And get the Array sizes
@@ -1929,7 +1929,7 @@
       enddo
 
       ! Call Array method to perform actual work
-      call ESMF_GridGet(btypep%grid, delayout=delayout, rc=status)
+      call ESMF_InternGridGet(btypep%interngrid, delayout=delayout, rc=status)
       call ESMF_IArrayScatter(array, delayout, decompids, sourceDE, dstarray, &
                              status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1996,7 +1996,7 @@
       integer :: status                           ! Error status
       integer :: i
       type(ESMF_BundleType), pointer :: stypep, dtypep
-      type(ESMF_GridStorage) :: sgridStorage, dgridStorage
+      type(ESMF_InternGridStorage) :: sinterngridStorage, dinterngridStorage
       integer :: srank, drank
       type(ESMF_TypeKind) :: skind, dkind
    
@@ -2059,18 +2059,18 @@
           
 	  
         ! check if the rank of the source array and the destination array are 
-        ! the same if the grid distribution are both arbitrary or both block.
+        ! the same if the interngrid distribution are both arbitrary or both block.
         ! Skip the checking if one is arbitrary and the other is block
 	! ** P Li ** 10/17/2006
-          call ESMF_GridGet(stypep%grid, gridStorage=sgridStorage, rc=status)
+          call ESMF_InternGridGet(stypep%interngrid, interngridStorage=sinterngridStorage, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          call ESMF_GridGet(dtypep%grid, gridStorage=dgridStorage, rc=status)
+          call ESMF_InternGridGet(dtypep%interngrid, interngridStorage=dinterngridStorage, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          if (sgridStorage.eq.dgridStorage) then				    
+          if (sinterngridStorage.eq.dinterngridStorage) then				    
             if (srank .ne. drank) then
               call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                   "Corresponding Fields in Bundles must have same data rank", &

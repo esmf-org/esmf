@@ -1,4 +1,4 @@
-! $Id: ESMF_UserMain.F90,v 1.13 2004/04/28 23:12:11 cdeluca Exp $
+! $Id: ESMF_UserMain.F90,v 1.14 2007/06/22 23:21:49 cdeluca Exp $
 !
 ! Test code which creates a new Application Component. 
 !   Expects to be compiled with ESMF_UserCComp.F90 and ESMF_UserGComp.F90
@@ -19,7 +19,7 @@
 !   ! ESMF Framework module
     use ESMF_Mod
 
-    use UserGridCompMod, only: User_SetServices => grid_services
+    use UserInternGridCompMod, only: User_SetServices => interngrid_services
     use UserCplCompMod, only: User_SetServices => coupler_services
     
     implicit none
@@ -27,8 +27,8 @@
 !   ! Local variables
     integer :: rc
 
-    type(ESMF_GridComp) :: topcomp
-    type(ESMF_GridComp) :: oceangridcomp, atmgridcomp
+    type(ESMF_InternGridComp) :: topcomp
+    type(ESMF_InternGridComp) :: oceaninterngridcomp, atminterngridcomp
     type(ESMF_CplComp) :: cplcomp
 
     ! instantiate a clock, a calendar, and timesteps
@@ -41,7 +41,7 @@
     type(ESMF_Config) :: tconfig
     type(ESMF_DELayout) :: tlayout
 
-    type(ESMF_Grid) :: grid1, grid2
+    type(ESMF_InternGrid) :: interngrid1, interngrid2
     type(ESMF_State) :: atmimport, ocnexport
 
     character(ESMF_MAXSTR) :: tname, gname1, gname2, cname
@@ -50,20 +50,20 @@
 !-------------------------------------------------------------------------
 !   ! Test 1:
 !   !
-!   !  Create an top component which in turn creates 2 Gridded components and
+!   !  Create an top component which in turn creates 2 InternGridded components and
 !   !    a Coupler component.
  
     print *, "Application Test 1:"
 
     !-------------------------------------------------------------------------
-    !  Create the top level Gridded Component
+    !  Create the top level InternGridded Component
 
     tname = "Test Application"
     configFile="/home/nancy/models/startup.conf"
-    topcomp = ESMF_GridCompCreate(name=tname, configFile=configFile, rc=rc)
+    topcomp = ESMF_InternGridCompCreate(name=tname, configFile=configFile, rc=rc)
 
     ! Query for the layout and config objects
-    call ESMF_GridCompGet(topcomp, layout=tlayout, config=tconfig)
+    call ESMF_InternGridCompGet(topcomp, layout=tlayout, config=tconfig)
 
     ! Create the main application clock
 
@@ -90,23 +90,23 @@
 
 
     !-------------------------------------------------------------------------
-    !  Create the 2 gridded components
+    !  Create the 2 interngridded components
 
-    grid1 = ESMF_GridCreate("ocean grid", rc=rc)
+    interngrid1 = ESMF_InternGridCreate("ocean interngrid", rc=rc)
     gname1 = "Ocean"
-    oceangridcomp = ESMF_GridCompCreate(name=gname1, layout=tlayout, &
-                                    mtype=ESMF_OCEAN, grid=grid1, &
+    oceaninterngridcomp = ESMF_InternGridCompCreate(name=gname1, layout=tlayout, &
+                                    mtype=ESMF_OCEAN, interngrid=interngrid1, &
                                     config=tconfig, rc=rc)  
 
-    print *, "Grid Comp Create completed, name = ", trim(gname1)
+    print *, "InternGrid Comp Create completed, name = ", trim(gname1)
 
-    grid2 = ESMF_GridCreate("atm grid", rc=rc)
+    interngrid2 = ESMF_InternGridCreate("atm interngrid", rc=rc)
     gname2 = "Atmosphere"
-    atmgridcomp = ESMF_GridCompCreate(name=gname2, layout=tlayout, &
-                                    mtype=ESMF_ATM, grid=grid2, &
+    atminterngridcomp = ESMF_InternGridCompCreate(name=gname2, layout=tlayout, &
+                                    mtype=ESMF_ATM, interngrid=interngrid2, &
                                     config=tconfig, rc=rc)  
 
-    print *, "Grid Comp Create completed, name = ", trim(gname2)
+    print *, "InternGrid Comp Create completed, name = ", trim(gname2)
 
     !-------------------------------------------------------------------------
     !  Create the coupler
@@ -120,8 +120,8 @@
     !-------------------------------------------------------------------------
     !  Register the entry points for each component
 
-    call ESMF_GridCompSetServices(oceangridcomp, grid_services, rc)
-    call ESMF_GridCompSetServices(atmgridcomp, grid_services, rc)
+    call ESMF_InternGridCompSetServices(oceaninterngridcomp, interngrid_services, rc)
+    call ESMF_InternGridCompSetServices(atminterngridcomp, interngrid_services, rc)
     call ESMF_CplCompSetServices(cplcomp, cpl_services, rc)
 
     !-------------------------------------------------------------------------
@@ -134,13 +134,13 @@
     !  Initialize each component
     !
     !   Full Init argument list is:
-    !   call ESMF_GridCompInitialize(comp, import, export, clock, phase, rc)
+    !   call ESMF_InternGridCompInitialize(comp, import, export, clock, phase, rc)
     !   call ESMF_CplCompInitialize(comp, import, export, clock, phase, rc)
 
 
-    call ESMF_GridCompInitialize(oceangridcomp, exportState=ocnexport, &
+    call ESMF_InternGridCompInitialize(oceaninterngridcomp, exportState=ocnexport, &
                                                     clock=tclock, rc=rc)
-    call ESMF_GridCompInitialize(atmgridcomp, atmimport, clock=tclock, rc=rc)
+    call ESMF_InternGridCompInitialize(atminterngridcomp, atmimport, clock=tclock, rc=rc)
     call ESMF_CplCompInitialize(cplcomp, ocnexport, atmimport, tclock, rc=rc)
     print *, "Initialization complete"
 
@@ -149,17 +149,17 @@
     !  Run the main loop
     !
     !   Full Run argument list is:
-    !   call ESMF_GridCompRun(comp, import, export, clock, phase, rc)
+    !   call ESMF_InternGridCompRun(comp, import, export, clock, phase, rc)
     !   call ESMF_CplCompRun(comp, import, export, clock, phase, rc)
 
     do
    
-        call ESMF_GridCompRun(oceangridcomp, exportState=ocnexport, 
+        call ESMF_InternGridCompRun(oceaninterngridcomp, exportState=ocnexport, 
                                                          clock=tclock, rc=rc)
 
         call ESMF_CplCompRun(cplcomp, ocnexport, atmimport, tclock, rc=rc)
 
-        call ESMF_GridCompRun(atmgridcomp, atmimport, clock=tclock, rc=rc)
+        call ESMF_InternGridCompRun(atminterngridcomp, atmimport, clock=tclock, rc=rc)
 
 
         call ESMF_ClockAdvance(aclock)
@@ -174,15 +174,15 @@
     !  Finalize each component
     !
     !   Full Final argument list is:
-    !   call ESMF_GridCompFinalize(comp, import, export, clock, phase, rc)
+    !   call ESMF_InternGridCompFinalize(comp, import, export, clock, phase, rc)
     !   call ESMF_CplCompFinalize(comp, import, export, clock, phase, rc)
 
 
-    call ESMF_GridCompFinalize(oceangridcomp, exportState=ocnexport, &
+    call ESMF_InternGridCompFinalize(oceaninterngridcomp, exportState=ocnexport, &
                                                     clock=tclock, rc=rc)
     call ESMF_CplCompFinalize(cplcomp, ocnexport, atmimport, clock=tclock, &
                                                                    rc=rc)
-    call ESMF_GridCompFinalize(component=atmgridcomp, importState=atmimport, &
+    call ESMF_InternGridCompFinalize(component=atminterngridcomp, importState=atmimport, &
                                                     clock=tclock, rc=rc)
     print *, "Finalization complete"
 
@@ -194,11 +194,11 @@
     call ESMF_ClockDestroy(tclock, rc)
     call ESMF_CalendarDestroy(gregorianCalendar, rc)
 
-    call ESMF_GridCompDestroy(oceangridcomp, rc)
-    call ESMF_GridCompDestroy(atmgridcomp, rc)
+    call ESMF_InternGridCompDestroy(oceaninterngridcomp, rc)
+    call ESMF_InternGridCompDestroy(atminterngridcomp, rc)
     call ESMF_CplCompDestroy(cplcomp, rc)
 
-    call ESMF_GridCompDestroy(topcomp, rc)
+    call ESMF_InternGridCompDestroy(topcomp, rc)
 
     print *, "Cleanup complete"
 

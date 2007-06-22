@@ -1,4 +1,4 @@
-! $Id: UserCodeMod.F90,v 1.5 2007/03/31 05:51:02 cdeluca Exp $
+! $Id: UserCodeMod.F90,v 1.6 2007/06/22 23:21:29 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -15,16 +15,16 @@
     use ESMF_Mod
 
     implicit none
-    private :: countX, countY, haloWidth, nPEsX, nPEsY, distGridX, distGridY
+    private :: countX, countY, haloWidth, nPEsX, nPEsY, distInternGridX, distInternGridY
     integer :: countX=50, countY=30
     integer :: haloWidth=2
     integer :: nPEsX=3, nPEsY=2
-    integer, dimension(3) :: distGridX = (/ 10, 15, 25 /)
-    integer, dimension(2) :: distGridY = (/ 12, 18 /)
+    integer, dimension(3) :: distInternGridX = (/ 10, 15, 25 /)
+    integer, dimension(2) :: distInternGridY = (/ 12, 18 /)
 
     public UserGetPEDecomposition
-    public UserGetGridCoords
-    public UserGetGridDistribution
+    public UserGetInternGridCoords
+    public UserGetInternGridDistribution
     public UserGetHalo
     public UserGetPointer2D
     public UserGetPointer3D
@@ -44,10 +44,10 @@
     end subroutine UserGetPEDecomposition
 
 
-    subroutine UserGetGridCoords(coordX, coordY)
-    ! Dummy routine to return grid axes coordinates.
-    ! Please note that currently all of the ESMF_GridCreate functions refer to
-    ! counts as the number of grid cells and not vertices, but the coordinates
+    subroutine UserGetInternGridCoords(coordX, coordY)
+    ! Dummy routine to return interngrid axes coordinates.
+    ! Please note that currently all of the ESMF_InternGridCreate functions refer to
+    ! counts as the number of interngrid cells and not vertices, but the coordinates
     ! are defined at vertex points.  So there should be count+1 number of
     ! coordinates.
 
@@ -68,34 +68,34 @@
       coordY(i) = coordY(i-1) + 2.0d0
     enddo
 
-    end subroutine UserGetGridCoords
+    end subroutine UserGetInternGridCoords
 
 
-    subroutine UserGetGridDistribution(distX, distY)
-    ! Dummy routine to return a distribution of grid cells.
+    subroutine UserGetInternGridDistribution(distX, distY)
+    ! Dummy routine to return a distribution of interngrid cells.
 
     integer, dimension(:), pointer :: distX
     integer, dimension(:), pointer :: distY
 
-    allocate(distX(size(distGridX)), &
-             distY(size(distGridY)))
+    allocate(distX(size(distInternGridX)), &
+             distY(size(distInternGridY)))
 
-    distX = distGridX
-    distY = distGridY
+    distX = distInternGridX
+    distY = distInternGridY
 
-    end subroutine UserGetGridDistribution
+    end subroutine UserGetInternGridDistribution
 
 
     subroutine UserGetPointer2D(f90ptr, myX, myY)
     ! Dummy routine to return a fortran pointer, sized appropriately for this
-    ! PE according to the set distribution of grid cells and the prescribed
+    ! PE according to the set distribution of interngrid cells and the prescribed
     ! haloWidth.
 
     real(ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
     integer, intent(in) :: myX
     integer, intent(in) :: myY
 
-    allocate(f90ptr(distGridX(myX)+2*haloWidth,distGridY(myY)+2*haloWidth))
+    allocate(f90ptr(distInternGridX(myX)+2*haloWidth,distInternGridY(myY)+2*haloWidth))
     f90ptr = 1.0d0
 
     end subroutine UserGetPointer2D
@@ -103,14 +103,14 @@
 
     subroutine UserGetPointer3D(f90ptr, myX, myY)
     ! Dummy routine to return a fortran pointer, sized appropriately for this
-    ! PE according to the set distribution of grid cells and the prescribed
+    ! PE according to the set distribution of interngrid cells and the prescribed
     ! haloWidth.
 
     real(ESMF_KIND_R8), dimension(:,:,:), pointer :: f90ptr
     integer, intent(in) :: myX
     integer, intent(in) :: myY
 
-    allocate(f90ptr(5,distGridX(myX)+2*haloWidth,distGridY(myY)+2*haloWidth))
+    allocate(f90ptr(5,distInternGridX(myX)+2*haloWidth,distInternGridY(myY)+2*haloWidth))
     f90ptr = 2.0d0
 
     end subroutine UserGetPointer3D

@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.7 2005/05/17 18:22:03 theurich Exp $
+! $Id: user_model.F90,v 1.8 2007/06/22 23:21:52 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -40,7 +40,7 @@
 !   !   private to the module.
  
     subroutine user_register(comp, rc)
-        type(ESMF_GridComp) :: comp
+        type(ESMF_InternGridComp) :: comp
         integer :: rc
 
         ! Local variables
@@ -51,11 +51,11 @@
 
         ! Register the callback routines.
 
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, user_init1, 1, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, user_init2, 2, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, user_run, &
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETINIT, user_init1, 1, rc)
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETINIT, user_init2, 2, rc)
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETRUN, user_run, &
                                                           ESMF_SINGLEPHASE, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
                                                           ESMF_SINGLEPHASE, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
@@ -69,7 +69,7 @@
 
         mywrapper%wrap => mydatablock
 
-        call ESMF_GridCompSetInternalState(comp, mywrapper, rc)
+        call ESMF_InternGridCompSetInternalState(comp, mywrapper, rc)
 
         print *, "Registered local datablock"
         print *, " initial data =", mydatablock%index, &
@@ -81,7 +81,7 @@
         ! your own code development you probably don't want to include the 
         ! following call unless you are interested in exploring ESMF's 
         ! threading features.
-        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+        call ESMF_InternGridCompSetVMMinThreads(comp, rc=rc)
 #endif
 
         rc = ESMF_SUCCESS
@@ -94,7 +94,7 @@
  
     
     subroutine user_init1(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp) :: comp
+        type(ESMF_InternGridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer :: rc
@@ -110,7 +110,7 @@
  
     
     subroutine user_init2(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp) :: comp
+        type(ESMF_InternGridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer :: rc
@@ -124,13 +124,13 @@
 
         ! This is where the model specific setup code goes.  
 
-        call ESMF_GridCompPrint(comp, "", rc)
+        call ESMF_InternGridCompPrint(comp, "", rc)
         call ESMF_StatePrint(exportState, "", rc)
 
         print *, "init, ready to call get data ptr"
         nullify(mydatablock)
         mywrapper%wrap => mydatablock
-        call ESMF_GridCompGetInternalState(comp, mywrapper, rc)
+        call ESMF_InternGridCompGetInternalState(comp, mywrapper, rc)
         mydatablock => mywrapper%wrap
         print *, "init, back from data ptr"
 
@@ -154,7 +154,7 @@
 !   !
  
     subroutine user_run(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp) :: comp
+        type(ESMF_InternGridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer :: rc
@@ -181,7 +181,7 @@
         print *, "in run, ready to get data block"
         nullify(mydatablock)
         mywrapper%wrap => mydatablock
-        call ESMF_GridCompGetInternalState(comp, mywrapper, rc)
+        call ESMF_InternGridCompGetInternalState(comp, mywrapper, rc)
         mydatablock => mywrapper%wrap
 
         print *, "run, local data =", mydatablock%index, &
@@ -209,7 +209,7 @@
 !   !
  
     subroutine user_final(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp) :: comp
+        type(ESMF_InternGridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer :: rc
@@ -224,7 +224,7 @@
         print *, "final, ready to call get data ptr"
         nullify(mydatablock)
         mywrapper%wrap => mydatablock
-        call ESMF_GridCompGetInternalState(comp, mywrapper, rc)
+        call ESMF_InternGridCompGetInternalState(comp, mywrapper, rc)
         mydatablock => mywrapper%wrap
    
         print *, "final, local data =", mydatablock%index, &

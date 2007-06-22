@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayCommEx.F90,v 1.4 2007/03/31 02:24:33 cdeluca Exp $
+! $Id: ESMF_InternArrayCommEx.F90,v 1.5 2007/06/22 23:21:34 cdeluca Exp $
 !
 ! Example code which shows how to use Array Communication routines
 
@@ -30,15 +30,15 @@
     integer :: bytwo, byfour
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2
-    type(ESMF_Grid) :: grid1, grid2
+    type(ESMF_InternGrid) :: interngrid1, interngrid2
     type(ESMF_FieldDataMap) :: datamap
     type(ESMF_VM) :: vm
     type(ESMF_DELayout) :: delayout1, delayout2
-    integer :: counts(ESMF_MAXGRIDDIM), nPETs
-    integer :: g1_cells(ESMF_MAXGRIDDIM), g2_cells(ESMF_MAXGRIDDIM)
+    integer :: counts(ESMF_MAXIGRIDDIM), nPETs
+    integer :: g1_cells(ESMF_MAXIGRIDDIM), g2_cells(ESMF_MAXIGRIDDIM)
     real (ESMF_KIND_R8) :: min(2), max(2)
     real (ESMF_KIND_R8), pointer :: f90ptr1(:,:), f90ptr2(:,:)
-    type(ESMF_GridHorzStagger) :: horz_stagger
+    type(ESMF_InternGridHorzStagger) :: horz_stagger
     character(len=32) :: gname
 !EOC
 
@@ -52,7 +52,7 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !-------------------------------------------------------------------------------
-!   Create the grid, datamap, and array objects here
+!   Create the interngrid, datamap, and array objects here
 !   which will be needed for the examples below.
 
     call ESMF_VMGet(vm, petcount=nPETs, rc=rc)
@@ -79,39 +79,39 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     !------------------------------------------------------------------------
-    ! First grid
+    ! First interngrid
     counts(1) = 48
     counts(2) = 24
     min(1) = 0.0
     max(1) = 20.0
     min(2) = 0.0
     max(2) = 5.0
-    horz_stagger = ESMF_GRID_HORZ_STAGGER_A
-    gname = "test grid 1"
+    horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
+    gname = "test interngrid 1"
 
-    grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
+    interngrid1 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzStagger=horz_stagger, &
                               name=gname, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridDistribute(grid1, delayout=delayout1, rc=rc)
+    call ESMF_InternGridDistribute(interngrid1, delayout=delayout1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
    
 
     !------------------------------------------------------------------------
-    ! Second grid
-    gname = "test grid 2"
-    horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
-    grid2 = ESMF_GridCreateHorzXYUni(counts=counts, &
+    ! Second interngrid
+    gname = "test interngrid 2"
+    horz_stagger = ESMF_IGRID_HORZ_STAGGER_D_NE
+    interngrid2 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzStagger=horz_stagger, &
                               name=gname, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridDistribute(grid2, delayout=delayout2, rc=rc)
+    call ESMF_InternGridDistribute(interngrid2, delayout=delayout2, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     !------------------------------------------------------------------------
@@ -120,14 +120,14 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! Array data
-    call ESMF_GridGetDELocalInfo(grid1, localCellCountPerDim=g1_cells, &
+    call ESMF_InternGridGetDELocalInfo(interngrid1, localCellCountPerDim=g1_cells, &
                           horzRelloc=ESMF_CELL_CENTER)
     allocate(f90ptr1(g1_cells(1)+4, g1_cells(2)+4))
     f90ptr1 = 10
     array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, haloWidth=2, rc=rc)
 
     ! Second array
-    call ESMF_GridGetDELocalInfo(grid2, localCellCountPerDim=g2_cells, &
+    call ESMF_InternGridGetDELocalInfo(interngrid2, localCellCountPerDim=g2_cells, &
                           horzRelloc=ESMF_CELL_CENTER)
     allocate(f90ptr2(g2_cells(1)+4, g2_cells(2)+4))
     f90ptr2 = -1
@@ -138,7 +138,7 @@
 
     call ESMF_FieldDataMapSetDefault(datamap, ESMF_INDEX_IJ)
 
-    !f1 = ESMF_FieldCreate(grid1, arr1, ESMF_DATA_REF, ESMF_CELL_CENTER, &
+    !f1 = ESMF_FieldCreate(interngrid1, arr1, ESMF_DATA_REF, ESMF_CELL_CENTER, &
     !                        ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
 
 !-------------------------------------------------------------------------------

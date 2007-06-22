@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.19 2007/04/26 06:19:44 cdeluca Exp $
+! $Id: user_coupler.F90,v 1.20 2007/06/22 23:21:55 cdeluca Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -118,7 +118,7 @@
       call ESMF_StateGetField(exportState, "humidity2", humidity2, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      ! These are fields on different Grids - call RegridStore to set
+      ! These are fields on different InternGrids - call RegridStore to set
       ! up the Regrid structure
 
       call ESMF_FieldRegridStore(humidity1, humidity2, vm, regridRH, &
@@ -186,7 +186,7 @@
       call ESMF_StateGetField(exportState, "humidity2", humidity2, rc=status)
       ! call ESMF_FieldPrint(humidity2, rc=status)
 
-      ! These are fields on different Grids - call Regrid to rearrange
+      ! These are fields on different InternGrids - call Regrid to rearrange
       !  the data.   The communication pattern was computed at init,
       !  this simply has to execute the send and receive equivalents.
 

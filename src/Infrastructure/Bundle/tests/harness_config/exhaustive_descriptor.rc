@@ -13,22 +13,22 @@
 # Syntax Summary
 #       Process specification: --> (redist), =*=> (remap, *=B, C, S, N, ...)
 #       Chunks of memory are enclosed by [ ], and delineated by ;
-#       Grid specification: G (tensor grid), S (spherical), U (unstructured)
+#       InternGrid specification: G (tensor interngrid), S (spherical), U (unstructured)
 #       Distribution specification: B (block), C (block cyclic), A (arbitrary)
 #
 # Specification files
 # Following the problem descriptor string are filename(s) with the complete problem specification.
-#	-d DeLayout/distGrid specification
-#	-g Grid Specification
+#	-d DeLayout/distInternGrid specification
+#	-g InternGrid Specification
 # Multiple filenames can be used to specify the respective parameter space.   
 #
 # ex.
-#	'[B1G1;B2G2] --> [B1G1;B2G2]' -d distGrid.rc otherdistGrid.rc -g grid.rc
+#	'[B1G1;B2G2] --> [B1G1;B2G2]' -d distInternGrid.rc otherdistInternGrid.rc -g interngrid.rc
 # specifies that a redistribution test is to be conducted where the range of distributions 
-# is specified by two files and the range of grid types is specified by a single file.
+# is specified by two files and the range of interngrid types is specified by a single file.
 ########################################################################################
 problem_descriptor_string::
 # Two redistribution examples
-'[B1G1;B2G2] --> [B1G1;B2G2]' -d distGrid.rc -g Redist_grid.rc     # simple block redistribution
-'[B1G1;B2G2] --> [B2G2;B1G1]' -d distGrid.rc -g Redist_grid.rc     # another simple block redistribution
+'[B1G1;B2G2] --> [B1G1;B2G2]' -d distInternGrid.rc -g Redist_interngrid.rc     # simple block redistribution
+'[B1G1;B2G2] --> [B2G2;B1G1]' -d distInternGrid.rc -g Redist_interngrid.rc     # another simple block redistribution
 ::   # end of list

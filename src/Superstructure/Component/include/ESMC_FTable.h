@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.h,v 1.18 2007/06/20 01:29:26 theurich Exp $
+// $Id: ESMC_FTable.h,v 1.19 2007/06/22 23:21:45 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 // table.  The types are the arguments that will be stored in the table
 // and that the function will be called with.  There are a few generic 
 // types (called with an int, 2 ints, etc) and then some very specific
-// types used by the framework (e.g. a grid component called with a list 
+// types used by the framework (e.g. a interngrid component called with a list 
 // of void's and a final int * for the return code.)
 // The typedefs are to ease the declarations of the function entry point
 // itself.

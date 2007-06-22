@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.99 2007/03/31 05:51:05 cdeluca Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.100 2007/06/22 23:21:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.99 2007/03/31 05:51:05 cdeluca Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.100 2007/06/22 23:21:30 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@
       integer, dimension(3) :: cellCounts
       type(ESMF_DELayout) :: delayout
       type(ESMF_VM) :: vm
-      type(ESMF_Grid) :: grid, grid2, grid3, grid4, grid5
+      type(ESMF_InternGrid) :: interngrid, interngrid2, interngrid3, interngrid4, interngrid5
       type(ESMF_ArraySpec) :: arrayspec
       real, dimension(:,:), pointer :: f90ptr2, f90ptr4, f90ptr5
       real(ESMF_KIND_R8) :: minCoord(2), deltas(10)
@@ -89,8 +89,8 @@
 
 
       !------------------------------------------------------------------------
-      ! several calls to field need a valid grid.  these will be used in
-      ! the grid create calls.
+      ! several calls to field need a valid interngrid.  these will be used in
+      ! the interngrid create calls.
       call ESMF_VMGetGlobal(vm, rc=rc)
       delayout = ESMF_DELayoutCreate(vm, rc=rc)
       minCoord(:) = (/ 0.0, 0.0 /)
@@ -101,7 +101,7 @@
       ! Test Requirement FLD1.1.3 Creation without data 
       ! Fields may be created as in FLD1.1.1 without allocating data or 
       ! specifying an associated data array. In this case specifying the 
-      ! grid parameters and data array dimensions may be deferred until 
+      ! interngrid parameters and data array dimensions may be deferred until 
       ! data is attached.
       f1 = ESMF_FieldCreateNoData(rc=rc) 
       write(failMsg, *) ""
@@ -274,12 +274,12 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Verifing that a Grid can be created
-      grid =  ESMF_GridCreateHorzXYUni((/ 10, 20 /), minCoord, &
-                                     name="landgrid", rc=rc)
-      call ESMF_GridDistribute(grid, delayout=delayout, rc=rc)
+      ! Verifing that a InternGrid can be created
+      interngrid =  ESMF_InternGridCreateHorzXYUni((/ 10, 20 /), minCoord, &
+                                     name="landinterngrid", rc=rc)
+      call ESMF_InternGridDistribute(interngrid, delayout=delayout, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Creating a Grid to use in Field Tests"
+      write(name, *) "Creating a InternGrid to use in Field Tests"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
@@ -318,10 +318,10 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Setting a Grid associated with Field
-      call ESMF_FieldSetGrid(f4, grid, rc=rc) 
+      ! Setting a InternGrid associated with Field
+      call ESMF_FieldSetInternGrid(f4, interngrid, rc=rc) 
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting a Grid associated with Field Test"
+      write(name, *) "Setting a InternGrid associated with Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -333,19 +333,19 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Verifing that a Field with a Grid and Array can be destroyed
+      ! Verifing that a Field with a InternGrid and Array can be destroyed
       call ESMF_FieldDestroy(f4, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Destroying a Field with a Grid and Array Test"
+      write(name, *) "Destroying a Field with a InternGrid and Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test requirement FLD1.1.1
-      ! Fields may be created by specifying attributes, a grid, data array 
+      ! Fields may be created by specifying attributes, a interngrid, data array 
       ! dimensions and descriptors, optional masks (e.g. for active cells), 
       ! and an optional I/O specification. In this case a field will 
-      ! allocate its own data. The grid passed into the argument list 
+      ! allocate its own data. The interngrid passed into the argument list 
       ! is referenced and not copied.
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
       write(name, *) "Creating an ArraySpec Test "
@@ -353,10 +353,10 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      f2 = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+      f2 = ESMF_FieldCreate(interngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                           name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating a Field with a Grid and ArraySpec Test FLD1.1.1"
+      write(name, *) "Creating a Field with a InternGrid and ArraySpec Test FLD1.1.1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -370,12 +370,12 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! verify we can create a 3d data on a 2d grid
+      ! verify we can create a 3d data on a 2d interngrid
       call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
-      f2 = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+      f2 = ESMF_FieldCreate(interngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                           name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating a Field with a 2d Grid and 3d ArraySpec"
+      write(name, *) "Creating a Field with a 2d InternGrid and 3d ArraySpec"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -383,15 +383,15 @@
       ! Requirement FLD1.1.2 Creation with external data 
       ! Fields may be created as in FLD1.1.1 with a data array passed into 
       ! the argument list. The data array is referenced and not copied.
-      ! Verifing that a Field can be created with a Grid and DataMap
+      ! Verifing that a Field can be created with a InternGrid and DataMap
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
       call ESMF_FieldDataMapSetDefault(dm, ESMF_INDEX_IJ)
-      f3 = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_ALLOC, &
+      f3 = ESMF_FieldCreate(interngrid, arrayspec, allocflag=ESMF_ALLOC, &
                         horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
                         haloWidth=2, datamap=dm, name="Field 0", iospec=ios, rc=rc)
 
       write(failMsg, *) ""
-      write(name, *) "Creating a Field with a Grid and Array Test FLD1.1.2"
+      write(name, *) "Creating a Field with a InternGrid and Array Test FLD1.1.2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -403,27 +403,27 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Create a different size Grid for testing with an incompatible Array
-      grid4 =  ESMF_GridCreateHorzXYUni((/ 100, 20 /), minCoord, &
-                                     name="biglandgrid", rc=rc)
-      call ESMF_GridDistribute(grid4, delayout=delayout, rc=rc)
+      ! Create a different size InternGrid for testing with an incompatible Array
+      interngrid4 =  ESMF_InternGridCreateHorzXYUni((/ 100, 20 /), minCoord, &
+                                     name="biglandinterngrid", rc=rc)
+      call ESMF_InternGridDistribute(interngrid4, delayout=delayout, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Creating a Grid to use in Field Tests"
+      write(name, *) "Creating a InternGrid to use in Field Tests"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !E-X-_-U-T-e-s-t
-      ! Try to create a Field with a Grid and ArraySpec of the wrong sizes
+      ! Try to create a Field with a InternGrid and ArraySpec of the wrong sizes
       ! try rank 1,2,3 :-)
       !TODO: with the removal of the old Array class (now called InternArray)
       !TODO: this test really does not work. 
       ! call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R4, rc=rc)
-!      f6 = ESMF_FieldCreate(grid4, arrayspec, allocflag=ESMF_ALLOC, &
+!      f6 = ESMF_FieldCreate(interngrid4, arrayspec, allocflag=ESMF_ALLOC, &
 !                        horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
 !                        haloWidth=2, datamap=dm, name="Field 1", iospec=ios, rc=rc)
 !
 !      write(failMsg, *) ""
-!      write(name, *) "Creating a Field with a mismatched Grid/Array"
+!      write(name, *) "Creating a Field with a mismatched InternGrid/Array"
 !      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -442,70 +442,70 @@
 
       !------------------------------------------------------------------------
       !E-X-_-U-T-e-s-t
-      ! Verifing that destroying a Grid in a Field is not allowed
-      ! TODO: the Grid has no way to tell that it is being referenced by
+      ! Verifing that destroying a InternGrid in a Field is not allowed
+      ! TODO: the InternGrid has no way to tell that it is being referenced by
       ! any other object, because we have so far chosen not to implement
       ! reference counts.  so this cannot be tested and expected to fail.
       ! however - it is reasonable to expect that the field might need to
       ! notice the next time the user tries to access the field and the
-      ! associated grid has been destroyed.  but the testing for validity
+      ! associated interngrid has been destroyed.  but the testing for validity
       ! does have a cost (in performance), and so far we have not put in
       ! a ton of checks into every function.  it is reasonable to add a
-      ! field function after the grid is destroyed and see if that is 
+      ! field function after the interngrid is destroyed and see if that is 
       ! detected, after we decide on a framework-wide consistent strategy.
      !!write(failMsg, *) ""
-     !!call ESMF_GridDestroy(grid, rc=rc)
-     !!write(name, *) "Destroying a Grid in a Field Test"
+     !!call ESMF_InternGridDestroy(interngrid, rc=rc)
+     !!write(name, *) "Destroying a InternGrid in a Field Test"
      !!call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Verifing that destroying the Field did not destroy the Grid
-       call ESMF_GridValidate(grid, rc=rc)
+      ! Verifing that destroying the Field did not destroy the InternGrid
+       call ESMF_InternGridValidate(interngrid, rc=rc)
        write(failMsg, *) ""
-       write(name, *) "Using a Grid after the Field is destroyed"
+       write(name, *) "Using a InternGrid after the Field is destroyed"
        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Verifing that a Field cannot be created with an uninitialized Grid 
+      ! Verifing that a Field cannot be created with an uninitialized InternGrid 
       ! and Array.  f6 is *not* created here and should be invalid.
-      grid2 = ESMF_GridCreate(rc=rc)
-      call ESMF_GridDestroy(grid2, rc=rc)
-      f6 = ESMF_FieldCreate(grid2, arrayspec, allocflag=ESMF_ALLOC, &
+      interngrid2 = ESMF_InternGridCreate(rc=rc)
+      call ESMF_InternGridDestroy(interngrid2, rc=rc)
+      f6 = ESMF_FieldCreate(interngrid2, arrayspec, allocflag=ESMF_ALLOC, &
                         horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
                         haloWidth=3, datamap=dm, name="Field 0", iospec=ios, rc=rc)
 
       write(failMsg, *) ""
-      write(name, *) "Creating a Field with an uninitialized Grid and Array"
+      write(name, *) "Creating a Field with an uninitialized InternGrid and Array"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Verify that a Grid cannot be gotten from a Field created with no data
+      ! Verify that a InternGrid cannot be gotten from a Field created with no data
       f5 = ESMF_FieldCreateNoData(rc=rc)
-      call ESMF_FieldGet(f5, grid=grid3, rc=rc)
+      call ESMF_FieldGet(f5, interngrid=interngrid3, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Getting a Grid from a Field created with no data Test"
+      write(name, *) "Getting a InternGrid from a Field created with no data Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldDestroy(f5, rc=rc)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Req. 1.6.2 Return grid 
-      ! A field shall be able to return a reference to its grid.
+      ! Req. 1.6.2 Return interngrid 
+      ! A field shall be able to return a reference to its interngrid.
       ! f3 gets created here and used thru the rest of the tests.
-      gname="oceangrid"
+      gname="oceaninterngrid"
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-      f3 = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_ALLOC, &
+      f3 = ESMF_FieldCreate(interngrid, arrayspec, allocflag=ESMF_ALLOC, &
                         horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
                         haloWidth=1, datamap=dm, name="Field 0", iospec=ios, rc=rc)
-      call ESMF_FieldGet(f3, grid=grid3, rc=rc)
+      call ESMF_FieldGet(f3, interngrid=interngrid3, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Getting a Grid from a Field created with no data Test"
-      call ESMF_GridGet(grid, name=gname, rc=rc)
-      call ESMF_GridGet(grid3, name=gname3, rc=rc)
-      print *, "Grid (grid3) name = ", trim(gname3)
+      write(name, *) "Getting a InternGrid from a Field created with no data Test"
+      call ESMF_InternGridGet(interngrid, name=gname, rc=rc)
+      call ESMF_InternGridGet(interngrid3, name=gname3, rc=rc)
+      print *, "InternGrid (interngrid3) name = ", trim(gname3)
       call ESMF_Test((gname.eq.gname3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest
@@ -526,48 +526,48 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Create a 3D grid for testing
-      grid5 =  ESMF_GridCreateHorzXYUni((/ 10, 20 /), minCoord, &
-                                     name="landgrid", rc=rc)
+      ! Create a 3D interngrid for testing
+      interngrid5 =  ESMF_InternGridCreateHorzXYUni((/ 10, 20 /), minCoord, &
+                                     name="landinterngrid", rc=rc)
       deltas(:) = (/ (i,i=1,10) /)
-      call ESMF_GridAddVertHeight(grid5, delta=deltas)
-      call ESMF_GridDistribute(grid5, delayout=delayout, rc=rc)
+      call ESMF_InternGridAddVertHeight(interngrid5, delta=deltas)
+      call ESMF_InternGridDistribute(interngrid5, delayout=delayout, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Creating a 3D Grid to use in Field Tests"
+      write(name, *) "Creating a 3D InternGrid to use in Field Tests"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !E-X_UTest
       ! TODO: this fails.
-      ! Create a Field with 3D grid and 3D data array, vertex centered in vert
+      ! Create a Field with 3D interngrid and 3D data array, vertex centered in vert
       !call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
-      !f7 = ESMF_FieldCreate(grid5, arrayspec, ESMF_ALLOC, ESMF_CELL_CENTER, &
+      !f7 = ESMF_FieldCreate(interngrid5, arrayspec, ESMF_ALLOC, ESMF_CELL_CENTER, &
       !                      ESMF_CELL_VERTEX, 3, name="Field 7", rc=rc)
       !write(failMsg, *) ""
-      !write(name, *) "Creating Field with 3D grid and 3D data, vert=vertex"
+      !write(name, *) "Creating Field with 3D interngrid and 3D data, vert=vertex"
       !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Create a Field with 3D grid and 3D data array, cell centered
+      ! Create a Field with 3D interngrid and 3D data array, cell centered
       call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
-      f7 = ESMF_FieldCreate(grid5, arrayspec, ESMF_ALLOC, ESMF_CELL_CENTER, &
+      f7 = ESMF_FieldCreate(interngrid5, arrayspec, ESMF_ALLOC, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 3, name="Field 7", rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Creating Field with 3D grid and 3D data, vert=cell"
+      write(name, *) "Creating Field with 3D interngrid and 3D data, vert=cell"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !E-X_UTest
       ! Bug 1160730 filed on this
-      ! fails in field validate when the grid is queried for the
+      ! fails in field validate when the interngrid is queried for the
       ! number of counts in the local decomposition.
-      ! Create a Field with 3D grid and 3D data array
+      ! Create a Field with 3D interngrid and 3D data array
 !      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-!      f7 = ESMF_FieldCreate(grid5, arrayspec, ESMF_ALLOC, ESMF_CELL_CENTER, &
+!      f7 = ESMF_FieldCreate(interngrid5, arrayspec, ESMF_ALLOC, ESMF_CELL_CENTER, &
 !                            ESMF_CELL_VERTEX, 3, name="Field 7", rc=rc)
 !      write(failMsg, *) ""
-!      write(name, *) "Creating Field with 3D grid and 3D data"
+!      write(name, *) "Creating Field with 3D interngrid and 3D data"
 !      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -801,43 +801,43 @@ print *, "done with test"
       ! Cannot be tested until Bug 705716 "Field Query attributes not 
       !  implemented" is fixed.
 
-! grid destroy to clear previous grids.
-       call ESMF_GridDestroy(grid, rc=rc)
+! interngrid destroy to clear previous interngrids.
+       call ESMF_InternGridDestroy(interngrid, rc=rc)
 
       !------------------------------------------------------------------------
       ! ESMF 3D Field Validate test to accommodate the single point mismatch 
-      ! between center and edge staggerings. This Bug is actually a grid design 
-      ! issue having to do with the grid being specified by vertex locations.
+      ! between center and edge staggerings. This Bug is actually a interngrid design 
+      ! issue having to do with the interngrid being specified by vertex locations.
 
-      ! define grid dimensions
+      ! define interngrid dimensions
        im = 18
        jm = 36
        km = 72
-      ! build uniform global grid in degrees
+      ! build uniform global interngrid in degrees
        xmin = 0.0
        xmax = 360.0
        ymin =-90.0
        ymax = 90.0
-       grid = ESMF_GridCreateHorzLatLonUni(counts=(/im,jm/),         &
+       interngrid = ESMF_InternGridCreateHorzLatLonUni(counts=(/im,jm/),         &
                      minGlobalCoordPerDim=(/xmin,ymin/),             &
                      maxGlobalCoordPerDim=(/xmax,ymax/),             &
-                     horzStagger=ESMF_GRID_HORZ_STAGGER_A,           &
+                     horzStagger=ESMF_IGRID_HORZ_STAGGER_A,           &
                      periodic=(/ ESMF_TRUE, ESMF_FALSE /),           &
-                     name="A-grid", rc=rc)
+                     name="A-interngrid", rc=rc)
 
-      ! construct vertical coordinate and add to height to grid
+      ! construct vertical coordinate and add to height to interngrid
        allocate( delta(km) )
        delta(1:km) = 1.0
-       call ESMF_GridAddVertHeight( grid, delta=delta,               &
-              vertStagger=ESMF_GRID_VERT_STAGGER_TOP, rc=rc)
+       call ESMF_InternGridAddVertHeight( interngrid, delta=delta,               &
+              vertStagger=ESMF_IGRID_VERT_STAGGER_TOP, rc=rc)
        deallocate( delta )
 
-      ! distribute first two dimensions of the grid
-       call ESMF_GridDistribute(grid, delayout=delayout,             &
+      ! distribute first two dimensions of the interngrid
+       call ESMF_InternGridDistribute(interngrid, delayout=delayout,             &
                                 decompIds=(/1,2,0/), rc=rc)
 
-      ! Get local Grid counts now for use later
-       call ESMF_GridGetDELocalInfo(grid, ESMF_CELL_CENTER,          &
+      ! Get local InternGrid counts now for use later
+       call ESMF_InternGridGetDELocalInfo(interngrid, ESMF_CELL_CENTER,          &
                  Vertrelloc=ESMF_CELL_TOPFACE,                       &
                  localCellCountPerDim=cellCounts, rc=rc)
       !EX_UTest
@@ -848,14 +848,14 @@ print *, "done with test"
       ! Create the test field from a fortran pointer  
        allocate( fptr(cellCounts(1),cellCounts(2),cellCounts(3)+1) )  
        print*,'cellcounts',cellCounts
-       f1 = ESMF_FieldCreate(grid, fptr, ESMF_DATA_REF,              &
+       f1 = ESMF_FieldCreate(interngrid, fptr, ESMF_DATA_REF,              &
                  horzRelloc=ESMF_CELL_CENTER,                        &
                  vertRelloc=ESMF_CELL_TOPFACE,                       &
                  name="field", rc=rc)
        print*,'field create',rc
       !EX_UTest
        write(failMsg, *) ""
-       write(name, *) "Create Field with vertical axis longer than grid"
+       write(name, *) "Create Field with vertical axis longer than interngrid"
        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! validate field

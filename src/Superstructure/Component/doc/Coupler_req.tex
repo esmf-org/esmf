@@ -1,4 +1,4 @@
-% $Id: Coupler_req.tex,v 1.2 2003/07/24 15:50:50 cdeluca Exp $
+% $Id: Coupler_req.tex,v 1.3 2007/06/22 23:21:44 cdeluca Exp $
 
 \req{Components}
 \label{req:compall}
@@ -406,12 +406,12 @@ sets of tasks are aligned efficiently on compute resources.
 {\bf Status:} Approved-1. \\
 {\bf Verification:} System test.\\
 {\bf Notes:}  We want to have the application component task for a particular
-  spatial grid region aligned with the physical model components and
+  spatial interngrid region aligned with the physical model components and
   coupler components that operate on that region.  Binding
   encompasses both associating tasks with specific PE lists and
   creating the necessary communication substrate to connect tasks that
   need to communicate.  This involves interactions with distributed
-  grid and communication kernel elements.
+  interngrid and communication kernel elements.
 \end{reqlist}
 
 \sreq{Application component as main}
@@ -539,17 +539,17 @@ Application components shall be scalable.
 {\bf Notes:}  The control mechanism should not be a sequential bottleneck.
 \end{reqlist}
 
-\req{Gridded components}
+\req{InternGridded components}
 
 In addition to the general requirements for  a component described in 
-\ref{req:compall}, gridded components are required to provide the
+\ref{req:compall}, interngridded components are required to provide the
 following capabilities.
 
-\sreq{Gridded components have one or more associated grids}
-A gridded component shall be associated with one or more grids.
-A default grid shall be associated with 
-each gridded component and shall default to the first grid created 
-in the component.  The default grid may be assigned.
+\sreq{InternGridded components have one or more associated interngrids}
+A interngridded component shall be associated with one or more interngrids.
+A default interngrid shall be associated with 
+each interngridded component and shall default to the first interngrid created 
+in the component.  The default interngrid may be assigned.
 \begin{reqlist}
 {\bf Priority:} 1\\
 {\bf Source:} NSIPP, GFDL, MIT \\
@@ -558,9 +558,9 @@ in the component.  The default grid may be assigned.
 \end{reqlist}
 
 \sreq{Creation}
-The creation method of a gridded component shall require as an 
-argument either a fully created grid or the parameters
-required to create a grid.
+The creation method of a interngridded component shall require as an 
+argument either a fully created interngrid or the parameters
+required to create a interngrid.
 \begin{reqlist}
 {\bf Priority:} 1\\
 {\bf Source:} Required by NSIPP, MIT, CCSM-CPL, GFDL \\
@@ -570,8 +570,8 @@ required to create a grid.
 
 \sreq{Queries}
 
-\ssreq{Query grids}
-A gridded component can return a list of its grids.
+\ssreq{Query interngrids}
+A interngridded component can return a list of its interngrids.
 \begin{reqlist}
 {\bf Priority:} 3\\
 {\bf Source:} \\
@@ -579,8 +579,8 @@ A gridded component can return a list of its grids.
 {\bf Verification:} Unit test.
 \end{reqlist}
 
-\ssreq{Query default grid}
-A gridded component can return its default grid.
+\ssreq{Query default interngrid}
+A interngridded component can return its default interngrid.
 \begin{reqlist}
 {\bf Priority:} 2\\
 {\bf Source:} GFDL, MIT\\

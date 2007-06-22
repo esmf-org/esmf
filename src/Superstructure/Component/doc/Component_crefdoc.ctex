@@ -1,4 +1,4 @@
-% $Id: Component_crefdoc.ctex,v 1.5 2007/03/31 05:51:29 cdeluca Exp $
+% $Id: Component_crefdoc.ctex,v 1.6 2007/06/22 23:21:43 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -160,8 +160,8 @@
 
 
 
-%%%%%%%%%%%%% Gridded Component Class %%%%%%%%%
-\section{Gridded Component Design}
+%%%%%%%%%%%%% InternGridded Component Class %%%%%%%%%
+\section{InternGridded Component Design}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -186,19 +186,19 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{ESMF_GridComp_fapi}
+\input{ESMF_InternGridComp_fapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_GridComp_fapi}
+\input{../Superstructure/Component/doc/ESMF_InternGridComp_fapi}
 #endif
 
-\subsection{Gridded Component F90 Use and Examples}
+\subsection{InternGridded Component F90 Use and Examples}
 #ifdef STANDALONE
 \input{ESMF_GCompEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/Component/doc/ESMF_GCompEx_fapi}
 #endif
 
-%\subsection{Gridded Component C++ Use and Examples}
+%\subsection{InternGridded Component C++ Use and Examples}
 %#ifdef STANDALONE
 %\input{ESMC_GCompEx_ccapi}
 %#elif defined(CONSTITUENT)

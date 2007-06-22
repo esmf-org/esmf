@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.13 2007/04/03 16:36:24 cdeluca Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.14 2007/06/22 23:21:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -27,8 +27,8 @@
      use ESMF_Mod
      implicit none
 
-     ! instantiate two grids, two fields, and two arrays
-     type(ESMF_Grid)  ::  grid1,  grid2
+     ! instantiate two interngrids, two fields, and two arrays
+     type(ESMF_InternGrid)  ::  interngrid1,  interngrid2
      type(ESMF_Field) :: field1, field2
 
      ! Local variables
@@ -43,7 +43,7 @@
      real(ESMF_KIND_R8), dimension(:,:), pointer :: srcdata
      type(ESMF_ArraySpec) :: arrayspec1D, arrayspec2D
      type(ESMF_DELayout) :: delayout1, delayout2
-     type(ESMF_GridHorzStagger) :: horz_stagger
+     type(ESMF_InternGridHorzStagger) :: horz_stagger
      type(ESMF_RouteHandle) :: rh12
      type(ESMF_VM) :: vm
 
@@ -68,9 +68,9 @@
 ! This example illustrates the use of Field interfaces for redistribution of
 ! data.
 !
-! Basically redistribution works on two Fields that are on the same Grid except
-! that the Grid is distributed differently.  In this example, two Grids are created
-! from the same underlying 2D horizontal Grid, but one is distributed as logical
+! Basically redistribution works on two Fields that are on the same InternGrid except
+! that the InternGrid is distributed differently.  In this example, two InternGrids are created
+! from the same underlying 2D horizontal InternGrid, but one is distributed as logical
 ! blocks and the other is distributed as arbitrary vectors.
 !EOE
 
@@ -85,7 +85,7 @@
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-     ! Next create the Grids with exactly the same underlying parameters:
+     ! Next create the InternGrids with exactly the same underlying parameters:
 
      counts(1) = 60
      counts(2) = 40
@@ -93,31 +93,31 @@
      max(1)    = 60.0
      min(2)    =  0.0
      max(2)    = 50.0
-     horz_stagger = ESMF_GRID_HORZ_STAGGER_A
+     horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
 
-     grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
+     interngrid1 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=min, &
                              maxGlobalCoordPerDim=max, &
                              horzStagger=horz_stagger, &
-                             name="source grid", rc=rc)
+                             name="source interngrid", rc=rc)
 !EOC
 
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-     grid2 = ESMF_GridCreateHorzXYUni(counts=counts, &
+     interngrid2 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=min, &
                              maxGlobalCoordPerDim=max, &
                              horzStagger=horz_stagger, &
-                             name="source grid", rc=rc)
+                             name="source interngrid", rc=rc)
 !EOC
 
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-     ! With two identical Grids, distribute one in the normal block style:
+     ! With two identical InternGrids, distribute one in the normal block style:
 
-     call ESMF_GridDistribute(grid1, delayout=delayout1, rc=rc)
+     call ESMF_InternGridDistribute(interngrid1, delayout=delayout1, rc=rc)
 !EOC
 
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -127,7 +127,7 @@
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-     ! The second Grid is distributed in arbitrary vectors.  The following code
+     ! The second InternGrid is distributed in arbitrary vectors.  The following code
      ! fragment calculates the vectors of index pairs in {\tt myIndices}, based
      ! on the local DE number.  This is just a simple algorithm to create a
      ! semi-regular distribution of points to the PETs.
@@ -146,7 +146,7 @@
        j1 = j - counts(2)
      enddo
 
-     call ESMF_GridDistribute(grid2, delayout=delayout2, myCount=add, &
+     call ESMF_InternGridDistribute(interngrid2, delayout=delayout2, myCount=add, &
                               myIndices=myIndices, rc=rc)
 !EOC
 
@@ -161,12 +161,12 @@
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-     ! Create Fields for each of the Grids:
-     field1 = ESMF_FieldCreate(grid1, arrayspec2D, &
+     ! Create Fields for each of the InternGrids:
+     field1 = ESMF_FieldCreate(interngrid1, arrayspec2D, &
                                horzRelloc=ESMF_CELL_CENTER, &
                                haloWidth=0, name="humidity1", rc=rc)
 
-     field2 = ESMF_FieldCreate(grid2, arrayspec1D, &
+     field2 = ESMF_FieldCreate(interngrid2, arrayspec1D, &
                                horzRelloc=ESMF_CELL_CENTER, &
                                haloWidth=0, name="humidity2", rc=rc)
 !EOC
@@ -183,10 +183,10 @@
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
      ! get coordinate arrays available for setting the source data array
-     call ESMF_GridGetCoord(grid1, dim=1, horzRelloc=ESMF_CELL_CENTER, &
+     call ESMF_InternGridGetCoord(interngrid1, dim=1, horzRelloc=ESMF_CELL_CENTER, &
                             centerCoord=coordX, localCounts=localCounts, rc=rc)
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-     call ESMF_GridGetCoord(grid1, dim=2, horzRelloc=ESMF_CELL_CENTER, &
+     call ESMF_InternGridGetCoord(interngrid1, dim=2, horzRelloc=ESMF_CELL_CENTER, &
                             centerCoord=coordY, rc=rc)
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -257,9 +257,9 @@
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
      call ESMF_FieldDestroy(field2, rc)
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-     call ESMF_GridDestroy(grid1, rc)
+     call ESMF_InternGridDestroy(interngrid1, rc)
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-     call ESMF_GridDestroy(grid2, rc)
+     call ESMF_InternGridDestroy(interngrid2, rc)
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
      call ESMF_DELayoutDestroy(delayout1, rc)
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE

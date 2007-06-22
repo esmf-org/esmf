@@ -1,4 +1,4 @@
-// $Id: ESMC_Macros.h,v 1.15 2007/05/23 18:52:30 theurich Exp $
+// $Id: ESMC_Macros.h,v 1.16 2007/06/22 23:21:42 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 #define ESMF_MAXSTR 128
 #define ESMF_MAXDIM 7
 #define ESMF_MAXDECOMPDIM 3
-#define ESMF_MAXGRIDDIM 3
+#define ESMF_MAXIGRIDDIM 3
 
 #if 0
 // this is now in ESMF_Macros.inc

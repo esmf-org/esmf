@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.247 2007/04/27 20:05:08 oehmke Exp $
+! $Id: ESMF_Field.F90,v 1.248 2007/06/22 23:21:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
 !------------------------------------------------------------------------------
 !
 !BOPI
-! !MODULE: ESMF_FieldMod - Combine physical field metadata, data and grid
+! !MODULE: ESMF_FieldMod - Combine physical field metadata, data and interngrid
 !
 ! !DESCRIPTION:
 ! The code in this file implements the {\tt ESMF\_Field} class, which 
@@ -35,9 +35,9 @@
 ! single scalar or vector field.  {\tt ESMF\_Field}s associate a metadata 
 ! description 
 ! expressed as a set of {\tt ESMF\_Attributes} with a data {\tt ESMF\_Array}, 
-! {\tt ESMF\_Grid}, and I/O specification, or {\tt ESMF\_IOSpec}.  
+! {\tt ESMF\_InternGrid}, and I/O specification, or {\tt ESMF\_IOSpec}.  
 ! An {\tt ESMF\_FieldDataMap} describes the 
-! relationship of the {\tt ESMF\_Array} to the {\tt ESMF\_Grid}.  
+! relationship of the {\tt ESMF\_Array} to the {\tt ESMF\_InternGrid}.  
 !
 ! This type is implemented in Fortran 90 and a corresponding
 ! C++ interface is provided for access.
@@ -54,8 +54,8 @@
       use ESMF_LocalArrayMod
       use ESMF_InternArrayDataMapMod
       use ESMF_DELayoutMod
-      use ESMF_GridTypesMod
-      use ESMF_GridMod
+      use ESMF_InternGridTypesMod
+      use ESMF_InternGridMod
       use ESMF_InternArrayMod
       use ESMF_InternArrayCreateMod
       use ESMF_InternArrayGetMod
@@ -108,7 +108,7 @@
       type ESMF_LocalField
         sequence
         type(ESMF_InternArray) :: localdata   ! local data for this DE
-        type(ESMF_Mask)        :: mask        ! may belong in Grid
+        type(ESMF_Mask)        :: mask        ! may belong in InternGrid
         type(ESMF_ArraySpec)   :: arrayspec   ! so field can allocate
 
         integer :: rwaccess                      ! reserved for future use
@@ -137,18 +137,18 @@
         type (ESMF_Base) :: base             ! base class object
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
         type (ESMF_Status) :: fieldstatus = ESMF_STATUS_UNINIT
-        type (ESMF_Status) :: gridstatus = ESMF_STATUS_UNINIT
+        type (ESMF_Status) :: interngridstatus = ESMF_STATUS_UNINIT
         type (ESMF_Status) :: datastatus = ESMF_STATUS_UNINIT
         type (ESMF_Status) :: datamapstatus = ESMF_STATUS_UNINIT
 #else
         type (ESMF_Status) :: fieldstatus
-        type (ESMF_Status) :: gridstatus
+        type (ESMF_Status) :: interngridstatus
         type (ESMF_Status) :: datastatus
         type (ESMF_Status) :: datamapstatus
 #endif
-        type (ESMF_Grid) :: grid
+        type (ESMF_InternGrid) :: interngrid
         type (ESMF_LocalField) :: localfield ! this differs per DE
-        type (ESMF_FieldDataMap) :: mapping  ! mapping of array indices to grid
+        type (ESMF_FieldDataMap) :: mapping  ! mapping of array indices to interngrid
         type (ESMF_IOSpec) :: iospec         ! iospec values
         type (ESMF_Status) :: iostatus       ! if unset, inherit from gcomp
         ESMF_INIT_DECLARE
@@ -198,16 +198,16 @@
 
    public ESMF_FieldGet                ! Generic Get() routine, replaces others
 
-   public ESMF_FieldGetGlobalGridInfo  ! Return global Grid info
-   public ESMF_FieldGetLocalGridInfo   ! Return local Grid info
+   public ESMF_FieldGetGlobalInternGridInfo  ! Return global InternGrid info
+   public ESMF_FieldGetLocalInternGridInfo   ! Return local InternGrid info
 
    public ESMF_FieldGetInternArray     ! Return the data Array
    public ESMF_FieldGetLocalArray      ! Return the Local Array
    public ESMF_FieldGetGlobalDataInfo  ! Return global data info
    public ESMF_FieldGetLocalDataInfo   ! Return local data info
 
-   public ESMF_FieldSetGrid            ! Set a Grid (may regrid if different
-                                       !   Grid is already present)
+   public ESMF_FieldSetInternGrid            ! Set a InternGrid (may regrid if different
+                                       !   InternGrid is already present)
    public ESMF_FieldSetInternArray     ! Set a data Array in a Field
    public ESMF_FieldSetLocalArray      ! Set a data Array in a Field
    public ESMF_FieldSetDataValues      ! Set Field data values 
@@ -225,7 +225,7 @@
    public ESMF_FieldPrint              ! Print contents of a Field
    public ESMF_FieldBoxIntersect       ! Intersect bounding boxes
 
-   public ESMF_FieldWrite              ! Write data and grid from a Field
+   public ESMF_FieldWrite              ! Write data and interngrid from a Field
 
    public ESMF_FieldConstructIA        ! Only public for internal use
    public ESMF_FieldSerialize
@@ -248,7 +248,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.247 2007/04/27 20:05:08 oehmke Exp $'
+      '$Id: ESMF_Field.F90,v 1.248 2007/06/22 23:21:30 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -266,12 +266,12 @@
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldCreateNoDataPtr
         module procedure ESMF_FieldCreateNoArray
-        module procedure ESMF_FieldCreateNoGridArray  
+        module procedure ESMF_FieldCreateNoInternGridArray  
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create 
 !     an {\tt ESMF\_Field} without allocating or referencing any associated data.
-!     The variations allow an {\tt ESMF\_Grid} to be specified or not, and for
+!     The variations allow an {\tt ESMF\_InternGrid} to be specified or not, and for
 !     the data description to be specified or not.
  
 !EOPI
@@ -305,7 +305,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldConstructNoDataPtr
         module procedure ESMF_FieldConstructNoArray
-        module procedure ESMF_FieldConstructNoGridArray  
+        module procedure ESMF_FieldConstructNoInternGridArray  
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for {\tt ESMF\_Field} construction 
@@ -603,7 +603,7 @@
 !EOPI
 
         s%fieldstatus   = ESMF_STATUS_UNINIT
-        s%gridstatus    = ESMF_STATUS_UNINIT
+        s%interngridstatus    = ESMF_STATUS_UNINIT
         s%datastatus    = ESMF_STATUS_UNINIT
         s%datamapstatus = ESMF_STATUS_UNINIT
         ESMF_INIT_SET_DEFINED(s)
@@ -688,7 +688,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
-      function ESMF_FieldCreateNoDataPtr(grid, arrayspec, horzRelloc, &
+      function ESMF_FieldCreateNoDataPtr(interngrid, arrayspec, horzRelloc, &
                                          vertRelloc, haloWidth, &
                                          datamap, name, iospec, rc)
 !
@@ -696,7 +696,7 @@
       type(ESMF_Field) :: ESMF_FieldCreateNoDataPtr   
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid) :: grid                 
+      type(ESMF_InternGrid) :: interngrid                 
       type(ESMF_ArraySpec), intent(inout) :: arrayspec    
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
@@ -713,23 +713,23 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [grid] 
-!           Pointer to an {\tt ESMF\_Grid} object. 
+!     \item [interngrid] 
+!           Pointer to an {\tt ESMF\_InternGrid} object. 
 !     \item [arrayspec]
 !           Data specification. 
 !     \item [{[horzRelloc]}] 
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.  If a relative location is specified both as an argument
+!           Relative location of data per interngrid cell/vertex in the horizontal
+!           interngrid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical
-!           grid.  If a relative location is specified both as an argument
+!           Relative location of data per interngrid cell/vertex in the vertical
+!           interngrid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[haloWidth]}]
 !           Halo region width when data is eventually created.  Defaults to 0.
 !     \item [{[datamap]}]
 !           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
-!           data to the {\tt ESMF\_Grid}.
+!           data to the {\tt ESMF\_InternGrid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -757,7 +757,7 @@
                                        ESMF_CONTEXT, rc)) return
 
       ! Call construction method to build field internals.
-      call ESMF_FieldConstructNoDataPtr(ftype, grid, arrayspec, horzRelloc, &
+      call ESMF_FieldConstructNoDataPtr(ftype, interngrid, arrayspec, horzRelloc, &
                                        vertRelloc, haloWidth, datamap, name, &
                                        iospec, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -782,14 +782,14 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
-      function ESMF_FieldCreateNoArray(grid, horzRelloc, vertRelloc, &
+      function ESMF_FieldCreateNoArray(interngrid, horzRelloc, vertRelloc, &
                                        datamap, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Field) :: ESMF_FieldCreateNoArray 
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid) :: grid                 
+      type(ESMF_InternGrid) :: interngrid                 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       type(ESMF_FieldDataMap), intent(inout), optional :: datamap              
@@ -804,19 +804,19 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [grid] 
-!           Pointer to an {\tt ESMF\_Grid} object. 
+!     \item [interngrid] 
+!           Pointer to an {\tt ESMF\_InternGrid} object. 
 !     \item [{[horzRelloc]}] 
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.  If a relative location is specified both as an argument
+!           Relative location of data per interngrid cell/vertex in the horizontal
+!           interngrid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical
-!           grid.  If a relative location is specified both as an argument
+!           Relative location of data per interngrid cell/vertex in the vertical
+!           interngrid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[datamap]}]
 !           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
-!           data to the {\tt ESMF\_Grid}.
+!           data to the {\tt ESMF\_InternGrid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -844,7 +844,7 @@
                                        ESMF_CONTEXT, rc)) return
 
       ! Call field construction method
-      call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
+      call ESMF_FieldConstructNoArray(ftype, interngrid, horzRelloc, vertRelloc, &
                                       datamap, name, &
                                       iospec, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -861,17 +861,17 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldCreateNoGridArray"
+#define ESMF_METHOD "ESMF_FieldCreateNoInternGridArray"
 
 !BOP
-! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no Grid or Array
+! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no InternGrid or Array
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
-      function ESMF_FieldCreateNoGridArray(name, iospec, rc)
+      function ESMF_FieldCreateNoInternGridArray(name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Field) :: ESMF_FieldCreateNoGridArray 
+      type(ESMF_Field) :: ESMF_FieldCreateNoInternGridArray 
 !
 ! !ARGUMENTS:
       character (len = *), intent(in), optional :: name  
@@ -881,7 +881,7 @@
 ! !DESCRIPTION:
 !     An interface function to {\tt ESMF\_FieldCreateNoData()}.
 !     This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
-!     and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
+!     and depends on later calls to add an {\tt ESMF\_InternGrid} and {\tt ESMF\_Array} to 
 !     it.  
 !
 !     The arguments are:
@@ -904,25 +904,25 @@
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       nullify(ftype)
-      nullify(ESMF_FieldCreateNoGridArray%ftypep)
+      nullify(ESMF_FieldCreateNoInternGridArray%ftypep)
 
       allocate(ftype, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
                                        ESMF_CONTEXT, rc)) return
 
       ! Call field construction method
-      call ESMF_FieldConstructNoGridArray(ftype, name, iospec, localrc)
+      call ESMF_FieldConstructNoInternGridArray(ftype, name, iospec, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      ESMF_FieldCreateNoGridArray%ftypep => ftype
+      ESMF_FieldCreateNoInternGridArray%ftypep => ftype
 
-      ESMF_INIT_SET_CREATED(ESMF_FieldCreateNoGridArray)
+      ESMF_INIT_SET_CREATED(ESMF_FieldCreateNoInternGridArray)
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_FieldCreateNoGridArray
+      end function ESMF_FieldCreateNoInternGridArray
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -994,13 +994,13 @@
 ! !IROUTINE: ESMF_FieldGet - Return info associated with a Field
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldGet(field, grid, array, datamap, horzRelloc, &
+      subroutine ESMF_FieldGet(field, interngrid, array, datamap, horzRelloc, &
                                vertRelloc, haloWidth, iospec, typekind, &
                                rank, lbounds, ubounds, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field    
-      type(ESMF_Grid), intent(out), optional :: grid     
+      type(ESMF_InternGrid), intent(out), optional :: interngrid     
       type(ESMF_InternArray), intent(out), optional :: array     
       type(ESMF_FieldDataMap), intent(out), optional :: datamap     
       type(ESMF_RelLoc), intent(out), optional :: horzRelloc 
@@ -1024,17 +1024,17 @@
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to an {\tt ESMF\_Field} object.
-!     \item [{[grid]}]
-!           {\tt ESMF\_Grid}.
+!     \item [{[interngrid]}]
+!           {\tt ESMF\_InternGrid}.
 !     \item [{[array]}]
 !           {\tt ESMF\_Array}.
 !     \item [{[datamap]}]
 !           {\tt ESMF\_FieldDataMap}.
 !     \item [{[horzRelloc}]]
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
+!           Relative location of data per interngrid cell/vertex in the horizontal
+!           interngrid.
 !     \item [{[vertRelloc]}]
-!           Relative location of data per grid cell/vertex in the vertical grid.
+!           Relative location of data per interngrid cell/vertex in the vertical interngrid.
 !     \item [{[haloWidth]}]
 !           Integer value for the width of the halo (ghost zone) region in the
 !           data array.  This can also be queried directly from the
@@ -1071,13 +1071,13 @@
  
         ftype => field%ftypep
 
-        if (present(grid)) then
-            if (ftype%gridstatus .ne. ESMF_STATUS_READY) then
+        if (present(interngrid)) then
+            if (ftype%interngridstatus .ne. ESMF_STATUS_READY) then
                 if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "No Grid or invalid Grid attached to Field", &
+                                "No InternGrid or invalid InternGrid attached to Field", &
                                  ESMF_CONTEXT, rc)) return
             endif
-            grid = ftype%grid
+            interngrid = ftype%interngrid
         endif
 
         if (present(array)) then
@@ -2230,13 +2230,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetGlobalGridInfo"
+#define ESMF_METHOD "ESMF_FieldGetGlobalInternGridInfo"
 
 !BOPI
-! !IROUTINE: ESMF_FieldGetGlobalGridInfo - Get information about the Global Grid
+! !IROUTINE: ESMF_FieldGetGlobalInternGridInfo - Get information about the Global InternGrid
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldGetGlobalGridInfo(field, ndim, ncell, nvertex, &
+      subroutine ESMF_FieldGetGlobalInternGridInfo(field, ndim, ncell, nvertex, &
         size, rc)
 !
 ! !ARGUMENTS:
@@ -2248,7 +2248,7 @@
       integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
-!     Return global {\tt ESMF\_Grid} information. 
+!     Return global {\tt ESMF\_InternGrid} information. 
 !
 !
 !     The arguments are:
@@ -2262,7 +2262,7 @@
 !     \item [{[nvertex]}]
 !           Number of vertex.
 !     \item [{[size]}]
-!           Size of grid.
+!           Size of interngrid.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2280,20 +2280,20 @@
 ! TODO: code goes here.  This marked BOPI because it isn't implemented yet,
 !   and it may be that a lot of the query routines are not actually
 !   implemented at the field level - only the most commonly used ones.
-!   the rest are to be implemented by GridGet() - the caller gets the grid
-!   from the field and then queries the grid directly.
+!   the rest are to be implemented by InternGridGet() - the caller gets the interngrid
+!   from the field and then queries the interngrid directly.
 !
-        end subroutine ESMF_FieldGetGlobalGridInfo
+        end subroutine ESMF_FieldGetGlobalInternGridInfo
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetLocalGridInfo"
+#define ESMF_METHOD "ESMF_FieldGetLocalInternGridInfo"
 
 !BOPI
-! !IROUTINE: ESMF_FieldGetLocalGridInfo - Get information about the Local Grid
+! !IROUTINE: ESMF_FieldGetLocalInternGridInfo - Get information about the Local InternGrid
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldGetLocalGridInfo(field, ndim, ncell, nvertex, & 
+      subroutine ESMF_FieldGetLocalInternGridInfo(field, ndim, ncell, nvertex, & 
         size, rc)
 !
 ! !ARGUMENTS:
@@ -2305,7 +2305,7 @@
       integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
-!      Get {\tt ESMF\_Grid} information specific to the local {\tt ESMF\_DE}.
+!      Get {\tt ESMF\_InternGrid} information specific to the local {\tt ESMF\_DE}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2318,7 +2318,7 @@
 !     \item [{[nvertex]}]
 !           Number of vertex.
 !     \item [{[size]}]
-!           Size of grid.
+!           Size of interngrid.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2335,7 +2335,7 @@
 !
 ! TODO: code goes here
 !
-        end subroutine ESMF_FieldGetLocalGridInfo
+        end subroutine ESMF_FieldGetLocalInternGridInfo
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2511,12 +2511,12 @@
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "  Name = '",  trim(name), "'"
 
-        call ESMF_StatusString(fp%gridstatus, str, localrc)
-      !jw  write(msgbuf, *)  "Grid status = ", trim(str)
+        call ESMF_StatusString(fp%interngridstatus, str, localrc)
+      !jw  write(msgbuf, *)  "InternGrid status = ", trim(str)
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-        write(*, *)  "Grid status = ", trim(str)
-        if (fp%gridstatus .eq. ESMF_STATUS_READY) then 
-           call ESMF_GridPrint(fp%grid, "", localrc)
+        write(*, *)  "InternGrid status = ", trim(str)
+        if (fp%interngridstatus .eq. ESMF_STATUS_READY) then 
+           call ESMF_InternGridPrint(fp%interngrid, "", localrc)
         endif
 
         call ESMF_StatusString(fp%datastatus, str, localrc)
@@ -2543,7 +2543,7 @@
         !type (ESMF_Status) :: iostatus           ! if unset, inherit from gcomp
 
         ! local field contents
-        !type (ESMF_Mask) :: mask                 ! may belong in Grid
+        !type (ESMF_Mask) :: mask                 ! may belong in InternGrid
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2564,22 +2564,22 @@
 !
 ! !ARGUMENTS:
       character (len = *), intent(in) :: fname             ! field name to read
-      character (len = *), intent(in), optional :: gname   ! grid name
+      character (len = *), intent(in), optional :: gname   ! interngrid name
       character (len = *), intent(in), optional :: dnames  ! data name
       type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
       integer, intent(out), optional :: rc                 ! return code
 !
 ! !DESCRIPTION:
 !      Used to read data from persistent storage in a variety of formats.
-!      This includes creating the {\tt ESMF\_Grid} associated with this {\tt ESMF\_Field}.
-!      To share a single {\tt ESMF\_Grid} betwen multiple {\tt ESMF\_Field}s, see the {\tt ESMF\_FieldCreate} calls.
+!      This includes creating the {\tt ESMF\_InternGrid} associated with this {\tt ESMF\_Field}.
+!      To share a single {\tt ESMF\_InternGrid} betwen multiple {\tt ESMF\_Field}s, see the {\tt ESMF\_FieldCreate} calls.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [name]
 !           An {\tt ESMF\_Field} name.
 !     \item [{[gname]}]
-!            {\tt ESMF\_Grid} name.
+!            {\tt ESMF\_InternGrid} name.
 !     \item [{[dnames]}]
 !            Data name.
 !     \item [{[iospec]}]
@@ -2716,7 +2716,7 @@
       ftypep%localfield%localdata = array
       ftypep%datastatus = ESMF_STATUS_READY
    
-      ! Now revalidate to be sure the grid and datamap, if they exist, are
+      ! Now revalidate to be sure the interngrid and datamap, if they exist, are
       ! consistent with the new array.
       call ESMF_FieldValidate(field, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -2791,7 +2791,7 @@
 !      ftypep%localfield%localarray = array
 !      ftypep%arraystatus = ESMF_STATUS_READY
    
-      ! Now revalidate to be sure the grid and datamap, if they exist, are
+      ! Now revalidate to be sure the interngrid and datamap, if they exist, are
       ! consistent with the new array.
       call ESMF_FieldValidate(field, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -3532,38 +3532,38 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldSetGrid"
+#define ESMF_METHOD "ESMF_FieldSetInternGrid"
 
 !BOP
-! !IROUTINE: ESMF_FieldSetGrid - Set Grid associated with the Field
+! !IROUTINE: ESMF_FieldSetInternGrid - Set InternGrid associated with the Field
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldSetGrid(field, grid, rc)
+      subroutine ESMF_FieldSetInternGrid(field, interngrid, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
-      type(ESMF_Grid), intent(inout) :: grid      
+      type(ESMF_InternGrid), intent(inout) :: interngrid      
       integer, intent(out), optional :: rc    
 !
 ! !DESCRIPTION:
 !  Used only with the version of {\tt ESMF\_FieldCreate} which creates an empty 
-!  {\tt ESMF\_Field} and allows the {\tt ESMF\_Grid} to be specified later.  
-!  Otherwise it is an error to try to change the {\tt ESMF\_Grid} 
+!  {\tt ESMF\_Field} and allows the {\tt ESMF\_InternGrid} to be specified later.  
+!  Otherwise it is an error to try to change the {\tt ESMF\_InternGrid} 
 !  associated with an {\tt ESMF\_Field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
-!     \item [grid]
-!           {\tt ESMF\_Grid} to be added.
+!     \item [interngrid]
+!           {\tt ESMF\_InternGrid} to be added.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
         type(ESMF_FieldType), pointer :: ftype
-        logical :: had_grid
+        logical :: had_interngrid
         integer :: localrc
 
         ! Initialize
@@ -3581,18 +3581,18 @@
 
         ftype => field%ftypep
 
-        ! decide if we're regridding or just adding a grid to a partially
+        ! decide if we're regridding or just adding a interngrid to a partially
         ! created field.
-        had_grid = .FALSE.
-        if (ftype%gridstatus .eq. ESMF_STATUS_READY) had_grid = .TRUE.
+        had_interngrid = .FALSE.
+        if (ftype%interngridstatus .eq. ESMF_STATUS_READY) had_interngrid = .TRUE.
 
-        if (.not. had_grid) then
-           ! if no grid, just add it
-           ftype%grid = grid
-           ftype%gridstatus = ESMF_STATUS_READY
+        if (.not. had_interngrid) then
+           ! if no interngrid, just add it
+           ftype%interngrid = interngrid
+           ftype%interngridstatus = ESMF_STATUS_READY
         else
            ! this could be considered a request to regrid the data
-           call ESMF_LogWrite("Replacing existing grid not yet supported", &
+           call ESMF_LogWrite("Replacing existing interngrid not yet supported", &
                                ESMF_LOG_WARNING, &
                                ESMF_CONTEXT)
            call ESMF_LogWrite("Will be considered a regrid request", &
@@ -3609,7 +3609,7 @@
 
         if (present(rc)) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_FieldSetGrid
+        end subroutine ESMF_FieldSetInternGrid
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -3757,7 +3757,7 @@
 ! !DESCRIPTION:
 !      Validates that the {\tt field} is internally consistent.
 !      Currently this method determines if the {\tt field} is uninitialized 
-!      or already destroyed.  The code also checks if the data and grid sizes agree.
+!      or already destroyed.  The code also checks if the data and interngrid sizes agree.
 !      Currently we allow for 1 point mismatch to accommodate different staggerings.
 !      The method returns an error code if problems 
 !      are found.  
@@ -3780,13 +3780,13 @@
       type(ESMF_FieldType), pointer :: ftypep
       type(ESMF_Relloc) :: horzRelloc, vertRelloc
       character(len=ESMF_MAXSTR) :: msgbuf
-      integer :: gridcounts(ESMF_MAXGRIDDIM)   ! how big the local grid is
+      integer :: interngridcounts(ESMF_MAXIGRIDDIM)   ! how big the local interngrid is
       integer :: arraycounts(ESMF_MAXDIM)      ! how big the local array is
       integer :: maplist(ESMF_MAXDIM)          ! mapping between them
-      integer :: otheraxes(ESMF_MAXDIM)        ! counts for non-grid dims
-      integer :: gridrank, maprank, arrayrank, halo
-      integer :: gridcellcount, arraycellcount
-      logical :: hasgrid, hasarray, hasmap     ! decide what we can validate
+      integer :: otheraxes(ESMF_MAXDIM)        ! counts for non-interngrid dims
+      integer :: interngridrank, maprank, arrayrank, halo
+      integer :: interngridcellcount, arraycellcount
+      logical :: hasinterngrid, hasarray, hasmap     ! decide what we can validate
       integer :: i, j
     
       ! Initialize
@@ -3814,9 +3814,9 @@
          return
       endif 
 
-      ! figure out whether there is a grid, datamap, and/or arrays first
+      ! figure out whether there is a interngrid, datamap, and/or arrays first
       ! before doing tests to be sure they are consistent.
-      hasgrid = .FALSE.
+      hasinterngrid = .FALSE.
       hasarray = .FALSE.
       hasmap = .FALSE.
 
@@ -3835,30 +3835,30 @@
       endif
 
       ! if there is no datamap yet, then default horzRelloc to cell center
-      ! before asking thegrid for count information
+      ! before asking theinterngrid for count information
       if (.not. hasmap) then
           horzRelloc = ESMF_CELL_CENTER
       endif
 
-      ! make sure there is a grid before asking it questions.
-      if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
+      ! make sure there is a interngrid before asking it questions.
+      if (ftypep%interngridstatus .eq. ESMF_STATUS_READY) then
 
-          ! get grid dim and extents for the local piece
-          call ESMF_GridGet(ftypep%grid, distDimCount=gridrank, rc=localrc)
+          ! get interngrid dim and extents for the local piece
+          call ESMF_InternGridGet(ftypep%interngrid, distDimCount=interngridrank, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          call ESMF_GridGetDELocalInfo(ftypep%grid, horzRelloc, vertRelloc, &
-                                    localCellCountPerDim=gridcounts, rc=localrc)
+          call ESMF_InternGridGetDELocalInfo(ftypep%interngrid, horzRelloc, vertRelloc, &
+                                    localCellCountPerDim=interngridcounts, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          hasgrid = .TRUE.
+          hasinterngrid = .TRUE.
 
-          ! compute total number of grid items for later
-          gridcellcount = 1
-          do i = 1, gridrank
-              gridcellcount = gridcellcount * gridcounts(i)
+          ! compute total number of interngrid items for later
+          interngridcellcount = 1
+          do i = 1, interngridrank
+              interngridcellcount = interngridcellcount * interngridcounts(i)
           enddo
       endif
 
@@ -3894,21 +3894,21 @@
           endif
       endif
 
-      ! if array and datamap and grid, check exact counts now
-      if (hasarray .and. hasmap .and. hasgrid) then
+      ! if array and datamap and interngrid, check exact counts now
+      if (hasarray .and. hasmap .and. hasinterngrid) then
 
-          ! if the array and grid cell counts are 0, there is no local
+          ! if the array and interngrid cell counts are 0, there is no local
           ! data on the PET and we should look no further.
-          if ((arraycellcount .eq. 0) .and. (gridcellcount .eq. 0)) then
+          if ((arraycellcount .eq. 0) .and. (interngridcellcount .eq. 0)) then
              continue ! ok, no data on this local PET.  
           else
             j = 1
             do i = 1, arrayrank
               if (maplist(i) .eq. 0) then
-                  ! maplist is 0 if the axes does not correspond to the grid.
+                  ! maplist is 0 if the axes does not correspond to the interngrid.
                   ! in that case, it must correspond to the counts in the map.
                   ! TODO: for now the halo is added to all axes in the array,
-                  ! not just those which correspond to the grid.  when we fix
+                  ! not just those which correspond to the interngrid.  when we fix
                   ! this, then change this test to ignore halo widths.
                   if ((abs(arraycounts(i)) - (otheraxes(j) + (2*halo))) > 1 ) then
                       if (arraycounts(i) .eq. otheraxes(j)) then
@@ -3931,13 +3931,13 @@
                   endif
                   j = j + 1
               else
-                  ! maplist is not 0, so this axes does correspond to the grid.
+                  ! maplist is not 0, so this axes does correspond to the interngrid.
                   ! the sizes must match, taking into account the halo widths
                   ! and the index reordering.
-                  if (abs(arraycounts(i) - (gridcounts(maplist(i)) + (2*halo))) > 1 ) then
+                  if (abs(arraycounts(i) - (interngridcounts(maplist(i)) + (2*halo))) > 1 ) then
                       write(msgbuf,*) "array index", i, "(", arraycounts(i), &
-                                      ") != grid index", maplist(i), "(", &
-                                      gridcounts(maplist(i)) + (2*halo), ")"
+                                      ") != interngrid index", maplist(i), "(", &
+                                      interngridcounts(maplist(i)) + (2*halo), ")"
                       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, msgbuf, &
                                                 ESMF_CONTEXT, rc)
                       return
@@ -4001,7 +4001,7 @@
         integer, dimension(:), pointer :: out_lbounds
         integer, dimension(:), pointer :: out_ubounds
         integer, dimension(:), pointer :: out_strides
-        type(ESMF_Grid) :: grid
+        type(ESMF_InternGrid) :: interngrid
         type(ESMF_DELayout) :: delayout
         type (ESMF_IOFileFormat) :: fileformat
         type(ESMF_Time) :: ts
@@ -4070,15 +4070,15 @@
         Date = Date(1:10)//'_'//Date(12:19)
 
         ! Collect results on DE 0 and output to a file
-        call ESMF_FieldGet(field, grid=grid, rc=localrc)
+        call ESMF_FieldGet(field, interngrid=interngrid, rc=localrc)
 !!$        call ESMF_FieldGet( field, name=fieldname, rc=localrc)
-        call ESMF_GridGet(grid, delayout=delayout, rc=localrc)
+        call ESMF_InternGridGet(interngrid, delayout=delayout, rc=localrc)
         call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=localrc)
 
         ! Output to file, from de_id 0 only
 !!$        call ESMF_FieldAllGather(field, out_array, rc=localrc)
         call ESMF_IArrayGather(field%ftypep%localfield%localdata, &
-                              field%ftypep%grid, field%ftypep%mapping, &
+                              field%ftypep%interngrid, field%ftypep%mapping, &
                               0, out_array, rc=localrc)
 
 
@@ -4138,7 +4138,7 @@
         ! Local variables
         integer :: localrc, de_id
         type(ESMF_InternArray) :: outarray
-        type(ESMF_Grid) :: grid
+        type(ESMF_InternGrid) :: interngrid
         type(ESMF_DELayout) :: delayout
         character(len=ESMF_MAXSTR) :: filename
         character(len=ESMF_MAXSTR) :: name
@@ -4167,11 +4167,11 @@
                                   ESMF_CONTEXT, rc)) return
 
         ! Collect results on DE 0 and output to a file
-        call ESMF_FieldGet(field, grid=grid, rc=localrc)
+        call ESMF_FieldGet(field, interngrid=interngrid, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_GridGet(grid, delayout=delayout, rc=localrc)
+        call ESMF_InternGridGet(interngrid, delayout=delayout, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4186,7 +4186,7 @@
 
         ! Output to file, from de_id 0 only
         call ESMF_IArrayGather(field%ftypep%localfield%localdata, &
-                              field%ftypep%grid, field%ftypep%mapping, &
+                              field%ftypep%interngrid, field%ftypep%mapping, &
                               0, outarray, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4269,13 +4269,13 @@
 ! !IROUTINE: ESMF_FieldConstructIANew - Construct the internals of a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructIANew(ftype, grid, arrayspec, allocflag, &
+      subroutine ESMF_FieldConstructIANew(ftype, interngrid, arrayspec, allocflag, &
                                         horzRelloc, vertRelloc, haloWidth, &
                                         datamap, name, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldType), pointer :: ftype 
-      type(ESMF_Grid) :: grid               
+      type(ESMF_InternGrid) :: interngrid               
       type(ESMF_ArraySpec), intent(inout) :: arrayspec     
       type(ESMF_AllocFlag), intent(in), optional :: allocflag
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
@@ -4290,34 +4290,34 @@
 ! 
 !     Constructs all {\tt ESMF\_Field} internals, including the allocation
 !     of a data {\tt ESMF\_Array}.   TODO: this is missing a counts argument,
-!     which is required if the arrayspec rank is greater than the grid rank.
+!     which is required if the arrayspec rank is greater than the interngrid rank.
 !     Either that, or we must enforce that a datamap comes in, and it
-!     contains the counts for non-grid dims.
+!     contains the counts for non-interngrid dims.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to an {\tt ESMF\_Field} object.
-!     \item [grid] 
-!           Pointer to an {\tt ESMF\_Grid} object. 
+!     \item [interngrid] 
+!           Pointer to an {\tt ESMF\_InternGrid} object. 
 !     \item [arrayspec]
 !           Data specification. 
 !     \item [{[allocflag]}]
 !           Allocate space for data array or not.  For possible values
 !           see Section~\ref{opt:allocflag}.
 !     \item [{[horzRelloc]}] 
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.  If a relative location is specified both as an argument
+!           Relative location of data per interngrid cell/vertex in the horizontal
+!           interngrid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical
-!           grid.  If a relative location is specified both as an argument
+!           Relative location of data per interngrid cell/vertex in the vertical
+!           interngrid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
 !     \item [{[datamap]}]
 !           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
-!           data to the {\tt ESMF\_Grid}.
+!           data to the {\tt ESMF\_InternGrid}.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -4334,10 +4334,10 @@
       type(ESMF_InternArray) :: array                   ! New array
       type(ESMF_RelLoc) :: hRelLoc, vRelLoc
       type(ESMF_FieldDataMap) :: dmap
-      integer, dimension(ESMF_MAXDIM) :: gridcounts, arraycounts
+      integer, dimension(ESMF_MAXDIM) :: interngridcounts, arraycounts
       integer, dimension(ESMF_MAXDIM) :: dimorder, counts
       integer :: hwidth, minRank
-      integer :: i, j, arrayRank, gridRank, baseGridRank
+      integer :: i, j, arrayRank, interngridRank, baseInternGridRank
 
       ! Initialize return code   
       localrc = ESMF_RC_NOT_IMPL
@@ -4359,13 +4359,13 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridGet(grid, distDimCount=gridRank, dimCount=baseGridRank, &
+      call ESMF_InternGridGet(interngrid, distDimCount=interngridRank, dimCount=baseInternGridRank, &
                         rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      minRank = min(arrayRank, gridRank)
+      minRank = min(arrayRank, interngridRank)
       if (present(datamap)) then
           dmap = datamap
       else
@@ -4375,15 +4375,15 @@
                                     ESMF_CONTEXT, rc)) return
       endif
 
-      ! this sets the grid status, and the datamap status
-      call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
+      ! this sets the interngrid status, and the datamap status
+      call ESMF_FieldConstructNoArray(ftype, interngrid, horzRelloc, vertRelloc, &
                                       dmap, name, &
                                       iospec, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      ! make sure hRelLoc has a value before GridGetDELocalInfo call
+      ! make sure hRelLoc has a value before InternGridGetDELocalInfo call
       if (present(horzRelLoc)) then
           hRelLoc = horzRelloc
       else
@@ -4401,7 +4401,7 @@
           if (present(datamap)) then
               call ESMF_FieldDataMapGet(datamap, vertRelLoc=vRelLoc, rc=localrc)
           else
-              if (baseGridRank .le. 2) then
+              if (baseInternGridRank .le. 2) then
                   vRelLoc = ESMF_CELL_UNDEFINED
               else
                   if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -4410,9 +4410,9 @@
               endif
           endif
       endif
-      call ESMF_GridGetDELocalInfo(ftype%grid, horzRelLoc=hRelLoc, &
+      call ESMF_InternGridGetDELocalInfo(ftype%interngrid, horzRelLoc=hRelLoc, &
                                    vertRelLoc=vRelLoc, &
-                                   localCellCountPerDim=gridcounts(1:gridRank), &
+                                   localCellCountPerDim=interngridcounts(1:interngridRank), &
                                    rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4432,8 +4432,8 @@
             !! TODO: decide if the counts going into ArrayCreate do or do not
             !! include either halo widths or allocation widths.  If so, this
             !! is the right count.  If not, then add hwidths plus awidths.
-            !!arraycounts(i) = gridcounts(dimorder(i))
-            arraycounts(i) = gridcounts(dimorder(i)) + (2 * hwidth)
+            !!arraycounts(i) = interngridcounts(dimorder(i))
+            arraycounts(i) = interngridcounts(dimorder(i)) + (2 * hwidth)
          endif
       enddo
 
@@ -4457,13 +4457,13 @@
 ! !IROUTINE: ESMF_FieldConstructIANewArray - Construct the internals of a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructIANewArray(ftype, grid, array, horzRelloc, &
+      subroutine ESMF_FieldConstructIANewArray(ftype, interngrid, array, horzRelloc, &
                                              vertRelloc, datamap, &
                                              name, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldType), pointer :: ftype 
-      type(ESMF_Grid) :: grid               
+      type(ESMF_InternGrid) :: interngrid               
       type(ESMF_InternArray), intent(in) :: array     
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
@@ -4481,21 +4481,21 @@
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to an {\tt ESMF\_Field} object.
-!     \item [grid] 
-!           Pointer to an {\tt ESMF\_Grid} object. 
+!     \item [interngrid] 
+!           Pointer to an {\tt ESMF\_InternGrid} object. 
 !     \item [array]
 !           Data. 
 !     \item [{[horzRelloc]}] 
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.  If a relative location is specified both as an argument
+!           Relative location of data per interngrid cell/vertex in the horizontal
+!           interngrid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical
-!           grid.  If a relative location is specified both as an argument
+!           Relative location of data per interngrid cell/vertex in the vertical
+!           interngrid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[datamap]}]
 !           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
-!           data to the {\tt ESMF\_Grid}.
+!           data to the {\tt ESMF\_InternGrid}.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -4517,8 +4517,8 @@
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
 
-      ! this validates the grid already, no need to validate it first.
-      call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
+      ! this validates the interngrid already, no need to validate it first.
+      call ESMF_FieldConstructNoArray(ftype, interngrid, horzRelloc, vertRelloc, &
                                       datamap=datamap, name=name, &
                                       iospec=iospec, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -4536,7 +4536,7 @@
       ftype%datastatus = ESMF_STATUS_READY
 
       ! instead of adding error checking all over the place, call the
-      ! validate routine to check sizes of array vs grid to be sure
+      ! validate routine to check sizes of array vs interngrid to be sure
       ! they are consistent.  the tfield is a temp wrapper so we can
       ! call the user level validate
       tfield%ftypep => ftype
@@ -4563,13 +4563,13 @@
 ! !IROUTINE: ESMF_FieldConstructNoDataPtr - Construct a Field with no associated buffer
 
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructNoDataPtr(ftype, grid, arrayspec, &
+      subroutine ESMF_FieldConstructNoDataPtr(ftype, interngrid, arrayspec, &
                                            horzRelloc, vertRelloc, haloWidth, &
                                            datamap, name, iospec, rc)
 !
 ! !ARGUMENTS:     
       type(ESMF_FieldType), pointer :: ftype                
-      type(ESMF_Grid), intent(inout) :: grid               
+      type(ESMF_InternGrid), intent(inout) :: interngrid               
       type(ESMF_ArraySpec), intent(inout) :: arrayspec     
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
@@ -4588,23 +4588,23 @@
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to an {\tt ESMF\_Field} object.
-!     \item [grid] 
-!           Pointer to an {\tt ESMF\_Grid} object. 
+!     \item [interngrid] 
+!           Pointer to an {\tt ESMF\_InternGrid} object. 
 !     \item [arrayspec]
 !           Data specification. 
 !     \item [{[horzRelloc]}] 
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.  If a relative location is specified both as an argument
+!           Relative location of data per interngrid cell/vertex in the horizontal
+!           interngrid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical 
-!           grid.  If a relative location is specified both as an argument
+!           Relative location of data per interngrid cell/vertex in the vertical 
+!           interngrid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[haloWidth]}]
 !           Width of the halo region around the data.  Defaults to 0.
 !     \item [{[datamap]}]
 !           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
-!           data to the {\tt ESMF\_Grid}.
+!           data to the {\tt ESMF\_InternGrid}.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -4617,7 +4617,7 @@
 
 
       integer :: localrc
-      integer :: gridRank, arrayRank
+      integer :: interngridRank, arrayRank
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -4635,15 +4635,15 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      ! Check to see grid is valid first.
-      call ESMF_GridValidate(grid, "", localrc)
+      ! Check to see interngrid is valid first.
+      call ESMF_InternGridValidate(interngrid, "", localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-      ftype%grid = grid
-      ftype%gridstatus = ESMF_STATUS_READY
+      ftype%interngrid = interngrid
+      ftype%interngridstatus = ESMF_STATUS_READY
 
-      call ESMF_GridGet(grid, distDimCount=gridRank, rc=localrc)
+      call ESMF_InternGridGet(interngrid, distDimCount=interngridRank, rc=localrc)
       if (present(datamap)) then
         ftype%mapping = datamap   ! copy, datamap can be reused by user now
         ! if specified as explicit args to create, they override anything
@@ -4659,9 +4659,9 @@
       ftype%datamapstatus = ESMF_STATUS_READY
 
       ! construct the array here - but TODO: we are missing the counts
-      ! in case there are non-grid axes.  there has to be an additional
+      ! in case there are non-interngrid axes.  there has to be an additional
       ! counts array which contains counts for any data axes which is
-      ! not associated with the grid.  e.g. for a 3d data array on a 2d grid,
+      ! not associated with the interngrid.  e.g. for a 3d data array on a 2d interngrid,
       ! there would be counts(1).  for 4d data, counts(2).
       
 
@@ -4693,13 +4693,13 @@
 ! !IROUTINE: ESMF_FieldConstructNoArray - Construct a Field with no associated Array
 
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, &
+      subroutine ESMF_FieldConstructNoArray(ftype, interngrid, horzRelloc, &
                                             vertRelloc, &
                                             datamap, name, iospec, rc)
 !
 ! !ARGUMENTS:     
       type(ESMF_FieldType), pointer :: ftype   
-      type(ESMF_Grid), intent(inout) :: grid                 
+      type(ESMF_InternGrid), intent(inout) :: interngrid                 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       type(ESMF_FieldDataMap), intent(inout), optional :: datamap              
@@ -4715,19 +4715,19 @@
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to an {\tt ESMF\_Field} object.
-!     \item [grid] 
-!           Pointer to an {\tt ESMF\_Grid} object. 
+!     \item [interngrid] 
+!           Pointer to an {\tt ESMF\_InternGrid} object. 
 !     \item [{[horzRelloc]}] 
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.  If a relative location is specified both as an argument
+!           Relative location of data per interngrid cell/vertex in the horizontal
+!           interngrid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical
-!           grid.  If a relative location is specified both as an argument
+!           Relative location of data per interngrid cell/vertex in the vertical
+!           interngrid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[datamap]}]
 !           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
-!           data to the {\tt ESMF\_Grid}.
+!           data to the {\tt ESMF\_InternGrid}.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -4740,7 +4740,7 @@
 
 
       integer :: localrc
-      integer :: gridRank
+      integer :: interngridRank
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -4758,15 +4758,15 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      ! Attach grid
-      call ESMF_GridValidate(grid, "", localrc)
+      ! Attach interngrid
+      call ESMF_InternGridValidate(interngrid, "", localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-      ftype%grid = grid
-      ftype%gridstatus = ESMF_STATUS_READY
+      ftype%interngrid = interngrid
+      ftype%interngridstatus = ESMF_STATUS_READY
 
-      call ESMF_GridGet(ftype%grid, distDimCount=gridRank, rc=localrc)
+      call ESMF_InternGridGet(ftype%interngrid, distDimCount=interngridRank, rc=localrc)
       if (present(datamap)) then
         ! this does a copy, datamap ok for user to delete now
         ftype%mapping = datamap   
@@ -4776,16 +4776,16 @@
         call ESMF_FieldDataMapSet(ftype%mapping, horzRelloc=horzRelloc, &
                              vertRelloc=vertRelloc, rc=localrc)
       else
-        ! create default datamap with 1-for-1 correspondence to grid
-        if (gridRank .eq. 1) then
+        ! create default datamap with 1-for-1 correspondence to interngrid
+        if (interngridRank .eq. 1) then
           call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_I, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=localrc)
-        else if (gridRank .eq. 2) then
+        else if (interngridRank .eq. 2) then
           call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJ, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=localrc)
-        else if (gridRank .eq. 3) then
+        else if (interngridRank .eq. 3) then
           call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJK, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=localrc)
@@ -4805,13 +4805,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldConstructNoGridArray"
+#define ESMF_METHOD "ESMF_FieldConstructNoInternGridArray"
 
 !BOPI
-! !IROUTINE: ESMF_FieldConstructNoGridArray - Construct a Field with no Grid or Array
+! !IROUTINE: ESMF_FieldConstructNoInternGridArray - Construct a Field with no InternGrid or Array
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructNoGridArray(ftypep, name, iospec, rc)
+      subroutine ESMF_FieldConstructNoInternGridArray(ftypep, name, iospec, rc)
 !
 ! !ARGUMENTS:     
       type(ESMF_FieldType), pointer :: ftypep
@@ -4821,7 +4821,7 @@
 !
 ! !DESCRIPTION:
 ! 
-!     Constructs {\tt ESMF\_Field} internals except those related to {\tt ESMF\_Grid} 
+!     Constructs {\tt ESMF\_Field} internals except those related to {\tt ESMF\_InternGrid} 
 !     and {\tt ESMF\_Data}.
 !
 !
@@ -4855,7 +4855,7 @@
                                   ESMF_CONTEXT, rc)) return
 
       ! Initialize field contents
-      ftypep%gridstatus = ESMF_STATUS_UNINIT
+      ftypep%interngridstatus = ESMF_STATUS_UNINIT
       ftypep%datastatus = ESMF_STATUS_UNINIT
       ftypep%datamapstatus = ESMF_STATUS_UNINIT
 
@@ -4873,7 +4873,7 @@
      
       if (present(rc)) rc = ESMF_SUCCESS
       
-      end subroutine ESMF_FieldConstructNoGridArray
+      end subroutine ESMF_FieldConstructNoInternGridArray
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -4946,7 +4946,7 @@
 !      Clips the src\_field physgrid box against the clip\_field, i.e. returns
 !      a description of the area in clip\_field which is necessary to cover the
 !      desired area in src\_field.  This procedure is mostly an entry point;
-!      most of the work is done in the {\tt ESMF\_Grid} class.
+!      most of the work is done in the {\tt ESMF\_InternGrid} class.
 !
 !     The arguments are:
 !     \begin{description}
@@ -4967,8 +4967,8 @@
       integer :: localrc
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
-      type(ESMF_DELayout) :: gridDELayout
-      type(ESMF_Grid) :: srcGrid, dstGrid
+      type(ESMF_DELayout) :: interngridDELayout
+      type(ESMF_InternGrid) :: srcInternGrid, dstInternGrid
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
       type(ESMF_RelLoc) :: dstHorzRelLoc, dstVertRelLoc, &
                            srcHorzRelLoc, srcVertRelLoc
@@ -4983,8 +4983,8 @@
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,dstField,rc)
 
       ! TODO: replace this with a better way to get the current VM
-      call ESMF_GridGet(srcField%ftypep%grid, delayout=gridDELayout, rc=localrc)
-      call ESMF_DELayoutGet(gridDELayout, vm=vm, rc=localrc)
+      call ESMF_InternGridGet(srcField%ftypep%interngrid, delayout=interngridDELayout, rc=localrc)
+      call ESMF_DELayoutGet(interngridDELayout, vm=vm, rc=localrc)
 
       ! This routine is called on every processor in the parent layout.
       !  It is quite possible that the source and destination fields do
@@ -4997,7 +4997,7 @@
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
         call ESMF_FieldGet(srcField, horzRelloc=srcHorzRelLoc, &
-                           vertRelloc=srcVertRelLoc, grid=srcGrid, rc=localrc)
+                           vertRelloc=srcVertRelLoc, interngrid=srcInternGrid, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -5007,7 +5007,7 @@
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
         call ESMF_FieldGet(dstField, horzRelloc=dstHorzRelLoc, &
-                           vertRelloc=dstVertRelLoc, grid=dstGrid, rc=localrc)
+                           vertRelloc=dstVertRelLoc, interngrid=dstInternGrid, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -5022,14 +5022,14 @@
 
       ! if src field exists on this DE, query it for information
       if (hassrcdata) then
-        ! From the grid get the bounding box on this DE
-        call ESMF_GridBoxIntersectSend(srcGrid, dstGrid, sendDomainList, &
+        ! From the interngrid get the bounding box on this DE
+        call ESMF_InternGridBoxIntersectSend(srcInternGrid, dstInternGrid, sendDomainList, &
                                        total=.false., layer=.false., rc=localrc)
       endif
 
       ! if dst field exists on this DE, query it for information
       if (hasdstdata) then
-        call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, vm, recvDomainList, &
+        call ESMF_InternGridBoxIntersectRecv(srcInternGrid, dstInternGrid, vm, recvDomainList, &
                                        hasdstdata, hassrcdata, &
                                        total=.false., layer=.false., rc=localrc)
       endif
@@ -5097,7 +5097,7 @@
 #if 0
       ! TODO: these are currently unused and are not serialized or deserialized.
       type (ESMF_LocalField) :: localfield ! this differs per DE
-        type (ESMF_Mask) :: mask                 ! may belong in Grid
+        type (ESMF_Mask) :: mask                 ! may belong in InternGrid
         integer :: rwaccess                      ! reserved for future use
         integer :: accesscount                   ! reserved for future use
 #endif
@@ -5107,15 +5107,15 @@
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_FieldSerialize(fp%fieldstatus, fp%gridstatus, fp%datastatus, &
+      call c_ESMC_FieldSerialize(fp%fieldstatus, fp%interngridstatus, fp%datastatus, &
                                  fp%datamapstatus, fp%iostatus, &
                                  buffer(1), length, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
-          call ESMF_GridSerialize(fp%grid, buffer, length, offset, localrc)
+      if (fp%interngridstatus .eq. ESMF_STATUS_READY) then
+          call ESMF_InternGridSerialize(fp%interngrid, buffer, length, offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
@@ -5215,7 +5215,7 @@
 #if 0
       ! TODO: these are currently unused and not serialized.
       type (ESMF_LocalField) :: localfield ! this differs per DE
-        type (ESMF_Mask) :: mask                 ! may belong in Grid
+        type (ESMF_Mask) :: mask                 ! may belong in InternGrid
         integer :: rwaccess                      ! reserved for future use
         integer :: accesscount                   ! reserved for future use
 #endif
@@ -5235,15 +5235,15 @@
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_FieldDeserialize(fp%fieldstatus, fp%gridstatus, &
+      call c_ESMC_FieldDeserialize(fp%fieldstatus, fp%interngridstatus, &
                                    fp%datastatus, fp%datamapstatus, &
                                    fp%iostatus, buffer(1), offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
-          fp%grid = ESMF_GridDeserialize(vm, buffer, offset, localrc)
+      if (fp%interngridstatus .eq. ESMF_STATUS_READY) then
+          fp%interngrid = ESMF_InternGridDeserialize(vm, buffer, offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return

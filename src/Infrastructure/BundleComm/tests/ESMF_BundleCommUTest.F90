@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommUTest.F90,v 1.19 2007/04/04 23:10:16 svasquez Exp $
+! $Id: ESMF_BundleCommUTest.F90,v 1.20 2007/06/22 23:21:28 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -38,13 +38,13 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommUTest.F90,v 1.19 2007/04/04 23:10:16 svasquez Exp $'
+      '$Id: ESMF_BundleCommUTest.F90,v 1.20 2007/06/22 23:21:28 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
       integer :: rc
       type(ESMF_VM) :: vm
-      type(ESMF_Grid) :: grid
+      type(ESMF_InternGrid) :: interngrid
       type(ESMF_Field) :: fields(8)
       type(ESMF_Bundle) :: bundle1, bundle2
       type(ESMF_DELayout) :: layout 
@@ -94,8 +94,8 @@
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !NEX_UTest
-      !  Create 4 data field for use below. fields 1 and 2 share a grid, 
-      !  fields 3 and 4 share a different grid.  fields 1 and 2 go into 
+      !  Create 4 data field for use below. fields 1 and 2 share a interngrid, 
+      !  fields 3 and 4 share a different interngrid.  fields 1 and 2 go into 
       !  bundle 1; fields 3 and 4 go into bundle 2.  
       fields(1) = CreateDataField("humidity", r8value=1.1_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
@@ -103,14 +103,14 @@
       
       !------------------------------------------------------------------------
       !NEX_UTest
-      !  Get grid from previous field and reuse it below.
-      call ESMF_FieldGet(fields(1), grid=grid, rc=rc)
-      write(name, *) "Getting Grid from Field"
+      !  Get interngrid from previous field and reuse it below.
+      call ESMF_FieldGet(fields(1), interngrid=interngrid, rc=rc)
+      write(name, *) "Getting InternGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !NEX_UTest
-      fields(2) = CreateDataField("pressure", grid=grid, &
+      fields(2) = CreateDataField("pressure", interngrid=interngrid, &
                                    r8value=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -132,14 +132,14 @@
       
       !------------------------------------------------------------------------
       !NEX_UTest
-      !  Get grid from previous field and reuse it below.
-      call ESMF_FieldGet(fields(3), grid=grid, rc=rc)
-      write(name, *) "Getting Grid from Field"
+      !  Get interngrid from previous field and reuse it below.
+      call ESMF_FieldGet(fields(3), interngrid=interngrid, rc=rc)
+      write(name, *) "Getting InternGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !NEX_UTest
-      fields(4) = CreateDataField("pressure", grid=grid, &
+      fields(4) = CreateDataField("pressure", interngrid=interngrid, &
                                   r8value=-99.99_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -268,8 +268,8 @@
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Create 4 data field for use below. fields 1 and 2 share a grid, 
-      !  fields 3 and 4 share a different grid.  fields 1 and 2 go into 
+      !  Create 4 data field for use below. fields 1 and 2 share a interngrid, 
+      !  fields 3 and 4 share a different interngrid.  fields 1 and 2 go into 
       !  bundle 1; fields 3 and 4 go into bundle 2.
       fields(1) = CreateDataField("humidity", r8value=1.1_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
@@ -277,14 +277,14 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Get grid from previous field and reuse it below.
-      call ESMF_FieldGet(fields(1), grid=grid, rc=rc)
-      write(name, *) "Getting Grid from Field"
+      !  Get interngrid from previous field and reuse it below.
+      call ESMF_FieldGet(fields(1), interngrid=interngrid, rc=rc)
+      write(name, *) "Getting InternGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      fields(2) = CreateDataField("pressure", grid=grid, &
+      fields(2) = CreateDataField("pressure", interngrid=interngrid, &
                                    r4value=2.2_ESMF_KIND_R4, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -306,14 +306,14 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Get grid from previous field and reuse it below.
-      call ESMF_FieldGet(fields(3), grid=grid, rc=rc)
-      write(name, *) "Getting Grid from Field"
+      !  Get interngrid from previous field and reuse it below.
+      call ESMF_FieldGet(fields(3), interngrid=interngrid, rc=rc)
+      write(name, *) "Getting InternGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      fields(4) = CreateDataField("pressure", grid=grid, &
+      fields(4) = CreateDataField("pressure", interngrid=interngrid, &
                                   r4value=-99.99_ESMF_KIND_R4, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -413,8 +413,8 @@
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Create 4 data field for use below. fields 1 and 2 share a grid, 
-      !  fields 3 and 4 share a different grid.  fields 1 and 2 go into 
+      !  Create 4 data field for use below. fields 1 and 2 share a interngrid, 
+      !  fields 3 and 4 share a different interngrid.  fields 1 and 2 go into 
       !  bundle 1; fields 3 and 4 go into bundle 2.  fields 1 and 2 match;
       !  fields 3 and 4 do not.
       fields(1) = CreateDataField("humidity", r8value=1.1_ESMF_KIND_R8, rc=rc)
@@ -430,14 +430,14 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Get grid from previous field and reuse it below.
-      call ESMF_FieldGet(fields(1), grid=grid, rc=rc)
-      write(name, *) "Getting Grid from Field"
+      !  Get interngrid from previous field and reuse it below.
+      call ESMF_FieldGet(fields(1), interngrid=interngrid, rc=rc)
+      write(name, *) "Getting InternGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      fields(2) = CreateDataField("pressure", grid=grid, &
+      fields(2) = CreateDataField("pressure", interngrid=interngrid, &
                                    r8value=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -473,14 +473,14 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Get grid from previous field and reuse it below.
-      call ESMF_FieldGet(fields(3), grid=grid, rc=rc)
-      write(name, *) "Getting Grid from Field"
+      !  Get interngrid from previous field and reuse it below.
+      call ESMF_FieldGet(fields(3), interngrid=interngrid, rc=rc)
+      write(name, *) "Getting InternGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      fields(4) = CreateDataField("pressure", grid=grid, &
+      fields(4) = CreateDataField("pressure", interngrid=interngrid, &
                                   r4value=9.9_ESMF_KIND_R4, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -621,8 +621,8 @@
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Create 4 data field for use below. fields 1 and 2 share a grid, 
-      !  fields 3 and 4 share a different grid.  fields 1 and 2 go into 
+      !  Create 4 data field for use below. fields 1 and 2 share a interngrid, 
+      !  fields 3 and 4 share a different interngrid.  fields 1 and 2 go into 
       !  bundle 1; fields 3 and 4 go into bundle 2.
       fields(1) = CreateDataField("humidity", r8value=1.1_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
@@ -630,14 +630,14 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Get grid from previous field and reuse it below.
-      call ESMF_FieldGet(fields(1), grid=grid, rc=rc)
-      write(name, *) "Getting Grid from Field"
+      !  Get interngrid from previous field and reuse it below.
+      call ESMF_FieldGet(fields(1), interngrid=interngrid, rc=rc)
+      write(name, *) "Getting InternGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      fields(2) = CreateDataField("pressure", grid=grid, &
+      fields(2) = CreateDataField("pressure", interngrid=interngrid, &
                                    r8value=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -652,22 +652,22 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Create a different grid based on the above layout.
-      ! See the helper routines for the different grid options.
-      grid = CreateGrid(3, layout, rc)
-      write(name, *) "Creating non-default grid"
+      ! Create a different interngrid based on the above layout.
+      ! See the helper routines for the different interngrid options.
+      interngrid = CreateInternGrid(3, layout, rc)
+      write(name, *) "Creating non-default interngrid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
       fields(3) = CreateDataField("humidity", r8value=-88.88_ESMF_KIND_R8, &
-                                  grid=grid, rc=rc)
+                                  interngrid=interngrid, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      fields(4) = CreateDataField("pressure", grid=grid, &
+      fields(4) = CreateDataField("pressure", interngrid=interngrid, &
                                   r8value=-99.99_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -759,8 +759,8 @@
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Create 4 data field for use below. fields 1 and 2 share a grid, 
-      !  fields 3 and 4 share a different grid.  fields 1 and 2 go into 
+      !  Create 4 data field for use below. fields 1 and 2 share a interngrid, 
+      !  fields 3 and 4 share a different interngrid.  fields 1 and 2 go into 
       !  bundle 1; fields 3 and 4 go into bundle 2.
       fields(1) = CreateDataField("humidity", r8value=1.1_ESMF_KIND_R8, &
                                    relloc=ESMF_CELL_NECORNER, rc=rc)
@@ -769,14 +769,14 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Get grid from previous field and reuse it below.
-      call ESMF_FieldGet(fields(1), grid=grid, rc=rc)
-      write(name, *) "Getting Grid from Field"
+      !  Get interngrid from previous field and reuse it below.
+      call ESMF_FieldGet(fields(1), interngrid=interngrid, rc=rc)
+      write(name, *) "Getting InternGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      fields(2) = CreateDataField("pressure", grid=grid, &
+      fields(2) = CreateDataField("pressure", interngrid=interngrid, &
                                    r8value=2.2_ESMF_KIND_R8, &
                                    relloc=ESMF_CELL_CENTER, rc=rc)
       write(name, *) "Creating Data Field"
@@ -792,15 +792,15 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Create a different grid based on the above layout.
-      ! See the helper routines for the different grid options.
-      grid = CreateGrid(3, layout, rc)
-      write(name, *) "Creating non-default grid"
+      ! Create a different interngrid based on the above layout.
+      ! See the helper routines for the different interngrid options.
+      interngrid = CreateInternGrid(3, layout, rc)
+      write(name, *) "Creating non-default interngrid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      fields(3) = CreateDataField("humidity", grid=grid, &
+      fields(3) = CreateDataField("humidity", interngrid=interngrid, &
                                    r8value=-88.88_ESMF_KIND_R8, &
                                    relloc=ESMF_CELL_NECORNER, rc=rc)
       write(name, *) "Creating Data Field"
@@ -808,7 +808,7 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      fields(4) = CreateDataField("pressure", grid=grid, &
+      fields(4) = CreateDataField("pressure", interngrid=interngrid, &
                                   r8value=-99.99_ESMF_KIND_R8, &
                                   relloc=ESMF_CELL_CENTER, rc=rc)
       write(name, *) "Creating Data Field"
@@ -902,8 +902,8 @@
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Create 4 data field for use below. fields 1 and 2 share a grid, 
-      !  fields 3 and 4 share a different grid.  fields 1 and 2 go into 
+      !  Create 4 data field for use below. fields 1 and 2 share a interngrid, 
+      !  fields 3 and 4 share a different interngrid.  fields 1 and 2 go into 
       !  bundle 1; fields 3 and 4 go into bundle 2.
       fields(1) = CreateDataField("humidity", r4value=1.1_ESMF_KIND_R4, rc=rc)
       write(name, *) "Creating Data Field"
@@ -911,14 +911,14 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Get grid from previous field and reuse it below.
-      call ESMF_FieldGet(fields(1), grid=grid, rc=rc)
-      write(name, *) "Getting Grid from Field"
+      !  Get interngrid from previous field and reuse it below.
+      call ESMF_FieldGet(fields(1), interngrid=interngrid, rc=rc)
+      write(name, *) "Getting InternGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      fields(2) = CreateDataField("pressure", grid=grid, &
+      fields(2) = CreateDataField("pressure", interngrid=interngrid, &
                                    r8value=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -933,22 +933,22 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Create a different grid based on the above layout.
-      ! See the helper routines for the different grid options.
-      grid = CreateGrid(3, layout, rc)
-      write(name, *) "Creating non-default grid"
+      ! Create a different interngrid based on the above layout.
+      ! See the helper routines for the different interngrid options.
+      interngrid = CreateInternGrid(3, layout, rc)
+      write(name, *) "Creating non-default interngrid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
       fields(3) = CreateDataField("humidity", r4value=-88.88_ESMF_KIND_R4, &
-                                  grid=grid, rc=rc)
+                                  interngrid=interngrid, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      fields(4) = CreateDataField("pressure", grid=grid, &
+      fields(4) = CreateDataField("pressure", interngrid=interngrid, &
                                   r8value=-99.99_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1041,8 +1041,8 @@
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Create 5 data field for use below. fields 1, 2, and 3 share a grid, 
-      !  fields 4 and 5 share a different grid.  fields 1, 2 and 3 go into 
+      !  Create 5 data field for use below. fields 1, 2, and 3 share a interngrid, 
+      !  fields 4 and 5 share a different interngrid.  fields 1, 2 and 3 go into 
       !  bundle 1; fields 4 and 5 go into bundle 2.
       fields(1) = CreateDataField("humidity", r8value=1.1_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
@@ -1050,21 +1050,21 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Get grid from previous field and reuse it below.
-      call ESMF_FieldGet(fields(1), grid=grid, rc=rc)
-      write(name, *) "Getting Grid from Field"
+      !  Get interngrid from previous field and reuse it below.
+      call ESMF_FieldGet(fields(1), interngrid=interngrid, rc=rc)
+      write(name, *) "Getting InternGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      fields(2) = CreateDataField("pressure", grid=grid, &
+      fields(2) = CreateDataField("pressure", interngrid=interngrid, &
                                    r4value=2.2_ESMF_KIND_R4, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      fields(3) = CreateDataField("density", grid=grid, &
+      fields(3) = CreateDataField("density", interngrid=interngrid, &
                                    r8value=4.4_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1086,14 +1086,14 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Get grid from previous field and reuse it below.
-      call ESMF_FieldGet(fields(4), grid=grid, rc=rc)
-      write(name, *) "Getting Grid from Field"
+      !  Get interngrid from previous field and reuse it below.
+      call ESMF_FieldGet(fields(4), interngrid=interngrid, rc=rc)
+      write(name, *) "Getting InternGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      fields(5) = CreateDataField("pressure", grid=grid, &
+      fields(5) = CreateDataField("pressure", interngrid=interngrid, &
                                   r4value=-99.99_ESMF_KIND_R4, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

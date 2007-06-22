@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.85 2007/06/22 20:52:31 theurich Exp $
+// $Id: ESMC_Array.C,v 1.86 2007/06/22 23:21:26 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.85 2007/06/22 20:52:31 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.86 2007/06/22 23:21:26 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -172,10 +172,10 @@ Array::Array(
   
   for (int i=0; i<deCount; i++){
     deList[i] = -1; // reset -> indicate not a local DE
-    int distGridDeCellCount = distgrid->getDeCellCount(i, &localrc);
+    int distInternGridDeCellCount = distgrid->getDeCellCount(i, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
-    deCellCount[i] = distGridDeCellCount;  // prime deCellCount element
+    deCellCount[i] = distInternGridDeCellCount;  // prime deCellCount element
     for (int k=0; k<tensorCount; k++){
       // multiply in tensor extents
       deCellCount[i] *= (ubounds[k] - lbounds[k] + 1);
@@ -4184,7 +4184,7 @@ ESMC_newArray *ESMC_newArrayCreate(
 //    This Create method generates a DELayout following a very simple 
 //    algorithm that assumes:
 //      1. that the DE vertix weight is proportional to the number of logical
-//         grid points of the associated array domain - thus it is best to
+//         interngrid points of the associated array domain - thus it is best to
 //         chunk up the entire domain into equal pieces
 //EOPI
 //-----------------------------------------------------------------------------

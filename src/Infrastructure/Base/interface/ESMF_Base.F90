@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.131 2007/04/26 19:18:56 rosalind Exp $
+! $Id: ESMF_Base.F90,v 1.132 2007/06/22 23:21:26 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -148,7 +148,7 @@ module ESMF_BaseMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.131 2007/04/26 19:18:56 rosalind Exp $'
+               '$Id: ESMF_Base.F90,v 1.132 2007/06/22 23:21:26 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -185,7 +185,7 @@ module ESMF_BaseMod
 !           specialized derived types will include an {\tt ESMF\_Base} 
 !           object as the first entry.
 !     \item [superclass]
-!           The name of the superclass, e.g. {\tt "Grid"}, {\tt "Array"}.
+!           The name of the superclass, e.g. {\tt "InternGrid"}, {\tt "Array"}.
 !           This sets the scope for unique object names.
 !     \item [{[name]}]
 !           If given, the unique name for this object.  If not given,
@@ -792,7 +792,7 @@ module ESMF_BaseMod
 !           is specified.  If a name is not given a unique name will be
 !           generated and can be queried by the {\tt ESMF\_GetName} routine.
 !     \item [{[namespace]}]
-!           Object namespace (e.g. "Application", "Component", "Grid", etc).
+!           Object namespace (e.g. "Application", "Component", "InternGrid", etc).
 !           If given, the name will be checked that it is unique within
 !           this namespace.  If not given, the generated name will be 
 !           unique within this namespace.  If namespace is not specified,

@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayGatherUTest.F90,v 1.7 2007/04/03 16:36:24 cdeluca Exp $
+! $Id: ESMF_InternArrayGatherUTest.F90,v 1.8 2007/06/22 23:21:33 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayGatherUTest.F90,v 1.7 2007/04/03 16:36:24 cdeluca Exp $'
+      '$Id: ESMF_InternArrayGatherUTest.F90,v 1.8 2007/06/22 23:21:33 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -50,7 +50,7 @@
     type(ESMF_DELayout) :: layout
     real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
     type(ESMF_Field) :: field
-    type(ESMF_Grid) :: grid
+    type(ESMF_InternGrid) :: interngrid
     type(ESMF_FieldDataMap) :: datamap
 
 
@@ -80,23 +80,23 @@
     mincoords = (/0.0,0.0/)
     maxcoords = (/20.0,20.0/)
 
-    !Create the grid
+    !Create the interngrid
    !===========================
    !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) " Grid Create Test"
-    grid = ESMF_GridCreateHorzXYUni((/nlen,1/), &
+    write(name, *) " InternGrid Create Test"
+    interngrid = ESMF_InternGridCreateHorzXYUni((/nlen,1/), &
                    mincoords, maxcoords, &
-                   horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
-                   name="grid", rc=rc)
+                   horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
+                   name="interngrid", rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-   !Distribute the grid
+   !Distribute the interngrid
    !===========================
    !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) " Grid Distribute Test"
-    call ESMF_GridDistribute(grid, delayout=layout, rc=rc)
+    write(name, *) " InternGrid Distribute Test"
+    call ESMF_InternGridDistribute(interngrid, delayout=layout, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    !Datamap Set
@@ -122,7 +122,7 @@
    !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Create Field Test"
-    field = ESMF_FieldCreate(grid, arrayspec, &
+    field = ESMF_FieldCreate(interngrid, arrayspec, &
                               horzRelloc=ESMF_CELL_CENTER, &
                               datamap=datamap, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -178,7 +178,7 @@
     write(name, *) "Test ArrayGather"
     ! Commented out because it hangs on some platforms
     ! Remove comment when bug 1324255 is fixed.
-    !call ESMF_ArrayGather(array1, grid=grid, datamap=datamap, &
+    !call ESMF_ArrayGather(array1, interngrid=interngrid, datamap=datamap, &
     !                      rootDE=rootDE, gatheredArray=array2, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -209,7 +209,7 @@
        	!call ESMF_InternArrayDestroy(array2, rc)
        !endif
        call ESMF_FieldDestroy(field, rc)
-       call ESMF_GridDestroy(grid, rc)
+       call ESMF_InternGridDestroy(interngrid, rc)
        call ESMF_DELayoutDestroy(layout, rc)
 
 		

@@ -16,7 +16,7 @@
 !EOP
 
 
-#define USER_APP_Mod            UserParentGridCompMod
+#define USER_APP_Mod            UserParentInternGridCompMod
 #define USER_APP_SetServices    UserPComp_SetServices
 
 #define USER_CONFIG_FILE       "sample.rc"

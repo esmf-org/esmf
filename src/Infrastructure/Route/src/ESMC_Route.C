@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.162 2007/06/20 01:29:23 theurich Exp $
+//$Id: ESMC_Route.C,v 1.163 2007/06/22 23:21:40 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.162 2007/06/20 01:29:23 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.163 2007/06/22 23:21:40 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 class permuteLocal {
 public:
@@ -1926,8 +1926,8 @@ int compare2(const void *item1, const void *item2) {
     ESMC_XPacket intersect_XP;
     ESMC_XPacket *my_XP = NULL;
     ESMC_XPacket *their_XP = NULL;
-    ESMC_Logical boundary[ESMF_MAXGRIDDIM][2];
-    int nde[ESMF_MAXGRIDDIM], DEpos[ESMF_MAXGRIDDIM];
+    ESMC_Logical boundary[ESMF_MAXIGRIDDIM][2];
+    int nde[ESMF_MAXIGRIDDIM], DEpos[ESMF_MAXIGRIDDIM];
     int my_global_start[ESMF_MAXDIM], my_start[ESMF_MAXDIM];
     int my_XPcount, their_XPcount;
     int rc; 
@@ -1938,13 +1938,13 @@ int compare2(const void *item1, const void *item2) {
     // Calculate the sending table.  If this DE is not part of the sending
     // TODO: this assumes a 2D layout?  (certainly < 3D)
     delayout->getDeprecated(&decount, NULL, NULL, NULL, 0, NULL, NULL, NULL,
-      nde, ESMF_MAXGRIDDIM);
+      nde, ESMF_MAXIGRIDDIM);
 
     // Calculate the sending table.
  
     // get "my" AI out of the AI_exc array
     // TODO:  this is NOT going to work for data dims which are not
-    //  equal the grid dims, e.g. a 2d grid with 4d data.
+    //  equal the interngrid dims, e.g. a 2d interngrid with 4d data.
     for (k=0; k<rank; k++) {
       my_AI_exc[k] = AI_exc[my_DE + k*AI_count];
       my_AI_tot[k] = AI_tot[my_DE + k*AI_count];
@@ -1962,7 +1962,7 @@ int compare2(const void *item1, const void *item2) {
     // already obtained "decount" during last call
     for (k=0; k<decount; k++) {
       their_de = k;
-      delayout->getDELocalInfo(their_de, DEpos, ESMF_MAXGRIDDIM, NULL, 0, NULL,
+      delayout->getDELocalInfo(their_de, DEpos, ESMF_MAXIGRIDDIM, NULL, 0, NULL,
         0, NULL, NULL);
 
       // get the actual pet number for use later on.
@@ -2032,7 +2032,7 @@ int compare2(const void *item1, const void *item2) {
     // Calculate the receiving table.
  
     // figure out my boundary array
-    delayout->getDELocalInfo(my_DE, DEpos, ESMF_MAXGRIDDIM, NULL, 0, NULL, 0,
+    delayout->getDELocalInfo(my_DE, DEpos, ESMF_MAXIGRIDDIM, NULL, 0, NULL, 0,
       NULL, NULL);
     for (j=0; j<rank; j++) {
       boundary[j][0] = ESMF_FALSE;
@@ -2184,7 +2184,7 @@ int compare2(const void *item1, const void *item2) {
 
     // TODO: 
     // start of precompute overhaul.   the proposed plan:
-    // - the rank of the AIs is the same as the data rank (not grid rank) 
+    // - the rank of the AIs is the same as the data rank (not interngrid rank) 
     // - the AIs are already ordered to match the data dims (any reordering
     //    required by the datamap has already been applied)
     // - (0,0) is offset for computational region in local space
@@ -2468,7 +2468,7 @@ int compare2(const void *item1, const void *item2) {
                                   
         // get "my" AI out of the srcAI array
         // TODO:  this is NOT going to work for data dims which are not
-        //  equal the grid dims, e.g. a 2d grid with 4d data.
+        //  equal the interngrid dims, e.g. a 2d interngrid with 4d data.
         for (k=0; k<rank; k++) {
           myAI[k]          =      srcCompAI[n + myDEStartCount + k*srcAICount];
           myTotalAI[k]     =     srcTotalAI[n + myDEStartCount + k*srcAICount];     
@@ -2743,7 +2743,7 @@ int compare2(const void *item1, const void *item2) {
       myDEStartCount = 0;
       for (i=0; i<srcMyDE; i++) myDEStartCount += srcAICountPerDE[i];
 
-      // extract indices for the local grid, calculate the offset and sort them
+      // extract indices for the local interngrid, calculate the offset and sort them
       myCount = srcAICountPerDE[srcMyDE];
       myOffsetTbl = new permuteLocal[myCount];
       for (n=0, m=myDEStartCount; n< myCount; n++, m++) {
@@ -2755,7 +2755,7 @@ int compare2(const void *item1, const void *item2) {
       // Sort the offset in ascending order,
       qsort(myOffsetTbl,myCount, sizeof(permuteLocal), compare1);
 
-      // totalAI count for the destination grid
+      // totalAI count for the destination interngrid
       totalAI = 0;
       for (i=0; i<theirDECount; i++) totalAI += dstAICountPerDE[i];
       dstOffsetTbl = new permuteGlobal[totalAI];
@@ -2803,7 +2803,7 @@ int compare2(const void *item1, const void *item2) {
       }
 
       // Need to sort the sendRT so that the XPackets are ordered in the sequence of
-      // of the destination grid.
+      // of the destination interngrid.
       sendRT->ESMC_RTableSort();
 
       delete [] theirMatchingPET;
@@ -2835,7 +2835,7 @@ int compare2(const void *item1, const void *item2) {
       myDEStartCount = 0;
       for (i=0; i<dstMyDE; i++) myDEStartCount += dstAICountPerDE[i];
 
-      // extract indices for the local grid, calculate the offset and sort them
+      // extract indices for the local interngrid, calculate the offset and sort them
       myCount = dstAICountPerDE[dstMyDE];
       myOffsetTbl = new permuteLocal[myCount];
       for (n=0, m=myDEStartCount; n< myCount; n++, m++) {
@@ -2847,7 +2847,7 @@ int compare2(const void *item1, const void *item2) {
       // Sort the offset in ascending order,
       qsort(myOffsetTbl,myCount, sizeof(permuteLocal), compare1);
 
-      // totalAI count for the source grid
+      // totalAI count for the source interngrid
       totalAI = 0;
       for (i=0; i<theirDECount; i++) totalAI += srcAICountPerDE[i];
       srcOffsetTbl = new permuteGlobal[totalAI];
@@ -2895,7 +2895,7 @@ int compare2(const void *item1, const void *item2) {
       }
 
       // Need to sort the sendRT so that the XPackets are ordered in the sequence of
-      // of the destination grid.
+      // of the destination interngrid.
       recvRT->ESMC_RTableSort();
 
       delete [] theirMatchingPET;
@@ -2991,7 +2991,7 @@ int compare2(const void *item1, const void *item2) {
  
       // get "my" AI out of the AI_snd array
       // TODO:  this is NOT going to work for data dims which are not
-      //  equal the grid dims, e.g. a 2d grid with 4d data.
+      //  equal the interngrid dims, e.g. a 2d interngrid with 4d data.
       for (k=0; k<rank; k++) {
         my_AI_exc[k] = AI_snd_exc[my_DE_snd + k*AI_snd_count];
         my_AI_tot[k] = AI_snd_tot[my_DE_snd + k*AI_snd_count];

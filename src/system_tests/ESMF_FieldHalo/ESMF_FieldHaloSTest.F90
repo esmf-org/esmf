@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.46 2007/04/03 16:36:26 cdeluca Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.47 2007/06/22 23:21:56 cdeluca Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -30,7 +30,7 @@
     external setserv
 
     ! Module Local variables
-    type(ESMF_GridComp) :: comp1
+    type(ESMF_InternGridComp) :: comp1
     type(ESMF_VM) :: vm
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_State) :: import
@@ -77,21 +77,21 @@
     endif
 
     cname = "System Test FieldHalo"
-    comp1 = ESMF_GridCompCreate(name=cname, rc=rc)
+    comp1 = ESMF_InternGridCompCreate(name=cname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Create finished, name = ", trim(cname)
 
-    call ESMF_GridCompSetServices(comp1, setserv, rc)
+    call ESMF_InternGridCompSetServices(comp1, setserv, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
 !
 !-------------------------------------------------------------------------
 !  Init section
 !
-    import = ESMF_StateCreate("gridded comp import", ESMF_STATE_IMPORT, rc=rc)
+    import = ESMF_StateCreate("interngridded comp import", ESMF_STATE_IMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_GridCompInitialize(comp1, importState=import, rc=rc)
+    call ESMF_InternGridCompInitialize(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Init returned"
@@ -101,7 +101,7 @@
 !     Run section
 !
 
-    call ESMF_GridCompRun(comp1, importState=import, rc=rc)
+    call ESMF_InternGridCompRun(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Run returned"
@@ -110,7 +110,7 @@
 !-------------------------------------------------------------------------
 !     Finalize section
 
-    call ESMF_GridCompFinalize(comp1, importState=import, rc=rc)
+    call ESMF_InternGridCompFinalize(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Finalize returned without error"
@@ -120,7 +120,7 @@
 !     Destroy section
 ! 
 
-    call ESMF_GridCompDestroy(comp1, rc)
+    call ESMF_InternGridCompDestroy(comp1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_StateDestroy(import, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -178,18 +178,18 @@
     subroutine setserv(comp, rc)
       use ESMF_Mod
 
-      type(ESMF_GridComp) :: comp
+      type(ESMF_InternGridComp) :: comp
       integer :: rc
 
       external myinit, myrun, myfinal
        
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, myinit, &
+      call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETINIT, myinit, &
                                                           ESMF_SINGLEPHASE, rc)
       if (rc .ne. ESMF_SUCCESS) return
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, myrun, &
+      call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETRUN, myrun, &
                                                           ESMF_SINGLEPHASE, rc)
       if (rc .ne. ESMF_SUCCESS) return
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, myfinal, &
+      call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETFINAL, myfinal, &
                                                           ESMF_SINGLEPHASE, rc)
       if (rc .ne. ESMF_SUCCESS) return
   
@@ -199,7 +199,7 @@
         ! your own code development you probably don't want to include the 
         ! following call unless you are interested in exploring ESMF's 
         ! threading features.
-        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+        call ESMF_InternGridCompSetVMMinThreads(comp, rc=rc)
 #endif
 
       rc = ESMF_SUCCESS
@@ -215,7 +215,7 @@
       use ESMF_Mod
       use shared
 
-      type(ESMF_GridComp) :: comp
+      type(ESMF_InternGridComp) :: comp
       type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
@@ -224,14 +224,14 @@
       integer :: i, j
       type(ESMF_VM) :: vm
       type(ESMF_DELayout) :: delayout1 
-      type(ESMF_Grid) :: grid1
+      type(ESMF_InternGrid) :: interngrid1
       type(ESMF_Field) :: field1
       type(ESMF_ArraySpec) :: arrayspec
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       integer :: lowerindex(2), upperindex(2)
       integer :: de_id
-      integer, dimension(ESMF_MAXGRIDDIM) :: counts
-      type(ESMF_GridHorzStagger) :: horz_stagger
+      integer, dimension(ESMF_MAXIGRIDDIM) :: counts
+      type(ESMF_InternGridHorzStagger) :: horz_stagger
       real(ESMF_KIND_R8) :: min(2), max(2)
       character(len=ESMF_MAXSTR) :: gname, fname
 
@@ -239,7 +239,7 @@
 
       ! Query the component for how many pets we have, and make a layout 
       ! based on that.
-      call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+      call ESMF_InternGridCompGet(comp, vm=vm, rc=rc)
 
       ! Make sure we were given enough pets for what we expected.
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
@@ -255,7 +255,7 @@
       delayout1 = ESMF_DELayoutCreate(vm, (/ 2, 2 /), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      ! The user creates a simple horizontal Grid internally by passing all
+      ! The user creates a simple horizontal InternGrid internally by passing all
       ! necessary information through the CreateInternal argument list.
 
       counts(1) = 30
@@ -264,19 +264,19 @@
       max(1) = 15.0
       min(2) = 0.0
       max(2) = 12.0
-      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
-      gname = "test grid 1"
+      horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
+      gname = "test interngrid 1"
 
-      grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
+      interngrid1 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                                        minGlobalCoordPerDim=min, &
                                        maxGlobalCoordPerDim=max, &
                                        horzStagger=horz_stagger, &
                                        name=gname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_GridDistribute(grid1, delayout=delayout1, rc=rc)
+      call ESMF_InternGridDistribute(interngrid1, delayout=delayout1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      print *, "Grid Create returned"
+      print *, "InternGrid Create returned"
 
       ! Figure out our local processor id to use as data in the Field.
       call ESMF_DELayoutGetDeprecated(delayout1, localDE=de_id, rc=rc)
@@ -286,9 +286,9 @@
       call ESMF_ArraySpecSet(arrayspec, rank=2, &
                              typekind=ESMF_TYPEKIND_I4)
 
-      ! Create a Field using the Grid and ArraySpec created above
+      ! Create a Field using the InternGrid and ArraySpec created above
       fname = "DE id"
-      field1 = ESMF_FieldCreate(grid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+      field1 = ESMF_FieldCreate(interngrid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_FieldPrint(field1, "", rc)
@@ -345,7 +345,7 @@
       use ESMF_Mod
       use shared
 
-      type(ESMF_GridComp) :: comp
+      type(ESMF_InternGridComp) :: comp
       type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
@@ -394,7 +394,7 @@
       use ESMF_Mod
       use shared
 
-      type(ESMF_GridComp) :: comp
+      type(ESMF_InternGridComp) :: comp
       type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
@@ -407,7 +407,7 @@
       integer :: lowerindex(2), upperindex(2)
       type(ESMF_DELayout) :: delayout
       type(ESMF_Field) :: field1
-      type(ESMF_Grid) :: grid1
+      type(ESMF_InternGrid) :: interngrid1
 
       print *, "Entering Finalize routine"
 
@@ -419,11 +419,11 @@
       call ESMF_StateGetField(importState, "DE id", field1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      ! Get a pointer to the Grid in the Field, and then to the DELayout
-      ! associated with that Grid
-      call ESMF_FieldGet(field1, grid=grid1, rc=rc)
+      ! Get a pointer to the InternGrid in the Field, and then to the DELayout
+      ! associated with that InternGrid
+      call ESMF_FieldGet(field1, interngrid=interngrid1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_GridGet(grid1, delayout=delayout, rc=rc)
+      call ESMF_InternGridGet(interngrid1, delayout=delayout, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! get our local de number from the layout

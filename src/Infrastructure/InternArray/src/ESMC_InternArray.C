@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray.C,v 1.10 2007/05/05 03:05:48 rosalind Exp $
+// $Id: ESMC_InternArray.C,v 1.11 2007/06/22 23:21:32 cdeluca Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArray.C,v 1.10 2007/05/05 03:05:48 rosalind Exp $";
+            "$Id: ESMC_InternArray.C,v 1.11 2007/06/22 23:21:32 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -397,9 +397,9 @@
         awidth[i][1] = 0;
 
         // TODO: this needs a way to say either which axes are associated
-        // with the grid, since those are the only ones which need halo space,
+        // with the interngrid, since those are the only ones which need halo space,
         // or require halo widths come in for all data axes and they have
-        // already been adjusted to match which are grid and non-grid axes.
+        // already been adjusted to match which are interngrid and non-interngrid axes.
         hwidth[i][0] = halo_width;
         hwidth[i][1] = halo_width;
   
@@ -665,9 +665,9 @@
         awidth[i][1] = 0;
 
         // TODO: this needs a way to say either which axes are associated
-        // with the grid, since those are the only ones which need halo space,
+        // with the interngrid, since those are the only ones which need halo space,
         // or require halo widths come in for all data axes and they have
-        // already been adjusted to match which are grid and non-grid axes.
+        // already been adjusted to match which are interngrid and non-interngrid axes.
         hwidth[i][0] = halo_width;
         hwidth[i][1] = halo_width;
   
@@ -964,10 +964,10 @@
 
 //---------------------------------------------------------------------------
  // "All" in this routine means all DEs and all ranks, and it assumes
- // that halo widths are applied equally to all ranks, even non-grid ranks.
- // We are trying to fix this so halos are only defined for grid ranks.
+ // that halo widths are applied equally to all ranks, even non-interngrid ranks.
+ // We are trying to fix this so halos are only defined for interngrid ranks.
  // So this needs to be defined in the InternArrayComm file, where it can access
- // the Grid, the DataMap, and the InternArray so it pulls the right things from
+ // the InternGrid, the DataMap, and the InternArray so it pulls the right things from
  // the right places.  
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArrayGetAllAxisIndices"
@@ -989,11 +989,11 @@
       struct ESMC_AxisIndex *excl) const { // out - exclusive
 //
 // !DESCRIPTION:
-//  Based on the grid and the halo widths of the {\tt ESMC\_InternArray} 
+//  Based on the interngrid and the halo widths of the {\tt ESMC\_InternArray} 
 //  on the local DE, compute all requested AI lists for all {\tt DE}s
-//  in the DELayout associated with the specified {\tt ESMF_Grid}.
+//  in the DELayout associated with the specified {\tt ESMF_InternGrid}.
 //  This does assume that all {\tt ESMC\_InternArray}s associated with 
-//  a grid have the same halo widths (but they can be different sizes
+//  a interngrid have the same halo widths (but they can be different sizes
 //  on different sides).
 //
 //EOPI

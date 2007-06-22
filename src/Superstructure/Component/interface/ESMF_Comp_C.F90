@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.41 2007/05/11 02:46:12 rosalind Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.42 2007/06/22 23:21:46 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.41 2007/05/11 02:46:12 rosalind Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.42 2007/06/22 23:21:46 cdeluca Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -243,24 +243,24 @@ end subroutine f_esmf_compdelete
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_gridcompcreate"
-subroutine f_esmf_gridcompcreate(gcomp, name, mtype, grid, config, configFile, &
+#define ESMF_METHOD "f_esmf_interngridcompcreate"
+subroutine f_esmf_interngridcompcreate(gcomp, name, mtype, interngrid, config, configFile, &
   clock, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ConfigMod
   use ESMF_ClockMod
   use ESMF_ClockTypeMod
-  use ESMF_GridTypesMod
+  use ESMF_InternGridTypesMod
   use ESMF_CompMod
-  use ESMF_GridCompMod
+  use ESMF_InternGridCompMod
   use ESMF_InitMacrosMod
   implicit none
 
-  type(ESMF_GridComp) :: gcomp
+  type(ESMF_InternGridComp) :: gcomp
   character(len=*), optional :: name
-  type(ESMF_GridCompType), optional :: mtype
-  type(ESMF_Grid), optional :: grid
+  type(ESMF_InternGridCompType), optional :: mtype
+  type(ESMF_InternGrid), optional :: interngrid
   type(ESMF_Config), optional :: config
   character(len=*), optional :: configFile
   type(ESMF_Clock), optional :: clock
@@ -269,29 +269,29 @@ subroutine f_esmf_gridcompcreate(gcomp, name, mtype, grid, config, configFile, &
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  gcomp = ESMF_GridCompCreate(name=name, gridcomptype=mtype, grid=grid, &
+  gcomp = ESMF_InternGridCompCreate(name=name, interngridcomptype=mtype, interngrid=interngrid, &
     config=config, configFile=configFile, clock=clock, rc=rc)
-end subroutine f_esmf_gridcompcreate
+end subroutine f_esmf_interngridcompcreate
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_gridcompdestroy"
-subroutine f_esmf_gridcompdestroy(comp, rc)
+#define ESMF_METHOD "f_esmf_interngridcompdestroy"
+subroutine f_esmf_interngridcompdestroy(comp, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
-  use ESMF_GridCompMod
+  use ESMF_InternGridCompMod
   use ESMF_InitMacrosMod
   implicit none
 
-  type(ESMF_GridComp) :: comp
+  type(ESMF_InternGridComp) :: comp
   integer, optional :: rc              
 
-  call ESMF_GridCompDestroy(comp, rc)
-end subroutine f_esmf_gridcompdestroy
+  call ESMF_InternGridCompDestroy(comp, rc)
+end subroutine f_esmf_interngridcompdestroy
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_gridcompinitialize"
-subroutine f_esmf_gridcompinitialize(comp, importState, exportState, clock, &
+#define ESMF_METHOD "f_esmf_interngridcompinitialize"
+subroutine f_esmf_interngridcompinitialize(comp, importState, exportState, clock, &
   phase, blockingFlag, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
@@ -299,11 +299,11 @@ subroutine f_esmf_gridcompinitialize(comp, importState, exportState, clock, &
   use ESMF_ClockTypeMod
   use ESMF_StateMod
   use ESMF_CompMod
-  use ESMF_GridCompMod
+  use ESMF_InternGridCompMod
   use ESMF_InitMacrosMod
   implicit none
 
-  type(ESMF_GridComp) :: comp      
+  type(ESMF_InternGridComp) :: comp      
   type(ESMF_State), optional :: importState
   type(ESMF_State), optional :: exportState
   type(ESMF_Clock), optional :: clock
@@ -314,13 +314,13 @@ subroutine f_esmf_gridcompinitialize(comp, importState, exportState, clock, &
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_GridCompInitialize(comp, importState, exportState, clock, phase, &
+  call ESMF_InternGridCompInitialize(comp, importState, exportState, clock, phase, &
     blockingFlag, rc)
-end subroutine f_esmf_gridcompinitialize
+end subroutine f_esmf_interngridcompinitialize
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_gridcomprun"
-subroutine f_esmf_gridcomprun(comp, importState, exportState, clock, phase, &
+#define ESMF_METHOD "f_esmf_interngridcomprun"
+subroutine f_esmf_interngridcomprun(comp, importState, exportState, clock, phase, &
   blockingFlag, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
@@ -328,11 +328,11 @@ subroutine f_esmf_gridcomprun(comp, importState, exportState, clock, phase, &
   use ESMF_ClockTypeMod
   use ESMF_StateMod
   use ESMF_CompMod
-  use ESMF_GridCompMod
+  use ESMF_InternGridCompMod
   use ESMF_InitMacrosMod
   implicit none
 
-  type(ESMF_GridComp) :: comp      
+  type(ESMF_InternGridComp) :: comp      
   type(ESMF_State), optional :: importState
   type(ESMF_State), optional :: exportState
   type(ESMF_Clock), optional :: clock
@@ -343,13 +343,13 @@ subroutine f_esmf_gridcomprun(comp, importState, exportState, clock, phase, &
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_GridCompRun(comp, importState, exportState, clock, phase, &
+  call ESMF_InternGridCompRun(comp, importState, exportState, clock, phase, &
     blockingFlag, rc)
-end subroutine f_esmf_gridcomprun
+end subroutine f_esmf_interngridcomprun
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_gridcompfinalize"
-subroutine f_esmf_gridcompfinalize(comp, importState, exportState, clock, &
+#define ESMF_METHOD "f_esmf_interngridcompfinalize"
+subroutine f_esmf_interngridcompfinalize(comp, importState, exportState, clock, &
   phase, blockingFlag, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
@@ -357,11 +357,11 @@ subroutine f_esmf_gridcompfinalize(comp, importState, exportState, clock, &
   use ESMF_ClockTypeMod
   use ESMF_StateMod
   use ESMF_CompMod
-  use ESMF_GridCompMod
+  use ESMF_InternGridCompMod
   use ESMF_InitMacrosMod
   implicit none
 
-  type(ESMF_GridComp) :: comp      
+  type(ESMF_InternGridComp) :: comp      
   type(ESMF_State), optional :: importState
   type(ESMF_State), optional :: exportState
   type(ESMF_Clock), optional :: clock
@@ -372,89 +372,89 @@ subroutine f_esmf_gridcompfinalize(comp, importState, exportState, clock, &
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_GridCompFinalize(comp, importState, exportState, clock, phase, &
+  call ESMF_InternGridCompFinalize(comp, importState, exportState, clock, phase, &
     blockingFlag, rc)
-end subroutine f_esmf_gridcompfinalize
+end subroutine f_esmf_interngridcompfinalize
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_gridcompset"
-subroutine f_esmf_gridcompset(comp, rc)
+#define ESMF_METHOD "f_esmf_interngridcompset"
+subroutine f_esmf_interngridcompset(comp, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
-  use ESMF_GridCompMod
+  use ESMF_InternGridCompMod
   use ESMF_InitMacrosMod
   implicit none
 
-  type(ESMF_GridComp) :: comp      
+  type(ESMF_InternGridComp) :: comp      
   integer, optional :: rc     
 
   ! Initialize return code; assume routine not implemented
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_GridCompSet(comp)
+  call ESMF_InternGridCompSet(comp)
 
   if (present(rc)) rc = ESMF_SUCCESS
-end subroutine f_esmf_gridcompset
+end subroutine f_esmf_interngridcompset
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_gridcompget"
-subroutine f_esmf_gridcompget(comp, rc)
+#define ESMF_METHOD "f_esmf_interngridcompget"
+subroutine f_esmf_interngridcompget(comp, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
-  use ESMF_GridCompMod
+  use ESMF_InternGridCompMod
   use ESMF_InitMacrosMod
   implicit none
 
-  type(ESMF_GridComp) :: comp      
+  type(ESMF_InternGridComp) :: comp      
   integer, optional :: rc     
 
   ! Initialize return code; assume routine not implemented
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_GridCompGet(comp)
-end subroutine f_esmf_gridcompget
+  call ESMF_InternGridCompGet(comp)
+end subroutine f_esmf_interngridcompget
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_gridcompvalidate"
-subroutine f_esmf_gridcompvalidate(comp, options, rc)
+#define ESMF_METHOD "f_esmf_interngridcompvalidate"
+subroutine f_esmf_interngridcompvalidate(comp, options, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
-  use ESMF_GridCompMod
+  use ESMF_InternGridCompMod
   use ESMF_InitMacrosMod
   implicit none
 
-  type(ESMF_GridComp) :: comp      
+  type(ESMF_InternGridComp) :: comp      
   character(len=*), optional :: options
   integer, optional :: rc     
 
   ! Initialize return code; assume routine not implemented
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_GridCompValidate(comp, options, rc)
-end subroutine f_esmf_gridcompvalidate
+  call ESMF_InternGridCompValidate(comp, options, rc)
+end subroutine f_esmf_interngridcompvalidate
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_gridcompprint"
-subroutine f_esmf_gridcompprint(comp, options, rc)
+#define ESMF_METHOD "f_esmf_interngridcompprint"
+subroutine f_esmf_interngridcompprint(comp, options, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
-  use ESMF_GridCompMod
+  use ESMF_InternGridCompMod
   use ESMF_InitMacrosMod
   implicit none
 
-  type(ESMF_GridComp) :: comp      
+  type(ESMF_InternGridComp) :: comp      
   character(len=*), optional :: options
   integer, optional :: rc     
 
   ! Initialize return code; assume routine not implemented
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_GridCompPrint(comp, options, rc)
-end subroutine f_esmf_gridcompprint
+  call ESMF_InternGridCompPrint(comp, options, rc)
+end subroutine f_esmf_interngridcompprint
 
 
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.38 2007/04/03 16:36:26 cdeluca Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.39 2007/06/22 23:21:56 cdeluca Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -15,9 +15,9 @@
 ! This system test checks the functionality of the FieldRedist routine by
 ! redistributing data from one Field to another and then back again.  The
 ! original data should exactly match the final data, which serves as the
-! test for SUCCESS.  This program creates two identical Grids on different
-! layouts.  The first Grid has two Fields created from it, the first as the
-! source for the test and the second for the final results.  The second Grid
+! test for SUCCESS.  This program creates two identical InternGrids on different
+! layouts.  The first InternGrid has two Fields created from it, the first as the
+! source for the test and the second for the final results.  The second InternGrid
 ! has a single Field that serves as an intermediate result between the
 ! two redistributions.
 !
@@ -43,9 +43,9 @@
     real(ESMF_KIND_R8), dimension(2) :: min, max
     real(ESMF_KIND_R8), dimension(:,:), pointer :: coordX, coordY
     real(ESMF_KIND_R8), dimension(:,:), pointer :: srcdata, resdata
-    type(ESMF_GridHorzStagger) :: horzStagger
+    type(ESMF_InternGridHorzStagger) :: horzStagger
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_Grid)  ::  grid1,  grid2
+    type(ESMF_InternGrid)  ::  interngrid1,  interngrid2
     type(ESMF_Field) :: field1, field2, field3
     type(ESMF_RouteHandle) :: rh12, rh23
     type(ESMF_VM):: vm
@@ -99,8 +99,8 @@
     delayout1 = ESMF_DELayoutCreate(vm, (/ 2, npets/2 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
-    !  Create the grids and corresponding Fields
-    !  note that the Grids are the same but decomposed differently
+    !  Create the interngrids and corresponding Fields
+    !  note that the InternGrids are the same but decomposed differently
     pi              = 3.14159
     hWidth          = 2
     counts(1)       = 60
@@ -109,40 +109,40 @@
     max(1)          = 60.0
     min(2)          = 0.0
     max(2)          = 50.0
-    horzStagger     = ESMF_GRID_HORZ_STAGGER_A
+    horzStagger     = ESMF_IGRID_HORZ_STAGGER_A
     call ESMF_ArraySpecSet(arrayspec, rank=2, &
                            typekind=ESMF_TYPEKIND_R8)
 
     decompids1(1) = 1
     decompids1(2) = 2
-    grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
+    interngrid1 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                                      minGlobalCoordPerDim=min, &
                                      maxGlobalCoordPerDim=max, &
                                      horzStagger=horzStagger, &
-                                     name="source grid", rc=rc)
+                                     name="source interngrid", rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_GridDistribute(grid1, delayout=delayout1, &
+    call ESMF_InternGridDistribute(interngrid1, delayout=delayout1, &
                              decompIds=decompids1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    field1 = ESMF_FieldCreate(grid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+    field1 = ESMF_FieldCreate(interngrid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=hWidth, name="field1", rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    field3 = ESMF_FieldCreate(grid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+    field3 = ESMF_FieldCreate(interngrid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=hWidth, name="field3", rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     decompids2(1) = 2
     decompids2(2) = 1
-    grid2 = ESMF_GridCreateHorzXYUni(counts=counts, &
+    interngrid2 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                                      minGlobalCoordPerDim=min, &
                                      maxGlobalCoordPerDim=max, &
                                      horzStagger=horzStagger, &
-                                     name="destination grid", rc=rc)
+                                     name="destination interngrid", rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_GridDistribute(grid2, delayout=delayout1, &
+    call ESMF_InternGridDistribute(interngrid2, delayout=delayout1, &
                              decompIds=decompids2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    field2 = ESMF_FieldCreate(grid2, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+    field2 = ESMF_FieldCreate(interngrid2, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=hWidth, name="field2", rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
@@ -153,10 +153,10 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! get coordinate arrays available for setting the source data array
-    call ESMF_GridGetCoord(grid1, dim=1, horzRelloc=ESMF_CELL_CENTER, &
+    call ESMF_InternGridGetCoord(interngrid1, dim=1, horzRelloc=ESMF_CELL_CENTER, &
                            centerCoord=coordX, localCounts=localCounts, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_GridGetCoord(grid1, dim=2, horzRelloc=ESMF_CELL_CENTER, &
+    call ESMF_InternGridGetCoord(interngrid1, dim=2, horzRelloc=ESMF_CELL_CENTER, &
                            centerCoord=coordY, localCounts=localCounts, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     
@@ -271,9 +271,9 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_FieldDestroy(field3, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_GridDestroy(grid1, rc)
+    call ESMF_InternGridDestroy(interngrid1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_GridDestroy(grid2, rc)
+    call ESMF_InternGridDestroy(interngrid2, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_DELayoutDestroy(delayout1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20

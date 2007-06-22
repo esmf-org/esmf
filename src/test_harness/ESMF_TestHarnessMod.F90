@@ -54,11 +54,11 @@
   integer, parameter :: Harness_CyclicDist       = 102
   integer, parameter :: Harness_ArbitraryDist    = 103
 
-  ! Grid Parameters
-  integer, parameter :: Harness_GridError        = 200
-  integer, parameter :: Harness_TensorGrid       = 201
-  integer, parameter :: Harness_SphericalGrid    = 202
-  integer, parameter :: Harness_UnstructuredGrid = 203
+  ! InternGrid Parameters
+  integer, parameter :: Harness_InternGridError        = 200
+  integer, parameter :: Harness_TensorInternGrid       = 201
+  integer, parameter :: Harness_SphericalInternGrid    = 202
+  integer, parameter :: Harness_UnstructuredInternGrid = 203
 
 
   ! Test Result Parameters
@@ -78,7 +78,7 @@
   type test_report   
      integer :: status                ! status of test
      integer :: dist_config           ! index of distribution specification 
-     integer :: grid_config           ! index of grid specification
+     integer :: interngrid_config           ! index of interngrid specification
      integer :: func_config           ! index of test function specification
   end type test_report
 
@@ -94,17 +94,17 @@
      integer, pointer :: rank(:)
   end type memory_record
 
-  type grid_record
+  type interngrid_record
      character(ESMF_MAXSTR) :: name
-     integer :: topology                     ! key representing the geometry of the grid
-     integer :: rank                         ! rank of the grid
+     integer :: topology                     ! key representing the geometry of the interngrid
+     integer :: rank                         ! rank of the interngrid
      integer, pointer :: order(:)        ! axis number, zero for free.
-     integer, pointer :: size(:)         ! number of grid elements along axis
+     integer, pointer :: size(:)         ! number of interngrid elements along axis
      integer, pointer :: stagger(:,:)    ! stagger location (axis,rank)
      logical, pointer :: periodicity(:)  ! (rank) periodicity along axis
      logical, pointer :: halo(:)         ! (rank) periodicity along axis
      integer, pointer :: halo_size(:,:)  ! (rank,2) halo size along axis
-  end type grid_record
+  end type interngrid_record
 
   type dist_record
      character(ESMF_MAXSTR) :: name
@@ -139,13 +139,13 @@
      type(test_report), pointer :: report(:)    ! record of test result
      type(process_record) :: process            ! method process
      type(sized_char_array) :: distfiles        ! distribution specification files
-     type(sized_char_array) :: gridfiles        ! grid specification files
+     type(sized_char_array) :: interngridfiles        ! interngrid specification files
      type(memory_record) :: src_memory          ! memory topology
      type(memory_record) :: dst_memory          ! memory topology
      type(dist_record) :: src_dist  ! src distribution specification
      type(dist_record) :: dst_dist  ! dst distribution specification
-     type(grid_record) :: src_grid  !  src grid specification
-     type(grid_record) :: dst_grid  !  dst grid specification
+     type(interngrid_record) :: src_interngrid  !  src interngrid specification
+     type(interngrid_record) :: dst_interngrid  !  dst interngrid specification
   end type problem_descriptor_record
 
 !
@@ -165,7 +165,7 @@
   !-------------------------------------------------------------------------
   ! Parse a single  problem descriptor string for problem description items
   ! such as process (REDISTRIBUTION or REMAPPING), memory topology and rank,
-  ! distribution and grid rank.
+  ! distribution and interngrid rank.
   !-------------------------------------------------------------------------
 
   ! arguments
@@ -179,7 +179,7 @@
   integer :: SrcMemRank, DstMemRank
   integer, allocatable :: SrcMemLoc(:), DstMemLoc(:)
   integer :: SrcMemBeg, SrcMemEnd, DstMemBeg, DstMemEnd
-  integer :: SrcDistRank, DstDistRank, SrcGridRank, DstGridRank
+  integer :: SrcDistRank, DstDistRank, SrcInternGridRank, DstInternGridRank
 
 
   !-------------------------------------------------------------------------
@@ -260,29 +260,29 @@
                      problem_descriptor%dst_dist%order, localrc)
              
      !-------------------------------------------------------------------------
-     ! Determine source grid rank and order
+     ! Determine source interngrid rank and order
      !-------------------------------------------------------------------------
-     SrcGridRank = grid_rank(problem_descriptor%string, SrcMemBeg, SrcMemEnd, localrc)
-     allocate( problem_descriptor%src_grid%order(SrcGridRank) )
-     problem_descriptor%src_grid%rank = SrcGridRank
-     call grid_query(problem_descriptor%string,                        &
+     SrcInternGridRank = interngrid_rank(problem_descriptor%string, SrcMemBeg, SrcMemEnd, localrc)
+     allocate( problem_descriptor%src_interngrid%order(SrcInternGridRank) )
+     problem_descriptor%src_interngrid%rank = SrcInternGridRank
+     call interngrid_query(problem_descriptor%string,                        &
                      SrcMemBeg, SrcMemEnd, SrcMemRank,                 &
-                     problem_descriptor%src_grid%topology,             &
-                     problem_descriptor%src_grid%order, localrc)
+                     problem_descriptor%src_interngrid%topology,             &
+                     problem_descriptor%src_interngrid%order, localrc)
              
      !-------------------------------------------------------------------------
-     ! Determine destination grid rank and order
+     ! Determine destination interngrid rank and order
      !-------------------------------------------------------------------------
-     DstGridRank = grid_rank(problem_descriptor%string, DstMemBeg, DstMemEnd, localrc)
-     allocate( problem_descriptor%dst_grid%order(DstGridRank) )
-     problem_descriptor%dst_Grid%rank = DstGridRank
-     call grid_query(problem_descriptor%string,                        &
+     DstInternGridRank = interngrid_rank(problem_descriptor%string, DstMemBeg, DstMemEnd, localrc)
+     allocate( problem_descriptor%dst_interngrid%order(DstInternGridRank) )
+     problem_descriptor%dst_InternGrid%rank = DstInternGridRank
+     call interngrid_query(problem_descriptor%string,                        &
                      DstMemBeg, DstMemEnd, DstMemRank,                 &
-                     problem_descriptor%dst_grid%topology,             &
-                     problem_descriptor%dst_grid%order, localrc)
+                     problem_descriptor%dst_interngrid%topology,             &
+                     problem_descriptor%dst_interngrid%order, localrc)
             !
      print*,'SrcDistRank ', SrcDistRank,' DstDistRank ', DstDistRank
-     print*,'SrcGridRank ', SrcGridRank,' DstGridRank ', DstGridRank
+     print*,'SrcInternGridRank ', SrcInternGridRank,' DstInternGridRank ', DstInternGridRank
 
      deallocate( SrcMemLoc, DstMemLoc )
   endif       ! memory topology
@@ -395,8 +395,8 @@
     ! check to see that values is within the acceptable range
     if ( ntemp < 0 .and. ntemp > 9 ) then
        localrc = ESMF_FAILURE
-       ! syntax error, no grid layout specified
-       print*,'Syntax error, no grid layout'
+       ! syntax error, no interngrid layout specified
+       print*,'Syntax error, no interngrid layout'
        char2int = 0
     else
        char2int = ntemp
@@ -517,9 +517,9 @@
  !-------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    subroutine grid_query(lstring, MemBeg, MemEnd, MemRank, MemTopology, MemOrder, localrc)
+    subroutine interngrid_query(lstring, MemBeg, MemEnd, MemRank, MemTopology, MemOrder, localrc)
     !------------------------------------------------------------------------
-    ! This subroutine returns grid topology (G - tensor, S - spherical, 
+    ! This subroutine returns interngrid topology (G - tensor, S - spherical, 
     ! U - unstructured) and order as specified by the descriptor string. 
     !------------------------------------------------------------------------
 
@@ -561,17 +561,17 @@
     do i=1,MemRank
        if ( lstring( MemLoc(i):MemLoc(i) ) == 'G' ) then
        
-          MemTopology = Harness_TensorGrid
+          MemTopology = Harness_TensorInternGrid
           MemOrder(i) = char2int( lstring, MemLoc(i)+1, localrc )
                     
        elseif ( lstring( MemLoc(i):MemLoc(i) ) == 'S' ) then
        
-          MemTopology = Harness_SphericalGrid
+          MemTopology = Harness_SphericalInternGrid
           MemOrder(i) = char2int( lstring, MemLoc(i)+1, localrc )
           
        elseif ( lstring( MemLoc(i):MemLoc(i) ) == 'U' ) then
        
-          MemTopology = Harness_UnstructuredGrid
+          MemTopology = Harness_UnstructuredInternGrid
           
        else  ! Error
        
@@ -581,15 +581,15 @@
     enddo
   
     !------------------------------------------------------------------------
-    end subroutine grid_query
+    end subroutine interngrid_query
     !------------------------------------------------------------------------
 
  !----------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    integer function grid_rank(lstring, MemBeg, MemEnd, localrc)
+    integer function interngrid_rank(lstring, MemBeg, MemEnd, localrc)
     !------------------------------------------------------------------------
-    ! This function returns the grid rank as specified by the descriptor
+    ! This function returns the interngrid rank as specified by the descriptor
     ! string.
     !------------------------------------------------------------------------
 
@@ -600,27 +600,27 @@
 
     ! local variables
     character(len=3) :: pattern3
-    integer :: nGrid
+    integer :: nInternGrid
 
     ! initialize variables
     localrc = ESMF_SUCCESS
 
     !------------------------------------------------------------------------
     ! Check each memory chunk to see if any of the dimensions are associated
-    ! with a grid.
+    ! with a interngrid.
     !------------------------------------------------------------------------
     pattern3 = 'GSU'
-    nGrid = set_query(lstring(MemBeg:MemEnd), pattern3)
+    nInternGrid = set_query(lstring(MemBeg:MemEnd), pattern3)
 
-    if ( nGrid == 0 ) then
-       ! syntax error, no grid layout specified
-       print*,'Syntax error, no grid layout'
+    if ( nInternGrid == 0 ) then
+       ! syntax error, no interngrid layout specified
+       print*,'Syntax error, no interngrid layout'
        localrc = ESMF_FAILURE
     endif
-    grid_rank = nGrid
+    interngrid_rank = nInternGrid
 
     !------------------------------------------------------------------------
-    end function grid_rank
+    end function interngrid_rank
     !------------------------------------------------------------------------
 
  !----------------------------------------------------------------------------
@@ -900,7 +900,7 @@
     ! methods include:
     ! REDIST (-->), BILINEAR REMAP (=B=>), CONSERVATIVE REMAP (=C=>), 
     ! SECOND ORDER CONSERVATIVE REMAP (=S=>), NEAREST NEIGHBOR REMAP (=N=>),
-    ! EXCHANGE GRID CONSERVATIVE REMAPPING (=E=>), and a USER SPECIFIED REMAP 
+    ! EXCHANGE IGRID CONSERVATIVE REMAPPING (=E=>), and a USER SPECIFIED REMAP 
     ! METHOD (=X=>).
     ! 
     !------------------------------------------------------------------------
@@ -979,9 +979,9 @@
                  tag  = Harness_2ndConservRemap
 
                case('=E=>')
-                  ! remap method exchange grid
-                  print*,'remap method exchange grid'
-                  lname = 'ExchangeGridRemap'
+                  ! remap method exchange interngrid
+                  print*,'remap method exchange interngrid'
+                  lname = 'ExchangeInternGridRemap'
                   tag  = Harness_ExchangeRemap
 
                case('=N=>')

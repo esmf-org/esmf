@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.91 2007/04/19 20:31:12 rosalind Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.92 2007/06/22 23:21:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 ! responsible for any regridding and interpolation required for ESMF 
 ! applications.
 ! Regridding includes any process that transforms a field from one ESMF
-! grid to another, including:
+! interngrid to another, including:
 ! \begin{itemize}
 ! \item bilinear or bicubic interpolation
 ! \item conservative remapping
@@ -52,9 +52,9 @@
       use ESMF_LocalArrayMod
       use ESMF_InternArrayDataMapMod
       use ESMF_InternArrayMod! ESMF internal array  class
-      use ESMF_PhysGridMod   ! ESMF physical grid class
-      use ESMF_GridTypesMod  ! ESMF grid   class
-      use ESMF_GridMod       ! ESMF grid   class
+      use ESMF_PhysGridMod   ! ESMF physical interngrid class
+      use ESMF_InternGridTypesMod  ! ESMF interngrid   class
+      use ESMF_InternGridMod       ! ESMF interngrid   class
       use ESMF_RHandleMod    ! ESMF route handle class
       use ESMF_RouteMod      ! ESMF route  class
       use ESMF_FieldDataMapMod
@@ -142,9 +142,9 @@
            srcArray,   &! source array
            dstArray     ! destination array
 
-        type (ESMF_Grid) :: &
-           srcGrid,    &! source grid
-           dstGrid      ! destination grid
+        type (ESMF_InternGrid) :: &
+           srcInternGrid,    &! source interngrid
+           dstInternGrid      ! destination interngrid
 
         type (ESMF_FieldDataMap) :: &
            srcDatamap,    &! source datamap
@@ -174,8 +174,8 @@
 !
       ! Supported ESMF Regrid Methods
       !   NONE       =  no regridding or undefined regrid
-      !   BILINEAR   =  bilinear (logically-rect grids)
-      !   BICUBIC    =  bicubic  (logically-rect grids)
+      !   BILINEAR   =  bilinear (logically-rect interngrids)
+      !   BICUBIC    =  bicubic  (logically-rect interngrids)
       !   CONSERV1   =  1st-order conservative
       !   CONSERV2   =  2nd-order conservative
       !   RASTER     =  regrid by rasterizing domain
@@ -266,7 +266,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.91 2007/04/19 20:31:12 rosalind Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.92 2007/06/22 23:21:39 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -459,7 +459,7 @@ end subroutine ESMF_RegridIndexTypeValidate
 !     \begin{description}
 !     \item[transformvalues]
 !          Stored information related to the actual data transformation
-!          needed when moving data from one grid to another.
+!          needed when moving data from one interngrid to another.
 !     \item[srcAdd]
 !          Address in source field array for this link.
 !     \item[dstAdd]
@@ -547,7 +547,7 @@ end subroutine ESMF_RegridIndexTypeValidate
 !     \begin{description}
 !     \item[tv]
 !          Stored information related to the actual data transformation
-!          needed when moving data from one grid to another.
+!          needed when moving data from one interngrid to another.
 !     \item[srcAdd]
 !          Address in source field array for this link.
 !     \item[dstAdd]
@@ -669,7 +669,7 @@ end subroutine ESMF_RegridIndexTypeValidate
 ! !IROUTINE: ESMF_RegridRouteConstruct - Constructs a Route used to gather data
 
 ! !INTERFACE:
-      function ESMF_RegridRouteConstruct(dimCount, srcGrid, dstGrid, &
+      function ESMF_RegridRouteConstruct(dimCount, srcInternGrid, dstInternGrid, &
                                          recvDomainList, parentVM, &
                                          srcDatamap, dstDatamap, &
                                          hasSrcData, hasDstData, &
@@ -682,8 +682,8 @@ end subroutine ESMF_RegridIndexTypeValidate
 ! !ARGUMENTS:
 
       integer,                 intent(in   ) :: dimCount
-      type(ESMF_Grid),         intent(inout) :: srcGrid
-      type(ESMF_Grid),         intent(inout) :: dstGrid
+      type(ESMF_InternGrid),         intent(inout) :: srcInternGrid
+      type(ESMF_InternGrid),         intent(inout) :: dstInternGrid
       type(ESMF_DomainList),   intent(inout) :: recvDomainList
       type(ESMF_VM),           intent(in   ) :: parentVM
       type(ESMF_FieldDataMap), intent(inout) :: srcDatamap
@@ -724,8 +724,8 @@ end subroutine ESMF_RegridIndexTypeValidate
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,recvDomainList)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,srcInternGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,dstInternGrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
 
       ! use optional arguments if present
@@ -753,7 +753,7 @@ end subroutine ESMF_RegridIndexTypeValidate
 
       ! calculate intersections
       if (hasSrcDataUse) then
-        call ESMF_GridBoxIntersectSend(srcGrid, dstGrid, sendDomainList, &
+        call ESMF_InternGridBoxIntersectSend(srcInternGrid, dstInternGrid, sendDomainList, &
                                        totalUse, layerUse, &
                                        srcHorzRelLoc, dstHorzRelLoc, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -761,7 +761,7 @@ end subroutine ESMF_RegridIndexTypeValidate
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, &
+      call ESMF_InternGridBoxIntersectRecv(srcInternGrid, dstInternGrid, &
                                      parentVM, recvDomainList, &
                                      hasSrcDataUse, hasDstDataUse, &
                                      totalUse, layerUse, &
@@ -770,26 +770,26 @@ end subroutine ESMF_RegridIndexTypeValidate
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! Modify DomainLists for Array AI's and to add ranks larger than Grid dimensions
+      ! Modify DomainLists for Array AI's and to add ranks larger than InternGrid dimensions
 
       ! sendDomainList first
       if (hasSrcDataUse .AND. present(srcArray)) then
         call ESMF_RegridDomainListModify('send', dimCount, sendDomainList, srcArray, &
-                                         srcGrid, srcDataMap, totalUse, rc)
+                                         srcInternGrid, srcDataMap, totalUse, rc)
       endif
 
       ! recvDomainList next
       if (hasDstDataUse .AND. present(dstArray)) then
         call ESMF_RegridDomainListModify('recv', dimCount, recvDomainList, dstArray, &
-                                         dstGrid, dstDataMap, totalUse, rc)
+                                         dstInternGrid, dstDataMap, totalUse, rc)
       endif
 
       ! get layouts for Route calculation
-      call ESMF_GridGet(srcGrid, delayout=srcDELayout, rc=localrc)
+      call ESMF_InternGridGet(srcInternGrid, delayout=srcDELayout, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_GridGet(dstGrid, delayout=dstDELayout, rc=localrc)
+      call ESMF_InternGridGet(dstInternGrid, delayout=dstDELayout, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -824,7 +824,7 @@ end subroutine ESMF_RegridIndexTypeValidate
 
 ! !INTERFACE:
       subroutine ESMF_RegridGet(regrid, name, srcArray, dstArray, &
-                                srcGrid,  dstGrid, srcDatamap,  dstDatamap, &
+                                srcInternGrid,  dstInternGrid, srcDatamap,  dstDatamap, &
                                 method, rc)
 !
 ! !ARGUMENTS:
@@ -833,8 +833,8 @@ end subroutine ESMF_RegridIndexTypeValidate
       character (*),            intent(out), optional :: name
       type(ESMF_InternArray),        intent(out), optional :: srcArray
       type(ESMF_InternArray),        intent(out), optional :: dstArray
-      type (ESMF_Grid),         intent(out), optional :: srcGrid
-      type (ESMF_Grid),         intent(out), optional :: dstGrid
+      type (ESMF_InternGrid),         intent(out), optional :: srcInternGrid
+      type (ESMF_InternGrid),         intent(out), optional :: dstInternGrid
       type (ESMF_FieldDataMap), intent(out), optional :: srcDatamap
       type (ESMF_FieldDataMap), intent(out), optional :: dstDatamap
       type (ESMF_RegridMethod), intent(out), optional :: method
@@ -857,9 +857,9 @@ end subroutine ESMF_RegridIndexTypeValidate
 !          
 !     \item[{[dstArray]}]
 !          
-!     \item[{[srcGrid]}]
+!     \item[{[srcInternGrid]}]
 !          
-!     \item[{[dstGrid]}]
+!     \item[{[dstInternGrid]}]
 !          
 !     \item[{[srcDatamap]}]
 !          
@@ -883,8 +883,8 @@ end subroutine ESMF_RegridIndexTypeValidate
  
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,srcInternGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,dstInternGrid,rc)
 
       rtype => regrid%ptr
       ! Get name if requested
@@ -903,12 +903,12 @@ end subroutine ESMF_RegridIndexTypeValidate
          dstArray = rtype%dstArray
       endif
 
-      ! Get grids if requested
-      if (present(srcGrid)) then
-         srcGrid = rtype%srcGrid
+      ! Get interngrids if requested
+      if (present(srcInternGrid)) then
+         srcInternGrid = rtype%srcInternGrid
       endif
-      if (present(dstGrid)) then
-         dstGrid = rtype%dstGrid
+      if (present(dstInternGrid)) then
+         dstInternGrid = rtype%dstInternGrid
       endif
 
       ! Get datamaps if requested
@@ -934,7 +934,7 @@ end subroutine ESMF_RegridIndexTypeValidate
 
 ! !INTERFACE:
       subroutine ESMF_RegridSet(regrid, srcArray, dstArray, &
-                                srcGrid,  dstGrid,          &
+                                srcInternGrid,  dstInternGrid,          &
                                 srcDatamap,  dstDatamap,    &
                                 method, name, rc)
 !
@@ -942,8 +942,8 @@ end subroutine ESMF_RegridIndexTypeValidate
       type (ESMF_Regrid),       intent(inout) :: regrid
       type(ESMF_InternArray),        intent(in   ), optional :: srcArray
       type(ESMF_InternArray),        intent(in   ), optional :: dstArray
-      type (ESMF_Grid),         intent(in   ), optional :: srcGrid
-      type (ESMF_Grid),         intent(in   ), optional :: dstGrid
+      type (ESMF_InternGrid),         intent(in   ), optional :: srcInternGrid
+      type (ESMF_InternGrid),         intent(in   ), optional :: dstInternGrid
       type (ESMF_FieldDataMap), intent(inout), optional :: srcDatamap
       type (ESMF_FieldDataMap), intent(inout), optional :: dstDatamap
       type (ESMF_RegridMethod), intent(in   ), optional :: method
@@ -963,9 +963,9 @@ end subroutine ESMF_RegridIndexTypeValidate
 !
 !     \item[{[dstArray]}]
 !
-!     \item[{[srcGrid]}]
+!     \item[{[srcInternGrid]}]
 !
-!     \item[{[dstGrid]}]
+!     \item[{[dstInternGrid]}]
 !
 !     \item[{[srcDataMap]}]
 !
@@ -990,8 +990,8 @@ end subroutine ESMF_RegridIndexTypeValidate
  
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,srcInternGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,dstInternGrid,rc)
 
       rtype => regrid%ptr
       ! Set name if requested
@@ -1006,9 +1006,9 @@ end subroutine ESMF_RegridIndexTypeValidate
       if (present(srcArray)) rtype%srcArray = srcArray
       if (present(dstArray)) rtype%dstArray = dstArray
            
-      ! Set grids if requested
-      if (present(srcGrid)) rtype%srcGrid = srcGrid
-      if (present(dstGrid)) rtype%dstGrid = dstGrid
+      ! Set interngrids if requested
+      if (present(srcInternGrid)) rtype%srcInternGrid = srcInternGrid
+      if (present(dstInternGrid)) rtype%dstInternGrid = dstInternGrid
  
       ! Set datamaps if requested
       if (present(srcDatamap)) rtype%srcDatamap = srcDatamap
@@ -1182,26 +1182,26 @@ end subroutine ESMF_RegridIndexTypeValidate
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RegridDomainListModify"
 !BOPI
-! !IROUTINE: ESMF_RegridDomainListModify - modify a DomainList from a Grid for an Array
+! !IROUTINE: ESMF_RegridDomainListModify - modify a DomainList from a InternGrid for an Array
 
 ! !INTERFACE:
       subroutine ESMF_RegridDomainListModify(option, dimCount, domainList, &
-                                             array, grid, dataMap, total, rc)
+                                             array, interngrid, dataMap, total, rc)
 !
 ! !ARGUMENTS:
       character(4),            intent(in   ) :: option
       integer,                 intent(in   ) :: dimCount
       type(ESMF_DomainList),   intent(inout) :: domainList
       type(ESMF_InternArray),        intent(in   ) :: array
-      type(ESMF_Grid),         intent(inout) :: grid
+      type(ESMF_InternGrid),         intent(inout) :: interngrid
       type(ESMF_FieldDataMap), intent(inout) :: dataMap
       logical,                 intent(in   ) :: total
       integer,                 intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
 !     ESMF routine which modifies a regrid index structure, changing it from
-!     being Grid-based to Array-based.  This means adding in information for
-!     Array ranks that do not correspond to a Grid axis, and modifying the
+!     being InternGrid-based to Array-based.  This means adding in information for
+!     Array ranks that do not correspond to a InternGrid axis, and modifying the
 !     domainList for the Array's halo and lower bounds.  Intended for internal
 !     ESMF use only.
 !
@@ -1211,17 +1211,17 @@ end subroutine ESMF_RegridIndexTypeValidate
 !          Character array of length four, indicating whether the domainList
 !          is for receiving or sending data.  Valid values are "recv" and "send".
 !     \item[dimCount]
-!          2D array giving the size of the local destination grid.
+!          2D array giving the size of the local destination interngrid.
 !     \item[domainList]
-!          2D array giving the size of the local destination grid.
+!          2D array giving the size of the local destination interngrid.
 !     \item[array]
-!          2D array giving the size of the local destination grid.
-!     \item[grid]
-!          2D array giving the size of the local destination grid.
+!          2D array giving the size of the local destination interngrid.
+!     \item[interngrid]
+!          2D array giving the size of the local destination interngrid.
 !     \item[dataMap]
-!          2D array giving the size of the local destination grid.
+!          2D array giving the size of the local destination interngrid.
 !     \item[total]
-!          2D array giving the size of the local destination grid.
+!          2D array giving the size of the local destination interngrid.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1241,18 +1241,18 @@ end subroutine ESMF_RegridIndexTypeValidate
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dataMap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,domainList)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dataMap)
 
-      call ESMF_GridGet(grid, delayout=layout, rc=localrc)
+      call ESMF_InternGridGet(interngrid, delayout=layout, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       call ESMF_DELayoutGet(layout, deCount=nDEs, rc=localrc)
 
-      ! Modify DomainLists for Array AI's and to add ranks larger than Grid dimensions
+      ! Modify DomainLists for Array AI's and to add ranks larger than InternGrid dimensions
       allocate(  dimOrder(dimCount), &
                    thisAI(dimCount), &
                allAI(nDEs,dimCount), stat=localrc)
@@ -1266,10 +1266,10 @@ end subroutine ESMF_RegridIndexTypeValidate
       endif
 
       if (total) then
-        call ESMF_IArrayGetAllAxisIndices(array, grid, dataMap, &
+        call ESMF_IArrayGetAllAxisIndices(array, interngrid, dataMap, &
                                          totalindex=allAI, rc=localrc)
       else
-        call ESMF_IArrayGetAllAxisIndices(array, grid, dataMap, &
+        call ESMF_IArrayGetAllAxisIndices(array, interngrid, dataMap, &
                                          compindex=allAI, rc=localrc)
       endif
 
@@ -1360,9 +1360,9 @@ end subroutine ESMF_RegridIndexTypeValidate
 !     The arguments are:
 !     \begin{description}
 !     \item[srcCount]
-!          Size of the local source grid.
+!          Size of the local source interngrid.
 !     \item[dstCount]
-!          2D array giving the size of the local destination grid.
+!          2D array giving the size of the local destination interngrid.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

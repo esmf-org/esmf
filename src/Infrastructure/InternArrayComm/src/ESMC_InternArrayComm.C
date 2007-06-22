@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArrayComm.C,v 1.9 2007/06/20 01:29:22 theurich Exp $
+// $Id: ESMC_InternArrayComm.C,v 1.10 2007/06/22 23:21:34 cdeluca Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -33,13 +33,13 @@
 #include "ESMC_InternArray.h"
 #include "ESMC_LogErr.h"
 #include "ESMC_DELayout.h"
-#include "ESMC_Grid.h"        // grid info
+#include "ESMC_InternGrid.h"        // interngrid info
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArrayComm.C,v 1.9 2007/06/20 01:29:22 theurich Exp $";
+            "$Id: ESMC_InternArrayComm.C,v 1.10 2007/06/22 23:21:34 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -69,7 +69,7 @@
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
-      ESMC_Logical periodic[] ) {  // in  - logical, size ESMF_MAXGRIDDIM 
+      ESMC_Logical periodic[] ) {  // in  - logical, size ESMF_MAXIGRIDDIM 
 //
 // !DESCRIPTION:
 //      

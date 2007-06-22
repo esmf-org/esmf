@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2006/09/22 23:55:42 theurich Exp $ 
+# $Id: makefile,v 1.5 2007/06/22 23:21:43 cdeluca Exp $ 
 
 # by default, this makefile builds the executable named "Application"
 ALL:  executable
@@ -15,8 +15,8 @@ CLEANFILES  =
 CLOBBERDIRS =
 
 # object files which need to be compiled into the executable.
-APPOBJS = CplCompTemplate.o GridComp1Template.o GridComp2Template.o \
-          ParentGridCompTemplate.o AppDriver.o
+APPOBJS = CplCompTemplate.o InternGridComp1Template.o InternGridComp2Template.o \
+          ParentInternGridCompTemplate.o AppDriver.o
 
 #
 # Sample application for which we supply skeleton files to use as a 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.52 2007/06/22 16:45:55 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.53 2007/06/22 23:21:26 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -145,7 +145,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // fill simple return values    
     if (ESMC_NOT_PRESENT_FILTER(distgrid) != ESMC_NULL_POINTER)
-      *distgrid = (*ptr)->getDistgrid();
+      *distgrid = (*ptr)->getDistinterngrid();
     if (ESMC_NOT_PRESENT_FILTER(delayout) != ESMC_NULL_POINTER)
       *delayout = (*ptr)->getDelayout();
     if (ESMC_NOT_PRESENT_FILTER(typekind) != ESMC_NULL_POINTER)
@@ -155,7 +155,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(indexflag) != ESMC_NULL_POINTER)
       *indexflag = (*ptr)->getIndexflag();
     // helper variables
-    int dimCount = (*ptr)->getDistgrid()->getDimCount();
+    int dimCount = (*ptr)->getDistinterngrid()->getDimCount();
     int localDeCount = (*ptr)->getDelayout()->getLocalDeCount();
     // fill localArrayList
     if (*len_localArrayList != 0){

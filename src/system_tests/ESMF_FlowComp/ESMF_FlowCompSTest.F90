@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.22 2007/04/26 06:19:44 cdeluca Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.23 2007/06/22 23:21:58 cdeluca Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -33,7 +33,7 @@
     character(len=ESMF_MAXSTR) :: cname1
     type(ESMF_VM) :: vm
     type(ESMF_State) :: c1exp
-    type(ESMF_GridComp) :: comp1
+    type(ESMF_InternGridComp) :: comp1
 
     ! instantiate a clock, a calendar, and timesteps
     type(ESMF_Clock) :: clock
@@ -81,7 +81,7 @@
 
     ! Create the model component, giving it all PETs to run on
     cname1 = "fluid flow"
-    comp1 = ESMF_GridCompCreate(name=cname1, rc=rc)
+    comp1 = ESMF_InternGridCompCreate(name=cname1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname1), "rc =", rc 
 
@@ -93,7 +93,7 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-      call ESMF_GridCompSetServices(comp1, FlowMod_register, rc)
+      call ESMF_InternGridCompSetServices(comp1, FlowMod_register, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp SetServices finished, rc= ", rc
 
@@ -133,7 +133,7 @@
  
       c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, &
+      call ESMF_InternGridCompInitialize(comp1, exportState=c1exp, clock=clock, &
                                    rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Component Initialize finished, rc =", rc
@@ -146,7 +146,7 @@
 
       do while (.not. ESMF_ClockIsStopTime(clock, rc))
 
-        call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
+        call ESMF_InternGridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
         print *, "Component Run returned, rc =", rc
 
@@ -163,7 +163,7 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-      call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clock, rc=rc)
+      call ESMF_InternGridCompFinalize(comp1, exportState=c1exp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Component Finalize finished, rc =", rc
 
@@ -192,7 +192,7 @@
       call ESMF_CalendarDestroy(gregorianCalendar, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_GridCompDestroy(comp1, rc)
+      call ESMF_InternGridCompDestroy(comp1, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       print *, "All Destroy routines done"

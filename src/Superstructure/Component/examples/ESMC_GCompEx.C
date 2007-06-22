@@ -1,4 +1,4 @@
-// $Id: ESMC_GCompEx.C,v 1.18 2007/06/20 01:29:26 theurich Exp $
+// $Id: ESMC_GCompEx.C,v 1.19 2007/06/22 23:21:45 cdeluca Exp $
 //
 // Example/test code which creates a new comp.
 
@@ -15,7 +15,7 @@
 // !DESCRIPTION:
 // See the following code fragments for general examples of working
 //  with Components.  For more specific examples, see the Application,
-//  Gridded, or Coupling examples.
+//  InternGridded, or Coupling examples.
 // Also see the Programming Model section of this document.
 //
 //
@@ -46,7 +46,7 @@ main(int argc, char **argv) {
 //   // Example 1:
 //   //
 
-     //comp1 = ESMC_CompCreate("Atmosphere", layout, ESMF_GRIDCOMP,
+     //comp1 = ESMC_CompCreate("Atmosphere", layout, ESMF_IGRIDCOMP,
      //                         ESMF_ATM, "/usr/local', &rc);
 
      //rc = ESMC_CompRegMethod(comp1, "initialize", ATM_Init);

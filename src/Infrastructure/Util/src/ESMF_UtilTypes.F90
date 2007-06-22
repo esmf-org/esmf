@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.48 2007/05/23 18:52:30 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.49 2007/06/22 23:21:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -69,7 +69,7 @@
       integer, parameter :: ESMF_MAXSTR = 128
       integer, parameter :: ESMF_MAXDIM = 7, &
                             ESMF_MAXDECOMPDIM = 3, &
-                            ESMF_MAXGRIDDIM = 3
+                            ESMF_MAXIGRIDDIM = 3
      
 !EOPI
 
@@ -231,7 +231,7 @@
          ESMF_ID_ARRAY = ESMF_ObjectID(16, "ESMF_Array"), &
          ESMF_ID_INTERNDG = ESMF_ObjectID(17, "ESMF_InternDG"), &
          ESMF_ID_PHYSGRID = ESMF_ObjectID(18, "ESMF_PhysGrid"), &
-         ESMF_ID_GRID = ESMF_ObjectID(19, "ESMF_Grid"), &
+         ESMF_ID_IGRID = ESMF_ObjectID(19, "ESMF_InternGrid"), &
          ESMF_ID_EXCHANGEPACKET = ESMF_ObjectID(20, "ESMF_ExchangePacket"), &
          ESMF_ID_COMMTABLE = ESMF_ObjectID(21, "ESMF_CommTable"), &
          ESMF_ID_ROUTETABLE = ESMF_ObjectID(22, "ESMF_RouteTable"), &
@@ -245,7 +245,7 @@
          ESMF_ID_REGRID = ESMF_ObjectID(30, "ESMF_Regrid"), &
          ESMF_ID_TRANSFORM = ESMF_ObjectID(31, "ESMF_Transform"), &
          ESMF_ID_STATE = ESMF_ObjectID(32, "ESMF_State"), &
-         ESMF_ID_GRIDCOMPONENT = ESMF_ObjectID(33, "ESMF_GridComponent"), &
+         ESMF_ID_IGRIDCOMPONENT = ESMF_ObjectID(33, "ESMF_InternGridComponent"), &
          ESMF_ID_CPLCOMPONENT = ESMF_ObjectID(34, "ESMF_CplComponent"), &
          ESMF_ID_COMPONENT = ESMF_ObjectID(35, "ESMF_Component"), &
          ESMF_ID_INTERNARRAY = ESMF_ObjectID(36, "ESMF_InternArray"), &
@@ -292,10 +292,10 @@
 
 !------------------------------------------------------------------------------
 !
-      ! For logically rectangular gridded data, are the index numbers being
+      ! For logically rectangular interngridded data, are the index numbers being
       ! computed/retrieved/exchanged relative to an origin of (0,0) on our
       ! local chunk (local), or are they global index numbers relative to 
-      ! all index numbers across the entire grid (global!). 
+      ! all index numbers across the entire interngrid (global!). 
       type ESMF_LocalGlobalFlag
       sequence
           integer :: value
@@ -307,7 +307,7 @@
 
 !------------------------------------------------------------------------------
 !
-      ! Once a large grid of data is decomposed into various local chunks
+      ! Once a large interngrid of data is decomposed into various local chunks
       ! there are several different "item counts" or "domains" of interest.  
       ! They include:
       !
@@ -516,7 +516,7 @@
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR
-      public ESMF_MAXDIM, ESMF_MAXDECOMPDIM, ESMF_MAXGRIDDIM
+      public ESMF_MAXDIM, ESMF_MAXDECOMPDIM, ESMF_MAXIGRIDDIM
      
       public ESMF_MAJOR_VERSION, ESMF_MINOR_VERSION
       public ESMF_REVISION, ESMF_PATCHLEVEL
@@ -534,12 +534,12 @@
       public ESMF_ID_ARRAYDATAMAP, ESMF_ID_VM, ESMF_ID_DELAYOUT
       public ESMF_ID_CONFIG, ESMF_ID_ARRAY
       public ESMF_ID_INTERNARRAY, ESMF_ID_INTERNDG
-      public ESMF_ID_PHYSGRID, ESMF_ID_GRID, ESMF_ID_EXCHANGEPACKET
+      public ESMF_ID_PHYSGRID, ESMF_ID_IGRID, ESMF_ID_EXCHANGEPACKET
       public ESMF_ID_COMMTABLE, ESMF_ID_ROUTETABLE, ESMF_ID_ROUTE
       public ESMF_ID_ROUTEHANDLE, ESMF_ID_FIELDDATAMAP, ESMF_ID_FIELD
       public ESMF_ID_BUNDLEDATAMAP, ESMF_ID_BUNDLE, ESMF_ID_TRANSFORMVALUES
       public ESMF_ID_REGRID, ESMF_ID_TRANSFORM, ESMF_ID_STATE
-      public ESMF_ID_GRIDCOMPONENT, ESMF_ID_CPLCOMPONENT, ESMF_ID_COMPONENT
+      public ESMF_ID_IGRIDCOMPONENT, ESMF_ID_CPLCOMPONENT, ESMF_ID_COMPONENT
 
       public ESMF_LOCAL, ESMF_GLOBAL
 

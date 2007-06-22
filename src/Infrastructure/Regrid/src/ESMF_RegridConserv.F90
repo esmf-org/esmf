@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.68 2007/04/19 20:31:12 rosalind Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.69 2007/06/22 23:21:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -39,9 +39,9 @@
       use ESMF_InternArrayDataMapMod
       use ESMF_InternArrayMod ! ESMF internal array  class
       use ESMF_InternArrayGetMod    ! ESMF array  class
-      use ESMF_PhysCoordMod   ! ESMF physical grid domain class
-      use ESMF_PhysGridMod    ! ESMF physical grid class
-      use ESMF_GridMod        ! ESMF grid   class
+      use ESMF_PhysCoordMod   ! ESMF physical interngrid domain class
+      use ESMF_PhysGridMod    ! ESMF physical interngrid class
+      use ESMF_InternGridMod        ! ESMF interngrid   class
       use ESMF_FieldDataMapMod
       use ESMF_FieldMod       ! ESMF field  class
       use ESMF_BundleMod      ! ESMF bundle class
@@ -81,7 +81,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.68 2007/04/19 20:31:12 rosalind Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.69 2007/06/22 23:21:39 cdeluca Exp $'
 
 !==============================================================================
 
@@ -99,9 +99,9 @@
 
 ! !INTERFACE:
      subroutine ESMF_RegridConstructConserv(rh, &
-                                            srcArray, srcGrid, srcDataMap, &
+                                            srcArray, srcInternGrid, srcDataMap, &
                                             hasSrcData, &
-                                            dstArray, dstGrid, dstDataMap, &
+                                            dstArray, dstInternGrid, dstDataMap, &
                                             hasDstData, &
                                             parentVM, routeIndex, &
                                             srcMask, dstMask, &
@@ -110,11 +110,11 @@
 ! !ARGUMENTS:
       type(ESMF_Routehandle),  intent(inout) :: rh
       type(ESMF_InternArray),        intent(in ) :: srcArray
-      type(ESMF_Grid),         intent(inout) :: srcGrid
+      type(ESMF_InternGrid),         intent(inout) :: srcInternGrid
       type(ESMF_FieldDataMap), intent(inout) :: srcDataMap
       logical,                 intent(inout) :: hasSrcData
       type(ESMF_InternArray),        intent(in ) :: dstArray
-      type(ESMF_Grid),         intent(inout) :: dstGrid
+      type(ESMF_InternGrid),         intent(inout) :: dstInternGrid
       type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       logical,                 intent(inout) :: hasDstData
       type(ESMF_VM),           intent(in ) :: parentVM
@@ -127,12 +127,12 @@
 !
 ! !DESCRIPTION:
 !     Given a source array and destination array (and their related
-!     grids and datamaps), this routine constructs a new {\tt Regrid} object
+!     interngrids and datamaps), this routine constructs a new {\tt Regrid} object
 !     and fills it with information necessary for regridding the source
 !     field to the destination field using a conservative interpolation.  
 !     Returns a pointer to a new {\tt Regrid}.  This routine implements
 !     the method described in Jones, P.W., 1999: First- and Second-order
-!     Conservative Remapping Schemes for Grids in Spherical Coordinates,
+!     Conservative Remapping Schemes for InternGrids in Spherical Coordinates,
 !     Mon. Weath. Rev., 127, 2204-2210.  This method was extended from
 !     an original method in Cartesian coordinates and this routine
 !     incorporates the Cartesian implementation as well as the spherical
@@ -142,15 +142,15 @@
 !     \begin{description}
 !     \item[srcArray]
 !          {\tt ESMF\_Array} to be regridded.
-!     \item[srcGrid]
-!          {\tt ESMF\_Grid} corresponding to [srcArray].
+!     \item[srcInternGrid]
+!          {\tt ESMF\_InternGrid} corresponding to [srcArray].
 !     \item[srcDataMap]
 !          {\tt ESMF\_DataMap} corresponding to [srcArray].
 !     \item[dstArray]
 !          Resultant {\tt ESMF\_Array} where regridded source array will be
 !          stored.
-!     \item[dstGrid]
-!          {\tt ESMF\_Grid} corresponding to [dstArray].
+!     \item[dstInternGrid]
+!          {\tt ESMF\_InternGrid} corresponding to [dstArray].
 !     \item[dstDataMap]
 !          {\tt ESMF\_DataMap} corresponding to [dstArray].
 !     \item[{[srcMask]}]
@@ -202,7 +202,7 @@
            temp1d                  !
       real(ESMF_KIND_R8), dimension(:), allocatable :: &
            srcArea,               &! src cell area computed during regrid create
-           srcUsrArea,            &! src cell area supplied by user through grid
+           srcUsrArea,            &! src cell area supplied by user through interngrid
            srcFracArea,           &! fractional area of src cell overlapping src
            srcCentroidX,          &! area-weighted cell coord in x
            srcCentroidY            ! area-weighted cell coord in y
@@ -216,7 +216,7 @@
            temp2d                  !
       real(ESMF_KIND_R8), dimension(:,:), allocatable :: &
            dstArea,               &! dst cell area computed during regrid create
-           dstUsrArea,            &! dst cell area supplied by user through grid
+           dstUsrArea,            &! dst cell area supplied by user through interngrid
            dstFracArea,           &! fractional area of dst cell overlapping src
            dstCentroidX,          &! area-weighted cell coord in x
            dstCentroidY            ! area-weighted cell coord in y
@@ -256,8 +256,8 @@
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDataMap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,recvDomainList)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,srcGrid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,dstGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,srcInternGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,dstInternGrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rh,rc)
 
@@ -304,11 +304,11 @@
                                      ESMF_CONTEXT, rc)) return
 
       ! set reordering information
-      srcOrder(:) = gridOrder(:,srcGrid%ptr%coordOrder%order,2)
-      dstOrder(:) = gridOrder(:,dstGrid%ptr%coordOrder%order,2)
+      srcOrder(:) = interngridOrder(:,srcInternGrid%ptr%coordOrder%order,2)
+      dstOrder(:) = interngridOrder(:,dstInternGrid%ptr%coordOrder%order,2)
 
-      ! get destination grid info
-      !TODO: Get grid masks?
+      ! get destination interngrid info
+      !TODO: Get interngrid masks?
       call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstRelLoc, &
                                 dataIndexList=dataOrder, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -316,7 +316,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       dstCounts(3) = 2
-      call ESMF_GridGetDELocalInfo(dstGrid, horzRelLoc=dstRelLoc, &
+      call ESMF_InternGridGetDELocalInfo(dstInternGrid, horzRelLoc=dstRelLoc, &
                                    localCellCountPerDim=dstCounts(1:2), &
                                    reorder=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -329,7 +329,7 @@
         if (ESMF_LogMsgFoundAllocError(localrc, "dst local arrays", &
                                        ESMF_CONTEXT, rc)) return
 
-        call ESMF_GridGetCoord(dstGrid, horzRelLoc=dstRelLoc, &
+        call ESMF_InternGridGetCoord(dstInternGrid, horzRelLoc=dstRelLoc, &
                                centerCoord=dstLocalCoordArray, &
                                cornerCoord=dstLocalCornerArray, &
                                reorder=.false., rc=localrc)
@@ -347,19 +347,19 @@
                                ESMF_DATA_COPY, localrc)
       endif
 
-      ! get source grid info
+      ! get source interngrid info
       call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcRelLoc, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridGet(srcGrid, horzCoordSystem=coordSystem, rc=localrc)
+      call ESMF_InternGridGet(srcInternGrid, horzCoordSystem=coordSystem, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       srcCounts(3) = 2
-      call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=srcRelLoc, &
+      call ESMF_InternGridGetDELocalInfo(srcInternGrid, horzRelLoc=srcRelLoc, &
                                    localCellCountPerDim=srcCounts(1:2), &
                                    reorder=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -372,7 +372,7 @@
         if (ESMF_LogMsgFoundAllocError(localrc, "src local arrays", &
                                        ESMF_CONTEXT, rc)) return
 
-        call ESMF_GridGetCoord(srcGrid, horzRelLoc=srcRelLoc, &
+        call ESMF_InternGridGetCoord(srcInternGrid, horzRelLoc=srcRelLoc, &
                                centerCoord=srcLocalCoordArray, &
                                cornerCoord=srcLocalCornerArray, &
                                reorder=.false., rc=localrc)
@@ -388,7 +388,7 @@
                                ESMF_DATA_REF, localrc)
         call ESMF_InternArrayGetData(srcLocalCornerArray(2), srcLocalCornerY, &
                                ESMF_DATA_REF, localrc)
-        call ESMF_GridGetCellMask(srcGrid, srcMaskArray, relloc=srcRelLoc, &
+        call ESMF_InternGridGetCellMask(srcInternGrid, srcMaskArray, relloc=srcRelLoc, &
                                   rc=localrc)
         call ESMF_InternArrayGetData(srcMaskArray, srcLocalMask, ESMF_DATA_REF, &
                                localrc)
@@ -401,7 +401,7 @@
       !              is used internal to this routine to get coordinate 
       !              information locally to calculate the regrid weights
 
-      route = ESMF_RegridRouteConstruct(dataRank, srcGrid, dstGrid, &
+      route = ESMF_RegridRouteConstruct(dataRank, srcInternGrid, dstInternGrid, &
                          recvDomainList, parentVM, &
                          srcArray=srcArray, srcDataMap=srcDataMap, &
                          dstArray=dstArray, dstDataMap=dstDataMap, &
@@ -410,7 +410,7 @@
       call ESMF_RouteHandleSet(rh, which_route=routeIndex, &
                                route=route, rc=localrc)
 
-      tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
+      tempRoute = ESMF_RegridRouteConstruct(2, srcInternGrid, dstInternGrid, &
                              recvDomainList, parentVM, &
                              srcDataMap=srcDataMap, dstDataMap=dstDataMap, &
                              hasSrcData=hasSrcData, hasDstData=hasDstData, &
@@ -422,8 +422,8 @@
       if (hasSrcData) nC = size(srcLocalCornerX,1)
       if (hasDstData) nC = size(dstLocalCornerX,1)
                                    !TODO: number if corners for the destination
-                                   !      grid is OK for now, but should be a
-                                   !      call to the source grid eventually
+                                   !      interngrid is OK for now, but should be a
+                                   !      call to the source interngrid eventually
       if (hasDstData) then
         call ESMF_RouteGetRecvItems(tempRoute, aSize, localrc)
         allocate(srcGatheredCoordX (   aSize), &
@@ -435,7 +435,7 @@
                                        ESMF_CONTEXT, rc)) return
       endif
 
-      ! Execute Route now to gather grid center coordinates from source
+      ! Execute Route now to gather interngrid center coordinates from source
       ! These arrays are just wrappers for the local coordinate data
       call ESMF_RouteRunF90PtrR821D(tempRoute, srcLocalCoordX, &
                                     srcGatheredCoordX, localrc)
@@ -467,7 +467,7 @@
         ! Create a Transform Values object
         tv = ESMF_TransformValuesCreate(aSize, rc)
 
-        ! set up user masks for search    ! TODO: combine user and grid masks
+        ! set up user masks for search    ! TODO: combine user and interngrid masks
         if (present(dstMask)) then
   !        dstUserMask = dstMask
         else
@@ -486,7 +486,7 @@
           srcUserMask = .TRUE.
         endif
      
-        ! allocate various local dst grid arrays
+        ! allocate various local dst interngrid arrays
         allocate(dstArea    (dstCounts(1),dstCounts(2)), &
                  dstUsrArea (dstCounts(1),dstCounts(2)), &
                  dstFracArea(dstCounts(1),dstCounts(2)), stat=localrc)
@@ -553,9 +553,9 @@
         endif
 
         ! Loop through domains for the search routine
-        call ESMF_GridGet(srcGrid, horzCoordSystem=coordSystem, rc=localrc)
- !       numSrcCorners = size(srcLocalCornerX,1)   ! TODO: should be from a Grid call
-        numSrcCorners = size(dstLocalCornerX,1)   ! TODO: should be from a Grid call
+        call ESMF_InternGridGet(srcInternGrid, horzCoordSystem=coordSystem, rc=localrc)
+ !       numSrcCorners = size(srcLocalCornerX,1)   ! TODO: should be from a InternGrid call
+        numSrcCorners = size(dstLocalCornerX,1)   ! TODO: should be from a InternGrid call
         numDstCorners = size(dstLocalCornerX,1)
 
         ! calculate the offsets due to haloWidths
@@ -773,7 +773,7 @@
 !
 ! !DESCRIPTION:
 !     Given a source field and destination field (and their attached
-!     grids), this routine constructs a new {\tt Regrid} object
+!     interngrids), this routine constructs a new {\tt Regrid} object
 !     and fills it with information necessary for regridding the source
 !     field to the destination field using a conservative interpolation.
 !     Returns a pointer to a new {\tt Regrid}.
@@ -788,15 +788,15 @@
 !     \item[name]
 !          {\tt Regrid}name.
 !     \item[srcCornerX]
-!          X cell corner coords for gathered source grid cells that potentially
+!          X cell corner coords for gathered source interngrid cells that potentially
 !          overlap destination domain.
 !     \item[srcCornerY]
-!          Y cell corner coords for gathered source grid cells that potentially
+!          Y cell corner coords for gathered source interngrid cells that potentially
 !          overlap destination domain.
 !     \item[dstCornerX]
-!          X cell corner coords for gathered destination grid cells.
+!          X cell corner coords for gathered destination interngrid cells.
 !     \item[dstCornerY]
-!          Y cell corner coords for gathered destination grid cells.
+!          Y cell corner coords for gathered destination interngrid cells.
 !     \item[srcMask]
 !          Optional user-defined mask to specify or eliminate source points from
 !          regridding.  Default is that all source points participate.
@@ -813,12 +813,12 @@
       integer :: localrc                          ! Error status
       integer ::           &
          iDst, jDst,       &! more loop counters
-         ibDst, ieDst,     &! beg, end of exclusive domain in i-dir of dest grid
-         jbDst, jeDst,     &! beg, end of exclusive domain in j-dir of dest grid
-         ibSrc, ieSrc       ! beg, end of exclusive domain in i-dir of source grid
+         ibDst, ieDst,     &! beg, end of exclusive domain in i-dir of dest interngrid
+         jbDst, jeDst,     &! beg, end of exclusive domain in j-dir of dest interngrid
+         ibSrc, ieSrc       ! beg, end of exclusive domain in i-dir of source interngrid
 
-      integer :: srcAdd,    &! address in gathered source grid
-                 dstAdd(2)   ! address in dest grid
+      integer :: srcAdd,    &! address in gathered source interngrid
+                 dstAdd(2)   ! address in dest interngrid
          
       integer(ESMF_KIND_I4), parameter :: maxSubseg = 10000
                                  ! max number of subsegments per segment
@@ -924,7 +924,7 @@
       iDst = 0
       jDst = 0
       nDst = 0
-      ! loop through each cell on source grid and
+      ! loop through each cell on source interngrid and
       ! perform line integrals around each cell
       srcLoop: do srcAdd = ibSrc,ieSrc
                
@@ -1043,9 +1043,9 @@
               return
             endif
 
-            ! find next intersection of this segment with a grid
-            ! line on the destination grid.  Offset from last
-            ! intersection to nudge into next grid cell.
+            ! find next intersection of this segment with a interngrid
+            ! line on the destination interngrid.  Offset from last
+            ! intersection to nudge into next interngrid cell.
             if (coordSystem .eq. ESMF_COORD_SYSTEM_SPHERICAL) then
               call ESMF_RegridConservXSphr(searchAdd, startCorner, &
                                            xIntersect, yIntersect, &
@@ -1137,7 +1137,7 @@
 
       deallocate(searchMask)
 
-      ! now integrate around each cell on destination grid
+      ! now integrate around each cell on destination interngrid
       allocate(cornerX(numSrcCorners), &
                cornerY(numSrcCorners), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "corner arrays", &
@@ -1274,9 +1274,9 @@
                 return
               endif
 
-              ! find next intersection of this segment with a grid line on the
-              ! destination grid.  Offset from last intersection to nudge into
-              ! next grid cell.
+              ! find next intersection of this segment with a interngrid line on the
+              ! destination interngrid.  Offset from last intersection to nudge into
+              ! next interngrid cell.
               if (coordSystem .eq. ESMF_COORD_SYSTEM_SPHERICAL) then
                 call ESMF_RegridConservXSphr(searchAdd, startCorner, &
                                              xIntersect, yIntersect, &
@@ -1362,11 +1362,11 @@
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocate corner arrays", &
                                      ESMF_CONTEXT, rc)) return
       !
-      ! For grids in spherical coordinates:
+      ! For interngrids in spherical coordinates:
       ! correct for situations where N/S pole not explicitly included in
-      ! grid (i.e. as a grid corner point). if pole is missing from only
-      ! one grid, need to correct only the area and centroid of that
-      ! grid.  if missing from both, do complete weight calculation.
+      ! interngrid (i.e. as a interngrid corner point). if pole is missing from only
+      ! one interngrid, need to correct only the area and centroid of that
+      ! interngrid.  if missing from both, do complete weight calculation.
       if (coordSystem .eq. ESMF_COORD_SYSTEM_SPHERICAL) then
 
         ! North Pole
@@ -1548,7 +1548,7 @@
 !
 ! !DESCRIPTION:
 !     Given a source field and destination field (and their attached
-!     grids), this routine constructs a new {\tt Regrid} object
+!     interngrids), this routine constructs a new {\tt Regrid} object
 !     and fills it with information necessary for regridding the source
 !     field to the destination field using a conservative interpolation.
 !     Returns a pointer to a new {\tt Regrid}.
@@ -1563,15 +1563,15 @@
 !     \item[name]
 !          {\tt Regrid}name.
 !     \item[srcCornerX]
-!          X cell corner coords for gathered source grid cells that potentially
+!          X cell corner coords for gathered source interngrid cells that potentially
 !          overlap destination domain.
 !     \item[srcCornerY]
-!          Y cell corner coords for gathered source grid cells that potentially
+!          Y cell corner coords for gathered source interngrid cells that potentially
 !          overlap destination domain.
 !     \item[dstCornerX]
-!          X cell corner coords for gathered destination grid cells.
+!          X cell corner coords for gathered destination interngrid cells.
 !     \item[dstCornerY]
-!          Y cell corner coords for gathered destination grid cells.
+!          Y cell corner coords for gathered destination interngrid cells.
 !     \item[srcMask]
 !          Optional user-defined mask to specify or eliminate source points from
 !          regridding.  Default is that all source points participate.
@@ -1680,7 +1680,7 @@
 
       do srcAdd = 1,srcSize
         if (srcArea(srcAdd).lt.-0.01d0) then
-          write(logMsg, *) "Source grid area < -0.01"
+          write(logMsg, *) "Source interngrid area < -0.01"
           call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
           write(logMsg, *) " value is ", srcArea(srcAdd)
           call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
@@ -1692,7 +1692,7 @@
       do jDst   = 1,dstSizeY
         do iDst = 1,dstSizeX
           if (dstArea(iDst,jDst).lt.-0.01d0) then
-            write(logMsg, *) "Dest grid area < -0.01"
+            write(logMsg, *) "Dest interngrid area < -0.01"
             call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
             write(logMsg, *) " value is ", dstArea(iDst,jDst)
             call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
@@ -1725,7 +1725,7 @@
           write(logMsg, *) " at location ", srcAdd, iDst, jDst
           call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
-        ! sum the weight for each dest grid point
+        ! sum the weight for each dest interngrid point
         temp2d(iDst,jDst) = temp2d(iDst,jDst) + weights(1)
       enddo
 
@@ -1812,7 +1812,7 @@
 !        The contribution to the first and second order weights
 !        from this line segment.
 !     \item[coordSystem]
-!        The {\tt ESMF_CoordSystem} for this grid to determine which
+!        The {\tt ESMF_CoordSystem} for this interngrid to determine which
 !        line integral form should be used.
 !     \item[xbeg, ybeg]
 !        The x,y coordinates for the beginning endpoint of this segment.
@@ -1977,15 +1977,15 @@
 
 ! !DESCRIPTION:
 !  Given the endpoints of a line segment, this routine finds the next 
-!  intersection of that line segment with a grid line of an input grid. 
-!  The location of the beginning point in the grid is returned together
+!  intersection of that line segment with a interngrid line of an input interngrid. 
+!  The location of the beginning point in the interngrid is returned together
 !  with the intersection point.  A coincidence flag is returned if the 
-!  segment is entirely coincident with a grid line.  If the segment
-!  lies entirely within a grid cell (no intersection), the endpoints
+!  segment is entirely coincident with a interngrid line.  If the segment
+!  lies entirely within a interngrid cell (no intersection), the endpoints
 !  of the segment are returned as the intersection point.  If the
-!  beginning point lies outside the grid, a location of zero is 
+!  beginning point lies outside the interngrid, a location of zero is 
 !  returned but an intersection may still be returned if the segment
-!  enters the grid from outside the grid domain.  If the current segment
+!  enters the interngrid from outside the interngrid domain.  If the current segment
 !  is a sub-segment of a longer line segment, an optional argument with
 !  the coordinates of the longer segment endpoints can be supplied
 !  to provide consistent intersections along the longer segment.
@@ -1993,12 +1993,12 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[nLoc]
-!        The location in the searched grid containing the beginning
+!        The location in the searched interngrid containing the beginning
 !        endpoint of the line segment.  If point could not be found,
-!        returns a zero signifying point outside grid.
+!        returns a zero signifying point outside interngrid.
 !     \item[xIntersect, yIntersect]
 !        Coordinates of the next intersection of the input line segment
-!        with the input grid cells.
+!        with the input interngrid cells.
 !     \item[xoff, yoff]
 !        Amount to offset intersection coordinates for next call to
 !        this routine (to step into next cell).
@@ -2015,7 +2015,7 @@
 !        The starting and ending coordinates of the full line segment
 !        in which the current segment is a subsegment.  This is necessary
 !        to provide consistent intersection calculations for different
-!        paths through the grid.
+!        paths through the interngrid.
 !     \item[srchCornerX, srchCornerY]
 !        Coordinate points of cell corners for the list of cells to search
 !        for next intersection. x,y refer to lon, lat in radians for
@@ -2024,7 +2024,7 @@
 !        Logical mask to flag which of the above cells are participating 
 !        in regrid.
 !     \item[coordSystem]
-!        The {\tt ESMF_CoordSystem} for this grid to check for special
+!        The {\tt ESMF_CoordSystem} for this interngrid to check for special
 !        conditions in spherical coordinates.
 !     \item[[rc]]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2036,17 +2036,17 @@
       integer ::         &
         n,               &! dummies for addresses
         corner, nextCorner,        &! loop index, next index
-        nCells,          &! search grid size
-        numCorners        ! number of corners in each search grid cell
+        nCells,          &! search interngrid size
+        numCorners        ! number of corners in each search interngrid cell
 
       logical ::    & 
         reverse,    &! segment in opposite direction of full segment
-        outside,    &! true if beg point outside grid
-        found        ! true if grid cell found
+        outside,    &! true if beg point outside interngrid
+        found        ! true if interngrid cell found
 
       real (ESMF_KIND_R8) ::     &
         xb, yb, xe, ye,         &! local coordinates for segment endpoints
-        x1, y1, x2, y2,         &! coordinates for grid side endpoints
+        x1, y1, x2, y2,         &! coordinates for interngrid side endpoints
         dx, dy,                 &! difference in x,y for stepping along seg
         s1, s2, determ,         &! variables used for linear solve to
         mat1, mat2, mat3, mat4, &! matrix entries for intersect linear system
@@ -2085,7 +2085,7 @@
       dy = ye - yb
       if (xend.eq.fullLine(1) .AND. yend.eq.fullLine(2)) reverse = .true.
  
-      ! search for location of the beginning of the segment in input grid
+      ! search for location of the beginning of the segment in input interngrid
     5 cellLoop: do n = 1, nCells
         
         ! set up local info for this cell
@@ -2165,9 +2165,9 @@
           found = .true.
           nLoc  = n
 
-          ! if the first part of the segment was outside the grid the found point
-          !   corresponds to the first point inside the grid. invert the segment
-          !   to find first intersection with grid boundary
+          ! if the first part of the segment was outside the interngrid the found point
+          !   corresponds to the first point inside the interngrid. invert the segment
+          !   to find first intersection with interngrid boundary
           if (outside) then
             xe   = xbeg
             ye   = ybeg
@@ -2180,8 +2180,8 @@
         ! otherwise move on to next cell
       enddo cellLoop
 
-      ! cell not found - assume beg point outside grid
-      ! take baby steps along segment to find a point inside the grid
+      ! cell not found - assume beg point outside interngrid
+      ! take baby steps along segment to find a point inside the interngrid
       s2 = s2 + s1
       if (s2.gt.1.0d0) go to 10
       outside = .true.
@@ -2220,7 +2220,7 @@
           !   s for the intersection point on each line segment.
           ! if 0<s1,s2<1 then the segment intersects with this side.
           !   return the point of intersection (adding a small
-          !   number so the intersection is off the grid line).
+          !   number so the intersection is off the interngrid line).
           if (abs(determ).gt.1.d-30) then
 
             s1 = (rhs1*mat4 - mat2*rhs2)/determ
@@ -2231,7 +2231,7 @@
 
               ! recompute intersection based on full segment so intersections
               !   are consistent in cases where computing intersections between
-              !   two grids
+              !   two interngrids
               if (.not. reverse) then
                 mat1 = fullLine(3) - fullLine(1)
                 mat3 = fullLine(4) - fullLine(2)
@@ -2318,15 +2318,15 @@
 
 ! !DESCRIPTION:
 !  Given the endpoints of a line segment, this routine finds the next 
-!  intersection of that line segment with a grid line of an input grid. 
-!  The location of the beginning point in the grid is returned together
+!  intersection of that line segment with a interngrid line of an input interngrid. 
+!  The location of the beginning point in the interngrid is returned together
 !  with the intersection point.  A coincidence flag is returned if the 
-!  segment is entirely coincident with a grid line.  If the segment
-!  lies entirely within a grid cell (no intersection), the endpoints
+!  segment is entirely coincident with a interngrid line.  If the segment
+!  lies entirely within a interngrid cell (no intersection), the endpoints
 !  of the segment are returned as the intersection point.  If the
-!  beginning point lies outside the grid, a location of zero is 
+!  beginning point lies outside the interngrid, a location of zero is 
 !  returned but an intersection may still be returned if the segment
-!  enters the grid from outside the grid domain.  If the current segment
+!  enters the interngrid from outside the interngrid domain.  If the current segment
 !  is a sub-segment of a longer line segment, an optional argument with
 !  the coordinates of the longer segment endpoints can be supplied
 !  to provide consistent intersections along the longer segment.
@@ -2334,12 +2334,12 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[nLoc]
-!        The location in the searched grid containing the beginning
+!        The location in the searched interngrid containing the beginning
 !        endpoint of the line segment.  If point could not be found,
-!        returns a zero signifying point outside grid.
+!        returns a zero signifying point outside interngrid.
 !     \item[xIntersect, yIntersect]
 !        Coordinates of the next intersection of the input line segment
-!        with the input grid cells.
+!        with the input interngrid cells.
 !     \item[xoff, yoff]
 !        Amount to offset intersection coordinates for next call to
 !        this routine (to step into next cell).
@@ -2356,7 +2356,7 @@
 !        The starting and ending coordinates of the full line segment
 !        in which the current segment is a subsegment.  This is necessary
 !        to provide consistent intersection calculations for different
-!        paths through the grid.
+!        paths through the interngrid.
 !     \item[srchCenterX, srchCenterY]
 !        Coordinate points of cell centers for the list of cells to search
 !        for next intersection.  x,y refer to lon, lat in radians for
@@ -2369,7 +2369,7 @@
 !        Logical mask to flag which of the above cells are participating 
 !        in regrid.
 !     \item[coordSystem]
-!        The {\tt ESMF_CoordSystem} for this grid to check for special
+!        The {\tt ESMF_CoordSystem} for this interngrid to check for special
 !        conditions in spherical coordinates.
 !     \item[[rc]]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2382,20 +2382,20 @@
         n,                  &! dummies for addresses
         corner, nextCorner, &! loop index, next index
         localrc,            &! error signal
-        nCells,             &! search grid size
-        numCorners           ! number of corners in each search grid cell
+        nCells,             &! search interngrid size
+        numCorners           ! number of corners in each search interngrid cell
       integer :: nStrt=1
 
       logical ::    & 
         reverse,    &! segment in opposite direction of full segment
         thresh,     &! flags segments crossing threshold bndy
-        outside,    &! true if beg point outside grid
-        found        ! true if grid cell found
+        outside,    &! true if beg point outside interngrid
+        found        ! true if interngrid cell found
 
       real (ESMF_KIND_R8) ::    &
         refx,                   &! temporary for manipulating longitudes
         xb, yb, xe, ye,         &! local coordinates for segment endpoints
-        x1, y1, x2, y2,         &! coordinates for grid side endpoints
+        x1, y1, x2, y2,         &! coordinates for interngrid side endpoints
         dx, dy,                 &! difference in x,y for stepping along seg
         s1, s2, determ,         &! variables used for linear solve to
         mat1, mat2, mat3, mat4, &! matrix entries for intersect linear system
@@ -2453,7 +2453,7 @@
          return
        endif
 
-      ! search for location of the beginning of the segment in input grid
+      ! search for location of the beginning of the segment in input interngrid
       nLoc = 0 ! default is zero if no cell location found
 
     5 cellLoop: do n = nStrt, nCells
@@ -2552,9 +2552,9 @@
           nLoc  = n
           if (srcCorner.eq.1) nStrt = n
 
-          ! if the first part of the segment was outside the grid the found point
-          !   corresponds to the first point inside the grid. invert the segment
-          !   to find first intersection with grid boundary
+          ! if the first part of the segment was outside the interngrid the found point
+          !   corresponds to the first point inside the interngrid. invert the segment
+          !   to find first intersection with interngrid boundary
           if (outside) then
             xe   = xbeg
             ye   = ybeg
@@ -2573,8 +2573,8 @@
         goto 5
       endif
 
-      ! cell not found - assume beg point outside grid
-      ! take baby steps along segment to find a point inside the grid
+      ! cell not found - assume beg point outside interngrid
+      ! take baby steps along segment to find a point inside the interngrid
       s2 = s2 + s1
       if (s2.gt.1.0d0) go to 10
       outside = .true.
@@ -2629,7 +2629,7 @@
           !   s for the intersection point on each line segment.
           ! if 0<s1,s2<1 then the segment intersects with this side.
           !   return the point of intersection (adding a small
-          !   number so the intersection is off the grid line).
+          !   number so the intersection is off the interngrid line).
           if (abs(determ).gt.1.d-30) then
 
             s1 = (rhs1*mat4 - mat2*rhs2)/determ
@@ -2640,7 +2640,7 @@
 
               ! recompute intersection based on full segment so intersections
               !   are consistent in cases where computing intersections between
-              !   two grids
+              !   two interngrids
               if (.not. reverse) then
                 mat1 = fullLine(3) - fullLine(1)
                 mat3 = fullLine(4) - fullLine(2)
@@ -2766,12 +2766,12 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[nLoc]
-!        The n location in the searched grid containing the beginning
+!        The n location in the searched interngrid containing the beginning
 !        endpoint of the line segment.  If point could not be found,
-!        returns a zero signifying point outside grid.
+!        returns a zero signifying point outside interngrid.
 !     \item[xIntersect, yIntersect]
 !        Coordinates of the next intersection of the input line segment
-!        with the input grid cells.
+!        with the input interngrid cells.
 !     \item[xoff, yoff]
 !        Amount to offset intersection coordinates for next call to
 !        this routine (to step into next cell).
@@ -2788,7 +2788,7 @@
 !        The starting and ending coordinates of the full line segment
 !        in which the current segment is a subsegment.  This is necessary
 !        to provide consistent intersection calculations for different
-!        paths through the grid.
+!        paths through the interngrid.
 !     \item[northThreshold, southThreshold]
 !        Northern and souther latitudes, poleward of which to use this
 !        special interesection routine.  Used by this routine to
@@ -2801,7 +2801,7 @@
 !        Logical mask to flag which of the above cells are participating 
 !        in regrid.
 !     \item[coordSystem]
-!        The {\tt ESMF_CoordSystem} for this grid to check for special
+!        The {\tt ESMF_CoordSystem} for this interngrid to check for special
 !        conditions in spherical coordinates.
 !     \item[[rc]]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2813,18 +2813,18 @@
       integer :: &
         localrc,            &
         n,                  &! dummies for addresses
-        nCells,             &! number of cells in search grid
-        numCorners,         &! number of corners in each cell of search grid
+        nCells,             &! number of cells in search interngrid
+        numCorners,         &! number of corners in each cell of search interngrid
         corner, nextCorner   ! loop index, next index
 
       logical :: & 
         reverse,           &! segment opposite direction of full segment
-        outside,           &! point outside of search grid
-        found               ! true if grid cell found
+        outside,           &! point outside of search interngrid
+        found               ! true if interngrid cell found
 
       real (ESMF_KIND_R8) ::         &
         xb, yb, xe, ye,         &! local coordinates for segment endpoints
-        x1, y1, x2, y2,         &! coordinates for grid side endpoints
+        x1, y1, x2, y2,         &! coordinates for interngrid side endpoints
         dx, dy,                 &! difference in x,y for stepping along seg
         s1, s2, determ,         &! variables used for linear solve to
         mat1, mat2, mat3, mat4, &! matrix entries for intersect linear system
@@ -2872,11 +2872,11 @@
       s1 = 0.01d0
       s2 = 0.0d0
 
-      ! search for location of the beginning of the segment in input grid
+      ! search for location of the beginning of the segment in input interngrid
       ! if a valid initial guess has been provided, check this cell now
       found = .false.
 
-   !   do n = 1,grid%num_corners
+   !   do n = 1,interngrid%num_corners
    !      call ESMF_LatLonToPoleXY(xcorner(n), ycorner(n), &
    !                                  cornerX(n,i,j,k), &
    !                                  cornerY(n,i,j,k))
@@ -2886,7 +2886,7 @@
 
    !
    ! if no initial guess or guess is wrong, perform search
-   ! loop through grid to find cell containing search point
+   ! loop through interngrid to find cell containing search point
       cellLoop: do n = 1,nCells
 
           if (.not. mask(n)) cycle cellLoop
@@ -2969,8 +2969,8 @@
 
       enddo cellLoop
 
-      ! cell not found - assume beg point outside grid
-      ! take baby steps along segment to find a point inside the grid
+      ! cell not found - assume beg point outside interngrid
+      ! take baby steps along segment to find a point inside the interngrid
       s2 = s2 + s1
       if (s2.gt.1.0d0) go to 10
       outside = .true.
@@ -2979,10 +2979,10 @@
 
    10 continue
 
-      ! if the first part of the segment was outside the grid
+      ! if the first part of the segment was outside the interngrid
       ! the found point corresponds to the first point inside the
-      ! grid. invert the segment to find first intersection with
-      ! grid boundary
+      ! interngrid. invert the segment to find first intersection with
+      ! interngrid boundary
       if (outside) then
         call ESMF_LatLonToPoleXY(xe, ye, xbeg, ybeg)
         nLoc = 0
@@ -3019,7 +3019,7 @@
           !   segment.
           ! if 0<s1,s2<1 then the segment intersects with this side.
           !   return the point of intersection (adding a small
-          !   number so the intersection is off the grid line).
+          !   number so the intersection is off the interngrid line).
           if (abs(determ).gt.1.d-30) then
 
             s1 = (rhs1*mat4 - mat2*rhs2)/determ
@@ -3030,7 +3030,7 @@
 
               ! recompute intersection based on full 
               ! segment so intersections are consistent in cases
-              ! where computing intersections between two grids
+              ! where computing intersections between two interngrids
               call ESMF_LatLonToPoleXY(fullLineXY(1), fullLineXY(2), &
                                        fullLine  (1), fullLine  (2))
               call ESMF_LatLonToPoleXY(fullLineXY(3), fullLineXY(4), &

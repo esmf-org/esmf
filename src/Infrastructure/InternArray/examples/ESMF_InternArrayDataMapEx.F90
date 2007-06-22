@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayDataMapEx.F90,v 1.4 2007/03/31 05:51:12 cdeluca Exp $
+! $Id: ESMF_InternArrayDataMapEx.F90,v 1.5 2007/06/22 23:21:32 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -58,7 +58,7 @@
 
 !BOC
       ! Set up a default data map for a Array with 2D data,
-      ! and a 1-for-1 mapping with the Grid.
+      ! and a 1-for-1 mapping with the InternGrid.
       call ESMF_ArrayDataMapSetDefault(arrayDM, 2, rc=rc)
 !EOC
 
@@ -117,8 +117,8 @@
       call ESMF_ArrayDataMapGet(arrayDM, drank, dlist, dcounts, rc=rc)
       print *, "Returned values from Array DataMap:"
       print *, "rank =", drank
-      print *, "correspondance to grid indices = ", dlist
-      print *, "counts for non-grid dimensions =", dcounts
+      print *, "correspondance to interngrid indices = ", dlist
+      print *, "counts for non-interngrid dimensions =", dcounts
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.27 2007/04/26 06:19:45 cdeluca Exp $
+! $Id: InjectorMod.F90,v 1.28 2007/06/22 23:21:59 cdeluca Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -54,7 +54,7 @@
 !   !   private to the module.
  
     subroutine Injector_register(comp, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
+        type(ESMF_InternGridComp), intent(inout) :: comp
         integer, intent(out) :: rc
 
         ! local variables
@@ -65,11 +65,11 @@
 
         ! Register the callback routines.
 
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETINIT, &
                                           injector_init, ESMF_SINGLEPHASE, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETRUN, &
                                           injector_run, ESMF_SINGLEPHASE, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETFINAL, &
                                           injector_final, ESMF_SINGLEPHASE, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
@@ -78,7 +78,7 @@
         ! Allocate private persistent space
         allocate(datablock)
         wrap%ptr => datablock
-        call ESMF_GridCompSetInternalState(comp, wrap, rc)
+        call ESMF_InternGridCompSetInternalState(comp, wrap, rc)
 
         print *, "Registered Private Data block for Internal State"
 
@@ -88,7 +88,7 @@
         ! your own code development you probably don't want to include the 
         ! following call unless you are interested in exploring ESMF's 
         ! threading features.
-        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+        call ESMF_InternGridCompSetVMMinThreads(comp, rc=rc)
 #endif
 
         rc = ESMF_SUCCESS
@@ -101,7 +101,7 @@
  
     
 subroutine injector_init(gcomp, importState, exportState, clock, rc)
-      type(ESMF_GridComp), intent(inout) :: gcomp
+      type(ESMF_InternGridComp), intent(inout) :: gcomp
       type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc
@@ -112,13 +112,13 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       integer :: npets
       type(ESMF_VM) :: vm
       type(ESMF_DELayout) :: layout
-      type(ESMF_Grid) :: grid
+      type(ESMF_InternGrid) :: interngrid
       real(ESMF_KIND_R8) :: g_min(2), g_max(2)
       real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
       integer :: counts(2), status
       real :: in_energy, in_velocity, in_rho
       integer :: printout
-      type(ESMF_GridHorzStagger) :: horz_stagger
+      type(ESMF_InternGridHorzStagger) :: horz_stagger
       type(injectdata), pointer :: datablock
       type(wrapper) :: wrap
       namelist /input/ counts, x_min, x_max, y_min, y_max, &
@@ -149,7 +149,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
    
       !
       ! Set peristent values in saved data block
-      call ESMF_GridCompGetInternalState(gcomp, wrap, rc)
+      call ESMF_InternGridCompGetInternalState(gcomp, wrap, rc)
       datablock => wrap%ptr
 
       ! initialize calendar to be Gregorian type
@@ -175,40 +175,40 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       ! Query component for number of PETs, and create a layout.
       !
 
-      call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
+      call ESMF_InternGridCompGet(gcomp, vm=vm, rc=rc)
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
       layout = ESMF_DELayoutCreate(vm, (/ npets/4, 4 /), rc=rc)
 
       !
-      ! Create the Grid
+      ! Create the InternGrid
       !
-      horz_stagger = ESMF_GRID_HORZ_STAGGER_C_NE
+      horz_stagger = ESMF_IGRID_HORZ_STAGGER_C_NE
 
-      grid = ESMF_GridCreateHorzXYUni(counts=counts, &
+      interngrid = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
                              horzStagger=horz_stagger, &
-                             name="source grid", rc=rc)
+                             name="source interngrid", rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in injector_init:  grid create"
+        print *, "ERROR in injector_init:  interngrid create"
         return
       endif
-      call ESMF_GridDistribute(grid, delayout=layout, rc=rc)
+      call ESMF_InternGridDistribute(interngrid, delayout=layout, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in injector_init:  grid distribute"
+        print *, "ERROR in injector_init:  interngrid distribute"
         return
       endif
 
-      call ESMF_GridCompSet(gcomp, grid=grid, rc=rc)
+      call ESMF_InternGridCompSet(gcomp, interngrid=interngrid, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in injector_init:  grid comp set"
+        print *, "ERROR in injector_init:  interngrid comp set"
         return
       endif
 
       !
       ! create space for data arrays
       !
-      call InjectArraysAlloc(grid, rc)
+      call InjectArraysAlloc(interngrid, rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in injector_init:  injectarraysalloc"
         return
@@ -254,7 +254,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
 !   !
  
     subroutine injector_run(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
+        type(ESMF_InternGridComp), intent(inout) :: comp
         type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
@@ -290,7 +290,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
         datanames(7) = "FLAG"
 
         ! Get our local info
-        call ESMF_GridCompGetInternalState(comp, wrap, rc)
+        call ESMF_InternGridCompGetInternalState(comp, wrap, rc)
         datablock => wrap%ptr
 
 
@@ -385,7 +385,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
 !   !
  
     subroutine injector_final(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
+        type(ESMF_InternGridComp), intent(inout) :: comp
         type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
@@ -403,7 +403,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
         ! Get our local info and release it
         nullify(wrap%ptr)
         datablock => wrap%ptr
-        call ESMF_GridCompGetInternalState(comp, wrap, rc)
+        call ESMF_InternGridCompGetInternalState(comp, wrap, rc)
 
         datablock => wrap%ptr
         call ESMF_CalendarDestroy(datablock%gregorianCalendar, rc)
@@ -421,7 +421,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
 
       subroutine FlowPrint(gcomp, clock, file_no, rc)
 
-      type(ESMF_GridComp) :: gcomp
+      type(ESMF_InternGridComp) :: gcomp
       type(ESMF_Clock) :: clock
       integer, intent(in) :: file_no
       integer, optional, intent(out) :: rc
@@ -433,7 +433,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       logical :: rcpresent
       integer :: de_id
       type(ESMF_InternArray) :: outarray
-      type(ESMF_Grid) :: grid
+      type(ESMF_InternGrid) :: interngrid
       type(ESMF_DELayout) :: layout
       character(len=ESMF_MAXSTR) :: filename
       !
@@ -451,8 +451,8 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       ! 
       ! Get our layout from the component, and our de number
       !
-      call ESMF_GridCompGet(gcomp, grid=grid, rc=status)
-      call ESMF_GridGet(grid, delayout=layout, rc=status)
+      call ESMF_InternGridCompGet(gcomp, interngrid=interngrid, rc=status)
+      call ESMF_InternGridGet(interngrid, delayout=layout, rc=status)
       call ESMF_DELayoutGetDeprecated(layout, localDe=de_id, rc=status)
       !
       ! Collect results on DE 0 and output to a file

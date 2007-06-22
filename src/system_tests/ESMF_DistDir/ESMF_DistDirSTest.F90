@@ -1,4 +1,4 @@
-! $Id: ESMF_DistDirSTest.F90,v 1.3 2007/06/04 14:43:10 dneckels Exp $
+! $Id: ESMF_DistDirSTest.F90,v 1.4 2007/06/22 23:21:53 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !SYSTEM_TEST        String used by test script to count system tests.
@@ -31,7 +31,7 @@ program DistDir
   character(len=ESMF_MAXSTR) :: cname1
   type(ESMF_VM):: vm
   type(ESMF_State) :: c1exp
-  type(ESMF_GridComp) :: comp1
+  type(ESMF_InternGridComp) :: comp1
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: testresult = 0
@@ -81,10 +81,10 @@ program DistDir
   ! Create the model component
   cname1 = "user model 1"
   ! use petList to define comp1 on PET 0,1,2,3
-  comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0,1,2,3/), rc=rc)
+  comp1 = ESMF_InternGridCompCreate(name=cname1, petList=(/0,1,2,3/), rc=rc)
   print *, "Created component ", trim(cname1), "rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
-  !  call ESMF_GridCompPrint(comp1, "", rc)
+  !  call ESMF_InternGridCompPrint(comp1, "", rc)
 
   print *, "Comp Creates finished"
 
@@ -94,7 +94,7 @@ program DistDir
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_GridCompSetServices(comp1, userm1_register, rc)
+  call ESMF_InternGridCompSetServices(comp1, userm1_register, rc)
   print *, "Comp SetServices finished, rc= ", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -106,7 +106,7 @@ program DistDir
  
   c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
-  call ESMF_GridCompInitialize(comp1, exportState=c1exp, rc=rc)
+  call ESMF_InternGridCompInitialize(comp1, exportState=c1exp, rc=rc)
   print *, "Comp 1 Initialize finished, rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
  
@@ -116,7 +116,7 @@ program DistDir
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_GridCompRun(comp1, exportState=c1exp, rc=rc)
+  call ESMF_InternGridCompRun(comp1, exportState=c1exp, rc=rc)
   print *, "Comp 1 Run returned, rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -126,7 +126,7 @@ program DistDir
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_GridCompFinalize(comp1, exportState=c1exp, rc=rc)
+  call ESMF_InternGridCompFinalize(comp1, exportState=c1exp, rc=rc)
   print *, "Comp 1 Finalize finished, rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -138,7 +138,7 @@ program DistDir
 
   call ESMF_StateDestroy(c1exp, rc)
 
-  call ESMF_GridCompDestroy(comp1, rc)
+  call ESMF_InternGridCompDestroy(comp1, rc)
 
   print *, "All Destroy routines finished"
 

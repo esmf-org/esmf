@@ -1,4 +1,4 @@
-! $Id: ESMF_SetServCode.F90,v 1.3 2007/03/31 05:51:32 cdeluca Exp $
+! $Id: ESMF_SetServCode.F90,v 1.4 2007/06/22 23:21:49 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,34 +36,34 @@
 contains
 
     subroutine SetServ1(gcomp, rc)
-       type(ESMF_GridComp) :: gcomp
+       type(ESMF_InternGridComp) :: gcomp
        integer :: rc
 
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init1, &
+       call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init1, &
                                                      ESMF_SINGLEPHASE, rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run1, &
+       call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run1, &
                                                      ESMF_SINGLEPHASE, rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final1, &
+       call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final1, &
                                                      ESMF_SINGLEPHASE, rc)
 
     end subroutine SetServ1
 
     subroutine SetServ2(gcomp, rc)
-       type(ESMF_GridComp) :: gcomp
+       type(ESMF_InternGridComp) :: gcomp
        integer :: rc
 
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init2, &
+       call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init2, &
                                                      ESMF_SINGLEPHASE, rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run2, &
+       call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run2, &
                                                      ESMF_SINGLEPHASE, rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final2, &
+       call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final2, &
                                                      ESMF_SINGLEPHASE, rc)
 
     end subroutine SetServ2
 
 
     subroutine my_init1(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_GridComp) :: gcomp
+      type(ESMF_InternGridComp) :: gcomp
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
@@ -75,7 +75,7 @@ contains
 
 
     subroutine my_run1(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_GridComp) :: gcomp
+      type(ESMF_InternGridComp) :: gcomp
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
@@ -87,7 +87,7 @@ contains
 
 
     subroutine my_final1(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_GridComp) :: gcomp
+      type(ESMF_InternGridComp) :: gcomp
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
@@ -99,7 +99,7 @@ contains
 
 
     subroutine my_init2(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_GridComp) :: gcomp
+      type(ESMF_InternGridComp) :: gcomp
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
@@ -111,7 +111,7 @@ contains
 
 
     subroutine my_run2(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_GridComp) :: gcomp
+      type(ESMF_InternGridComp) :: gcomp
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
@@ -123,7 +123,7 @@ contains
 
 
     subroutine my_final2(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_GridComp) :: gcomp
+      type(ESMF_InternGridComp) :: gcomp
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock

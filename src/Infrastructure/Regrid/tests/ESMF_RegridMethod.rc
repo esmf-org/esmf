@@ -1,4 +1,4 @@
-&gridMethod index = "A", regscheme = 1, regridString = "ESMF_REGRID_METHOD_BILINEAR" /
-&gridMethod index = "B", regscheme = 3, regridString = "ESMF_REGRID_METHOD_CONSERV1" /
-! $Id: ESMF_RegridMethod.rc,v 1.3 2006/01/18 18:06:24 svasquez Exp $
+&interngridMethod index = "A", regscheme = 1, regridString = "ESMF_REGRID_METHOD_BILINEAR" /
+&interngridMethod index = "B", regscheme = 3, regridString = "ESMF_REGRID_METHOD_CONSERV1" /
+! $Id: ESMF_RegridMethod.rc,v 1.4 2007/06/22 23:21:39 cdeluca Exp $
 This file provides the Regrid scheme options.

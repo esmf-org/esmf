@@ -1,4 +1,4 @@
-% $Id: State_desc.tex,v 1.7 2007/03/31 05:51:32 cdeluca Exp $
+% $Id: State_desc.tex,v 1.8 2007/06/22 23:21:49 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -19,9 +19,9 @@ transferred between components - and an interface in which data structures
 are completely ad hoc.
 
 There are two types of States, import and export.
-An import State contains data that is necessary for a Gridded Component
+An import State contains data that is necessary for a InternGridded Component
 or Coupler Component to execute, and an export State contains the data
-that a Gridded Component or Coupler Component can make available.
+that a InternGridded Component or Coupler Component can make available.
 
 States can contain Bundles, Fields, Arrays, and other States.  They
 cannot directly contain Fortran arrays.   Objects in a State must span

@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.34 2006/03/20 22:38:35 theurich Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.35 2007/06/22 23:22:00 cdeluca Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -32,13 +32,13 @@
     integer :: rowlen
     integer :: result, pet_id, npets, rightvalue 
     integer :: counts(2), localCount(2)
-    type(ESMF_GridHorzStagger) :: horz_stagger
+    type(ESMF_InternGridHorzStagger) :: horz_stagger
     real(ESMF_KIND_R8) :: min(2), max(2)
     integer(ESMF_KIND_I4), dimension(:), pointer :: ldata, rowdata, oneDdata
     integer(ESMF_KIND_I4), dimension(:,:), pointer :: idata, rdata
     character(len=ESMF_MAXSTR) :: cname, gname, fname
     type(ESMF_DELayout) :: delayout1 
-    type(ESMF_Grid) :: grid1
+    type(ESMF_InternGrid) :: interngrid1
     type(ESMF_Array) :: array1, array2
     type(ESMF_Field) :: field1
     type(ESMF_VM) :: vm
@@ -89,7 +89,7 @@
 !-------------------------------------------------------------------------
 !
 
-!   !  The user creates a simple horizontal Grid internally by passing all
+!   !  The user creates a simple horizontal InternGrid internally by passing all
 !   !  necessary information through the CreateInternal argument list.
 
       counts(1) = 41
@@ -98,26 +98,26 @@
       max(1) = 20.5d0
       min(2) = 0.0d0
       max(2) = 5.0d0
-      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
-      gname = "test grid 1"
+      horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
+      gname = "test interngrid 1"
 
-      print *, "right before grid create"
-      grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
+      print *, "right before interngrid create"
+      interngrid1 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzStagger=horz_stagger, &
                               name=gname, rc=rc)
-      print *, "Grid Create returned ", rc,  "(0=SUCCESS, -1=FAILURE)"
+      print *, "InternGrid Create returned ", rc,  "(0=SUCCESS, -1=FAILURE)"
 
-      call ESMF_GridDistribute(grid1, delayout=delayout1, rc=rc)
-      print *, "Grid Distribute returned ", rc,  "(0=SUCCESS, -1=FAILURE)"
+      call ESMF_InternGridDistribute(interngrid1, delayout=delayout1, rc=rc)
+      print *, "InternGrid Distribute returned ", rc,  "(0=SUCCESS, -1=FAILURE)"
 
 
     ! figure out our local processor id
     call ESMF_VMGet(vm, localPet=pet_id, rc=rc)
 
     ! Allocate and set initial data values.  These are different on each DE.
-    call ESMF_GridGetDELocalInfo(grid1, localCellCountPerDim=localCount, &
+    call ESMF_InternGridGetDELocalInfo(interngrid1, localCellCountPerDim=localCount, &
                                  horzRelloc=ESMF_CELL_CENTER, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "allocating", localCount(1)*localCount(2), " cells on PET", pet_id
@@ -141,7 +141,7 @@
     print *, "size local1D", size(ldata)
     print *, "size global1D", size(idata)
     ! TODO: there should be a 2D version of this call.
-    call ESMF_GridDELocalToGlobalIndex(grid1, local1D=ldata, global1D=oneDdata, &
+    call ESMF_InternGridDELocalToGlobalIndex(interngrid1, local1D=ldata, global1D=oneDdata, &
                                        horzRelloc=ESMF_CELL_CENTER, rc=rc) 
     if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -168,9 +168,9 @@
     ! the Array is destroyed we will need an explicit deallocate().
 
 
-    ! Create a Field using the Grid and Arrays created above
+    ! Create a Field using the InternGrid and Arrays created above
     fname = "relative humidity"
-    field1 = ESMF_FieldCreate(grid1, array1, horzRelloc=ESMF_CELL_CENTER, &
+    field1 = ESMF_FieldCreate(interngrid1, array1, horzRelloc=ESMF_CELL_CENTER, &
                                     name=fname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_FieldPrint(field1, rc=rc)
@@ -207,7 +207,7 @@
 
     ! Get the mapping between local and global indices for this DE
     !   and count of row size
-    call ESMF_GridGetDELocalInfo(grid1, localCellCountPerDim=localCount, &
+    call ESMF_InternGridGetDELocalInfo(interngrid1, localCellCountPerDim=localCount, &
                                  horzRelloc=ESMF_CELL_CENTER, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
  
@@ -258,7 +258,7 @@
 
     call ESMF_FieldDestroy(field1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_GridDestroy(grid1, rc)
+    call ESMF_InternGridDestroy(interngrid1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_ArrayDestroy(array1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10

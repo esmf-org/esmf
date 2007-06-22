@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.24 2007/04/16 21:30:28 rosalind Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.25 2007/06/22 23:21:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,8 +38,8 @@
       use ESMF_LocalArrayMod
       use ESMF_InternArrayDataMapMod
       use ESMF_DELayoutMod
-      use ESMF_GridTypesMod
-      use ESMF_GridMod
+      use ESMF_InternGridTypesMod
+      use ESMF_InternGridMod
       use ESMF_InternArrayMod
       use ESMF_InternArrayGetMod
       use ESMF_InternArrayCreateMod
@@ -61,7 +61,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.24 2007/04/16 21:30:28 rosalind Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.25 2007/06/22 23:21:30 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -90,7 +90,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 
 ! !DESCRIPTION:
 !   This interface provides an entry point for methods that create a complete
-!   {\tt ESMF\_Field}.  These method all contain an {\tt ESMF\_Grid} and 
+!   {\tt ESMF\_Field}.  These method all contain an {\tt ESMF\_InternGrid} and 
 !   {\tt ESMF\_Data}.  The variations allow the user to specify the data 
 !   using either a Fortran array or an {\tt ESMF\_Array}.
 !    
@@ -112,7 +112,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreate()
-      function ESMF_FieldCreateNew(grid, arrayspec, allocflag, horzRelloc, &
+      function ESMF_FieldCreateNew(interngrid, arrayspec, allocflag, horzRelloc, &
                                    vertRelloc, haloWidth, datamap, name, &
                                    iospec, rc)
 !
@@ -120,7 +120,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
       type(ESMF_Field) :: ESMF_FieldCreateNew
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid) :: grid               
+      type(ESMF_InternGrid) :: interngrid               
       type(ESMF_ArraySpec), intent(inout) :: arrayspec     
       type(ESMF_AllocFlag), intent(in), optional :: allocflag
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
@@ -134,12 +134,12 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 ! !DESCRIPTION:
 !     An interface function to {\tt ESMF\_FieldCreate()}.
 !     Create an {\tt ESMF\_Field} and allocate space internally for a
-!     gridded {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}.
+!     interngridded {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}.
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [grid] 
-!           Pointer to an {\tt ESMF\_Grid} object. 
+!     \item [interngrid] 
+!           Pointer to an {\tt ESMF\_InternGrid} object. 
 !     \item [arrayspec]
 !           {\tt ESMF\_Data} specification. 
 !     \item [{[allocflag]}]
@@ -147,19 +147,19 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 !           Section~\ref{opt:allocflag} for possible values.  Default is
 !           {\tt ESMF\_ALLOC}.
 !     \item [{[horzRelloc]}] 
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.  
+!           Relative location of data per interngrid cell/vertex in the horizontal
+!           interngrid.  
 !           If specified here, takes precedence over the same setting
 !           in the {\tt datamap} argument.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
+!           Relative location of data per interngrid cell/vertex in the vertical interngrid.
 !           If specified here, takes precedence over the same setting
 !           in the {\tt datamap} argument.
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
 !     \item [{[datamap]}]
 !           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
-!           data to the {\tt ESMF\_Grid}.
+!           data to the {\tt ESMF\_InternGrid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -199,7 +199,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
                                   ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize field internals.
-      call ESMF_FieldConstructIA(ftype, grid, arrayspec, allocflag, &
+      call ESMF_FieldConstructIA(ftype, interngrid, arrayspec, allocflag, &
                                   horzRelloc, vertRelloc, haloWidth, &
                                   datamap, name, iospec, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -222,7 +222,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreate()
-      function ESMF_FieldCreateFromArray(grid, array, copyflag, horzRelloc, &
+      function ESMF_FieldCreateFromArray(interngrid, array, copyflag, horzRelloc, &
                                          vertRelloc, haloWidth, datamap, name, &
                                          iospec, rc)
 !
@@ -230,7 +230,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
       type(ESMF_Field) :: ESMF_FieldCreateFromArray    
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid                
+      type(ESMF_InternGrid), intent(in) :: interngrid                
       type(ESMF_InternArray), intent(in) :: array              
       type(ESMF_CopyFlag), intent(in), optional :: copyflag       
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
@@ -248,8 +248,8 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [grid] 
-!           Pointer to an {\tt ESMF\_Grid} object. 
+!     \item [interngrid] 
+!           Pointer to an {\tt ESMF\_InternGrid} object. 
 !     \item [array]
 !           Includes data specification and allocated memory. 
 !           It must already include space for the halo regions.
@@ -258,17 +258,17 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 !           copy of it.  Valid values are {\tt ESMF\_DATA\_COPY} and 
 !           {\tt ESMF\_DATA\_REF}, respectively.
 !     \item [{[horzRelloc]}] 
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
+!           Relative location of data per interngrid cell/vertex in the horizontal
+!           interngrid.
 !           If specified here, takes precedence over the same setting
 !           in the {\tt datamap} argument.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
+!           Relative location of data per interngrid cell/vertex in the vertical interngrid.
 !           If specified here, takes precedence over the same setting
 !           in the {\tt datamap} argument.
 !     \item [{[datamap]}]
 !           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
-!           data to the {\tt ESMF\_Grid}.
+!           data to the {\tt ESMF\_InternGrid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -305,7 +305,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
                                        ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize field internals.
-      call ESMF_FieldConstructIA(ftype, grid, array, horzRelloc, &
+      call ESMF_FieldConstructIA(ftype, interngrid, array, horzRelloc, &
                                        vertRelloc, datamap, name, &
                                        iospec, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -328,7 +328,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreate()
-      function ESMF_FieldCreateRemap(srcField, grid, horzRelloc, vertRelloc, &
+      function ESMF_FieldCreateRemap(srcField, interngrid, horzRelloc, vertRelloc, &
                                      haloWidth, datamap, name, iospec, rc)
 !
 ! !RETURN VALUE:
@@ -336,7 +336,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField            
-      type(ESMF_Grid), intent(in) :: grid                 
+      type(ESMF_InternGrid), intent(in) :: interngrid                 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
@@ -348,8 +348,8 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 ! !DESCRIPTION:
 !
 ! An interface function to {\tt ESMF\_FieldCreate()}.
-! Remaps data between an existing {\tt ESMF\_Grid} on a source {\tt ESMF\_Field}
-! and a new {\tt ESMF\_Grid}.  The {\tt ESMF\_Grid} is referenced by the 
+! Remaps data between an existing {\tt ESMF\_InternGrid} on a source {\tt ESMF\_Field}
+! and a new {\tt ESMF\_InternGrid}.  The {\tt ESMF\_InternGrid} is referenced by the 
 ! new {\tt ESMF\_Field}.  Data is copied.
 !
 !
@@ -357,13 +357,13 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 !     \begin{description}
 !     \item [srcField]
 !           Source {\tt ESMF\_Field}.
-!     \item [grid]
-!           {\tt ESMF\_Grid} of source {\tt ESMF\_Field}.
+!     \item [interngrid]
+!           {\tt ESMF\_InternGrid} of source {\tt ESMF\_Field}.
 !     \item [horzRelLoc]
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
+!           Relative location of data per interngrid cell/vertex in the horizontal
+!           interngrid.
 !     \item [vertRelLoc]
-!           Relative location of data per grid cell/vertex in the vertical grid.
+!           Relative location of data per interngrid cell/vertex in the vertical interngrid.
 !     \item [{[halowidth]}]
 !           Halo width.
 !     \item [{[datamap]}]

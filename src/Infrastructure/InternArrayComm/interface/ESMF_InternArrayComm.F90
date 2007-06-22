@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.20 2007/05/05 03:05:48 rosalind Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.21 2007/06/22 23:21:34 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@ module ESMF_InternArrayCommMod
 ! The code in this file implements the distributed {\tt ESMF\_Array} class 
 ! communication routines.  The {\tt ESMF\_Array} class definitions and basic
 ! methods are in the Array module.  These routines are broken out into a
-! separate module so that the Route and Grid methods can be compiled 
+! separate module so that the Route and InternGrid methods can be compiled 
 ! after the basic Array definitions, and before the ArrayComm routines.
 !
 !------------------------------------------------------------------------------
@@ -50,8 +50,8 @@ module ESMF_InternArrayCommMod
   use ESMF_DELayoutMod  
   use ESMF_InternArrayMod
   use ESMF_InternArrayGetMod
-  use ESMF_GridTypesMod
-  use ESMF_GridMod
+  use ESMF_InternGridTypesMod
+  use ESMF_InternGridMod
   use ESMF_RHandleMod
   use ESMF_RouteMod
   use ESMF_FieldDataMapMod
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.20 2007/05/05 03:05:48 rosalind Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.21 2007/06/22 23:21:34 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -212,11 +212,11 @@ module ESMF_InternArrayCommMod
 ! !IROUTINE: ESMF_IArrayGather - Gather an Array onto one DE
 !
 ! !INTERFACE:
-  subroutine ESMF_IArrayGather(array, grid, datamap, rootDE, gatheredArray, rc)
+  subroutine ESMF_IArrayGather(array, interngrid, datamap, rootDE, gatheredArray, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(in) :: array
-    type(ESMF_Grid), intent(inout) :: grid
+    type(ESMF_InternGrid), intent(inout) :: interngrid
     type(ESMF_FieldDataMap), intent(inout) :: datamap
     integer, intent(in) :: rootDE
     type(ESMF_InternArray), intent(out) :: gatheredArray
@@ -230,11 +230,11 @@ module ESMF_InternArrayCommMod
 !     \begin{description}
 !     \item [array]
 !           {\tt ESMF\_Array} containing distributed data to be gathered.
-!     \item [grid]
-!           {\tt ESMF\_Grid} which corresponds to the distributed data.
+!     \item [interngrid]
+!           {\tt ESMF\_InternGrid} which corresponds to the distributed data.
 !     \item [datamap]
 !           {\tt ESMF\_FieldDataMap} which describes the mapping of the
-!           data onto the cells in the {\tt ESMF\_Grid}.
+!           data onto the cells in the {\tt ESMF\_InternGrid}.
 !     \item [rootDE]
 !           The DE number on which the resulting gathered {\tt ESMF\_Array}
 !           will be created.  
@@ -248,14 +248,14 @@ module ESMF_InternArrayCommMod
 !EOP
 
     integer :: status         ! local error status
-    integer :: gridrank, datarank
+    integer :: interngridrank, datarank
     integer :: i, j, nDEs
     type(ESMF_DELayout) :: delayout
     type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
     integer, dimension(ESMF_MAXDIM) :: decompids
     integer, dimension(:,:), pointer :: localAxisLengths, tempCCPDEPD
     integer, dimension(ESMF_MAXDIM) :: dimOrder, dimlengths
-    integer, dimension(ESMF_MAXGRIDDIM) :: decomps
+    integer, dimension(ESMF_MAXIGRIDDIM) :: decomps
     integer:: size_decomp
     integer, dimension(ESMF_MAXDIM) :: localMaxDimCount, globalCellDim
     integer, dimension(:), allocatable :: tempMLCCPD, tempGCCPD
@@ -265,11 +265,11 @@ module ESMF_InternArrayCommMod
  
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit, interngrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
-    ! extract necessary information from the grid
-    call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, rc=status)
+    ! extract necessary information from the interngrid
+    call ESMF_InternGridGet(interngrid, dimCount=interngridrank, delayout=delayout, rc=status)
     
     call ESMF_DELayoutGetDeprecated(delayout, deCount=nDEs, &
       dimCount=size_decomp, rc=status)
@@ -277,12 +277,12 @@ module ESMF_InternArrayCommMod
     ! gjt size_decomp can be hardcoded to 2 here because that's what it had to be
       
     allocate(localAxisLengths(nDEs,ESMF_MAXDIM), stat=status)
-    allocate( tempMLCCPD(     gridrank), stat=status)
-    allocate(  tempGCCPD(     gridrank), stat=status)
-    allocate(tempCCPDEPD(nDEs,gridrank), stat=status)
+    allocate( tempMLCCPD(     interngridrank), stat=status)
+    allocate(  tempGCCPD(     interngridrank), stat=status)
+    allocate(tempCCPDEPD(nDEs,interngridrank), stat=status)
 
-    ! Query the datamap and set info for grid so it knows how to match up the
-    ! array indices and the grid indices.
+    ! Query the datamap and set info for interngrid so it knows how to match up the
+    ! array indices and the interngrid indices.
     call ESMF_FieldDataMapGet(datamap, dataIndexList=dimOrder, &
                               horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                               rc=status)
@@ -290,17 +290,17 @@ module ESMF_InternArrayCommMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-    call ESMF_GridGet(grid, &
+    call ESMF_InternGridGet(interngrid, &
                         horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                         globalCellCountPerDim=tempGCCPD, &
                         cellCountPerDEPerDim=tempCCPDEPD, &
                         maxLocalCellCountPerDim=tempMLCCPD, rc=rc)
-    ! call ESMF_GridGet(grid, decomps, rc=status)   !TODO: add decomps
+    ! call ESMF_InternGridGet(interngrid, decomps, rc=status)   !TODO: add decomps
     if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
     ! size_decomp = size(decompids) ! already have this value
-    decomps(1) = 1    ! TODO: remove this once the grid call is created
+    decomps(1) = 1    ! TODO: remove this once the interngrid call is created
     decomps(2) = 2
 
     ! get the Array sizes
@@ -363,13 +363,13 @@ module ESMF_InternArrayCommMod
 ! !IROUTINE: ESMF_IArrayGetAIsAllDEs - Get AxisIndex list for all DEs in a distributed Array
 !
 ! !INTERFACE:
-  subroutine ESMF_IArrayGetAIsAllDEs(array, grid, datamap, &
+  subroutine ESMF_IArrayGetAIsAllDEs(array, interngrid, datamap, &
                                       localGlobalFlag, domainTypeFlag, &
                                       AIListPerDEPerRank, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(in) :: array
-    type(ESMF_Grid), intent(inout) :: grid
+    type(ESMF_InternGrid), intent(inout) :: interngrid
     type(ESMF_FieldDataMap), intent(inout) :: datamap
     type(ESMF_LocalGlobalFlag), intent(in) :: localGlobalFlag
     type(ESMF_DomainTypeFlag), intent(in) :: domainTypeFlag
@@ -379,35 +379,35 @@ module ESMF_InternArrayCommMod
 ! !DESCRIPTION:
 !   
 !   Used to retrieve the AxisIndex lists from all {\tt ESMF\_Array}s         
-!   associated with a {\tt ESMF\_Grid}.  
-!   The axes associated with the Grid need halo widths added to the numbers
-!   coming back from the GridGet routines; the axes which are non-grid
+!   associated with a {\tt ESMF\_InternGrid}.  
+!   The axes associated with the InternGrid need halo widths added to the numbers
+!   coming back from the InternGridGet routines; the axes which are non-interngrid
 !   associated need to get the sizes from the array itself, and must be
 !   the same across all DEs.  The DataMap is needed to query the mapping
-!   between the axes order in the array and the axes order in the Grid.
+!   between the axes order in the array and the axes order in the InternGrid.
 !
 !   If the AIListPerDEPerRank is unallocated, this routine will query
 !   for the right sizes, allocate the space, and fill it in.  In that case
 !   the calling code *must* deallocate the space when done.  
 !
 !   If the AIListPerDEPerRank is already allocated, it must be (nDES, rank)
-!   where rank is the *datarank* from the array and not the grid rank.
+!   where rank is the *datarank* from the array and not the interngrid rank.
 !
 !  The arguments are:
 !     \begin{description}
 !     \item [array]
 !           {\tt ESMF\_Array} containing data.  Needed here not for the data
-!           contents but to read the sizes of the non-grid indices and to
-!           look up the halo widths for the grid-based indices.
-!     \item [grid]
-!           {\tt ESMF\_Grid} which corresponds to the array data.
+!           contents but to read the sizes of the non-interngrid indices and to
+!           look up the halo widths for the interngrid-based indices.
+!     \item [interngrid]
+!           {\tt ESMF\_InternGrid} which corresponds to the array data.
 !     \item [datamap]
 !           {\tt ESMF\_FieldDataMap} which describes the mapping of the
-!           data onto the cells in the {\tt ESMF\_Grid}.  Needed to match up
-!           the array axes and the grid axes.
+!           data onto the cells in the {\tt ESMF\_InternGrid}.  Needed to match up
+!           the array axes and the interngrid axes.
 !     \item [localGlobalFlag]
 !           Return sizes and offsets either relative to this chunk (local)
-!           or relative to the entire undecomposed grid (global).
+!           or relative to the entire undecomposed interngrid (global).
 !           Valid values are {\tt ESMF\_LOCAL} or {\tt ESMF\_GLOBAL}.
 !     \item [domainTypeFlag]
 !           TypeKind of counts you want back.  Valid values are:
@@ -428,10 +428,10 @@ module ESMF_InternArrayCommMod
 !EOPI
 
     integer :: localrc, nDEs, i
-    integer :: gridrank, datarank
+    integer :: interngridrank, datarank
     integer, dimension(:), allocatable :: dimOrder
     type(ESMF_AxisIndex), dimension(:), pointer :: myArrayAIsPerRank
-    type(ESMF_AxisIndex), dimension(:,:), pointer :: gridAIsPerDEPerRank
+    type(ESMF_AxisIndex), dimension(:,:), pointer :: interngridAIsPerDEPerRank
     type(ESMF_DELayout) :: delayout
     type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
@@ -440,16 +440,16 @@ module ESMF_InternArrayCommMod
 
     ! Check init status of arguments
 !    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit, interngrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
     ! make sure the compilers can tell these are unassociated.
     nullify(myArrayAIsPerRank)
-    nullify(gridAIsPerDEPerRank)
+    nullify(interngridAIsPerDEPerRank)
 
-    ! get layout from the grid in order to get the number of DEs
+    ! get layout from the interngrid in order to get the number of DEs
     call ESMF_InternArrayGet(array, rank=datarank, rc=localrc)
-    call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, &
+    call ESMF_InternGridGet(interngrid, dimCount=interngridrank, delayout=delayout, &
                       rc=localrc)
     call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=localrc)
 
@@ -476,9 +476,9 @@ module ESMF_InternArrayCommMod
                               horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                               rc=localrc)
 
-    ! call grid to access AIs for all DEs
-    call ESMF_GridGetAIsAllDEs(grid, localGlobalFlag, &
-                               gridAIsPerDEPerRank, &
+    ! call interngrid to access AIs for all DEs
+    call ESMF_InternGridGetAIsAllDEs(interngrid, localGlobalFlag, &
+                               interngridAIsPerDEPerRank, &
                                horzRelLoc, vertRelLoc, rc=localrc)
 
     ! allocate arrayindex array; get all types (excl, comp, total?) from the array
@@ -486,12 +486,12 @@ module ESMF_InternArrayCommMod
     call ESMF_IArrayGetAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
                                 myArrayAIsPerRank, rc=localrc)
 
-    ! load AIListPerDEPerRank with array AIs and grid AIs
+    ! load AIListPerDEPerRank with array AIs and interngrid AIs
     do i = 1,datarank
       if (dimOrder(i).eq.0) then
         AIListPerDEPerRank(:,i) = myArrayAIsPerRank(i)
       else
-        AIListPerDEPerRank(:,i) = gridAIsPerDEPerRank(:,dimOrder(i))
+        AIListPerDEPerRank(:,i) = interngridAIsPerDEPerRank(:,dimOrder(i))
       endif
     enddo
 
@@ -514,7 +514,7 @@ module ESMF_InternArrayCommMod
     ! Clean up
     deallocate(dimOrder,            stat=localrc)
     deallocate(myArrayAIsPerRank,   stat=localrc)
-    deallocate(gridAIsPerDEPerRank, stat=localrc)
+    deallocate(interngridAIsPerDEPerRank, stat=localrc)
 
     if (present(rc)) rc = localrc
 
@@ -527,12 +527,12 @@ module ESMF_InternArrayCommMod
 ! !IROUTINE: ESMF_IArrayGetGlobalAIs - Get AIs for local chunk in global index space
 !
 ! !INTERFACE:
-  subroutine ESMF_IArrayGetGlobalAIs(array, grid, datamap, &
+  subroutine ESMF_IArrayGetGlobalAIs(array, interngrid, datamap, &
                                       domainTypeFlag, globalAIPerRank, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(in) :: array
-    type(ESMF_Grid), intent(inout) :: grid
+    type(ESMF_InternGrid), intent(inout) :: interngrid
     type(ESMF_FieldDataMap), intent(inout) :: datamap
     type(ESMF_DomainTypeFlag), intent(in) :: domainTypeFlag
     type(ESMF_AxisIndex), dimension(:), pointer :: globalAIPerRank
@@ -542,7 +542,7 @@ module ESMF_InternArrayCommMod
 !   
 !   This routine returns AI info in global index space.
 !   If you want local AI info, you can ask the array directly.  If you want
-!   AIs in global index space, you need to query the grid for the global 
+!   AIs in global index space, you need to query the interngrid for the global 
 !   offsets for each DE, then pick out which one you are and add that.
 !   This is the same regardless of which kind of AI you are asking to return.
 !   This routine queries the array for the local AIs of the requested type 
@@ -552,14 +552,14 @@ module ESMF_InternArrayCommMod
 !     \begin{description}
 !     \item [array]
 !           {\tt ESMF\_Array} containing data.  Needed here not for the data
-!           contents but to read the sizes of the non-grid indices and to
-!           look up the halo widths for the grid-based indices.
-!     \item [grid]
-!           {\tt ESMF\_Grid} which corresponds to the array data.
+!           contents but to read the sizes of the non-interngrid indices and to
+!           look up the halo widths for the interngrid-based indices.
+!     \item [interngrid]
+!           {\tt ESMF\_InternGrid} which corresponds to the array data.
 !     \item [datamap]
 !           {\tt ESMF\_FieldDataMap} which describes the mapping of the
-!           data onto the cells in the {\tt ESMF\_Grid}.  Needed to match up
-!           the array axes and the grid axes.
+!           data onto the cells in the {\tt ESMF\_InternGrid}.  Needed to match up
+!           the array axes and the interngrid axes.
 !     \item [domainTypeFlag]
 !           TypeKind of counts you want back.  Valid values are:
 !           {\tt ESMF\_DOMAIN\_EXCLUSIVE}, 
@@ -578,7 +578,7 @@ module ESMF_InternArrayCommMod
     integer :: localrc, i
     integer :: datarank
     integer :: dimOrder(ESMF_MAXDIM)
-    integer :: gridOffsets(ESMF_MAXGRIDDIM)
+    integer :: interngridOffsets(ESMF_MAXIGRIDDIM)
     type(ESMF_AxisIndex),pointer :: localAIsPerRank(:)
     type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
@@ -587,10 +587,10 @@ module ESMF_InternArrayCommMod
 
     ! Check init status of arguments
 !    ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit, interngrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
-    ! get layout from the grid in order to get the number of DEs
+    ! get layout from the interngrid in order to get the number of DEs
     call ESMF_InternArrayGet(array, rank=datarank, rc=localrc)
 
     ! allocate array for localAIs
@@ -603,25 +603,25 @@ module ESMF_InternArrayCommMod
                               horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                               rc=localrc)
 
-    ! call grid to access AIs for all DEs
-    call ESMF_GridGetDELocalInfo(grid, horzRelLoc, vertRelLoc, &
-                                 globalStartPerDim=gridOffsets, rc=localrc)
+    ! call interngrid to access AIs for all DEs
+    call ESMF_InternGridGetDELocalInfo(interngrid, horzRelLoc, vertRelLoc, &
+                                 globalStartPerDim=interngridOffsets, rc=localrc)
 
     ! allocate arrayindex array; get requested type from array
     call ESMF_IArrayGetAxisIndex(array, domainTypeFlag, &
                                 localAIsPerRank, rc=localrc)
 
-    ! load AIListPerDEPerRank with array AIs and grid AIs
-    ! adding grid offsets for grid-aligned axes
+    ! load AIListPerDEPerRank with array AIs and interngrid AIs
+    ! adding interngrid offsets for interngrid-aligned axes
     do i = 1,datarank
       if (dimOrder(i).eq.0) then
         globalAIPerRank(i) = localAIsPerRank(i)
       else
         globalAIPerRank(i) = localAIsPerRank(i)
         globalAIPerRank(i)%min = globalAIPerRank(i)%min + &
-                                                    gridOffsets(dimOrder(i))
+                                                    interngridOffsets(dimOrder(i))
         globalAIPerRank(i)%max = globalAIPerRank(i)%max + &
-                                                    gridOffsets(dimOrder(i))
+                                                    interngridOffsets(dimOrder(i))
       endif
     enddo
 
@@ -636,16 +636,16 @@ module ESMF_InternArrayCommMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGetAllAxisIndices"
 !BOPI
-! !IROUTINE: ESMF_IArrayGetAllAxisIndices - Get all AIs associated with a Grid
+! !IROUTINE: ESMF_IArrayGetAllAxisIndices - Get all AIs associated with a InternGrid
 !
 ! !INTERFACE:
-  subroutine ESMF_IArrayGetAllAxisIndices(array, grid, datamap, &
+  subroutine ESMF_IArrayGetAllAxisIndices(array, interngrid, datamap, &
                                              totalindex, compindex, exclindex, &
                                              AICountPerDE, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(in) :: array
-    type(ESMF_Grid), intent(inout) :: grid
+    type(ESMF_InternGrid), intent(inout) :: interngrid
     type(ESMF_FieldDataMap), intent(inout) :: datamap
     type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: totalindex
     type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: compindex
@@ -655,17 +655,17 @@ module ESMF_InternArrayCommMod
 !
 ! !DESCRIPTION:
 !   Used to retrieve the index annotations from all {\tt ESMF\_Array}s
-!    associated with a {\tt ESMF\_Grid}.  This computes the values
+!    associated with a {\tt ESMF\_InternGrid}.  This computes the values
 !    instead of broadcasting them.
 !EOPI
 
     integer :: status, nDEs, nAIs, i, j
-    integer :: gridrank, datarank, maxrank
+    integer :: interngridrank, datarank, maxrank
     integer, dimension(:), allocatable :: dimOrder, countPerDim
     type(ESMF_AxisIndex), dimension(:), pointer :: arrayindex
-    type(ESMF_AxisIndex), dimension(:,:), pointer :: gridindex, globalindex
+    type(ESMF_AxisIndex), dimension(:,:), pointer :: interngridindex, globalindex
     type(ESMF_DELayout) :: delayout
-    type(ESMF_GridStorage) :: gridStorage
+    type(ESMF_InternGridStorage) :: interngridStorage
     type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
      ! initialize return code; assume routine not implemented
@@ -673,40 +673,40 @@ module ESMF_InternArrayCommMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit, interngrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
-      ! get layout from the grid in order to get the number of DEs
+      ! get layout from the interngrid in order to get the number of DEs
       call ESMF_InternArrayGet(array, rank=datarank, rc=status)
-      call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, &
-                        gridStorage=gridStorage, rc=status)
+      call ESMF_InternGridGet(interngrid, dimCount=interngridrank, delayout=delayout, &
+                        interngridStorage=interngridStorage, rc=status)
       call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=status)
 
       ! allocate dimOrder array and get from datamap
-      maxrank = max(datarank, gridrank)
-      if (gridStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) &
-        maxrank = max(datarank+1, gridrank)     ! possible for arbitrary storage
+      maxrank = max(datarank, interngridrank)
+      if (interngridStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY) &
+        maxrank = max(datarank+1, interngridrank)     ! possible for arbitrary storage
       allocate(dimOrder(maxrank), stat=status)
       call ESMF_FieldDataMapGet(datamap, dataIndexList=dimOrder, &
                            horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                            rc=status)
     
       ! for arbitrary storage, modify the dimOrder array
-      if (gridStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
-        do i = maxrank,gridrank,-1
+      if (interngridStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY) then
+        do i = maxrank,interngridrank,-1
           dimOrder(i) = dimOrder(i-1)
         enddo
-        dimOrder(gridrank) = 2
+        dimOrder(interngridrank) = 2
       endif
 
-      ! set the number of AIs based on the grid storage
+      ! set the number of AIs based on the interngrid storage
       nAIs = nDEs
-      if (gridStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
-        allocate(countPerDim(gridrank))
-        call ESMF_GridGet(grid, horzrelloc=horzRelLoc, vertrelloc=vertRelLoc, &
+      if (interngridStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY) then
+        allocate(countPerDim(interngridrank))
+        call ESMF_InternGridGet(interngrid, horzrelloc=horzRelLoc, vertrelloc=vertRelLoc, &
                           globalCellCountPerDim=countPerDim, rc=status)
         nAIs = 1
-        do i = 1,gridrank
+        do i = 1,interngridrank
           nAIs = nAIs * countPerDim(i)
         enddo
         deallocate(countPerDim, stat=status)
@@ -716,24 +716,24 @@ module ESMF_InternArrayCommMod
       allocate(arrayindex(datarank), stat=status)
       call ESMF_IArrayGetAxisIndex(array, arrayindex, rc=status)
 
-      ! allocate gridindex array and get all of them from the grid
-      allocate(gridindex(nAIs,gridrank), stat=status)
-      call ESMF_GridGetAllAxisIndex(grid, gridindex, &
+      ! allocate interngridindex array and get all of them from the interngrid
+      allocate(interngridindex(nAIs,interngridrank), stat=status)
+      call ESMF_InternGridGetAllAxisIndex(interngrid, interngridindex, &
                                     horzRelLoc=horzRelLoc, &
                                     vertRelLoc=vertRelLoc, &
                                     AICountPerDE=AICountPerDE, rc=status)
 
-      ! load globalindex with arrayindex and gridindex
+      ! load globalindex with arrayindex and interngridindex
       allocate(globalindex(nAIs, maxrank), stat=status)
       do i = 1,maxrank
         if (dimOrder(i).eq.0) then
           globalindex(:,i) = arrayindex(i)
         else
-          globalindex(:,i) = gridindex(:,dimOrder(i))
+          globalindex(:,i) = interngridindex(:,dimOrder(i))
         endif
       enddo
 
-      if (gridStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
+      if (interngridStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY) then
         if (present(compindex)) then
           do j=1,size(compindex, 2)
             do i=1, nAIs
@@ -795,7 +795,7 @@ module ESMF_InternArrayCommMod
       ! Clean up
       deallocate(dimOrder,    stat=status)
       deallocate(arrayindex,  stat=status)
-      deallocate(gridindex,   stat=status)
+      deallocate(interngridindex,   stat=status)
       deallocate(globalindex, stat=status)
 
       if (present(rc)) rc = status 
@@ -1057,13 +1057,13 @@ module ESMF_InternArrayCommMod
 !
 ! !INTERFACE:
       ! Private interface; call using ESMF_IArrayHaloStore()
-  subroutine ESMF_IArrayHaloStoreOne(array, localFlag, grid, datamap, &
+  subroutine ESMF_IArrayHaloStoreOne(array, localFlag, interngrid, datamap, &
     routehandle, halodirection, routeOptions, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(inout) :: array
     logical, intent(in) :: localFlag
-    type(ESMF_Grid), intent(inout) :: grid
+    type(ESMF_InternGrid), intent(inout) :: interngrid
     type(ESMF_FieldDataMap), intent(inout) :: datamap
     type(ESMF_RouteHandle), intent(out) :: routehandle
     type(ESMF_HaloDirection), intent(in), optional :: halodirection
@@ -1075,18 +1075,18 @@ module ESMF_InternArrayCommMod
 !     perform a halo operation over the data in an {\tt ESMF\_Array}.  
 !     It associates this information with the {\tt routehandle}, which 
 !     should then provided to {\tt ESMF\_ArrayHalo()} at execution time.
-!     The {\tt ESMF\_Grid} and {\tt ESMF\_FieldDataMap} are used as
+!     The {\tt ESMF\_InternGrid} and {\tt ESMF\_FieldDataMap} are used as
 !     templates to understand how this {\tt ESMF\_Array} relates 
 !     to {\tt ESMF\_Array}s on other DEs.
 !
 !     \begin{description}
 !     \item [array]
 !           {\tt ESMF\_Array} containing data to be haloed.
-!     \item [grid]
-!           {\tt ESMF\_Grid} which matches how this data was decomposed.
+!     \item [interngrid]
+!           {\tt ESMF\_InternGrid} which matches how this data was decomposed.
 !     \item [datamap]
 !           {\tt ESMF\_FieldDataMap} which matches how the data in the
-!           {\tt ESMF\_Array} relates to the given {\tt ESMF\_Grid}.
+!           {\tt ESMF\_Array} relates to the given {\tt ESMF\_InternGrid}.
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} is returned to be used during the
 !           execution of the halo operation.
@@ -1121,12 +1121,12 @@ module ESMF_InternArrayCommMod
     if (localFlag) then
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
     endif
-    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit, interngrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
       ! passthru call, setting index to 1 and type 1-to-1
       call ESMF_IArrayHaloStoreIndex(array, localFlag, 1, ESMF_1TO1HANDLEMAP, &
-        1, grid, datamap, routehandle, halodirection, routeOptions, rc)
+        1, interngrid, datamap, routehandle, halodirection, routeOptions, rc)
 
   end subroutine ESMF_IArrayHaloStoreOne
 
@@ -1139,7 +1139,7 @@ module ESMF_InternArrayCommMod
 ! !INTERFACE:
       ! Internal routine, intended to be called directly by Bundle code only
   subroutine ESMF_IArrayHaloStoreIndex(array, localFlag, index, rmaptype, &
-    maxindex, grid, datamap, routehandle, halodirection, routeOptions, rc)
+    maxindex, interngrid, datamap, routehandle, halodirection, routeOptions, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(inout) :: array
@@ -1147,7 +1147,7 @@ module ESMF_InternArrayCommMod
       integer, intent(in) :: index
       integer, intent(in) :: rmaptype
       integer, intent(in) :: maxindex
-      type(ESMF_Grid), intent(inout) :: grid
+      type(ESMF_InternGrid), intent(inout) :: interngrid
       type(ESMF_FieldDataMap), intent(inout) :: datamap
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_HaloDirection), intent(in), optional :: halodirection
@@ -1159,7 +1159,7 @@ module ESMF_InternArrayCommMod
 !     perform a halo operation over the data in an {\tt ESMF\_Array}.  
 !     It associates this information with the {\tt routehandle}, which 
 !     should then provided to {\tt ESMF\_ArrayHalo()} at execution time.
-!     The {\tt ESMF\_Grid} and {\tt ESMF\_FieldDataMap} are used as
+!     The {\tt ESMF\_InternGrid} and {\tt ESMF\_FieldDataMap} are used as
 !     templates to understand how this {\tt ESMF\_Array} relates 
 !     to {\tt ESMF\_Array}s on other DEs.
 !
@@ -1182,11 +1182,11 @@ module ESMF_InternArrayCommMod
 !           If {\tt index} is 1, set the maximum number of routes which
 !           will eventually be set.  If not known, use 1.  The list of
 !           routes can be reallocated and expanded later.
-!     \item [grid]
-!           {\tt ESMF\_Grid} which matches how this data was decomposed.
+!     \item [interngrid]
+!           {\tt ESMF\_InternGrid} which matches how this data was decomposed.
 !     \item [datamap]
 !           {\tt ESMF\_FieldDataMap} which matches how the data in the
-!           {\tt ESMF\_Array} relates to the given {\tt ESMF\_Grid}.
+!           {\tt ESMF\_Array} relates to the given {\tt ESMF\_InternGrid}.
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} is returned to be used during the
 !           execution of the halo operation.
@@ -1215,7 +1215,7 @@ module ESMF_InternArrayCommMod
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths
       integer, dimension(:,:), allocatable :: globalStartPerDEPerDim
       integer :: nDEs, my_DE
-      integer :: gridrank, datarank, cellCount
+      integer :: interngridrank, datarank, cellCount
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1224,10 +1224,10 @@ module ESMF_InternArrayCommMod
     if (localFlag) then
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
     endif
-    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit, interngrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
-      ! TODO: all this code could be moved to the C++ side once Grid has
+      ! TODO: all this code could be moved to the C++ side once InternGrid has
       !       an interface
 
       ! create the routehandle if this is the first route.  otherwise
@@ -1245,9 +1245,9 @@ module ESMF_InternArrayCommMod
           ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
       endif
     
-      ! Extract layout information from the Grid
-      call ESMF_GridGet(grid, delayout=delayout, rc=status)
-      call ESMF_GridGet(grid, dimCount=gridrank, rc=status)
+      ! Extract layout information from the InternGrid
+      call ESMF_InternGridGet(interngrid, delayout=delayout, rc=status)
+      call ESMF_InternGridGet(interngrid, dimCount=interngridrank, rc=status)
       
       ! Get the current VM context
       call ESMF_VMGetCurrent(vm, rc)
@@ -1256,34 +1256,34 @@ module ESMF_InternArrayCommMod
       call ESMF_DELayoutGetDeprecated(delayout, deCount=nDEs, localDE=my_DE, rc=status)
 
       ! Allocate temporary arrays
-      allocate(periodic(gridrank), stat=status)
+      allocate(periodic(interngridrank), stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
                                        ESMF_CONTEXT, rc)) return
-      allocate(decompids(gridrank), stat=status)
+      allocate(decompids(interngridrank), stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
                                        ESMF_CONTEXT, rc)) return
-      allocate(globalCellCountPerDim(gridrank), stat=status)
+      allocate(globalCellCountPerDim(interngridrank), stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
                                        ESMF_CONTEXT, rc)) return
-      allocate(globalStartPerDEPerDim(nDEs, gridrank), stat=status)
+      allocate(globalStartPerDEPerDim(nDEs, interngridrank), stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
                                        ESMF_CONTEXT, rc)) return
-      allocate(src_AI(nDEs, gridrank), stat=status)
+      allocate(src_AI(nDEs, interngridrank), stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
                                        ESMF_CONTEXT, rc)) return
-      allocate(dst_AI(nDEs, gridrank), stat=status)
+      allocate(dst_AI(nDEs, interngridrank), stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
                                        ESMF_CONTEXT, rc)) return
-      allocate(gl_src_AI(nDEs, gridrank), stat=status)
+      allocate(gl_src_AI(nDEs, interngridrank), stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
                                        ESMF_CONTEXT, rc)) return
-      allocate(gl_dst_AI(nDEs, gridrank), stat=status)
+      allocate(gl_dst_AI(nDEs, interngridrank), stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
                                        ESMF_CONTEXT, rc)) return
 
 
-      ! Query the datamap and set info for grid so it knows how to
-      ! match up the array indicies and the grid indicies.
+      ! Query the datamap and set info for interngrid so it knows how to
+      ! match up the array indicies and the interngrid indicies.
       call ESMF_FieldDataMapGet(datamap, horzRelLoc=horzRelLoc, &
                            vertRelLoc=vertRelLoc, &
                            dataIndexList=dimorder, rc=status)
@@ -1291,19 +1291,19 @@ module ESMF_InternArrayCommMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
      
-      ! Extract more information from the Grid
-      call ESMF_GridGet(grid, &
+      ! Extract more information from the InternGrid
+      call ESMF_InternGridGet(interngrid, &
                         horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                         globalCellCountPerDim=globalCellCountPerDim, &
                         globalStartPerDEPerDim=globalStartPerDEPerDim, &
                         periodic=periodic, rc=status)
-      ! TODO: get decompids, get grid rank here?
+      ! TODO: get decompids, get interngrid rank here?
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       ! see if you have local data
-      call ESMF_GridGetDELocalInfo(grid, &
+      call ESMF_InternGridGetDELocalInfo(interngrid, &
                         horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                         localCellCount=cellCount, &
                         rc=status)
@@ -1323,19 +1323,19 @@ module ESMF_InternArrayCommMod
 
       ! set up things we need to find a cached route or precompute one
       if (localFlag) then
-        call ESMF_IArrayGetAllAxisIndices(array, grid, datamap, totalindex=dst_AI, &
+        call ESMF_IArrayGetAllAxisIndices(array, interngrid, datamap, totalindex=dst_AI, &
                                        compindex=src_AI, rc=status)
       endif
       
       ! translate AI's into global numbering
-      call ESMF_GridDELocalToGlobalAI(grid, horzRelLoc=horzRelLoc, &
+      call ESMF_InternGridDELocalToGlobalAI(interngrid, horzRelLoc=horzRelLoc, &
                                       vertRelLoc=vertRelloc, &
                                       localAI2D=dst_AI, &
                                       globalAI2D=gl_dst_AI, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-      call ESMF_GridDELocalToGlobalAI(grid, horzRelLoc=horzRelLoc, &
+      call ESMF_InternGridDELocalToGlobalAI(interngrid, horzRelLoc=horzRelLoc, &
                                       vertRelLoc=vertRelloc, &
                                       localAI2D=src_AI, &
                                       globalAI2D=gl_src_AI, rc=status)
@@ -1624,8 +1624,8 @@ module ESMF_InternArrayCommMod
 !  Redistribute the data in one set of {\tt ESMF\_Array}s to another
 !  set of {\tt ESMF\_Array}s.  Data redistribution does no interpolation,
 !  so during the {\tt ESMF\_ArrayRedistPrecompute()} call the 
-!  {\tt ESMF\_Grid}s must have identical coordinates.  
-!  The distribution of the {\tt ESMF\_Grid} can be over different
+!  {\tt ESMF\_InternGrid}s must have identical coordinates.  
+!  The distribution of the {\tt ESMF\_InternGrid} can be over different
 !  {\tt ESMF\_DELayout}s, or the {\tt ESMF\_FieldDataMaps} can differ.
 !  The {\tt routehandle} argument must be the one which was associated
 !  with the precomputed data movements during the precompute operation, and
@@ -1778,8 +1778,8 @@ module ESMF_InternArrayCommMod
 !  Redistribute the data in one set of {\tt ESMF\_Array}s to another
 !  set of {\tt ESMF\_Array}s.  Data redistribution does no interpolation,
 !  so during the {\tt ESMF\_ArrayRedistPrecompute()} call the 
-!  {\tt ESMF\_Grid}s must have identical coordinates.  
-!  The distribution of the {\tt ESMF\_Grid} can be over different
+!  {\tt ESMF\_InternGrid}s must have identical coordinates.  
+!  The distribution of the {\tt ESMF\_InternGrid} can be over different
 !  {\tt ESMF\_DELayout}s, or the {\tt ESMF\_FieldDataMaps} can differ.
 !  The {\tt routehandle} argument must be the one which was associated
 !  with the precomputed data movements during the precompute operation, and
@@ -1928,18 +1928,18 @@ module ESMF_InternArrayCommMod
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_IArrayRedistStore()
-  subroutine ESMF_IArrayRedistStoreOne(srcArray, srcLocalFlag, srcGrid, &
-    srcDataMap, dstArray, dstLocalFlag, dstGrid, dstDataMap, parentVM, &
+  subroutine ESMF_IArrayRedistStoreOne(srcArray, srcLocalFlag, srcInternGrid, &
+    srcDataMap, dstArray, dstLocalFlag, dstInternGrid, dstDataMap, parentVM, &
     routeOptions, routehandle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(in) :: srcArray
       logical, intent(in) :: srcLocalFlag
-      type(ESMF_Grid), intent(inout) :: srcGrid
+      type(ESMF_InternGrid), intent(inout) :: srcInternGrid
       type(ESMF_FieldDataMap), intent(inout) :: srcDataMap
       type(ESMF_InternArray), intent(in) :: dstArray
       logical, intent(in) :: dstLocalFlag
-      type(ESMF_Grid), intent(inout) :: dstGrid
+      type(ESMF_InternGrid), intent(inout) :: dstInternGrid
       type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteOptions), intent(in), optional :: routeOptions
@@ -1950,8 +1950,8 @@ module ESMF_InternArrayCommMod
 !  Precompute and associate the required data movements to redistribute
 !  data over one set of {\tt ESMF\_Array}s to another
 !  set of {\tt ESMF\_Array}s.  Data redistribution does no interpolation,
-!  so both {\tt ESMF\_Grid}s must have identical coordinates.
-!  The distribution of the {\tt ESMF\_Grid}s can be over different
+!  so both {\tt ESMF\_InternGrid}s must have identical coordinates.
+!  The distribution of the {\tt ESMF\_InternGrid}s can be over different
 !  {\tt ESMF\_DELayout}s, or the {\tt ESMF\_FieldDataMap}s can differ.
 !  The {\tt routehandle} argument is associated with the stored information
 !  and must be supplied to {\tt ESMF\_ArrayRedist()} to execute the
@@ -1962,21 +1962,21 @@ module ESMF_InternArrayCommMod
 !   \begin{description}
 !   \item[srcArray]
 !    {\tt ESMF\_Array} containing the data source.
-!   \item[srcGrid]
-!    {\tt ESMF\_Grid} describing the grid on which the source data is arranged.
+!   \item[srcInternGrid]
+!    {\tt ESMF\_InternGrid} describing the interngrid on which the source data is arranged.
 !   \item[srcDataMap]
-!    {\tt ESMF\_FieldDataMap} describing how the source data maps onto the grid.
+!    {\tt ESMF\_FieldDataMap} describing how the source data maps onto the interngrid.
 !   \item[dstArray]
 !    {\tt ESMF\_Array} where the destination data will be put.
-!   \item[dstGrid]
-!    {\tt ESMF\_Grid} describing the grid on which the destination data is 
+!   \item[dstInternGrid]
+!    {\tt ESMF\_InternGrid} describing the interngrid on which the destination data is 
 !    arranged.
 !   \item[dstDataMap]
 !    {\tt ESMF\_FieldDataMap} describing how the destination data maps 
-!    onto the grid.
+!    onto the interngrid.
 !   \item[parentVM]
 !    {\tt ESMF\_VM} object which includes all PETs in both the
-!    source and destination grids.
+!    source and destination interngrids.
 !     \item [{[routeOptions]}]
 !           Not normally specified.  Specify which internal strategy to select
 !           when executing the communication needed to execute the
@@ -2000,17 +2000,17 @@ module ESMF_InternArrayCommMod
     if (srcLocalFlag) then
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, srcArray, rc)
     endif
-    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, srcGrid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit, srcInternGrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, srcDatamap)
     if (dstLocalFlag) then
       ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, dstArray, rc)
     endif
-    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, dstGrid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit, dstInternGrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, dstDatamap)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, parentVM, rc)
 
-    call ESMF_IArrayRedistStoreIndex(srcArray, srcLocalFlag, srcGrid, &
-      srcDataMap, dstArray, dstLocalFlag, dstGrid, dstDataMap, &
+    call ESMF_IArrayRedistStoreIndex(srcArray, srcLocalFlag, srcInternGrid, &
+      srcDataMap, dstArray, dstLocalFlag, dstInternGrid, dstDataMap, &
       1, ESMF_1TO1HANDLEMAP, 1, parentVM, routehandle, routeOptions, rc)
 
   end subroutine ESMF_IArrayRedistStoreOne
@@ -2023,18 +2023,18 @@ module ESMF_InternArrayCommMod
 !
 ! !INTERFACE:
       ! internal use only; called by Bundle code for multi-fields
-  subroutine ESMF_IArrayRedistStoreIndex(srcArray, srcLocalFlag, srcGrid, &
-    srcDataMap, dstArray, dstLocalFlag, dstGrid, dstDataMap, index, &
+  subroutine ESMF_IArrayRedistStoreIndex(srcArray, srcLocalFlag, srcInternGrid, &
+    srcDataMap, dstArray, dstLocalFlag, dstInternGrid, dstDataMap, index, &
     rmaptype, maxindex, parentVM, routehandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(in) :: srcArray
       logical, intent(in) :: srcLocalFlag
-      type(ESMF_Grid), intent(inout) :: srcGrid
+      type(ESMF_InternGrid), intent(inout) :: srcInternGrid
       type(ESMF_FieldDataMap), intent(inout) :: srcDataMap
       type(ESMF_InternArray), intent(in) :: dstArray
       logical, intent(in) :: dstLocalFlag
-      type(ESMF_Grid), intent(inout) :: dstGrid
+      type(ESMF_InternGrid), intent(inout) :: dstInternGrid
       type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       integer, intent(in) :: index
       integer, intent(in) :: rmaptype
@@ -2048,8 +2048,8 @@ module ESMF_InternArrayCommMod
 !  Precompute and associate the required data movements to redistribute
 !  data over one set of {\tt ESMF\_Array}s to another
 !  set of {\tt ESMF\_Array}s.  Data redistribution does no interpolation,
-!  so both {\tt ESMF\_Grid}s must have identical coordinates.
-!  The distribution of the {\tt ESMF\_Grid}s can be over different
+!  so both {\tt ESMF\_InternGrid}s must have identical coordinates.
+!  The distribution of the {\tt ESMF\_InternGrid}s can be over different
 !  {\tt ESMF\_DELayout}s, or the {\tt ESMF\_FieldDataMap}s can differ.
 !  The {\tt routehandle} argument is associated with the stored information
 !  and must be supplied to {\tt ESMF\_ArrayRedist()} to execute the
@@ -2060,18 +2060,18 @@ module ESMF_InternArrayCommMod
 !   \begin{description}
 !   \item[srcArray]
 !    {\tt ESMF\_Array} containing the data source.
-!   \item[srcGrid]
-!    {\tt ESMF\_Grid} describing the grid on which the source data is arranged.
+!   \item[srcInternGrid]
+!    {\tt ESMF\_InternGrid} describing the interngrid on which the source data is arranged.
 !   \item[srcDataMap]
-!    {\tt ESMF\_FieldDataMap} describing how the source data maps onto the grid.
+!    {\tt ESMF\_FieldDataMap} describing how the source data maps onto the interngrid.
 !   \item[dstArray]
 !    {\tt ESMF\_Array} where the destination data will be put.
-!   \item[dstGrid]
-!    {\tt ESMF\_Grid} describing the grid on which the destination data is 
+!   \item[dstInternGrid]
+!    {\tt ESMF\_InternGrid} describing the interngrid on which the destination data is 
 !    arranged.
 !   \item[dstDataMap]
 !    {\tt ESMF\_FieldDataMap} describing how the destination data maps 
-!    onto the grid.
+!    onto the interngrid.
 !     \item [index]
 !           Integer specifying which route number this is to be inside
 !           the {\tt routehandle}.  Route handles for bundles can contain
@@ -2090,7 +2090,7 @@ module ESMF_InternArrayCommMod
 !           routes can be reallocated and expanded later.
 !   \item[parentVM]
 !    {\tt ESMF\_VM} object which includes all PETs in both the
-!    source and destination grids.
+!    source and destination interngrids.
 !   \item [routehandle]
 !    Returned {\tt ESMF\_RouteHandle} which identifies this 
 !    communication pattern.
@@ -2107,7 +2107,7 @@ module ESMF_InternArrayCommMod
       integer :: status         ! local error status
       integer :: dstDEs, srcDEs, myDstDE, MySrcDE
       integer :: srcCount, dstCount
-      integer :: gridrank, datarank
+      integer :: interngridrank, datarank
       integer, dimension(ESMF_MAXDIM) :: dstDimOrder, srcDimOrder, dimlengths
       integer, dimension(:), pointer :: dstAICountPerDE, srcAICountPerDE
       type(ESMF_AxisIndex), dimension(:), pointer :: &
@@ -2115,7 +2115,7 @@ module ESMF_InternArrayCommMod
       type(ESMF_AxisIndex), dimension(:,:), pointer :: &
 		srcGlobalCompAIperDEperRank, dstGlobalCompAIperDEperRank
       type(ESMF_DELayout) :: dstDElayout, srcDElayout
-      type(ESMF_GridStorage) :: dstStorage, srcStorage
+      type(ESMF_InternGridStorage) :: dstStorage, srcStorage
       type(ESMF_Logical) :: hasSrcData, hasDstData
       type(ESMF_RelLoc) :: dstHorzRelLoc, srcHorzRelLoc, &
                            dstVertRelLoc, srcVertRelLoc
@@ -2128,12 +2128,12 @@ module ESMF_InternArrayCommMod
     if (srcLocalFlag) then
       ESMF_INIT_CHECK_DEEP_SHORT(ESMF_InternArrayGetInit, srcArray, rc)
     endif
-    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, srcGrid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit, srcInternGrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, srcDatamap)
     if (dstLocalFlag) then
       ESMF_INIT_CHECK_DEEP_SHORT(ESMF_InternArrayGetInit, dstArray, rc)
     endif
-    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, dstGrid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit, dstInternGrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, dstDatamap)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, parentVM, rc)
 
@@ -2161,8 +2161,8 @@ module ESMF_InternArrayCommMod
       endif
     
 
-      ! Query the datamap and set info for grid so it knows how to
-      ! match up the array indices and the grid indices.
+      ! Query the datamap and set info for interngrid so it knows how to
+      ! match up the array indices and the interngrid indices.
       call ESMF_FieldDataMapGet(dstDataMap, horzRelLoc=dstHorzRelLoc, &
                                 vertRelLoc=dstVertRelLoc, &
                                 dataIndexList=dstDimOrder, rc=status)
@@ -2176,31 +2176,31 @@ module ESMF_InternArrayCommMod
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! TODO: move storage to the GridGet that does not require RelLocs
+      ! TODO: move storage to the InternGridGet that does not require RelLocs
 
-      ! Extract information from the Grids
-      call ESMF_GridGet(dstGrid, delayout=dstDElayout, &
-                        gridStorage=dstStorage, &
+      ! Extract information from the InternGrids
+      call ESMF_InternGridGet(dstInternGrid, delayout=dstDElayout, &
+                        interngridStorage=dstStorage, &
                         horzRelLoc=dstHorzRelLoc, vertRelLoc=dstVertRelLoc, &
                         rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_GridGetDELocalInfo(dstGrid, &
+      call ESMF_InternGridGetDELocalInfo(dstInternGrid, &
                         horzRelLoc=dstHorzRelLoc, vertRelLoc=dstVertRelLoc, &
                         localCellCount=dstCount, &
                         rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_GridGet(srcGrid, delayout=srcDElayout, &
-                        gridStorage=srcStorage, dimCount=gridrank, &
+      call ESMF_InternGridGet(srcInternGrid, delayout=srcDElayout, &
+                        interngridStorage=srcStorage, dimCount=interngridrank, &
                         horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
                         rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_GridGetDELocalInfo(srcGrid, &
+      call ESMF_InternGridGetDELocalInfo(srcInternGrid, &
                         horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
                         localCellCount=srcCount, &
                         rc=status)
@@ -2222,10 +2222,10 @@ module ESMF_InternArrayCommMod
       ! TODO: if I don't have any data then return here 
 
       ! for now, branch out if arbitrary storage
-      if (dstStorage.eq.ESMF_GRID_STORAGE_ARBITRARY .OR. &
-          srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
-        call ESMF_IArrayRedistStoreIndexArb(srcArray, srcGrid, srcDataMap, &
-                                          dstArray, dstGrid, dstDataMap, &
+      if (dstStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY .OR. &
+          srcStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY) then
+        call ESMF_IArrayRedistStoreIndexArb(srcArray, srcInternGrid, srcDataMap, &
+                                          dstArray, dstInternGrid, dstDataMap, &
                                           index, rmaptype, maxindex, &
                                           parentVM, routehandle, &
                                           routeOptions, rc)
@@ -2250,11 +2250,11 @@ module ESMF_InternArrayCommMod
 
       ! TODO: error check/validation code needs to be added here.
       ! these things must be true (or equal):
-      !  grid ranks equal
+      !  interngrid ranks equal
       !  data ranks equal
-      !  computational global grid sizes equal
+      !  computational global interngrid sizes equal
       !  (halo sizes should *not* need to match anymore)
-      !  non-grid axes lengths must match
+      !  non-interngrid axes lengths must match
       !  (should we call validate on the objects?)
       !
 
@@ -2265,15 +2265,15 @@ module ESMF_InternArrayCommMod
                myDstGlobalTotalAIperRank(datarank), stat=status)
 
 
-      ! get more grid information
-      !call ESMF_GridGet(dstGrid, &
+      ! get more interngrid information
+      !call ESMF_InternGridGet(dstInternGrid, &
       !                  horzRelLoc=dstHorzRelLoc, vertRelLoc=dstVertRelLoc, &
       !                  globalCellCountPerDim=dstCellCountPerDim, &
       !                  globalStartPerDEPerDim=dstStartPerDEPerDim, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      !call ESMF_GridGet(srcGrid, &
+      !call ESMF_InternGridGet(srcInternGrid, &
       !                  horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
       !                  globalCellCountPerDim=srcCellCountPerDim, &
       !                  globalStartPerDEPerDim=srcStartPerDEPerDim, rc=status)
@@ -2282,7 +2282,7 @@ module ESMF_InternArrayCommMod
                                 ESMF_CONTEXT, rc)) return
 
       ! get all of the AIs -- that mean for all of the DEs
-      call ESMF_IArrayGetAIsAllDEs(dstArray, dstGrid, dstDataMap, &
+      call ESMF_IArrayGetAIsAllDEs(dstArray, dstInternGrid, dstDataMap, &
                                   ESMF_GLOBAL, ESMF_DOMAIN_COMPUTATIONAL, &
                                   dstGlobalCompAIperDEperRank, &
                                   rc=status)
@@ -2290,7 +2290,7 @@ module ESMF_InternArrayCommMod
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_IArrayGetAIsAllDEs(srcArray, srcGrid, srcDataMap, &
+      call ESMF_IArrayGetAIsAllDEs(srcArray, srcInternGrid, srcDataMap, &
                                   ESMF_GLOBAL, ESMF_DOMAIN_COMPUTATIONAL, &
                                   srcGlobalCompAIperDEperRank, &
                                   rc=status)
@@ -2299,10 +2299,10 @@ module ESMF_InternArrayCommMod
                                 ESMF_CONTEXT, rc)) return
 
       ! TODO: make GlobalTotalAI arrays
-      call ESMF_IArrayGetGlobalAIs(dstArray, dstGrid, dstDataMap, &
+      call ESMF_IArrayGetGlobalAIs(dstArray, dstInternGrid, dstDataMap, &
                                   ESMF_DOMAIN_TOTAL, &
                                   myDstGlobalTotalAIPerRank, rc=status)
-      call ESMF_IArrayGetGlobalAIs(srcArray, srcGrid, srcDataMap, &
+      call ESMF_IArrayGetGlobalAIs(srcArray, srcInternGrid, srcDataMap, &
                                   ESMF_DOMAIN_TOTAL, &
                                   mySrcGlobalTotalAIPerRank, rc=status)
 
@@ -2357,17 +2357,17 @@ module ESMF_InternArrayCommMod
 !
 ! !INTERFACE:
       ! internal use only; called by Bundle code for multi-fields
-  subroutine ESMF_IArrayRedistStoreIndexArb(srcArray, srcGrid, srcDataMap, &
-                                       dstArray, dstGrid, dstDataMap, &
+  subroutine ESMF_IArrayRedistStoreIndexArb(srcArray, srcInternGrid, srcDataMap, &
+                                       dstArray, dstInternGrid, dstDataMap, &
                                        index, rmaptype, maxindex, &
                                        parentVM, routehandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(in) :: srcArray
-      type(ESMF_Grid), intent(inout) :: srcGrid
+      type(ESMF_InternGrid), intent(inout) :: srcInternGrid
       type(ESMF_FieldDataMap), intent(inout) :: srcDataMap
       type(ESMF_InternArray), intent(in) :: dstArray
-      type(ESMF_Grid), intent(inout) :: dstGrid
+      type(ESMF_InternGrid), intent(inout) :: dstInternGrid
       type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       integer, intent(in) :: index
       integer, intent(in) :: rmaptype
@@ -2381,8 +2381,8 @@ module ESMF_InternArrayCommMod
 !  Precompute and associate the required data movements to redistribute
 !  data over one set of {\tt ESMF\_Array}s to another
 !  set of {\tt ESMF\_Array}s.  Data redistribution does no interpolation,
-!  so both {\tt ESMF\_Grid}s must have identical coordinates.
-!  The distribution of the {\tt ESMF\_Grid}s can be over different
+!  so both {\tt ESMF\_InternGrid}s must have identical coordinates.
+!  The distribution of the {\tt ESMF\_InternGrid}s can be over different
 !  {\tt ESMF\_DELayout}s, or the {\tt ESMF\_FieldDataMap}s can differ.
 !  The {\tt routehandle} argument is associated with the stored information
 !  and must be supplied to {\tt ESMF\_ArrayRedist()} to execute the
@@ -2393,18 +2393,18 @@ module ESMF_InternArrayCommMod
 !   \begin{description}
 !   \item[srcArray]
 !    {\tt ESMF\_Array} containing the data source.
-!   \item[srcGrid]
-!    {\tt ESMF\_Grid} describing the grid on which the source data is arranged.
+!   \item[srcInternGrid]
+!    {\tt ESMF\_InternGrid} describing the interngrid on which the source data is arranged.
 !   \item[srcDataMap]
-!    {\tt ESMF\_FieldDataMap} describing how the source data maps onto the grid.
+!    {\tt ESMF\_FieldDataMap} describing how the source data maps onto the interngrid.
 !   \item[dstArray]
 !    {\tt ESMF\_Array} where the destination data will be put.
-!   \item[dstGrid]
-!    {\tt ESMF\_Grid} describing the grid on which the destination data is 
+!   \item[dstInternGrid]
+!    {\tt ESMF\_InternGrid} describing the interngrid on which the destination data is 
 !    arranged.
 !   \item[dstDataMap]
 !    {\tt ESMF\_FieldDataMap} describing how the destination data maps 
-!    onto the grid.
+!    onto the interngrid.
 !     \item [index]
 !           Integer specifying which route number this is to be inside
 !           the {\tt routehandle}.  Route handles for bundles can contain
@@ -2423,7 +2423,7 @@ module ESMF_InternArrayCommMod
 !           routes can be reallocated and expanded later.
 !   \item[parentVM]
 !    {\tt ESMF\_VM} object which includes all PETs in both the
-!    source and destination grids.
+!    source and destination interngrids.
 !   \item [routehandle]
 !    Returned {\tt ESMF\_RouteHandle} which identifies this 
 !    communication pattern.
@@ -2441,7 +2441,7 @@ module ESMF_InternArrayCommMod
       integer :: dstAICount, srcAICount
       integer :: dstDEs, srcDEs, dstMyDE, srcMyDE
       integer :: srcCount, dstCount
-      integer :: gridrank, datarank
+      integer :: interngridrank, datarank
       integer, dimension(ESMF_MAXDIM) :: dstDimOrder, srcDimOrder, dimlengths
       integer, dimension(:), allocatable :: dstCellCountPerDim, decompids, &
                                             srcCellCountPerDim
@@ -2454,7 +2454,7 @@ module ESMF_InternArrayCommMod
                                                    dstCLocalAI, srcCLocalAI, &
                                                    dstTLocalAI, srcTLocalAI
       type(ESMF_DELayout) :: dstDElayout, srcDElayout
-      type(ESMF_GridStorage) :: dstStorage, srcStorage
+      type(ESMF_InternGridStorage) :: dstStorage, srcStorage
       type(ESMF_Logical), dimension(:), allocatable :: periodic
       type(ESMF_Logical) :: hasSrcData, hasDstData
       type(ESMF_RelLoc) :: dstHorzRelLoc, srcHorzRelLoc, &
@@ -2466,10 +2466,10 @@ module ESMF_InternArrayCommMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_InternArrayGetInit, srcArray, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, srcGrid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit, srcInternGrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, srcDatamap)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_InternArrayGetInit, dstArray, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, dstGrid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit, dstInternGrid, rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, dstDatamap)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, parentVM, rc)
 
@@ -2503,8 +2503,8 @@ module ESMF_InternArrayCommMod
       endif
     
 
-      ! Query the datamap and set info for grid so it knows how to
-      ! match up the array indices and the grid indices.
+      ! Query the datamap and set info for interngrid so it knows how to
+      ! match up the array indices and the interngrid indices.
       call ESMF_FieldDataMapGet(dstDataMap, horzRelLoc=dstHorzRelLoc, &
                                 vertRelLoc=dstVertRelLoc, &
                                 dataIndexList=dstDimOrder, rc=status)
@@ -2518,29 +2518,29 @@ module ESMF_InternArrayCommMod
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! Extract information from the Grids
-      call ESMF_GridGet(dstGrid, delayout=dstDElayout, &
-                        gridStorage=dstStorage, &
+      ! Extract information from the InternGrids
+      call ESMF_InternGridGet(dstInternGrid, delayout=dstDElayout, &
+                        interngridStorage=dstStorage, &
                         horzRelLoc=dstHorzRelLoc, vertRelLoc=dstVertRelLoc, &
                         rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_GridGetDELocalInfo(dstGrid, &
+      call ESMF_InternGridGetDELocalInfo(dstInternGrid, &
                         horzRelLoc=dstHorzRelLoc, vertRelLoc=dstVertRelLoc, &
                         localCellCount=dstCount, &
                         rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_GridGet(srcGrid, delayout=srcDElayout, &
-                        gridStorage=srcStorage, dimCount=gridrank, &
+      call ESMF_InternGridGet(srcInternGrid, delayout=srcDElayout, &
+                        interngridStorage=srcStorage, dimCount=interngridrank, &
                         horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
                         rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_GridGetDELocalInfo(srcGrid, &
+      call ESMF_InternGridGetDELocalInfo(srcInternGrid, &
                         horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
                         localCellCount=srcCount, &
                         rc=status)
@@ -2567,46 +2567,46 @@ module ESMF_InternArrayCommMod
  
       ! TODO: error check/validation code needs to be added here.
       ! these things must be true (or equal):
-      !  grid ranks equal
+      !  interngrid ranks equal
       !  data ranks equal
-      !  computational global grid sizes equal
+      !  computational global interngrid sizes equal
       !  (halo sizes should *not* need to match anymore)
-      !  non-grid axes lengths must match
+      !  non-interngrid axes lengths must match
       !  (should we call validate on the objects?)
       !
 
       ! Allocate temporary arrays
       dstVector = .false.
       srcVector = .false.
-      allocate(          periodic(gridrank), &
-                        decompids(gridrank), &
-               dstCellCountPerDim(gridrank), &
-               srcCellCountPerDim(gridrank), stat=status)
-      allocate(dstStartPerDEPerDim(dstDEs, gridrank), &
-               srcStartPerDEPerDim(srcDEs, gridrank), stat=status)
+      allocate(          periodic(interngridrank), &
+                        decompids(interngridrank), &
+               dstCellCountPerDim(interngridrank), &
+               srcCellCountPerDim(interngridrank), stat=status)
+      allocate(dstStartPerDEPerDim(dstDEs, interngridrank), &
+               srcStartPerDEPerDim(srcDEs, interngridrank), stat=status)
 
-      if (dstStorage.eq.ESMF_GRID_STORAGE_LOGRECT) then
-        allocate(  dstCompAI(dstDEs, gridrank), &
-                  dstTotalAI(dstDEs, gridrank), &
-                 dstCLocalAI(dstDEs, gridrank), &
-                 dstTLocalAI(dstDEs, gridrank), stat=status)
+      if (dstStorage.eq.ESMF_IGRID_STORAGE_LOGRECT) then
+        allocate(  dstCompAI(dstDEs, interngridrank), &
+                  dstTotalAI(dstDEs, interngridrank), &
+                 dstCLocalAI(dstDEs, interngridrank), &
+                 dstTLocalAI(dstDEs, interngridrank), stat=status)
       endif
-      if (srcStorage.eq.ESMF_GRID_STORAGE_LOGRECT) then
-        allocate(  srcCompAI(srcDEs, gridrank), &
-                  srcTotalAI(srcDEs, gridrank), &
-                 srcCLocalAI(srcDEs, gridrank), &
-                 srcTLocalAI(srcDEs, gridrank), stat=status)
+      if (srcStorage.eq.ESMF_IGRID_STORAGE_LOGRECT) then
+        allocate(  srcCompAI(srcDEs, interngridrank), &
+                  srcTotalAI(srcDEs, interngridrank), &
+                 srcCLocalAI(srcDEs, interngridrank), &
+                 srcTLocalAI(srcDEs, interngridrank), stat=status)
       endif
 
-      ! get more grid information
-      call ESMF_GridGet(dstGrid, &
+      ! get more interngrid information
+      call ESMF_InternGridGet(dstInternGrid, &
                         horzRelLoc=dstHorzRelLoc, vertRelLoc=dstVertRelLoc, &
                         globalCellCountPerDim=dstCellCountPerDim, &
                         globalStartPerDEPerDim=dstStartPerDEPerDim, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_GridGet(srcGrid, &
+      call ESMF_InternGridGet(srcInternGrid, &
                         horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
                         globalCellCountPerDim=srcCellCountPerDim, &
                         globalStartPerDEPerDim=srcStartPerDEPerDim, rc=status)
@@ -2615,17 +2615,17 @@ module ESMF_InternArrayCommMod
                                 ESMF_CONTEXT, rc)) return
 
       ! allocate more local arrays for arbitrary storage
-      if (dstStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
+      if (dstStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY) then
         dstVector  = .true.
         dstAICount = dstCellCountPerDim(1)*dstCellCountPerDim(2)
-        allocate(  dstCompAI(dstAICount, gridrank), &
-                  dstTotalAI(dstAICount, gridrank), stat=status)
+        allocate(  dstCompAI(dstAICount, interngridrank), &
+                  dstTotalAI(dstAICount, interngridrank), stat=status)
       endif
-      if (srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
+      if (srcStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY) then
         srcVector  = .true.
         srcAICount = srcCellCountPerDim(1)*srcCellCountPerDim(2)
-        allocate(  srcCompAI(srcAICount, gridrank), &
-                  srcTotalAI(srcAICount, gridrank), stat=status)
+        allocate(  srcCompAI(srcAICount, interngridrank), &
+                  srcTotalAI(srcAICount, interngridrank), stat=status)
       endif
       if (dstVector .OR. srcVector) then
         allocate(dstAICountPerDE(dstDEs), &
@@ -2639,20 +2639,20 @@ module ESMF_InternArrayCommMod
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      if (srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) datarank = datarank + 1
+      if (srcStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY) datarank = datarank + 1
 
       ! TODO: apply dimorder and decompids to get mapping of array to data
 
       ! check if arbitrary-to-arbitrary optimization is to be used
-      if (dstStorage.eq.ESMF_GRID_STORAGE_ARBITRARY .and. &
-	  srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
-        call ESMF_IArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+      if (dstStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY .and. &
+	  srcStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY) then
+        call ESMF_IArrayGetAllAxisIndices(dstArray, dstInternGrid, dstDataMap, &
                                          compindex=dstCompAI, &
                                          AICountPerDE=dstAICountPerDE, rc=status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_IArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+        call ESMF_IArrayGetAllAxisIndices(srcArray, srcInternGrid, srcDataMap, &
                                          compindex=srcCompAI, &
                                          AICountPerDE=srcAICountPerDE, rc=status)
         if (ESMF_LogMsgFoundError(status, &
@@ -2662,8 +2662,8 @@ module ESMF_InternArrayCommMod
       else ! at least one side is block distributed
 
         ! set up things we need to precompute a route
-        if (dstStorage.eq.ESMF_GRID_STORAGE_LOGRECT) then
-          call ESMF_IArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+        if (dstStorage.eq.ESMF_IGRID_STORAGE_LOGRECT) then
+          call ESMF_IArrayGetAllAxisIndices(dstArray, dstInternGrid, dstDataMap, &
                                          compindex =dstCLocalAI, &
                                          totalindex=dstTLocalAI, rc=status)
           if (ESMF_LogMsgFoundError(status, &
@@ -2671,7 +2671,7 @@ module ESMF_InternArrayCommMod
                                   ESMF_CONTEXT, rc)) return
 
           ! translate AI's into global numbering
-          call ESMF_GridDELocalToGlobalAI(dstGrid, &
+          call ESMF_InternGridDELocalToGlobalAI(dstInternGrid, &
                                         horzRelLoc=dstHorzRelLoc, &
                                         vertRelLoc=dstVertRelLoc, &
                                         localAI2D=dstCLocalAI, &
@@ -2679,7 +2679,7 @@ module ESMF_InternArrayCommMod
           if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-          call ESMF_GridDELocalToGlobalAI(dstGrid, &
+          call ESMF_InternGridDELocalToGlobalAI(dstInternGrid, &
                                         horzRelLoc=dstHorzRelLoc, &
                                         vertRelLoc=dstVertRelLoc, &
                                         localAI2D=dstTLocalAI, &
@@ -2688,14 +2688,14 @@ module ESMF_InternArrayCommMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        elseif (dstStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
-          call ESMF_IArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+        elseif (dstStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY) then
+          call ESMF_IArrayGetAllAxisIndices(dstArray, dstInternGrid, dstDataMap, &
                                          compindex=dstCompAI, &
                                          AICountPerDE=dstAICountPerDE, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-          call ESMF_IArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+          call ESMF_IArrayGetAllAxisIndices(dstArray, dstInternGrid, dstDataMap, &
                                          compindex=dstTotalAI, &
                                          AICountPerDE=dstAICountPerDE, rc=status)
           if (ESMF_LogMsgFoundError(status, &
@@ -2703,15 +2703,15 @@ module ESMF_InternArrayCommMod
                                   ESMF_CONTEXT, rc)) return
         endif
 
-        ! now the source grid
-        if (srcStorage.eq.ESMF_GRID_STORAGE_LOGRECT) then
-          call ESMF_IArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+        ! now the source interngrid
+        if (srcStorage.eq.ESMF_IGRID_STORAGE_LOGRECT) then
+          call ESMF_IArrayGetAllAxisIndices(srcArray, srcInternGrid, srcDataMap, &
                                          compindex =srcCLocalAI, &
                                          totalindex=srcTLocalAI, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-          call ESMF_GridDELocalToGlobalAI(srcGrid, &
+          call ESMF_InternGridDELocalToGlobalAI(srcInternGrid, &
                                         horzRelLoc=srcHorzRelLoc, &
                                         vertRelLoc=srcVertRelLoc, &
                                         localAI2D=srcCLocalAI, &
@@ -2719,7 +2719,7 @@ module ESMF_InternArrayCommMod
           if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-          call ESMF_GridDELocalToGlobalAI(srcGrid, &
+          call ESMF_InternGridDELocalToGlobalAI(srcInternGrid, &
                                         horzRelLoc=srcHorzRelLoc, &
                                         vertRelLoc=srcVertRelLoc, &
                                         localAI2D=srcTLocalAI, &
@@ -2728,14 +2728,14 @@ module ESMF_InternArrayCommMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        elseif (srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
-          call ESMF_IArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+        elseif (srcStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY) then
+          call ESMF_IArrayGetAllAxisIndices(srcArray, srcInternGrid, srcDataMap, &
                                          compindex=srcCompAI, &
                                          AICountPerDE=srcAICountPerDE, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-          call ESMF_IArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+          call ESMF_IArrayGetAllAxisIndices(srcArray, srcInternGrid, srcDataMap, &
                                          compindex=srcTotalAI, &
                                          AICountPerDE=srcAICountPerDE, rc=status)
           if (ESMF_LogMsgFoundError(status, &
@@ -2747,8 +2747,8 @@ module ESMF_InternArrayCommMod
       ! Create the route object.
       route = ESMF_RouteCreate(parentVM, rc)
 
-      if (dstStorage.eq.ESMF_GRID_STORAGE_ARBITRARY .and. &
-	  srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
+      if (dstStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY .and. &
+	  srcStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY) then
 	  call ESMF_RoutePrecomputeRedistA2A(route, datarank, &
 				hasDstData, dstMyDE, dstCompAI, &
 				dstAICountPerDE, dstStartPerDEPerDim, &
@@ -3063,11 +3063,11 @@ module ESMF_InternArrayCommMod
 !     \begin{description}
 !     \item [array]
 !           {\tt ESMF\_Array} containing undistributed data to be scattered.
-!     \item [grid]
-!           {\tt ESMF\_Grid} which will correspond to the distributed data.
+!     \item [interngrid]
+!           {\tt ESMF\_InternGrid} which will correspond to the distributed data.
 !     \item [datamap]
 !           {\tt ESMF\_FieldDataMap} which describes the mapping of the
-!           data onto the cells in the {\tt ESMF\_Grid}.
+!           data onto the cells in the {\tt ESMF\_InternGrid}.
 !     \item [rootDE]
 !           The DE number on which the source {\tt ESMF\_Array} is located.
 !     \item [scatteredArray]

@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.1 2007/06/12 04:54:25 cdeluca Exp $
+! $Id: CouplerMod.F90,v 1.2 2007/06/22 23:21:51 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -241,8 +241,8 @@
 !   The following piece of code provides an example of calling the data
 !   redistribution routine  between two Fields in the Coupler Component.  
 !   Unlike regrid, which translates between
-!   different Grids, redist translates between different DELayouts on
-!   the same Grid.   The first two lines get the Fields from the 
+!   different InternGrids, redist translates between different DELayouts on
+!   the same InternGrid.   The first two lines get the Fields from the 
 !   States, each corresponding to a different subcomponent.  One is
 !   an Export State and the other is an Import State.
 !
@@ -253,7 +253,7 @@
 !
 !   The redist routine uses information contained in the Fields and the
 !   Coupler VM object to call the communication routines to move the data.
-!   Because many Fields may share the same Grid association, the same
+!   Because many Fields may share the same InternGrid association, the same
 !   routing information may be needed repeatedly.  Route information is 
 !   saved so the precomputed information can be retained.  The following 
 !   is an example of a Field redist call:

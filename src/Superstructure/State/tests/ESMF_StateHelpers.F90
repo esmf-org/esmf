@@ -1,4 +1,4 @@
-! $Id: ESMF_StateHelpers.F90,v 1.10 2007/04/03 16:36:25 cdeluca Exp $
+! $Id: ESMF_StateHelpers.F90,v 1.11 2007/06/22 23:21:50 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@ module ESMF_StateHelpers
 
    use ESMF_Mod
 
-   public Create2DGrids, Create3DGrids
+   public Create2DInternGrids, Create3DInternGrids
    public CreateFields, CreateBundle, AddBundle
 
    public FillConstantR8Field, FillConstantR4Field
@@ -31,23 +31,23 @@ module ESMF_StateHelpers
    public ValidateIndexField
    public FieldCleanup, BundleCleanup
 
-   public CreateGrid, CreateLayout
+   public CreateInternGrid, CreateLayout
    public CreateEmptyDataField, CreateDataField
 
 contains
 
 !------------------------------------------------------------------------------
 !
-! Create 2 grids which have identical numbers of cells and coordinates,
+! Create 2 interngrids which have identical numbers of cells and coordinates,
 ! but are decomposed differently.
 !
 ! TODO: pass in optional list of layouts, list of rellocs, and
-!  make grid an array of grids?
+!  make interngrid an array of interngrids?
 !
 #undef  ESMF_METHOD
-#define ESMF_METHOD "Create2DGrids"
-subroutine Create2DGrids(grid1, grid2, rc)
-    type(ESMF_Grid), intent(out) :: grid1, grid2
+#define ESMF_METHOD "Create2DInternGrids"
+subroutine Create2DInternGrids(interngrid1, interngrid2, rc)
+    type(ESMF_InternGrid), intent(out) :: interngrid1, interngrid2
     integer, intent(out) :: rc
     
     ! Local variables
@@ -73,42 +73,42 @@ subroutine Create2DGrids(grid1, grid2, rc)
 
     mincoords = (/  0.0,  0.0 /)
     maxcoords = (/ 20.0, 30.0 /)
-    grid1 = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
+    interngrid1 = ESMF_InternGridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
-                   horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
-                   name="srcgrid", rc=rc)
+                   horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
+                   name="srcinterngrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
-    call ESMF_GridDistribute(grid1, delayout=layout1, rc=rc)
+    call ESMF_InternGridDistribute(interngrid1, delayout=layout1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
-    ! same grid coordinates, but different layout
-    grid2 = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
+    ! same interngrid coordinates, but different layout
+    interngrid2 = ESMF_InternGridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
-                   horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
-                   name="dstgrid", rc=rc)
+                   horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
+                   name="dstinterngrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
-    call ESMF_GridDistribute(grid2, delayout=layout2, rc=rc)
+    call ESMF_InternGridDistribute(interngrid2, delayout=layout2, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
 
     rc = ESMF_SUCCESS
     return
 
-end subroutine Create2DGrids
+end subroutine Create2DInternGrids
 
 
 !------------------------------------------------------------------------------
 !
-! Create 2 grids which have identical numbers of cells and coordinates,
+! Create 2 interngrids which have identical numbers of cells and coordinates,
 ! but are decomposed differently.
 !
 ! TODO: pass in optional list of layouts, list of rellocs, and
-!  make grid an array of grids?
+!  make interngrid an array of interngrids?
 !
 #undef  ESMF_METHOD
-#define ESMF_METHOD "Create3DGrids"
-subroutine Create3DGrids(grid1, grid2, rc)
-    type(ESMF_Grid), intent(out) :: grid1, grid2
+#define ESMF_METHOD "Create3DInternGrids"
+subroutine Create3DInternGrids(interngrid1, interngrid2, rc)
+    type(ESMF_InternGrid), intent(out) :: interngrid1, interngrid2
     integer, intent(out) :: rc
     
     ! Local variables
@@ -134,46 +134,46 @@ subroutine Create3DGrids(grid1, grid2, rc)
 
     mincoords = (/  0.0,  0.0 /)
     maxcoords = (/ 20.0, 30.0 /)
-    grid1 = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
+    interngrid1 = ESMF_InternGridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
-                   horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
-                   name="srcgrid", rc=rc)
+                   horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
+                   name="srcinterngrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
-    call ESMF_GridDistribute(grid1, delayout=layout1, rc=rc)
+    call ESMF_InternGridDistribute(interngrid1, delayout=layout1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
-    ! same grid coordinates, but different layout
-    grid2 = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
+    ! same interngrid coordinates, but different layout
+    interngrid2 = ESMF_InternGridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
-                   horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
-                   name="dstgrid", rc=rc)
+                   horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
+                   name="dstinterngrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
-    call ESMF_GridDistribute(grid2, delayout=layout2, rc=rc)
+    call ESMF_InternGridDistribute(interngrid2, delayout=layout2, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
 
     rc = ESMF_SUCCESS
     return
 
-end subroutine Create3DGrids
+end subroutine Create3DInternGrids
 
 
 
 !------------------------------------------------------------------------------
 !
-! Create 2 fields with the same grid
+! Create 2 fields with the same interngrid
 !
 ! todo: make fields a list and create as many as are in the list?
 !
 #undef  ESMF_METHOD
 #define ESMF_METHOD "CreateFields"
-subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
+subroutine CreateFields(interngrid1, field1, field2, field3, field4, field5, &
                         dim1, dim2, dim3, dim4, dim5, &
                         dkind1, dkind2, dkind3, dkind4, dkind5, &
                         halo1, halo2, halo3, halo4, halo5, &
                         relloc1, relloc2, relloc3, relloc4, relloc5, &
                         vrelloc1, vrelloc2, vrelloc3, vrelloc4, vrelloc5, rc)
-    type(ESMF_Grid), intent(in) :: grid1
+    type(ESMF_InternGrid), intent(in) :: interngrid1
     type(ESMF_Field), intent(out) :: field1
     type(ESMF_Field), intent(out), optional :: field2, field3, field4, field5
     integer, intent(in), optional :: dim1, dim2, dim3, dim4, dim5
@@ -275,35 +275,35 @@ subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
     
 
     ! let field create call allocate the proper amount of space
-    field1 = ESMF_FieldCreate(grid1, arrayspecf1, &
+    field1 = ESMF_FieldCreate(interngrid1, arrayspecf1, &
                                 horzRelloc=rellocf1, vertRelloc=vrellocf1, &
                                 haloWidth=halof1, name="pressure 1", rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
                                 
     if (present(field2)) then
       ! let field create call allocate the proper amount of space
-      field2 = ESMF_FieldCreate(grid1, arrayspecf2, &
+      field2 = ESMF_FieldCreate(interngrid1, arrayspecf2, &
                                 horzRelloc=rellocf2, vertRelloc=vrellocf2, &
                                 haloWidth=halof2, name="pressure 2", rc=rc)
       if (rc.NE.ESMF_SUCCESS) return
     endif
     if (present(field3)) then
       ! let field create call allocate the proper amount of space
-      field3 = ESMF_FieldCreate(grid1, arrayspecf3, &
+      field3 = ESMF_FieldCreate(interngrid1, arrayspecf3, &
                                 horzRelloc=rellocf3, vertRelloc=vrellocf3, &
                                 haloWidth=halof3, name="pressure 3", rc=rc)
       if (rc.NE.ESMF_SUCCESS) return
     endif
     if (present(field4)) then
       ! let field create call allocate the proper amount of space
-      field4 = ESMF_FieldCreate(grid1, arrayspecf4, &
+      field4 = ESMF_FieldCreate(interngrid1, arrayspecf4, &
                                 horzRelloc=rellocf4, vertRelloc=vrellocf4, &
                                 haloWidth=halof4, name="pressure 4", rc=rc)
       if (rc.NE.ESMF_SUCCESS) return
     endif
     if (present(field5)) then
       ! let field create call allocate the proper amount of space
-      field5 = ESMF_FieldCreate(grid1, arrayspecf5, &
+      field5 = ESMF_FieldCreate(interngrid1, arrayspecf5, &
                                 horzRelloc=rellocf5, vertRelloc=vrellocf5, &
                                 haloWidth=halof5, name="pressure 5", rc=rc)
       if (rc.NE.ESMF_SUCCESS) return
@@ -530,9 +530,9 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
     kind = dk
 
     ! TODO: if it is important to set the halo to something other than the
-    ! constant value, then we will need the halo width and the grid info.
+    ! constant value, then we will need the halo width and the interngrid info.
     ! for now, simply set the entire data space to the constant value.
-    !call ESMF_FieldGet(field, haloWidth=halo, grid=grid, rc=rc)
+    !call ESMF_FieldGet(field, haloWidth=halo, interngrid=interngrid, rc=rc)
 
     select case (rank)
       case (2)
@@ -868,10 +868,10 @@ subroutine FillIndexField(field, rc)
     ! Local variables
     integer :: i, j
     integer :: lb(7), ub(7), haloWidth, cellNum, rownum, colnum
-    integer :: localCellCounts(3), globalCellCounts(3), gridOffsets(3)
+    integer :: localCellCounts(3), globalCellCounts(3), interngridOffsets(3)
     real (ESMF_KIND_R8), dimension(:,:), pointer :: ptr
     !integer :: i, j, k, l, m
-    type(ESMF_Grid) :: grid
+    type(ESMF_InternGrid) :: interngrid
     !type(ESMF_Array) :: array
     !integer :: rank
 
@@ -880,15 +880,15 @@ subroutine FillIndexField(field, rc)
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
 
-    call ESMF_FieldGet(field, haloWidth=haloWidth, grid=grid, rc=rc)
+    call ESMF_FieldGet(field, haloWidth=haloWidth, interngrid=interngrid, rc=rc)
 
-    call ESMF_GridGet(grid, horzrelloc=ESMF_CELL_CENTER, &
+    call ESMF_InternGridGet(interngrid, horzrelloc=ESMF_CELL_CENTER, &
                       globalCellCountPerDim=globalCellCounts, rc=rc)
 
-    ! get grid information used to calculate global indices
-    call ESMF_GridGetDELocalInfo(grid, horzrelloc=ESMF_CELL_CENTER, &
+    ! get interngrid information used to calculate global indices
+    call ESMF_InternGridGetDELocalInfo(interngrid, horzrelloc=ESMF_CELL_CENTER, &
                                  localCellCountPerDim=localCellCounts, &
-                                 globalStartPerDim=gridOffsets, rc=rc)
+                                 globalStartPerDim=interngridOffsets, rc=rc)
 
     ! get a Fortran 90 pointer back to the data
     call ESMF_FieldGetDataPointer(field, ptr, ESMF_DATA_REF, rc=rc)
@@ -900,8 +900,8 @@ subroutine FillIndexField(field, rc)
     ! Set the data values to the global cell index number.
     do j=lb(2)+haloWidth, ub(2)-haloWidth
       rownum = j - halowidth - 1
-      cellNum = (gridOffsets(1) + 1) + &
-                ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
+      cellNum = (interngridOffsets(1) + 1) + &
+                ((interngridOffsets(2)+rownum) * globalCellCounts(1)) 
       do i=lb(1)+haloWidth, ub(1)-haloWidth
         colnum = i - haloWidth - 1
         ptr(i, j) = cellNum + colnum
@@ -1740,24 +1740,24 @@ subroutine ValidateIndexField(field, rc)
     ! Local variables
     integer :: i, j
     integer :: lb(2), ub(2), haloWidth, cellNum, rownum, colnum
-    integer :: localCellCounts(2), globalCellCounts(2), gridOffsets(2)
+    integer :: localCellCounts(2), globalCellCounts(2), interngridOffsets(2)
     real (ESMF_KIND_R8), dimension(:,:), pointer :: ptr
-    type(ESMF_Grid) :: grid
+    type(ESMF_InternGrid) :: interngrid
 
     rc = ESMF_FAILURE
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
 
-    call ESMF_FieldGet(field, haloWidth=haloWidth, grid=grid, rc=rc)
+    call ESMF_FieldGet(field, haloWidth=haloWidth, interngrid=interngrid, rc=rc)
 
-    call ESMF_GridGet(grid, horzrelloc=ESMF_CELL_CENTER, &
+    call ESMF_InternGridGet(interngrid, horzrelloc=ESMF_CELL_CENTER, &
                       globalCellCountPerDim=globalCellCounts, rc=rc)
 
-    ! get grid information used to calculate global indices
-    call ESMF_GridGetDELocalInfo(grid, horzrelloc=ESMF_CELL_CENTER, &
+    ! get interngrid information used to calculate global indices
+    call ESMF_InternGridGetDELocalInfo(interngrid, horzrelloc=ESMF_CELL_CENTER, &
                                  localCellCountPerDim=localCellCounts, &
-                                 globalStartPerDim=gridOffsets, rc=rc)
+                                 globalStartPerDim=interngridOffsets, rc=rc)
 
     ! get a Fortran 90 pointer back to the data
     call ESMF_FieldGetDataPointer(field, ptr, ESMF_DATA_REF, rc=rc)
@@ -1772,8 +1772,8 @@ subroutine ValidateIndexField(field, rc)
     ! Check the data values against the global cell index number.
     do j=lb(2)+haloWidth, ub(2)-haloWidth
       rownum = j - halowidth - 1
-      cellNum = (gridOffsets(1) + 1) + &
-                ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
+      cellNum = (interngridOffsets(1) + 1) + &
+                ((interngridOffsets(2)+rownum) * globalCellCounts(1)) 
       do i=lb(1)+haloWidth, ub(1)-haloWidth
         colnum = i - haloWidth - 1
         if (abs(ptr(i, j) - (cellNum+colnum)) .gt. 10E-8) then
@@ -1795,60 +1795,60 @@ end subroutine ValidateIndexField
 
 !------------------------------------------------------------------------------
 !
-! delete all fields; this code assumes that all share the identical grid
+! delete all fields; this code assumes that all share the identical interngrid
 !  and only delete it once.
 !
 #undef  ESMF_METHOD
 #define ESMF_METHOD "FieldCleanup"
-subroutine FieldCleanup(field1, field2, field3, field4, field5, dogrid, rc)
+subroutine FieldCleanup(field1, field2, field3, field4, field5, dointerngrid, rc)
     type(ESMF_Field), intent(inout) :: field1
     type(ESMF_Field), intent(inout), optional :: field2, field3, field4, field5
-    logical, optional :: dogrid
+    logical, optional :: dointerngrid
     integer, intent(out), optional :: rc
     
     ! Local variables
-    type(ESMF_Grid) :: grid
+    type(ESMF_InternGrid) :: interngrid
 
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! query for grid and data.  field1 is required; all other fields test
+    ! query for interngrid and data.  field1 is required; all other fields test
     ! first to be sure it is present
-    call ESMF_FieldGet(field1, grid=grid, rc=rc)
+    call ESMF_FieldGet(field1, interngrid=interngrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
     call ESMF_FieldDestroy(field1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
-    ! query for data only; grid is shared and will be deleted last.
+    ! query for data only; interngrid is shared and will be deleted last.
     if (present(field2)) then
         call ESMF_FieldDestroy(field2, rc=rc)
         if (rc.NE.ESMF_SUCCESS) return
     endif
 
-    ! query for data only; grid is shared and will be deleted last.
+    ! query for data only; interngrid is shared and will be deleted last.
     if (present(field3)) then
         call ESMF_FieldDestroy(field3, rc=rc)
         if (rc.NE.ESMF_SUCCESS) return
     endif
 
-    ! query for data only; grid is shared and will be deleted last.
+    ! query for data only; interngrid is shared and will be deleted last.
     if (present(field4)) then
         call ESMF_FieldDestroy(field4, rc=rc)
         if (rc.NE.ESMF_SUCCESS) return
     endif
 
-    ! query for data only; grid is shared and will be deleted last.
+    ! query for data only; interngrid is shared and will be deleted last.
     if (present(field5)) then
         call ESMF_FieldDestroy(field5, rc=rc)
         if (rc.NE.ESMF_SUCCESS) return
     endif
 
     ! do this last, unless requested not to.
-    if (.not. present(dogrid)) then
-      call ESMF_GridDestroy(grid, rc=rc)
+    if (.not. present(dointerngrid)) then
+      call ESMF_InternGridDestroy(interngrid, rc=rc)
       if (rc.NE.ESMF_SUCCESS) return
-    else if (dogrid) then
-      call ESMF_GridDestroy(grid, rc=rc)
+    else if (dointerngrid) then
+      call ESMF_InternGridDestroy(interngrid, rc=rc)
       if (rc.NE.ESMF_SUCCESS) return
     endif
 
@@ -1859,7 +1859,7 @@ end subroutine FieldCleanup
 
 !------------------------------------------------------------------------------
 !
-! delete all bundles; this code assumes that all share the identical grid
+! delete all bundles; this code assumes that all share the identical interngrid
 !  and only delete it once.
 !
 #undef  ESMF_METHOD
@@ -1871,13 +1871,13 @@ subroutine BundleCleanup(bundle1, bundle2, bundle3, bundle4, bundle5, rc)
     integer, intent(out), optional :: rc
     
     ! Local variables
-    !type(ESMF_Grid) :: grid
+    !type(ESMF_InternGrid) :: interngrid
     !type(ESMF_Field) :: allfields(:)
 
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! query for grid.  bundle1 is required; all other bundles optional.
-    !call ESMF_BundleGet(bundle1, field=allfields, grid=grid, rc=rc)
+    ! query for interngrid.  bundle1 is required; all other bundles optional.
+    !call ESMF_BundleGet(bundle1, field=allfields, interngrid=interngrid, rc=rc)
     !if (rc.NE.ESMF_SUCCESS) return
 
     call ESMF_BundleDestroy(bundle1, rc=rc)
@@ -1896,7 +1896,7 @@ subroutine BundleCleanup(bundle1, bundle2, bundle3, bundle4, bundle5, rc)
 
     !enddo
 
-    !call ESMF_GridDestroy(grid, rc=rc)
+    !call ESMF_InternGridDestroy(interngrid, rc=rc)
     !if (rc.NE.ESMF_SUCCESS) return
 
 
@@ -1933,7 +1933,7 @@ subroutine BundleCleanup(bundle1, bundle2, bundle3, bundle4, bundle5, rc)
     endif
 
     ! do this last.
-    !call ESMF_GridDestroy(grid, rc=rc)
+    !call ESMF_InternGridDestroy(interngrid, rc=rc)
     !if (rc.NE.ESMF_SUCCESS) return
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1950,18 +1950,18 @@ end subroutine BundleCleanup
 !
 #undef  ESMF_METHOD
 #define ESMF_METHOD "CreateDataField"
-function CreateDataField(name, grid, layout, relloc, r4value, r8value, rc)
+function CreateDataField(name, interngrid, layout, relloc, r4value, r8value, rc)
   type(ESMF_Field) :: CreateDataField
 
   character(len=*), intent(in) :: name                ! field name
-  type(ESMF_Grid), intent(in), optional :: grid       ! if set, grid to use
+  type(ESMF_InternGrid), intent(in), optional :: interngrid       ! if set, interngrid to use
   type(ESMF_DELayout), intent(in), optional :: layout ! if set, layout to use
   type(ESMF_RelLoc), intent(in), optional :: relloc   ! if set, relloc to use
   real(ESMF_KIND_R4), intent(in), optional :: r4value ! if set, initial value
   real(ESMF_KIND_R8), intent(in), optional :: r8value ! if set, initial value
   integer, intent(out), optional :: rc                ! return code
 
-  type(ESMF_Grid) :: thisgrid
+  type(ESMF_InternGrid) :: thisinterngrid
   type(ESMF_DELayout) :: thislayout
   type(ESMF_RelLoc) :: thisrelloc
   real(ESMF_KIND_R4) :: thisr4data
@@ -1993,25 +1993,25 @@ function CreateDataField(name, grid, layout, relloc, r4value, r8value, rc)
                                 ESMF_CONTEXT, rc)) goto 10
   endif
 
-  ! default grid
-  if (.not. present(grid)) then
-      thisgrid = ESMF_GridCreateHorzXYUni(counts=(/100, 200/), &
+  ! default interngrid
+  if (.not. present(interngrid)) then
+      thisinterngrid = ESMF_InternGridCreateHorzXYUni(counts=(/100, 200/), &
                                minGlobalCoordPerDim=(/0.0_ESMF_KIND_R8, &
                                                       0.0_ESMF_KIND_R8/), &
                                maxGlobalCoordPerDim=(/180.0_ESMF_KIND_R8, &
                                                       360.0_ESMF_KIND_R8/), &
-                               horzStagger=ESMF_GRID_HORZ_STAGGER_B_NE, &
+                               horzStagger=ESMF_IGRID_HORZ_STAGGER_B_NE, &
                                rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
-      call ESMF_GridDistribute(thisgrid, delayout=thislayout, rc=status)
+      call ESMF_InternGridDistribute(thisinterngrid, delayout=thislayout, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
   else
-      thisgrid = grid
+      thisinterngrid = interngrid
   endif
 
   ! default relloc
@@ -2053,7 +2053,7 @@ function CreateDataField(name, grid, layout, relloc, r4value, r8value, rc)
                             ESMF_CONTEXT, rc)) goto 10
 
   ! make the new field
-  CreateDataField = ESMF_FieldCreate(grid=thisgrid, arrayspec=as, &
+  CreateDataField = ESMF_FieldCreate(interngrid=thisinterngrid, arrayspec=as, &
                                      horzRelloc=thisrelloc, haloWidth=2, &
                                      name=name, rc=status)
   if (ESMF_LogMsgFoundError(status, &
@@ -2176,11 +2176,11 @@ end function CreateLayout
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "CreateGrid"
-function CreateGrid(which, layout, rc)
-  type(ESMF_Grid) :: CreateGrid
+#define ESMF_METHOD "CreateInternGrid"
+function CreateInternGrid(which, layout, rc)
+  type(ESMF_InternGrid) :: CreateInternGrid
 
-  integer, intent(in), optional :: which               ! optional grid type
+  integer, intent(in), optional :: which               ! optional interngrid type
   type(ESMF_DELayout), intent(in), optional :: layout  ! layout to use
   integer, intent(out), optional :: rc                 ! return code
 
@@ -2209,7 +2209,7 @@ function CreateGrid(which, layout, rc)
       thislayout = ESMF_DELayoutCreate(vm, (/ 1, npets /), rc=status)
    endif
 
-   ! if not specified, use a default grid spacing
+   ! if not specified, use a default interngrid spacing
    if (.not.present(which)) then
        thiswhich = 0
    else
@@ -2226,55 +2226,55 @@ function CreateGrid(which, layout, rc)
 
    select case (thiswhich)
    case (1)
-      CreateGrid = ESMF_GridCreateHorzXYUni((/100, 200/), &
+      CreateInternGrid = ESMF_InternGridCreateHorzXYUni((/100, 200/), &
                                      mincoords1, maxcoords1, &
-                                     horzStagger=ESMF_GRID_HORZ_STAGGER_B_NE, &
+                                     horzStagger=ESMF_IGRID_HORZ_STAGGER_B_NE, &
                                      rc=status)
 
     case (2)
-      CreateGrid = ESMF_GridCreateHorzXYUni((/300, 500/), &
+      CreateInternGrid = ESMF_InternGridCreateHorzXYUni((/300, 500/), &
                                      mincoords1, maxcoords1, &
-                                     horzStagger=ESMF_GRID_HORZ_STAGGER_B_NE, &
+                                     horzStagger=ESMF_IGRID_HORZ_STAGGER_B_NE, &
                                      rc=status)
 
     case (3)
-      CreateGrid = ESMF_GridCreateHorzXYUni((/10, 20/), &
+      CreateInternGrid = ESMF_InternGridCreateHorzXYUni((/10, 20/), &
                                      mincoords1, maxcoords1, &
-                                     horzStagger=ESMF_GRID_HORZ_STAGGER_B_NE, &
+                                     horzStagger=ESMF_IGRID_HORZ_STAGGER_B_NE, &
                                      rc=status)
 
     case (4)
-      CreateGrid = ESMF_GridCreateHorzXYUni((/90, 180/), &
+      CreateInternGrid = ESMF_InternGridCreateHorzXYUni((/90, 180/), &
                                      mincoords1, maxcoords1, &
-                                     horzStagger=ESMF_GRID_HORZ_STAGGER_B_NE, &
+                                     horzStagger=ESMF_IGRID_HORZ_STAGGER_B_NE, &
                                      rc=status)
 
     case (11)
-      CreateGrid  = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
+      CreateInternGrid  = ESMF_InternGridCreateHorzXYUni((/ 90, 180 /), &
                                         mincoords2, maxcoords2, &
-                                        horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
+                                        horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
                                         rc=status)
 
     case (12)
-      CreateGrid  = ESMF_GridCreateHorzXYUni((/ 400, 700 /), &
+      CreateInternGrid  = ESMF_InternGridCreateHorzXYUni((/ 400, 700 /), &
                                         mincoords2, maxcoords2, &
-                                        horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
+                                        horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
                                         rc=status)
 
     case (13)
-      CreateGrid  = ESMF_GridCreateHorzXYUni((/ 15, 80 /), &
+      CreateInternGrid  = ESMF_InternGridCreateHorzXYUni((/ 15, 80 /), &
                                         mincoords2, maxcoords2, &
-                                        horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
+                                        horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
                                         rc=status)
 
     case (14)
-      CreateGrid  = ESMF_GridCreateHorzXYUni((/ 900, 1800 /), &
+      CreateInternGrid  = ESMF_InternGridCreateHorzXYUni((/ 900, 1800 /), &
                                         mincoords2, maxcoords2, &
-                                        horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
+                                        horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
                                         rc=status)
 
     case default
-      CreateGrid = ESMF_GridCreateHorzXYUni((/100, 200/), &
+      CreateInternGrid = ESMF_InternGridCreateHorzXYUni((/100, 200/), &
                                             mincoords1, maxcoords1, &
                                             rc=status)
 
@@ -2284,8 +2284,8 @@ function CreateGrid(which, layout, rc)
                             ESMF_CONTEXT, rc)) goto 10
 
 
-  ! distribute the grid across the PETs
-  call ESMF_GridDistribute(CreateGrid, delayout=thislayout, rc=status)
+  ! distribute the interngrid across the PETs
+  call ESMF_InternGridDistribute(CreateInternGrid, delayout=thislayout, rc=status)
   if (ESMF_LogMsgFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
@@ -2295,22 +2295,22 @@ function CreateGrid(which, layout, rc)
   ! rc will have been set by the call to logerr; 
   ! just return at this point
 
-end function CreateGrid
+end function CreateInternGrid
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "CreateLatLonGrid"
-function CreateLatLonGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
-  type(ESMF_Grid) :: CreateLatLonGrid
+#define ESMF_METHOD "CreateLatLonInternGrid"
+function CreateLatLonInternGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
+  type(ESMF_InternGrid) :: CreateLatLonInternGrid
 
-  integer, intent(in) :: nx, ny, nz               ! grid size
+  integer, intent(in) :: nx, ny, nz               ! interngrid size
   integer, intent(in) :: xde, yde                 ! layout counts
-  character(len=*), intent(in), optional :: name  ! grid name
+  character(len=*), intent(in), optional :: name  ! interngrid name
   integer, intent(in), optional :: data_xde       ! if set, des with data
   integer, intent(in), optional :: data_yde       ! ditto
   integer, intent(out), optional :: rc            ! return code
 
-  type(ESMF_Grid) :: grid
+  type(ESMF_InternGrid) :: interngrid
   type(ESMF_VM) :: vm
   type(ESMF_DELayout) :: thislayout
   real (ESMF_KIND_R8), dimension(2) :: mincoords1, maxcoords1
@@ -2340,8 +2340,8 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
     print *, "error - cannot support requested number of DEs"
     print *, "number of PETs = ", npets
     print *, "xde, yde, xde*yde = ", xde, yde, xde*yde
-    !CreateLatLonGrid = ESMF_GridCreateEmpty()
-    !call ESMF_GridDestroy(CreateLatLonGrid)
+    !CreateLatLonInternGrid = ESMF_InternGridCreateEmpty()
+    !call ESMF_InternGridDestroy(CreateLatLonInternGrid)
     rc = ESMF_FAILURE
     return
   endif
@@ -2359,9 +2359,9 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
 
   deltas(:) = 100.0
 
-  grid = ESMF_GridCreateHorzLatLonUni(counts, &
+  interngrid = ESMF_InternGridCreateHorzLatLonUni(counts, &
                                       mincoords1, maxcoords1, &
-                                      horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
+                                      horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
                                       dimNames=(/ "lon", "lat" /), &
                                       dimUnits=(/ "deg", "deg" /), &
                                       periodic=(/ ESMF_TRUE, ESMF_FALSE /), &
@@ -2371,15 +2371,15 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
                             ESMF_CONTEXT, rc)) goto 10
 
 
-  call ESMF_GridAddVertHeight(grid, deltas, &
-                              vertstagger=ESMF_GRID_VERT_STAGGER_CENTER, &
+  call ESMF_InternGridAddVertHeight(interngrid, deltas, &
+                              vertstagger=ESMF_IGRID_VERT_STAGGER_CENTER, &
                               rc=status)
   if (ESMF_LogMsgFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
 
 
-  ! distribute the grid across the PETs.   allow the option of only
+  ! distribute the interngrid across the PETs.   allow the option of only
   ! having data on a (logically rectangular) subset of the DEs.
   if (present(data_xde) .or. present(data_yde)) then
 
@@ -2435,18 +2435,18 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
 
     ! debug
     ! print *, xde, yde, nx, ny, xdecounts, ydecounts, emptyx, emptyy
-    call ESMF_GridDistribute(grid, delayout=thislayout, &
+    call ESMF_InternGridDistribute(interngrid, delayout=thislayout, &
                              countsPerDEDim1=xdecounts, &
                              countsPerDEDim2=ydecounts, &
                              rc=status)
   else
-    call ESMF_GridDistribute(grid, delayout=thislayout, rc=status)
+    call ESMF_InternGridDistribute(interngrid, delayout=thislayout, rc=status)
   endif 
   if (ESMF_LogMsgFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
 
-  CreateLatLonGrid = grid
+  CreateLatLonInternGrid = interngrid
 
 10 continue
   ! rc will have been set by the call to logerr; 
@@ -2455,7 +2455,7 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
   if (allocated(xdecounts)) deallocate(xdecounts, stat=status)
   if (allocated(ydecounts)) deallocate(ydecounts, stat=status)
 
-end function CreateLatLonGrid
+end function CreateLatLonInternGrid
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

@@ -1,4 +1,4 @@
-! $Id: ESMF_SimpleCouplingSTest.F90,v 1.24 2007/02/13 20:40:21 theurich Exp $
+! $Id: ESMF_SimpleCouplingSTest.F90,v 1.25 2007/06/22 23:22:00 cdeluca Exp $
 !
 ! System test code SimpleCoupling
 !  Description on Sourceforge under System Test #62502
@@ -35,7 +35,7 @@
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
     type(ESMF_VM) :: vm
     type(ESMF_State) :: c1exp, c2imp
-    type(ESMF_GridComp) :: comp1, comp2
+    type(ESMF_InternGridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
 
     ! instantiate a clock, a calendar, and timesteps
@@ -83,12 +83,12 @@
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    comp1 = ESMF_GridCompCreate(name=cname1, rc=rc)
+    comp1 = ESMF_InternGridCompCreate(name=cname1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname1), "rc =", rc
 
     cname2 = "user model 2"
-    comp2 = ESMF_GridCompCreate(name=cname2, rc=rc)
+    comp2 = ESMF_InternGridCompCreate(name=cname2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname2), "rc =", rc
 
@@ -106,11 +106,11 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-      call ESMF_GridCompSetServices(comp1, userm1_register, rc)
+      call ESMF_InternGridCompSetServices(comp1, userm1_register, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp SetServices finished, rc= ", rc
 
-      call ESMF_GridCompSetServices(comp2, userm2_register, rc)
+      call ESMF_InternGridCompSetServices(comp2, userm2_register, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp SetServices finished, rc= ", rc
 
@@ -156,13 +156,13 @@
  
       c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
+      call ESMF_InternGridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1 Initialize finished, rc =", rc
  
       c2imp = ESMF_StateCreate("comp2 import", ESMF_STATE_IMPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clock, rc=rc)
+      call ESMF_InternGridCompInitialize(comp2, importState=c2imp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1a Initialize finished, rc =", rc
 
@@ -178,7 +178,7 @@
 
       do while (.not. ESMF_ClockIsStopTime(clock, rc))
 
-        call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
+        call ESMF_InternGridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
         print *, "Comp 1 Run returned, rc =", rc
   
@@ -186,7 +186,7 @@
         if (rc .ne. ESMF_SUCCESS) goto 10
         print *, "Coupler Run returned, rc =", rc
   
-        call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, rc=rc)
+        call ESMF_InternGridCompRun(comp2, importState=c2imp, clock=clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
         print *, "Comp 2 Run returned, rc =", rc
 
@@ -203,11 +203,11 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-      call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clock, rc=rc)
+      call ESMF_InternGridCompFinalize(comp1, exportState=c1exp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1 Finalize finished, rc =", rc
 
-      call ESMF_GridCompFinalize(comp2, importState=c2imp, clock=clock, rc=rc)
+      call ESMF_InternGridCompFinalize(comp2, importState=c2imp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 2 Finalize finished, rc =", rc
 
@@ -242,9 +242,9 @@
       call ESMF_CalendarDestroy(gregorianCalendar, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_GridCompDestroy(comp1, rc)
+      call ESMF_InternGridCompDestroy(comp1, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridCompDestroy(comp2, rc)
+      call ESMF_InternGridCompDestroy(comp2, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_CplCompDestroy(cpl, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10

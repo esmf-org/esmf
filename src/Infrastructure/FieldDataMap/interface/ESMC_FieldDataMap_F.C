@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldDataMap_F.C,v 1.8 2007/05/02 03:09:52 rosalind Exp $
+// $Id: ESMC_FieldDataMap_F.C,v 1.9 2007/06/22 23:21:32 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_FieldDataMap_F.C,v 1.8 2007/05/02 03:09:52 rosalind Exp $";
+             "$Id: ESMC_FieldDataMap_F.C,v 1.9 2007/06/22 23:21:32 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -56,7 +56,7 @@ extern "C" {
         type(ESMF_Status) :: status
         integer :: dataRank                             ! scalar, vector, etc.
         integer, dimension(ESMF_MAXDIM) :: dataDimOrder ! 0 = not a data dim
-        integer, dimension(ESMF_MAXDIM) :: dataNonGridCounts ! for non-grid
+        integer, dimension(ESMF_MAXDIM) :: dataNonInternGridCounts ! for non-interngrid
 
       type ESMF_FieldDataMapDataMap
         type(ESMF_Status) :: status 
@@ -71,7 +71,7 @@ extern "C" {
 // non-method functions
 void FTN(c_esmc_arraydatamapserialize)(int *status, int *dataRank,
                                   int *dataDimOrder,      /* ESMF_MAXDIM ints */
-                                  int *dataNonGridCounts, /* ESMF_MAXDIM ints */
+                                  int *dataNonInternGridCounts, /* ESMF_MAXDIM ints */
                          void *buffer, int *length, int *offset, int *rc) {
 
     int i, *ip;
@@ -99,7 +99,7 @@ void FTN(c_esmc_arraydatamapserialize)(int *status, int *dataRank,
     for (i=0; i<ESMF_MAXDIM; i++)
         *ip++ = *dataDimOrder++;
     for (i=0; i<ESMF_MAXDIM; i++)
-        *ip++ = *dataNonGridCounts++;
+        *ip++ = *dataNonInternGridCounts++;
 
     *offset = (char *)ip - (char *)buffer;
 
@@ -111,7 +111,7 @@ void FTN(c_esmc_arraydatamapserialize)(int *status, int *dataRank,
 
 void FTN(c_esmc_arraydatamapdeserialize)(int *status, int *dataRank,
                                   int *dataDimOrder,      /* ESMF_MAXDIM ints */
-                                  int *dataNonGridCounts, /* ESMF_MAXDIM ints */
+                                  int *dataNonInternGridCounts, /* ESMF_MAXDIM ints */
                                   void *buffer, int *offset, int *rc) {
 
     int i, *ip;
@@ -125,7 +125,7 @@ void FTN(c_esmc_arraydatamapdeserialize)(int *status, int *dataRank,
     for (i=0; i<ESMF_MAXDIM; i++)
         *dataDimOrder++ = *ip++;
     for (i=0; i<ESMF_MAXDIM; i++)
-        *dataNonGridCounts++ = *ip++;
+        *dataNonInternGridCounts++ = *ip++;
 
     *offset = (char *)ip - (char *)buffer;
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.35 2007/05/11 21:53:20 theurich Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.36 2007/06/22 23:21:32 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
 ! FieldDataMaps are used to indicate where data 
 !   values are located relative to an individual cell/element, and
 !   store interleave information for vector and higher order data items.
-!   They also contain an ArrayDataMap which contains the data to grid
+!   They also contain an ArrayDataMap which contains the data to interngrid
 !   rank mappings.
 !
 !------------------------------------------------------------------------------
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 !
 ! This section contains the basic derived type for encapsulating the
-!  various mappings between grids, arrays, and interleaved arrays, including
+!  various mappings between interngrids, arrays, and interleaved arrays, including
 !  the internal subroutines and functions which operate on them.
 !
 !
@@ -64,9 +64,9 @@
 !------------------------------------------------------------------------------
 !  ! ESMF_FieldDataMap
 !  ! The data map type, which should fully describe the mapping
-!  ! between index orders in the grid and the memory layout of
+!  ! between index orders in the interngrid and the memory layout of
 !  ! the data array, plus other metadata info such as where the
-!  ! data is relative to the grid, and any interleaving info needed.
+!  ! data is relative to the interngrid, and any interleaving info needed.
 
       type ESMF_FieldDataMap
       sequence
@@ -80,7 +80,7 @@
 
         ! plus the additional information we need about vector ordering
         ! on individual data items and the relative locations of the data
-        ! in each grid cell.
+        ! in each interngrid cell.
         type(ESMF_Logical) :: isScalar                  ! scalar values
         integer, dimension(ESMF_MAXDIM) :: rankLength   ! len if > scalar
         type(ESMF_InterleaveType) :: interleave         ! if > scalar
@@ -119,7 +119,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.35 2007/05/11 21:53:20 theurich Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.36 2007/06/22 23:21:32 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -251,21 +251,21 @@
 !     The number of dimensions in the data {\tt ESMF\_Array}.
 !  \item [{[dataIndexList]}]
 !      An integer array, {\tt datarank} long, which specifies
-!      the mapping between rank numbers in the {\tt ESMF\_Grid}
+!      the mapping between rank numbers in the {\tt ESMF\_InternGrid}
 !      and the {\tt ESMF\_Array}.  If there is no correspondance
 !      (because the {\tt ESMF\_Array} has a higher rank than the
-!      {\tt ESMF\_Grid}) the index value will be 0.
+!      {\tt ESMF\_InternGrid}) the index value will be 0.
 !  \item [{[counts]}]
-!      An integer array, with length ({\tt datarank} minus the grid rank).
+!      An integer array, with length ({\tt datarank} minus the interngrid rank).
 !      Each entry is the default item count which would be used
-!      for those ranks which do not correspond to grid ranks when
+!      for those ranks which do not correspond to interngrid ranks when
 !      creating an {\tt ESMF\_Field} using only an
 !      an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_ArrayDataMap}.
 !  \item [{[horzRelloc]}]
-!        Relative location of data per grid cell/vertex in the horzontal
-!        grid.
+!        Relative location of data per interngrid cell/vertex in the horzontal
+!        interngrid.
 !  \item [{[vertRelloc]}]
-!        Relative location of data per grid cell/vertex in the vertical grid.
+!        Relative location of data per interngrid cell/vertex in the vertical interngrid.
 !  \item [{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -403,25 +403,25 @@
 !           The number of dimensions in the data {\tt ESMF\_Array}.
 !     \item [{[dataIndexList]}] 
 !           An integer array, {\tt datarank} long, which specifies
-!           the mapping between rank numbers in the {\tt ESMF\_Grid}
+!           the mapping between rank numbers in the {\tt ESMF\_InternGrid}
 !           and the {\tt ESMF\_Array}.  If there is no correspondance
 !           (because the {\tt ESMF\_Array} has a higher rank than the
-!           {\tt ESMF\_Grid}) the index value must be 0.
+!           {\tt ESMF\_InternGrid}) the index value must be 0.
 !     \item [{[counts]}]
-!           An integer array, with length ({\tt datarank} minus the grid rank).
+!           An integer array, with length ({\tt datarank} minus the interngrid rank).
 !           If the {\tt ESMF\_Array} is a higher rank than the
-!           {\tt ESMF\_Grid}, the additional dimensions may
+!           {\tt ESMF\_InternGrid}, the additional dimensions may
 !           optionally each have an item count defined here.
 !           This allows {\tt ESMF\_FieldCreate()} to take 
 !           an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_ArrayDataMap}
 !           and create the appropriately sized {\tt ESMF\_Array} for each DE.
-!           These values are unneeded if the ranks of the data and grid
+!           These values are unneeded if the ranks of the data and interngrid
 !           are the same, and ignored if {\tt ESMF\_FieldCreate()} is called
 !           called with an already-created {\tt ESMF\_Array}.
 !  \item [{[horzRelloc]}]
-!        Relative location of data per grid cell/vertex in the horzontal grid.
+!        Relative location of data per interngrid cell/vertex in the horzontal interngrid.
 !  \item [{[vertRelloc]}]
-!        Relative location of data per grid cell/vertex in the vertical grid.
+!        Relative location of data per interngrid cell/vertex in the vertical interngrid.
 !  \item [{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -494,28 +494,28 @@
 !           The number of dimensions in the data {\tt ESMF\_Array}.
 !     \item [{[dataIndexList]}] 
 !           An integer array, {\tt datarank} long, which specifies
-!           the mapping between rank numbers in the {\tt ESMF\_Grid}
+!           the mapping between rank numbers in the {\tt ESMF\_InternGrid}
 !           and the {\tt ESMF\_Array}.  If there is no correspondance
 !           (because the {\tt ESMF\_Array} has a higher rank than the
-!           {\tt ESMF\_Grid}) the index value must be 0.  The default is
-!           a 1-to-1 mapping with the {\tt ESMF\_Grid}.
+!           {\tt ESMF\_InternGrid}) the index value must be 0.  The default is
+!           a 1-to-1 mapping with the {\tt ESMF\_InternGrid}.
 !     \item [{[counts]}]
-!           An integer array, with length ({\tt datarank} minus the grid rank).
+!           An integer array, with length ({\tt datarank} minus the interngrid rank).
 !           If the {\tt ESMF\_Array} is a higher rank than the
-!           {\tt ESMF\_Grid}, the additional dimensions may
+!           {\tt ESMF\_InternGrid}, the additional dimensions may
 !           optionally each have an item count defined here.
 !           This allows {\tt ESMF\_FieldCreate()} to take
 !           an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_ArrayDataMap}
 !           and create the appropriately sized {\tt ESMF\_Array} for each DE.
-!           These values are unneeded if the ranks of the data and grid
+!           These values are unneeded if the ranks of the data and interngrid
 !           are the same, and ignored if {\tt ESMF\_FieldCreate()} is called
 !           called with an already-created {\tt ESMF\_Array}.  If unspecified,
 !           the default lengths are 1.
 ! \item [{[horzRelloc]}]
-!       Relative location of data per grid cell/vertex in the horizontal grid.
+!       Relative location of data per interngrid cell/vertex in the horizontal interngrid.
 !       The default is {\tt ESMF\_CELL\_CENTER}.
 ! \item [{[vertRelloc]}]
-!       Relative location of data per grid cell/vertex in the vertical grid.
+!       Relative location of data per interngrid cell/vertex in the vertical interngrid.
 !       The default is {\tt ESMF\_CELL\_UNDEFINED}.
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -591,27 +591,27 @@
 !           An {\tt ESMF\_FieldDataMap}.
 !     \item [indexorder]
 !           An {\tt ESMF\_DataIndexOrder} which specifies one of several
-!           common predefined mappings between the grid and data ranks.
+!           common predefined mappings between the interngrid and data ranks.
 !           This is simply a convenience for the common cases; there is
 !           a more general form of this call which allows the mapping to
 !           be specified as an integer array of index numbers directly.
 !     \item [{[counts]}]
-!           An integer array, with length ({\tt datarank} minus the grid rank).
+!           An integer array, with length ({\tt datarank} minus the interngrid rank).
 !           If the {\tt ESMF\_Array} is a higher rank than the
-!           {\tt ESMF\_Grid}, the additional dimensions may
+!           {\tt ESMF\_InternGrid}, the additional dimensions may
 !           optionally each have an item count defined here.
 !           This allows {\tt ESMF\_FieldCreate()} to take
 !           an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_ArrayDataMap}
 !           and create the appropriately sized {\tt ESMF\_Array} for each DE.
-!           These values are unneeded if the ranks of the data and grid
+!           These values are unneeded if the ranks of the data and interngrid
 !           are the same, and ignored if {\tt ESMF\_FieldCreate()} is called
 !           called with an already-created {\tt ESMF\_Array}.  If unspecified,
 !           the default lengths are 1.
 !  \item [{[horzRelloc]}]
-!        Relative location of data per grid cell/vertex in the horzontal
-!        grid.  The default is {\tt ESMF\_CELL\_CENTER}.
+!        Relative location of data per interngrid cell/vertex in the horzontal
+!        interngrid.  The default is {\tt ESMF\_CELL\_CENTER}.
 !  \item [{[vertRelloc]}]
-!        Relative location of data per grid cell/vertex in the vertical grid.
+!        Relative location of data per interngrid cell/vertex in the vertical interngrid.
 !        The default is {\tt ESMF\_CELL\_UNDEFINED}.
 !  \end{description}
 !
@@ -1013,7 +1013,7 @@
       call c_ESMC_ArrayDataMapSerialize(fielddatamap%adm%status, &
                                  fielddatamap%adm%dataRank, &
                                  fielddatamap%adm%dataDimOrder, &
-                                 fielddatamap%adm%dataNonGridCounts, &
+                                 fielddatamap%adm%dataNonInternGridCounts, &
                                  buffer(1), length, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -1085,7 +1085,7 @@
       call c_ESMC_ArrayDataMapDeserialize(fielddatamap%adm%status, &
                                  fielddatamap%adm%dataRank, &
                                  fielddatamap%adm%dataDimOrder, &
-                                 fielddatamap%adm%dataNonGridCounts, &
+                                 fielddatamap%adm%dataNonInternGridCounts, &
                                  buffer(1), offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &

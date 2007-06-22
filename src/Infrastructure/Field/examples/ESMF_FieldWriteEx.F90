@@ -27,11 +27,11 @@
     
   ! Local variables
   integer :: status, rc, petcount
-  type(ESMF_GridHorzStagger) :: horz_stagger
+  type(ESMF_InternGridHorzStagger) :: horz_stagger
   integer, dimension(2) :: counts
   real(ESMF_KIND_R8), dimension(2) :: min, max
   type(ESMF_DELayout) :: layout
-  type(ESMF_Grid) :: grid
+  type(ESMF_InternGrid) :: interngrid
   type(ESMF_VM) :: vm
   character (len = ESMF_MAXSTR) :: name
   real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: u2
@@ -63,19 +63,19 @@
 !-------------------------------------------------------------------------
 !   ! Example 1:
 !   !
-!   !  The user creates a simple horizontal Grid internally by passing all
+!   !  The user creates a simple horizontal InternGrid internally by passing all
 !   !  necessary information through the CreateInternal argument list.
 
   counts(1) = 10
   counts(2) = 12
-  horz_stagger = ESMF_GRID_HORZ_STAGGER_A
+  horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
   min(1) = 0.0
   max(1) = 10.0
   min(2) = 0.0
   max(2) = 12.0
-  name = "test grid 1"
+  name = "test interngrid 1"
  
-  ! Create an 2 x N layout for the Grid, if possible (if running with >= 2 PETs)
+  ! Create an 2 x N layout for the InternGrid, if possible (if running with >= 2 PETs)
   call ESMF_VMGet(vm, petCount=petcount, rc=rc)
   if (petcount .ge. 2) then
     layout = ESMF_DELayoutCreate(vm, (/ 2, petcount/2 /), rc=status)
@@ -90,21 +90,21 @@
   endif
 
 
-  grid = ESMF_GridCreateHorzXYUni(counts=counts, &
+  interngrid = ESMF_InternGridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzStagger=horz_stagger, &
                               name=name, rc=status)
       if (status.NE.ESMF_SUCCESS) then
-         print*, "'call ESMF_GridCreateHorzXYUni' failed"
+         print*, "'call ESMF_InternGridCreateHorzXYUni' failed"
          finalrc = ESMF_FAILURE
       end if
 
-  call ESMF_GridDistribute(grid, delayout=layout, rc=status)
+  call ESMF_InternGridDistribute(interngrid, delayout=layout, rc=status)
 
  
   if (status.NE.ESMF_SUCCESS) then
-     print*, "'call ESMF_GridDistribute' failed"
+     print*, "'call ESMF_InternGridDistribute' failed"
          finalrc = ESMF_FAILURE
   endif
   
@@ -132,7 +132,7 @@
      finalrc = ESMF_FAILURE
   endif
   
-  field_u2  = ESMF_FieldCreate(grid, arrayspec, &
+  field_u2  = ESMF_FieldCreate(interngrid, arrayspec, &
        horzRelloc=ESMF_CELL_CENTER, &
        haloWidth=0, name="u2", iospec=iospec, rc=status)
   if (status.NE.ESMF_SUCCESS) then
@@ -170,11 +170,11 @@
   endif
   
 
-      call ESMF_GridDestroy(grid, rc)
+      call ESMF_InternGridDestroy(interngrid, rc)
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
-          print*, "'call ESMF_GridDestroy' failed"
+          print*, "'call ESMF_InternGridDestroy' failed"
       end if
 
      if (finalrc.eq.ESMF_SUCCESS) then

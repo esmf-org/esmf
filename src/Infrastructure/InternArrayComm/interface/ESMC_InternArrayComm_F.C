@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArrayComm_F.C,v 1.5 2007/06/20 01:29:22 theurich Exp $
+// $Id: ESMC_InternArrayComm_F.C,v 1.6 2007/06/22 23:21:34 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 #include "ESMC_Base.h"
 #include "ESMC_InternArray.h"
 #include "ESMC_DELayout.h"
-#include "ESMC_Grid.h" 
+#include "ESMC_InternGrid.h" 
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:

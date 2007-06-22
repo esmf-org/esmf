@@ -1,4 +1,4 @@
-// $Id: ESMC_AppMainEx.C,v 1.21 2007/06/20 01:29:25 theurich Exp $
+// $Id: ESMC_AppMainEx.C,v 1.22 2007/06/22 23:21:44 cdeluca Exp $
 //
 // Example code which creates a main Application program.
 // This is the cap component which creates other components below it.
@@ -27,16 +27,16 @@
 #include <stdio.h>
 #include "ESMCI.h"
 
-void ATM_SetServices(ESMC_GridComp *gc, int *rc);
+void ATM_SetServices(ESMC_InternGridComp *gc, int *rc);
     
 main(int argc, char **argv) {
 //   // Local variables
      int x, y, rc, finalrc, mycell;
      char compname[32];
      ESMCI::VM *vm;
-     ESMC_GridComp *gcomp1, *gcomp2, *gcomp3, *comp4;
+     ESMC_InternGridComp *gcomp1, *gcomp2, *gcomp3, *comp4;
      ESMC_CplComp *ccomp1;
-     ESMC_Grid *grid = NULL;
+     ESMC_InternGrid *interngrid = NULL;
      ESMC_Clock *clock = NULL;
         
 //-------------------------------------------------------------------------
@@ -51,12 +51,12 @@ main(int argc, char **argv) {
 //   //
 
      vm = ESMCI::VM::getGlobal(&rc);
-     gcomp1 = ESMC_GridCompCreate("Atmosphere", ESMF_ATM, grid, 
+     gcomp1 = ESMC_InternGridCompCreate("Atmosphere", ESMF_ATM, interngrid, 
                                   "setup.rc", clock, &rc);
 
-     rc = gcomp1->ESMC_GridCompSetServices(ATM_SetServices); 
+     rc = gcomp1->ESMC_InternGridCompSetServices(ATM_SetServices); 
      if (rc != ESMF_SUCCESS) finalrc = rc;
-     printf("Gridded Comp example 1 complete\n");
+     printf("InternGridded Comp example 1 complete\n");
 
 //-------------------------------------------------------------------------
 //   // Example 2:
@@ -109,7 +109,7 @@ main(int argc, char **argv) {
 
 }
 
-void ATM_SetServices(ESMC_GridComp *gc, int *rc) {
+void ATM_SetServices(ESMC_InternGridComp *gc, int *rc) {
     // this is where it should register Init, Run, Finalize
    *rc = ESMF_SUCCESS;
 }

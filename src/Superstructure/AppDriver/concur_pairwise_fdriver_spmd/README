@@ -12,10 +12,10 @@ each stage of execution.
 
 
 To use these files as a basis for a real application begin by copying
-them to another directory.  Then edit the child Coupler and Grid
+them to another directory.  Then edit the child Coupler and InternGrid
 Component Template files to reflect the actual data passed between
 components and the computations necessary.  If needed, edit the Parent
-Grid Component file.  The AppDriver file should be useable for
+InternGrid Component file.  The AppDriver file should be useable for
 most applications without changes.
 
 

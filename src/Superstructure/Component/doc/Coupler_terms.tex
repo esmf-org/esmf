@@ -1,11 +1,11 @@
-% $Id: Coupler_terms.tex,v 1.1 2003/02/24 22:59:05 cdeluca Exp $
+% $Id: Coupler_terms.tex,v 1.2 2007/06/22 23:21:44 cdeluca Exp $
 
 \begin{description}
 
-\item [Gridded Component] \label{glos:GC}
-Gridded components are associated with one or more ESMF 
-grids.  ESMF may not place any requirements  on the physical content of a
-gridded component's data or on the nature of its computations. 
+\item [InternGridded Component] \label{glos:GC}
+InternGridded components are associated with one or more ESMF 
+interngrids.  ESMF may not place any requirements  on the physical content of a
+interngridded component's data or on the nature of its computations. 
 
 \item [Coupler or Coupling Component] \label{glos:Cplr}
 All data and actions (such as regridding) needed to implement the
@@ -23,18 +23,18 @@ associated with a single output and a single input exchange packet.
 Exchange packets may or may not contain contiguous data, and may 
 contain both field data and other types of data.
 
-\item [PE Grid] \label{glos:PEGrid} A PE grid specifies a set of 
+\item [PE InternGrid] \label{glos:PEInternGrid} A PE interngrid specifies a set of 
 processing elements, decomposition strategy (thread and process), and 
 a decomposition topology.  All components, bundles, fields and ESMF
-grids are defined on PE grids.
+interngrids are defined on PE interngrids.
 
-\item [Grid] An ESMF grid contains a physical grid 
-that defines spatial coordinates and metrics, and a distributed grid that 
-defines the decomposition of gridpoints on a PE grid.
+\item [InternGrid] An ESMF interngrid contains a physical interngrid 
+that defines spatial coordinates and metrics, and a distributed interngrid that 
+defines the decomposition of interngridpoints on a PE interngrid.
 
-\item [Grid Transform or Mapping] \label{glos:GrdTrans} A grid transform 
-or mapping is an ESMF-supplied operation that converts gridded data 
-from one physical grid and/or decomposition to another using a specified 
+\item [InternGrid Transform or Mapping] \label{glos:GrdTrans} A interngrid transform 
+or mapping is an ESMF-supplied operation that converts interngridded data 
+from one physical interngrid and/or decomposition to another using a specified 
 technique.  (I believe these terms are used interchangeably in our documents 
 so I've included both in this glossary.)
 
@@ -44,7 +44,7 @@ input or output exchange packet.
 
 \item [Field and Field Bundle] These are discussed in their own 
 requirements and design documents. A field consists of data defined 
-and decomposed on an ESMF grid, together with auxilliary metadata. 
+and decomposed on an ESMF interngrid, together with auxilliary metadata. 
 Fields and field bundles are the main objects in states and exchange 
 packets.
 

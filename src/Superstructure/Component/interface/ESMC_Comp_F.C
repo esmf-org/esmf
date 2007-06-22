@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.46 2007/06/20 01:29:26 theurich Exp $
+// $Id: ESMC_Comp_F.C,v 1.47 2007/06/22 23:21:45 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -240,7 +240,7 @@ extern "C" {
      // be the first entry in the comp derived type.
 
      // ---------- Set Services ---------------
-     void FTN(esmf_gridcompsetservices)(void *ptr, int (*func)(), int *status) {
+     void FTN(esmf_interngridcompsetservices)(void *ptr, int (*func)(), int *status) {
          ESMC_SetServ(ptr, func, status);
      }
      void FTN(esmf_cplcompsetservices)(void *ptr, int (*func)(), int *status) {
@@ -252,7 +252,7 @@ extern "C" {
      }
 
      // ---------- Set Entry Point ---------------
-     void FTN(esmf_gridcompsetentrypoint)(void *ptr, char *tname,
+     void FTN(esmf_interngridcompsetentrypoint)(void *ptr, char *tname,
                                void *func, int *phase, int *status, int slen) {
         //ESMC_SetTypedEP(ptr, tname, slen, phase, 1, FT_COMP1STAT, func, status);
         ESMC_SetTypedEP(ptr, tname, slen, phase, 0, FT_COMP2STAT, func, status);
@@ -270,7 +270,7 @@ extern "C" {
 
 
      // ---------- Set Internal State ---------------
-     void FTN(esmf_gridcompsetinternalstate)(ESMC_FTable ***ptr, 
+     void FTN(esmf_interngridcompsetinternalstate)(ESMC_FTable ***ptr, 
                                                  void **datap, int *status) {
          ESMC_SetDP(ptr, datap, status);
      }
@@ -307,7 +307,7 @@ extern "C" {
      }
 
      // ---------- Get Internal State ---------------
-     void FTN(esmf_gridcompgetinternalstate)(ESMC_FTable ***ptr, 
+     void FTN(esmf_interngridcompgetinternalstate)(ESMC_FTable ***ptr, 
                                                  void **datap, int *status) {
          ESMC_GetDP(ptr, datap, status);
      }

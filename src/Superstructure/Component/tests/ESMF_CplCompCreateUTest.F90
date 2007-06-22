@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.16 2007/04/11 22:31:02 svasquez Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.17 2007/06/22 23:21:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -123,10 +123,10 @@
 
    !------------------------------------------------------------------------
     !EX_UTest
-    ! Query the run status of a Gridded Component
+    ! Query the run status of a InternGridded Component
     bool = ESMF_CplCompIsPetLocal(cpl2, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Query run status of a Gridded Component"
+    write(name, *) "Query run status of a InternGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------

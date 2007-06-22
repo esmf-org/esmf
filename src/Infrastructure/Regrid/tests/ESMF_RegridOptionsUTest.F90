@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridOptionsUTest.F90,v 1.16 2007/04/03 16:36:25 cdeluca Exp $
+! $Id: ESMF_RegridOptionsUTest.F90,v 1.17 2007/06/22 23:21:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_RegridOptionsUTest.F90,v 1.16 2007/04/03 16:36:25 cdeluca Exp $'
+      '$Id: ESMF_RegridOptionsUTest.F90,v 1.17 2007/06/22 23:21:39 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -101,7 +101,7 @@
 !   ! execute the regrid
 !-------------------------------------------------------------------------
 
-    ! These are fields on different Grids - call Regrid to rearrange
+    ! These are fields on different InternGrids - call Regrid to rearrange
     !  the data.   The communication pattern was computed at init,
     !  this simply has to execute the send and receive equivalents.
 
@@ -344,12 +344,12 @@ contains
       integer :: status
       type(ESMF_DELayout) :: delayout
       type(ESMF_ArraySpec) :: arrayspec
-      type(ESMF_Grid) :: grid
+      type(ESMF_InternGrid) :: interngrid
       integer :: npets, de_id, decount(2)
-      integer :: counts(ESMF_MAXGRIDDIM), order(ESMF_MAXDIM)
+      integer :: counts(ESMF_MAXIGRIDDIM), order(ESMF_MAXDIM)
       real(ESMF_KIND_R8) :: mincoord(2), maxcoord(2)
       real(ESMF_KIND_R8), pointer :: idata(:,:,:)
-      type(ESMF_GridHorzStagger) :: horz_stagger
+      type(ESMF_InternGridHorzStagger) :: horz_stagger
       type(ESMF_FieldDataMap) :: datamap
 
 
@@ -370,7 +370,7 @@ contains
       if (status .ne. ESMF_SUCCESS) goto 10
 
 
-      ! Set up the grid size
+      ! Set up the interngrid size
       counts(1) = 4
       counts(2) = 60
       counts(3) = 40
@@ -382,16 +382,16 @@ contains
       maxcoord(2) = 50.0
 
       ! Specify the places on each cell at which data might be located
-      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
+      horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
 
-      grid = ESMF_GridCreateHorzXYUni(counts=counts(2:3), &
+      interngrid = ESMF_InternGridCreateHorzXYUni(counts=counts(2:3), &
                                       minGlobalCoordPerDim=mincoord, &
                                       maxGlobalCoordPerDim=maxcoord, &
                                       horzStagger=horz_stagger, &
-                                      name="source grid", rc=status)
+                                      name="source interngrid", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_GridDistribute(grid, delayout=delayout, rc=status)
+      call ESMF_InternGridDistribute(interngrid, delayout=delayout, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Set up a 3D real array
@@ -400,8 +400,8 @@ contains
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Set up a datamap to tell the framework which of the 2 axes
-      ! correspond to the grid, and which one is multiple scalar
-      ! values for the same grid cell.
+      ! correspond to the interngrid, and which one is multiple scalar
+      ! values for the same interngrid cell.
       order(1) = 0
       order(2) = 1
       order(3) = 2
@@ -410,7 +410,7 @@ contains
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Create the field 
-      userfield = ESMF_FieldCreate(grid, arrayspec=arrayspec, datamap=datamap, &
+      userfield = ESMF_FieldCreate(interngrid, arrayspec=arrayspec, datamap=datamap, &
                                   horzRelloc=ESMF_CELL_CENTER, &
                                   haloWidth=0, name="userfield", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
@@ -435,7 +435,7 @@ contains
 !-------------------------------------------------------------------------
 !--------------------------------------------------------------------------
 !   ! Make a Field where we specify the decomposition; the number of cells
-!   ! per processor is passed into the GridDistribute call.
+!   ! per processor is passed into the InternGridDistribute call.
 
     subroutine createField2(userfield, vm, result, rc)
       type(ESMF_Field), intent(out) :: userfield
@@ -447,14 +447,14 @@ contains
       integer :: status
       type(ESMF_DELayout) :: delayout
       type(ESMF_ArraySpec) :: arrayspec
-      type(ESMF_Grid) :: grid
+      type(ESMF_InternGrid) :: interngrid
       integer :: npets, countsPerDE1(8), countsPerDE2(2)
       integer :: nDE1, nDE2
       integer :: counts(3), order(3)
       real(ESMF_KIND_R8) :: mincoord(2)
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       real(ESMF_KIND_R8), pointer :: idata(:,:,:)
-      type(ESMF_GridHorzStagger) :: horz_stagger
+      type(ESMF_InternGridHorzStagger) :: horz_stagger
       type(ESMF_FieldDataMap) :: datamap
 
 
@@ -501,14 +501,14 @@ contains
                   1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
                   1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
 
-      horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
+      horz_stagger = ESMF_IGRID_HORZ_STAGGER_D_NE
 
-      grid = ESMF_GridCreateHorzXY(minGlobalCoordPerDim=mincoord, &
+      interngrid = ESMF_InternGridCreateHorzXY(minGlobalCoordPerDim=mincoord, &
                                     delta1=delta1, delta2=delta2, &
                                     horzStagger=horz_stagger, &
-                                    name="source grid", rc=status)
+                                    name="source interngrid", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridDistribute(grid, delayout=delayout, &
+      call ESMF_InternGridDistribute(interngrid, delayout=delayout, &
                                countsPerDEDim1=countsPerDE1(1:nDE1), &
                                countsPerDEDim2=countsPerDE2(1:nDE2), &
                                rc=status)
@@ -528,7 +528,7 @@ contains
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Create the field 
-      userfield = ESMF_FieldCreate(grid, arrayspec=arrayspec, datamap=datamap, &
+      userfield = ESMF_FieldCreate(interngrid, arrayspec=arrayspec, datamap=datamap, &
                                   haloWidth=0, name="userfield", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
@@ -561,23 +561,23 @@ contains
 
       ! Local variables
       integer :: i, j, k, status
-      type(ESMF_Grid) :: grid
-      integer :: counts(ESMF_MAXGRIDDIM)
+      type(ESMF_InternGrid) :: interngrid
+      integer :: counts(ESMF_MAXIGRIDDIM)
       real(ESMF_KIND_R8), pointer :: coordX(:,:), coordY(:,:), idata(:,:,:)
       type(ESMF_RelLoc) :: relloc
       real(ESMF_KIND_R8) :: pi = 3.14159
       !type(ESMF_FieldDataMap) :: datamap
 
 
-      ! get the grid and coordinates
-      call ESMF_FieldGet(userfield, grid=grid, horzRelloc=relloc, &
+      ! get the interngrid and coordinates
+      call ESMF_FieldGet(userfield, interngrid=interngrid, horzRelloc=relloc, &
                          rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_GridGetCoord(grid, dim=1, horzRelloc=relloc, &
+      call ESMF_InternGridGetCoord(interngrid, dim=1, horzRelloc=relloc, &
                              centerCoord=coordX, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridGetCoord(grid, dim=2, horzRelloc=relloc, &
+      call ESMF_InternGridGetCoord(interngrid, dim=2, horzRelloc=relloc, &
                              centerCoord=coordY, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
@@ -620,7 +620,7 @@ contains
       ! Local variables
       integer :: status, i, j, k, myDE, counts(2)
       type(ESMF_RelLoc) :: relloc
-      type(ESMF_Grid) :: grid
+      type(ESMF_InternGrid) :: interngrid
       real(ESMF_KIND_R8) :: pi, error, maxError, maxPerError
       real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
       real(ESMF_KIND_R8), dimension(:,:), pointer :: calc, coordX, coordY
@@ -629,20 +629,20 @@ contains
 
       pi = 3.14159
 
-      ! get the grid and coordinates
+      ! get the interngrid and coordinates
 
-      call ESMF_FieldGet(userfield, grid=grid, horzRelloc=relloc, rc=status)
+      call ESMF_FieldGet(userfield, interngrid=interngrid, horzRelloc=relloc, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_GridGetDELocalInfo(grid, myDE=myDE, &
+      call ESMF_InternGridGetDELocalInfo(interngrid, myDE=myDE, &
                                    localCellCountPerDim=counts, &
                                    horzRelloc=ESMF_CELL_CENTER, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_GridGetCoord(grid, dim=1, horzRelloc=relloc, &
+      call ESMF_InternGridGetCoord(interngrid, dim=1, horzRelloc=relloc, &
                              centerCoord=coordX, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridGetCoord(grid, dim=2, horzRelloc=relloc, &
+      call ESMF_InternGridGetCoord(interngrid, dim=2, horzRelloc=relloc, &
                              centerCoord=coordY, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Bundle_F.C,v 1.5 2007/03/31 05:50:52 cdeluca Exp $
+// $Id: ESMC_Bundle_F.C,v 1.6 2007/06/22 23:21:27 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Bundle_F.C,v 1.5 2007/03/31 05:50:52 cdeluca Exp $";
+             "$Id: ESMC_Bundle_F.C,v 1.6 2007/06/22 23:21:27 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -67,7 +67,7 @@ extern "C" {
 
       type ESMF_LocalBundle
         type(ESMF_Array) :: packed_data               ! local packed array
-        type(ESMF_Status) :: gridstatus
+        type(ESMF_Status) :: interngridstatus
         type(ESMF_Status) :: arraystatus
         integer :: accesscount
       end type
@@ -76,9 +76,9 @@ extern "C" {
         type(ESMF_Base) :: base                   ! base class object
         type(ESMF_Field), dimension(:), pointer :: flist
         type(ESMF_Status) :: bundlestatus
-        type(ESMF_Status) :: gridstatus
+        type(ESMF_Status) :: interngridstatus
         integer :: field_count
-        type(ESMF_Grid) :: grid                  ! associated global grid
+        type(ESMF_InternGrid) :: interngrid                  ! associated global interngrid
         type(ESMF_LocalBundle) :: localbundle    ! this differs per DE
         type(ESMF_Packflag) :: pack_flag         ! is packed data present?
         type(ESMF_BundleFieldInterleave) :: fil  ! ordering in buffer
@@ -92,7 +92,7 @@ extern "C" {
 
 // non-method functions
 void FTN(c_esmc_bundleserialize)(ESMC_Status *bundlestatus, 
-                            ESMC_Status *gridstatus, 
+                            ESMC_Status *interngridstatus, 
                             int *field_count, 
                             int *pack_flag, 
                             void *mapping, 
@@ -119,7 +119,7 @@ void FTN(c_esmc_bundleserialize)(ESMC_Status *bundlestatus,
 
     sp = (ESMC_Status *)((char *)(buffer) + *offset);
     *sp++ = *bundlestatus;
-    *sp++ = *gridstatus; 
+    *sp++ = *interngridstatus; 
     ip = (int *)sp;
     *ip++ = *field_count; 
     *ip++ = *pack_flag; 
@@ -135,7 +135,7 @@ void FTN(c_esmc_bundleserialize)(ESMC_Status *bundlestatus,
 
 // non-method functions
 void FTN(c_esmc_bundledeserialize)(ESMC_Status *bundlestatus, 
-                              ESMC_Status *gridstatus, 
+                              ESMC_Status *interngridstatus, 
                               int *field_count, 
                               int *pack_flag, 
                               void *mapping, 
@@ -148,7 +148,7 @@ void FTN(c_esmc_bundledeserialize)(ESMC_Status *bundlestatus,
 
     sp = (ESMC_Status *)((char *)(buffer) + *offset);
     *bundlestatus = *sp++;
-    *gridstatus = *sp++;
+    *interngridstatus = *sp++;
     ip = (int *)sp;
     *field_count = *ip++;
     *pack_flag = *ip++;

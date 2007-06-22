@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.108 2007/04/30 13:29:24 rosalind Exp $
+! $Id: ESMF_Bundle.F90,v 1.109 2007/06/22 23:21:27 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 ! !DESCRIPTION:
 ! The code in this file implements the {\tt ESMF\_Bundle} class, which 
 ! represents a set of {\tt ESMF\_Fields} discretized on the same 
-! {\tt ESMF\_Grid}.  {\tt ESMF\_Bundle}s offer the option to pack the data 
+! {\tt ESMF\_InternGrid}.  {\tt ESMF\_Bundle}s offer the option to pack the data 
 ! from the {\tt ESMF\_Field}s they contain into a single buffer. 
 !
 !  This type is implemented in Fortran 90 and a corresponding
@@ -44,8 +44,8 @@
       use ESMF_LogErrMod
       use ESMF_IOSpecMod
       use ESMF_InternArrayDataMapMod
-      use ESMF_GridTypesMod
-      use ESMF_GridMod
+      use ESMF_InternGridTypesMod
+      use ESMF_InternGridMod
       use ESMF_InternArrayMod
       use ESMF_FieldDataMapMod
       use ESMF_FieldMod
@@ -128,7 +128,7 @@
       sequence
       !private
         type(ESMF_InternArray) :: packed_data               ! local packed array
-        type(ESMF_Status) :: gridstatus
+        type(ESMF_Status) :: interngridstatus
         type(ESMF_Status) :: arraystatus
         integer :: accesscount
         ESMF_INIT_DECLARE
@@ -156,9 +156,9 @@
         type(ESMF_Field), dimension(:), pointer :: flist
 #endif
         type(ESMF_Status) :: bundlestatus
-        type(ESMF_Status) :: gridstatus
+        type(ESMF_Status) :: interngridstatus
 
-        type(ESMF_Grid) :: grid                  ! associated global grid
+        type(ESMF_InternGrid) :: interngrid                  ! associated global interngrid
         type(ESMF_LocalBundle) :: localbundle    ! this differs per DE
         type(ESMF_Packflag) :: pack_flag         ! is packed data present?
         type(ESMF_BundleFieldIntrlv) :: fil  ! ordering in buffer
@@ -242,9 +242,9 @@
        public ESMF_BundlePackData     ! Pack bundle data into a single 
 !                                     !   buffer
 
-      public ESMF_BundleSetGrid           ! In empty Bundle, set Grid
-!      public ESMF_BundleGetGlobalGridInfo ! Return global grid info
-!      public ESMF_BundleGetLocalGridInfo  ! Return local grid info
+      public ESMF_BundleSetInternGrid           ! In empty Bundle, set InternGrid
+!      public ESMF_BundleGetGlobalInternGridInfo ! Return global interngrid info
+!      public ESMF_BundleGetLocalInternGridInfo  ! Return local interngrid info
 
 !      public ESMF_BundleGetGlobalDataInfo ! Return global data info
 !      public ESMF_BundleGetLocalDataInfo  ! Return local data info
@@ -252,7 +252,7 @@
       public ESMF_BundleIsCongruent        ! private to framework
 
    ! These are the recommended entry points; the code itself is in Array:
-   !public ESMF_BundleRedist   ! Redistribute existing arrays, matching grids
+   !public ESMF_BundleRedist   ! Redistribute existing arrays, matching interngrids
    !public ESMF_BundleHalo     ! Halo updates
 
    !public ESMF_BundleGather   ! Combine 1 decomposed bundle into 1 on 1 DE
@@ -286,7 +286,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
 !  ! additional future signatures of ESMF_BundleCreate() functions:
 !  !function ESMF_BundleCreateCopy(bundle, subarray, name, packflag, rc)
-!  !function ESMF_BundleCreateRemap(bundle, grid, name, packflag, rc)
+!  !function ESMF_BundleCreateRemap(bundle, interngrid, name, packflag, rc)
 
 !EOPI
 
@@ -993,7 +993,7 @@ end function
 !
 ! !DESCRIPTION:
 !      Adds a single {\tt field} to an existing {\tt bundle}.  The
-!      {\tt field} must be associated with the same {\tt ESMF\_Grid} 
+!      {\tt field} must be associated with the same {\tt ESMF\_InternGrid} 
 !      as the other {\tt ESMF\_Field}s in the {\tt bundle}.   
 !      The {\tt field} is referenced by the {\tt bundle}, not copied.
 ! 
@@ -1060,7 +1060,7 @@ end function
 ! !DESCRIPTION:
 !      Adds a {\tt fieldList} to an existing {\tt ESMF\_Bundle}.  
 !      The items added from the {\tt ESMF\_fieldList} must be associated 
-!      with the same {\tt ESMF\_Grid} as the other {\tt ESMF\_Field}s in the 
+!      with the same {\tt ESMF\_InternGrid} as the other {\tt ESMF\_Field}s in the 
 !      {\tt bundle}.  The items in the {\tt fieldList} are referenced by
 !      the {\tt bundle}, not copied.  
 !
@@ -1141,7 +1141,7 @@ end function
 !   Creates an {\tt ESMF\_Bundle} from a list of existing
 !   {\tt ESMF\_Fields} stored in a {\tt fieldList}.  All items in 
 !   the {\tt fieldList} must be associated with the same 
-!   {\tt ESMF\_Grid}.  Returns a new {\tt ESMF\_Bundle}.
+!   {\tt ESMF\_InternGrid}.  Returns a new {\tt ESMF\_Bundle}.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1248,13 +1248,13 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleCreate()
-      function ESMF_BundleCreateNoFields(grid, name, iospec, rc)
+      function ESMF_BundleCreateNoFields(interngrid, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Bundle) :: ESMF_BundleCreateNoFields
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in), optional :: grid
+      type(ESMF_InternGrid), intent(in), optional :: interngrid
       character (len = *), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc             
@@ -1265,11 +1265,11 @@ end function
 !
 !   The arguments are:
 !   \begin{description}
-!   \item [{[grid]}]
-!       The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
+!   \item [{[interngrid]}]
+!       The {\tt ESMF\_InternGrid} which all {\tt ESMF\_Field}s added to this
 !       {\tt ESMF\_Bundle} must be associated with.  If not specified now, the 
-!       grid associated with the first {\tt ESMF\_Field} added will be
-!       used as the reference grid for the {\tt ESMF\_Bundle}.
+!       interngrid associated with the first {\tt ESMF\_Field} added will be
+!       used as the reference interngrid for the {\tt ESMF\_Bundle}.
 !   \item [{[name]}]
 !       {\tt ESMF\_Bundle} name.  A default name is generated if
 !       one is not specified.
@@ -1296,7 +1296,7 @@ end function
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check inputs 
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
 
       allocate(btypep, stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Bundle allocate", &
@@ -1308,16 +1308,16 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      ! If specified, set the Grid.  All Fields added to this Bundle
-      !  must be based on this same Grid.
+      ! If specified, set the InternGrid.  All Fields added to this Bundle
+      !  must be based on this same InternGrid.
       
-      if (present(grid)) then
-          call ESMF_GridValidate(grid, rc=status)
+      if (present(interngrid)) then
+          call ESMF_InternGridValidate(interngrid, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-          btypep%grid = grid
-          btypep%gridstatus = ESMF_STATUS_READY
+          btypep%interngrid = interngrid
+          btypep%interngridstatus = ESMF_STATUS_READY
       endif
 
       ! Set return values.
@@ -1403,11 +1403,11 @@ end function
 ! !IROUTINE: ESMF_BundleGet - Return information about a Bundle
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleGet(bundle, grid, fieldCount, name, rc)
+      subroutine ESMF_BundleGet(bundle, interngrid, fieldCount, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle
-      type(ESMF_Grid), intent(out), optional :: grid
+      type(ESMF_InternGrid), intent(out), optional :: interngrid
       integer, intent(out), optional :: fieldCount
       character (len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
@@ -1422,8 +1422,8 @@ end function
 !     \begin{description}
 !     \item [bundle]
 !           The {\tt ESMF\_Bundle} object to query.
-!     \item [{[grid]}]
-!           The {\tt ESMF\_Grid} associated with the {\tt bundle}.
+!     \item [{[interngrid]}]
+!           The {\tt ESMF\_InternGrid} associated with the {\tt bundle}.
 !     \item [{[fieldCount]}]
 !           Number of {\tt ESMF\_Field}s in the {\tt bundle}.
 !     \item [{[name]}]
@@ -1459,16 +1459,16 @@ end function
 
       btype => bundle%btypep
 
-      if (present(grid)) then
-          ! Check to be sure bundle has grid before trying to return it.
-          if (btype%gridstatus .ne. ESMF_STATUS_READY) then
+      if (present(interngrid)) then
+          ! Check to be sure bundle has interngrid before trying to return it.
+          if (btype%interngridstatus .ne. ESMF_STATUS_READY) then
                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Bundle does not contains a Grid", &
+                                "Bundle does not contains a InternGrid", &
                                  ESMF_CONTEXT, rc)) return
           endif
           
-          ! OK to return grid
-          grid = btype%grid
+          ! OK to return interngrid
+          interngrid = btype%interngrid
       endif
 
       if (present(fieldCount)) then
@@ -2660,14 +2660,14 @@ end function
         if (pattern%typekind .ne. candidate%typekind ) return
         if (pattern%haloWidth .ne. candidate%haloWidth) return
         if (pattern%datahorzrelloc .ne. candidate%datahorzrelloc) return
-        ! TODO: if grid is 2d, then this is not set.  can it still be tested?
+        ! TODO: if interngrid is 2d, then this is not set.  can it still be tested?
         if (pattern%datavertrelloc .ne. candidate%datavertrelloc ) return
 
         ! TODO: finish this
-        !do j=1, gridrank
+        !do j=1, interngridrank
         !if (pattern%indexorders(ESMF_MAXDIM) .ne. &
         !     candidate%indexorders(ESMF_MAXDIM)) return
-        !do j=1, datarank-gridrank 
+        !do j=1, datarank-interngridrank 
         !if (pattern%nonindexcounts(ESMF_MAXDIM) .ne. &
         !     candidate%nonindexcounts(ESMF_MAXDIM)) return
 
@@ -2991,12 +2991,12 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetGridCellCount"
+#define ESMF_METHOD "ESMF_BundleGetInternGridCellCount"
 !BOPI
-! !IROUTINE: ESMF_BundleGetGridCellCount - Return global and local grid cell count
+! !IROUTINE: ESMF_BundleGetInternGridCellCount - Return global and local interngrid cell count
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleGetGridCellCount(bundle, localcount, globalcount, rc)
+      subroutine ESMF_BundleGetInternGridCellCount(bundle, localcount, globalcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle
@@ -3005,7 +3005,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      For both the local decomposition and the global grid, return the 
+!      For both the local decomposition and the global interngrid, return the 
 !       number of items in each.
 !
 !     The arguments are:
@@ -3027,17 +3027,17 @@ end function
 !
 !  TODO: code goes here
 !
-        end subroutine ESMF_BundleGetGridCellCount
+        end subroutine ESMF_BundleGetInternGridCellCount
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetGridDimCount"
+#define ESMF_METHOD "ESMF_BundleGetInternGridDimCount"
 !BOPI
-! !IROUTINE: ESMF_BundleGetGridDimCount - Get dimensionality of Grid
+! !IROUTINE: ESMF_BundleGetInternGridDimCount - Get dimensionality of InternGrid
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleGetGridDimCount(bundle, dimcount, rc)
+      subroutine ESMF_BundleGetInternGridDimCount(bundle, dimcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle
@@ -3045,7 +3045,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Find out how many dimensions are in the {\tt ESMF\_Grid} associated with this {\tt ESMF\_Bundle}.
+!      Find out how many dimensions are in the {\tt ESMF\_InternGrid} associated with this {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3067,18 +3067,18 @@ end function
 !
 !  TODO: code goes here
 !
-        end subroutine ESMF_BundleGetGridDimCount
+        end subroutine ESMF_BundleGetInternGridDimCount
 
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetGridDimSize"
+#define ESMF_METHOD "ESMF_BundleGetInternGridDimSize"
 !BOPI
-! !IROUTINE: ESMF_BundleGetGridDimSize - Return the number of items in each dimension
+! !IROUTINE: ESMF_BundleGetInternGridDimSize - Return the number of items in each dimension
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleGetGridDimSize(bundle, locallist, globallist, rc)
+      subroutine ESMF_BundleGetInternGridDimSize(bundle, locallist, globallist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle
@@ -3087,7 +3087,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      For both the local decomposition and the global grid, 
+!      For both the local decomposition and the global interngrid, 
 !      return the number of items in each dimension.
 !
 !     The arguments are:
@@ -3112,17 +3112,17 @@ end function
 !
 !  TODO: code goes here
 !
-        end subroutine ESMF_BundleGetGridDimSize
+        end subroutine ESMF_BundleGetInternGridDimSize
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetGridIndexOrder"
+#define ESMF_METHOD "ESMF_BundleGetInternGridIndexOrder"
 !BOPI
-! !IROUTINE: ESMF_BundleGetGridIndexOrder - Return the order of the indices
+! !IROUTINE: ESMF_BundleGetInternGridIndexOrder - Return the order of the indices
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleGetGridIndexOrder(bundle, indexorder, rc)
+      subroutine ESMF_BundleGetInternGridIndexOrder(bundle, indexorder, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle
@@ -3130,7 +3130,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Return in what order the indicies of the {\tt ESMF\_Grid} is specified.
+!      Return in what order the indicies of the {\tt ESMF\_InternGrid} is specified.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3151,17 +3151,17 @@ end function
 !
 !  TODO: code goes here
 !
-        end subroutine ESMF_BundleGetGridIndexOrder
+        end subroutine ESMF_BundleGetInternGridIndexOrder
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetGridPointCount"
+#define ESMF_METHOD "ESMF_BundleGetInternGridPointCount"
 !BOPI
-! !IROUTINE: ESMF_BundleGetGridPointCount - Return global and local grids point count
+! !IROUTINE: ESMF_BundleGetInternGridPointCount - Return global and local interngrids point count
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleGetGridPointCount(bundle, localcount, globalcount, rc)
+      subroutine ESMF_BundleGetInternGridPointCount(bundle, localcount, globalcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle
@@ -3170,7 +3170,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      For both the local decomposition and the global grid, return the 
+!      For both the local decomposition and the global interngrid, return the 
 !      number of items in each.
 !
 !     The arguments are:
@@ -3194,7 +3194,7 @@ end function
 !
 !  TODO: code goes here
 !
-        end subroutine ESMF_BundleGetGridPointCount
+        end subroutine ESMF_BundleGetInternGridPointCount
 
 
 !------------------------------------------------------------------------------
@@ -4371,30 +4371,30 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleSetGrid"
+#define ESMF_METHOD "ESMF_BundleSetInternGrid"
 !BOP
-! !IROUTINE: ESMF_BundleSetGrid - Associate a Grid with an empty Bundle
+! !IROUTINE: ESMF_BundleSetInternGrid - Associate a InternGrid with an empty Bundle
 ! 
 ! !INTERFACE:
-      subroutine ESMF_BundleSetGrid(bundle, grid, rc)
+      subroutine ESMF_BundleSetInternGrid(bundle, interngrid, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle
-      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_InternGrid), intent(in) :: interngrid
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Sets the {\tt grid} for a {\tt bundle} that contains no {\tt ESMF\_Field}s. 
+!   Sets the {\tt interngrid} for a {\tt bundle} that contains no {\tt ESMF\_Field}s. 
 !   All {\tt ESMF\_Field}s added to this {\tt bundle} must be
-!   associated with the same {\tt ESMF\_Grid}.  Returns an error if 
-!   there is already an {\tt ESMF\_Grid} associated with the {\tt bundle}.
+!   associated with the same {\tt ESMF\_InternGrid}.  Returns an error if 
+!   there is already an {\tt ESMF\_InternGrid} associated with the {\tt bundle}.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item [bundle]
 !        An {\tt ESMF\_Bundle} object.
-!   \item [grid]
-!        The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
+!   \item [interngrid]
+!        The {\tt ESMF\_InternGrid} which all {\tt ESMF\_Field}s added to this
 !        {\tt ESMF\_Bundle} must have.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4422,26 +4422,26 @@ end function
 
       btype => bundle%btypep
    
-      ! here we will only let someone associate a grid with a bundle
+      ! here we will only let someone associate a interngrid with a bundle
       ! if there is not one already associated with it.  
-      if (btype%gridstatus .eq. ESMF_STATUS_READY) then
+      if (btype%interngridstatus .eq. ESMF_STATUS_READY) then
         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Bundle is already associated with a Grid", &
+                                "Bundle is already associated with a InternGrid", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      ! OK to set grid, but validate it first
-      call ESMF_GridValidate(grid, rc=status)
+      ! OK to set interngrid, but validate it first
+      call ESMF_InternGridValidate(interngrid, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-      btype%grid = grid
-      btype%gridstatus = ESMF_STATUS_READY
+      btype%interngrid = interngrid
+      btype%interngridstatus = ESMF_STATUS_READY
 
       if (present(rc)) rc = ESMF_SUCCESS
 
 
-      end subroutine ESMF_BundleSetGrid
+      end subroutine ESMF_BundleSetInternGrid
 
 
 !------------------------------------------------------------------------------
@@ -4617,7 +4617,7 @@ end function
 ! !DESCRIPTION:
 !  Add a Field reference to an existing {\tt ESMF\_Bundle}.  
 !  The {\tt ESMF\_Field} must have the
-!  same {\tt ESMF\_Grid} as the rest of the 
+!  same {\tt ESMF\_InternGrid} as the rest of the 
 !  {\tt ESMF\_Field}s in the {\tt ESMF\_Bundle}.
 !  If the {\tt ESMF\_Bundle} has
 !  packed data this will mean making a copy of the data.
@@ -4644,7 +4644,7 @@ end function
       integer :: i                                ! temp var
       type(ESMF_Field), dimension(:), pointer :: temp_flist  
                                                   ! list of fields
-      type(ESMF_Grid) :: testgrid, matchgrid
+      type(ESMF_InternGrid) :: testinterngrid, matchinterngrid
       logical :: wasempty
 
       ! Initialize return code.  Assume routine not implemented.
@@ -4676,52 +4676,52 @@ end function
       enddo
 
       ! consistency checking.  logic is: 
-      !    if bundle has grid, use it to compare against
-      !    if bundle has no grid, find first field w/ grid and use it instead
-      !    if field has no grid, skip it 
-      !    if inconsistent grid found in list, exit w/ error leaving bundle
+      !    if bundle has interngrid, use it to compare against
+      !    if bundle has no interngrid, find first field w/ interngrid and use it instead
+      !    if field has no interngrid, skip it 
+      !    if inconsistent interngrid found in list, exit w/ error leaving bundle
       !       unchanged
-      !    if all ok, then if bundle had no grid originally, set it here 
+      !    if all ok, then if bundle had no interngrid originally, set it here 
 
-      nullify(matchgrid%ptr)
-      if (btype%gridstatus .eq. ESMF_STATUS_UNINIT) then
+      nullify(matchinterngrid%ptr)
+      if (btype%interngridstatus .eq. ESMF_STATUS_UNINIT) then
           do i=1, fieldCount
-            ! an error here is not fatal; just means field has no grid yet.
-            call ESMF_FieldGet(fields(i), grid=testgrid, rc=status)
+            ! an error here is not fatal; just means field has no interngrid yet.
+            call ESMF_FieldGet(fields(i), interngrid=testinterngrid, rc=status)
             if (status .ne. ESMF_SUCCESS) cycle
 
-            ! use grid from first field in add list which contains one
-            matchgrid = testgrid
+            ! use interngrid from first field in add list which contains one
+            matchinterngrid = testinterngrid
             exit
           enddo
        else
-          ! use the grid already associated with the bundle 
-          matchgrid = btype%grid
+          ! use the interngrid already associated with the bundle 
+          matchinterngrid = btype%interngrid
        endif
   
-       ! if bundle has no grid, and all new fields have no grid, then 
-       ! we cannot do any grid consistency checks here.  so only continue
-       ! here if someone somewhere has a grid to compare against.
-       if (associated(matchgrid%ptr)) then
-          ! check matchgrid against each new grid in the add list
+       ! if bundle has no interngrid, and all new fields have no interngrid, then 
+       ! we cannot do any interngrid consistency checks here.  so only continue
+       ! here if someone somewhere has a interngrid to compare against.
+       if (associated(matchinterngrid%ptr)) then
+          ! check matchinterngrid against each new interngrid in the add list
           do i=1, fieldCount
-            call ESMF_FieldGet(fields(i), grid=testgrid, rc=status)
+            call ESMF_FieldGet(fields(i), interngrid=testinterngrid, rc=status)
             if (status .ne. ESMF_SUCCESS) cycle
 
-            if (.not.associated(matchgrid%ptr, testgrid%ptr)) then
+            if (.not.associated(matchinterngrid%ptr, testinterngrid%ptr)) then
                 if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                   "Fields with inconsistent Grids cannot be added to Bundle", &
+                   "Fields with inconsistent InternGrids cannot be added to Bundle", &
                                  ESMF_CONTEXT, rc)) return
             endif
           enddo
-          ! if this is the first field added with a grid, set the bundle grid
-          if (btype%gridstatus .eq. ESMF_STATUS_UNINIT) then
-            btype%grid = matchgrid
-            btype%gridstatus = ESMF_STATUS_READY
+          ! if this is the first field added with a interngrid, set the bundle interngrid
+          if (btype%interngridstatus .eq. ESMF_STATUS_UNINIT) then
+            btype%interngrid = matchinterngrid
+            btype%interngridstatus = ESMF_STATUS_READY
           endif
       endif
 
-      ! if we get this far, either no one has any grids, or the grids
+      ! if we get this far, either no one has any interngrids, or the interngrids
       ! have passed the consistency check.  add them to the bundle.
 
       ! Add the fields in the list, checking for consistency.
@@ -4780,11 +4780,11 @@ end function
       ! unless all the fields are required to contain data before they are
       ! added to the bundle, we cannot set the congruent flag yet -- it is
       ! possible with the current interfaces to add empty fields to a bundle
-      ! and then add inconsistent grids to the fields -- which needs to be
+      ! and then add inconsistent interngrids to the fields -- which needs to be
       ! avoided; but also the data can be added afterwards and there is no
       ! obvious time to check for consistency/congruency.   the suggested
       ! fix is that a field being added to a bundle must already contain both
-      ! a grid and the data array, so we can do the checking here.
+      ! a interngrid and the data array, so we can do the checking here.
 
       ! all the handling below is to fool around with maintaining information
       ! about whether the data fields inside this bundle are identical in
@@ -4912,7 +4912,7 @@ end function
 !
 ! !DESCRIPTION:
 !   Constructs an {\tt ESMF\_Bundle} from a list of existing
-!   gridded {\tt ESMF\_Fields}.  This routine requires an existing
+!   interngridded {\tt ESMF\_Fields}.  This routine requires an existing
 !   {\tt ESMF\_Bundle} type as an input and fills in
 !   the internals.  {\tt ESMF\_BundleCreateNew()} does
 !   the allocation of an {\tt ESMF\_Bundle} type first and then
@@ -5038,9 +5038,9 @@ end function
       ! As fields are added, the first non-compliant one turns the flag
       ! to false, and after it is false, there is no way to set it back
       ! to true.
-      btype%localbundle%gridstatus = ESMF_STATUS_UNINIT
+      btype%localbundle%interngridstatus = ESMF_STATUS_UNINIT
       btype%localbundle%arraystatus = ESMF_STATUS_UNINIT
-      btype%gridstatus = ESMF_STATUS_UNINIT
+      btype%interngridstatus = ESMF_STATUS_UNINIT
       btype%isCongruent = .TRUE.
    
       btype%field_count = 0
@@ -5169,9 +5169,9 @@ end function
         type(ESMF_Base) :: base                   ! base class object
         type(ESMF_Field), dimension(:), pointer :: flist
         type(ESMF_Status) :: bundlestatus
-        type(ESMF_Status) :: gridstatus
+        type(ESMF_Status) :: interngridstatus
         integer :: field_count
-        type(ESMF_Grid) :: grid                  ! associated global grid
+        type(ESMF_InternGrid) :: interngrid                  ! associated global interngrid
         type(ESMF_LocalBundle) :: localbundle    ! this differs per DE
         type(ESMF_Packflag) :: pack_flag         ! is packed data present?
         type(ESMF_BundleFieldIntrlv) :: fil  ! ordering in buffer
@@ -5191,7 +5191,7 @@ end function
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_BundleSerialize(bp%bundlestatus, bp%gridstatus, &
+      call c_ESMC_BundleSerialize(bp%bundlestatus, bp%interngridstatus, &
                                  bp%field_count, bp%pack_flag, &
                                  bp%mapping, bp%iostatus, &
                                  buffer(1), length, offset, localrc)
@@ -5199,8 +5199,8 @@ end function
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      if (bp%gridstatus .eq. ESMF_STATUS_READY) then
-          call ESMF_GridSerialize(bp%grid, buffer, length, offset, localrc)
+      if (bp%interngridstatus .eq. ESMF_STATUS_READY) then
+          call ESMF_InternGridSerialize(bp%interngrid, buffer, length, offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
@@ -5311,7 +5311,7 @@ end function
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_BundleDeserialize(bp%bundlestatus, bp%gridstatus, &
+      call c_ESMC_BundleDeserialize(bp%bundlestatus, bp%interngridstatus, &
                                  bp%field_count, bp%pack_flag, &
                                  bp%mapping, bp%iostatus, &
                                  buffer(1), offset, localrc)
@@ -5319,8 +5319,8 @@ end function
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      if (bp%gridstatus .eq. ESMF_STATUS_READY) then
-          bp%grid = ESMF_GridDeserialize(vm, buffer, offset, localrc)
+      if (bp%interngridstatus .eq. ESMF_STATUS_READY) then
+          bp%interngrid = ESMF_InternGridDeserialize(vm, buffer, offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
