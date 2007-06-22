@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.19 2007/06/22 04:48:42 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.20 2007/06/22 16:45:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -86,7 +86,6 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
       int *dimExtent, int **indexList, ESMC_Logical regDecompFlagArg,
       InterfaceInt *connectionList, DELayout *delayout, VM *vm);
     int destruct(void);
-    
   public:
     // create() and destroy()
     static DistGrid *create(InterfaceInt *minIndex,
@@ -132,7 +131,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int getDimContigFlag(int de, int dim, int *rc) const;
     const int *getDimExtent()       const {return dimExtent;}
     const int *getLocalIndexList(int de, int dim, int *rc) const;
-    DELayout *getDELayout()         const {return delayout;}
+    DELayout *getDelayout()         const {return delayout;}
     ESMC_Logical getRegDecompFlag() const {return regDecompFlag;}
     int getSequenceIndex(int de, int *index) const;
     int getSequenceDe(int seqindex) const;
@@ -141,6 +140,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int setArbIdx(InterfaceInt *argIndices);
     // misc.
     int print(void) const;
+    // serialize() and deserialize()
     int serialize(char *buffer, int *length, int *offset) const;
     static DistGrid *deserialize(char *buffer, int *offset);
     // connections

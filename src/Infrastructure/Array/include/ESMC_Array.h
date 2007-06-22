@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.55 2007/06/22 04:48:41 theurich Exp $
+// $Id: ESMC_Array.h,v 1.56 2007/06/22 16:45:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -119,24 +119,26 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       InterfaceInt *lboundsArg, InterfaceInt *uboundsArg, int *rc);
     static int destroy(Array **array);
     // get() and set()
-    const char *getName(void)       const {return ESMC_BaseGetName();}
+    ESMC_TypeKind getTypekind(void)         const {return typekind;}
+    int getRank(void)                       const {return rank;}
+    ESMC_LocalArray **getLocalarrayList(void) const {return larrayList;}
+    DistGrid *getDistgrid(void)             const {return distgrid;}
+    DELayout *getDelayout(void)             const {return delayout;}
+    ESMC_IndexFlag getIndexflag(void)       const {return indexflag;}
+    const int *getDimmap(void)              const {return dimmap;}
+    const int *getInverseDimmap(void)       const {return inverseDimmap;}
+    const int *getExclusiveLBound(void)     const {return exclusiveLBound;}
+    const int *getExclusiveUBound(void)     const {return exclusiveUBound;}
+    const int *getComputationalLBound(void) const {return computationalLBound;}
+    const int *getComputationalUBound(void) const {return computationalUBound;}
+    const int *getTotalLBound(void)         const {return totalLBound;}
+    const int *getTotalUBound(void)         const {return totalUBound;}
+    int getLinearIndexExclusive(int localDe, int *index, int *rc=NULL) const;
+    const char *getName(void)               const {return ESMC_BaseGetName();}
     int setName(char *name){return ESMC_BaseSetName(name, "Array");}
-    int get(ESMC_TypeKind *typekind, int *rank,
-      ESMC_LocalArray **localArrayList, int localArrayListCount,
-      DistGrid **distgridArg, DELayout **delayoutArg,
-      ESMC_IndexFlag *indexflag, InterfaceInt *dimmapArg,
-      InterfaceInt *inverseDimmapArg,
-      InterfaceInt *exclusiveLBoundArg,
-      InterfaceInt *exclusiveUBoundArg,
-      InterfaceInt *computationalLBoundArg,
-      InterfaceInt *computationalUBoundArg,
-      InterfaceInt *totalLBoundArg, InterfaceInt *totalUBoundArg,
-      InterfaceInt *computationalLWidthArg,
-      InterfaceInt *computationalUWidthArg,
-      InterfaceInt *totalLWidthArg, InterfaceInt *totalUWidthArg);
-    int getLinearIndexExclusive(int localDe, int *index) const;
     // misc.
     int print(void) const;
+    // serialize() and deserialize()
     int serialize(char *buffer, int *length, int *offset) const;
     int deserialize(char *buffer, int *offset);
     // comms

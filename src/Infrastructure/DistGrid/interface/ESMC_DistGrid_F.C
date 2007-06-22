@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.16 2007/06/22 04:48:42 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.17 2007/06/22 16:45:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -57,8 +57,7 @@ extern "C" {
     ESMCI::VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterd()"
-  if (rc!=NULL)
-    *rc = ESMC_RC_NOT_IMPL;
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
       opt_delayout = NULL;
@@ -185,12 +184,12 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // fill simple return values
     if (ESMC_NOT_PRESENT_FILTER(delayout) != ESMC_NULL_POINTER)
-      *delayout = (*ptr)->getDELayout();
-    if (patchCount != ESMC_NULL_POINTER)
+      *delayout = (*ptr)->getDelayout();
+    if (ESMC_NOT_PRESENT_FILTER(patchCount) != ESMC_NULL_POINTER)
       *patchCount = (*ptr)->getPatchCount();
-    if (dimCount != ESMC_NULL_POINTER)
+    if (ESMC_NOT_PRESENT_FILTER(dimCount) != ESMC_NULL_POINTER)
       *dimCount = (*ptr)->getDimCount();
-    if (regDecompFlag != ESMC_NULL_POINTER)
+    if (ESMC_NOT_PRESENT_FILTER(regDecompFlag) != ESMC_NULL_POINTER)
       *regDecompFlag = (*ptr)->getRegDecompFlag();
     // fill dimExtent
     if (*dimExtent != NULL){
@@ -205,7 +204,7 @@ extern "C" {
           "- 1st dim of dimExtent array must be of size 'dimCount'", rc);
         return;
       }
-      if ((*dimExtent)->extent[1] < (*ptr)->getDELayout()->getDeCount()){
+      if ((*dimExtent)->extent[1] < (*ptr)->getDelayout()->getDeCount()){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dim of dimExtent array must be of size 'deCount'", rc);
         return;
@@ -214,7 +213,7 @@ extern "C" {
       // which are larger than dimCount x deCount. Consequently it is necessary
       // to memcpy strips of contiguous data since it cannot be assumed that
       // all data ends up contiguous in the dimExtent array.
-      for (int i=0; i<(*ptr)->getDELayout()->getDeCount(); i++)
+      for (int i=0; i<(*ptr)->getDelayout()->getDeCount(); i++)
         memcpy(&((*dimExtent)->array[i*((*dimExtent)->extent[0])]),
           &(((*ptr)->getDimExtent())[i*(*ptr)->getDimCount()]),
           sizeof(int)*(*ptr)->getDimCount());
@@ -227,14 +226,14 @@ extern "C" {
           "- patchList array must be of rank 1", rc);
         return;
       }
-      if ((*patchList)->extent[0] < (*ptr)->getDELayout()->getDeCount()){
+      if ((*patchList)->extent[0] < (*ptr)->getDelayout()->getDeCount()){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of patchList array must be of size 'deCount'", rc);
         return;
       }
       // fill in values
       memcpy((*patchList)->array, (*ptr)->getDePatchList(),
-        sizeof(int)*(*ptr)->getDELayout()->getDeCount());
+        sizeof(int)*(*ptr)->getDelayout()->getDeCount());
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
