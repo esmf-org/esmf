@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.24 2007/06/13 22:36:30 samsoncheung Exp $
+// $Id: ESMC_Util.C,v 1.25 2007/06/22 20:49:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.24 2007/06/13 22:36:30 samsoncheung Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.25 2007/06/22 20:49:47 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -646,16 +646,17 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
     char *cp, *ctmp;
     int clen;
 
+    if (slen == 0) return NULL; // nothing to do, but not an error
+    
     // minor idiotproofing
-    if ((src == NULL) || (src[0] == '\0') || (slen <= 0)) {
+    if ((src == NULL) || (src[0] == '\0') || (slen < 0)) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                             "bad count or NULL pointer", NULL);
        return NULL;
     }
 
     // count back from end of string to last non-blank character.
-    for (clen=slen, cp = &src[slen-1]; (*cp == ' ') && (clen > 0); cp--, clen--)
-        ;
+    for (clen=slen, cp = &src[slen-1];(*cp == ' ') && (clen > 0); cp--, clen--);
 
     // make new space and leave room for a null terminator
     ctmp = new char[clen+1];
@@ -702,8 +703,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
     }
 
     // count back from end of string to last non-blank character.
-    for (clen=slen, cp = &src[slen-1]; (*cp == ' ') && (clen > 0); cp--, clen--)
-        ;
+    for (clen=slen, cp = &src[slen-1];(*cp == ' ') && (clen > 0); cp--, clen--);
 
     // make sure dst space is long enough 
     if (clen >= dlen) {
