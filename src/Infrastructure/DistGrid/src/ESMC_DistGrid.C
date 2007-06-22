@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.19 2007/06/22 04:48:42 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.20 2007/06/22 20:52:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.19 2007/06/22 04:48:42 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.20 2007/06/22 20:52:31 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1077,7 +1077,7 @@ DistGrid *DistGrid::create(
 int DistGrid::destroy(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -1133,7 +1133,7 @@ int DistGrid::destroy(
 int DistGrid::construct(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -1268,7 +1268,7 @@ int DistGrid::construct(
 int DistGrid::destruct(void){
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 //
 // !DESCRIPTION:
@@ -1327,7 +1327,7 @@ int DistGrid::destruct(void){
 int DistGrid::print()const{
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 //
 // !DESCRIPTION:
@@ -1962,7 +1962,7 @@ DistGrid *DistGrid::deserialize(
 int DistGrid::connection(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -2070,7 +2070,7 @@ int DistGrid::connection(
 //
 int DistGrid::setArbIdx(
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //

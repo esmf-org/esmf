@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.84 2007/06/22 16:45:55 theurich Exp $
+// $Id: ESMC_Array.C,v 1.85 2007/06/22 20:52:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.84 2007/06/22 16:45:55 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.85 2007/06/22 20:52:31 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -104,12 +104,11 @@ Array::Array(
 //-----------------------------------------------------------------------------
   // local vars
   int localrc;                // local return code
-
+   
   // initialize return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
-  if (rc!=NULL)
-    *rc = ESMC_RC_NOT_IMPL;
-
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  
   // fill in the Array object
   typekind = typekindArg;
   rank = rankArg;
@@ -236,7 +235,6 @@ Array::~Array(){
 //EOPI
 //-----------------------------------------------------------------------------
   // garbage collection
-  delete [] deList;
   for (int i=0; i<localDeCount; i++)
     ESMC_LocalArrayDestroy(larrayList[i]);
   delete [] larrayList;
@@ -255,6 +253,7 @@ Array::~Array(){
   delete [] inverseDimmap;
   delete [] contiguousFlag;
   delete [] deCellCount;
+  delete [] deList;
 }
 //-----------------------------------------------------------------------------
 
@@ -300,12 +299,11 @@ Array *Array::create(
 //EOPI
 //-----------------------------------------------------------------------------
   // local vars
-  int status;                 // local error status
+  int localrc;                // local return code
    
   // initialize return code; assume routine not implemented
-  status = ESMC_RC_NOT_IMPL;
-  if (rc!=NULL)
-    *rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
   
   // check the input and get the information together to call construct()
   // larrayListArg -> typekind/rank
@@ -452,11 +450,9 @@ Array *Array::create(
       int de = localDeList[i];
       for (int j=0; j<dimCount; j++){
         // obtain indexList for this DE and dim
-        const int *indexList = distgrid->getLocalIndexList(i, j+1, &status);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
-          rc)){
+        const int *indexList = distgrid->getLocalIndexList(i, j+1, &localrc);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
           return ESMC_NULL_POINTER;
-        }
         // check that this dim has a contiguous index list
         for (int k=1; k<dimExtent[de*dimCount+j]; k++){
           if (indexList[k] != indexList[k-1]+1){
@@ -678,10 +674,9 @@ Array *Array::create(
     }
     // adjust LocalArray object for specific lbounds and ubounds
     larrayList[i] = larrayListArg[i]->
-      ESMC_LocalArrayAdjust(temp_lbounds, temp_ubounds, &status);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+      ESMC_LocalArrayAdjust(temp_lbounds, temp_ubounds, &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
-    }
   }
   delete [] temp_counts;
   delete [] temp_lbounds;
@@ -694,10 +689,9 @@ Array *Array::create(
       exclusiveUBound, computationalLBound, computationalUBound,
       totalLBound, totalUBound, tensorCount, lboundsArray, uboundsArray,
       staggerLoc, vectorDim, dimmapArray, inverseDimmapArray, indexflag,
-      &status);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+      &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
-    }
   }catch(...){
      // allocation error
      ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
@@ -758,12 +752,11 @@ Array *Array::create(
 //EOPI
 //-----------------------------------------------------------------------------
   // local vars
-  int status;                 // local error status
+  int localrc;                // local return code
    
   // initialize return code; assume routine not implemented
-  status = ESMC_RC_NOT_IMPL;
-  if (rc!=NULL)
-    *rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
   
   // check the input and get the information together to call construct()
   // arrayspec -> typekind/rank
@@ -884,11 +877,9 @@ Array *Array::create(
       int de = localDeList[i];
       for (int j=0; j<dimCount; j++){
         // obtain indexList for this DE and dim
-        const int *indexList = distgrid->getLocalIndexList(i, j+1, &status);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
-          rc)){
+        const int *indexList = distgrid->getLocalIndexList(i, j+1, &localrc);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
           return ESMC_NULL_POINTER;
-        }
         // check that this dim has a contiguous index list
         for (int k=1; k<dimExtent[de*dimCount+j]; k++){
           if (indexList[k] != indexList[k-1]+1){
@@ -1082,10 +1073,9 @@ Array *Array::create(
       exclusiveUBound, computationalLBound, computationalUBound,
       totalLBound, totalUBound, tensorCount, lboundsArray, uboundsArray,
       staggerLoc, vectorDim, dimmapArray, inverseDimmapArray, indexflag,
-      &status);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+      &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
-    }
   }catch(...){
      // allocation error
      ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
@@ -1122,7 +1112,7 @@ Array *Array::create(
 int Array::destroy(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -1133,20 +1123,18 @@ int Array::destroy(
 //EOPI
 //-----------------------------------------------------------------------------
   // local vars
-  int localrc;                // automatic variable for local return code
-  int *rc = &localrc;         // pointer to localrc
-  int status;                 // local error status
+  int localrc;                // local return code
+  int rc;                     // final return code
 
   // initialize return code; assume routine not implemented
-  status = ESMC_RC_NOT_IMPL;
-  if (rc!=NULL)
-    *rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (array == ESMC_NULL_POINTER || *array == ESMC_NULL_POINTER){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to Array", rc);
-    return localrc;
+      "- Not a valid pointer to Array", &rc);
+    return rc;
   }
 
   // delete Array object
@@ -1154,7 +1142,8 @@ int Array::destroy(
   *array = ESMC_NULL_POINTER;
   
   // return successfully
-  return ESMF_SUCCESS;
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
@@ -1227,7 +1216,7 @@ int Array::getLinearIndexExclusive(
 int Array::print()const{
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 //
 // !DESCRIPTION:
@@ -1236,19 +1225,18 @@ int Array::print()const{
 //EOPI
 //-----------------------------------------------------------------------------
   // local vars
-  int localrc;                // automatic variable for local return code
-  int *rc = &localrc;         // pointer to localrc
-  int status;                 // local error status
+  int localrc;                // local return code
+  int rc;                     // final return code
 
   // initialize return code; assume routine not implemented
-  status = ESMC_RC_NOT_IMPL;
-  *rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
   if (this == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to Array", rc);
-    return localrc;
+      "- Not a valid pointer to Array", &rc);
+    return rc;
   }
 
   // print info about the ESMCI::Array object
@@ -1290,7 +1278,8 @@ int Array::print()const{
   }
   printf("--- ESMCI::Array::print end ---\n");
   // return successfully
-  return ESMF_SUCCESS;
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
@@ -1311,46 +1300,48 @@ int Array::print()const{
 int Array::serialize(
 //
 // !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
+//    int return code
 //
 // !ARGUMENTS:
   char *buffer,          // inout - byte stream to fill
   int *length,           // inout - buf length
-  int *offset) const {   // inout - original offset, updated to point 
+  int *offset)const{     // inout - original offset, updated to point 
                          //         to first free byte after current obj info
 //
 // !DESCRIPTION:
 //    Turn info in array class into a stream of bytes.
 //
 //EOPI
+//-----------------------------------------------------------------------------
   // local vars
-  int localrc;                // automatic variable for local return code
-  int *rc = &localrc;         // pointer to localrc
-  int status;                 // local error status
+  int localrc;                // local return code
+  int rc;                     // final return code
 
   // initialize return code; assume routine not implemented
-  status = ESMC_RC_NOT_IMPL;
-  *rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
+  // Prepare pointer variables of different types
   char *cp;
   int *ip;
   ESMC_TypeKind *dkp;
   ESMC_IndexFlag *ifp;
 
+  // Check if buffer has enough free memory to hold object
   if ((*length - *offset) < sizeof(Array)){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-      "Buffer too short to add an Array object", rc);
-    return localrc;
+      "Buffer too short to add an Array object", &rc);
+    return rc;
   }
 
   // First, serialize the base class,
-  status = ESMC_Base::ESMC_Serialize(buffer, length, offset);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
-    return localrc;
+  localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
   // Serialize the DistGrid
-  status = distgrid->serialize(buffer, length, offset);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
-    return localrc;
+  localrc = distgrid->serialize(buffer, length, offset);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
   // Then, serialize Array meta data
   dkp = (ESMC_TypeKind *)(buffer + *offset);
   *dkp++ = typekind;
@@ -1367,7 +1358,8 @@ int Array::serialize(
   *offset = (cp - buffer);
   
   // return successfully
-  return ESMF_SUCCESS;
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 
 
@@ -1381,35 +1373,37 @@ int Array::serialize(
 int Array::deserialize(
 //
 // !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
+//    int return code
 //
 // !ARGUMENTS:
   char *buffer,          // in - byte stream to read
-  int *offset) {         // inout - original offset, updated to point 
+  int *offset){          // inout - original offset, updated to point 
                          //         to first free byte after current obj info
 //
 // !DESCRIPTION:
 //    Turn a stream of bytes into an object.
 //
 //EOPI
+//-----------------------------------------------------------------------------
   // local vars
-  int localrc;                // automatic variable for local return code
-  int *rc = &localrc;         // pointer to localrc
-  int status;                 // local error status
-  
-  // initialize return code; assume routine not implemented
-  status = ESMC_RC_NOT_IMPL;
-  *rc = ESMC_RC_NOT_IMPL;
+  int localrc;                // local return code
+  int rc;                     // final return code
 
+  // initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
+
+  // Prepare pointer variables of different types
   char *cp;
   int *ip;
   ESMC_TypeKind *dkp;
   ESMC_IndexFlag *ifp;
 
   // First, deserialize the base class
-  status = ESMC_Base::ESMC_Deserialize(buffer, offset);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
-    return localrc;
+  localrc = ESMC_Base::ESMC_Deserialize(buffer, offset);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
   // Deserialize the DistGrid
   distgrid = DistGrid::deserialize(buffer, offset);
   // Pull DELayout out of DistGrid
@@ -1429,18 +1423,18 @@ int Array::deserialize(
   cp = (char *)ip;
   *offset = (cp - buffer);
   
-  // setting constant values for proxy objects
-  localDeCount = 0;
-  localDeList = NULL;
-  larrayList = new ESMC_LocalArray*[localDeCount];
-  larrayBaseAddrList = new void*[localDeCount];
-  for (int i=0; i<localDeCount; i++){
-    larrayList[i] = NULL;
-    larrayBaseAddrList[i] = NULL;
-  }
-  
+  // set values with local dependency
+  localDeCount = 0;                         // no DE on proxy object
+  localDeList = NULL;                       // no DE on proxy object
+  larrayList = new ESMC_LocalArray*[0];     // no DE on proxy object
+  larrayBaseAddrList = new void*[0];        // no DE on proxy object
+  deList = new int[deCount];
+  for (int i=0; i<deCount; i++)
+    deList[i] = -1;                         // indicate not a local DE
+
   // return successfully
-  return ESMF_SUCCESS;
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 
 
@@ -1460,7 +1454,7 @@ int Array::deserialize(
 int Array::scatter(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -1980,7 +1974,7 @@ typedef struct{
 int Array::sparseMatMulStore(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -1999,79 +1993,78 @@ int Array::sparseMatMulStore(
 //EOPI
 //-----------------------------------------------------------------------------
   // local vars
-  int localrc;                // automatic variable for local return code
-  int *rc = &localrc;         // pointer to localrc
-  int status;                 // local error status
+  int localrc;                // local return code
+  int rc;                     // final return code
 
   // initialize return code; assume routine not implemented
-  status = ESMC_RC_NOT_IMPL;
-  *rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // get the current VM and VM releated information
-  VM *vm = VM::getCurrent(&status);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
-    return localrc;
+  VM *vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
 
   // error checking for input
   if (srcArray == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to srcArray", rc);
-    return localrc;
+      "- Not a valid pointer to srcArray", &rc);
+    return rc;
   }
   if (dstArray == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to dstArray", rc);
-    return localrc;
+      "- Not a valid pointer to dstArray", &rc);
+    return rc;
   }
   if (localPet == rootPet){
     // only rootPet must provide valid factorList and factorIndexList args
     if (factorIndexList == NULL){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to factorIndexList array", rc);
-      return localrc;
+        "- Not a valid pointer to factorIndexList array", &rc);
+      return rc;
     }
     if (factorIndexList->dimCount != 2){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-        "- factorIndexList array must be of rank 2", rc);
-      return localrc;
+        "- factorIndexList array must be of rank 2", &rc);
+      return rc;
     }
     if (factorIndexList->extent[0] != 2){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-        "- first dimension of factorIndexList array must be of size 2", rc);
-      return localrc;
+        "- first dimension of factorIndexList array must be of size 2", &rc);
+      return rc;
     }
     if (factorIndexList->extent[1] != factorListCount){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
         "- second dimension of factorIndexList does not match factorListCount",
-        rc);
-      return localrc;
+        &rc);
+      return rc;
     }
   }
   
   // create and initialize the RouteHandle
-  *routehandle = ESMC_RouteHandleCreate(&status);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
-    return localrc;
+  *routehandle = ESMC_RouteHandleCreate(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
   // todo: I have no idea what some of these settings do, just copied it for now
   // todo: from what I saw being set in ESMF_IArrayHaloStoreIndex()
-  status =
+  localrc =
     (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYSPARSEMATMULHANDLE);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
-    return localrc;
-  status = (*routehandle)->ESMC_RouteHandleSetRouteCount(1);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
-    return localrc;
-  status = (*routehandle)->ESMC_RouteHandleSetRMapType(ESMC_1TO1HANDLEMAP);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
-    return localrc;
-  status = (*routehandle)->ESMC_RouteHandleSetTVCount(0);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
-    return localrc;
-  status = (*routehandle)->ESMC_RouteHandleSetTVMapType(ESMC_NOHANDLEMAP);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
-    return localrc;
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  localrc = (*routehandle)->ESMC_RouteHandleSetRouteCount(1);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  localrc = (*routehandle)->ESMC_RouteHandleSetRMapType(ESMC_1TO1HANDLEMAP);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  localrc = (*routehandle)->ESMC_RouteHandleSetTVCount(0);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  localrc = (*routehandle)->ESMC_RouteHandleSetTVMapType(ESMC_NOHANDLEMAP);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
 
   // -->> here the RouteHandle needs to be filled with info!!!!  
   // 1) memory needs to be allocated to hold the factor lists for the dstArray
@@ -2082,9 +2075,9 @@ int Array::sparseMatMulStore(
   // the "storage" variable holds all the allocations needed for sparse mat mul
   ArraySparseMatMulStorage *storage = new ArraySparseMatMulStorage;
   // attach "storage" to routehandle
-  status = (*routehandle)->ESMC_RouteHandleSetStorage(storage);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
-    return localrc;
+  localrc = (*routehandle)->ESMC_RouteHandleSetStorage(storage);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
       
   // allocate and fill the factorStorage on all PETs
   storage->factorStorage = new FactorStorage;
@@ -2127,7 +2120,7 @@ int Array::sparseMatMulStore(
   int totalLocalCellCount = 0; // reset
   for (int i=0; i<dstArray->localDeCount; i++){
     int de = dstArray->localDeList[i];
-    int cellCount = dstArray->distgrid->getDeCellCount(de, &status);
+    int cellCount = dstArray->distgrid->getDeCellCount(de, &localrc);
     totalLocalCellCount += cellCount;
   }
   TermStorage **tempTermStorage = new TermStorage*[totalLocalCellCount];
@@ -2330,16 +2323,16 @@ int Array::sparseMatMulStore(
   // really fit together ...
   
   // create the Route
-//  ESMC_Route *route = ESMC_RouteCreate(vm, &status);
-//  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
-//    return localrc;
+//  ESMC_Route *route = ESMC_RouteCreate(vm, &localrc);
+//  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+//    return rc;
 
   // -->> here the Route needs to be filled with info!!!!  
   // 1) a route needs to be determined for the srcArray elements to be
   //    communicated to the temporary memory on the dstArray side.
     
   // store the Route in the RouteHandle
-//  status = (*routehandle)->ESMC_RouteHandleSetRoute(0, route);
+//  localrc = (*routehandle)->ESMC_RouteHandleSetRoute(0, route);
   
   
   // delete the local factor storage as it is not needed any longer
@@ -2350,7 +2343,9 @@ int Array::sparseMatMulStore(
   delete [] storage->factorStorage->factorList;
   delete [] storage->factorStorage;
     
-  return ESMF_SUCCESS;
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
@@ -2365,7 +2360,7 @@ int Array::sparseMatMulStore(
 int Array::sparseMatMul(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -2380,31 +2375,30 @@ int Array::sparseMatMul(
 //EOPI
 //-----------------------------------------------------------------------------
   // local vars
-  int localrc;                // automatic variable for local return code
-  int *rc = &localrc;         // pointer to localrc
-  int status;                 // local error status
+  int localrc;                // local return code
+  int rc;                     // final return code
 
   // initialize return code; assume routine not implemented
-  status = ESMC_RC_NOT_IMPL;
-  *rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // get the current VM and VM releated information
-  VM *vm = VM::getCurrent(&status);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
-    return localrc;
+  VM *vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
 
   // error checking for input
   if (srcArray == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to srcArray", rc);
-    return localrc;
+      "- Not a valid pointer to srcArray", &rc);
+    return rc;
   }
   if (dstArray == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to dstArray", rc);
-    return localrc;
+      "- Not a valid pointer to dstArray", &rc);
+    return rc;
   }
 
   // get a handle on the storage in routehandle
@@ -2451,7 +2445,9 @@ int Array::sparseMatMul(
   for (int i=0; i<storage->sendTable->count; i++)
     vm->commwait(&(storage->sendTable->commh[i]));
   
-  return ESMF_SUCCESS;
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
@@ -2466,7 +2462,7 @@ int Array::sparseMatMul(
 int Array::sparseMatMulRelease(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -2479,13 +2475,12 @@ int Array::sparseMatMulRelease(
 //EOPI
 //-----------------------------------------------------------------------------
   // local vars
-  int localrc;                // automatic variable for local return code
-  int *rc = &localrc;         // pointer to localrc
-  int status;                 // local error status
+  int localrc;                // local return code
+  int rc;                     // final return code
 
   // initialize return code; assume routine not implemented
-  status = ESMC_RC_NOT_IMPL;
-  *rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // get a handle on the storage in routehandle
   ArraySparseMatMulStorage *storage = 
@@ -2523,7 +2518,8 @@ int Array::sparseMatMulRelease(
   routehandle->ESMC_RouteHandleSetStorage(NULL);
   
   // return successfully
-  return ESMF_SUCCESS;
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
@@ -2567,7 +2563,7 @@ int Array::sparseMatMulRelease(
 int ESMC_newArray::ESMC_newArrayConstruct(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -2819,7 +2815,7 @@ int ESMC_newArray::ESMC_newArrayConstruct(
 int ESMC_newArray::ESMC_newArrayDestruct(void){
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 //
 // !DESCRIPTION:
@@ -2842,7 +2838,7 @@ int ESMC_newArray::ESMC_newArrayDestruct(void){
 int ESMC_newArray::ESMC_newArrayScatter(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -3114,7 +3110,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
 int ESMC_newArray::ESMC_newArrayScatter(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -3290,7 +3286,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
 int ESMC_newArray::ESMC_newArrayScatter(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -3368,7 +3364,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
 int ESMC_newArray::ESMC_newArrayScalarReduce(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -3622,7 +3618,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 int ESMC_newArray::ESMC_newArrayScalarReduce(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -3689,7 +3685,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 int ESMC_newArray::ESMC_newArrayScalarReduce(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -3935,7 +3931,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 int ESMC_newArray::ESMC_newArrayWait(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -3998,7 +3994,7 @@ int ESMC_newArray::ESMC_newArrayWait(
 int ESMC_newArray::ESMC_newArrayWait(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -4067,7 +4063,7 @@ int ESMC_newArray::ESMC_newArrayWait(
 int ESMC_newArray::ESMC_newArrayGet(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -4137,7 +4133,7 @@ int ESMC_newArray::ESMC_newArrayGet(
 int ESMC_newArray::ESMC_newArrayPrint(void){
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 //
 // !DESCRIPTION:
@@ -4367,7 +4363,7 @@ ESMC_newArray *ESMC_newArrayCreate(
 int ESMC_newArrayDestroy(
 //
 // !RETURN VALUE:
-//    int error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
