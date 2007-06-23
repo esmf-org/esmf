@@ -1,4 +1,4 @@
-! $Id: ESMF_InternGrid.F90,v 1.2 2007/06/23 04:25:45 cdeluca Exp $
+! $Id: ESMF_InternGrid.F90,v 1.3 2007/06/23 06:03:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_InternGrid.F90,v 1.2 2007/06/23 04:25:45 cdeluca Exp $'
+      '$Id: ESMF_InternGrid.F90,v 1.3 2007/06/23 06:03:25 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -377,7 +377,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      !  ESMF_IGRID_STRUCTURE_UNKNOWN
+      !  ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                       "IGridStructureUnknown not supported", &
@@ -401,7 +401,7 @@
         return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                       "IGridStructureUnstruct not supported", &
@@ -409,7 +409,7 @@
         return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                       "IGridStructureUser not supported", &
@@ -550,7 +550,7 @@
       select case(igridStructure)
 
       !-------------
-      !  ESMF_IGRID_STRUCTURE_UNKNOWN
+      !  ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -569,14 +569,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -651,7 +651,7 @@
       select case(igridIn%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -670,14 +670,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -762,7 +762,7 @@
       select case(igridIn%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -782,14 +782,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -879,7 +879,7 @@
       select case(igridIn%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -899,14 +899,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -989,7 +989,7 @@
       select case(igridIn1%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -1009,14 +1009,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -1091,7 +1091,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         ! allow a user to create an empty igrid and then delete 
         ! it without being created further.
@@ -1110,14 +1110,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -1243,7 +1243,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -1263,14 +1263,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -1367,7 +1367,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -1387,14 +1387,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -1536,7 +1536,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      !  ESMF_IGRID_STRUCTURE_UNKNOWN
+      !  ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         ! the only thing that can be retrieved from an empty igrid is the name
         if (present(name)) then
@@ -1590,14 +1590,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -1761,7 +1761,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      !  ESMF_IGRID_STRUCTURE_UNKNOWN
+      !  ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         ! the only thing that can be retrieved from an empty igrid is the name
         if (present(name)) then
@@ -1815,14 +1815,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -3032,7 +3032,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -3052,14 +3052,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -3184,7 +3184,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -3226,14 +3226,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -3357,7 +3357,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -3399,14 +3399,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -3534,7 +3534,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -3557,14 +3557,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -3697,7 +3697,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -3706,7 +3706,7 @@
       !-------------
       ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRIGridGlobalToDELocalIndex(igrid, horzrelloc, vertrelloc, &
+        call ESMF_LRIGridGlobToDELocalIndex(igrid, horzrelloc, vertrelloc, &
                                              global1D, local1D, &
                                              global2D, local2D, &
                                              dimOrder, localrc)
@@ -3719,14 +3719,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -3857,7 +3857,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -3866,7 +3866,7 @@
       !-------------
       ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRIGridDELocalToGlobalIndex(igrid, horzrelloc, vertrelloc, &
+        call ESMF_LRIGridDELocalToGlobIndex(igrid, horzrelloc, vertrelloc, &
                                              local1D, global1D, &
                                              local2D, global2D, localrc)
 
@@ -3878,14 +3878,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -4881,7 +4881,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                       "Unknown igrid structure", &
@@ -4901,14 +4901,14 @@
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                 "IGrid structure Unstructured", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                 "IGrid structure User", &
@@ -5028,7 +5028,7 @@
       select case(srcIGrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                       "Unknown igrid structure", &
@@ -5051,14 +5051,14 @@
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                 "IGrid structure Unstructured", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                 "IGrid structure User", &
@@ -5162,7 +5162,7 @@
       select case(srcIGrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                       "Unknown igrid structure", &
@@ -5184,14 +5184,14 @@
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                 "IGrid structure Unstructured", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                 "IGrid structure User", &
@@ -5345,7 +5345,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                 "Unknown igrid structure", &
@@ -5365,14 +5365,14 @@
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                 "IGrid structure Unstructured", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                 "IGrid structure User", &
@@ -5452,7 +5452,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                    "Unknown igrid structure", &
@@ -5472,14 +5472,14 @@
                                    ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                    "IGrid structure Unstructured", &
                                    ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                    "IGrid structure User", &
@@ -5553,7 +5553,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      !  ESMF_IGRID_STRUCTURE_UNKNOWN
+      !  ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                 "Unknown igrid structure", &
@@ -5572,14 +5572,14 @@
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                 "IGrid structure Unstructured", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                 "IGrid structure User", &
@@ -5672,7 +5672,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -5693,14 +5693,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -5796,7 +5796,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -5818,14 +5818,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -5918,7 +5918,7 @@
       select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -5939,14 +5939,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -6029,7 +6029,7 @@
 !      select case(igrid%ptr%igridStructure%igridStructure)
 !
 !      !-------------
-!      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+!      ! ESMF_IGRID_STRUCT_UNKNOWN
 !      case(0)
 !        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
 !                                      "Unknown igrid structure", &
@@ -6051,7 +6051,7 @@
 !        return
 !
 !      !-------------
-!      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+!      ! ESMF_IGRID_STRUCT_UNSTRUCT
 !      case(3)
 !        dummy =  ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
 !                                       "IGrid structure Unstructured", &
@@ -6059,7 +6059,7 @@
 !        return
 !
 !      !-------------
-!      ! ESMF_IGRID_STRUCTURE_USER
+!      ! ESMF_IGRID_STRUCT_USER
 !      case(4)
 !        dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
 !                                      "IGrid structure User", &
@@ -6168,7 +6168,7 @@
       select case(gp%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -6187,14 +6187,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &
@@ -6338,7 +6338,7 @@
       select case(gp%igridStructure%igridStructure)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNKNOWN
+      ! ESMF_IGRID_STRUCT_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                   "Unknown igrid structure", &
@@ -6357,14 +6357,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
+      ! ESMF_IGRID_STRUCT_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_USER
+      ! ESMF_IGRID_STRUCT_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                   "IGrid structure User", &

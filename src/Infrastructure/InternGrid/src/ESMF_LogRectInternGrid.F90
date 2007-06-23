@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectInternGrid.F90,v 1.2 2007/06/23 04:25:46 cdeluca Exp $
+! $Id: ESMF_LogRectInternGrid.F90,v 1.3 2007/06/23 06:03:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 !
 ! The code in this file implements the {\tt ESMF\_LogRectIGrid} class.  
 ! This class provides a unified interface for both {\tt ESMF\_PhysGrid} and 
-! {\tt ESMF\_InternDG} information for model interngrids.  
+! {\tt ESMF\_InternDG} information for model igrids.  
 ! Functions for defining and computing {\tt ESMF\_IGrid}
 ! information are available through this class.
 !
@@ -48,10 +48,10 @@
       use ESMF_InternArrayMod
       use ESMF_InternArrayCreateMod
       use ESMF_InternArrayGetMod
-      use ESMF_InternDGMod    ! ESMF distributed interngrid class
+      use ESMF_InternDGMod    ! ESMF distributed igrid class
       use ESMF_PhysCoordMod   ! ESMF physical coord class
-      use ESMF_PhysGridMod    ! ESMF physical interngrid class
-      use ESMF_IGridTypesMod   ! ESMF basic interngrid types and primitives
+      use ESMF_PhysGridMod    ! ESMF physical igrid class
+      use ESMF_IGridTypesMod   ! ESMF basic igrid types and primitives
       use ESMF_InitMacrosMod
       use ESMF_VMMod
       implicit none
@@ -97,8 +97,8 @@
     public ESMF_LRIGridGetDELocalInfo   ! access InternDG from above
     public ESMF_LRIGridGetAllAxisIndex  ! access InternDG from above
     public ESMF_LRIGridGetAIsAllDEs     ! access InternDG from above
-    public ESMF_LRIGridGlobalToDELocalIndex
-    public ESMF_LRIGridDELocalToGlobalIndex
+    public ESMF_LRIGridGlobToDELocalIndex
+    public ESMF_LRIGridDELocalToGlobIndex
     public ESMF_LRIGridGlobalToDELocalAI
     public ESMF_LRIGridDELocalToGlobalAI
     public ESMF_LRIGridGet
@@ -125,7 +125,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectInternGrid.F90,v 1.2 2007/06/23 04:25:46 cdeluca Exp $'
+      '$Id: ESMF_LogRectInternGrid.F90,v 1.3 2007/06/23 06:03:25 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -185,7 +185,7 @@
       interface ESMF_LRIGridSetCoord
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_LRIGridSetCoordComputeBlock
+         module procedure ESMF_LRIGridSetCoordCompBlock
          module procedure ESMF_LRIGridSetCoordComputeArb
 
 ! !DESCRIPTION:
@@ -295,7 +295,7 @@
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_IGridHorzStagger} specifier denoting horizontal IGrid
 !          stagger.  If none is specified, the default is 
-!          {\tt ESMF\_INTERNGRID\_HORZ\_STAGGER\_A}.
+!          {\tt ESMF\_IGRID\_HORZ\_STAGGER\_A}.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
@@ -317,7 +317,7 @@
 ! !REQUIREMENTS:  TODO
 
       integer :: localrc                          ! Error status
-      type(ESMF_IGridClass), pointer :: interngrid       ! Pointer to new interngrid
+      type(ESMF_IGridClass), pointer :: igrid       ! Pointer to new igrid
       type(ESMF_IGridType)           :: horzIGridType
       type(ESMF_CoordSystem)        :: horzCoordSystem
 
@@ -325,19 +325,19 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize pointers
-      nullify(interngrid)
+      nullify(igrid)
       nullify(ESMF_IGridCreateHorzLatLonCoord%ptr)
 
       ! set applicable default values
-      horzIGridType    = ESMF_INTERNGRID_TYPE_XY
+      horzIGridType    = ESMF_IGRID_TYPE_XY
       horzCoordSystem = ESMF_COORD_SYSTEM_SPHERICAL
 
-      allocate(interngrid, stat=localrc)
+      allocate(igrid, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating IGrid object", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize interngrid internals.
-      call ESMF_LRIGridConstructSpecd(interngrid, 2, coord1, coord2, &
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_LRIGridConstructSpecd(igrid, 2, coord1, coord2, &
                                      horzIGridType=horzIGridType, &
                                      horzStagger=horzstagger, &
                                      horzCoordSystem=horzCoordSystem, &
@@ -349,12 +349,12 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      ESMF_IGridCreateHorzLatLonCoord%ptr => interngrid
+      ESMF_IGridCreateHorzLatLonCoord%ptr => igrid
       if (present(rc)) rc = ESMF_SUCCESS
 
-      ! Set interngrid as created 
+      ! Set igrid as created 
       ! (this may be done twice if this sub. is called from a general
-      !  interngrid create subroutine, but that should be ok, since
+      !  igrid create subroutine, but that should be ok, since
       !  it doesn't matter how often a var. is set to the same value.)
       ESMF_INIT_SET_CREATED(ESMF_IGridCreateHorzLatLonCoord)
 
@@ -415,15 +415,15 @@
 !     \item[delta1]
 !          Array of physical increments between nodes in the first direction.
 !          These are cell widths, and there should be as many as there are
-!          cells in the interngrid.
+!          cells in the igrid.
 !     \item[delta2]
 !          Array of physical increments between nodes in the second direction.
 !          These are cell widths, and there should be as many as there are
-!          cells in the interngrid.
+!          cells in the igrid.
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_IGridHorzStagger} specifier denoting horizontal IGrid
 !          stagger.  If none is specified, the default is 
-!          {\tt ESMF\_INTERNGRID\_HORZ\_STAGGER\_A}.
+!          {\tt ESMF\_IGRID\_HORZ\_STAGGER\_A}.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
@@ -445,7 +445,7 @@
 ! !REQUIREMENTS:  TODO
 
       integer :: localrc                          ! Error status
-      type(ESMF_IGridClass), pointer :: interngrid       ! Pointer to new interngrid
+      type(ESMF_IGridClass), pointer :: igrid       ! Pointer to new igrid
       type(ESMF_IGridType)           :: horzIGridType
       type(ESMF_CoordSystem)        :: horzCoordSystem
 
@@ -453,19 +453,19 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize pointers
-      nullify(interngrid)
+      nullify(igrid)
       nullify(ESMF_IGridCreateHorzLatLonDelta%ptr)
 
       ! set applicable default values
-      horzIGridType    = ESMF_INTERNGRID_TYPE_XY
+      horzIGridType    = ESMF_IGRID_TYPE_XY
       horzCoordSystem = ESMF_COORD_SYSTEM_SPHERICAL
 
-      allocate(interngrid, stat=localrc)
+      allocate(igrid, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating IGrid object", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize interngrid internals.
-      call ESMF_LRIGridConstructSpecd(interngrid, 2, &
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_LRIGridConstructSpecd(igrid, 2, &
                                      minGlobalCoordPerDim=minGlobalCoordPerDim, &
                                      delta1=delta1, delta2=delta2, &
                                      horzIGridType=horzIGridType, &
@@ -479,11 +479,11 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      ESMF_IGridCreateHorzLatLonDelta%ptr => interngrid
+      ESMF_IGridCreateHorzLatLonDelta%ptr => igrid
 
-      ! Set interngrid as created 
+      ! Set igrid as created 
       ! (this may be done twice if this sub. is called from a general
-      !  interngrid create subroutine, but that should be ok, since
+      !  igrid create subroutine, but that should be ok, since
       !  it doesn't matter how often a var. is set to the same value.)
       ESMF_INIT_SET_CREATED(ESMF_IGridCreateHorzLatLonDelta)
 
@@ -531,7 +531,7 @@
 !     \begin{description}
 !       \item logically rectangular;
 !       \item uniformly spaced coordinates (the distance between any 
-!                   two consecutive interngrid points is equal);
+!                   two consecutive igrid points is equal);
 !       \item horizontal spherical coordinate system.
 !     \end{description}
 !     This routine generates {\tt ESMF\_IGrid} coordinates from either of two
@@ -548,7 +548,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[counts]
-!          Array of number of interngrid increments in each dimension.  This array
+!          Array of number of igrid increments in each dimension.  This array
 !          must have at least a length of two and have valid values in the
 !          first two array locations or a fatal error occurs.
 !     \item[minGlobalCoordPerDim]
@@ -562,7 +562,7 @@
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_IGridHorzStagger} specifier denoting horizontal IGrid
 !          stagger.  If none is specified, the default is 
-!          {\tt ESMF\_INTERNGRID\_HORZ\_STAGGER\_A}.
+!          {\tt ESMF\_IGRID\_HORZ\_STAGGER\_A}.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
@@ -584,7 +584,7 @@
 ! !REQUIREMENTS:  TODO
 
       integer :: localrc                          ! Error status
-      type(ESMF_IGridClass), pointer :: interngrid       ! Pointer to new interngrid
+      type(ESMF_IGridClass), pointer :: igrid       ! Pointer to new igrid
       type(ESMF_IGridType)           :: horzIGridType
       type(ESMF_CoordSystem)        :: horzCoordSystem
 
@@ -592,19 +592,19 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize pointers
-      nullify(interngrid)
+      nullify(igrid)
       nullify(ESMF_IGridCreateHorzLatLonUni%ptr)
 
       ! set applicable default values
-      horzIGridType    = ESMF_INTERNGRID_TYPE_LATLON_UNI
+      horzIGridType    = ESMF_IGRID_TYPE_LATLON_UNI
       horzCoordSystem = ESMF_COORD_SYSTEM_SPHERICAL
 
-      allocate(interngrid, stat=localrc)
+      allocate(igrid, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating IGrid object", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize interngrid internals.
-      call ESMF_LRIGridConstructUniform(interngrid, 2, counts(1:2), &
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_LRIGridConstructUniform(igrid, 2, counts(1:2), &
                                        minGlobalCoordPerDim, &
                                        maxGlobalCoordPerDim, deltaPerDim, &
                                        horzIGridType, horzstagger, &
@@ -616,11 +616,11 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      ESMF_IGridCreateHorzLatLonUni%ptr => interngrid
+      ESMF_IGridCreateHorzLatLonUni%ptr => igrid
 
-      ! Set interngrid as created 
+      ! Set igrid as created 
       ! (this may be done twice if this sub. is called from a general
-      !  interngrid create subroutine, but that should be ok, since
+      !  igrid create subroutine, but that should be ok, since
       !  it doesn't matter how often a var. is set to the same value.)
       ESMF_INIT_SET_CREATED(ESMF_IGridCreateHorzLatLonUni)
 
@@ -685,7 +685,7 @@
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_IGridHorzStagger} specifier denoting horizontal IGrid
 !          stagger.  If none is specified, the default is 
-!          {\tt ESMF\_INTERNGRID\_HORZ\_STAGGER\_A}.
+!          {\tt ESMF\_IGRID\_HORZ\_STAGGER\_A}.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
@@ -707,7 +707,7 @@
 ! !REQUIREMENTS:  TODO
 
       integer                       :: localrc    ! Error status
-      type(ESMF_IGridClass), pointer :: interngrid       ! Pointer to new interngrid
+      type(ESMF_IGridClass), pointer :: igrid       ! Pointer to new igrid
       type(ESMF_IGridType)           :: horzIGridType
       type(ESMF_CoordSystem)        :: horzCoordSystem
 
@@ -715,19 +715,19 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize pointers
-      nullify(interngrid)
+      nullify(igrid)
       nullify(ESMF_IGridCreateHorzXYCoord%ptr)
 
       ! set applicable default values
-      horzIGridType    = ESMF_INTERNGRID_TYPE_XY
+      horzIGridType    = ESMF_IGRID_TYPE_XY
       horzCoordSystem = ESMF_COORD_SYSTEM_CARTESIAN
 
-      allocate(interngrid, stat=localrc)
+      allocate(igrid, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating IGrid object", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize interngrid internals.
-      call ESMF_LRIGridConstructSpecd(interngrid, 2, coord1, coord2, &
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_LRIGridConstructSpecd(igrid, 2, coord1, coord2, &
                                      horzIGridType=horzIGridType, &
                                      horzStagger=horzStagger, &
                                      horzCoordSystem=horzCoordSystem, &
@@ -739,11 +739,11 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      ESMF_IGridCreateHorzXYCoord%ptr => interngrid
+      ESMF_IGridCreateHorzXYCoord%ptr => igrid
 
-      ! Set interngrid as created 
+      ! Set igrid as created 
       ! (this may be done twice if this sub. is called from a general
-      !  interngrid create subroutine, but that should be ok, since
+      !  igrid create subroutine, but that should be ok, since
       !  it doesn't matter how often a var. is set to the same value.)
       ESMF_INIT_SET_CREATED(ESMF_IGridCreateHorzXYCoord)
 
@@ -806,15 +806,15 @@
 !     \item[delta1]
 !          Array of physical increments between nodes in the first direction.
 !          These are cell widths, and there should be as many as there are
-!          cells in the interngrid.
+!          cells in the igrid.
 !     \item[delta2]
 !          Array of physical increments between nodes in the second direction.
 !          These are cell widths, and there should be as many as there are
-!          cells in the interngrid.
+!          cells in the igrid.
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_IGridHorzStagger} specifier denoting horizontal IGrid
 !          stagger.  If none is specified, the default is 
-!          {\tt ESMF\_INTERNGRID\_HORZ\_STAGGER\_A}.
+!          {\tt ESMF\_IGRID\_HORZ\_STAGGER\_A}.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
@@ -836,7 +836,7 @@
 ! !REQUIREMENTS:  TODO
 
       integer                       :: localrc    ! Error status
-      type(ESMF_IGridClass), pointer :: interngrid       ! Pointer to new interngrid
+      type(ESMF_IGridClass), pointer :: igrid       ! Pointer to new igrid
       type(ESMF_IGridType)           :: horzIGridType
       type(ESMF_CoordSystem)        :: horzCoordSystem
 
@@ -844,19 +844,19 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize pointers
-      nullify(interngrid)
+      nullify(igrid)
       nullify(ESMF_IGridCreateHorzXYDelta%ptr)
 
       ! set applicable default values
-      horzIGridType    = ESMF_INTERNGRID_TYPE_XY
+      horzIGridType    = ESMF_IGRID_TYPE_XY
       horzCoordSystem = ESMF_COORD_SYSTEM_CARTESIAN
 
-      allocate(interngrid, stat=localrc)
+      allocate(igrid, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating IGrid object", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize interngrid internals.
-      call ESMF_LRIGridConstructSpecd(interngrid, 2, &
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_LRIGridConstructSpecd(igrid, 2, &
                                      minGlobalCoordPerDim=minGlobalCoordPerDim, &
                                      delta1=delta1, delta2=delta2, &
                                      horzIGridType=horzIGridType, &
@@ -870,11 +870,11 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      ESMF_IGridCreateHorzXYDelta%ptr => interngrid
+      ESMF_IGridCreateHorzXYDelta%ptr => igrid
 
-      ! Set interngrid as created 
+      ! Set igrid as created 
       ! (this may be done twice if this sub. is called from a general
-      !  interngrid create subroutine, but that should be ok, since
+      !  igrid create subroutine, but that should be ok, since
       !  it doesn't matter how often a var. is set to the same value.)
       ESMF_INIT_SET_CREATED(ESMF_IGridCreateHorzXYDelta)
 
@@ -922,7 +922,7 @@
 !     \begin{description}
 !       \item logically rectangular;
 !       \item uniformly spaced coordinates (the distance between any 
-!                   two consecutive interngrid points is equal);
+!                   two consecutive igrid points is equal);
 !       \item horizontal cartesian coordinate system.
 !     \end{description}
 !     This routine generates {\tt ESMF\_IGrid} coordinates from either of two
@@ -939,7 +939,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[counts]
-!          Array of number of interngrid increments in each dimension.  This array
+!          Array of number of igrid increments in each dimension.  This array
 !          must have at least a length of two and have valid values in the
 !          first two array locations or a fatal error occurs.
 !     \item[minGlobalCoordPerDim]
@@ -953,7 +953,7 @@
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_IGridHorzStagger} specifier denoting horizontal IGrid
 !          stagger.  If none is specified, the default is 
-!          {\tt ESMF\_INTERNGRID\_HORZ\_STAGGER\_A}.
+!          {\tt ESMF\_IGRID\_HORZ\_STAGGER\_A}.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
@@ -975,7 +975,7 @@
 ! !REQUIREMENTS:  TODO
 
       integer                       :: localrc    ! Error status
-      type(ESMF_IGridClass), pointer :: interngrid       ! Pointer to new interngrid
+      type(ESMF_IGridClass), pointer :: igrid       ! Pointer to new igrid
       type(ESMF_IGridType)           :: horzIGridType
       type(ESMF_CoordSystem)        :: horzCoordSystem
 
@@ -983,19 +983,19 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize pointers
-      nullify(interngrid)
+      nullify(igrid)
       nullify(ESMF_IGridCreateHorzXYUni%ptr)
 
       ! set applicable default values
-      horzIGridType    = ESMF_INTERNGRID_TYPE_XY_UNI
+      horzIGridType    = ESMF_IGRID_TYPE_XY_UNI
       horzCoordSystem = ESMF_COORD_SYSTEM_CARTESIAN
 
-      allocate(interngrid, stat=localrc)
+      allocate(igrid, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating IGrid object", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize interngrid internals.
-      call ESMF_LRIGridConstructUniform(interngrid, 2, counts(1:2), &
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_LRIGridConstructUniform(igrid, 2, counts(1:2), &
                                        minGlobalCoordPerDim, &
                                        maxGlobalCoordPerDim, deltaPerDim, &
                                        horzIGridType, horzStagger, &
@@ -1007,11 +1007,11 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      ESMF_IGridCreateHorzXYUni%ptr => interngrid
+      ESMF_IGridCreateHorzXYUni%ptr => igrid
 
-      ! Set interngrid as created 
+      ! Set igrid as created 
       ! (this may be done twice if this sub. is called from a general
-      !  interngrid create subroutine, but that should be ok, since
+      !  igrid create subroutine, but that should be ok, since
       !  it doesn't matter how often a var. is set to the same value.)
       ESMF_INIT_SET_CREATED(ESMF_IGridCreateHorzXYUni)
 
@@ -1026,18 +1026,18 @@
 ! !IROUTINE: ESMF_LRIGridAddVert - Add a vertical subIGrid to an existing IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridAddVert(interngrid, minGlobalCoord, delta, coord, &
-                                    vertinterngridtype, vertstagger, &
+      subroutine ESMF_LRIGridAddVert(igrid, minGlobalCoord, delta, coord, &
+                                    vertigridtype, vertstagger, &
                                     vertcoordsystem, dimName, dimUnit, &
                                     name, rc)
                                              
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass), pointer :: interngrid
+      type(ESMF_IGridClass), pointer :: igrid
       real(ESMF_KIND_R8), intent(in), optional :: minGlobalCoord
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord
-      type(ESMF_IGridVertType), intent(in), optional :: vertinterngridtype
+      type(ESMF_IGridVertType), intent(in), optional :: vertigridtype
       type(ESMF_IGridVertStagger), intent(in), optional :: vertstagger
       type(ESMF_CoordSystem), intent(in), optional :: vertcoordsystem
       character(len=*), intent(in), optional :: dimName
@@ -1061,28 +1061,28 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_IGrid} to add vertical interngrid to.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to add vertical igrid to.
 !     \item[{[minGlobalCoord]}]
 !          Minimum physical coordinate in the vertical direction.
 !     \item[{[delta]}]
 !          Array of physical increments in the vertical direction.
 !     \item[{[coord]}]
 !          Array of physical coordinates in the vertical direction.
-!     \item[{[vertinterngridtype]}]
-!          {\tt ESMF\_IGridVertType} specifier denoting vertical interngrid type.
+!     \item[{[vertigridtype]}]
+!          {\tt ESMF\_IGridVertType} specifier denoting vertical igrid type.
 !     \item[{[vertstagger]}]
-!          {\tt ESMF\_IGridVertStagger} specifier denoting vertical interngrid stagger.
+!          {\tt ESMF\_IGridVertStagger} specifier denoting vertical igrid stagger.
 !     \item[{[vertcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the vertical interngrid.
+!          the vertical igrid.
 !     \item[{[dimName]}]
 !          Dimension name.
 !     \item[{[dimUnit]}]
 !          Dimension unit.
 !     \item[{[name]}]
-!          Name for the vertical interngrid.
+!          Name for the vertical igrid.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1094,14 +1094,14 @@
       integer :: count, i
       real(ESMF_KIND_R8) :: minGlobalCoordUse, maxGlobalCoordUse
       real(ESMF_KIND_R8), dimension(:), pointer :: coordsUse
-      type(ESMF_LogRectIGrid), pointer :: lrinterngrid
+      type(ESMF_LogRectIGrid), pointer :: lrigrid
       type(ESMF_LocalArray), dimension(:), pointer :: coords
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
 
       ! sanity check for bad values  TODO: more checks
       if (present(delta)) count = size(delta)
@@ -1116,14 +1116,14 @@
       allocate(coords(3), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coords", &
                                      ESMF_CONTEXT, rc)) return
-      if (associated(interngrid%interngridSpecific%logRectIGrid%coords)) then
-        coords(1) = interngrid%interngridSpecific%logRectIGrid%coords(1)
-        coords(2) = interngrid%interngridSpecific%logRectIGrid%coords(2)
+      if (associated(igrid%igridSpecific%logRectIGrid%coords)) then
+        coords(1) = igrid%igridSpecific%logRectIGrid%coords(1)
+        coords(2) = igrid%igridSpecific%logRectIGrid%coords(2)
       endif
 
-      interngrid%interngridSpecific%logRectIGrid%coords => coords
+      igrid%igridSpecific%logRectIGrid%coords => coords
 
-      ! Two ways to make a subinterngrid here: by coordinates or by minimum and delta
+      ! Two ways to make a subigrid here: by coordinates or by minimum and delta
       ! by coordinates:
       allocate(coordsUse(count+1), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordsUse", &
@@ -1153,26 +1153,26 @@
       maxGlobalCoordUse = maxval(coordsUse)
 
       ! Fill in logRectIGrid derived type with subroutine arguments
-      lrinterngrid => interngrid%interngridSpecific%logRectIGrid
-      lrinterngrid%countPerDim(3) = count
+      lrigrid => igrid%igridSpecific%logRectIGrid
+      lrigrid%countPerDim(3) = count
 
-      ! Fill in interngrid derived type with subroutine arguments
-      interngrid%dimCount      = 3
-      if (present(vertIGridType   )) interngrid%vertIGridType    = vertIGridType
-      if (present(vertStagger    )) interngrid%vertStagger     = vertStagger
-      if (present(vertCoordSystem)) interngrid%vertCoordSystem = vertCoordSystem
+      ! Fill in igrid derived type with subroutine arguments
+      igrid%dimCount      = 3
+      if (present(vertIGridType   )) igrid%vertIGridType    = vertIGridType
+      if (present(vertStagger    )) igrid%vertStagger     = vertStagger
+      if (present(vertCoordSystem)) igrid%vertCoordSystem = vertCoordSystem
 
       ! Set dimension name and unit
       if (present(dimName)) then
-        interngrid%dimNames(3) = dimName
+        igrid%dimNames(3) = dimName
       endif
       if (present(dimUnit)) then
-        interngrid%dimUnits(3) = dimUnit
+        igrid%dimUnits(3) = dimUnit
       endif
 
       ! Set global domain limit
-      interngrid%minGlobalCoordPerDim(3) = minGlobalCoordUse
-      interngrid%maxGlobalCoordPerDim(3) = maxGlobalCoordUse
+      igrid%minGlobalCoordPerDim(3) = minGlobalCoordUse
+      igrid%maxGlobalCoordPerDim(3) = maxGlobalCoordUse
 
       ! Clean up
       deallocate(coordsUse, stat=localrc)
@@ -1219,32 +1219,32 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      type(ESMF_IGridClass), pointer :: interngrid       ! Pointer to new interngrid
+      type(ESMF_IGridClass), pointer :: igrid       ! Pointer to new igrid
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize pointers
-      nullify(interngrid)
+      nullify(igrid)
       nullify(ESMF_LRIGridCreateRead%ptr)
 
-      allocate(interngrid, stat=localrc)
+      allocate(igrid, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating IGrid object", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize interngrid internals.
-      call ESMF_IGridConstructNew(interngrid, name, localrc)
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_IGridConstructNew(igrid, name, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      ESMF_LRIGridCreateRead%ptr => interngrid
+      ESMF_LRIGridCreateRead%ptr => igrid
 
-      ! Set interngrid as created 
+      ! Set igrid as created 
       ! (this may be done twice if this sub. is called from a general
-      !  interngrid create subroutine, but that should be ok, since
+      !  igrid create subroutine, but that should be ok, since
       !  it doesn't matter how often a var. is set to the same value.)
       ESMF_INIT_SET_CREATED(ESMF_LRIGridCreateRead)
 
@@ -1259,13 +1259,13 @@
 ! !IROUTINE: ESMF_LRIGridCreateCopy - Create a new IGrid by copying another IGrid
 
 ! !INTERFACE:
-      function ESMF_LRIGridCreateCopy(interngridIn, name, rc)
+      function ESMF_LRIGridCreateCopy(igridIn, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_IGrid) :: ESMF_LRIGridCreateCopy
 !
 ! !ARGUMENTS:
-      type(ESMF_IGrid), intent(in) :: interngridIn
+      type(ESMF_IGrid), intent(in) :: igridIn
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -1276,7 +1276,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngridIn]
+!     \item[igridIn]
 !          {\tt ESMF\_IGrid} to be copied.
 !     \item[{[name]}]
 !          {\tt ESMF\_IGrid} name.
@@ -1287,35 +1287,35 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      type(ESMF_IGridClass), pointer :: interngrid       ! Pointer to new interngrid
+      type(ESMF_IGridClass), pointer :: igrid       ! Pointer to new igrid
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngridIn,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igridIn,rc)
 
       ! Initialize pointers
-      nullify(interngrid)
+      nullify(igrid)
       nullify(ESMF_LRIGridCreateCopy%ptr)
 
-      allocate(interngrid, stat=localrc)
+      allocate(igrid, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating IGrid object", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize interngrid internals.
-      call ESMF_IGridConstructNew(interngrid, name, localrc)
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_IGridConstructNew(igrid, name, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      ESMF_LRIGridCreateCopy%ptr => interngrid
+      ESMF_LRIGridCreateCopy%ptr => igrid
 
-      ! Set interngrid as created 
+      ! Set igrid as created 
       ! (this may be done twice if this sub. is called from a general
-      !  interngrid create subroutine, but that should be ok, since
+      !  igrid create subroutine, but that should be ok, since
       !  it doesn't matter how often a var. is set to the same value.)
       ESMF_INIT_SET_CREATED(ESMF_LRIGridCreateCopy)
 
@@ -1330,13 +1330,13 @@
 ! !IROUTINE: ESMF_LRIGridCreateCutout - Create a new IGrid as a subset of an existing IGrid
 
 ! !INTERFACE:
-      function ESMF_LRIGridCreateCutout(interngridIn, min, max, name, rc)
+      function ESMF_LRIGridCreateCutout(igridIn, min, max, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_IGrid) :: ESMF_LRIGridCreateCutout
 !
 ! !ARGUMENTS:
-      type(ESMF_IGrid), intent(in) :: interngridIn
+      type(ESMF_IGrid), intent(in) :: igridIn
       integer, dimension(:), intent(in) :: min
       integer, dimension(:), intent(in) :: max
       character (len=*), intent(in), optional :: name
@@ -1349,12 +1349,12 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngridIn]
+!     \item[igridIn]
 !          {\tt ESMF\_IGrid} to be partially copied.
 !     \item[min]
-!          Minimum global indices for the region of the interngrid to be cutout.
+!          Minimum global indices for the region of the igrid to be cutout.
 !     \item[max]
-!          Maximum global indices for the region of the interngrid to be cutout.
+!          Maximum global indices for the region of the igrid to be cutout.
 !     \item[{[name]}]
 !          {\tt ESMF\_IGrid} name.
 !     \item[{[rc]}]
@@ -1364,35 +1364,35 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      type(ESMF_IGridClass), pointer :: interngrid       ! Pointer to new interngrid
+      type(ESMF_IGridClass), pointer :: igrid       ! Pointer to new igrid
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngridIn,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igridIn,rc)
 
       ! Initialize pointers
-      nullify(interngrid)
+      nullify(igrid)
       nullify(ESMF_LRIGridCreateCutout%ptr)
 
-      allocate(interngrid, stat=localrc)
+      allocate(igrid, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating IGrid object", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize interngrid internals.
-      call ESMF_IGridConstructNew(interngrid, name, localrc)
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_IGridConstructNew(igrid, name, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      ESMF_LRIGridCreateCutout%ptr => interngrid
+      ESMF_LRIGridCreateCutout%ptr => igrid
 
-      ! Set interngrid as created 
+      ! Set igrid as created 
       ! (this may be done twice if this sub. is called from a general
-      !  interngrid create subroutine, but that should be ok, since
+      !  igrid create subroutine, but that should be ok, since
       !  it doesn't matter how often a var. is set to the same value.)
       ESMF_INIT_SET_CREATED(ESMF_LRIGridCreateCutout)
 
@@ -1407,13 +1407,13 @@
 ! !IROUTINE: ESMF_LRIGridCreateDiffRes - Create a new IGrid by coarsening or refining an existing IGrid
 
 ! !INTERFACE:
-      function ESMF_LRIGridCreateDiffRes(interngridIn, resolution, name, rc)
+      function ESMF_LRIGridCreateDiffRes(igridIn, resolution, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_IGrid) :: ESMF_LRIGridCreateDiffRes
 !
 ! !ARGUMENTS:
-      type(ESMF_IGrid), intent(in) :: interngridIn
+      type(ESMF_IGrid), intent(in) :: igridIn
       integer, dimension(:), intent(in) :: resolution
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
@@ -1425,7 +1425,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngridIn]
+!     \item[igridIn]
 !          Source {\tt ESMF\_IGrid} to be coarsened or refined.
 !     \item[resolution]
 !          Integer resolution factors in each direction.
@@ -1445,35 +1445,35 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      type(ESMF_IGridClass), pointer :: interngrid       ! Pointer to new interngrid
+      type(ESMF_IGridClass), pointer :: igrid       ! Pointer to new igrid
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngridIn,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igridIn,rc)
 
       ! Initialize pointers
-      nullify(interngrid)
+      nullify(igrid)
       nullify(ESMF_LRIGridCreateDiffRes%ptr)
 
-      allocate(interngrid, stat=localrc)
+      allocate(igrid, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating IGrid object", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize interngrid internals.
-      call ESMF_IGridConstructNew(interngrid, name, localrc)
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_IGridConstructNew(igrid, name, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      ESMF_LRIGridCreateDiffRes%ptr => interngrid
+      ESMF_LRIGridCreateDiffRes%ptr => igrid
 
-      ! Set interngrid as created 
+      ! Set igrid as created 
       ! (this may be done twice if this sub. is called from a general
-      !  interngrid create subroutine, but that should be ok, since
+      !  igrid create subroutine, but that should be ok, since
       !  it doesn't matter how often a var. is set to the same value.)
       ESMF_INIT_SET_CREATED(ESMF_LRIGridCreateDiffRes)
 
@@ -1485,17 +1485,17 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRIGridCreateExchange"
 !BOPI
-! !IROUTINE: ESMF_LRIGridCreateExchange - Create a new IGrid from the intersection of two existing interngrids
+! !IROUTINE: ESMF_LRIGridCreateExchange - Create a new IGrid from the intersection of two existing igrids
 
 ! !INTERFACE:
-      function ESMF_LRIGridCreateExchange(interngridIn1, interngridIn2, name, rc)
+      function ESMF_LRIGridCreateExchange(igridIn1, igridIn2, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_IGrid) :: ESMF_LRIGridCreateExchange
 !
 ! !ARGUMENTS:
-      type(ESMF_IGrid), intent(in) :: interngridIn1
-      type(ESMF_IGrid), intent(in) :: interngridIn2
+      type(ESMF_IGrid), intent(in) :: igridIn1
+      type(ESMF_IGrid), intent(in) :: igridIn2
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -1506,9 +1506,9 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngridIn1]
+!     \item[igridIn1]
 !          First source {\tt ESMF\_IGrid}.
-!     \item[interngridIn2]
+!     \item[igridIn2]
 !          Second source {\tt ESMF\_IGrid}.
 !     \item[{[name]}]
 !          New {\tt ESMF\_IGrid} name.
@@ -1519,36 +1519,36 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      type(ESMF_IGridClass), pointer :: interngrid       ! Pointer to new interngrid
+      type(ESMF_IGridClass), pointer :: igrid       ! Pointer to new igrid
       integer :: localrc                          ! Error status
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngridIn1,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngridIn2,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igridIn1,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igridIn2,rc)
 
       ! Initialize pointers
-      nullify(interngrid)
+      nullify(igrid)
       nullify(ESMF_LRIGridCreateExchange%ptr)
 
-      allocate(interngrid, stat=localrc)
+      allocate(igrid, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating IGrid object", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize interngrid internals.
-      call ESMF_IGridConstructNew(interngrid, name, localrc)
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_IGridConstructNew(igrid, name, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      ESMF_LRIGridCreateExchange%ptr => interngrid
+      ESMF_LRIGridCreateExchange%ptr => igrid
 
-      ! Set interngrid as created 
+      ! Set igrid as created 
       ! (this may be done twice if this sub. is called from a general
-      !  interngrid create subroutine, but that should be ok, since
+      !  igrid create subroutine, but that should be ok, since
       !  it doesn't matter how often a var. is set to the same value.)
       ESMF_INIT_SET_CREATED(ESMF_LRIGridCreateExchange)
 
@@ -1559,15 +1559,15 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRIGridConstructSpecificNew"
+#define ESMF_METHOD "ESMF_LRIGridConstructSpecNew"
 !BOPI
-! !IROUTINE: ESMF_LRIGridConstructSpecificNew - Construct a new empty logRectIGrid specific type
+! !IROUTINE: ESMF_LRIGridConstructSpecNew - Construct a new empty logRectIGrid specific type
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridConstructSpecificNew(lrinterngrid, rc)
+      subroutine ESMF_LRIGridConstructSpecNew(lrigrid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LogRectIGrid) :: lrinterngrid
+      type(ESMF_LogRectIGrid) :: lrigrid
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -1579,7 +1579,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[lrinterngrid]
+!     \item[lrigrid]
 !          The {\tt ESMF\_LogRectIGrid} object to be constructed.
 !     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1594,19 +1594,19 @@
       rc     = ESMF_RC_NOT_IMPL
 
       ! check and set input variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_LogRectIGridGetInit, ESMF_LogRectIGridInit,lrinterngrid)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_LogRectIGridGetInit, ESMF_LogRectIGridInit,lrigrid)
 
-      ! Initialize lrinterngrid contents to default values
-      do i = 1,ESMF_MAXINTERNGRIDDIM
-        lrinterngrid%countPerDim(i) = 0
-        lrinterngrid%deltaPerDim(i) = 0.0
+      ! Initialize lrigrid contents to default values
+      do i = 1,ESMF_MAXIGRIDDIM
+        lrigrid%countPerDim(i) = 0
+        lrigrid%deltaPerDim(i) = 0.0
       enddo
-      nullify(lrinterngrid%coords)
+      nullify(lrigrid%coords)
 
       ! Set return values.
       rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRIGridConstructSpecificNew
+      end subroutine ESMF_LRIGridConstructSpecNew
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1615,7 +1615,7 @@
 ! !IROUTINE: ESMF_LRIGridConstructUniform - Construct a uniform IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridConstructUniform(interngrid, dimCount, counts, &
+      subroutine ESMF_LRIGridConstructUniform(igrid, dimCount, counts, &
                                              minGlobalCoordPerDim, &
                                              maxGlobalCoordPerDim, &
                                              deltaPerDim, &
@@ -1625,7 +1625,7 @@
                                              coordOrder, periodic, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass) :: interngrid
+      type(ESMF_IGridClass) :: igrid
       integer, intent(in) :: dimCount
       integer, dimension(:), intent(in) :: counts
       real(ESMF_KIND_R8), dimension(:), intent(in) :: minGlobalCoordPerDim
@@ -1653,24 +1653,24 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Pointer to a {\tt ESMF\_IGrid}
 !     \item[dimCount]
-!          Number of interngrid dimensions.
+!          Number of igrid dimensions.
 !     \item[counts]
-!          Array of number of interngrid increments in each dimension.
+!          Array of number of igrid increments in each dimension.
 !     \item[minGlobalCoordPerDim]
 !          Array of minimum physical coordinates in each dimension.
 !     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum physical coordinates in each direction.
 !     \item[{[horzIGridType]}]
-!          Integer specifier to denote horizontal interngrid type.
+!          Integer specifier to denote horizontal igrid type.
 !     \item[{[horzStagger]}]
-!          Integer specifier to denote horizontal interngrid stagger.
+!          Integer specifier to denote horizontal igrid stagger.
 !     \item[{[horzCoordSystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the horizontal interngrid.
+!          the horizontal igrid.
 !     \item[{[coordOrder]}]
 !          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
 !          ordering for the IGrid and all related Fields (i.e. KIJ).
@@ -1688,7 +1688,7 @@
 
       integer :: localrc                          ! Error status
       integer :: i
-      type(ESMF_LogRectIGrid), pointer :: lrinterngrid
+      type(ESMF_LogRectIGrid), pointer :: lrigrid
       real(ESMF_KIND_R8) :: recheck
       real(ESMF_KIND_R8), dimension(dimCount) :: useMaxes, useDeltas
       character(len=ESMF_MAXSTR) :: msgbuf
@@ -1697,7 +1697,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize the derived type contents, including setting name
-      call ESMF_IGridConstructNew(interngrid, name, localrc)
+      call ESMF_IGridConstructNew(igrid, name, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1716,9 +1716,9 @@
       ! Fill in default values for optional arguments which weren't specified
       ! and check for an over-specified system which isn't consistent.  (in which
       ! case, deltas are overwritten and a warning printed.)
-      interngrid%interngridStructure   = ESMF_INTERNGRID_STRUCTURE_LOGRECT
-      interngrid%horzStagger     = ESMF_INTERNGRID_HORZ_STAGGER_A
-      interngrid%coordOrder      = ESMF_COORD_ORDER_XYZ
+      igrid%igridStructure   = ESMF_IGRID_STRUCT_LOGRECT
+      igrid%horzStagger     = ESMF_IGRID_HORZ_STAGGER_A
+      igrid%coordOrder      = ESMF_COORD_ORDER_XYZ
       if (present(deltaPerDim)) then
          do i=1,dimCount
            useDeltas(i) = deltaPerDim(i)
@@ -1753,39 +1753,39 @@
       endif
 
       ! Fill in logRectIGrid derived type with subroutine arguments
-      allocate(interngrid%interngridSpecific%logRectIGrid, stat=localrc)
+      allocate(igrid%igridSpecific%logRectIGrid, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "logRectIGrid", &
                                      ESMF_CONTEXT, rc)) return
 
-      lrinterngrid => interngrid%interngridSpecific%logRectIGrid
-      call ESMF_LRIGridConstructSpecificNew(lrinterngrid, localrc)
+      lrigrid => igrid%igridSpecific%logRectIGrid
+      call ESMF_LRIGridConstructSpecNew(lrigrid, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       do i = 1,dimCount
-        lrinterngrid%countPerDim(i) = counts(i)
-        lrinterngrid%deltaPerDim(i) = useDeltas(i) 
+        lrigrid%countPerDim(i) = counts(i)
+        lrigrid%deltaPerDim(i) = useDeltas(i) 
       enddo
 
-      ! Fill in interngrid derived type with subroutine arguments
-      interngrid%dimCount      = dimCount
-      if (present(horzIGridType   )) interngrid%horzIGridType    = horzIGridType
-      if (present(horzStagger    )) interngrid%horzStagger     = horzStagger
-      if (present(horzCoordSystem)) interngrid%horzCoordSystem = horzCoordSystem
-      if (present(coordOrder     )) interngrid%coordOrder      = coordOrder
+      ! Fill in igrid derived type with subroutine arguments
+      igrid%dimCount      = dimCount
+      if (present(horzIGridType   )) igrid%horzIGridType    = horzIGridType
+      if (present(horzStagger    )) igrid%horzStagger     = horzStagger
+      if (present(horzCoordSystem)) igrid%horzCoordSystem = horzCoordSystem
+      if (present(coordOrder     )) igrid%coordOrder      = coordOrder
 
       ! Set dimension names and units for each dimension
       if (present(dimNames)) then
         do i = 1,dimCount
           if (i > size(dimNames)) exit
-          interngrid%dimNames(i) = dimNames(i)
+          igrid%dimNames(i) = dimNames(i)
         enddo
       endif
       if (present(dimUnits)) then
         do i = 1,dimCount
           if (i > size(dimUnits)) exit
-          interngrid%dimUnits(i) = dimUnits(i)
+          igrid%dimUnits(i) = dimUnits(i)
         enddo
       endif
 
@@ -1793,43 +1793,43 @@
       if (present(periodic)) then
         do i = 1,dimCount
           if (i > size(periodic)) exit
-          interngrid%periodic(i) = periodic(i)
+          igrid%periodic(i) = periodic(i)
         enddo
       endif
 
       ! Set global domain limits
-      if (size(minGlobalCoordPerDim) > ESMF_MAXINTERNGRIDDIM) then
+      if (size(minGlobalCoordPerDim) > ESMF_MAXIGRIDDIM) then
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                 "minGlobalCoordPerDim too big", &
                                  ESMF_CONTEXT, rc)) return
       endif
       do i = 1,dimCount
-        interngrid%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
+        igrid%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
       enddo
 
       if (present(maxGlobalCoordPerDim)) then
-        if (size(maxGlobalCoordPerDim) > ESMF_MAXINTERNGRIDDIM) then
+        if (size(maxGlobalCoordPerDim) > ESMF_MAXIGRIDDIM) then
             if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                 "maxGlobalCoordPerDim too big", &
                                  ESMF_CONTEXT, rc)) return
         endif
         do i = 1,dimCount
-          interngrid%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
+          igrid%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
         enddo
       else
         ! default values computed above
         do i = 1,dimCount
-          interngrid%maxGlobalCoordPerDim(i) = useMaxes(i)
+          igrid%maxGlobalCoordPerDim(i) = useMaxes(i)
         enddo
       endif
 
-      interngrid%interngridStatus = ESMF_INTERNGRID_STATUS_INIT
+      igrid%igridStatus = ESMF_IGRID_STATUS_INIT
 
-      ! Set interngrid as created 
+      ! Set igrid as created 
       ! (this may be done twice if this sub. is called from a general
-      !  interngrid create subroutine, but that should be ok, since
+      !  igrid create subroutine, but that should be ok, since
       !  it doesn't matter how often a var. is set to the same value.)
-      ESMF_INIT_SET_CREATED(interngrid)
+      ESMF_INIT_SET_CREATED(igrid)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1842,7 +1842,7 @@
 ! !IROUTINE: ESMF_LRIGridConstructSpecd - Construct a specified IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridConstructSpecd(interngrid, dimCount, &
+      subroutine ESMF_LRIGridConstructSpecd(igrid, dimCount, &
                                            coord1, coord2, coord3, &
                                            minGlobalCoordPerDim, &
                                            delta1, delta2, delta3, &
@@ -1853,7 +1853,7 @@
                                            coordOrder, periodic, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass) :: interngrid
+      type(ESMF_IGridClass) :: igrid
       integer, intent(in) :: dimCount
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
@@ -1886,10 +1886,10 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Pointer to a {\tt ESMF\_IGrid}
 !     \item[dimCount]
-!          Number of interngrid dimensions.
+!          Number of igrid dimensions.
 !     \item[{[coord1]}]
 !          Array of physical coordinates in the first direction.
 !     \item[{[coord2]}]
@@ -1909,21 +1909,21 @@
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[horzIGridType]}]
-!          Integer specifier to denote horizontal interngrid type.
+!          Integer specifier to denote horizontal igrid type.
 !     \item[{[vertIGridType]}]
-!          Integer specifier to denote vertical interngrid type.
+!          Integer specifier to denote vertical igrid type.
 !     \item[{[horzStagger]}]
-!          Integer specifier to denote horizontal interngrid stagger.
+!          Integer specifier to denote horizontal igrid stagger.
 !     \item[{[vertStagger]}]
-!          Integer specifier to denote vertical interngrid stagger.
+!          Integer specifier to denote vertical igrid stagger.
 !     \item[{[horzCoordSystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the horizontal interngrid.
+!          the horizontal igrid.
 !     \item[{[vertCoordSystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the vertical interngrid.
+!          the vertical igrid.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
 !          axes.
@@ -1945,39 +1945,39 @@
       real(ESMF_KIND_R8), dimension(:), pointer :: coordsUse1, coordsUse2, &
                                                    coordsUse3
       type(ESMF_LocalArray), dimension(:), pointer :: coords
-      type(ESMF_LogRectIGrid), pointer :: lrinterngrid
+      type(ESMF_LogRectIGrid), pointer :: lrigrid
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! Initialize the derived type contents, including setting name
-      call ESMF_IGridConstructNew(interngrid, name, localrc)
+      call ESMF_IGridConstructNew(igrid, name, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! Fill in logRectIGrid derived type with subroutine arguments
       ! TODO: check stat return code against 0 (not ESMF_FAILURE)
-      interngrid%interngridStructure   = ESMF_INTERNGRID_STRUCTURE_LOGRECT
-      interngrid%horzStagger     = ESMF_INTERNGRID_HORZ_STAGGER_A
-      interngrid%coordOrder      = ESMF_COORD_ORDER_XYZ
-      allocate(interngrid%interngridSpecific%logRectIGrid, stat=localrc) 
+      igrid%igridStructure   = ESMF_IGRID_STRUCT_LOGRECT
+      igrid%horzStagger     = ESMF_IGRID_HORZ_STAGGER_A
+      igrid%coordOrder      = ESMF_COORD_ORDER_XYZ
+      allocate(igrid%igridSpecific%logRectIGrid, stat=localrc) 
       if (ESMF_LogMsgFoundAllocError(localrc, "logRectIGrid", &
                                      ESMF_CONTEXT, rc)) return
 
-      lrinterngrid => interngrid%interngridSpecific%logRectIGrid
-      call ESMF_LRIGridConstructSpecificNew(lrinterngrid, localrc)
+      lrigrid => igrid%igridSpecific%logRectIGrid
+      call ESMF_LRIGridConstructSpecNew(lrigrid, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      allocate(interngrid%interngridSpecific%logRectIGrid%coords(dimCount), stat=localrc)
+      allocate(igrid%igridSpecific%logRectIGrid%coords(dimCount), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "logRectIGrid%coords", &
                                      ESMF_CONTEXT, rc)) return
    
-      coords => interngrid%interngridSpecific%logRectIGrid%coords
+      coords => igrid%igridSpecific%logRectIGrid%coords
 
-      ! Two ways to make a interngrid here: by coordinates or by minima and deltas
+      ! Two ways to make a igrid here: by coordinates or by minima and deltas
       ! by coordinates:
       if (present(coord1)) then    ! for now, assume if coord1 array is there then
                                    ! using coords for all directions
@@ -2089,57 +2089,57 @@
 
       ! either way, we have the counts now
       do i = 1,dimCount
-        lrinterngrid%countPerDim(i) = counts(i)
+        lrigrid%countPerDim(i) = counts(i)
       enddo
 
-      ! Fill in interngrid derived type with subroutine arguments
-      interngrid%dimCount      = dimCount
-      interngrid%interngridStructure = ESMF_INTERNGRID_STRUCTURE_LOGRECT
-      if (present(horzIGridType   )) interngrid%horzIGridType    = horzIGridType
-      if (present(vertIGridType   )) interngrid%vertIGridType    = vertIGridType
-      if (present(horzStagger    )) interngrid%horzStagger     = horzStagger
-      if (present(vertStagger    )) interngrid%vertStagger     = vertStagger
-      if (present(horzCoordSystem)) interngrid%horzCoordSystem = horzCoordSystem
-      if (present(vertCoordSystem)) interngrid%vertCoordSystem = vertCoordSystem
-      if (present(coordOrder     )) interngrid%coordOrder      = coordOrder
+      ! Fill in igrid derived type with subroutine arguments
+      igrid%dimCount      = dimCount
+      igrid%igridStructure = ESMF_IGRID_STRUCT_LOGRECT
+      if (present(horzIGridType   )) igrid%horzIGridType    = horzIGridType
+      if (present(vertIGridType   )) igrid%vertIGridType    = vertIGridType
+      if (present(horzStagger    )) igrid%horzStagger     = horzStagger
+      if (present(vertStagger    )) igrid%vertStagger     = vertStagger
+      if (present(horzCoordSystem)) igrid%horzCoordSystem = horzCoordSystem
+      if (present(vertCoordSystem)) igrid%vertCoordSystem = vertCoordSystem
+      if (present(coordOrder     )) igrid%coordOrder      = coordOrder
 
       ! Set dimension names and units for each dimension
       if (present(dimNames)) then
-        do i=1,ESMF_MAXINTERNGRIDDIM
+        do i=1,ESMF_MAXIGRIDDIM
           if (i > size(dimNames)) exit
-          interngrid%dimNames(i) = dimNames(i)
+          igrid%dimNames(i) = dimNames(i)
         enddo
       endif
       if (present(dimUnits)) then
-        do i=1,ESMF_MAXINTERNGRIDDIM
+        do i=1,ESMF_MAXIGRIDDIM
           if (i > size(dimUnits)) exit
-          interngrid%dimUnits(i) = dimUnits(i)
+          igrid%dimUnits(i) = dimUnits(i)
         enddo
       endif
 
       ! Set periodic flags for each dimension
       if (present(periodic)) then
-        do i=1,ESMF_MAXINTERNGRIDDIM
+        do i=1,ESMF_MAXIGRIDDIM
           if (i > size(periodic)) exit
-          interngrid%periodic(i) = periodic(i)
+          igrid%periodic(i) = periodic(i)
         enddo
       endif
 
       ! Set global domain limits
       do i=1,size(minGlobalCoordPerDimUse)
-        interngrid%minGlobalCoordPerDim(i) = minGlobalCoordPerDimUse(i)
+        igrid%minGlobalCoordPerDim(i) = minGlobalCoordPerDimUse(i)
       enddo
       do i=1,size(maxGlobalCoordPerDimUse)
-        interngrid%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDimUse(i)
+        igrid%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDimUse(i)
       enddo
 
-      interngrid%interngridStatus = ESMF_INTERNGRID_STATUS_INIT
+      igrid%igridStatus = ESMF_IGRID_STATUS_INIT
 
-      ! Set interngrid as created 
+      ! Set igrid as created 
       ! (this may be done twice if this sub. is called from a general
-      !  interngrid create subroutine, but that should be ok, since
+      !  igrid create subroutine, but that should be ok, since
       !  it doesn't matter how often a var. is set to the same value.)
-      ESMF_INIT_SET_CREATED(interngrid)
+      ESMF_INIT_SET_CREATED(igrid)
 
       ! Clean up
       deallocate(coordsUse1, &
@@ -2164,13 +2164,13 @@
 ! !IROUTINE: ESMF_LRIGridDistributeBlock - Distribute a IGrid with block storage
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridDistributeBlock(interngrid, delayout, &
+      subroutine ESMF_LRIGridDistributeBlock(igrid, delayout, &
                                             countsPerDEDecomp1, &
                                             countsPerDEDecomp2, &
                                             decompIds, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass), target :: interngrid
+      type(ESMF_IGridClass), target :: igrid
       type(ESMF_DELayout), intent(in) :: delayout
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp1
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp2
@@ -2187,15 +2187,15 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Pointer to a {\tt ESMF\_IGrid}
 !     \item[delayout]
 !         {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[{[countsPerDEDecomp1]}]
-!          Array of number of interngrid increments (cells) per DE in the 
+!          Array of number of igrid increments (cells) per DE in the 
 !          first decomposition axis.
 !     \item[{[countsPerDEDecomp2]}]
-!          Array of number of interngrid increments (cells) per DE in the 
+!          Array of number of igrid increments (cells) per DE in the 
 !          second decomposition axis.
 !     \item[{[decompIds]}]
 !          Identifier for which IGrid axes are decomposed.
@@ -2230,7 +2230,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,delayout,rc)
 
       ! validate the layout before going any further
@@ -2242,7 +2242,7 @@
       ! do some sanity error checking
 
       ! Extract some information from the IGrid
-      dimCount = interngrid%dimCount
+      dimCount = igrid%dimCount
       allocate(  counts(dimCount), &
                     min(dimCount), &
                     max(dimCount), &
@@ -2252,21 +2252,21 @@
                                      ESMF_CONTEXT, rc)) return
 
       nullify(coords)
-      if (associated(interngrid%interngridSpecific%logRectIGrid%coords)) then
-        coords => interngrid%interngridSpecific%logRectIGrid%coords
+      if (associated(igrid%igridSpecific%logRectIGrid%coords)) then
+        coords => igrid%igridSpecific%logRectIGrid%coords
       endif
 
       do i = 1,dimCount
-        counts(i)   = interngrid%interngridSpecific%logRectIGrid%countPerDim(i)
-        min(i)      = interngrid%minGlobalCoordPerDim(i)
-        max(i)      = interngrid%maxGlobalCoordPerDim(i)
-        dimNames(i) = interngrid%dimNames(i)
-        dimUnits(i) = interngrid%dimUnits(i)
+        counts(i)   = igrid%igridSpecific%logRectIGrid%countPerDim(i)
+        min(i)      = igrid%minGlobalCoordPerDim(i)
+        max(i)      = igrid%maxGlobalCoordPerDim(i)
+        dimNames(i) = igrid%dimNames(i)
+        dimUnits(i) = igrid%dimUnits(i)
       enddo
-      periodic => interngrid%periodic
+      periodic => igrid%periodic
 
-      if (interngrid%horzIGridType.eq.ESMF_INTERNGRID_TYPE_LATLON_UNI .OR. &
-          interngrid%horzIGridType.eq.ESMF_INTERNGRID_TYPE_XY_UNI) then ! uniform
+      if (igrid%horzIGridType.eq.ESMF_IGRID_TYPE_LATLON_UNI .OR. &
+          igrid%horzIGridType.eq.ESMF_IGRID_TYPE_XY_UNI) then ! uniform
         allocate(coord1(counts(1)+1), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "coord1", &
                                        ESMF_CONTEXT, rc)) return
@@ -2291,7 +2291,7 @@
           call ESMF_LocalArrayGetData(coords(2), coord2, ESMF_DATA_COPY, localrc)
       endif
 
-      ! the vertical interngrid is never uniform, so get its coordinates if 3d interngrid
+      ! the vertical igrid is never uniform, so get its coordinates if 3d igrid
       if (dimCount.ge.3) &
         call ESMF_LocalArrayGetData(coords(3), coord3, ESMF_DATA_COPY, localrc)
 
@@ -2315,7 +2315,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Check layout attributes
-      ! TODO: this is only interesting for DEs with non-0 interngridcounts.
+      ! TODO: this is only interesting for DEs with non-0 igridcounts.
       !if (otoFlag .ne. ESMF_TRUE) then    ! ensure this is 1-to-1 layout
       !  dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
       !                                "not a 1-to-1 layout", &
@@ -2435,8 +2435,8 @@
       enddo
       myCount = countsPerDE1(myDE(1))*countsPerDE2(myDE(2))
       if (dimCount.eq.3) myCount = myCount*countsPerDE3(myDE(3))
-      interngrid%hasLocalData = ESMF_TRUE
-      if (myCount.le.0) interngrid%hasLocalData = ESMF_FALSE
+      igrid%hasLocalData = ESMF_TRUE
+      if (myCount.le.0) igrid%hasLocalData = ESMF_FALSE
 
       ! Create InternDG and PhysGrid at cell center
       dimCountIGrid = dimCount
@@ -2446,7 +2446,7 @@
       physIGridId = 1
       physIGridName = 'cell_center'
       relloc = ESMF_CELL_CENTER
-      call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, dimCountIGrid, counts, &
+      call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, dimCountIGrid, counts, &
                                        delayout, decompIdsUse(1:2), &
                                        countsPerDEDim1=countsPerDE1, &
                                        countsPerDEDim2=countsPerDE2, &
@@ -2456,7 +2456,7 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_LRIGridAddPhysGridBlock(interngrid, physIGridId, relloc, dimCountIGrid, &
+      call ESMF_LRIGridAddPhysGridBlock(igrid, physIGridId, relloc, dimCountIGrid, &
                                        decompIdsUse(1:2), coord1, coord2, &
                                        countsPerDE1, countsPerDE2, &
                                        dimNames, dimUnits, physIGridName, localrc)
@@ -2464,24 +2464,24 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      interngrid%internDGIndex(physIGridId) = internDGId
+      igrid%internDGIndex(physIGridId) = internDGId
       internDGId = internDGId + 1 
       physIGridId = physIGridId + 1 
 
       ! Create any other InternDGs and PhysGrids necessary for horizontal
-      ! interngrid stagger
+      ! igrid stagger
       ! TODO: finish filling out, look up D
-      select case (interngrid%horzStagger%stagger)
+      select case (igrid%horzStagger%stagger)
 
         ! Arakawa A (centered velocity)
         case (1)
 
-        ! Arakawa B_NE (velocities at NE interngrid corner)
+        ! Arakawa B_NE (velocities at NE igrid corner)
         case (2)
           internDGName = 'cell_necorner'
           physIGridName = 'cell_necorner'
           relloc = ESMF_CELL_NECORNER
-          call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, dimCountIGrid, &
+          call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, dimCountIGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
@@ -2491,7 +2491,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridBlock(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridBlock(igrid, physIGridId, relloc, &
                                            dimCountIGrid, decompIdsUse(1:2), &
                                            coord1, coord2, countsPerDE1, &
                                            countsPerDE2, dimNames, dimUnits, &
@@ -2500,16 +2500,16 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1 
           physIGridId = physIGridId + 1 
 
-        ! Arakawa B_SW (velocities at SW interngrid corner)
+        ! Arakawa B_SW (velocities at SW igrid corner)
         case (3)
           internDGName = 'cell_swcorner'
           physIGridName = 'cell_swcorner'
           relloc = ESMF_CELL_SWCORNER
-          call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, dimCountIGrid, &
+          call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, dimCountIGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
@@ -2519,7 +2519,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridBlock(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridBlock(igrid, physIGridId, relloc, &
                                            dimCountIGrid, decompIdsUse(1:2), &
                                            coord1, coord2, countsPerDE1, &
                                            countsPerDE2, dimNames, dimUnits, &
@@ -2528,16 +2528,16 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
 
-        ! Arakawa B_SE (velocities at SE interngrid corner)
+        ! Arakawa B_SE (velocities at SE igrid corner)
         case (4)
           internDGName = 'cell_secorner'
           physIGridName = 'cell_secorner'
           relloc = ESMF_CELL_SECORNER
-          call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, dimCountIGrid, &
+          call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, dimCountIGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
@@ -2547,7 +2547,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridBlock(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridBlock(igrid, physIGridId, relloc, &
                                            dimCountIGrid, decompIdsUse(1:2), &
                                            coord1, coord2, countsPerDE1, &
                                            countsPerDE2, dimNames, dimUnits, &
@@ -2556,16 +2556,16 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
 
-        ! Arakawa B_NW (velocities at NW interngrid corner)
+        ! Arakawa B_NW (velocities at NW igrid corner)
         case (5)
           internDGName = 'cell_nwcorner'
           physIGridName = 'cell_nwcorner'
           relloc = ESMF_CELL_NWCORNER
-          call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, dimCountIGrid, &
+          call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, dimCountIGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
@@ -2575,7 +2575,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridBlock(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridBlock(igrid, physIGridId, relloc, &
                                            dimCountIGrid, decompIdsUse(1:2), &
                                            coord1, coord2, countsPerDE1, &
                                            countsPerDE2, dimNames, dimUnits, &
@@ -2584,7 +2584,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
 
@@ -2594,7 +2594,7 @@
           internDGName = 'cell_eface'
           physIGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
-          call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, dimCountIGrid, &
+          call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, dimCountIGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
@@ -2604,7 +2604,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridBlock(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridBlock(igrid, physIGridId, relloc, &
                                            dimCountIGrid, decompIdsUse(1:2), &
                                            coord1, coord2, countsPerDE1, &
                                            countsPerDE2, dimNames, dimUnits, &
@@ -2613,13 +2613,13 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
           internDGName = 'cell_nface'
           physIGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
-          call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, dimCountIGrid, &
+          call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, dimCountIGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
@@ -2629,7 +2629,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridBlock(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridBlock(igrid, physIGridId, relloc, &
                                            dimCountIGrid, decompIdsUse(1:2), &
                                            coord1, coord2, countsPerDE1, &
                                            countsPerDE2, dimNames, dimUnits, &
@@ -2638,7 +2638,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
 
@@ -2648,7 +2648,7 @@
           internDGName = 'cell_wface'
           physIGridName = 'cell_wface'
           relloc = ESMF_CELL_WFACE
-          call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, dimCountIGrid, &
+          call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, dimCountIGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
@@ -2658,7 +2658,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridBlock(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridBlock(igrid, physIGridId, relloc, &
                                            dimCountIGrid, decompIdsUse(1:2), &
                                            coord1, coord2, countsPerDE1, &
                                            countsPerDE2, dimNames, dimUnits, &
@@ -2667,13 +2667,13 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
           internDGName = 'cell_sface'
           physIGridName = 'cell_sface'
           relloc = ESMF_CELL_SFACE
-          call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, dimCountIGrid, &
+          call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, dimCountIGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
@@ -2683,7 +2683,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridBlock(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridBlock(igrid, physIGridId, relloc, &
                                            dimCountIGrid, decompIdsUse(1:2), &
                                            coord1, coord2, countsPerDE1, &
                                            countsPerDE2, dimNames, dimUnits, &
@@ -2692,7 +2692,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
 
@@ -2702,7 +2702,7 @@
           internDGName = 'cell_eface'
           physIGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
-          call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, dimCountIGrid, &
+          call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, dimCountIGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
@@ -2712,7 +2712,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridBlock(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridBlock(igrid, physIGridId, relloc, &
                                            dimCountIGrid, decompIdsUse(1:2), &
                                            coord1, coord2, countsPerDE1, &
                                            countsPerDE2, dimNames, dimUnits, &
@@ -2721,13 +2721,13 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
           internDGName = 'cell_sface'
           physIGridName = 'cell_sface'
           relloc = ESMF_CELL_SFACE
-          call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, dimCountIGrid, &
+          call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, dimCountIGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
@@ -2737,7 +2737,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridBlock(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridBlock(igrid, physIGridId, relloc, &
                                            dimCountIGrid, decompIdsUse(1:2), &
                                            coord1, coord2, countsPerDE1, &
                                            countsPerDE2, dimNames, dimUnits, &
@@ -2746,7 +2746,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
 
@@ -2756,7 +2756,7 @@
           internDGName = 'cell_wface'
           physIGridName = 'cell_wface'
           relloc = ESMF_CELL_WFACE
-          call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, dimCountIGrid, &
+          call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, dimCountIGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
@@ -2766,7 +2766,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridBlock(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridBlock(igrid, physIGridId, relloc, &
                                            dimCountIGrid, decompIdsUse(1:2), &
                                            coord1, coord2, countsPerDE1, &
                                            countsPerDE2, dimNames, dimUnits, &
@@ -2775,13 +2775,13 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
           internDGName = 'cell_nface'
           physIGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
-          call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, dimCountIGrid, &
+          call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, dimCountIGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
@@ -2791,7 +2791,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridBlock(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridBlock(igrid, physIGridId, relloc, &
                                            dimCountIGrid, decompIdsUse(1:2), &
                                            coord1, coord2, countsPerDE1, &
                                            countsPerDE2, dimNames, dimUnits, &
@@ -2800,7 +2800,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
 
@@ -2811,7 +2811,7 @@
         internDGName = 'vertical center'
         physIGridName = 'vertical center'
         relloc = ESMF_CELL_CELL    ! TODO: right relloc?
-        call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, 1, counts(3:3), &
+        call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, 1, counts(3:3), &
                                          delayout, decompIdsUse(3:3), &
                                          countsPerDEDim1=countsPerDE3, &
                                          periodic=periodic(3:3), &
@@ -2820,27 +2820,27 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        call ESMF_LRIGridAddVertPhysGrid(interngrid, physIGridId, relloc, coord3, &
+        call ESMF_LRIGridAddVertPhysGrid(igrid, physIGridId, relloc, coord3, &
                                         countsPerDE3, physIGridName, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        interngrid%internDGIndex(physIGridId) = internDGId
+        igrid%internDGIndex(physIGridId) = internDGId
         internDGId = internDGId + 1
         physIGridId = physIGridId + 1
 
-        select case (interngrid%vertStagger%stagger)
+        select case (igrid%vertStagger%stagger)
 
-          ! ESMF_INTERNGRID_VERT_STAGGER_CENTER - vertical velocity at vertical midpoints
+          ! ESMF_IGRID_VERT_STAGGER_CENTER - vertical velocity at vertical midpoints
           case (1)
 
-          ! ESMF_INTERNGRID_VERT_STAGGER_TOP - vertical velocity at top vertical face
+          ! ESMF_IGRID_VERT_STAGGER_TOP - vertical velocity at top vertical face
           case (2)
             internDGName = 'vertical top face'
             physIGridName = 'vertical top face'
             relloc = ESMF_CELL_TOPFACE
-            call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, 1, counts(3:3), &
+            call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, 1, counts(3:3), &
                                              delayout, decompIdsUse(3:3), &
                                              countsPerDEDim1=countsPerDE3, &
                                              periodic=periodic(3:3), &
@@ -2849,13 +2849,13 @@
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
 
-            call ESMF_LRIGridAddVertPhysGrid(interngrid, physIGridId, relloc, coord3, &
+            call ESMF_LRIGridAddVertPhysGrid(igrid, physIGridId, relloc, coord3, &
                                             countsPerDE3, physIGridName, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
 
-            interngrid%internDGIndex(physIGridId) = internDGId
+            igrid%internDGIndex(physIGridId) = internDGId
             internDGId = internDGId + 1
             physIGridId = physIGridId + 1
 
@@ -2864,7 +2864,7 @@
       endif
 
       ! Create the BoundingBoxes structure
-      call ESMF_LRIGridSetBoundBoxesBlock(interngrid, dimCount, coord1, coord2, &
+      call ESMF_LRIGridSetBoundBoxesBlock(igrid, dimCount, coord1, coord2, &
                                          countsPerDE1, countsPerDE2, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2922,8 +2922,8 @@
                                        ESMF_CONTEXT, rc)) return
       endif
 
-      interngrid%interngridStorage = ESMF_INTERNGRID_STORAGE_LOGRECT
-      interngrid%interngridStatus  = ESMF_INTERNGRID_STATUS_READY
+      igrid%igridStorage = ESMF_IGRID_STORAGE_LOGRECT
+      igrid%igridStatus  = ESMF_IGRID_STATUS_READY
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRIGridDistributeBlock
@@ -2934,11 +2934,11 @@
 !BOPI
 ! !IROUTINE: ESMF_LRIGridDistributeArbitrary - Distribute a IGrid as an arbitrary vector of points
 ! !INTERFACE:
-      subroutine ESMF_LRIGridDistributeArbitrary(interngrid, delayout, myCount, &
+      subroutine ESMF_LRIGridDistributeArbitrary(igrid, delayout, myCount, &
                                                 myIndices, decompIds, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass), target :: interngrid
+      type(ESMF_IGridClass), target :: igrid
       type(ESMF_DELayout), intent(in) :: delayout
       integer, intent(in) :: myCount
       integer, dimension(:,:), intent(in) :: myIndices
@@ -2955,14 +2955,14 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Pointer to a {\tt ESMF\_IGrid}
 !     \item[delayout]
 !         {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[myCount]
-!          Number of interngrid cells to be distributed to this DE.
+!          Number of igrid cells to be distributed to this DE.
 !     \item[myIndices]
-!          Array of interngrid indices to be distributed to this DE.  The size of this
+!          Array of igrid indices to be distributed to this DE.  The size of this
 !          array must be at least [myCount] in the first dimension and 2 in the
 !          second.
 !     \item[{[decompIds]}]
@@ -2993,7 +2993,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,delayout,rc)
 
       ! validate the layout before going any further
@@ -3005,7 +3005,7 @@
       ! do some sanity error checking
 
       ! Extract some information from the IGrid
-      dimCount = interngrid%dimCount
+      dimCount = igrid%dimCount
       allocate(  counts(dimCount), &
                     min(dimCount), &
                     max(dimCount), &
@@ -3016,21 +3016,21 @@
 
       ! Either get coordinates or calculate them from IGrid information
       nullify(coords)
-      if (associated(interngrid%interngridSpecific%logRectIGrid%coords)) then
-        coords => interngrid%interngridSpecific%logRectIGrid%coords
+      if (associated(igrid%igridSpecific%logRectIGrid%coords)) then
+        coords => igrid%igridSpecific%logRectIGrid%coords
       endif
 
       do i = 1,dimCount
-        counts(i)   = interngrid%interngridSpecific%logRectIGrid%countPerDim(i)
-        min(i)      = interngrid%minGlobalCoordPerDim(i)
-        max(i)      = interngrid%maxGlobalCoordPerDim(i)
-        dimNames(i) = interngrid%dimNames(i)
-        dimUnits(i) = interngrid%dimUnits(i)
+        counts(i)   = igrid%igridSpecific%logRectIGrid%countPerDim(i)
+        min(i)      = igrid%minGlobalCoordPerDim(i)
+        max(i)      = igrid%maxGlobalCoordPerDim(i)
+        dimNames(i) = igrid%dimNames(i)
+        dimUnits(i) = igrid%dimUnits(i)
       enddo
-      periodic => interngrid%periodic
+      periodic => igrid%periodic
 
-      if (interngrid%horzIGridType.eq.ESMF_INTERNGRID_TYPE_LATLON_UNI .OR. &
-          interngrid%horzIGridType.eq.ESMF_INTERNGRID_TYPE_XY_UNI) then ! uniform
+      if (igrid%horzIGridType.eq.ESMF_IGRID_TYPE_LATLON_UNI .OR. &
+          igrid%horzIGridType.eq.ESMF_IGRID_TYPE_XY_UNI) then ! uniform
         allocate(coord1(counts(1)+1), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "coord1", &
                                        ESMF_CONTEXT, rc)) return
@@ -3055,7 +3055,7 @@
           call ESMF_LocalArrayGetData(coords(2), coord2, ESMF_DATA_COPY, localrc)
       endif
 
-      ! the vertical interngrid is never uniform, so get its coordinates if 3d interngrid
+      ! the vertical igrid is never uniform, so get its coordinates if 3d igrid
       if (dimCount.ge.3) &
         call ESMF_LocalArrayGetData(coords(3), coord3, ESMF_DATA_COPY, localrc)
 
@@ -3113,7 +3113,7 @@
       physIGridId = 1
       physIGridName = 'cell_center'
       relloc = ESMF_CELL_CENTER
-      call ESMF_LRIGridAddInternDGArb(interngrid, internDGId, distCount, &
+      call ESMF_LRIGridAddInternDGArb(igrid, internDGId, distCount, &
                                      myCount, myIndices, counts, delayout, &
                                      decompIdsUse(1:2), &
                                      internDGName=internDGName, rc=localrc)
@@ -3121,7 +3121,7 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_LRIGridAddPhysGridArb(interngrid, physIGridId, relloc, dimCountIGrid, &
+      call ESMF_LRIGridAddPhysGridArb(igrid, physIGridId, relloc, dimCountIGrid, &
                                      decompIdsUse(1:2), coord1, coord2, &
                                      myCount, myIndices, dimNames, dimUnits, &
                                      physIGridName, localrc)
@@ -3129,24 +3129,24 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      interngrid%internDGIndex(physIGridId) = internDGId
+      igrid%internDGIndex(physIGridId) = internDGId
       internDGId = internDGId + 1 
       physIGridId = physIGridId + 1 
 
       ! Create any other InternDGs and PhysGrids necessary for horizontal
-      ! interngrid stagger
+      ! igrid stagger
       ! TODO: finish filling out, look up D
-      select case (interngrid%horzStagger%stagger)
+      select case (igrid%horzStagger%stagger)
 
         ! Arakawa A (centered velocity)
         case (1)
 
-        ! Arakawa B_NE (velocities at NE interngrid corner)
+        ! Arakawa B_NE (velocities at NE igrid corner)
         case (2)
           internDGName = 'cell_necorner'
           physIGridName = 'cell_necorner'
           relloc = ESMF_CELL_NECORNER
-          call ESMF_LRIGridAddInternDGArb(interngrid, internDGId, distCount, &
+          call ESMF_LRIGridAddInternDGArb(igrid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
                                          internDGName=internDGName, rc=localrc)
@@ -3154,7 +3154,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridArb(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridArb(igrid, physIGridId, relloc, &
                                          dimCountIGrid, decompIdsUse(1:2), &
                                          coord1, coord2, myCount, myIndices, &
                                          dimNames, dimUnits, physIGridName, &
@@ -3163,16 +3163,16 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1 
           physIGridId = physIGridId + 1 
 
-        ! Arakawa B_SW (velocities at SW interngrid corner)
+        ! Arakawa B_SW (velocities at SW igrid corner)
         case (3)
           internDGName = 'cell_swcorner'
           physIGridName = 'cell_swcorner'
           relloc = ESMF_CELL_SWCORNER
-          call ESMF_LRIGridAddInternDGArb(interngrid, internDGId, distCount, &
+          call ESMF_LRIGridAddInternDGArb(igrid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
                                          internDGName=internDGName, rc=localrc)
@@ -3180,7 +3180,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridArb(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridArb(igrid, physIGridId, relloc, &
                                          dimCountIGrid, decompIdsUse(1:2), &
                                          coord1, coord2, myCount, myIndices, &
                                          dimNames, dimUnits, physIGridName, &
@@ -3189,16 +3189,16 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
 
-        ! Arakawa B_SE (velocities at SE interngrid corner)
+        ! Arakawa B_SE (velocities at SE igrid corner)
         case (4)
           internDGName = 'cell_secorner'
           physIGridName = 'cell_secorner'
           relloc = ESMF_CELL_SECORNER
-          call ESMF_LRIGridAddInternDGArb(interngrid, internDGId, distCount, &
+          call ESMF_LRIGridAddInternDGArb(igrid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
                                          internDGName=internDGName, rc=localrc)
@@ -3206,7 +3206,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridArb(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridArb(igrid, physIGridId, relloc, &
                                          dimCountIGrid, decompIdsUse(1:2), &
                                          coord1, coord2, myCount, myIndices, &
                                          dimNames, dimUnits, physIGridName, &
@@ -3215,16 +3215,16 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
 
-        ! Arakawa B_NW (velocities at NW interngrid corner)
+        ! Arakawa B_NW (velocities at NW igrid corner)
         case (5)
           internDGName = 'cell_nwcorner'
           physIGridName = 'cell_nwcorner'
           relloc = ESMF_CELL_NWCORNER
-          call ESMF_LRIGridAddInternDGArb(interngrid, internDGId, distCount, &
+          call ESMF_LRIGridAddInternDGArb(igrid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
                                          internDGName=internDGName, rc=localrc)
@@ -3232,7 +3232,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridArb(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridArb(igrid, physIGridId, relloc, &
                                          dimCountIGrid, decompIdsUse(1:2), &
                                          coord1, coord2, myCount, myIndices, &
                                          dimNames, dimUnits, physIGridName, &
@@ -3241,7 +3241,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
 
@@ -3251,7 +3251,7 @@
           internDGName = 'cell_eface'
           physIGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
-          call ESMF_LRIGridAddInternDGArb(interngrid, internDGId, distCount, &
+          call ESMF_LRIGridAddInternDGArb(igrid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
                                          internDGName=internDGName, rc=localrc)
@@ -3259,7 +3259,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridArb(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridArb(igrid, physIGridId, relloc, &
                                          dimCountIGrid, decompIdsUse(1:2), &
                                          coord1, coord2, myCount, myIndices, &
                                          dimNames, dimUnits, physIGridName, &
@@ -3268,13 +3268,13 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
           internDGName = 'cell_nface'
           physIGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
-          call ESMF_LRIGridAddInternDGArb(interngrid, internDGId, distCount, &
+          call ESMF_LRIGridAddInternDGArb(igrid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
                                          internDGName=internDGName, rc=localrc)
@@ -3282,7 +3282,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridArb(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridArb(igrid, physIGridId, relloc, &
                                          dimCountIGrid, decompIdsUse(1:2), &
                                          coord1, coord2, myCount, myIndices, &
                                          dimNames, dimUnits, physIGridName, &
@@ -3291,7 +3291,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
 
@@ -3301,7 +3301,7 @@
           internDGName = 'cell_wface'
           physIGridName = 'cell_wface'
           relloc = ESMF_CELL_WFACE
-          call ESMF_LRIGridAddInternDGArb(interngrid, internDGId, distCount, &
+          call ESMF_LRIGridAddInternDGArb(igrid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
                                          internDGName=internDGName, rc=localrc)
@@ -3309,7 +3309,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridArb(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridArb(igrid, physIGridId, relloc, &
                                          dimCountIGrid, decompIdsUse(1:2), &
                                          coord1, coord2, myCount, myIndices, &
                                          dimNames, dimUnits, physIGridName, &
@@ -3318,13 +3318,13 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
           internDGName = 'cell_sface'
           physIGridName = 'cell_sface'
           relloc = ESMF_CELL_SFACE
-          call ESMF_LRIGridAddInternDGArb(interngrid, internDGId, distCount, &
+          call ESMF_LRIGridAddInternDGArb(igrid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
                                          internDGName=internDGName, rc=localrc)
@@ -3332,7 +3332,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridArb(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridArb(igrid, physIGridId, relloc, &
                                          dimCountIGrid, decompIdsUse(1:2), &
                                          coord1, coord2, myCount, myIndices, &
                                          dimNames, dimUnits, physIGridName, &
@@ -3341,7 +3341,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
 
@@ -3351,7 +3351,7 @@
           internDGName = 'cell_eface'
           physIGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
-          call ESMF_LRIGridAddInternDGArb(interngrid, internDGId, distCount, &
+          call ESMF_LRIGridAddInternDGArb(igrid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
                                          internDGName=internDGName, rc=localrc)
@@ -3359,7 +3359,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridArb(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridArb(igrid, physIGridId, relloc, &
                                          dimCountIGrid, decompIdsUse(1:2), &
                                          coord1, coord2, myCount, myIndices, &
                                          dimNames, dimUnits, physIGridName, &
@@ -3368,13 +3368,13 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
           internDGName = 'cell_sface'
           physIGridName = 'cell_sface'
           relloc = ESMF_CELL_SFACE
-          call ESMF_LRIGridAddInternDGArb(interngrid, internDGId, distCount, &
+          call ESMF_LRIGridAddInternDGArb(igrid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
                                          internDGName=internDGName, rc=localrc)
@@ -3382,7 +3382,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridArb(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridArb(igrid, physIGridId, relloc, &
                                          dimCountIGrid, decompIdsUse(1:2), &
                                          coord1, coord2, myCount, myIndices, &
                                          dimNames, dimUnits, physIGridName, &
@@ -3391,7 +3391,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
 
@@ -3401,7 +3401,7 @@
           internDGName = 'cell_wface'
           physIGridName = 'cell_wface'
           relloc = ESMF_CELL_WFACE
-          call ESMF_LRIGridAddInternDGArb(interngrid, internDGId, distCount, &
+          call ESMF_LRIGridAddInternDGArb(igrid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
                                          internDGName=internDGName, rc=localrc)
@@ -3409,7 +3409,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridArb(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridArb(igrid, physIGridId, relloc, &
                                          dimCountIGrid, decompIdsUse(1:2), &
                                          coord1, coord2, myCount, myIndices, &
                                          dimNames, dimUnits, physIGridName, &
@@ -3418,13 +3418,13 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
           internDGName = 'cell_nface'
           physIGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
-          call ESMF_LRIGridAddInternDGArb(interngrid, internDGId, distCount, &
+          call ESMF_LRIGridAddInternDGArb(igrid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
                                          internDGName=internDGName, rc=localrc)
@@ -3432,7 +3432,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRIGridAddPhysGridArb(interngrid, physIGridId, relloc, &
+          call ESMF_LRIGridAddPhysGridArb(igrid, physIGridId, relloc, &
                                          dimCountIGrid, decompIdsUse(1:2), &
                                          coord1, coord2, myCount, myIndices, &
                                          dimNames, dimUnits, physIGridName, &
@@ -3441,7 +3441,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          interngrid%internDGIndex(physIGridId) = internDGId
+          igrid%internDGIndex(physIGridId) = internDGId
           internDGId = internDGId + 1
           physIGridId = physIGridId + 1
 
@@ -3452,7 +3452,7 @@
         internDGName = 'vertical center'
         physIGridName = 'vertical center'
         relloc = ESMF_CELL_CELL    ! TODO: right relloc?
-        call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, 1, counts(3:3), &
+        call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, 1, counts(3:3), &
                                          delayout, decompIdsUse(3:3), &
                                          countsPerDEDim1=counts(3:3), &
                                          internDGName=internDGName, rc=localrc)
@@ -3460,27 +3460,27 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        call ESMF_LRIGridAddVertPhysGrid(interngrid, physIGridId, relloc, coord3, &
+        call ESMF_LRIGridAddVertPhysGrid(igrid, physIGridId, relloc, coord3, &
                                         counts(3:3), physIGridName, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        interngrid%internDGIndex(physIGridId) = internDGId
+        igrid%internDGIndex(physIGridId) = internDGId
         internDGId = internDGId + 1
         physIGridId = physIGridId + 1
 
-        select case (interngrid%vertStagger%stagger)
+        select case (igrid%vertStagger%stagger)
 
-          ! ESMF_INTERNGRID_VERT_STAGGER_CENTER - vertical velocity at vertical midpoints
+          ! ESMF_IGRID_VERT_STAGGER_CENTER - vertical velocity at vertical midpoints
           case (1)
 
-          ! ESMF_INTERNGRID_VERT_STAGGER_TOP - vertical velocity at top vertical face
+          ! ESMF_IGRID_VERT_STAGGER_TOP - vertical velocity at top vertical face
           case (2)
             internDGName = 'vertical top face'
             physIGridName = 'vertical top face'
             relloc = ESMF_CELL_TOPFACE
-            call ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, 1, counts(3:3), &
+            call ESMF_LRIGridAddInternDGBlock(igrid, internDGId, 1, counts(3:3), &
                                              delayout, decompIdsUse(3:3), &
                                              countsPerDEDim1=counts(3:3), &
                                              internDGName=internDGName, &
@@ -3489,13 +3489,13 @@
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
 
-            call ESMF_LRIGridAddVertPhysGrid(interngrid, physIGridId, relloc, coord3, &
+            call ESMF_LRIGridAddVertPhysGrid(igrid, physIGridId, relloc, coord3, &
                                             counts(3:3), physIGridName, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
 
-            interngrid%internDGIndex(physIGridId) = internDGId
+            igrid%internDGIndex(physIGridId) = internDGId
             internDGId = internDGId + 1
             physIGridId = physIGridId + 1
 
@@ -3504,7 +3504,7 @@
       endif
 
       ! Create the BoundingBoxes structure
-      call ESMF_LRIGridSetBoundBoxesArb(interngrid, dimCount, coord1, coord2, &
+      call ESMF_LRIGridSetBoundBoxesArb(igrid, dimCount, coord1, coord2, &
                                        myCount, myIndices, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3545,8 +3545,8 @@
                                        ESMF_CONTEXT, rc)) return
       endif
 
-      interngrid%interngridStorage = ESMF_INTERNGRID_STORAGE_ARBITRARY
-      interngrid%interngridStatus  = ESMF_INTERNGRID_STATUS_READY
+      igrid%igridStorage = ESMF_IGRID_STORAGE_ARBITRARY
+      igrid%igridStatus  = ESMF_IGRID_STATUS_READY
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRIGridDistributeArbitrary
@@ -3558,10 +3558,10 @@
 ! !IROUTINE: ESMF_LRIGridDestruct - Free all resources associated with a IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridDestruct(interngrid, rc)
+      subroutine ESMF_LRIGridDestruct(igrid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass) :: interngrid
+      type(ESMF_IGridClass) :: igrid
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3573,7 +3573,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          The class to be destroyed.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3589,44 +3589,44 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
 
       ! If IGrid is unitialized, return with warning
-      if (interngrid%interngridStatus.eq.ESMF_INTERNGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("destroying uninitialized interngrid", ESMF_LOG_WARNING, &
+      if (igrid%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("destroying uninitialized igrid", ESMF_LOG_WARNING, &
                            ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      if (interngrid%interngridStatus.eq.ESMF_INTERNGRID_STATUS_READY) then
-        do n = 1,interngrid%numPhysGrids
-          call ESMF_PhysGridDestroy(interngrid%physgrids(n), rc=localrc)
+      if (igrid%igridStatus.eq.ESMF_IGRID_STATUS_READY) then
+        do n = 1,igrid%numPhysGrids
+          call ESMF_PhysGridDestroy(igrid%physgrids(n), rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
         end do
-        interngrid%numPhysGridsAlloc = 0
-        deallocate(interngrid%physgrids, &
-                   interngrid%internDGIndex, stat=localrc)
+        igrid%numPhysGridsAlloc = 0
+        deallocate(igrid%physgrids, &
+                   igrid%internDGIndex, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "deallocating physgrids", &
                                        ESMF_CONTEXT, rc)) return
 
-        do n = 1,interngrid%numInternDGs
-          call ESMF_InternDGDestroy(interngrid%interndgs(n), rc=localrc)
+        do n = 1,igrid%numInternDGs
+          call ESMF_InternDGDestroy(igrid%interndgs(n), rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
         end do
-        interngrid%numInternDGsAlloc = 0
-        deallocate(interngrid%interndgs, stat=localrc)
+        igrid%numInternDGsAlloc = 0
+        deallocate(igrid%interndgs, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "deallocating interndgs", &
                                        ESMF_CONTEXT, rc)) return
 
-        interngrid%minGlobalCoordPerDim(:) = 0
-        interngrid%maxGlobalCoordPerDim(:) = 0
+        igrid%minGlobalCoordPerDim(:) = 0
+        igrid%maxGlobalCoordPerDim(:) = 0
 
-        call ESMF_LocalArrayDestroy(interngrid%boundingBoxes, rc=localrc)
+        call ESMF_LocalArrayDestroy(igrid%boundingBoxes, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3634,23 +3634,23 @@
 
       !TODO: destruct these?
       !  type (ESMF_Base) :: base
-      !  type (ESMF_Status) :: interngridStatus
-      interngrid%horzIGridType    = ESMF_INTERNGRID_TYPE_UNKNOWN
-      interngrid%vertIGridType    = ESMF_INTERNGRID_VERT_TYPE_UNKNOWN
-      interngrid%horzStagger     = ESMF_INTERNGRID_HORZ_STAGGER_UNKNOWN
-      interngrid%vertStagger     = ESMF_INTERNGRID_VERT_STAGGER_UNKNOWN
-      interngrid%horzCoordSystem = ESMF_COORD_SYSTEM_UNKNOWN
-      interngrid%vertCoordSystem = ESMF_COORD_SYSTEM_UNKNOWN
-      interngrid%coordOrder      = ESMF_COORD_ORDER_UNKNOWN
-      interngrid%periodic        = ESMF_FALSE
-      interngrid%numPhysGrids    = 0
-      interngrid%numInternDGs    = 0
+      !  type (ESMF_Status) :: igridStatus
+      igrid%horzIGridType    = ESMF_IGRID_TYPE_UNKNOWN
+      igrid%vertIGridType    = ESMF_IGRID_VERT_TYPE_UNKNOWN
+      igrid%horzStagger     = ESMF_IGRID_HORZ_STAGGER_UNKNOWN
+      igrid%vertStagger     = ESMF_IGRID_VERT_STAGGER_UNKNOWN
+      igrid%horzCoordSystem = ESMF_COORD_SYSTEM_UNKNOWN
+      igrid%vertCoordSystem = ESMF_COORD_SYSTEM_UNKNOWN
+      igrid%coordOrder      = ESMF_COORD_ORDER_UNKNOWN
+      igrid%periodic        = ESMF_FALSE
+      igrid%numPhysGrids    = 0
+      igrid%numInternDGs    = 0
 
-      ! Set interngrid as deleted 
+      ! Set igrid as deleted 
       ! (this may be done twice if this sub. is called from a general
-      !  interngrid create subroutine, but that should be ok, since
+      !  igrid create subroutine, but that should be ok, since
       !  it doesn't matter how often a var. is set to the same value.)
-      ESMF_INIT_SET_DELETED(interngrid)
+      ESMF_INIT_SET_DELETED(igrid)
       
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3663,14 +3663,14 @@
 ! !IROUTINE: ESMF_LRIGridAddInternDGBlock - Add a InternDG to a LogRectIGrid with block storage
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridAddInternDGBlock(interngrid, internDGId, dimCount, &
+      subroutine ESMF_LRIGridAddInternDGBlock(igrid, internDGId, dimCount, &
                                              counts, delayout, decompIds, &
                                              countsPerDEDim1, countsPerDEDim2, &
                                              periodic, coversDomain, &
                                              internDGName, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass), target :: interngrid
+      type(ESMF_IGridClass), target :: igrid
       integer, intent(out) :: internDGId
       integer, intent(in) :: dimCount 
       integer, dimension(dimCount), intent(in) :: counts
@@ -3690,12 +3690,12 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          {\tt ESMF\_IGrid} to add {\tt InternDG} to.
 !     \item[internDGId]
 !          Integer identifier for {\tt ESMF\_InternDG}.
 !     \item[dimCount]
-!          Number of interngrid dimensions.
+!          Number of igrid dimensions.
 !     \item[counts]
 !          Array of number of computational cells in each direction.
 !     \item[delayout]
@@ -3709,10 +3709,10 @@
 !          Logical specifier (array) to denote if the InternDG covers the entire
 !          physical domain in each direction.
 !     \item[{[countsPerDEDim1]}]
-!          Array of number of interngrid increments per DE in the first
+!          Array of number of igrid increments per DE in the first
 !          decomposition direction.
 !     \item[{[countsPerDEDim2]}]
-!          Array of number of interngrid increments per DE in the second
+!          Array of number of igrid increments per DE in the second
 !          decomposition direction.
 !     \item[{[internDGName]}]
 !          {\tt ESMF\_InternDG} name.
@@ -3730,7 +3730,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,delayout,rc)
 
       ! Create the InternDG
@@ -3745,9 +3745,9 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! now that it's created, add the interndg to the interngrid
-      call ESMF_IGridAddInternDG(interngrid, internDG, localrc)
-      internDGId = interngrid%numInternDGs
+      ! now that it's created, add the interndg to the igrid
+      call ESMF_IGridAddInternDG(igrid, internDG, localrc)
+      internDGId = igrid%numInternDGs
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3760,12 +3760,12 @@
 ! !IROUTINE: ESMF_LRIGridAddInternDGArb - Add a InternDG to a LogRectIGrid with arbitrary storage
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridAddInternDGArb(interngrid, internDGId, dimCount, &
+      subroutine ESMF_LRIGridAddInternDGArb(igrid, internDGId, dimCount, &
                                            myCount, myIndices, counts, delayout, &
                                            decompIds, internDGName, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass), target :: interngrid
+      type(ESMF_IGridClass), target :: igrid
       integer, intent(out) :: internDGId
       integer, intent(in) :: dimCount 
       integer, intent(in) :: myCount
@@ -3782,16 +3782,16 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          {\tt ESMF\_IGrid} to add {\tt InternDG} to.
 !     \item[internDGId]
 !          Integer identifier for {\tt ESMF\_InternDG}.
 !     \item[dimCount]
-!          Number of interngrid dimensions.
+!          Number of igrid dimensions.
 !     \item[myCount]
 !          Number of computational cells on this DE.
 !     \item[myIndices]
-!          Array of interngrid indices to be distributed to this DE.  The size of this
+!          Array of igrid indices to be distributed to this DE.  The size of this
 !          array must be at least [myCount] in the first dimension and 2 in the
 !          second.
 !     \item[counts]
@@ -3816,7 +3816,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,delayout,rc)
 
       ! Create the InternDG
@@ -3827,9 +3827,9 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! now that it's created, add the interndg to the interngrid
-      call ESMF_IGridAddInternDG(interngrid, internDG, localrc)
-      internDGId = interngrid%numInternDGs
+      ! now that it's created, add the interndg to the igrid
+      call ESMF_IGridAddInternDG(igrid, internDG, localrc)
+      internDGId = igrid%numInternDGs
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3842,7 +3842,7 @@
 ! !IROUTINE: ESMF_LRIGridAddPhysGridBlock - Add a PhysGrid to a LogRectIGrid with block storage
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridAddPhysGridBlock(interngrid, physIGridId, relloc, &
+      subroutine ESMF_LRIGridAddPhysGridBlock(igrid, physIGridId, relloc, &
                                              dimCount, decompIds, &
                                              coord1, coord2, &
                                              countsPerDEDim1, countsPerDEDim2, &
@@ -3850,7 +3850,7 @@
                                              physIGridName, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass), target :: interngrid
+      type(ESMF_IGridClass), target :: igrid
       integer, intent(out) :: physIGridId
       type(ESMF_RelLoc), intent(in) :: relloc
       integer, intent(in) :: dimCount 
@@ -3869,7 +3869,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          {\tt ESMF\_IGrid} to add {\tt PhysGrid} to.
 !     \item[physIGridId]
 !          Integer identifier for {\tt ESMF\_PhysGrid}.
@@ -3877,7 +3877,7 @@
 !          Relative location of data at the centers, faces, and vertices of
 !          the {\tt ESMF\_IGrid}.
 !     \item[dimCount]
-!          Number of interngrid dimensions.
+!          Number of igrid dimensions.
 !     \item[decompIds]
 !          Identifier for which IGrid axes are decomposed.
 !     \item[coord1]
@@ -3885,9 +3885,9 @@
 !     \item[coord2]
 !          Array of physical coordinates in the second direction.
 !     \item[countsPerDEDim1]
-!          Array of number of interngrid increments per DE in the x-direction.
+!          Array of number of igrid increments per DE in the x-direction.
 !     \item[countsPerDEDim2]
-!          Array of number of interngrid increments per DE in the y-direction.
+!          Array of number of igrid increments per DE in the y-direction.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
@@ -3902,7 +3902,7 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: i, j, i1, i2, j1, j2, interngridBoundWidth, myDE(2), myDEDecomp(0:2)
+      integer :: i, j, i1, i2, j1, j2, igridBoundWidth, myDE(2), myDEDecomp(0:2)
       integer :: localDE
       integer, dimension(dimCount) :: counts, compCount, localStart
       integer, dimension(:), allocatable :: cellType1, cellType2
@@ -3914,7 +3914,7 @@
       type(ESMF_CoordSystem) :: coordSystem
       type(ESMF_CoordType), dimension(dimCount) :: coordType
       type(ESMF_DELayout) :: delayout
-      type(ESMF_IGrid) :: interngridp
+      type(ESMF_IGrid) :: igridp
       type(ESMF_PhysGrid) :: physIGrid
       type(ESMF_PhysCoord) :: tempCoord
 
@@ -3922,17 +3922,17 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
 
       ! initialize some values
-      interngridBoundWidth = 1   ! TODO: move into structure, make input?
+      igridBoundWidth = 1   ! TODO: move into structure, make input?
 
-      ! create temporary interngrid to pass into query subroutines
-      interngridp%ptr => interngrid
-      call ESMF_IGridSetInitCreated(interngridp, rc)
+      ! create temporary igrid to pass into query subroutines
+      igridp%ptr => igrid
+      call ESMF_IGridSetInitCreated(igridp, rc)
 
       ! figure out the position of myDE to get local counts
-      call ESMF_LRIGridGet(interngridp, delayout=delayout)
+      call ESMF_LRIGridGet(igridp, delayout=delayout)
       call ESMF_DELayoutGetDeprecated(delayout, localDE=localDE, rc=localrc)
       call ESMF_DELayoutGetDELocalInfo(delayout, de=localDE, &
                                        coord=myDEDecomp(1:2), rc=localrc)
@@ -3947,7 +3947,7 @@
       localMin(2) = 0.0
       localStart(1) = 0
       localStart(2) = 0
-      if (interngrid%hasLocalData .eq. ESMF_TRUE) then
+      if (igrid%hasLocalData .eq. ESMF_TRUE) then
 
         ! set local starts for this DE
         if (myDE(1).ge.2) then
@@ -3964,8 +3964,8 @@
         ! modify global counts to include ghost region
         compCount(1) = size(coord1)
         compCount(2) = size(coord2)
-        counts(1) = compCount(1) + 2*interngridBoundWidth
-        counts(2) = compCount(2) + 2*interngridBoundWidth
+        counts(1) = compCount(1) + 2*igridBoundWidth
+        counts(2) = compCount(2) + 2*igridBoundWidth
 
         ! allocate and load coords
         allocate(coordUse1(counts(1)), &
@@ -3974,22 +3974,22 @@
                                        ESMF_CONTEXT, rc)) return
 
         do i = 1,compCount(1)
-          coordUse1(i+interngridBoundWidth) = coord1(i)
+          coordUse1(i+igridBoundWidth) = coord1(i)
         enddo
-        do i = interngridBoundWidth,1,-1
+        do i = igridBoundWidth,1,-1
           coordUse1(i) = coordUse1(i+1) - (coord1(2)-coord1(1))
         enddo
-        do i = compCount(1)+interngridBoundWidth,compCount(1)+2*interngridBoundWidth-1
+        do i = compCount(1)+igridBoundWidth,compCount(1)+2*igridBoundWidth-1
           coordUse1(i+1) = coordUse1(i) &
                          + (coord1(compCount(1))-coord1(compCount(1)-1))
         enddo
         do i = 1,compCount(2)
-          coordUse2(i+interngridBoundWidth) = coord2(i)
+          coordUse2(i+igridBoundWidth) = coord2(i)
         enddo
-        do i = interngridBoundWidth,1,-1
+        do i = igridBoundWidth,1,-1
           coordUse2(i) = coordUse2(i+1) - (coord2(2)-coord2(1))
         enddo
-        do i = compCount(2)+interngridBoundWidth,compCount(2)+2*interngridBoundWidth-1
+        do i = compCount(2)+igridBoundWidth,compCount(2)+2*igridBoundWidth-1
           coordUse2(i+1) = coordUse2(i) &
                          + (coord2(compCount(2))-coord2(compCount(2)-1))
         enddo
@@ -4002,18 +4002,18 @@
                                        ESMF_CONTEXT, rc)) return
         cellType1 = 0
         cellType2 = 0
-        do i = 1,interngridBoundWidth
+        do i = 1,igridBoundWidth
           cellType1(i) = 1
           cellType2(i) = 1
-          cellType1(compCount(1)-1+interngridBoundWidth+i) = 1
-          cellType2(compCount(2)-1+interngridBoundWidth+i) = 1
+          cellType1(compCount(1)-1+igridBoundWidth+i) = 1
+          cellType2(compCount(2)-1+igridBoundWidth+i) = 1
         enddo
       endif
 
-      ! set parameters based on interngrid type
-      select case (interngrid%horzIGridType%interngridType)
+      ! set parameters based on igrid type
+      select case (igrid%horzIGridType%igridType)
 
-        ! ESMF_INTERNGRID_TYPE_LATLON
+        ! ESMF_IGRID_TYPE_LATLON
         case (1)
           coordSystem         = ESMF_COORD_SYSTEM_SPHERICAL
           coordNames(1)       = 'latitude'
@@ -4026,7 +4026,7 @@
           coordCyclic(1)      = .true.
           coordCyclic(2)      = .false.
 
-        ! ESMF_INTERNGRID_TYPE_LATLON_UNI
+        ! ESMF_IGRID_TYPE_LATLON_UNI
         case (2)
           coordSystem         = ESMF_COORD_SYSTEM_SPHERICAL
           coordNames(1)       = 'latitude'
@@ -4039,7 +4039,7 @@
           coordCyclic(1)      = .true.
           coordCyclic(2)      = .false.
 
-        ! ESMF_INTERNGRID_TYPE_XY
+        ! ESMF_IGRID_TYPE_XY
         case (8)
           coordSystem         = ESMF_COORD_SYSTEM_CARTESIAN
           coordNames(1)       = 'x'
@@ -4051,7 +4051,7 @@
           coordEqualSpaced(:) = .false.
           coordCyclic(:)      = .false.
 
-        ! ESMF_INTERNGRID_TYPE_XY_UNI
+        ! ESMF_IGRID_TYPE_XY_UNI
         case (9)
           coordSystem         = ESMF_COORD_SYSTEM_CARTESIAN
           coordNames(1)       = 'x'
@@ -4078,19 +4078,19 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      if (interngrid%hasLocalData .eq. ESMF_TRUE) then
+      if (igrid%hasLocalData .eq. ESMF_TRUE) then
         ! set coordinate min/max using total cell count -- but don't include the halo
-        ! region around the global interngrid
-        counts(1) = countsPerDEDim1(myDE(1)) + 2*interngridBoundWidth
-        counts(2) = countsPerDEDim2(myDE(2)) + 2*interngridBoundWidth
+        ! region around the global igrid
+        counts(1) = countsPerDEDim1(myDE(1)) + 2*igridBoundWidth
+        counts(2) = countsPerDEDim2(myDE(2)) + 2*igridBoundWidth
         i1 = localStart(1) + 1
         i2 = localStart(1) + counts(1) + 1
         j1 = localStart(2) + 1
         j2 = localStart(2) + counts(2) + 1
-        i1 = max(i1,interngridBoundWidth + 1)
-        j1 = max(j1,interngridBoundWidth + 1)
-        i2 = min(i2,interngridBoundWidth + compCount(1))
-        j2 = min(j2,interngridBoundWidth + compCount(2))
+        i1 = max(i1,igridBoundWidth + 1)
+        j1 = max(j1,igridBoundWidth + 1)
+        i2 = min(i2,igridBoundWidth + compCount(1))
+        j2 = min(j2,igridBoundWidth + compCount(2))
         localMin(1) = minval(coordUse1(i1:i2))
         localMax(1) = maxval(coordUse1(i1:i2))
         localMin(2) = minval(coordUse2(j1:j2))
@@ -4112,17 +4112,17 @@
         enddo
       endif
 
-      ! now that it's created, add the physgrid to the interngrid
-      call ESMF_IGridAddPhysGrid(interngrid, physIGrid, localrc)
+      ! now that it's created, add the physgrid to the igrid
+      call ESMF_IGridAddPhysGrid(igrid, physIGrid, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      physIGridId = interngrid%numPhysGrids
+      physIGridId = igrid%numPhysGrids
 
-      if (interngrid%hasLocalData .eq. ESMF_TRUE) then
+      if (igrid%hasLocalData .eq. ESMF_TRUE) then
         ! set coordinates using total cell count
-        counts(1) = countsPerDEDim1(myDE(1)) + 2*interngridBoundWidth
-        counts(2) = countsPerDEDim2(myDE(2)) + 2*interngridBoundWidth
+        counts(1) = countsPerDEDim1(myDE(1)) + 2*igridBoundWidth
+        counts(2) = countsPerDEDim2(myDE(2)) + 2*igridBoundWidth
         i1 = localStart(1) + 1
         i2 = localStart(1) + counts(1) + 1
         j1 = localStart(2) + 1
@@ -4144,8 +4144,8 @@
                                      ESMF_CONTEXT, rc)
             return
         endif
-        call ESMF_LRIGridSetCoord(interngrid, physIGridId, dimCount, counts, &
-                                 interngridBoundWidth, relloc, coordUse1(i1:i2), &
+        call ESMF_LRIGridSetCoord(igrid, physIGridId, dimCount, counts, &
+                                 igridBoundWidth, relloc, coordUse1(i1:i2), &
                                  coordUse2(j1:j2), total=.true., rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4154,12 +4154,12 @@
         ! set coordinates using computational cell count
         counts(1) = countsPerDEDim1(myDE(1))
         counts(2) = countsPerDEDim2(myDE(2))
-        i1 = localStart(1) + 1 + interngridBoundWidth
-        i2 = localStart(1) + counts(1) + 1 + interngridBoundWidth
-        j1 = localStart(2) + 1 + interngridBoundWidth
-        j2 = localStart(2) + counts(2) + 1 + interngridBoundWidth
-        call ESMF_LRIGridSetCoord(interngrid, physIGridId, dimCount, counts, &
-                                 interngridBoundWidth, relloc, &
+        i1 = localStart(1) + 1 + igridBoundWidth
+        i2 = localStart(1) + counts(1) + 1 + igridBoundWidth
+        j1 = localStart(2) + 1 + igridBoundWidth
+        j2 = localStart(2) + counts(2) + 1 + igridBoundWidth
+        call ESMF_LRIGridSetCoord(igrid, physIGridId, dimCount, counts, &
+                                 igridBoundWidth, relloc, &
                                  coordUse1(i1:i2), coordUse2(j1:j2), &
                                  total=.false., rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -4168,14 +4168,14 @@
 
         ! set mask using total cell count -- but masks are cell centered instead of
         ! on the vertices
-        counts(1) = countsPerDEDim1(myDE(1)) + 2*interngridBoundWidth
-        counts(2) = countsPerDEDim2(myDE(2)) + 2*interngridBoundWidth
+        counts(1) = countsPerDEDim1(myDE(1)) + 2*igridBoundWidth
+        counts(2) = countsPerDEDim2(myDE(2)) + 2*igridBoundWidth
         i1 = localStart(1) + 1
         i2 = localStart(1) + counts(1)
         j1 = localStart(2) + 1
         j2 = localStart(2) + counts(2)
-        call ESMF_LRIGridSetCellMask(interngrid, physIGridId, dimCount, counts, &
-                                    interngridBoundWidth, relloc, cellType1(i1:i2), &
+        call ESMF_LRIGridSetCellMask(igrid, physIGridId, dimCount, counts, &
+                                    igridBoundWidth, relloc, cellType1(i1:i2), &
                                     cellType2(j1:j2), localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4200,13 +4200,13 @@
 ! !IROUTINE: ESMF_LRIGridAddPhysGridArb - Add a PhysGrid to a LogRectIGrid with arbitrary storage
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridAddPhysGridArb(interngrid, physIGridId, relloc, dimCount, &
+      subroutine ESMF_LRIGridAddPhysGridArb(igrid, physIGridId, relloc, dimCount, &
                                            decompIds, coord1, coord2, &
                                            myCount, myIndices, dimNames, &
                                            dimUnits, physIGridName, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass), target :: interngrid
+      type(ESMF_IGridClass), target :: igrid
       integer, intent(out) :: physIGridId
       type(ESMF_RelLoc), intent(in) :: relloc
       integer, intent(in) :: dimCount 
@@ -4225,7 +4225,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          {\tt ESMF\_IGrid} to add {\tt PhysGrid} to.
 !     \item[physIGridId]
 !          Integer identifier for {\tt ESMF\_PhysGrid}.
@@ -4233,7 +4233,7 @@
 !          Relative location of data at the centers, faces, and vertices of
 !          the {\tt ESMF\_IGrid}.
 !     \item[dimCount]
-!          Number of interngrid dimensions.
+!          Number of igrid dimensions.
 !     \item[decompIds]
 !          Identifier for which IGrid axes are decomposed.
 !     \item[coord1]
@@ -4241,9 +4241,9 @@
 !     \item[coord2]
 !          Array of physical coordinates in the second direction.
 !     \item[myCount]
-!          Number of interngrid increments for this DE.
+!          Number of igrid increments for this DE.
 !     \item[myIndices]
-!          Array of interngrid indices to be distributed to this DE.  The size of this
+!          Array of igrid indices to be distributed to this DE.  The size of this
 !          array must be at least [myCount] in the first dimension and 2 in the
 !          second.
 !     \item[{[dimNames]}]
@@ -4260,7 +4260,7 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: i, i1, j1, interngridBoundWidth
+      integer :: i, i1, j1, igridBoundWidth
       integer, dimension(dimCount) :: counts, compCount
       integer, dimension(:), allocatable :: cellType
       character(len=ESMF_MAXSTR), dimension(dimCount) :: coordNames, coordUnits
@@ -4270,7 +4270,7 @@
       real(ESMF_KIND_R8), dimension(:), allocatable :: coordUse1, coordUse2
       type(ESMF_CoordSystem) :: coordSystem
       type(ESMF_CoordType), dimension(dimCount) :: coordType
-      type(ESMF_IGrid) :: interngridp
+      type(ESMF_IGrid) :: igridp
       type(ESMF_PhysGrid) :: physIGrid
       type(ESMF_PhysCoord) :: tempCoord
 
@@ -4278,28 +4278,28 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
 
-      ! create temporary interngrid to pass into subroutines
-      interngridp%ptr => interngrid
-      call ESMF_IGridSetInitCreated(interngridp, rc)
+      ! create temporary igrid to pass into subroutines
+      igridp%ptr => igrid
+      call ESMF_IGridSetInitCreated(igridp, rc)
 
       ! initialize some values
-      interngridBoundWidth = 1   ! TODO: move into structure, make input?
+      igridBoundWidth = 1   ! TODO: move into structure, make input?
 
-      ! interngridBoundWidth is not fully implemented for arbitrary interngrid.  It
+      ! igridBoundWidth is not fully implemented for arbitrary igrid.  It
       ! is not used to set up a totalArray for the physIGrid as did in
       ! ESMF_LRIGridAddPhysGridBlock.  Moreover, being set to 1 results in
-      ! shifting the interngrid coordinates by 1 to the right, thus causing 
+      ! shifting the igrid coordinates by 1 to the right, thus causing 
       ! ESMF_IGridGetCoord() returning wrong values.
       !  **PLi (10/11/2006)**
-      ! interngridBoundWidth = 0
+      ! igridBoundWidth = 0
       !
       ! The extra coordinate boundary layer obtained by setting
-      ! interngridBoundWidth=1 is used in ESMF_LRIGridSetCoord to set some 
-      ! of the corner locations, so leave interngridBoundWidth=1, and
+      ! igridBoundWidth=1 is used in ESMF_LRIGridSetCoord to set some 
+      ! of the corner locations, so leave igridBoundWidth=1, and
       ! instead offset the myIndices values. - Bob Oehmke 10/13/2006 
-      interngridBoundWidth = 1
+      igridBoundWidth = 1
 
       localMin =  99999999.
       localMax = -99999999.
@@ -4321,8 +4321,8 @@
       ! modify global counts to include ghost region
       compCount(1) = size(coord1)
       compCount(2) = size(coord2)
-      counts(1) = compCount(1) + 2*interngridBoundWidth
-      counts(2) = compCount(2) + 2*interngridBoundWidth
+      counts(1) = compCount(1) + 2*igridBoundWidth
+      counts(2) = compCount(2) + 2*igridBoundWidth
 
       ! allocate and load coords for use, which includes calculating the coordinates
       ! in the halo cells which might be needed for certain staggerings
@@ -4332,22 +4332,22 @@
                                      ESMF_CONTEXT, rc)) return
 
       do i = 1,compCount(1)
-        coordUse1(i+interngridBoundWidth) = coord1(i)
+        coordUse1(i+igridBoundWidth) = coord1(i)
       enddo
-      do i = interngridBoundWidth,1,-1
+      do i = igridBoundWidth,1,-1
         coordUse1(i) = coordUse1(i+1) - (coord1(2)-coord1(1))
       enddo
-      do i = compCount(1)+interngridBoundWidth,compCount(1)+2*interngridBoundWidth-1
+      do i = compCount(1)+igridBoundWidth,compCount(1)+2*igridBoundWidth-1
         coordUse1(i+1) = coordUse1(i) &
                        + (coord1(compCount(1))-coord1(compCount(1)-1))
       enddo
       do i = 1,compCount(2)
-        coordUse2(i+interngridBoundWidth) = coord2(i)
+        coordUse2(i+igridBoundWidth) = coord2(i)
       enddo
-      do i = interngridBoundWidth,1,-1
+      do i = igridBoundWidth,1,-1
         coordUse2(i) = coordUse2(i+1) - (coord2(2)-coord2(1))
       enddo
-      do i = compCount(2)+interngridBoundWidth,compCount(2)+2*interngridBoundWidth-1
+      do i = compCount(2)+igridBoundWidth,compCount(2)+2*igridBoundWidth-1
         coordUse2(i+1) = coordUse2(i) &
                        + (coord2(compCount(2))-coord2(compCount(2)-1))
       enddo
@@ -4358,10 +4358,10 @@
                                      ESMF_CONTEXT, rc)) return
       cellType = 0
 
-      ! set parameters based on interngrid type
-      select case (interngrid%horzIGridType%interngridType)
+      ! set parameters based on igrid type
+      select case (igrid%horzIGridType%igridType)
 
-        ! ESMF_INTERNGRID_TYPE_LATLON
+        ! ESMF_IGRID_TYPE_LATLON
         case (1)
           coordSystem         = ESMF_COORD_SYSTEM_SPHERICAL
           coordNames(1)       = 'latitude'
@@ -4374,7 +4374,7 @@
           coordCyclic(1)      = .true.
           coordCyclic(2)      = .false.
 
-        ! ESMF_INTERNGRID_TYPE_LATLON_UNI
+        ! ESMF_IGRID_TYPE_LATLON_UNI
         case (2)
           coordSystem         = ESMF_COORD_SYSTEM_SPHERICAL
           coordNames(1)       = 'latitude'
@@ -4387,7 +4387,7 @@
           coordCyclic(1)      = .true.
           coordCyclic(2)      = .false.
 
-        ! ESMF_INTERNGRID_TYPE_XY
+        ! ESMF_IGRID_TYPE_XY
         case (8)
           coordSystem         = ESMF_COORD_SYSTEM_CARTESIAN
           coordNames(1)       = 'x'
@@ -4399,7 +4399,7 @@
           coordEqualSpaced(:) = .false.
           coordCyclic(:)      = .false.
 
-        ! ESMF_INTERNGRID_TYPE_XY_UNI
+        ! ESMF_IGRID_TYPE_XY_UNI
         case (9)
           coordSystem         = ESMF_COORD_SYSTEM_CARTESIAN
           coordNames(1)       = 'x'
@@ -4442,23 +4442,23 @@
                                   ESMF_CONTEXT, rc)) return
       enddo
 
-      ! now that it's created, add the physgrid to the interngrid
-      call ESMF_IGridAddPhysGrid(interngrid, physIGrid, localrc)
+      ! now that it's created, add the physgrid to the igrid
+      call ESMF_IGridAddPhysGrid(igrid, physIGrid, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      physIGridId = interngrid%numPhysGrids
+      physIGridId = igrid%numPhysGrids
 
       ! set coordinates
-      call ESMF_LRIGridSetCoord(interngrid, physIGridId, dimCount, myCount, &
-                               myIndices,interngridBoundWidth, relloc,    &
+      call ESMF_LRIGridSetCoord(igrid, physIGridId, dimCount, myCount, &
+                               myIndices,igridBoundWidth, relloc,    &
                                coordUse1, coordUse2, &
                                total=.true., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_LRIGridSetCoord(interngrid, physIGridId, dimCount, myCount, &
-                               myIndices, interngridBoundWidth, relloc,   &
+      call ESMF_LRIGridSetCoord(igrid, physIGridId, dimCount, myCount, &
+                               myIndices, igridBoundWidth, relloc,   &
                                coordUse1, coordUse2, &
                                total=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -4467,7 +4467,7 @@
 
 
       ! set mask
-      call ESMF_LRIGridSetCellMask(interngrid, physIGridId, dimCount, myCount, &
+      call ESMF_LRIGridSetCellMask(igrid, physIGridId, dimCount, myCount, &
                                   relloc, cellType, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4490,11 +4490,11 @@
 ! !IROUTINE: ESMF_LRIGridAddVertPhysGrid - Add a vertical PhysGrid to a LogRectIGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridAddVertPhysGrid(interngrid, physIGridId, relloc, coord, &
+      subroutine ESMF_LRIGridAddVertPhysGrid(igrid, physIGridId, relloc, coord, &
                                             countsPerDEDim, physIGridName, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass), target :: interngrid
+      type(ESMF_IGridClass), target :: igrid
       integer, intent(out) :: physIGridId
       type(ESMF_RelLoc), intent(in) :: relloc
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord
@@ -4507,7 +4507,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Class to be queried.
 !     \item [physIGridId]
 !          Integer identifier for {\tt ESMF\_PhysGrid}.
@@ -4517,7 +4517,7 @@
 !     \item[coord]
 !          Array of physical coordinates in the vertical direction.
 !     \item[countsPerDEDim]
-!          Array of number of interngrid increments per DE in the vertical direction.
+!          Array of number of igrid increments per DE in the vertical direction.
 !     \item [{[physIGridName]}]
 !          {\tt ESMF\_PhysGrid} name.
 !     \item[{[rc]}]
@@ -4528,7 +4528,7 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: i, i1, i2, interngridBoundWidth 
+      integer :: i, i1, i2, igridBoundWidth 
       !integer :: myDE(0:2)
       character(len=ESMF_MAXSTR) :: coordName, coordUnit
       logical :: coordAligned, coordEqualSpaced, coordCyclic
@@ -4540,7 +4540,7 @@
       type(ESMF_CoordType) :: coordType
       !type(ESMF_DELayout) :: delayout
       type(ESMF_PhysCoord) :: tempCoord
-      !type(ESMF_IGrid) :: interngridp
+      !type(ESMF_IGrid) :: igridp
       type(ESMF_PhysGrid) :: physIGrid
       type(ESMF_CoordSystem) :: coordSystem
 
@@ -4548,19 +4548,19 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
 
       ! initialize some values
-      interngridBoundWidth = 1   ! TODO: move into structure, make input?
+      igridBoundWidth = 1   ! TODO: move into structure, make input?
 
 #if 0
 ! gjt: I took this out because it seems that it is not used...
       ! figure out the position of myDE to get local counts
-      ! create temporary interngrid to pass into subroutines
-      interngridp%ptr => interngrid
-      call ESMF_IGridSetInitCreated(interngridp, rc)
+      ! create temporary igrid to pass into subroutines
+      igridp%ptr => igrid
+      call ESMF_IGridSetInitCreated(igridp, rc)
 
-      call ESMF_IGridGetDELayout(interngridp, delayout, localrc)
+      call ESMF_IGridGetDELayout(igridp, delayout, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -4591,7 +4591,7 @@
 
       ! modify global counts to include ghost region
       compCount = size(coord)
-      count     = compCount + 2*interngridBoundWidth
+      count     = compCount + 2*igridBoundWidth
 
       ! allocate and load coords
       allocate(coordUse(count), stat=localrc)
@@ -4599,12 +4599,12 @@
                                      ESMF_CONTEXT, rc)) return
 
       do i = 1,compCount
-        coordUse(i+interngridBoundWidth) = coord(i)
+        coordUse(i+igridBoundWidth) = coord(i)
       enddo
-      do i = interngridBoundWidth,1,-1
+      do i = igridBoundWidth,1,-1
         coordUse(i) = coordUse(i+1) - (coord(2)-coord(1))
       enddo
-      do i = compCount+interngridBoundWidth,compCount+2*interngridBoundWidth-1
+      do i = compCount+igridBoundWidth,compCount+2*igridBoundWidth-1
         coordUse(i+1) = coordUse(i) &
                       + (coord(compCount)-coord(compCount-1))
       enddo
@@ -4614,13 +4614,13 @@
       if (ESMF_LogMsgFoundAllocError(localrc, "cellType", &
                                      ESMF_CONTEXT, rc)) return
       cellType = 0
-      do i = 1,interngridBoundWidth
+      do i = 1,igridBoundWidth
         cellType(i) = 1
-        cellType(compCount-1+interngridBoundWidth+i) = 1
+        cellType(compCount-1+igridBoundWidth+i) = 1
       enddo
 
       ! set parameters based on vertical coordinate system  TODO: better as a case
-      if (interngrid%vertCoordSystem .eq. ESMF_COORD_SYSTEM_DEPTH) then
+      if (igrid%vertCoordSystem .eq. ESMF_COORD_SYSTEM_DEPTH) then
         ! ESMF_CoordSystem_Depth
         coordSystem      = ESMF_COORD_SYSTEM_DEPTH
         coordName        = 'depth'
@@ -4630,7 +4630,7 @@
         coordEqualSpaced = .true.
         coordCyclic      = .false.
 
-      elseif (interngrid%vertCoordSystem .eq. ESMF_COORD_SYSTEM_HEIGHT) then
+      elseif (igrid%vertCoordSystem .eq. ESMF_COORD_SYSTEM_HEIGHT) then
         ! ESMF_CoordSystem_Height
         coordSystem      = ESMF_COORD_SYSTEM_HEIGHT
         coordName        = 'height'
@@ -4659,16 +4659,16 @@
                                        maxVal=localMaxCoord, rc=localrc)
       call ESMF_PhysGridSetCoord(physIGrid, tempCoord, dimOrder=1, rc=localrc)
 
-      ! now that it's created, add the physgrid to the interngrid
-      call ESMF_IGridAddPhysGrid(interngrid, physIGrid, localrc)
-      physIGridId = interngrid%numPhysGrids
+      ! now that it's created, add the physgrid to the igrid
+      call ESMF_IGridAddPhysGrid(igrid, physIGrid, localrc)
+      physIGridId = igrid%numPhysGrids
 
       ! set coordinates using total cell count
-      localCount(1) = countsPerDEDim(1) + 2*interngridBoundWidth  ! TODO: indirect address for countPer
+      localCount(1) = countsPerDEDim(1) + 2*igridBoundWidth  ! TODO: indirect address for countPer
       i1 = localStart + 1
       i2 = localStart + localCount(1) + 1
-      call ESMF_LRIGridSetCoord(interngrid, physIGridId, 1, localCount, &
-                               interngridBoundWidth, relloc, coordUse(i1:i2), &
+      call ESMF_LRIGridSetCoord(igrid, physIGridId, 1, localCount, &
+                               igridBoundWidth, relloc, coordUse(i1:i2), &
                                total=.true., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4676,9 +4676,9 @@
 
       ! set coordinates using computational cell count
       localCount(1) = countsPerDEDim(1)  ! TODO: indirect address for countPer
-      i1 = localStart + 1 + interngridBoundWidth
+      i1 = localStart + 1 + igridBoundWidth
       i2 = i1 + localCount(1)
-      call ESMF_LRIGridSetCoord(interngrid, physIGridId, 1, localCount, &
+      call ESMF_LRIGridSetCoord(igrid, physIGridId, 1, localCount, &
                                0, relloc, coordUse(i1:i2), &
                                total=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -4686,12 +4686,12 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! set mask using total cell count
-      localCount(1) = countsPerDEDim(1) + 2*interngridBoundWidth  ! TODO: indirect address for countPer
+      localCount(1) = countsPerDEDim(1) + 2*igridBoundWidth  ! TODO: indirect address for countPer
       i1 = localStart + 1
       i2 = localStart + localCount(1) + 1
       ! TODO: fix setcellmask to work 1d
-      ! call ESMF_LRIGridSetCellMask(interngrid, physIGridId, 1, localCount, &
-      !                             interngridBoundWidth, relloc, cellType(i1:i2), &
+      ! call ESMF_LRIGridSetCellMask(igrid, physIGridId, 1, localCount, &
+      !                             igridBoundWidth, relloc, cellType(i1:i2), &
       !                             rc=localrc)
       !if (ESMF_LogMsgFoundError(localrc, &
       !                          ESMF_ERR_PASSTHRU, &
@@ -4714,11 +4714,11 @@
 ! !IROUTINE: ESMF_LRIGridGetCoord - Get the coordinates of a IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridGetCoord(interngrid, horzRelLoc, vertRelLoc, centerCoord, &
+      subroutine ESMF_LRIGridGetCoord(igrid, horzRelLoc, vertRelLoc, centerCoord, &
                                      cornerCoord, faceCoord, reorder, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGrid), intent(inout) :: interngrid
+      type(ESMF_IGrid), intent(inout) :: igrid
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       type(ESMF_InternArray), intent(out), dimension(:), optional :: centerCoord
@@ -4734,7 +4734,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Pointer to a {\tt ESMF\_IGrid} to be queried.
 !     \item[{[horzRelLoc]}]
 !          Horizontal relative location of the {\tt ESMF\_PhysGrid} to be
@@ -4749,7 +4749,7 @@
 !          Coordinates of corners of each cell.  The dimension index should
 !          be defined first, followed by the corner index.  Corners can
 !          be numbered in either clockwise or counter-clockwise direction,
-!          but must be numbered consistently throughout interngrid.
+!          but must be numbered consistently throughout igrid.
 !     \item[{[faceCoord]}]
 !          Coordinates of corners of each cell.  The dimension index should
 !          be defined first, followed by the face index.  Faces should
@@ -4775,7 +4775,7 @@
       integer :: localrc                          ! Error status
       integer :: i
       integer :: horzPhysIdUse, vertPhysIdUse
-      integer :: aSize, interngridRank, index
+      integer :: aSize, igridRank, index
       integer, dimension(3) :: order
       logical :: dummy
       logical :: reorderUse
@@ -4786,10 +4786,10 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       ! some basic error checking    TODO: more
-      if (.not.associated(interngrid%ptr)) then
+      if (.not.associated(igrid%ptr)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Invalid IGrid object", &
                                  ESMF_CONTEXT, rc)) return
@@ -4801,13 +4801,13 @@
       reorderUse    = .TRUE.
       if (present(reorder)) reorderUse = reorder
 
-      ! Get the interngrid rank -- to check if there is a vertical interngrid available
-      interngridRank = interngrid%ptr%dimCount
+      ! Get the igrid rank -- to check if there is a vertical igrid available
+      igridRank = igrid%ptr%dimCount
 
       ! get physgrid identifiers from relative locations
       if (present(horzRelLoc)) then
         if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
-          call ESMF_IGridGetPhysGridId(interngrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+          call ESMF_IGridGetPhysGridId(igrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -4820,8 +4820,8 @@
       endif
 
       if (present(vertRelLoc)) then
-        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. interngridRank.eq.3) then
-          call ESMF_IGridGetPhysGridId(interngrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. igridRank.eq.3) then
+          call ESMF_IGridGetPhysGridId(igrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -4831,13 +4831,13 @@
       ! Call PhysGridGet with valid PhysGrid
       if (present(centerCoord)) then
         index = 1
-        aSize = min(interngridRank, size(centerCoord))
+        aSize = min(igridRank, size(centerCoord))
         allocate(coord(aSize), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "coord", &
                                        ESMF_CONTEXT, rc)) return
         if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
           index = 3
-          call ESMF_PhysGridGetLocations(interngrid%ptr%physIGrids(horzPhysIdUse), &
+          call ESMF_PhysGridGetLocations(igrid%ptr%physgrids(horzPhysIdUse), &
                                          locationArray=coord(1:2), &
                                          total=total, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -4845,7 +4845,7 @@
                                     ESMF_CONTEXT, rc)) return
         endif
         if (aSize.ge.index .AND. vertPhysIdUse.ne.-1) then
-          call ESMF_PhysGridGetLocations(interngrid%ptr%physIGrids(vertPhysIdUse), &
+          call ESMF_PhysGridGetLocations(igrid%ptr%physgrids(vertPhysIdUse), &
                                          locationArray=coord(index:index), &
                                          total=total, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -4853,11 +4853,11 @@
                                     ESMF_CONTEXT, rc)) return
         endif
         if (reorderUse) then
-          order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,aSize)
+          order(:) = igridOrder(:,igrid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             ! if i and j are reordered, then the coordinate data arrays need to
             ! be shuffled as well
-            if (interngridOrder(1,interngrid%ptr%coordOrder%order,2).eq.1) then
+            if (igridOrder(1,igrid%ptr%coordOrder%order,2).eq.1) then
               centerCoord(order(i)) = coord(i)
             else
               call ESMF_LRIGridReshape(coord(i), tempArray, localrc)
@@ -4876,20 +4876,20 @@
 
       if (present(cornerCoord)) then
         index = 1
-        aSize = min(interngridRank, size(cornerCoord))
+        aSize = min(igridRank, size(cornerCoord))
         allocate(coord2(aSize), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "coord2", &
                                        ESMF_CONTEXT, rc)) return
         if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
           index = 3
-          call ESMF_PhysGridGetRegions(interngrid%ptr%physIGrids(horzPhysIdUse), &
+          call ESMF_PhysGridGetRegions(igrid%ptr%physgrids(horzPhysIdUse), &
                                        vertexArray=coord2(1:2), rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
         endif
         if (aSize.ge.index .AND. vertPhysIdUse.ne.-1) then
-          call ESMF_PhysGridGetRegions(interngrid%ptr%physIGrids(horzPhysIdUse), &
+          call ESMF_PhysGridGetRegions(igrid%ptr%physgrids(horzPhysIdUse), &
                                        vertexArray=coord2(index:index), &
                                        rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -4897,7 +4897,7 @@
                                     ESMF_CONTEXT, rc)) return
         endif
         if (reorderUse) then
-          order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,aSize)
+          order(:) = igridOrder(:,igrid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             cornerCoord(order(i)) = coord2(i)
           enddo
@@ -4924,14 +4924,14 @@
 ! !IROUTINE: ESMF_LRIGridGetDELocalInfo - Get DE (local) information for a IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridGetDELocalInfo(interngrid, horzRelLoc, vertRelLoc, &
+      subroutine ESMF_LRIGridGetDELocalInfo(igrid, horzRelLoc, vertRelLoc, &
                                   myDE, localCellCount, localCellCountPerDim, &
                                   minLocalCoordPerDim, maxLocalCoordPerDim, &
                                   globalStartPerDim, globalAIPerDim, reorder, &
                                   total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       integer, intent(inout), optional :: myDE
@@ -4953,20 +4953,20 @@
 !     {\tt ESMF\_IGrid} can have many {\tt ESMF\_InternDGs}, the correct
 !     {\tt ESMF\_InternDG} must be identified by this calling routine.  For a 3D
 !     {\tt ESMF\_IGrid}, the user must supply identifiers for both the horizontal
-!     and vertical interngrids if querying for an array of values, like
+!     and vertical igrids if querying for an array of values, like
 !     localCellCountPerDim.  The {\tt ESMF\_InternDG(s)} are identified
 !     using the set of input variables:  horzRelLoc and/or vertRelLoc.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Class to be queried.
 !     \item[{[horzRelLoc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
-!          interngrid.
+!          igrid.
 !     \item[{[vertRelLoc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
-!          interngrid.
+!          igrid.
 !     \item[{[myDE]}]
 !          Identifier for this {\tt ESMF\_DE}, zero-based.
 !     \item[{[localCellCount]}]
@@ -5001,7 +5001,7 @@
       integer :: i
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
-      integer :: aSize, interngridRank, distDimCount, index
+      integer :: aSize, igridRank, distDimCount, index
       integer :: horzCellCount, vertCellCount
       integer, dimension(3) :: localCellCountPerDimUse, &
                                globalStartPerDimUse, order
@@ -5009,7 +5009,7 @@
       real(ESMF_KIND_R8), dimension(3) :: minLCPDUse, maxLCPDUse
       type(ESMF_AxisIndex), pointer :: globalAIPerDimUse(:)
 !      type(ESMF_AxisIndex), dimension(3) :: globalAIPerDimUse
-      type(ESMF_IGridStorage) :: interngridStorage
+      type(ESMF_IGridStorage) :: igridStorage
       type(ESMF_PhysCoord) :: coord
       type(ESMF_DELayout) :: delayout
 
@@ -5017,10 +5017,10 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       ! some basic error checking    TODO: more
-      if (.not.associated(interngrid%ptr)) then
+      if (.not.associated(igrid%ptr)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Invalid IGrid object", &
                                  ESMF_CONTEXT, rc)) return
@@ -5039,29 +5039,29 @@
       if (present(reorder)) reorderUse = reorder
       if (present(total)) totalUse = total
 
-      ! Get the interngrid rank -- to check if there is a vertical interngrid available
-      interngridRank = interngrid%ptr%dimCount
+      ! Get the igrid rank -- to check if there is a vertical igrid available
+      igridRank = igrid%ptr%dimCount
 
-      ! also get the number of dimensions in the distributed interngrid
-      call ESMF_LRIGridGet(interngrid, distDimCount=distDimCount, &
-                          interngridStorage=interngridStorage, rc=localrc)
+      ! also get the number of dimensions in the distributed igrid
+      call ESMF_LRIGridGet(igrid, distDimCount=distDimCount, &
+                          igridStorage=igridStorage, rc=localrc)
 
-      ! if this is an arbitrarily distributed interngrid, make sure total is false,
+      ! if this is an arbitrarily distributed igrid, make sure total is false,
       ! since there is no difference and we have only made the computational
       ! domain
-      if (interngridStorage.eq.ESMF_INTERNGRID_STORAGE_ARBITRARY) then
+      if (igridStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY) then
         totalUse = .FALSE.
       endif
 
       ! get physgrid and interndg identifiers from relative locations
       if (present(horzRelLoc)) then
         if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
-          call ESMF_IGridGetPhysGridId(interngrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+          call ESMF_IGridGetPhysGridId(igrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          horzDistIdUse = interngrid%ptr%internDGIndex(horzPhysIdUse)
+          horzDistIdUse = igrid%ptr%internDGIndex(horzPhysIdUse)
         else
             if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                 "undefined horizontal relloc", &
@@ -5070,13 +5070,13 @@
       endif
 
       if (present(vertRelLoc)) then
-        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. interngridRank.eq.3) then
-          call ESMF_IGridGetPhysGridId(interngrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. igridRank.eq.3) then
+          call ESMF_IGridGetPhysGridId(igrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          vertDistIdUse = interngrid%ptr%internDGIndex(vertPhysIdUse)
+          vertDistIdUse = igrid%ptr%internDGIndex(vertPhysIdUse)
         endif
       endif
 
@@ -5086,7 +5086,7 @@
       ! use DELayout call instead of InternDG to get myDE to avoid zero-based
       ! vs. 1-based issues.  note: layout the same for all interndgs, so use 1
       if (present(myDE)) then
-        call ESMF_LRIGridGet(interngrid, delayout=delayout)
+        call ESMF_LRIGridGet(igrid, delayout=delayout)
         call ESMF_DELayoutGetDeprecated(delayout, localDE=myDE, rc=localrc)
       endif
 
@@ -5099,7 +5099,7 @@
         aSize = max(aSize, size(   globalStartPerDim))
       if (present(      globalAIPerDim)) &
         aSize = max(aSize, size(      globalAIPerDim))
-      aSize = min(interngridRank, aSize)
+      aSize = min(igridRank, aSize)
 
       ! call InternDG method to retrieve information otherwise not available
       ! to the application level
@@ -5107,7 +5107,7 @@
         horzCellCount = 1
         vertCellCount = 1
         if (horzPhysIdUse.ne.-1) then
-          call ESMF_InternDGGetDE(interngrid%ptr%interndgs(horzDistIdUse)%ptr, &
+          call ESMF_InternDGGetDE(igrid%ptr%interndgs(horzDistIdUse)%ptr, &
                                   horzCellCount, &
                                   total=totalUse, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -5115,7 +5115,7 @@
                                     ESMF_CONTEXT, rc)) return
         endif
         if (vertPhysIdUse.ne.-1) then
-          call ESMF_InternDGGetDE(interngrid%ptr%interndgs(vertDistIdUse)%ptr, &
+          call ESMF_InternDGGetDE(igrid%ptr%interndgs(vertDistIdUse)%ptr, &
                                   vertCellCount, &
                                   total=totalUse, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -5128,7 +5128,7 @@
         index = 1
         if (distDimCount.eq.1 .AND. horzPhysIdUse.ne.-1) then
           index = 2
-          call ESMF_InternDGGetDE(interngrid%ptr%interndgs(horzDistIdUse)%ptr, &
+          call ESMF_InternDGGetDE(igrid%ptr%interndgs(horzDistIdUse)%ptr, &
                     localCellCountPerDim=localCellCountPerDimUse(1:1), &
                     globalStartPerDim=globalStartPerDimUse(1:1), &
                     globalAIPerDim=globalAIPerDimUse(1:1), &
@@ -5139,7 +5139,7 @@
         endif
         if (distDimCount.ge.2 .AND. horzPhysIdUse.ne.-1) then
           index         = 3
-          call ESMF_InternDGGetDE(interngrid%ptr%interndgs(horzDistIdUse)%ptr, &
+          call ESMF_InternDGGetDE(igrid%ptr%interndgs(horzDistIdUse)%ptr, &
                     localCellCountPerDim=localCellCountPerDimUse(1:2), &
                     globalStartPerDim=globalStartPerDimUse(1:2), &
                     globalAIPerDim=globalAIPerDimUse(1:2), &
@@ -5149,7 +5149,7 @@
                                     ESMF_CONTEXT, rc)) return
         endif
         if (aSize.ge.index .AND. vertPhysIdUse.ne.-1) then
-          call ESMF_InternDGGetDE(interngrid%ptr%interndgs(vertDistIdUse)%ptr, &
+          call ESMF_InternDGGetDE(igrid%ptr%interndgs(vertDistIdUse)%ptr, &
                     localCellCountPerDim=localCellCountPerDimUse(index:index), &
                     globalStartPerDim=globalStartPerDimUse(index:index), &
                     globalAIPerDim=globalAIPerDimUse(index:index), &
@@ -5161,7 +5161,7 @@
 
         ! load local values into return arguments
         if (reorderUse) then
-          order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,aSize)
+          order(:) = igridOrder(:,igrid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             if (present(localCellCountPerDim)) &
                 localCellCountPerDim(order(i)) = localCellCountPerDimUse(i)
@@ -5185,11 +5185,11 @@
       ! now make PhysGrid calls
       if (present(minLocalCoordPerDim)) then
         index = 1
-        aSize = min(interngridRank, size(minLocalCoordPerDim))
+        aSize = min(igridRank, size(minLocalCoordPerDim))
         if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
           index = 3
           do i = 1,2
-            coord = interngrid%ptr%physgrids(horzPhysIdUse)%ptr%coords(i)
+            coord = igrid%ptr%physgrids(horzPhysIdUse)%ptr%coords(i)
             call ESMF_PhysCoordGetExtents(coord, minVal=minLCPDUse(i), &
                                           rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
@@ -5198,7 +5198,7 @@
           enddo
         endif
         if (aSize.ge.index .AND. vertPhysIdUse.ne.-1) then
-          coord = interngrid%ptr%physgrids(vertPhysIdUse)%ptr%coords(1)
+          coord = igrid%ptr%physgrids(vertPhysIdUse)%ptr%coords(1)
           call ESMF_PhysCoordGetExtents(coord, minVal=minLCPDUse(index), &
                                         rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -5206,7 +5206,7 @@
                                     ESMF_CONTEXT, rc)) return
         endif
         if (reorderUse) then
-          order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,aSize)
+          order(:) = igridOrder(:,igrid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             minLocalCoordPerDim(order(i)) = minLCPDUse(i)
           enddo
@@ -5219,11 +5219,11 @@
 
       if (present(maxLocalCoordPerDim)) then
         index = 1
-        aSize = min(interngridRank, size(maxLocalCoordPerDim))
+        aSize = min(igridRank, size(maxLocalCoordPerDim))
         if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
           index = 3
           do i = 1,2
-            coord = interngrid%ptr%physgrids(horzPhysIdUse)%ptr%coords(i)
+            coord = igrid%ptr%physgrids(horzPhysIdUse)%ptr%coords(i)
             call ESMF_PhysCoordGetExtents(coord, maxVal=maxLCPDUse(i), &
                                           rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
@@ -5232,7 +5232,7 @@
           enddo
         endif
         if (aSize.ge.index .AND. vertPhysIdUse.ne.-1) then
-          coord = interngrid%ptr%physgrids(vertPhysIdUse)%ptr%coords(1)
+          coord = igrid%ptr%physgrids(vertPhysIdUse)%ptr%coords(1)
           call ESMF_PhysCoordGetExtents(coord, maxVal=maxLCPDUse(index), &
                                         rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -5240,7 +5240,7 @@
                                     ESMF_CONTEXT, rc)) return
         endif
         if (reorderUse) then
-          order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,aSize)
+          order(:) = igridOrder(:,igrid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             maxLocalCoordPerDim(order(i)) = maxLCPDUse(i)
           enddo
@@ -5265,11 +5265,11 @@
 ! !IROUTINE: ESMF_LRIGridGetAllAxisIndex - Get all axis indices for a InternDG
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridGetAllAxisIndex(interngrid, globalAI, horzRelLoc, &
+      subroutine ESMF_LRIGridGetAllAxisIndex(igrid, globalAI, horzRelLoc, &
                                             vertRelLoc, AICountPerDE, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_AxisIndex), dimension(:,:), pointer :: globalAI
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
@@ -5282,16 +5282,16 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Class to be queried.
 !     \item[globalAI]
 !          Global axis indices on all DE's.
 !     \item[{[horzRelLoc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
-!          interngrid.
+!          igrid.
 !     \item[{[vertRelLoc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
-!          interngrid.
+!          igrid.
 !     \item[{[total]}]
 !          Logical flag for whether the axis indices should be for total
 !          cells or not.  Default is false, which infers computational cells.
@@ -5303,10 +5303,10 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: aSize, interngridRank, index, sizeAI
+      integer :: aSize, igridRank, index, sizeAI
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
-      integer, dimension(ESMF_MAXINTERNGRIDDIM) :: order
+      integer, dimension(ESMF_MAXIGRIDDIM) :: order
       logical :: dummy
       type(ESMF_AxisIndex), dimension(:,:), pointer :: horzAI, vertAI
 
@@ -5314,10 +5314,10 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       ! some basic error checking    TODO: more
-      if (.not.associated(interngrid%ptr)) then
+      if (.not.associated(igrid%ptr)) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Invalid IGrid object", &
                                  ESMF_CONTEXT, rc)) return
@@ -5329,16 +5329,16 @@
       horzPhysIdUse = -1
       vertPhysIdUse = -1
 
-      ! Get the interngrid rank and check against size of globalAI
-      interngridRank = interngrid%ptr%dimCount
-      if (size(globalAI,2).lt.interngridRank) then
-        call ESMF_LogWrite("globalAI array size smaller than interngrid rank", &
+      ! Get the igrid rank and check against size of globalAI
+      igridRank = igrid%ptr%dimCount
+      if (size(globalAI,2).lt.igridRank) then
+        call ESMF_LogWrite("globalAI array size smaller than igrid rank", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
       endif
 
       ! Get the size of the AI array and allocate horz and vert temp AI arrays
       sizeAI = size(globalAI,1)
-      aSize  = min(interngridRank, size(globalAI,2))
+      aSize  = min(igridRank, size(globalAI,2))
       allocate(horzAI(sizeAI,2), &
                vertAI(sizeAI,1), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "allocating AI arrays", &
@@ -5347,12 +5347,12 @@
       ! get interndg identifiers from relative locations
       if (present(horzRelLoc)) then
         if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
-          call ESMF_IGridGetPhysGridId(interngrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+          call ESMF_IGridGetPhysGridId(igrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          horzDistIdUse = interngrid%ptr%internDGIndex(horzPhysIdUse)
+          horzDistIdUse = igrid%ptr%internDGIndex(horzPhysIdUse)
         else
           dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                         "undefined horizontal relloc", &
@@ -5362,12 +5362,12 @@
       endif
 
       if (present(vertRelLoc)) then
-        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. interngridRank.eq.3) then
-          call ESMF_IGridGetPhysGridId(interngrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. igridRank.eq.3) then
+          call ESMF_IGridGetPhysGridId(igrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          vertDistIdUse = interngrid%ptr%internDGIndex(vertPhysIdUse)
+          vertDistIdUse = igrid%ptr%internDGIndex(vertPhysIdUse)
         endif
       endif
 
@@ -5376,9 +5376,9 @@
       index = 1
       if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
         index = 3
-        if (interngrid%ptr%interngridStorage.eq.ESMF_INTERNGRID_STORAGE_ARBITRARY) then
+        if (igrid%ptr%igridStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY) then
           if (present(AICountPerDE)) then
-            call ESMF_InternDGGetAllAxisIndex(interngrid%ptr%interndgs(horzDistIdUse)%ptr, &
+            call ESMF_InternDGGetAllAxisIndex(igrid%ptr%interndgs(horzDistIdUse)%ptr, &
                                               horzAI, AICountPerDE, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
@@ -5390,7 +5390,7 @@
             return
           endif 
         else
-          call ESMF_InternDGGetAllAxisIndex(interngrid%ptr%interndgs(horzDistIdUse)%ptr, &
+          call ESMF_InternDGGetAllAxisIndex(igrid%ptr%interndgs(horzDistIdUse)%ptr, &
                                             horzAI, total, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -5398,13 +5398,13 @@
         endif
       endif
       if (aSize.ge.index .AND. vertDistIdUse.ne.-1) then
-        call ESMF_InternDGGetAllAxisIndex(interngrid%ptr%interndgs(vertDistIdUse)%ptr, &
+        call ESMF_InternDGGetAllAxisIndex(igrid%ptr%interndgs(vertDistIdUse)%ptr, &
                                           vertAI, total, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       else
-        if (interngridRank.eq.3) then
+        if (igridRank.eq.3) then
            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                  "valid vertical relloc required", &
                                   ESMF_CONTEXT, rc)) return
@@ -5412,7 +5412,7 @@
       endif
 
       ! Load temp values into input array and clean up
-      order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,aSize)
+      order(:) = igridOrder(:,igrid%ptr%coordOrder%order,aSize)
       if (aSize.ge.2) then
         globalAI(:,order(1)) = horzAI(:,1)
         globalAI(:,order(2)) = horzAI(:,2)
@@ -5435,12 +5435,12 @@
 ! !IROUTINE: ESMF_LRIGridGetAIsAllDEs - Get all axis indices for a InternDG
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridGetAIsAllDEs(interngrid, localGlobalFlag, &
+      subroutine ESMF_LRIGridGetAIsAllDEs(igrid, localGlobalFlag, &
                                          AIListPerDEPerRank, &
                                          horzRelLoc, vertRelLoc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_LocalGlobalFlag), intent(in) :: localGlobalFlag
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AIListPerDEPerRank
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
@@ -5452,7 +5452,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Class to be queried.
 !     \item[localGlobalFlag]
 !          {\tt ESMF\_LocalGlobalFlag] identifier indicating whether the returned
@@ -5460,13 +5460,13 @@
 !          index space.
 !     \item[AIListPerDEPerRank]
 !          2D array of {\tt ESMF\_AxisIndex} types containing results.  If
-!          allocated, it must be of size (nDEs,interngridrank).
+!          allocated, it must be of size (nDEs,igridrank).
 !     \item[{[horzrelloc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
-!          interngrid.
+!          igrid.
 !     \item[{[vertrelloc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
-!          interngrid.
+!          igrid.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5475,10 +5475,10 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: AIrank, interngridRank, nDEs
+      integer :: AIrank, igridRank, nDEs
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
-      integer, dimension(ESMF_MAXINTERNGRIDDIM) :: order
+      integer, dimension(ESMF_MAXIGRIDDIM) :: order
       logical :: dummy, horz, vert
       type(ESMF_AxisIndex), dimension(:,:), pointer :: horzAI, vertAI
       type(ESMF_DELayout) :: delayout
@@ -5487,7 +5487,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       ! Initialize other variables
       horzDistIdUse = -1
@@ -5499,14 +5499,14 @@
       vert          = .false.
 
       ! some basic error checking    TODO: more
-      if (.not.associated(interngrid%ptr)) then
+      if (.not.associated(igrid%ptr)) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                    "Invalid IGrid object", &
                                    ESMF_CONTEXT, rc)) return
       endif
 
-      interngridRank = interngrid%ptr%dimCount
-      call ESMF_LRIGridGet(interngrid, delayout=delayout, rc=localrc)
+      igridRank = igrid%ptr%dimCount
+      call ESMF_LRIGridGet(igrid, delayout=delayout, rc=localrc)
       call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=localrc)
 
       ! check for validity of horizontal and vertical rellocs and determine the
@@ -5516,11 +5516,11 @@
         ! get the physgrid/interndg identifier from the horizontal relLoc.  If it
         ! is not valid return an error.
         if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
-          call ESMF_IGridGetPhysGridId(interngrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+          call ESMF_IGridGetPhysGridId(igrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          horzDistIdUse = interngrid%ptr%internDGIndex(horzPhysIdUse)
+          horzDistIdUse = igrid%ptr%internDGIndex(horzPhysIdUse)
           AIrank = AIrank + 2
           horz   = .true.
         else
@@ -5534,12 +5534,12 @@
       if (present(vertRelLoc)) then
 	! get the physgrid/interndg identifier from the vertical relLoc.  If it
         ! is not valid return an error.
-        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .and. interngridRank.eq.3) then
-          call ESMF_IGridGetPhysGridId(interngrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .and. igridRank.eq.3) then
+          call ESMF_IGridGetPhysGridId(igrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          vertDistIdUse = interngrid%ptr%internDGIndex(vertPhysIdUse)
+          vertDistIdUse = igrid%ptr%internDGIndex(vertPhysIdUse)
           AIrank = AIrank + 1
           vert   = .true.
         endif
@@ -5571,7 +5571,7 @@
                                        ESMF_CONTEXT, rc)) return
 
         ! call the proper interndg to retrieve the horizontal AIs
-        call ESMF_InternDGGetAIsAllDEs(interngrid%ptr%interndgs(horzDistIdUse)%ptr, &
+        call ESMF_InternDGGetAIsAllDEs(igrid%ptr%interndgs(horzDistIdUse)%ptr, &
                                        horzAI, localGlobalFlag, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -5589,7 +5589,7 @@
                                        ESMF_CONTEXT, rc)) return
 
         ! call the proper interndg to retrieve the vertical AIs
-        call ESMF_InternDGGetAIsAllDEs(interngrid%ptr%interndgs(vertDistIdUse)%ptr, &
+        call ESMF_InternDGGetAIsAllDEs(igrid%ptr%interndgs(vertDistIdUse)%ptr, &
                                        vertAI, localGlobalFlag, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -5598,8 +5598,8 @@
       endif
 
       ! Load temp values into return array
-      order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,interngridRank)
-      ! TODO: logic for a 3D interngrid and a request for the horizontal AIs,
+      order(:) = igridOrder(:,igrid%ptr%coordOrder%order,igridRank)
+      ! TODO: logic for a 3D igrid and a request for the horizontal AIs,
       !       where the order array could reference outside of the AIList
       if (horz) then
         AIListPerDEPerRank(:,order(1)) = horzAI(:,1)
@@ -5631,18 +5631,18 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRIGridGlobalToDELocalIndex"
+#define ESMF_METHOD "ESMF_LRIGridGlobToDELocalIndex"
 !BOPI
-! !IROUTINE: ESMF_LRIGridGlobalToDELocalIndex - translate global indexing to local
+! !IROUTINE: ESMF_LRIGridGlobToDELocalIndex - translate global indexing to local
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridGlobalToDELocalIndex(interngrid, horzRelLoc, vertRelLoc, &
+      subroutine ESMF_LRIGridGlobToDELocalIndex(igrid, horzRelLoc, vertRelLoc, &
                                                  global1D, local1D, &
                                                  global2D, local2D, &
                                                  dimOrder, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_RelLoc), intent(in) :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       integer(ESMF_KIND_I4), dimension(:), intent(in),  optional :: global1D
@@ -5658,14 +5658,14 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Class to be used.
 !     \item[horzRelLoc]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
-!          interngrid.
+!          igrid.
 !     \item[{[vertRelLoc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
-!          interngrid.
+!          igrid.
 !     \item[{[global1D]}]
 !          One-dimensional {\tt ESMF\_LocalArray} of global identifiers to be
 !          translated.  Infers translating between positions in memory.
@@ -5688,7 +5688,7 @@
       integer :: localrc                          ! Error status
       integer :: i
       integer :: order(3)
-      integer :: interngridRank, aSize, tempSize, tempSize2
+      integer :: igridRank, aSize, tempSize, tempSize2
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
       integer, dimension(:), allocatable :: dimOrderUse
@@ -5700,10 +5700,10 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       ! some basic error checking    TODO: more
-      if (.not.associated(interngrid%ptr)) then
+      if (.not.associated(igrid%ptr)) then
         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                  "Invalid IGrid object", &
                                   ESMF_CONTEXT, rc)) return
@@ -5715,8 +5715,8 @@
       horzPhysIdUse = -1
       vertPhysIdUse = -1
 
-      ! Get the interngrid rank -- to check if there is a vertical interngrid available
-      interngridRank = interngrid%ptr%dimCount
+      ! Get the igrid rank -- to check if there is a vertical igrid available
+      igridRank = igrid%ptr%dimCount
 
       ! determine the largest input array size and allocate temp arrays
       aSize = 0
@@ -5732,12 +5732,12 @@
                  ltemp2D(tempSize,tempSize2), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "temp2D arrays", &
                                        ESMF_CONTEXT, rc)) return
-        order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,tempSize2)
+        order(:) = igridOrder(:,igrid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           gtemp2D(:,i) = global2D(:,order(i))
         enddo
       endif
-      aSize = min(interngridRank, aSize)
+      aSize = min(igridRank, aSize)
 
       ! calculate default if dimOrder is not present
       allocate(dimOrderUse(aSize), stat=localrc)
@@ -5753,11 +5753,11 @@
 
       ! get interndg identifier from relative locations
       if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
-        call ESMF_IGridGetPhysGridId(interngrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+        call ESMF_IGridGetPhysGridId(igrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        horzDistIdUse = interngrid%ptr%internDGIndex(horzPhysIdUse)
+        horzDistIdUse = igrid%ptr%internDGIndex(horzPhysIdUse)
       else
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                 "undefined horizontal relloc", &
@@ -5765,20 +5765,20 @@
       endif
 
       if (present(vertRelLoc)) then
-        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. interngridRank.eq.3) then
-          call ESMF_IGridGetPhysGridId(interngrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. igridRank.eq.3) then
+          call ESMF_IGridGetPhysGridId(igrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          vertDistIdUse = interngrid%ptr%internDGIndex(vertPhysIdUse)
+          vertDistIdUse = igrid%ptr%internDGIndex(vertPhysIdUse)
         endif
       endif
 
-      hdgtype => interngrid%ptr%interndgs(horzDistIdUse)%ptr
+      hdgtype => igrid%ptr%interndgs(horzDistIdUse)%ptr
       if (vertDistIdUse.ne.-1) then
-        vdgtype => interngrid%ptr%interndgs(vertDistIdUse)%ptr
+        vdgtype => igrid%ptr%interndgs(vertDistIdUse)%ptr
       else
-        if (aSize.ge.3 .and. interngridRank.eq.3) then
+        if (aSize.ge.3 .and. igridRank.eq.3) then
            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                  "valid vertical relloc required", &
                                   ESMF_CONTEXT, rc)) return
@@ -5789,7 +5789,7 @@
       ! to the application level
       ! can't send parts of optional arguments, so for now break out
       if (present(global1D)) then
-        if (interngridRank.le.2) then
+        if (igridRank.le.2) then
           call ESMF_InternDGGlobalToLocalIndex(hdgtype, &
                                                global1D=global1D, &
                                                local1D=local1D, &
@@ -5800,7 +5800,7 @@
                                     ESMF_CONTEXT, rc)) return
         else
           dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                             "1D operation not yet defined for 3d interngrids", &
+                             "1D operation not yet defined for 3d igrids", &
                               ESMF_CONTEXT, rc)
           return
         endif
@@ -5828,7 +5828,7 @@
         endif
 
         tempSize2 = size(global2D,2)
-        order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,tempSize2)
+        order(:) = igridOrder(:,igrid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           local2D(:,order(i)) = ltemp2D(:,i)
         enddo
@@ -5844,21 +5844,21 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRIGridGlobalToDELocalIndex
+      end subroutine ESMF_LRIGridGlobToDELocalIndex
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRIGridDELocalToGlobalIndex"
+#define ESMF_METHOD "ESMF_LRIGridDELocalToGlobIndex"
 !BOPI
-! !IROUTINE: ESMF_LRIGridDELocalToGlobalIndex - translate global indexing to local
+! !IROUTINE: ESMF_LRIGridDELocalToGlobIndex - translate global indexing to local
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridDELocalToGlobalIndex(interngrid, horzRelLoc, vertRelLoc, &
+      subroutine ESMF_LRIGridDELocalToGlobIndex(igrid, horzRelLoc, vertRelLoc, &
                                                  local1D, global1D, &
                                                  local2D, global2D, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_RelLoc), intent(in) :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       integer(ESMF_KIND_I4), dimension(:), optional, intent(in) ::  local1D
@@ -5873,14 +5873,14 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Class to be used.
 !     \item[horzRelLoc]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
-!          interngrid.
+!          igrid.
 !     \item[{[vertRelLoc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
-!          interngrid.
+!          igrid.
 !     \item[{[local1D]}]
 !          One-dimensional {\tt ESMF\_LocalArray} of local identifiers to be
 !          translated.  Infers translating between positions in memory.
@@ -5903,7 +5903,7 @@
       integer :: localrc                          ! Error status
       integer :: i
       integer :: order(3)
-      integer :: interngridRank, aSize, tempSize, tempSize2
+      integer :: igridRank, aSize, tempSize, tempSize2
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
       integer(ESMF_KIND_I4), dimension(:,:), allocatable :: gTemp2D,   lTemp2D
@@ -5914,10 +5914,10 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       ! some basic error checking    TODO: more
-      if (.not.associated(interngrid%ptr)) then
+      if (.not.associated(igrid%ptr)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Invalid IGrid object", &
                                  ESMF_CONTEXT, rc)) return
@@ -5929,8 +5929,8 @@
       horzPhysIdUse = -1
       vertPhysIdUse = -1
 
-      ! Get the interngrid rank -- to check if there is a vertical interngrid available
-      interngridRank = interngrid%ptr%dimCount
+      ! Get the igrid rank -- to check if there is a vertical igrid available
+      igridRank = igrid%ptr%dimCount
 
       ! determine the largest input array size and allocate temp arrays
       aSize = 0
@@ -5946,20 +5946,20 @@
                  ltemp2D(tempSize,tempSize2), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "temp2D arrays", &
                                        ESMF_CONTEXT, rc)) return
-        order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,tempSize2)
+        order(:) = igridOrder(:,igrid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           ltemp2D(:,i) = local2D(:,order(i))
         enddo
       endif
-      aSize = min(interngridRank, aSize)
+      aSize = min(igridRank, aSize)
 
       ! get interndg identifiers from relative locations
       if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
-        call ESMF_IGridGetPhysGridId(interngrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+        call ESMF_IGridGetPhysGridId(igrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        horzDistIdUse = interngrid%ptr%internDGIndex(horzPhysIdUse)
+        horzDistIdUse = igrid%ptr%internDGIndex(horzPhysIdUse)
       else
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                      "undefined horizontal relloc", &
@@ -5968,20 +5968,20 @@
       endif
 
       if (present(vertRelLoc)) then
-        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. interngridRank.eq.3) then
-          call ESMF_IGridGetPhysGridId(interngrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. igridRank.eq.3) then
+          call ESMF_IGridGetPhysGridId(igrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          vertDistIdUse = interngrid%ptr%internDGIndex(vertPhysIdUse)
+          vertDistIdUse = igrid%ptr%internDGIndex(vertPhysIdUse)
         endif
       endif
 
-      hdgtype => interngrid%ptr%interndgs(horzDistIdUse)%ptr
+      hdgtype => igrid%ptr%interndgs(horzDistIdUse)%ptr
       if (vertDistIdUse.ne.-1) then
-        vdgtype => interngrid%ptr%interndgs(vertDistIdUse)%ptr
+        vdgtype => igrid%ptr%interndgs(vertDistIdUse)%ptr
       else
-        if (aSize.ge.3 .and. interngridRank.eq.3) then
+        if (aSize.ge.3 .and. igridRank.eq.3) then
            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                      "valid vertical relloc required", &
                                      ESMF_CONTEXT, rc)) return
@@ -5992,7 +5992,7 @@
       ! to the application level
       ! can't send parts of optional arguments, so for now break out  TODO: fix
       if (present(local1D)) then
-        if (interngridRank.le.2) then
+        if (igridRank.le.2) then
           call ESMF_InternDGLocalToGlobalIndex(hdgtype, &
                                                local1D=local1D, &
                                                global1D=global1D, &
@@ -6002,7 +6002,7 @@
                                     ESMF_CONTEXT, rc)) return
         else
           dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                       "1D operation not yet defined for 3d interngrids", &
+                       "1D operation not yet defined for 3d igrids", &
                        ESMF_CONTEXT, rc)
           return
         endif
@@ -6027,7 +6027,7 @@
                                     ESMF_CONTEXT, rc)) return
         endif
         tempSize2 = size(local2D,2)
-        order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,tempSize2)
+        order(:) = igridOrder(:,igrid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           global2D(:,order(i)) = gtemp2D(:,i)
         enddo
@@ -6039,7 +6039,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRIGridDELocalToGlobalIndex
+      end subroutine ESMF_LRIGridDELocalToGlobIndex
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -6048,13 +6048,13 @@
 ! !IROUTINE: ESMF_LRIGridGlobalToDELocalAI - translate global axis index to local
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridGlobalToDELocalAI(interngrid, horzRelLoc, vertRelLoc, &
+      subroutine ESMF_LRIGridGlobalToDELocalAI(igrid, horzRelLoc, vertRelLoc, &
                                               globalAI1D, localAI1D, &
                                               globalAI2D, localAI2D, &
                                               dimOrder, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_RelLoc), intent(in) :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       type(ESMF_AxisIndex), dimension(:), intent(in),  optional :: globalAI1D
@@ -6070,14 +6070,14 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Class to be used.
 !     \item[horzRelLoc]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
-!          interngrid.
+!          igrid.
 !     \item[{[vertRelLoc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
-!          interngrid.
+!          igrid.
 !     \item[{[globalAI1D]}]
 !          One-dimensional array of global AxisIndices to be translated.
 !     \item[{[localAI1D]}]
@@ -6096,7 +6096,7 @@
       integer :: localrc                          ! Error status
       integer :: i
       integer :: order(3)
-      integer :: interngridRank, aSize, tempSize, tempSize2
+      integer :: igridRank, aSize, tempSize, tempSize2
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
       integer, dimension(:), allocatable :: dimOrderUse
@@ -6109,7 +6109,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       if (present(globalAI1D)) then
           do i=1,size(globalAI1D)
@@ -6127,7 +6127,7 @@
 
 
       ! some basic error checking    TODO: more
-      if (.not.associated(interngrid%ptr)) then
+      if (.not.associated(igrid%ptr)) then
         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                  "Invalid IGrid object", &
                                   ESMF_CONTEXT, rc)) return
@@ -6139,8 +6139,8 @@
       horzPhysIdUse = -1
       vertPhysIdUse = -1
 
-      ! Get the interngrid rank -- to check if there is a vertical interngrid available
-      interngridRank = interngrid%ptr%dimCount
+      ! Get the igrid rank -- to check if there is a vertical igrid available
+      igridRank = igrid%ptr%dimCount
 
       ! determine the largest input array size and allocate temp arrays
       aSize = 0
@@ -6156,12 +6156,12 @@
                  ltempAI2D(tempSize,tempSize2), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "tempAI2D arrays", &
                                        ESMF_CONTEXT, rc)) return
-        order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,tempSize2)
+        order(:) = igridOrder(:,igrid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           gtempAI2D(:,i) = globalAI2D(:,order(i))
         enddo
       endif
-      aSize = min(interngridRank, aSize)
+      aSize = min(igridRank, aSize)
 
       ! calculate default if dimOrder is not present
       allocate(dimOrderUse(aSize), stat=localrc)
@@ -6177,11 +6177,11 @@
 
       ! get interndg identifier from relative locations
       if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
-        call ESMF_IGridGetPhysGridId(interngrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+        call ESMF_IGridGetPhysGridId(igrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        horzDistIdUse = interngrid%ptr%internDGIndex(horzPhysIdUse)
+        horzDistIdUse = igrid%ptr%internDGIndex(horzPhysIdUse)
       else
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                 "undefined horizontal relloc", &
@@ -6189,20 +6189,20 @@
       endif
 
       if (present(vertRelLoc)) then
-        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. interngridRank.eq.3) then
-          call ESMF_IGridGetPhysGridId(interngrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. igridRank.eq.3) then
+          call ESMF_IGridGetPhysGridId(igrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          vertDistIdUse = interngrid%ptr%internDGIndex(vertPhysIdUse)
+          vertDistIdUse = igrid%ptr%internDGIndex(vertPhysIdUse)
         endif
       endif
 
-      hdgtype => interngrid%ptr%interndgs(horzDistIdUse)%ptr
+      hdgtype => igrid%ptr%interndgs(horzDistIdUse)%ptr
       if (vertDistIdUse.ne.-1) then
-        vdgtype => interngrid%ptr%interndgs(vertDistIdUse)%ptr
+        vdgtype => igrid%ptr%interndgs(vertDistIdUse)%ptr
       else
-        if (aSize.ge.3 .and. interngridRank.eq.3) then
+        if (aSize.ge.3 .and. igridRank.eq.3) then
            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                  "valid vertical relloc required", &
                                   ESMF_CONTEXT, rc)) return
@@ -6213,7 +6213,7 @@
       ! to the application level
       ! can't send parts of optional arguments, so for now break out
       if (present(globalAI1D)) then
-        if (interngridRank.le.2) then
+        if (igridRank.le.2) then
           call ESMF_InternDGGlobalToLocalIndex(hdgtype, &
                                                globalAI1D=globalAI1D, &
                                                localAI1D=localAI1D, &
@@ -6224,7 +6224,7 @@
                                     ESMF_CONTEXT, rc)) return
         else
           dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                       "1D operation not yet defined for 3d interngrids", &
+                       "1D operation not yet defined for 3d igrids", &
                        ESMF_CONTEXT, rc)
           return
         endif
@@ -6251,7 +6251,7 @@
                                     ESMF_CONTEXT, rc)) return
         endif
         tempSize2 = size(globalAI2D,2)
-        order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,tempSize2)
+        order(:) = igridOrder(:,igrid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           localAI2D(:,order(i)) = ltempAI2D(:,i)
         enddo
@@ -6276,12 +6276,12 @@
 ! !IROUTINE: ESMF_LRIGridDELocalToGlobalAI - translate global axis indices to local
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridDELocalToGlobalAI(interngrid, horzRelLoc, vertRelLoc, &
+      subroutine ESMF_LRIGridDELocalToGlobalAI(igrid, horzRelLoc, vertRelLoc, &
                                               localAI1D, globalAI1D, &
                                               localAI2D, globalAI2D, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_RelLoc), intent(in) :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       type(ESMF_AxisIndex), dimension(:), optional, intent(in) ::  localAI1D
@@ -6296,14 +6296,14 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Class to be used.
 !     \item[horzRelLoc]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
-!          interngrid.
+!          igrid.
 !     \item[{[vertRelLoc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
-!          interngrid.
+!          igrid.
 !     \item[{[localAI1D]}]
 !          One-dimensional array of local AxisIndices to be translated.
 !     \item[{[globalAI1D]}]
@@ -6322,7 +6322,7 @@
       integer :: localrc                          ! Error status
       integer :: i,j
       integer :: order(3)
-      integer :: interngridRank, aSize, tempSize, tempSize2
+      integer :: igridRank, aSize, tempSize, tempSize2
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
       logical :: dummy
@@ -6333,7 +6333,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       if (present(localAI1D)) then
           do i=1,size(localAI1D)
@@ -6350,7 +6350,7 @@
       endif
 
       ! some basic error checking    TODO: more
-      if (.not.associated(interngrid%ptr)) then
+      if (.not.associated(igrid%ptr)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Invalid IGrid object", &
                                  ESMF_CONTEXT, rc)) return
@@ -6362,8 +6362,8 @@
       horzPhysIdUse = -1
       vertPhysIdUse = -1
 
-      ! Get the interngrid rank -- to check if there is a vertical interngrid available
-      interngridRank = interngrid%ptr%dimCount
+      ! Get the igrid rank -- to check if there is a vertical igrid available
+      igridRank = igrid%ptr%dimCount
 
       ! determine the largest input array size and allocate temp arrays
       aSize = 0
@@ -6379,20 +6379,20 @@
                  ltempAI2D(tempSize,tempSize2), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "tempAI2D arrays", &
                                        ESMF_CONTEXT, rc)) return
-        order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,tempSize2)
+        order(:) = igridOrder(:,igrid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           ltempAI2D(:,i) = localAI2D(:,order(i))
         enddo
       endif
-      aSize = min(interngridRank, aSize)
+      aSize = min(igridRank, aSize)
 
       ! get interndg identifiers from relative locations
       if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
-        call ESMF_IGridGetPhysGridId(interngrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+        call ESMF_IGridGetPhysGridId(igrid%ptr, horzRelLoc, horzPhysIdUse, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        horzDistIdUse = interngrid%ptr%internDGIndex(horzPhysIdUse)
+        horzDistIdUse = igrid%ptr%internDGIndex(horzPhysIdUse)
       else
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                      "undefined horizontal relloc", &
@@ -6401,20 +6401,20 @@
       endif
 
       if (present(vertRelLoc)) then
-        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. interngridRank.eq.3) then
-          call ESMF_IGridGetPhysGridId(interngrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. igridRank.eq.3) then
+          call ESMF_IGridGetPhysGridId(igrid%ptr, vertRelLoc, vertPhysIdUse, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          vertDistIdUse = interngrid%ptr%internDGIndex(vertPhysIdUse)
+          vertDistIdUse = igrid%ptr%internDGIndex(vertPhysIdUse)
         endif
       endif
 
-      hdgtype => interngrid%ptr%interndgs(horzDistIdUse)%ptr
+      hdgtype => igrid%ptr%interndgs(horzDistIdUse)%ptr
       if (vertDistIdUse.ne.-1) then
-        vdgtype => interngrid%ptr%interndgs(vertDistIdUse)%ptr
+        vdgtype => igrid%ptr%interndgs(vertDistIdUse)%ptr
       else
-        if (aSize.ge.3 .and. interngridRank.eq.3) then
+        if (aSize.ge.3 .and. igridRank.eq.3) then
            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                  "valid vertical relloc required", &
                                   ESMF_CONTEXT, rc)) return
@@ -6425,7 +6425,7 @@
       ! to the application level
       ! can't send parts of optional arguments, so for now break out  TODO: fix
       if (present(localAI1D)) then
-        if (interngridRank.le.2) then
+        if (igridRank.le.2) then
           call ESMF_InternDGLocalToGlobalIndex(hdgtype, &
                                                localAI1D=localAI1D, &
                                                globalAI1D=globalAI1D, &
@@ -6435,7 +6435,7 @@
                                     ESMF_CONTEXT, rc)) return
         else
           dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                       "1D operation not yet defined for 3d interngrids", &
+                       "1D operation not yet defined for 3d igrids", &
                        ESMF_CONTEXT, rc)
           return
         endif
@@ -6460,7 +6460,7 @@
                                     ESMF_CONTEXT, rc)) return
         endif
         tempSize2 = size(localAI2D,2)
-        order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,tempSize2)
+        order(:) = igridOrder(:,igrid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           globalAI2D(:,order(i)) = gtempAI2D(:,i)
         enddo
@@ -6476,22 +6476,22 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRIGridSetCoordComputeBlock"
+#define ESMF_METHOD "ESMF_LRIGridSetCoordCompBlock"
 !BOPI
 ! !IROUTINE: ESMF_LRIGridSetCoord - Compute coordinates for a IGrid with block storage
 
 ! !INTERFACE:
       ! Private name; call using ESMF_LRIGridSetCoord()
-      subroutine ESMF_LRIGridSetCoordComputeBlock(interngrid, physIGridId, dimCount, &
-                                                 counts, interngridBoundWidth, relloc, &
+      subroutine ESMF_LRIGridSetCoordCompBlock(igrid, physIGridId, dimCount, &
+                                                 counts, igridBoundWidth, relloc, &
                                                  coord1, coord2, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass) :: interngrid
+      type(ESMF_IGridClass) :: igrid
       integer, intent(in) :: physIGridId
       integer, intent(in) :: dimCount
       integer, dimension(dimCount), intent(in) :: counts
-      integer, intent(in) :: interngridBoundWidth
+      integer, intent(in) :: igridBoundWidth
       type(ESMF_RelLoc), intent(in) :: relloc
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
@@ -6504,23 +6504,23 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Pointer to a {\tt ESMF\_IGrid} to be modified.
 !     \item[physIGridId]
 !          Identifier of the {\tt ESMF\_PhysGrid} to be modified.
 !     \item[dimCount]
-!          Number of interngrid dimensions.
+!          Number of igrid dimensions.
 !     \item[counts]
-!          Array of number of interngrid increments in each dimension.
-!     \item[interngridBoundWidth]
+!          Array of number of igrid increments in each dimension.
+!     \item[igridBoundWidth]
 !          Number of extra cell layers in the internal coordinate representation
 !          for halo and ghost cells.  Used by {\tt ESMF\_Regrid}.
 !     \item[relloc]
-!          Relative location in interngrid cell for which this PhysGrid.
+!          Relative location in igrid cell for which this PhysGrid.
 !     \item[coord1]
-!          Array of specified interngrid coordinates in the first dimension.
+!          Array of specified igrid coordinates in the first dimension.
 !     \item[{[coord2]}]
-!          Array of specified interngrid coordinates in the second dimension.
+!          Array of specified igrid coordinates in the second dimension.
 !     \item[{[total]}]
 !          Logical flag to optionally set physical coordinate arrays of total cells.
 !          Default is to set computational cells.
@@ -6547,7 +6547,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
 
       ! TODO: could be a 1-D array for each coord axis later, but that
       !       would have to be supported by Regrid first
@@ -6561,7 +6561,7 @@
 
       ! set halo width
       hWidth = 0
-      if (total) hWidth = interngridBoundWidth
+      if (total) hWidth = igridBoundWidth
 
       ! set up cornerCounts arrays
       cornerCounts(1) = dimCount*2
@@ -6579,7 +6579,7 @@
       enddo
 
       select case (dimCount)
-      case(1)   ! 1D coordinates, assumed mostly for vertical interngrids
+      case(1)   ! 1D coordinates, assumed mostly for vertical igrids
 
         ! get data
         call ESMF_InternArrayGetData(centerArray(1), center, ESMF_DATA_REF, localrc)
@@ -6614,7 +6614,7 @@
 
         else
           if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                    "This relative location not yet supported for 1D interngrids", &
+                    "This relative location not yet supported for 1D igrids", &
                     ESMF_CONTEXT, rc)) return
         endif
 
@@ -6911,13 +6911,13 @@
 
       case default
         dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                      "interngrids of this dimension are not yet supported", &
+                                      "igrids of this dimension are not yet supported", &
                                      ESMF_CONTEXT, rc)
         return
       end select
 
       ! now set the location array in PhysGrid
-      call ESMF_PhysGridSetLocations(interngrid%physIGrids(physIGridId), &
+      call ESMF_PhysGridSetLocations(igrid%physgrids(physIGridId), &
                                      locationArray=centerArray, total=total, &
                                      rc=localrc)
             ! TODO: add name to set call
@@ -6927,7 +6927,7 @@
 
       ! set the region array in PhysGrid
       if (total) then
-        call ESMF_PhysGridSetRegions(interngrid%physIGrids(physIGridId), &
+        call ESMF_PhysGridSetRegions(igrid%physgrids(physIGridId), &
                                      regionType=ESMF_REGION_TYPE_POLYGON, &
                                      vertexArray=cornerArray, &
                                      numVertices=4, rc=localrc)
@@ -6943,7 +6943,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRIGridSetCoordComputeBlock
+      end subroutine ESMF_LRIGridSetCoordCompBlock
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -6953,18 +6953,18 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_LRIGridSetCoord()
-      subroutine ESMF_LRIGridSetCoordComputeArb(interngrid, physIGridId, dimCount, &
+      subroutine ESMF_LRIGridSetCoordComputeArb(igrid, physIGridId, dimCount, &
                                                myCount, myIndices,         &
-                                               interngridBoundWidth, relloc,     &
+                                               igridBoundWidth, relloc,     &
                                                coord1, coord2, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass) :: interngrid
+      type(ESMF_IGridClass) :: igrid
       integer, intent(in) :: physIGridId
       integer, intent(in) :: dimCount
       integer, intent(in) :: myCount
       integer, dimension(:,:), intent(in) :: myIndices
-      integer, intent(in) :: interngridBoundWidth
+      integer, intent(in) :: igridBoundWidth
       type(ESMF_RelLoc), intent(in) :: relloc
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
@@ -6977,24 +6977,24 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Pointer to a {\tt ESMF\_IGrid} to be modified.
 !     \item[physIGridId]
 !          Identifier of the {\tt ESMF\_PhysGrid} to be modified.
 !     \item[dimCount]
-!          Number of interngrid dimensions.
+!          Number of igrid dimensions.
 !     \item[myCount]
-!          Number of interngrid increments on this DE.
+!          Number of igrid increments on this DE.
 !     \item[myIndices]
-!          Array of interngrid indices to be distributed to this DE.  The size of this
+!          Array of igrid indices to be distributed to this DE.  The size of this
 !          array must be at least [myCount] in the first dimension and 2 in the
 !          second.
 !     \item[relloc]
-!          Relative location in interngrid cell for which this PhysGrid.
+!          Relative location in igrid cell for which this PhysGrid.
 !     \item[coord1]
-!          Array of specified interngrid coordinates in the first dimension.
+!          Array of specified igrid coordinates in the first dimension.
 !     \item[{[coord2]}]
-!          Array of specified interngrid coordinates in the second dimension.
+!          Array of specified igrid coordinates in the second dimension.
 !     \item[{[total]}]
 !          Logical flag to optionally set physical coordinate arrays of total cells.
 !          Default is to set computational cells.
@@ -7019,7 +7019,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
 
       ! allocate arrays
       allocate(centerArray(dimCount), stat=localrc)
@@ -7044,13 +7044,13 @@
       enddo
 
 
-      ! NOTE: the +interngridBoundaryWidth is to offset the indices to
+      ! NOTE: the +igridBoundaryWidth is to offset the indices to
       !       account for the boundary layer, if the total=.true.
       !       ever becomes meaningful this will have to be
       !       adjusted to account for that - Bob Oehmke (10/13/2006)
 
       select case (dimCount)
-      case(1)   ! 1D coordinates, assumed mostly for vertical interngrids
+      case(1)   ! 1D coordinates, assumed mostly for vertical igrids
 
         ! get data
         call ESMF_InternArrayGetData(centerArray(1), center, ESMF_DATA_REF, localrc)
@@ -7062,14 +7062,14 @@
 
         elseif (relloc.eq.ESMF_CELL_CENTER .or. relloc.eq.ESMF_CELL_CELL) then  ! TODO:?
           do i = 1,myCount
-            i1 = myIndices(i,1)+interngridBoundWidth
+            i1 = myIndices(i,1)+igridBoundWidth
             center(  i) = 0.5d0*(coord1(i1)+coord1(i1+1))
             corner(1,i) = coord1(i1  )
             corner(2,i) = coord1(i1+1)
           enddo
         elseif (relloc .eq. ESMF_CELL_TOPFACE) then   ! TODO: check bottom or top
           do i = 1,myCount
-            i1 = myIndices(i,1)+interngridBoundWidth
+            i1 = myIndices(i,1)+igridBoundWidth
             center(  i) = coord1(i1+1)
             corner(1,i) = 0.5d0*(coord1(i1  )+coord1(i1+1))
             corner(2,i) = 0.5d0*(coord1(i1+1)+coord1(i1+2))
@@ -7077,7 +7077,7 @@
 
         else
           if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                    "This relative location not yet supported for 1D interngrids", &
+                    "This relative location not yet supported for 1D igrids", &
                     ESMF_CONTEXT, rc)) return
         endif
 
@@ -7097,8 +7097,8 @@
 
         elseif (relloc .eq. ESMF_CELL_CENTER) then
           do i = 1,myCount
-            i1 = myIndices(i,1)+interngridBoundWidth
-            j1 = myIndices(i,2)+interngridBoundWidth
+            i1 = myIndices(i,1)+igridBoundWidth
+            j1 = myIndices(i,2)+igridBoundWidth
             center1(i)   = 0.5d0*(coord1(i1)+coord1(i1+1))
             center2(i)   = 0.5d0*(coord2(j1)+coord2(j1+1))
             cornerUse11  =        coord1(i1  )
@@ -7117,8 +7117,8 @@
 
         elseif (relloc .eq. ESMF_CELL_NFACE) then
           do i = 1,myCount
-            i1 = myIndices(i,1)+interngridBoundWidth
-            j1 = myIndices(i,2)+interngridBoundWidth
+            i1 = myIndices(i,1)+igridBoundWidth
+            j1 = myIndices(i,2)+igridBoundWidth
             center1(i)   = 0.5d0*(coord1(i1  )+coord1(i1+1))
             center2(i)   =        coord2(j1+1)
             cornerUse11  =        coord1(i1  )
@@ -7137,8 +7137,8 @@
 
         elseif (relloc .eq. ESMF_CELL_SFACE) then
           do i = 1,myCount
-            i1 = myIndices(i,1)+interngridBoundWidth
-            j1 = myIndices(i,2)+interngridBoundWidth
+            i1 = myIndices(i,1)+igridBoundWidth
+            j1 = myIndices(i,2)+igridBoundWidth
             center1(i)   = 0.5d0*(coord1(i1  )+coord1(i1+1))
             center2(i)   =        coord2(j1  )
             cornerUse11  =        coord1(i1  )
@@ -7157,8 +7157,8 @@
 
         elseif (relloc .eq. ESMF_CELL_EFACE) then
           do i = 1,myCount
-            i1 = myIndices(i,1)+interngridBoundWidth
-            j1 = myIndices(i,2)+interngridBoundWidth
+            i1 = myIndices(i,1)+igridBoundWidth
+            j1 = myIndices(i,2)+igridBoundWidth
             center1(i)   =        coord1(i1+1)
             center2(i)   = 0.5d0*(coord2(j1  )+coord2(j1+1))
             cornerUse11  = 0.5d0*(coord1(i1  )+coord1(i1+1))
@@ -7177,8 +7177,8 @@
 
         elseif (relloc .eq. ESMF_CELL_WFACE) then
           do i = 1,myCount
-            i1 = myIndices(i,1)+interngridBoundWidth
-            j1 = myIndices(i,2)+interngridBoundWidth
+            i1 = myIndices(i,1)+igridBoundWidth
+            j1 = myIndices(i,2)+igridBoundWidth
             center1(i)   =        coord1(i1  )
             center2(i)   = 0.5d0*(coord2(j1  )+coord2(j1+1))
             cornerUse11  = 0.5d0*(coord1(i1-1)+coord1(i1  ))
@@ -7197,8 +7197,8 @@
 
         elseif (relloc .eq. ESMF_CELL_NECORNER) then
           do i = 1,myCount
-            i1 = myIndices(i,1)+interngridBoundWidth
-            j1 = myIndices(i,2)+interngridBoundWidth
+            i1 = myIndices(i,1)+igridBoundWidth
+            j1 = myIndices(i,2)+igridBoundWidth
             center1(i)   =        coord1(i1+1)
             center2(i)   =        coord2(j1+1)
             cornerUse11  = 0.5d0*(coord1(i1  )+coord1(i1+1))
@@ -7217,8 +7217,8 @@
 
         elseif (relloc .eq. ESMF_CELL_SWCORNER) then
           do i = 1,myCount
-            i1 = myIndices(i,1)+interngridBoundWidth
-            j1 = myIndices(i,2)+interngridBoundWidth
+            i1 = myIndices(i,1)+igridBoundWidth
+            j1 = myIndices(i,2)+igridBoundWidth
             center1(i)   =        coord1(i1  )
             center2(i)   =        coord2(j1  )
             cornerUse11  = 0.5d0*(coord1(i1-1)+coord1(i1  ))
@@ -7237,8 +7237,8 @@
 
         elseif (relloc .eq. ESMF_CELL_SECORNER) then
           do i = 1,myCount
-            i1 = myIndices(i,1)+interngridBoundWidth
-            j1 = myIndices(i,2)+interngridBoundWidth
+            i1 = myIndices(i,1)+igridBoundWidth
+            j1 = myIndices(i,2)+igridBoundWidth
             center1(i)   =        coord1(i1+1)
             center2(i)   =        coord2(j1  )
             cornerUse11  = 0.5d0*(coord1(i1  )+coord1(i1+1))
@@ -7257,8 +7257,8 @@
 
        elseif (relloc .eq. ESMF_CELL_NWCORNER) then
           do i = 1,myCount
-            i1 = myIndices(i,1)+interngridBoundWidth
-            j1 = myIndices(i,2)+interngridBoundWidth
+            i1 = myIndices(i,1)+igridBoundWidth
+            j1 = myIndices(i,2)+igridBoundWidth
             center1(i)   =        coord1(i1  )
             center2(i)   =        coord2(j1+1)
             cornerUse11  = 0.5d0*(coord1(i1-1)+coord1(i1  ))
@@ -7284,13 +7284,13 @@
 
       case default
         dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                      "interngrids of this dimension are not yet supported", &
+                                      "igrids of this dimension are not yet supported", &
                                      ESMF_CONTEXT, rc)
         return
       end select
 
       ! now set the location array in PhysGrid
-      call ESMF_PhysGridSetLocations(interngrid%physIGrids(physIGridId), &
+      call ESMF_PhysGridSetLocations(igrid%physgrids(physIGridId), &
                                      locationArray=centerArray, total=total, &
                                      rc=localrc)
             ! TODO: add name to set call
@@ -7299,7 +7299,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! set the region array in PhysGrid
-      call ESMF_PhysGridSetRegions(interngrid%physIGrids(physIGridId), &
+      call ESMF_PhysGridSetRegions(igrid%physgrids(physIGridId), &
                                    regionType=ESMF_REGION_TYPE_POLYGON, &
                                    vertexArray=cornerArray, &
                                    numVertices=4, rc=localrc)
@@ -7316,21 +7316,21 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRIGridGet"
 !BOPI
-! !IROUTINE: ESMF_LRIGridGet - Gets a variety of information about the interngrid
+! !IROUTINE: ESMF_LRIGridGet - Gets a variety of information about the igrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridGet(interngrid, horzRelLoc, vertRelLoc, &
+      subroutine ESMF_LRIGridGet(igrid, horzRelLoc, vertRelLoc, &
                                 horzIGridType, vertIGridType, &
                                 horzStagger, vertStagger, &
                                 horzCoordSystem, vertCoordSystem, coordOrder, &
-                                dimCount, distDimCount, interngridStorage, &
+                                dimCount, distDimCount, igridStorage, &
                                 minGlobalCoordPerDim, maxGlobalCoordPerDim, &
                                 globalCellCountPerDim, maxLocalCellCountPerDim, &
                                 globalStartPerDEPerDim, cellCountPerDEPerDim, &
                                 periodic, delayout, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGrid), intent(inout) :: interngrid
+      type(ESMF_IGrid), intent(inout) :: igrid
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       type(ESMF_IGridType), intent(out), optional :: horzIGridType
@@ -7342,7 +7342,7 @@
       type(ESMF_CoordOrder),  intent(out), optional :: coordOrder
       integer, intent(out), optional :: dimCount
       integer, intent(out), optional :: distDimCount
-      type(ESMF_IGridStorage), intent(out), optional :: interngridStorage
+      type(ESMF_IGridStorage), intent(out), optional :: igridStorage
       real(ESMF_KIND_R8), intent(out), dimension(:), &
                             optional :: minGlobalCoordPerDim
       real(ESMF_KIND_R8), intent(out), dimension(:), &
@@ -7362,24 +7362,24 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Pointer to a {\tt ESMF\_IGrid} to be modified.
 !     \item[{[horzIGridType]}]
-!          Integer specifier to denote horizontal interngrid type.
+!          Integer specifier to denote horizontal igrid type.
 !     \item[{[vertIGridType]}]
-!          Integer specifier to denote vertical interngrid type.
+!          Integer specifier to denote vertical igrid type.
 !     \item[{[horzStagger]}]
-!          Integer specifier to denote horizontal interngrid stagger.
+!          Integer specifier to denote horizontal igrid stagger.
 !     \item[{[vertStagger]}]
-!          Integer specifier to denote vertical interngrid stagger.
+!          Integer specifier to denote vertical igrid stagger.
 !     \item[{[horzCoordSystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the horizontal interngrid.
+!          the horizontal igrid.
 !     \item[{[vertCoordSystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the vertical interngrid.
+!          the vertical igrid.
 !     \item[{[coordOrder]}]
 !          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
 !          ordering for the IGrid and all related Fields (i.e. KIJ).
@@ -7388,13 +7388,13 @@
 !     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum global physical coordinates in each direction.
 !     \item[{[globalCellCountPerDim]}]
-!          Array of numbers of global interngrid increments in each direction.
+!          Array of numbers of global igrid increments in each direction.
 !     \item[{[maxLocalCellCountPerDim]}]
-!          Array of maximum interngrid counts on any DE in each direction.
+!          Array of maximum igrid counts on any DE in each direction.
 !     \item[{[globalStartPerDEPerDim]}]
 !          Array of global starting locations for each DE and in each direction.
 !     \item[{[cellCountPerDEPerDim]}]
-!          2-D array of interngrid counts on each DE and in each direction.
+!          2-D array of igrid counts on each DE and in each direction.
 !     \item[{[periodic]}]
 !          Returns the periodicity along the coordinate axes - logical array.
 !     \item[{[name]}]
@@ -7407,28 +7407,28 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: i, aSize, interngridRank
+      integer :: i, aSize, igridRank
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
-      integer, dimension(ESMF_MAXINTERNGRIDDIM) :: order
+      integer, dimension(ESMF_MAXIGRIDDIM) :: order
       integer, dimension(:), allocatable :: gCCPDUse, mLCCPDUse
       integer, dimension(:,:), allocatable :: gSPDEPDUse, cCPDEPDUse
-      type(ESMF_IGridClass), pointer :: interngridp
+      type(ESMF_IGridClass), pointer :: igridp
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       ! some basic error checking    TODO: more
-      if (.not.associated(interngrid%ptr)) then
+      if (.not.associated(igrid%ptr)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Invalid IGrid object", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      interngridp => interngrid%ptr
+      igridp => igrid%ptr
 
       ! Initialize other variables
       horzDistIdUse = -1
@@ -7436,23 +7436,23 @@
       horzPhysIdUse = -1
       vertPhysIdUse = -1
 
-      ! Get the interngrid rank -- to check if there is a vertical interngrid available
-      interngridRank = interngridp%dimCount
+      ! Get the igrid rank -- to check if there is a vertical igrid available
+      igridRank = igridp%dimCount
 
-      ! if present, gets information from the interngrid derived type
-      if (present(horzIGridType   )) horzIGridType    = interngridp%horzIGridType
-      if (present(vertIGridType   )) vertIGridType    = interngridp%vertIGridType
-      if (present(horzStagger    )) horzStagger     = interngridp%horzStagger
-      if (present(vertStagger    )) vertStagger     = interngridp%vertStagger
-      if (present(horzCoordSystem)) horzCoordSystem = interngridp%horzCoordSystem
-      if (present(vertCoordSystem)) vertCoordSystem = interngridp%vertCoordSystem
-      if (present(coordOrder     )) coordOrder      = interngridp%coordOrder
-      if (present(dimCount       )) dimCount        = interngridp%dimCount
-      if (present(interngridStorage    )) interngridStorage     = interngridp%interngridStorage
+      ! if present, gets information from the igrid derived type
+      if (present(horzIGridType   )) horzIGridType    = igridp%horzIGridType
+      if (present(vertIGridType   )) vertIGridType    = igridp%vertIGridType
+      if (present(horzStagger    )) horzStagger     = igridp%horzStagger
+      if (present(vertStagger    )) vertStagger     = igridp%vertStagger
+      if (present(horzCoordSystem)) horzCoordSystem = igridp%horzCoordSystem
+      if (present(vertCoordSystem)) vertCoordSystem = igridp%vertCoordSystem
+      if (present(coordOrder     )) coordOrder      = igridp%coordOrder
+      if (present(dimCount       )) dimCount        = igridp%dimCount
+      if (present(igridStorage    )) igridStorage     = igridp%igridStorage
 
       ! get name from base obj
       if (present(name)) then
-        call ESMF_GetName(interngridp%base, name, localrc)
+        call ESMF_GetName(igridp%base, name, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -7460,26 +7460,26 @@
 
       ! Get global coordinate extents
       if (present(minGlobalCoordPerDim)) then
-        aSize = min(interngridRank, size(minGlobalCoordPerDim))
-        order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,aSize)
+        aSize = min(igridRank, size(minGlobalCoordPerDim))
+        order(:) = igridOrder(:,igrid%ptr%coordOrder%order,aSize)
         do i=1,aSize
-          minGlobalCoordPerDim(order(i)) = interngridp%minGlobalCoordPerDim(i)
+          minGlobalCoordPerDim(order(i)) = igridp%minGlobalCoordPerDim(i)
         enddo
       endif
       if (present(maxGlobalCoordPerDim)) then
-        aSize = min(interngridRank, size(maxGlobalCoordPerDim))
-        order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,aSize)
+        aSize = min(igridRank, size(maxGlobalCoordPerDim))
+        order(:) = igridOrder(:,igrid%ptr%coordOrder%order,aSize)
         do i=1,aSize
-          maxGlobalCoordPerDim(order(i)) = interngridp%maxGlobalCoordPerDim(i)
+          maxGlobalCoordPerDim(order(i)) = igridp%maxGlobalCoordPerDim(i)
         enddo
       endif
 
       ! get the periodicity
       if (present(periodic)) then
-        aSize = min(interngridRank, size(periodic))
-        order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,aSize)
+        aSize = min(igridRank, size(periodic))
+        order(:) = igridOrder(:,igrid%ptr%coordOrder%order,aSize)
         do i=1,aSize
-          periodic(order(i)) = interngridp%periodic(i)
+          periodic(order(i)) = igridp%periodic(i)
         enddo
       endif
 
@@ -7499,7 +7499,7 @@
             aSize = max(aSize, size(globalStartPerDEPerDim,2))
         if (present(cellCountPerDEPerDim)) &
             aSize = max(aSize, size(cellCountPerDEPerDim,2))
-        aSize = min(interngridRank, aSize)
+        aSize = min(igridRank, aSize)
 
         ! get interndg identifiers from relative locations
         if (.not.(present(horzRelLoc))) then
@@ -7507,12 +7507,12 @@
                                 "invalid horizontal relloc", &
                                  ESMF_CONTEXT, rc)) return
         endif
-        call ESMF_IGridGetPhysGridId(interngrid%ptr, horzRelLoc, horzPhysIdUse, &
+        call ESMF_IGridGetPhysGridId(igrid%ptr, horzRelLoc, horzPhysIdUse, &
                                     localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        horzDistIdUse = interngrid%ptr%internDGIndex(horzPhysIdUse)
+        horzDistIdUse = igrid%ptr%internDGIndex(horzPhysIdUse)
 
         if (aSize.ge.3) then
           if (.not.(present(vertRelLoc))) then
@@ -7520,21 +7520,21 @@
                                  "no valid vertical InternDG identifier", &
                                  ESMF_CONTEXT, rc)) return
           endif
-          call ESMF_IGridGetPhysGridId(interngrid%ptr, vertRelLoc, vertPhysIdUse, &
+          call ESMF_IGridGetPhysGridId(igrid%ptr, vertRelLoc, vertPhysIdUse, &
                                       localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-          vertDistIdUse = interngrid%ptr%internDGIndex(vertPhysIdUse)
+          vertDistIdUse = igrid%ptr%internDGIndex(vertPhysIdUse)
         endif
 
         ! Get interndg info with global coordinate counts
         if (present(globalCellCountPerDim)) then
-          aSize = min(interngridRank, size(globalCellCountPerDim))
+          aSize = min(igridRank, size(globalCellCountPerDim))
           allocate(gCCPDUse(aSize), stat=localrc)
           if (ESMF_LogMsgFoundAllocError(localrc, "gCCPDUse", &
                                          ESMF_CONTEXT, rc)) return
-          call ESMF_InternDGGet(interngridp%interndgs(horzDistIdUse), &
+          call ESMF_InternDGGet(igridp%interndgs(horzDistIdUse), &
                                 globalCellCountPerDim=gCCPDUse(1:2), &
                                 rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -7542,14 +7542,14 @@
                                     ESMF_CONTEXT, rc)) return
 
           if (aSize.ge.3) then
-            call ESMF_InternDGGet(interngridp%interndgs(vertDistIdUse), &
+            call ESMF_InternDGGet(igridp%interndgs(vertDistIdUse), &
                                   globalCellCountPerDim=gCCPDUse(3:3), &
                                   rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
           endif
-          order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,aSize)
+          order(:) = igridOrder(:,igrid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             globalCellCountPerDim(order(i)) = gCCPDUse(i)
           enddo
@@ -7559,11 +7559,11 @@
         endif
 
         if (present(globalStartPerDEPerDim)) then
-          aSize = min(interngridRank, size(globalStartPerDEPerDim,2))
+          aSize = min(igridRank, size(globalStartPerDEPerDim,2))
           allocate(gSPDEPDUse(size(globalStartPerDEPerDim,1), aSize), stat=localrc)
           if (ESMF_LogMsgFoundAllocError(localrc, "gSPDEPUse", &
                                          ESMF_CONTEXT, rc)) return
-          call ESMF_InternDGGet(interngridp%interndgs(horzDistIdUse), &
+          call ESMF_InternDGGet(igridp%interndgs(horzDistIdUse), &
                                 globalStartPerDEPerDim=gSPDEPDUse(:,1:2), &
                                 rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -7571,14 +7571,14 @@
                                     ESMF_CONTEXT, rc)) return
 
           if (aSize.ge.3) then
-            call ESMF_InternDGGet(interngridp%interndgs(vertDistIdUse), &
+            call ESMF_InternDGGet(igridp%interndgs(vertDistIdUse), &
                                   globalStartPerDEPerDim=gSPDEPDUse(:,3:3), &
                                   rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
           endif
-          order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,aSize)
+          order(:) = igridOrder(:,igrid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             globalStartPerDEPerDim(:,order(i)) = gSPDEPDUse(:,i)
           enddo
@@ -7588,11 +7588,11 @@
         endif
 
         if (present(maxLocalCellCountPerDim)) then
-          aSize = min(interngridRank, size(maxLocalCellCountPerDim))
+          aSize = min(igridRank, size(maxLocalCellCountPerDim))
           allocate(mLCCPDUse(aSize), stat=localrc)
           if (ESMF_LogMsgFoundAllocError(localrc, "mLCCPDUse", &
                                          ESMF_CONTEXT, rc)) return
-          call ESMF_InternDGGet(interngridp%interndgs(horzDistIdUse), &
+          call ESMF_InternDGGet(igridp%interndgs(horzDistIdUse), &
                                 maxLocalCellCountPerDim=mLCCPDUse(1:2), &
                                 rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -7600,14 +7600,14 @@
                                     ESMF_CONTEXT, rc)) return
 
           if (aSize.ge.3) then
-            call ESMF_InternDGGet(interngridp%interndgs(vertDistIdUse), &
+            call ESMF_InternDGGet(igridp%interndgs(vertDistIdUse), &
                                   maxLocalCellCountPerDim=mLCCPDUse(3:3), &
                                   rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
           endif
-          order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,aSize)
+          order(:) = igridOrder(:,igrid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             maxLocalCellCountPerDim(order(i)) = mLCCPDUse(i)
           enddo
@@ -7617,24 +7617,24 @@
         endif
 
         if (present(cellCountPerDEPerDim)) then
-          aSize = min(interngridRank, size(cellCountPerDEPerDim,2))
+          aSize = min(igridRank, size(cellCountPerDEPerDim,2))
           allocate(cCPDEPDUse(size(cellCountPerDEPerDim,1), aSize), stat=localrc)
           if (ESMF_LogMsgFoundAllocError(localrc, "cCPDEPDUse", &
                                          ESMF_CONTEXT, rc)) return
-          call ESMF_InternDGGetAllCounts(interngridp%interndgs(horzDistIdUse)%ptr, &
+          call ESMF_InternDGGetAllCounts(igridp%interndgs(horzDistIdUse)%ptr, &
                                          cCPDEPDUse(:,1:2), rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
           if (aSize.ge.3) then
-            call ESMF_InternDGGetAllCounts(interngridp%interndgs(vertDistIdUse)%ptr, &
+            call ESMF_InternDGGetAllCounts(igridp%interndgs(vertDistIdUse)%ptr, &
                                            cCPDEPDUse(:,3:3), rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
           endif
-          order(:) = interngridOrder(:,interngrid%ptr%coordOrder%order,aSize)
+          order(:) = igridOrder(:,igrid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             cellCountPerDEPerDim(:,order(i)) = cCPDEPDUse(:,i)
           enddo
@@ -7645,14 +7645,14 @@
       endif
 
       if (present(distDimCount)) then
-        distDimCount = interngridRank
-        ! arbitrarily distributed interngrids are a special case
-        if (interngridp%interngridStorage.eq.ESMF_INTERNGRID_STORAGE_ARBITRARY) &
-            distDimCount = interngridRank - 1
+        distDimCount = igridRank
+        ! arbitrarily distributed igrids are a special case
+        if (igridp%igridStorage.eq.ESMF_IGRID_STORAGE_ARBITRARY) &
+            distDimCount = igridRank - 1
       endif
 
       if (present(delayout)) then
-        call ESMF_InternDGGet(interngridp%interndgs(1), delayout=delayout, rc=localrc)
+        call ESMF_InternDGGet(igridp%interndgs(1), delayout=delayout, rc=localrc)
       endif
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -7663,17 +7663,17 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRIGridSet"
 !BOPI
-! !IROUTINE: ESMF_LRIGridSet - Sets a variety of information about the interngrid
+! !IROUTINE: ESMF_LRIGridSet - Sets a variety of information about the igrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridSet(interngrid, horzIGridType, vertIGridType, &
+      subroutine ESMF_LRIGridSet(igrid, horzIGridType, vertIGridType, &
                                 horzStagger, vertStagger, &
                                 horzCoordSystem, vertCoordSystem, &
                                 coordOrder, minGlobalCoordPerDim, &
                                 maxGlobalCoordPerDim, periodic, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass) :: interngrid
+      type(ESMF_IGridClass) :: igrid
       type(ESMF_IGridType),     intent(in), optional :: horzIGridType
       type(ESMF_IGridVertType), intent(in), optional :: vertIGridType
       type(ESMF_IGridHorzStagger), intent(in), optional :: horzStagger
@@ -7694,24 +7694,24 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Pointer to a {\tt ESMF\_IGrid} to be modified.
 !     \item[{[horzIGridType]}]
-!          Integer specifier to denote horizontal interngrid type.
+!          Integer specifier to denote horizontal igrid type.
 !     \item[{[vertIGridType]}]
-!          Integer specifier to denote vertical interngrid type.
+!          Integer specifier to denote vertical igrid type.
 !     \item[{[horzStagger]}]
-!          Integer specifier to denote horizontal interngrid stagger.
+!          Integer specifier to denote horizontal igrid stagger.
 !     \item[{[vertStagger]}]
-!          Integer specifier to denote vertical interngrid stagger.
+!          Integer specifier to denote vertical igrid stagger.
 !     \item[{[horzCoordSystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the horizontal interngrid.
+!          the horizontal igrid.
 !     \item[{[vertCoordSystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the vertical interngrid.
+!          the vertical igrid.
 !     \item[{[coordOrder]}]
 !          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
 !          ordering for the IGrid and all related Fields (i.e. KIJ).
@@ -7736,33 +7736,33 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
 
-      ! if present, set information filling in interngrid derived type
-      if (present(horzIGridType)) interngrid%horzIGridType = horzIGridType
-      if (present(vertIGridType)) interngrid%vertIGridType = vertIGridType
-      if (present(horzStagger)) interngrid%horzStagger = horzStagger
-      if (present(vertStagger)) interngrid%vertStagger = vertStagger
-      if (present(horzCoordSystem)) interngrid%horzCoordSystem = horzCoordSystem
-      if (present(vertCoordSystem)) interngrid%vertCoordSystem = vertCoordSystem
-      if (present(coordOrder)) interngrid%coordOrder = coordOrder
+      ! if present, set information filling in igrid derived type
+      if (present(horzIGridType)) igrid%horzIGridType = horzIGridType
+      if (present(vertIGridType)) igrid%vertIGridType = vertIGridType
+      if (present(horzStagger)) igrid%horzStagger = horzStagger
+      if (present(vertStagger)) igrid%vertStagger = vertStagger
+      if (present(horzCoordSystem)) igrid%horzCoordSystem = horzCoordSystem
+      if (present(vertCoordSystem)) igrid%vertCoordSystem = vertCoordSystem
+      if (present(coordOrder)) igrid%coordOrder = coordOrder
       if (present(periodic)) then
-        do i=1,ESMF_MAXINTERNGRIDDIM
+        do i=1,ESMF_MAXIGRIDDIM
           if (i > size(periodic)) exit
-          interngrid%periodic(i) = periodic(i)
+          igrid%periodic(i) = periodic(i)
         enddo
       endif
 
       if (present(minGlobalCoordPerDim)) then
-   !      if (size(minGlobalCoordPerDim) .gt. ESMF_MAXINTERNGRIDDIM) exit  ! TODO
+   !      if (size(minGlobalCoordPerDim) .gt. ESMF_MAXIGRIDDIM) exit  ! TODO
         do i=1,size(minGlobalCoordPerDim)
-          interngrid%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
+          igrid%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
         enddo
       endif
       if (present(maxGlobalCoordPerDim)) then
-   !      if (size(maxGlobalCoordPerDim) .gt. ESMF_MAXINTERNGRIDDIM) exit  ! TODO
+   !      if (size(maxGlobalCoordPerDim) .gt. ESMF_MAXIGRIDDIM) exit  ! TODO
         do i=1,size(maxGlobalCoordPerDim)
-          interngrid%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
+          igrid%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
         enddo
       endif
 
@@ -7777,10 +7777,10 @@
 ! !IROUTINE: ESMF_LRIGridGetCellMask - Retrieves cell identifier mask for a IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridGetCellMask(interngrid, maskArray, relloc, rc)
+      subroutine ESMF_LRIGridGetCellMask(igrid, maskArray, relloc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_InternArray), intent(out) :: maskArray !BOB changed to out from inout
       type(ESMF_RelLoc), intent(in) :: relloc
       integer, intent(out), optional :: rc
@@ -7794,14 +7794,14 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Pointer to a {\tt ESMF\_IGrid} to be modified.
 !     \item[maskArray]
 !          {\tt ESMF\_Array} to contain the internally-used cell array denoting
 !          whether cells are in the computational regime, a ghost region, or a
 !          halo region.
 !     \item[relloc]
-!          Relative location in interngrid cell for this PhysGrid.
+!          Relative location in igrid cell for this PhysGrid.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -7817,10 +7817,10 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       ! some basic error checking    TODO: more
-      if (.not.associated(interngrid%ptr)) then
+      if (.not.associated(igrid%ptr)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Invalid IGrid object", &
                                  ESMF_CONTEXT, rc)) return
@@ -7830,7 +7830,7 @@
       physIdUse = -1
 
       if (relloc.ne.ESMF_CELL_UNDEFINED) then
-        call ESMF_IGridGetPhysGridId(interngrid%ptr, relloc, physIdUse, localrc)
+        call ESMF_IGridGetPhysGridId(igrid%ptr, relloc, physIdUse, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -7846,7 +7846,7 @@
       endif
 
       ! call PhysGrid with the valid Id
-      call ESMF_PhysGridGetMask(interngrid%ptr%physIGrids(physIdUse), maskArray, id=1, &
+      call ESMF_PhysGridGetMask(igrid%ptr%physgrids(physIdUse), maskArray, id=1, &
                                 rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -7864,16 +7864,16 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_LRIGridSetCellMask()
-      subroutine ESMF_LRIGridSetCellMaskBlock(interngrid, physIGridId, dimCount, counts, &
-                                             interngridBoundWidth, relloc, cellType1, &
+      subroutine ESMF_LRIGridSetCellMaskBlock(igrid, physIGridId, dimCount, counts, &
+                                             igridBoundWidth, relloc, cellType1, &
                                              cellType2, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass) :: interngrid
+      type(ESMF_IGridClass) :: igrid
       integer, intent(in) :: physIGridId
       integer, intent(in) :: dimCount
       integer, dimension(dimCount), intent(in) :: counts
-      integer, intent(in) :: interngridBoundWidth
+      integer, intent(in) :: igridBoundWidth
       type(ESMF_RelLoc), intent(in) :: relloc
       integer, dimension(:), intent(in) :: cellType1
       integer, dimension(:), intent(in), optional :: cellType2
@@ -7888,19 +7888,19 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Pointer to a {\tt ESMF\_IGrid} to be modified.
 !     \item[physIGridId]
 !          Identifier of the {\tt ESMF\_PhysGrid} to be modified.
 !     \item[dimCount]
-!          Number of interngrid dimensions.
+!          Number of igrid dimensions.
 !     \item[counts]
-!          Array of number of interngrid increments in each dimension.
-!     \item[interngridBoundWidth]
-!          Width, in cells, of the ficticious boundary around the interngrid for
+!          Array of number of igrid increments in each dimension.
+!     \item[igridBoundWidth]
+!          Width, in cells, of the ficticious boundary around the igrid for
 !          halo and ghost regions.
 !     \item[relloc]
-!          Relative location in interngrid cell for which this PhysGrid.
+!          Relative location in igrid cell for which this PhysGrid.
 !     \item[cellType1]
 !          Array of cell type identifiers in the first dimension.
 !     \item[{[cellType2]}]
@@ -7923,19 +7923,19 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
 
       ! TODO: different subroutines for different dimCount?  or case?
 
       ! create ESMF_Array
       kind = ESMF_TYPEKIND_I4
       arrayTemp = ESMF_InternArrayCreate(dimCount, kind, counts, &
-                                   haloWidth=interngridBoundWidth, rc=localrc)
+                                   haloWidth=igridBoundWidth, rc=localrc)
       call ESMF_InternArrayGetData(arrayTemp, temp, ESMF_DATA_REF, localrc)
 
       ! TODO: should this be different for different relative locations?
-      iMax1 = counts(1) - interngridBoundWidth + 1
-      jMax1 = counts(2) - interngridBoundWidth + 1
+      iMax1 = counts(1) - igridBoundWidth + 1
+      jMax1 = counts(2) - igridBoundWidth + 1
       do i = 1,counts(1)
         iType = cellType1(i)
         do j = 1,counts(2)
@@ -7946,7 +7946,7 @@
           if (iType.eq.1 .or. jType.eq.1) then
             temp(i,j) = 1
           ! identify halo cells
-          elseif (i.le.interngridBoundWidth .OR. j.le.interngridBoundWidth .OR. &
+          elseif (i.le.igridBoundWidth .OR. j.le.igridBoundWidth .OR. &
                   i.ge.iMax1          .OR. j.ge.jMax1) then
             temp(i,j) = 2
           endif
@@ -7955,7 +7955,7 @@
 
       ! now set the mask array in PhysGrid
       name = 'cell type total'
-      call ESMF_PhysGridSetMask(interngrid%physIGrids(physIGridId), &
+      call ESMF_PhysGridSetMask(igrid%physgrids(physIGridId), &
                                 maskArray=arrayTemp, &
                                 maskType=ESMF_GRID_MASKTYPE_REGION_ID, &
                                 name=name, rc=localrc)
@@ -7975,11 +7975,11 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_LRIGridSetCellMask()
-      subroutine ESMF_LRIGridSetCellMaskArb(interngrid, physIGridId, dimCount, &
+      subroutine ESMF_LRIGridSetCellMaskArb(igrid, physIGridId, dimCount, &
                                            myCount, relloc, cellType, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass) :: interngrid
+      type(ESMF_IGridClass) :: igrid
       integer, intent(in) :: physIGridId
       integer, intent(in) :: dimCount
       integer, intent(in) :: myCount
@@ -7996,16 +7996,16 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Pointer to a {\tt ESMF\_IGrid} to be modified.
 !     \item[physIGridId]
 !          Identifier of the {\tt ESMF\_PhysGrid} to be modified.
 !     \item[dimCount]
-!          Number of interngrid dimensions.
+!          Number of igrid dimensions.
 !     \item[myCount]
-!          Number of interngrid increments on this DE.
+!          Number of igrid increments on this DE.
 !     \item[relloc]
-!          Relative location in interngrid cell for which this PhysGrid.
+!          Relative location in igrid cell for which this PhysGrid.
 !     \item[cellType]
 !          Array of cell type identifiers corresponding to the list of
 !          arbitrary points.
@@ -8028,7 +8028,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
 
       ! create ESMF_Array
       kind = ESMF_TYPEKIND_I4
@@ -8044,7 +8044,7 @@
 
       ! now set the mask array in PhysGrid
       name = 'cell type total'
-      call ESMF_PhysGridSetMask(interngrid%physIGrids(physIGridId), &
+      call ESMF_PhysGridSetMask(igrid%physgrids(physIGridId), &
                                 maskArray=arrayTemp, &
                                 maskType=ESMF_GRID_MASKTYPE_REGION_ID, &
                                 name=name, rc=localrc)
@@ -8063,12 +8063,12 @@
 ! !IROUTINE: ESMF_LRIGridSetBoundBoxesBlock - Set the array of bounding boxes per DE
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridSetBoundBoxesBlock(interngrid, dimCount, coord1, &
+      subroutine ESMF_LRIGridSetBoundBoxesBlock(igrid, dimCount, coord1, &
                                                coord2, countsPerDEDim1, &
                                                countsPerDEDim2, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass), intent(inout) :: interngrid
+      type(ESMF_IGridClass), intent(inout) :: igrid
       integer, intent(in) :: dimCount
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord1
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord2
@@ -8082,18 +8082,18 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Pointer to a {\tt ESMF\_IGrid} to be modified.
 !     \item[dimCount]
-!          Number of interngrid dimensions (directions).
+!          Number of igrid dimensions (directions).
 !     \item[coord1]
 !          Array of physical coordinates in the first direction.
 !     \item[coord2]
 !          Array of physical coordinates in the second direction.
 !     \item[countsPerDEDim1]
-!          Array of number of interngrid increments per DE in the x-direction.
+!          Array of number of igrid increments per DE in the x-direction.
 !     \item[countsPerDEDim2]
-!          Array of number of interngrid increments per DE in the y-direction.
+!          Array of number of igrid increments per DE in the y-direction.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8111,7 +8111,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
 
 
       huge     = 999999.     !TODO: could be an ESMF constant -- OK for now
@@ -8191,7 +8191,7 @@
         i1    = i1 + countsPerDEDim2(j)
       enddo
 
-      interngrid%boundingBoxes = ESMF_LocalArrayCreate(boxes, ESMF_DATA_COPY, localrc)
+      igrid%boundingBoxes = ESMF_LocalArrayCreate(boxes, ESMF_DATA_COPY, localrc)
 
       ! Clean up
       deallocate(boxes, stat=localrc)
@@ -8209,11 +8209,11 @@
 ! !IROUTINE: ESMF_LRIGridSetBoundBoxesArb - Set the array of bounding boxes per DE
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridSetBoundBoxesArb(interngrid, dimCount, coord1, &
+      subroutine ESMF_LRIGridSetBoundBoxesArb(igrid, dimCount, coord1, &
                                              coord2, myCount, myIndices, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass), target :: interngrid
+      type(ESMF_IGridClass), target :: igrid
       integer, intent(in) :: dimCount
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord1
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord2
@@ -8227,18 +8227,18 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Pointer to a {\tt ESMF\_IGrid} to be modified.
 !     \item[dimCount]
-!          Number of interngrid dimensions (directions).
+!          Number of igrid dimensions (directions).
 !     \item[coord1]
 !          Array of physical coordinates in the first direction.
 !     \item[coord2]
 !          Array of physical coordinates in the second direction.
 !     \item[countsPerDEDim1]
-!          Array of number of interngrid increments per DE in the x-direction.
+!          Array of number of igrid increments per DE in the x-direction.
 !     \item[countsPerDEDim2]
-!          Array of number of interngrid increments per DE in the y-direction.
+!          Array of number of igrid increments per DE in the y-direction.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8251,13 +8251,13 @@
       real(ESMF_KIND_R8) :: start, stop
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
       type(ESMF_DELayout) :: delayout
-      type(ESMF_IGrid) :: interngridp
+      type(ESMF_IGrid) :: igridp
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
 
       ! TODO: break out by rank?
       ! Assume the following starage for bounding boxes:
@@ -8273,11 +8273,11 @@
       !                 6. (Xmax,Ymin,Zmax)
       !                 7. (Xmax,Ymax,Zmax)
       !                 8. (Xmin,Ymax,Zmax)
-      ! create temporary interngrid to pass into subroutines
-      interngridp%ptr => interngrid
-      call ESMF_IGridSetInitCreated(interngridp, rc)
+      ! create temporary igrid to pass into subroutines
+      igridp%ptr => igrid
+      call ESMF_IGridSetInitCreated(igridp, rc)
 
-      call ESMF_LRIGridGet(interngridp, delayout=delayout, rc=localrc)
+      call ESMF_LRIGridGet(igridp, delayout=delayout, rc=localrc)
       call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=localrc)
       npts = 2**dimCount
       allocate(boxes(nDEs,npts,dimCount), stat=localrc)
@@ -8300,7 +8300,7 @@
       boxes(:,3,2) = stop
       boxes(:,4,2) = start
 
-      interngrid%boundingBoxes = ESMF_LocalArrayCreate(boxes, ESMF_DATA_COPY, localrc)
+      igrid%boundingBoxes = ESMF_LocalArrayCreate(boxes, ESMF_DATA_COPY, localrc)
 
       ! Clean up
       deallocate(boxes, stat=localrc)
@@ -8318,10 +8318,10 @@
 ! !IROUTINE: ESMF_LRIGridValidate - Check internal consistency of a IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRIGridValidate(interngrid, opt, rc)
+      subroutine ESMF_LRIGridValidate(igrid, opt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len=*), intent(in), optional :: opt
       integer, intent(out), optional :: rc
 !
@@ -8330,7 +8330,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Class to be queried.
 !     \item[{[opt]}]
 !          Validation options.
@@ -8347,16 +8347,16 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      if (.not. associated(interngrid%ptr)) then
+      if (.not. associated(igrid%ptr)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Invalid IGrid object", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      gp => interngrid%ptr
-      if (gp%interngridStatus /= ESMF_INTERNGRID_STATUS_READY) then
+      gp => igrid%ptr
+      if (gp%igridStatus /= ESMF_IGRID_STATUS_READY) then
         return
       endif
 
@@ -8460,7 +8460,7 @@
       real(ESMF_KIND_R8), dimension(:), pointer :: localMaxPerDim
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
       type(ESMF_AxisIndex) :: thisAI(2)
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: interngridAI, localAI
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: igridAI, localAI
       type(ESMF_LocalArray) :: array
       type(ESMF_RelLoc) :: srcRellocUse, dstRellocUse
       type(ESMF_DELayout) :: srcDELayout
@@ -8495,7 +8495,7 @@
       ! collective communication calls if it has source data.
       if (hasDstData) then
 
-        ! get set of bounding boxes from the source interngrid
+        ! get set of bounding boxes from the source igrid
         call ESMF_IGridGetBoundingBoxes(srcIGrid%ptr, array, localrc)
 
         ! get rank and counts from the bounding boxes array
@@ -8506,7 +8506,7 @@
         call ESMF_LocalArrayGetData(array, boxes, rc=localrc)
 
         ! allocate arrays now
-        allocate( interngridAI(nDEs,rank), &
+        allocate( igridAI(nDEs,rank), &
                  localAI(nDEs,rank), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "AI arrays", &
                                        ESMF_CONTEXT, rc)) return
@@ -8517,14 +8517,14 @@
                                        maxLocalCoordPerDim=localMaxPerDim, &
                                        reorder=.false., rc=localrc)
 
-        ! get set of axis indices from source interngrid
-        call ESMF_LRIGridGetAllAxisIndex(srcIGrid, interngridAI, &
+        ! get set of axis indices from source igrid
+        call ESMF_LRIGridGetAllAxisIndex(srcIGrid, igridAI, &
                                         horzRelLoc=srcRellocUse, total=total, &
                                         rc=localrc)
 
         ! translate the AIs from global to local
         call ESMF_LRIGridGlobalToDELocalAI(srcIGrid, horzRelLoc=srcRellocUse, &
-                                          globalAI2D=interngridAI, &
+                                          globalAI2D=igridAI, &
                                           localAI2D=localAI, rc=localrc)
 
         ! loop through bounding boxes, looking for overlap with our "box"
@@ -8607,7 +8607,7 @@
           endif
           call ESMF_VMBroadcast(parentVM, point, 2, thisPET, rc=localrc)
           if (hasSrcData) then
-            call ESMF_PhysGridSearchMyDERowCol(srcIGrid%ptr%physIGrids(physId), &
+            call ESMF_PhysGridSearchMyDERowCol(srcIGrid%ptr%physgrids(physId), &
                                                localIndex, point, &
                                                option='min', total=total, rc=rc)
           endif
@@ -8619,7 +8619,7 @@
           endif
           call ESMF_VMBroadcast(parentVM, point, 2, thisPET, rc=localrc)
           if (hasSrcData) then
-            call ESMF_PhysGridSearchMyDERowCol(srcIGrid%ptr%physIGrids(physId), &
+            call ESMF_PhysGridSearchMyDERowCol(srcIGrid%ptr%physgrids(physId), &
                                                localIndex, point, &
                                                option='max', total=total, rc=rc)
           endif
@@ -8751,7 +8751,7 @@
                                      ESMF_CONTEXT, rc)) return
 
       if (hasDstData) then
-        deallocate( interngridAI, &
+        deallocate( igridAI, &
                    localAI, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "deallocating AI arrays", &
                                        ESMF_CONTEXT, rc)) return
@@ -8850,7 +8850,7 @@
       if (present(srcRelloc)) srcRellocUse = srcRelloc
       if (present(dstRelloc)) dstRellocUse = dstRelloc
 
-      ! get set of bounding boxes from the destination interngrid
+      ! get set of bounding boxes from the destination igrid
       call ESMF_IGridGetBoundingBoxes(dstIGrid%ptr, array, localrc)
 
       ! get rank and counts from the bounding boxes array
@@ -8915,7 +8915,7 @@
       ! whole domain from each overlapping DE
       case(0)
 
-        ! loop over the DEs in the destination interngrid
+        ! loop over the DEs in the destination igrid
         do j = 1,nDEs
           if ((localMinPerDim(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .or. &
               (localMaxPerDim(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .or. &
@@ -8952,14 +8952,14 @@
           ! that point in my source IGrid
           point(1) = min(boxes(j,1,1),boxes(j,4,1))
           point(2) = min(boxes(j,1,2),boxes(j,2,2))
-          call ESMF_PhysGridSearchMyDERowCol(srcIGrid%ptr%physIGrids(physId), &
+          call ESMF_PhysGridSearchMyDERowCol(srcIGrid%ptr%physgrids(physId), &
                                              localIndex, point, &
                                              option='min', total=total, rc=rc)
           globalMinIndex((j-1)*2 + 1) = localIndex(1)
           globalMinIndex((j-1)*2 + 2) = localIndex(2)
           point(1) = max(boxes(j,2,1),boxes(j,3,1))
           point(2) = max(boxes(j,3,2),boxes(j,4,2))
-          call ESMF_PhysGridSearchMyDERowCol(srcIGrid%ptr%physIGrids(physId), &
+          call ESMF_PhysGridSearchMyDERowCol(srcIGrid%ptr%physgrids(physId), &
                                              localIndex, point, &
                                              option='max', total=total, rc=rc)
           globalMaxIndex((j-1)*2 + 1) = localIndex(1)
@@ -9147,7 +9147,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRIGridSearchPoint"
 !!BOPI
-!! !IROUTINE: ESMF_LRIGridSearchPoint - Search the interngrid for a cell containing point
+!! !IROUTINE: ESMF_LRIGridSearchPoint - Search the igrid for a cell containing point
 !
 ! !INTERFACE:
 !      subroutine ESMF_LRIGridSearchPoint(dstAdd, x, y, DEId, searchIGrid, &
@@ -9155,28 +9155,28 @@
 !!
 !! !ARGUMENTS:
 !
-!      integer, dimension(?) :: dstAdd       ! location in interngrid of interngrid cell
+!      integer, dimension(?) :: dstAdd       ! location in igrid of igrid cell
 !                                            ! containing search point
 !      real (kind=?), intent(in) :: x        ! x coordinates of search point 
 !      real (kind=?), intent(in) :: y        ! y coordinates of search point 
 !      integer, intent(in) :: DEId           ! DE which owns the search point
 !      type(ESMF_IGrid), intent(in) :: searchIGrid
-!                                            ! interngrid to search for location of
+!                                            ! igrid to search for location of
 !                                            ! point
 !      integer, intent(in), optional :: physIGridId
-!                                            ! id of the subinterngrid to search
-!                                            ! (if more than one subinterngrid)
+!                                            ! id of the subigrid to search
+!                                            ! (if more than one subigrid)
 !      integer, intent(out), optional :: rc  ! return code
 !
 !!
 !! !DESCRIPTION:
-!!     This routine searches for the location in the interngrid of a interngrid cell 
+!!     This routine searches for the location in the igrid of a igrid cell 
 !!     containing the point given by the input x,y coordinates.
 !!
 !!     The arguments are:
 !!     \begin{description}
 !!     \item[dstAdd]
-!!          Address of interngrid cell containing the search point.
+!!          Address of igrid cell containing the search point.
 !!     \item[x]
 !!          X coordinates of search point.
 !!     \item[y]
@@ -9187,7 +9187,7 @@
 !!          ESMF {\tt ESMF\_IGrid} to search for location.
 !!     \item[{[physIGridId]}]
 !!          If more than one {\tt ESMF\_PhysGrid} is contained in 
-!!          {\tt ESMF\_IGrid}, choose which interngrid to search (default is 1st
+!!          {\tt ESMF\_IGrid}, choose which igrid to search (default is 1st
 !!          {\tt ESMF\_PhysGrid}?).
 !!     \item[{[rc]}]
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -9201,10 +9201,10 @@
 !!    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 !
 !!      ! check input variables
-!!      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,interngrid,rc)
+!!      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 !!
 !!     extract appropriate PhysGrid and InternDG to search
-!!     extract various other interngrid properties
+!!     extract various other igrid properties
 !!
 !      if (.not. present(physIGridId)) physIGridId = 1 (or whatever default)
 !      ! combine these queries?  format of query functions?
@@ -9213,28 +9213,28 @@
 !      call ESMF_LRIGridGet(searchIGrid, horzIGridType = searchIGridType)
 !!
 !!     Call appropriate search routine based on coordinate system and
-!!     interngrid type.
+!!     igrid type.
 !!
 ! 
 !      select case (srchIGridType)
-!      case(ESMF_INTERNGRID_TYPE_LATLON,       ESMF_INTERNGRID_TYPE_LATLON_MERCATOR, &
-!           ESMF_INTERNGRID_TYPE_LATLON_GAUSS, ESMF_INTERNGRID_TYPE_REDUCED)
+!      case(ESMF_IGRID_TYPE_LATLON,       ESMF_IGRID_TYPE_LATLON_MERCATOR, &
+!           ESMF_IGRID_TYPE_LATLON_GAUSS, ESMF_IGRID_TYPE_REDUCED)
 !         !*** simple search adequate for these cases
 !         call ESMF_PhysGridSearchBboxSpherical(dstAdd, x, y, DEId, physIGrid, &
 !                                               internDG, localrc)
 !
-!      case(ESMF_INTERNGRID_TYPE_DIPOLE,   ESMF_INTERNGRID_TYPE_TRIPOLE, &
-!           ESMF_INTERNGRID_TYPE_GEODESIC, ESMF_INTERNGRID_TYPE_CUBEDSPHERE)
+!      case(ESMF_IGRID_TYPE_DIPOLE,   ESMF_IGRID_TYPE_TRIPOLE, &
+!           ESMF_IGRID_TYPE_GEODESIC, ESMF_IGRID_TYPE_CUBEDSPHERE)
 !         !*** must use more general algorithm for these cases
 !         call ESMF_PhysGridSearchGeneralSpherical(dstAdd, x, y, DEId, physIGrid, &
 !                                                  internDG, localrc)
 !
-!      case(ESMF_INTERNGRIDTYPE_XY, ESMF_INTERNGRIDTYPE_XY_UNI)
+!      case(ESMF_IGRIDTYPE_XY, ESMF_IGRIDTYPE_XY_UNI)
 !         call ESMF_PhysGridSearchBboxCartesian(dstAdd, x, y, DEId, physIGrid, &
 !                                               internDG, localrc)
 !
 !      case default
-!         print *,'IGridSearchPoint: search of this interngrid type not supported'
+!         print *,'IGridSearchPoint: search of this igrid type not supported'
 !         localrc = ESMF_Failure
 !      end select
 !
@@ -9285,13 +9285,13 @@
 #define ESMF_METHOD "ESMF_LRIGridSerialize"
 
 !BOPI
-! !IROUTINE: ESMF_LRIGridSerialize - Serialize lr interngrid specific info into a byte stream
+! !IROUTINE: ESMF_LRIGridSerialize - Serialize lr igrid specific info into a byte stream
 !
 ! !INTERFACE:
-      subroutine ESMF_LRIGridSerialize(interngrid, buffer, length, offset, rc)
+      subroutine ESMF_LRIGridSerialize(igrid, buffer, length, offset, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass), pointer :: interngrid
+      type(ESMF_IGridClass), pointer :: igrid
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
@@ -9305,7 +9305,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
+!     \item [igrid]
 !           {\tt ESMF\_IGrid} object to be serialized.
 !     \item [buffer]
 !           Data buffer which will hold the serialized information.
@@ -9324,32 +9324,32 @@
 !EOPI
       integer :: localrc                         ! Error status
       integer :: i
-      type(ESMF_LogRectIGrid), pointer :: lrinterngrid  ! lrinterngrid class
+      type(ESMF_LogRectIGrid), pointer :: lrigrid  ! lrigrid class
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_IGridClassGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridClGetInit,igrid,rc)
 
       ! shortcut to internals
-      lrinterngrid => interngrid%interngridSpecific%logRectIGrid
+      lrigrid => igrid%igridSpecific%logRectIGrid
 
-      ! serialize the interngrid derived type
-      call c_ESMC_LRIGridSerialize(interngrid%dimCount, &
-                                  lrinterngrid%countPerDim(1), &
-                                  lrinterngrid%deltaPerDim(1), &
+      ! serialize the igrid derived type
+      call c_ESMC_LRIGridSerialize(igrid%dimCount, &
+                                  lrigrid%countPerDim(1), &
+                                  lrigrid%deltaPerDim(1), &
                                   buffer(1), length, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! loop over the arrays of coords (only for non-uniform interngrids)
-      if (interngrid%horzIGridType.ne.ESMF_INTERNGRID_TYPE_XY_UNI .AND. &
-          interngrid%horzIGridType.ne.ESMF_INTERNGRID_TYPE_LATLON_UNI) then
-        do i = 1,interngrid%dimCount
-          call c_ESMC_LocalArraySerialize(lrinterngrid%coords(i), buffer(1), length, &
+      ! loop over the arrays of coords (only for non-uniform igrids)
+      if (igrid%horzIGridType.ne.ESMF_IGRID_TYPE_XY_UNI .AND. &
+          igrid%horzIGridType.ne.ESMF_IGRID_TYPE_LATLON_UNI) then
+        do i = 1,igrid%dimCount
+          call c_ESMC_LocalArraySerialize(lrigrid%coords(i), buffer(1), length, &
                                      offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -9369,10 +9369,10 @@
 ! !IROUTINE: ESMF_LRIGridDeserialize - Deserialize a byte stream into an LRIGrid
 !
 ! !INTERFACE:
-      subroutine ESMF_LRIGridDeserialize(interngrid, buffer, offset, rc)
+      subroutine ESMF_LRIGridDeserialize(igrid, buffer, offset, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridClass), pointer :: interngrid
+      type(ESMF_IGridClass), pointer :: igrid
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       integer, intent(out), optional :: rc
@@ -9399,39 +9399,39 @@
 !EOPI
       integer :: localrc, status             ! Error status, allocation status
       integer :: i
-      type(ESMF_LogRectIGrid), pointer :: lrinterngrid  ! lrinterngrid class
+      type(ESMF_LogRectIGrid), pointer :: lrigrid  ! lrigrid class
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! allocate logRectIGrid derived type
-      allocate(interngrid%interngridSpecific%logRectIGrid, stat=status)
+      allocate(igrid%igridSpecific%logRectIGrid, stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "logRectIGrid", &
                                      ESMF_CONTEXT, rc)) return
       
       ! shortcut to internals
-      lrinterngrid => interngrid%interngridSpecific%logRectIGrid
-      call ESMF_LRIGridConstructSpecificNew(lrinterngrid, localrc)
+      lrigrid => igrid%igridSpecific%logRectIGrid
+      call ESMF_LRIGridConstructSpecNew(lrigrid, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! serialize the interngrid derived type
-      call c_ESMC_LRIGridDeserialize(lrinterngrid%countPerDim(1), &
-                                    lrinterngrid%deltaPerDim(1), &
+      ! serialize the igrid derived type
+      call c_ESMC_LRIGridDeserialize(lrigrid%countPerDim(1), &
+                                    lrigrid%deltaPerDim(1), &
                                     buffer(1), offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! loop over the arrays of coords
-      if (interngrid%horzIGridType.ne.ESMF_INTERNGRID_TYPE_XY_UNI .AND. &
-          interngrid%horzIGridType.ne.ESMF_INTERNGRID_TYPE_LATLON_UNI) then
-        allocate(lrinterngrid%coords(interngrid%dimCount), stat=status)
+      if (igrid%horzIGridType.ne.ESMF_IGRID_TYPE_XY_UNI .AND. &
+          igrid%horzIGridType.ne.ESMF_IGRID_TYPE_LATLON_UNI) then
+        allocate(lrigrid%coords(igrid%dimCount), stat=status)
         if (ESMF_LogMsgFoundAllocError(status, "logRectIGrid", &
                                      ESMF_CONTEXT, rc)) return
-        do i = 1,interngrid%dimCount
-          call c_ESMC_LocalArrayDeserialize(lrinterngrid%coords(i), buffer(1), &
+        do i = 1,igrid%dimCount
+          call c_ESMC_LocalArrayDeserialize(lrigrid%coords(i), buffer(1), &
                                        offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -9441,11 +9441,11 @@
 
       ! call the appropriate create function -- is this necessary or is it all there?
 
-      ! Set interngrid as created 
+      ! Set igrid as created 
       ! (this may be done twice if this sub. is called from a general
-      !  interngrid create subroutine, but that should be ok, since
+      !  igrid create subroutine, but that should be ok, since
       !  it doesn't matter how often a var. is set to the same value.)
-      ESMF_INIT_SET_CREATED(interngrid)
+      ESMF_INIT_SET_CREATED(igrid)
 
       if  (present(rc)) rc = ESMF_SUCCESS
 

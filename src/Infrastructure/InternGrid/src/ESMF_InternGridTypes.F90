@@ -1,4 +1,4 @@
-! $Id: ESMF_InternGridTypes.F90,v 1.2 2007/06/23 04:25:45 cdeluca Exp $
+! $Id: ESMF_InternGridTypes.F90,v 1.3 2007/06/23 06:03:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -372,18 +372,18 @@
       ESMF_IGRID_STATUS_INVALID      =  ESMF_IGridStatus(6)
 
   ! Supported ESMF structure kinds:
-  !   ESMF_IGRID_STRUCTURE_UNKNOWN         ! unknown or undefined igrid
+  !   ESMF_IGRID_STRUCT_UNKNOWN         ! unknown or undefined igrid
   !   ESMF_IGRID_STRUCT_LOGRECT         ! logically rectangular igrid
   !   ESMF_IGRID_STRUCT_LOGRECT_BLK     ! logically rectangular blocked igrid
-  !   ESMF_IGRID_STRUCTURE_UNSTRUCT        ! unstructured igrid
-  !   ESMF_IGRID_STRUCTURE_USER            ! user-defined igrid
+  !   ESMF_IGRID_STRUCT_UNSTRUCT        ! unstructured igrid
+  !   ESMF_IGRID_STRUCT_USER            ! user-defined igrid
 
    type (ESMF_IGridStructure), parameter, public ::              &
-      ESMF_IGRID_STRUCTURE_UNKNOWN     =  ESMF_IGridStructure(0), &
+      ESMF_IGRID_STRUCT_UNKNOWN     =  ESMF_IGridStructure(0), &
       ESMF_IGRID_STRUCT_LOGRECT     =  ESMF_IGridStructure(1), &
       ESMF_IGRID_STRUCT_LOGRECT_BLK =  ESMF_IGridStructure(2), &
-      ESMF_IGRID_STRUCTURE_UNSTRUCT    =  ESMF_IGridStructure(3), &
-      ESMF_IGRID_STRUCTURE_USER        =  ESMF_IGridStructure(4)
+      ESMF_IGRID_STRUCT_UNSTRUCT    =  ESMF_IGridStructure(3), &
+      ESMF_IGRID_STRUCT_USER        =  ESMF_IGridStructure(4)
 
   ! Supported ESMF igrid kinds:
   !   ESMF_IGRID_TYPE_UNKNOWN           ! unknown or undefined igrid
@@ -566,7 +566,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_InternGridTypes.F90,v 1.2 2007/06/23 04:25:45 cdeluca Exp $'
+      '$Id: ESMF_InternGridTypes.F90,v 1.3 2007/06/23 06:03:25 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -676,7 +676,7 @@
 
       ! Initialize igrid contents
       igrid%igridStatus      = ESMF_IGRID_STATUS_READY
-      igrid%igridStructure   = ESMF_IGRID_STRUCTURE_UNKNOWN
+      igrid%igridStructure   = ESMF_IGRID_STRUCT_UNKNOWN
       igrid%horzIGridType    = ESMF_IGRID_TYPE_UNKNOWN
       igrid%vertIGridType    = ESMF_IGRID_VERT_TYPE_UNKNOWN
       igrid%horzStagger     = ESMF_IGRID_HORZ_STAGGER_UNKNOWN
