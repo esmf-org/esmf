@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.29 2007/06/22 23:21:45 cdeluca Exp $
+// $Id: ESMC_Comp.h,v 1.30 2007/06/23 04:00:55 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 
 enum ESMC_CompType { ESMF_COMPTYPE_IGRID=1, ESMF_COMPTYPE_CPL, 
                      ESMF_COMPTYPE_UNKNOWN };
-enum ESMC_InternGridCompType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE, 
+enum ESMC_IGridCompType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE, 
                       ESMF_RIVER, ESMF_IGRIDCOMPTYPE_UNKNOWN };
 
 extern const char *ESMC_SetInit;
@@ -124,7 +124,7 @@ extern const char *ESMC_SetReadRestart;
 
  // this is missing the config object, and a clock object.
  ESMC_Comp *ESMC_CompCreate(char *name, enum ESMC_CompType ctype,
-                            enum ESMC_InternGridCompType mtype, char *filepath, 
+                            enum ESMC_IGridCompType mtype, char *filepath, 
                             int *rc);
  int ESMC_CompDestroy(ESMC_Comp *comp);
 

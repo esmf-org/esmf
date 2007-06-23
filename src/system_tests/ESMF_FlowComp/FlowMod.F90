@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.22 2007/06/22 23:21:58 cdeluca Exp $
+! $Id: FlowMod.F90,v 1.23 2007/06/23 04:01:33 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -30,16 +30,16 @@
 
     subroutine FlowMod_register(comp, rc)
 
-        type(ESMF_InternGridComp) :: comp
+        type(ESMF_IGridComp) :: comp
         integer :: rc
 
         print *, "in user register routine"
 
         ! Register the callback routines.
 
-        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETINIT, User1_Init, 0, rc)
-        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, rc)
-        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETFINAL, User1_Final, 0, rc)
+        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, User1_Init, 0, rc)
+        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, rc)
+        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETFINAL, User1_Final, 0, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
 
@@ -49,7 +49,7 @@
         ! your own code development you probably don't want to include the 
         ! following call unless you are interested in exploring ESMF's 
         ! threading features.
-        call ESMF_InternGridCompSetVMMinThreads(comp, rc=rc)
+        call ESMF_IGridCompSetVMMinThreads(comp, rc=rc)
 #endif
 
         rc = ESMF_SUCCESS
@@ -60,7 +60,7 @@
  
     subroutine User1_Init(gcomp, import_state, export_state, clock, rc)
 
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
@@ -70,10 +70,10 @@
 !      
       type(ESMF_VM) :: vm
       type(ESMF_DELayout) :: layout
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       real(ESMF_KIND_R8) :: g_min(2), g_max(2)
       integer, dimension(ESMF_MAXIGRIDDIM) :: counts
-      type(ESMF_InternGridHorzStagger) :: horz_stagger
+      type(ESMF_IGridHorzStagger) :: horz_stagger
       integer :: myde, npets, halo_width
 !
 ! Set initial values
@@ -82,7 +82,7 @@
 !
 ! Query component for number of PETs, and create a layout which corresponds
 !
-      call ESMF_InternGridCompGet(gcomp, vm=vm, rc=rc)
+      call ESMF_IGridCompGet(gcomp, vm=vm, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
@@ -94,7 +94,7 @@
       if (rc .ne. ESMF_SUCCESS) return
 
 !
-! Create the InternGrid
+! Create the IGrid
 !
       counts(1) = 40
       counts(2) = 20
@@ -105,30 +105,30 @@
       horz_stagger = ESMF_IGRID_HORZ_STAGGER_D_NE
       halo_width = 1
 
-      interngrid = ESMF_InternGridCreateHorzXYUni(counts=counts, &
+      igrid = ESMF_IGridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
                              horzStagger=horz_stagger, &
-                             name="source interngrid", rc=rc)
+                             name="source igrid", rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in User1_init:  interngrid create"
+        print *, "ERROR in User1_init:  igrid create"
         return
       endif
-      call ESMF_InternGridDistribute(interngrid, delayout=layout, rc=rc)
+      call ESMF_IGridDistribute(igrid, delayout=layout, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in User1_init:  interngrid distribute"
+        print *, "ERROR in User1_init:  igrid distribute"
         return
       endif
 
-      call  ESMF_InternGridCompSet(gcomp, interngrid=interngrid, rc=rc)
+      call  ESMF_IGridCompSet(gcomp, igrid=igrid, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in User1_init:  interngrid comp set"
+        print *, "ERROR in User1_init:  igrid comp set"
         return
       endif
 
       call FlowInit(gcomp, clock, rc)
       if(rc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in User1_init:  interngrid create"
+        print *, "ERROR in User1_init:  igrid create"
         return
       endif
 
@@ -141,7 +141,7 @@
     subroutine FlowInit(gcomp, clock, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_InternGridComp), intent(inout) :: gcomp
+      type(ESMF_IGridComp), intent(inout) :: gcomp
       type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
 !
@@ -149,7 +149,7 @@
 !
       integer :: i, j, x, y, nx, ny, ncounts(2), pos(2), de_id
       real(ESMF_KIND_R8) :: s_
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_DELayout) :: layout
 !
 ! Set initial values
@@ -159,17 +159,17 @@
 ! Initialize return code
 !
 !
-! get InternGrid from Component
+! get IGrid from Component
 !
-      call ESMF_InternGridCompGet(gcomp, interngrid=interngrid, rc=rc)
+      call ESMF_IGridCompGet(gcomp, igrid=igrid, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in Flowinit:  interngrid comp get"
+        print *, "ERROR in Flowinit:  igrid comp get"
         return
       endif
 !
 ! create space for global arrays
 !
-      call ArraysGlobalAlloc(interngrid, rc)
+      call ArraysGlobalAlloc(igrid, rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  arraysglobalalloc"
         return
@@ -206,9 +206,9 @@
 ! note: since we're operating on a five-point stencil, we don't
 !       really care out how the corners get set
 !
-      call ESMF_InternGridGet(interngrid, delayout=layout, rc=rc)
+      call ESMF_IGridGet(igrid, delayout=layout, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in Flowinit:  interngrid get"
+        print *, "ERROR in Flowinit:  igrid get"
         return
       endif
       call ESMF_DELayoutGetDeprecated(layout, localDE=de_id, deCountPerDim=ncounts, rc=rc)
@@ -377,7 +377,7 @@
 
     subroutine FlowSolve(gcomp, import_state, export_state, clock, rc)
 
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
@@ -907,7 +907,7 @@
 
       subroutine User1_Final(gcomp, import_state, export_state, clock, rc)
 
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
@@ -918,7 +918,7 @@
       integer :: de_id
       integer(kind=ESMF_KIND_I8) :: frame
       type(ESMF_InternArray) :: array2
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_DELayout) :: layout
       character(len=ESMF_MAXSTR) :: filename
 !
@@ -932,8 +932,8 @@
       ! call ESMF_StateGetField(import_state, "U", field_u, rc)
 
       ! Collect results on DE 0 and output to a file
-      call ESMF_InternGridCompGet(gcomp, interngrid=interngrid, rc=rc)
-      call ESMF_InternGridGet(interngrid, delayout=layout, rc=rc)
+      call ESMF_IGridCompGet(gcomp, igrid=igrid, rc=rc)
+      call ESMF_IGridGet(igrid, delayout=layout, rc=rc)
       call ESMF_DELayoutGetDeprecated(layout, localDe=de_id, rc=rc)
 
       ! Frame number from computation

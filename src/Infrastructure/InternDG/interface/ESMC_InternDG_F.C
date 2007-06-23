@@ -1,4 +1,4 @@
-// $Id: ESMC_InternDG_F.C,v 1.7 2007/06/22 23:21:34 cdeluca Exp $
+// $Id: ESMC_InternDG_F.C,v 1.8 2007/06/23 04:00:34 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_InternDG_F.C,v 1.7 2007/06/22 23:21:34 cdeluca Exp $";
+             "$Id: ESMC_InternDG_F.C,v 1.8 2007/06/23 04:00:34 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -62,7 +62,7 @@ void FTN(c_esmc_interndgserialize)(int *dimCount, int *ndes,
     if ((*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                             "Buffer too short to add a InternGrid object", localrc);
+                             "Buffer too short to add a IGrid object", localrc);
          return;
  
         //buffer = (char *)realloc((void *)buffer,

@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.18 2007/06/22 23:21:52 cdeluca Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.19 2007/06/23 04:01:20 cdeluca Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -30,7 +30,7 @@
 !   Local variables
     integer :: my_pet, rc
     type(ESMF_VM):: vm
-    type(ESMF_InternGridComp) :: comp1
+    type(ESMF_IGridComp) :: comp1
     type(ESMF_State) :: imp, exp
     character(len=ESMF_MAXSTR) :: cname
         
@@ -67,9 +67,9 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test CompCreate"
-    comp1 = ESMF_InternGridCompCreate(name=cname, interngridcompType=ESMF_ATM, rc=rc)
+    comp1 = ESMF_IGridCompCreate(name=cname, igridcompType=ESMF_ATM, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_InternGridCompPrint(comp1)
+    call ESMF_IGridCompPrint(comp1)
 
     print *, "Comp Create finished, name = ", trim(cname)
 
@@ -79,7 +79,7 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-      call ESMF_InternGridCompSetServices(comp1, user_register, rc)
+      call ESMF_IGridCompSetServices(comp1, user_register, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Register finished, rc= ", rc
 
@@ -89,16 +89,16 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
-      imp = ESMF_StateCreate("interngrid import state", ESMF_STATE_IMPORT, rc=rc)
+      imp = ESMF_StateCreate("igrid import state", ESMF_STATE_IMPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      exp = ESMF_StateCreate("interngrid export state", ESMF_STATE_EXPORT, rc=rc)
+      exp = ESMF_StateCreate("igrid export state", ESMF_STATE_EXPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_InternGridCompInitialize(comp1, imp, exp, phase=1, rc=rc)
+      call ESMF_IGridCompInitialize(comp1, imp, exp, phase=1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Initialize 1 finished"
  
-      call ESMF_InternGridCompInitialize(comp1, imp, exp, phase=2, rc=rc)
+      call ESMF_IGridCompInitialize(comp1, imp, exp, phase=2, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Initialize 2 finished"
  
@@ -108,15 +108,15 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-      call ESMF_InternGridCompRun(comp1, imp, exp, rc=rc)
+      call ESMF_IGridCompRun(comp1, imp, exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Run returned first time"
 
-      call ESMF_InternGridCompRun(comp1, imp, exp, rc=rc)
+      call ESMF_IGridCompRun(comp1, imp, exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Run returned second time"
  
-      call ESMF_InternGridCompRun(comp1, imp, exp, rc=rc)
+      call ESMF_IGridCompRun(comp1, imp, exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Run returned third time"
 
@@ -127,7 +127,7 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-      call ESMF_InternGridCompFinalize(comp1, imp, exp, rc=rc)
+      call ESMF_IGridCompFinalize(comp1, imp, exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
 
@@ -147,7 +147,7 @@
 !-------------------------------------------------------------------------
 !     Clean up
 
-      call ESMF_InternGridCompDestroy(comp1, rc)
+      call ESMF_IGridCompDestroy(comp1, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateDestroy(imp, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10

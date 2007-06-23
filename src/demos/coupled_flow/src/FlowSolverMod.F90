@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.2 2007/06/22 23:21:51 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.3 2007/06/23 04:01:15 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -90,7 +90,7 @@
       subroutine FlowSolver_register(comp, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGridComp) :: comp
+      type(ESMF_IGridComp) :: comp
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -99,7 +99,7 @@
 !     private to the module.
 !     \begin{description}
 !     \item [comp]
-!           A InternGridded Component.
+!           A IGridded Component.
 !     \item [rc]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -115,10 +115,10 @@
 !
 ! Register the callback routines.
 !
-      call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init1, 1, rc)
-      call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init2, 2, rc)
-      call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, rc)
-      call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETFINAL, Flow_Final, 0, rc)
+      call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init1, 1, rc)
+      call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init2, 2, rc)
+      call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, rc)
+      call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETFINAL, Flow_Final, 0, rc)
 
       print *, "FlowSolverMod: Registered Initialize, Run, and Finalize routines"
 
@@ -134,7 +134,7 @@
       subroutine Flow_Init1(gcomp, import_state, export_state, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock), intent(inout) :: clock
@@ -142,11 +142,11 @@
 !
 ! !DESCRIPTION:
 !     This subroutine is the registered init routine.  It reads input,
-!     creates the InternGrid, attaches it to the InternGridded Component,
+!     creates the IGrid, attaches it to the IGridded Component,
 !     initializes data, and sets the import and export States.
 !     \begin{description}
 !     \item [gcomp]
-!           A InternGridded Component.
+!           A IGridded Component.
 !     \item [import\_state]
 !           State containing the import list.
 !     \item [export\_state]
@@ -163,7 +163,7 @@
 ! Local variables
 !
       type(ESMF_DELayout) :: layout
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       real(ESMF_KIND_R8), dimension(ESMF_MAXIGRIDDIM) :: global_min_coord
       real(ESMF_KIND_R8), dimension(ESMF_MAXIGRIDDIM) :: global_max_coord
       real :: x_min, x_max, y_min, y_max
@@ -197,9 +197,9 @@
 !           Dimensionless linear artificial viscosity coefficient
 !           (should be between 0.1 and 0.2).
 !     \item [u0]
-!           Initial velocity in the first interngrid direction.
+!           Initial velocity in the first igrid direction.
 !     \item [v0]
-!           Initial velocity in the second interngrid direction.
+!           Initial velocity in the second igrid direction.
 !     \item [sie0]
 !           Initial specific internal energy.
 !     \item [rho0]
@@ -213,26 +213,26 @@
 !           block of cells that will serve as an obstacle and not allow
 !           fluid flow.
 !     \item [iobs\_min]
-!           Minimum global cell number in the first interngrid direction defining
+!           Minimum global cell number in the first igrid direction defining
 !           a block of cells to be an obstacle.  Must be [nobsdesc] number
 !           of these.
 !     \item [iobs\_max]
-!           Maximum global cell number in the first interngrid direction defining
+!           Maximum global cell number in the first igrid direction defining
 !           a block of cells to be an obstacle.  Must be [nobsdesc] number
 !           of these.
 !     \item [jobs\_min]
-!           Minimum global cell number in the second interngrid direction defining
+!           Minimum global cell number in the second igrid direction defining
 !           a block of cells to be an obstacle.  Must be [nobsdesc] number
 !           of these.
 !     \item [jobs\_max]
-!           Maximum global cell number in the second interngrid direction defining
+!           Maximum global cell number in the second igrid direction defining
 !           a block of cells to be an obstacle.  Must be [nobsdesc] number
 !           of these.
 !     \item [iflo\_min]
-!           Minimum global interngrid cell number for the second inflow along the
+!           Minimum global igrid cell number for the second inflow along the
 !           bottom boundary.
 !     \item [iflo\_max]
-!           Maximum global interngrid cell number for the second inflow along the
+!           Maximum global igrid cell number for the second inflow along the
 !           bottom boundary.
 !     \end{description}
 !
@@ -254,9 +254,9 @@
 !
 ! Query component for information.
 !
-      call ESMF_InternGridCompGet(gcomp, interngrid=interngrid, rc=rc)
+      call ESMF_IGridCompGet(gcomp, igrid=igrid, rc=rc)
 
-      call ESMF_InternGridGet(interngrid, horzRelLoc=ESMF_CELL_CENTER, &
+      call ESMF_IGridGet(igrid, horzRelLoc=ESMF_CELL_CENTER, &
                               delayout=layout, &
                               globalCellCountPerDim=global_nmax, &
                               minGlobalCoordPerDim=global_min_coord, &
@@ -324,7 +324,7 @@
       subroutine Flow_Init2(gcomp, import_state, export_state, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock), intent(inout) :: clock
@@ -335,7 +335,7 @@
 !     It sets the export fields in the export state for what's required.
 !     \begin{description}
 !     \item [gcomp]
-!           A InternGridded Component.
+!           A IGridded Component.
 !     \item [import\_state]
 !           State containing the import list.
 !     \item [export\_state]
@@ -395,7 +395,7 @@
       subroutine FlowInit(gcomp, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGridComp), intent(inout) :: gcomp
+      type(ESMF_IGridComp), intent(inout) :: gcomp
       type(ESMF_Clock), intent(inout) :: clock
       integer, optional, intent(out) :: rc
 !
@@ -404,7 +404,7 @@
 !     FlowSolver.
 !     \begin{description}
 !     \item [gcomp]
-!           A InternGridded Component.
+!           A IGridded Component.
 !     \item [clock]
 !           Clock describing the external time.
 !     \item [{[rc]}]
@@ -421,7 +421,7 @@
       integer :: i, j, n, x, y, nx, ny, ncounts(2), pos(2), de_id
       integer, dimension(1,2) :: local, global
       real(ESMF_KIND_R8) :: s_
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_DELayout) :: layout
 !
 ! Set initial values
@@ -436,17 +436,17 @@
         rc = ESMF_FAILURE
       endif
 !
-! get InternGrid from Component
+! get IGrid from Component
 !
-      call ESMF_InternGridCompGet(gcomp, interngrid=interngrid, rc=status)
+      call ESMF_IGridCompGet(gcomp, igrid=igrid, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in Flowinit:  interngrid comp get"
+        print *, "ERROR in Flowinit:  igrid comp get"
         return
       endif
 !
 ! create space for global arrays
 !
-      call FlowArraysAlloc(interngrid, status)
+      call FlowArraysAlloc(igrid, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  arraysglobalalloc"
         return
@@ -473,9 +473,9 @@
 ! First, get size of delayout and position of my DE to determine if
 ! this DE is on the domain boundary
 !
-      call ESMF_InternGridGet(interngrid, delayout=layout, rc=status)
+      call ESMF_IGridGet(igrid, delayout=layout, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in Flowinit:  interngrid comp get"
+        print *, "ERROR in Flowinit:  igrid comp get"
         return
       endif
       call ESMF_DELayoutGetDeprecated(layout, deCountPerDim=ncounts, localDE=de_id, &
@@ -590,12 +590,12 @@
           global(1,2) = j
           do i = iobs_min(n),iobs_max(n)
             global(1,1) = i
-            call ESMF_InternGridGlobalToDELocalIndex(interngrid, horzRelloc=ESMF_CELL_CENTER,&
+            call ESMF_IGridGlobalToDELocalIndex(igrid, horzRelloc=ESMF_CELL_CENTER,&
                                       global2d=global, local2d=local, rc=status)
             if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
             if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
   ! TODO:  The above two lines are junk, making up for the halo width which is
-  !        no longer in InternGrid. GlobalToLocal should be an Array method
+  !        no longer in IGrid. GlobalToLocal should be an Array method
             if(local(1,1).ne.-1 .and. local(1,2).ne.-1) then
               flag(local(1,1),local(1,2)) = -1
             endif
@@ -609,12 +609,12 @@
         do j = 1, 2 
           global(1,1) = i
           global(1,2) = j
-          call ESMF_InternGridGlobalToDELocalIndex(interngrid, horzRelloc=ESMF_CELL_CENTER, &
+          call ESMF_IGridGlobalToDELocalIndex(igrid, horzRelloc=ESMF_CELL_CENTER, &
                                       global2d=global, local2d=local, rc=status)
           if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
           if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
 ! TODO:  The above two lines are junk, making up for the halo width which is
-!        no longer in InternGrid. GlobalToLocal should be an Array method
+!        no longer in IGrid. GlobalToLocal should be an Array method
           if(local(1,1).ne.-1 .and. local(1,2).ne.-1) then
             flag(local(1,1),local(1,2)) = 10
           endif
@@ -700,7 +700,7 @@
       subroutine FlowSolve(gcomp, import_state, export_state, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
@@ -712,7 +712,7 @@
 !     algorithm and checks the output interval.
 !     \begin{description}
 !     \item [gcomp]
-!           A InternGridded Component.
+!           A IGridded Component.
 !     \item [import\_state]
 !           State containing data obtained from other components.
 !     \item [export\_state]
@@ -1571,7 +1571,7 @@
       subroutine FlowPrint(gcomp, clock, file_no, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_Clock), intent(inout) :: clock
       integer, intent(in) :: file_no
       integer, optional, intent(out) :: rc
@@ -1582,7 +1582,7 @@
 !     run.
 !     \begin{description}
 !     \item [gcomp]
-!           A InternGridded Component.
+!           A IGridded Component.
 !     \item [clock]
 !           Clock describing the external time.
 !     \item [file\_no]
@@ -1618,7 +1618,7 @@
 !
 ! Collect results on DE 0 and output to a file
 !
-      call ESMF_InternGridCompGet(gcomp, vm=vm, rc=status)
+      call ESMF_IGridCompGet(gcomp, vm=vm, rc=status)
       call ESMF_VMGet(vm, localPet=pet_id, rc=status)
 !
 ! Frame number from computation
@@ -1685,7 +1685,7 @@
       subroutine Flow_Final(gcomp, import_state, export_state, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock), intent(inout) :: clock
@@ -1697,7 +1697,7 @@
 !     process.
 !     \begin{description}
 !     \item [gcomp]
-!           A InternGridded Component.
+!           A IGridded Component.
 !     \item [import\_state]
 !           State containing the import list.
 !     \item [export\_state]

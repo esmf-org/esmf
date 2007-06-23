@@ -1,4 +1,4 @@
-// $Id: ESMC_GCompEx.C,v 1.19 2007/06/22 23:21:45 cdeluca Exp $
+// $Id: ESMC_GCompEx.C,v 1.20 2007/06/23 04:00:55 cdeluca Exp $
 //
 // Example/test code which creates a new comp.
 
@@ -15,7 +15,7 @@
 // !DESCRIPTION:
 // See the following code fragments for general examples of working
 //  with Components.  For more specific examples, see the Application,
-//  InternGridded, or Coupling examples.
+//  IGridded, or Coupling examples.
 // Also see the Programming Model section of this document.
 //
 //

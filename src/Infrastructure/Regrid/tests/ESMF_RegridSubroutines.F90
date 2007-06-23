@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.25 2007/06/22 23:21:40 cdeluca Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.26 2007/06/23 04:00:41 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -13,13 +13,13 @@ module ESMF_RegridSubroutines
     type testArguments
     	integer :: function
         type(ESMF_RegridMethod) :: regscheme
-        type(ESMF_InternGridHorzStagger) :: srcinterngrid, dstinterngrid
+        type(ESMF_IGridHorzStagger) :: srcigrid, dstigrid
         type(ESMF_RelLoc) :: srcrelloc, dstrelloc
         integer :: srcdelayout(2), dstdelayout(2)
 	integer :: domain, srchalo, dsthalo
         character(ESMF_MAXSTR) :: functionString, regridString
         character(ESMF_MAXSTR) :: srcdelayoutString, dstdelayoutString
-        character(ESMF_MAXSTR) :: srcinterngridStaggerString, dstinterngridStaggerString
+        character(ESMF_MAXSTR) :: srcigridStaggerString, dstigridStaggerString
         character(ESMF_MAXSTR) :: srcHaloString, dstHaloString
     end type testArguments
     type(ESMF_VM),save :: vm
@@ -109,7 +109,7 @@ contains
                 	rc = ESMF_FAILURE
                 	return
 		endif
-		! Run the Regrid unit test here: srcinterngrid to dstinterngrid1
+		! Run the Regrid unit test here: srcigrid to dstigrid1
 		err_threshold=0.5
 		write(failMsg, *) "Error in Regrid"
                 write(name, *) "Regrid test: ", trim(testString)
@@ -117,8 +117,8 @@ contains
 			   nSrcPetsXY= testArgs%srcdelayout, &
                            npetsXY=testArgs%dstdelayout, &
                            MethodChoice = testArgs%regscheme, &
-                           SrcInternGridChoice = testArgs%srcinterngrid, &
-                           DstInternGridChoice = testArgs%dstinterngrid, &
+                           SrcIGridChoice = testArgs%srcigrid, &
+                           DstIGridChoice = testArgs%dstigrid, &
                            SrcLocChoice = testArgs%srcrelloc, &
                            DstLocChoice = testArgs%dstrelloc, &
                            SrcHalo = testArgs%srchalo, &
@@ -135,10 +135,10 @@ contains
 		testMsg = trim(" Regrid Method             : " // testArgs%regridString)
 		print *, testMsg
 		call ESMF_LogWrite(testMsg, ESMF_LOG_INFO)
-		testMsg = trim(" Source Horiz. Stagger Pair: " // testArgs%srcinterngridStaggerString)
+		testMsg = trim(" Source Horiz. Stagger Pair: " // testArgs%srcigridStaggerString)
 		print *, testMsg
 		call ESMF_LogWrite(testMsg, ESMF_LOG_INFO)
-		testMsg = trim(" Dest. Horiz. Stagger Pair : " // testArgs%dstinterngridStaggerString)
+		testMsg = trim(" Dest. Horiz. Stagger Pair : " // testArgs%dstigridStaggerString)
 		print *, testMsg
 		call ESMF_LogWrite(testMsg, ESMF_LOG_INFO)
 		testMsg = trim(" Source Delayout           : " // testArgs%srcdelayoutString)
@@ -182,13 +182,13 @@ contains
 
     ! Local variables
     character(ESMF_MAXSTR) :: index, letter, delayoutconfig, functionString
-    character(ESMF_MAXSTR) :: regridString, interngridStaggerString
+    character(ESMF_MAXSTR) :: regridString, igridStaggerString
     character(ESMF_MAXSTR) :: delayoutString, haloString
     type(ESMF_RegridMethod) :: regscheme
     integer :: i, value, openStatus, readStatus, domain
-    integer :: relloc, interngrid
-    namelist /interngridMethod/ index, regscheme, regridString
-    namelist /interngridHStagger/ index, interngrid, relloc, interngridStaggerString
+    integer :: relloc, igrid
+    namelist /igridMethod/ index, regscheme, regridString
+    namelist /igridHStagger/ index, igrid, relloc, igridStaggerString
     namelist /delayout/ index, delayoutconfig, delayoutString
     namelist /function/ index, value, domain, functionString
     namelist /halo/ index, value, haloString
@@ -228,7 +228,7 @@ contains
         return
     endif
     do
-	read (unit=(npets+20), nml = interngridMethod, iostat=readStatus) 
+	read (unit=(npets+20), nml = igridMethod, iostat=readStatus) 
     	if (readStatus.ne.0) then
 		print *, " Unable to read file: ESMF_RegridMethod.rc"
 		rc=ESMF_FAILURE
@@ -244,23 +244,23 @@ contains
 
     i = 3
     letter = string (i:i)
-    open (unit=(npets+20), file = "ESMF_InternGridHorzStagger.rc", action = "read", iostat=openStatus)
+    open (unit=(npets+20), file = "ESMF_IGridHorzStagger.rc", action = "read", iostat=openStatus)
     if (openStatus.ne.0) then
-        print *, " Unable to open file: ESMF_InternGridHorzStagger.rc"
+        print *, " Unable to open file: ESMF_IGridHorzStagger.rc"
         rc=ESMF_FAILURE
         return
     endif
     do
-	read (unit=(npets+20), nml = interngridHStagger, iostat=readStatus) 
+	read (unit=(npets+20), nml = igridHStagger, iostat=readStatus) 
         if (readStatus.ne.0) then
-                print *, " Unable to read file: ESMF_InternGridHorzStagger.rc"
+                print *, " Unable to read file: ESMF_IGridHorzStagger.rc"
                 rc=ESMF_FAILURE
                 return
         endif
         if (index.eq.letter) then
-            testArgs%srcinterngrid = ESMF_InternGridHorzStagger(interngrid)
+            testArgs%srcigrid = ESMF_IGridHorzStagger(igrid)
             testArgs%srcrelloc = ESMF_Relloc(relloc)
-            testArgs%srcinterngridStaggerString = trim(interngridStaggerString)
+            testArgs%srcigridStaggerString = trim(igridStaggerString)
 	    close ((npets+20))
             exit
         endif
@@ -269,23 +269,23 @@ contains
 
     i = 4
     letter = string (i:i)
-    open (unit=(npets+20), file = "ESMF_InternGridHorzStagger.rc", action = "read", iostat=openStatus)
+    open (unit=(npets+20), file = "ESMF_IGridHorzStagger.rc", action = "read", iostat=openStatus)
     if (openStatus.ne.0) then
-        print *, " Unable to open file: ESMF_InternGridHorzStagger.rc"
+        print *, " Unable to open file: ESMF_IGridHorzStagger.rc"
         rc=ESMF_FAILURE
         return
     endif
     do
-	read (unit=(npets+20), nml = interngridHStagger, iostat=readStatus) 
+	read (unit=(npets+20), nml = igridHStagger, iostat=readStatus) 
         if (readStatus.ne.0) then
-                print *, " Unable to read file: ESMF_InternGridHorzStagger.rc"
+                print *, " Unable to read file: ESMF_IGridHorzStagger.rc"
                 rc=ESMF_FAILURE
                 return
         endif
         if (index.eq.letter) then
-            testArgs%dstinterngrid = ESMF_InternGridHorzStagger(interngrid)
+            testArgs%dstigrid = ESMF_IGridHorzStagger(igrid)
             testArgs%dstrelloc = ESMF_RelLoc(relloc)
-            testArgs%dstinterngridStaggerString = trim(interngridStaggerString)
+            testArgs%dstigridStaggerString = trim(igridStaggerString)
 	    close ((npets+20))
             exit
         endif
@@ -410,7 +410,7 @@ contains
 
 !-------------------------------------------------------------------
     subroutine Regrid(FieldChoice, nSrcPetsXY, npetsXY, MethodChoice, &
-                           SrcInternGridChoice,DstInternGridChoice, &
+                           SrcIGridChoice,DstIGridChoice, &
                            SrcLocChoice, DstLocChoice, &
                            SrcHalo, DstHalo, &
                            domainType, error_threshold, ier )
@@ -418,10 +418,10 @@ contains
   !--Execute a Regrid Unit test for a single set of testing parameter choices.
 
   !  FieldChoice -- Choice of test function (ESMF_RegridMethod).
-  !  nSrcPetsXY -- Choice of geom. decomposition on the source interngrid (int).
-  !  npetsXY -- Choice of geom. decomposition on destination interngrid (int).
+  !  nSrcPetsXY -- Choice of geom. decomposition on the source igrid (int).
+  !  npetsXY -- Choice of geom. decomposition on destination igrid (int).
   !  MethodCHoice -- Regridding Method Choice (ESMF_RegridMethod).
-  !  Src(Dst)InternGridChoice -- Type of (Arakawa) interngrid (ESMF_InternGridHorzStagger).
+  !  Src(Dst)IGridChoice -- Type of (Arakawa) igrid (ESMF_IGridHorzStagger).
   !  Src(Dst)LocChoice -- In cell relative location of data (ESMF_RelLoc).
   !  error_threshold -- Normalized error threshold (int).
 
@@ -435,7 +435,7 @@ contains
 
       integer, intent(in) :: FieldChoice
       type(ESMF_RegridMethod), intent(in) :: MethodChoice
-      type(ESMF_InternGridHorzStagger), intent(in) :: SrcInternGridChoice, DstInternGridChoice
+      type(ESMF_IGridHorzStagger), intent(in) :: SrcIGridChoice, DstIGridChoice
       type(ESMF_RelLoc), intent(in) :: SrcLocChoice, DstLocChoice 
       integer, intent(in) :: SrcHalo, DstHalo
       real(ESMF_KIND_R8), optional, intent(in) :: error_threshold
@@ -446,7 +446,7 @@ contains
 
     !--- Local variables
     type(ESMF_Field) :: field1, field2, field3
-    type(ESMF_InternGrid) :: srcinterngrid, dstinterngrid1, dstinterngrid2
+    type(ESMF_IGrid) :: srcigrid, dstigrid1, dstigrid2
     type(ESMF_RouteHandle) :: regrid_rh1, regrid_rh2
     type(ESMF_DELayout) :: layout1, layout2
     integer :: rc
@@ -478,7 +478,7 @@ contains
 !-------------------------------------------------------------------------
 !   ! Setup:
 !   !
-!   !  Create a source and destination interngrid with data on it, to use
+!   !  Create a source and destination igrid with data on it, to use
 !   !  in the Regrid calls below.
  
     layout1 = ESMF_DELayoutCreate(vm, nSrcPetsXY    , rc=rc)
@@ -492,14 +492,14 @@ contains
         print *, "layout 2 failed"
     end if
 
-   !--Create and distribute the source and destination interngrids
+   !--Create and distribute the source and destination igrids
    !=========================================================
 !   domainType=2
    !...tab for choice of DOMAIN type:
     if ( domainType == 1 )  then         !WholeGlobe
-      call createWholeGlobeInternGrids
+      call createWholeGlobeIGrids
     else if ( domainType == 2 ) then     !Regional
-      call createRegionalInternGrids
+      call createRegionalIGrids
     else                          !ERROR
       print*,'ERROR! domainType=', domainType,'  valid values= 1,2 '
       ier=ESMF_FAILURE
@@ -516,7 +516,7 @@ contains
 
    !Create the source field (with halo width of 3)
    !==============================================
-    call createField(interngrid=srcinterngrid,               &
+    call createField(igrid=srcigrid,               &
                      LocChoice = SrcLocChoice,   &
                      halo      = SrcHalo,        &
                      fieldName = "src pressure", &
@@ -556,9 +556,9 @@ contains
                         lbSrc, ubSrc, Srchalo, maxcoords, f90ptr1, ier)
 
 
-   !Create the destination field for dstinterngrid1(with halo width of 0)
+   !Create the destination field for dstigrid1(with halo width of 0)
    !===================================================
-    call createField(interngrid=Dstinterngrid1,               &
+    call createField(igrid=Dstigrid1,               &
                      LocChoice = DstLocChoice,   &
                      halo      = DstHalo,        &
                      fieldName = "Dst pressure", &
@@ -571,7 +571,7 @@ contains
 
    !Create the destination field for distgrid2(with halo width of 0)
    !===================================================
-    call createField(interngrid=Dstinterngrid2,               &
+    call createField(igrid=Dstigrid2,               &
                      LocChoice = DstLocChoice,   &
                      halo      = DstHalo,        &
                      fieldName = "Dst pressure", &
@@ -590,7 +590,7 @@ contains
 
 !\subsubsection{Precomputing and Executing a Regrid}
       
-!  The user has already created an {\tt ESMF\_InternGrid}, an
+!  The user has already created an {\tt ESMF\_IGrid}, an
 !  {\tt ESMF\_Array} with data, and put them together in an {\tt ESMF\_Field}.
 !  An {\tt ESMF\_RouteHandle} is created and the data movement needed to
 !  execute the regrid is stored with that handle by the store method. 
@@ -599,7 +599,7 @@ contains
       
 
 
-   !Do all the calculations in preparation for the actual re-interngridding
+   !Do all the calculations in preparation for the actual re-igridding
    !=================================================================
     call ESMF_FieldRegridStore(field1, field2, vm, &
                                routehandle=regrid_rh1, &
@@ -609,7 +609,7 @@ contains
         print *, "ESMF_FieldRegridStore failed"
     end if
 
-   !Do all the calculations in preparation for the actual re-interngridding
+   !Do all the calculations in preparation for the actual re-igridding
    !=================================================================
     call ESMF_FieldRegridStore(field1, field3, vm, &
                                routehandle=regrid_rh2, &
@@ -636,15 +636,15 @@ contains
 
 
 !===============================================================
-!Verification: Compare to the "exact solution" on the dest. interngrid
+!Verification: Compare to the "exact solution" on the dest. igrid
 !===============================================================
 
-    !Array bounds in the destination interngrid (local indexing)
+    !Array bounds in the destination igrid (local indexing)
     !=====================================================
      lbDst(:) = lbound(f90ptr2)
      ubDst(:) = ubound(f90ptr2)
 
-    !Allocate the array pointer for the "exact solution at the dest. interngrid
+    !Allocate the array pointer for the "exact solution at the dest. igrid
     !====================================================================
      allocate( SolnOnTarget( lbDst(1):ubDst(1) , lbDst(2):ubDst(2) ) )
 
@@ -667,7 +667,7 @@ contains
     end if
 
 
-   !--Compute exact fcn. values at the Destination InternGrid 
+   !--Compute exact fcn. values at the Destination IGrid 
    !===================================================
     call functionValues(FieldChoice, x_coords2, y_coords2, Phi, Theta, &
                         lbDst, ubDst, DstHalo, maxcoords, SolnOnTarget, ier)
@@ -710,15 +710,15 @@ contains
 
    deallocate(SolnOnTarget)
 
-   !Verify the second regrid with a different interngrid size 
+   !Verify the second regrid with a different igrid size 
    !=====================================================
 
-    !Array bounds in the destination interngrid (local indexing)
+    !Array bounds in the destination igrid (local indexing)
     !=====================================================
      lbDst(:) = lbound(f90ptr3)
      ubDst(:) = ubound(f90ptr3)
 
-    !Allocate the array pointer for the "exact solution at the dest. interngrid
+    !Allocate the array pointer for the "exact solution at the dest. igrid
     !====================================================================
      allocate( SolnOnTarget( lbDst(1):ubDst(1) , lbDst(2):ubDst(2) ) )
 
@@ -741,7 +741,7 @@ contains
     end if
 
 
-   !--Compute exact fcn. values at the Destination InternGrid 
+   !--Compute exact fcn. values at the Destination IGrid 
    !===================================================
     call functionValues(FieldChoice, x_coords3, y_coords3, Phi, Theta, &
                         lbDst, ubDst, DstHalo, maxcoords, SolnOnTarget, ier)
@@ -805,21 +805,21 @@ contains
 
     call ESMF_FieldDestroy(field3, rc=rc)
 
-    call ESMF_InternGridDestroy(srcinterngrid, rc=rc)
+    call ESMF_IGridDestroy(srcigrid, rc=rc)
 
-    call ESMF_InternGridDestroy(dstinterngrid1, rc=rc)
+    call ESMF_IGridDestroy(dstigrid1, rc=rc)
 
-    call ESMF_InternGridDestroy(dstinterngrid2, rc=rc)
+    call ESMF_IGridDestroy(dstigrid2, rc=rc)
 !----------------------------------------------------------------
     return
 
 contains
 
 !==================================================================
-    subroutine createWholeGlobeInternGrids
+    subroutine createWholeGlobeIGrids
 
- ! Create interngrids covering the whole globe. Note that crop factor was introduced
- ! for the benefit of regional interngrids originally. It is not needed here.
+ ! Create igrids covering the whole globe. Note that crop factor was introduced
+ ! for the benefit of regional igrids originally. It is not needed here.
 
     !--- Full physical domain dimension
     xmin = 0.0
@@ -827,13 +827,13 @@ contains
     xmax = 2.*pi
     ymax = 0.5*pi
 
-    crop_factor=1.0 !portion of the domain to be covered by the interngrid
+    crop_factor=1.0 !portion of the domain to be covered by the igrid
 
-    !--- InternGrid dimension to cover full physical domain.
+    !--- IGrid dimension to cover full physical domain.
     nx_domain=100
     ny_domain=150
 	
-    !--Coordinate ranges of the "test interngrids"
+    !--Coordinate ranges of the "test igrids"
     ! The following line is replaced with actual values to avoid an
     ! internal compiler error on jazz pgi.
     ! PGF90-F-0000-Internal compiler error. Errors in Lowering
@@ -841,7 +841,7 @@ contains
     mincoords = (/ 0.0*1.0d0,  -0.5d0*pi*1.0d0 /)
     maxcoords = (/ xmax*crop_factor,  ymax*crop_factor /)
 
-    !--- Number of cells in the current interngrid.
+    !--- Number of cells in the current igrid.
     n_cells = (/ int(real(nx_domain)*crop_factor), &
                  int(real(ny_domain)*crop_factor) /)
 
@@ -852,75 +852,75 @@ contains
     end if
 
 
-    !Create the source interngrid
+    !Create the source igrid
    !===========================
-    srcinterngrid = ESMF_InternGridCreateHorzLatLonUni( n_cells, &
+    srcigrid = ESMF_IGridCreateHorzLatLonUni( n_cells, &
                    mincoords, maxcoords, &
-                   horzStagger=SrcInternGridChoice, &
+                   horzStagger=SrcIGridChoice, &
                    dimUnits= (/ "radians" , "radians" /), &
                    periodic=(/ ESMF_true , ESMF_false /), &
-                   name="srcinterngrid", rc=rc)
+                   name="srcigrid", rc=rc)
 
-   !Distribute the source interngrid
+   !Distribute the source igrid
    !===========================
-    call ESMF_InternGridDistribute(srcinterngrid, delayout=layout1, rc=rc)
+    call ESMF_IGridDistribute(srcigrid, delayout=layout1, rc=rc)
 
-   !Create the destination interngrid1 (the same size as srcinterngrid)
+   !Create the destination igrid1 (the same size as srcigrid)
    !=======================================================
-    dstinterngrid1 = ESMF_InternGridCreateHorzLatLonUni( n_cells, &
+    dstigrid1 = ESMF_IGridCreateHorzLatLonUni( n_cells, &
                    mincoords, maxcoords, &
-                   horzStagger=DstInternGridChoice, &
+                   horzStagger=DstIGridChoice, &
                    dimUnits= (/ "radians" , "radians" /), &
                    periodic=(/ ESMF_true , ESMF_false /), &
-                   name="dstinterngrid1", rc=rc)
+                   name="dstigrid1", rc=rc)
 
-   !Distribute destination interngrid
+   !Distribute destination igrid
    !===========================
-    call ESMF_InternGridDistribute(dstinterngrid1, delayout=layout2, rc=rc)
+    call ESMF_IGridDistribute(dstigrid1, delayout=layout2, rc=rc)
 
-    !--- InternGrid dimension to cover full physical domain.
+    !--- IGrid dimension to cover full physical domain.
     nx_domain=240
     ny_domain=120
 
-    !--- Number of cells in the current interngrid.
+    !--- Number of cells in the current igrid.
     n_cells = (/ int(real(nx_domain)*crop_factor), &
                  int(real(ny_domain)*crop_factor) /)
 
-   !Create the destination interngrid2 (different size from srcinterngrid)
+   !Create the destination igrid2 (different size from srcigrid)
    !==========================================================
-    dstinterngrid2 = ESMF_InternGridCreateHorzLatLonUni( n_cells, &
+    dstigrid2 = ESMF_IGridCreateHorzLatLonUni( n_cells, &
                    mincoords, maxcoords, &
-                   horzStagger=DstInternGridChoice, &
+                   horzStagger=DstIGridChoice, &
                    dimUnits= (/ "radians" , "radians" /), &
                    periodic=(/ ESMF_true , ESMF_false /), &
-                   name="dstinterngrid2", rc=rc)
+                   name="dstigrid2", rc=rc)
 
-   !Distribute destination interngrid
+   !Distribute destination igrid
    !===========================
-    call ESMF_InternGridDistribute(dstinterngrid2, delayout=layout2, rc=rc)
+    call ESMF_IGridDistribute(dstigrid2, delayout=layout2, rc=rc)
 
     return
-    end subroutine createWholeGlobeInternGrids
+    end subroutine createWholeGlobeIGrids
 
 !===========================================================================
 
-    subroutine createRegionalInternGrids
+    subroutine createRegionalIGrids
 
-!--Create a Regional (not whole-globe) rectangular interngrid.
+!--Create a Regional (not whole-globe) rectangular igrid.
    
-    !---Maximum range of physical dimensions of the interngrid
+    !---Maximum range of physical dimensions of the igrid
     xmin = 0.0
     ymin = 0.0
     xmax = 20.
     ymax = 30.
 
-    crop_factor=.2   !Fraction of the maximum range covered by the actual interngrid
+    crop_factor=.2   !Fraction of the maximum range covered by the actual igrid
 
-    !--- Maximum size of the interngrid (# of interngrid cells).
+    !--- Maximum size of the igrid (# of igrid cells).
     nx_domain=100
     ny_domain=150
 
-    !--- Number of cells in the current interngrid.
+    !--- Number of cells in the current igrid.
     n_cells = (/real(nx_domain)*crop_factor, real(ny_domain)*crop_factor /)
     mincoords = (/ xmin*crop_factor,  ymin*crop_factor /)
     maxcoords = (/ xmax*crop_factor,  ymax*crop_factor /)
@@ -931,61 +931,61 @@ contains
       print*,'maxcoords=',maxcoords
     end if
 
-    !Create the source interngrid
+    !Create the source igrid
    !===========================
-    srcinterngrid = ESMF_InternGridCreateHorzXYUni( n_cells, &
+    srcigrid = ESMF_IGridCreateHorzXYUni( n_cells, &
                    mincoords, maxcoords, &
-                   horzStagger=SrcInternGridChoice, &
-                   name="srcinterngrid", rc=rc)
+                   horzStagger=SrcIGridChoice, &
+                   name="srcigrid", rc=rc)
 
-   !Distribute the source interngrid
+   !Distribute the source igrid
    !===========================
-    call ESMF_InternGridDistribute(srcinterngrid, delayout=layout1, rc=rc)
+    call ESMF_IGridDistribute(srcigrid, delayout=layout1, rc=rc)
 
-   !Create the destination interngrid1
+   !Create the destination igrid1
    !===========================
-    dstinterngrid1 = ESMF_InternGridCreateHorzXYUni( n_cells, &
+    dstigrid1 = ESMF_IGridCreateHorzXYUni( n_cells, &
                    mincoords, maxcoords, &
-                   horzStagger=DstInternGridChoice, &
-                   name="dstinterngrid1", rc=rc)
+                   horzStagger=DstIGridChoice, &
+                   name="dstigrid1", rc=rc)
 
-   !Distribute destination interngrid1
+   !Distribute destination igrid1
    !===========================
-    call ESMF_InternGridDistribute(dstinterngrid1, delayout=layout2, rc=rc)
+    call ESMF_IGridDistribute(dstigrid1, delayout=layout2, rc=rc)
 
-    !---Maximum range of physical dimensions of the interngrid
+    !---Maximum range of physical dimensions of the igrid
     !xmin = 0.0
     !ymin = 0.0
     !xmax = 48.
     !ymax = 24.
 
-    !--- Maximum size of the interngrid (# of interngrid cells).
+    !--- Maximum size of the igrid (# of igrid cells).
     nx_domain=240
     ny_domain=120
     n_cells = (/real(nx_domain)*crop_factor, real(ny_domain)*crop_factor /)
     !mincoords = (/ xmin*crop_factor,  ymin*crop_factor /)
     !maxcoords = (/ xmax*crop_factor,  ymax*crop_factor /)
 
-   !Create the destination interngrid2
+   !Create the destination igrid2
    !===========================
-    dstinterngrid2 = ESMF_InternGridCreateHorzXYUni( n_cells, &
+    dstigrid2 = ESMF_IGridCreateHorzXYUni( n_cells, &
                    mincoords, maxcoords, &
-                   horzStagger=DstInternGridChoice, &
-                   name="dstinterngrid2", rc=rc)
+                   horzStagger=DstIGridChoice, &
+                   name="dstigrid2", rc=rc)
 
-   !Distribute destination interngrid2
+   !Distribute destination igrid2
    !===========================
-    call ESMF_InternGridDistribute(dstinterngrid2, delayout=layout2, rc=rc)
+    call ESMF_IGridDistribute(dstigrid2, delayout=layout2, rc=rc)
 
 
     return
-    end subroutine createRegionalInternGrids
+    end subroutine createRegionalIGrids
 
 !=========================================================================
 
-    subroutine createField(interngrid, LocChoice, halo, fieldName, field, &
+    subroutine createField(igrid, LocChoice, halo, fieldName, field, &
                               f90ptr, xCoor,  yCoor, arrayspec, rc )
-    type(ESMF_InternGrid), intent(inout)              :: interngrid
+    type(ESMF_IGrid), intent(inout)              :: igrid
     type(ESMF_RelLoc), intent(in)               :: LocChoice
     integer, intent(in)                         :: halo
     character (len=*), intent(in)               :: fieldName
@@ -1004,7 +1004,7 @@ contains
 
    !Create the field 
    !================
-    field = ESMF_FieldCreate(interngrid, arrayspec, &
+    field = ESMF_FieldCreate(igrid, arrayspec, &
                               horzRelloc=LocChoice, &
                               haloWidth=halo, name=fieldName, rc=local_rc)
    if (local_rc.ne.ESMF_SUCCESS) then 
@@ -1022,22 +1022,22 @@ contains
         print *, "ESMF_FieldGetDataPointer failed"
    end if
 
-   !Get the coordinates of the interngrid
+   !Get the coordinates of the igrid
    !===============================
-    call ESMF_InternGridGetCoord(interngrid,dim=1,horzRelLoc=LocChoice,  &
+    call ESMF_IGridGetCoord(igrid,dim=1,horzRelLoc=LocChoice,  &
            centercoord=xCoor,docopy=ESMF_DATA_COPY,rc=local_rc)
 
    if (local_rc.ne.ESMF_SUCCESS) then 
 	rc = ESMF_FAILURE
-        print *, "ESMF_InternGridGetCoord xCoor failed"
+        print *, "ESMF_IGridGetCoord xCoor failed"
    end if
 
-    call ESMF_InternGridGetCoord(interngrid,dim=2,horzRelLoc=LocChoice,  &
+    call ESMF_IGridGetCoord(igrid,dim=2,horzRelLoc=LocChoice,  &
            centercoord=yCoor,docopy=ESMF_DATA_COPY,rc=local_rc)
                                                                                                                       
    if (local_rc.ne.ESMF_SUCCESS) then
         rc = ESMF_FAILURE
-        print *, "ESMF_InternGridGetCoord yCoor failed"
+        print *, "ESMF_IGridGetCoord yCoor failed"
    end if
 
     return

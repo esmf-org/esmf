@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridTimeUTest.F90,v 1.8 2007/06/22 23:21:40 cdeluca Exp $'
+      '$Id: ESMF_RegridTimeUTest.F90,v 1.9 2007/06/23 04:00:41 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
     integer :: lrc,iFunction
@@ -165,7 +165,7 @@
 
     ! Local variables
     type(ESMF_Field) :: field1, field2
-    type(ESMF_InternGrid) :: srcinterngrid, dstinterngrid
+    type(ESMF_IGrid) :: srcigrid, dstigrid
     type(ESMF_RouteHandle) :: regrid_rh
     type(ESMF_DELayout) :: layout1, layout2, layout3
     integer :: rc
@@ -187,7 +187,7 @@
 !-------------------------------------------------------------------------
 !   ! Setup:
 !   !
-!   !  Create a source and destination interngrid with data on it, to use
+!   !  Create a source and destination igrid with data on it, to use
 !   !  in the Regrid calls below.
  
     TwoOrOne= 1 + mod(npets+1,2)
@@ -202,28 +202,28 @@
    !epsil=epsilon(maxcoords(1))*maxcoords(1)*1.e3
     epsil=.05
 
-    !Create thesource interngrid
+    !Create thesource igrid
    !===========================
-    srcinterngrid = ESMF_InternGridCreateHorzXYUni((/100,150 /), &
+    srcigrid = ESMF_IGridCreateHorzXYUni((/100,150 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_IGRID_HORZ_STAGGER_B_NE, &
-                   name="srcinterngrid", rc=rc)
+                   name="srcigrid", rc=rc)
 
-   !Distribute the source interngrid
+   !Distribute the source igrid
    !===========================
-    call ESMF_InternGridDistribute(srcinterngrid, delayout=layout1, rc=rc)
+    call ESMF_IGridDistribute(srcigrid, delayout=layout1, rc=rc)
 
-   !Create the destination interngrid
+   !Create the destination igrid
    !===========================
 
-    dstinterngrid = ESMF_InternGridCreateHorzXYUni((/100,150 /), &
+    dstigrid = ESMF_IGridCreateHorzXYUni((/100,150 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
-                   name="srcinterngrid", rc=rc)
+                   name="srcigrid", rc=rc)
 
-   !Distribute destination interngrid
+   !Distribute destination igrid
    !===========================
-    call ESMF_InternGridDistribute(dstinterngrid, delayout=layout2, rc=rc)
+    call ESMF_IGridDistribute(dstigrid, delayout=layout2, rc=rc)
  
 
 
@@ -234,7 +234,7 @@
    !Create the field (with halo width of 3)
    !=======================================
     halo = 3
-    field1 = ESMF_FieldCreate(srcinterngrid, arrayspec, &
+    field1 = ESMF_FieldCreate(srcigrid, arrayspec, &
                               horzRelloc=ESMF_CELL_NECORNER, &
                               haloWidth=halo, name="src pressure", rc=rc)
 
@@ -246,10 +246,10 @@
    !Get the actual values of the x and y coordinate arrays
    !======================================================
 
-    call ESMF_InternGridGetCoord(srcinterngrid, dim=1, horzRelLoc=ESMF_CELL_NECORNER,  &
+    call ESMF_IGridGetCoord(srcigrid, dim=1, horzRelLoc=ESMF_CELL_NECORNER,  &
            centercoord=x_coords, rc=rc)
 
-    call ESMF_InternGridGetCoord(srcinterngrid, dim=2, horzRelLoc=ESMF_CELL_NECORNER,  &
+    call ESMF_IGridGetCoord(srcigrid, dim=2, horzRelLoc=ESMF_CELL_NECORNER,  &
            centercoord=y_coords, rc=rc)
 
 
@@ -259,7 +259,7 @@
     pi = 3.1416
     select case(FieldChoice)
     case(1) !** f=x
-      !Set the values of the NE corner interngrid points equal to their x-coordinate
+      !Set the values of the NE corner igrid points equal to their x-coordinate
       f90ptr1(:,:) = 0.0
       do j=lb(2)+halo, ub(2)-halo
         do i=lb(1)+halo, ub(1)-halo
@@ -297,14 +297,14 @@
 
     !Create the destination field
    !=============================
-    field2 = ESMF_FieldCreate(dstinterngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+    field2 = ESMF_FieldCreate(dstigrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                                    name="dst pressure", rc=rc)
 
     ! fields all ready to go
 
 !\subsubsection{Precomputing and Executing a Regrid}
       
-!  The user has already created an {\tt ESMF\_InternGrid}, an
+!  The user has already created an {\tt ESMF\_IGrid}, an
 !  {\tt ESMF\_Array} with data, and put them together in an {\tt ESMF\_Field}.
 !  An {\tt ESMF\_RouteHandle} is created and the data movement needed to
 !  execute the regrid is stored with that handle by the store method. 
@@ -313,7 +313,7 @@
       
 
 
-   !Do all the calculations in preparation for the actual re-interngridding
+   !Do all the calculations in preparation for the actual re-igridding
    !=================================================================
     call ESMF_FieldRegridStore(field1, field2, vm, &
                                routehandle=regrid_rh, &
@@ -329,24 +329,24 @@
    !==================================================
     call ESMF_FieldGetDataPointer(field2, f90ptr2, ESMF_DATA_REF, rc=rc)
 
-    !Array bounds in the destination interngrid
+    !Array bounds in the destination igrid
     !------------------------------------
     lb(:) = lbound(f90ptr2)
     ub(:) = ubound(f90ptr2)
     
-    print *, localPet,'In interngrid 2 lb=',lb,'  ub=',ub
+    print *, localPet,'In igrid 2 lb=',lb,'  ub=',ub
 
-    !Compute the "exact" array values in the destination interngrid (for verification)
+    !Compute the "exact" array values in the destination igrid (for verification)
     !---------------------------------------------------------------------------
     allocate( SolnOnTarget( lb(1):ub(1) , lb(2):ub(2) ) )
 
-    call ESMF_InternGridGetCoord(dstinterngrid, dim=1, horzRelLoc=ESMF_CELL_CENTER,  &
+    call ESMF_IGridGetCoord(dstigrid, dim=1, horzRelLoc=ESMF_CELL_CENTER,  &
            centercoord=x_coords2, rc=rc)
-    call ESMF_InternGridGetCoord(dstinterngrid, dim=2, horzRelLoc=ESMF_CELL_CENTER,  &
+    call ESMF_IGridGetCoord(dstigrid, dim=2, horzRelLoc=ESMF_CELL_CENTER,  &
            centercoord=y_coords2, rc=rc)
 
 
-    !Solution values at the target interngrid -- 4 cases
+    !Solution values at the target igrid -- 4 cases
     select case (FieldChoice)
     case(1) !** f=x
       SolnOnTarget(:,:)=x_coords2(:,:)
@@ -416,9 +416,9 @@
 
     call ESMF_FieldDestroy(field2, rc=rc)
 
-    call ESMF_InternGridDestroy(srcinterngrid, rc=rc)
+    call ESMF_IGridDestroy(srcigrid, rc=rc)
 
-    call ESMF_InternGridDestroy(dstinterngrid, rc=rc)
+    call ESMF_IGridDestroy(dstigrid, rc=rc)
 
     end subroutine RegridUTest
 

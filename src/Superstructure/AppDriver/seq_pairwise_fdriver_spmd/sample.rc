@@ -1,13 +1,13 @@
 # These are read in by the ESMF Config object and used
-# to create the default interngrid used by the example code.
+# to create the default igrid used by the example code.
 #
 # Lines starting with # are comments
 
-# Number of InternGrid cells in each direction
+# Number of IGrid cells in each direction
 I Counts: 10
 J Counts: 40
 
-# Coordinate information for the InternGrid
+# Coordinate information for the IGrid
 X Min: 0.0
 Y Min: -180.0
 X Max: 90.0

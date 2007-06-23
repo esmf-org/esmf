@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.11 2007/06/22 23:21:50 cdeluca Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.12 2007/06/23 04:01:13 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -19,7 +19,7 @@ contains
 
 ! Initialize routine which creates "field1" on PETs 0 and 1
 subroutine comp1_init(gcomp, istate, ostate, clock, rc)
-    type(ESMF_InternGridComp), intent(inout) :: gcomp
+    type(ESMF_IGridComp), intent(inout) :: gcomp
     type(ESMF_State), intent(inout) :: istate, ostate
     type(ESMF_Clock), intent(in) :: clock
     integer, intent(out) :: rc
@@ -39,7 +39,7 @@ end subroutine comp1_init
 
 ! Initialize routine which creates "field2" on PETs 2 and 3
 subroutine comp2_init(gcomp, istate, ostate, clock, rc)
-    type(ESMF_InternGridComp), intent(inout) :: gcomp
+    type(ESMF_IGridComp), intent(inout) :: gcomp
     type(ESMF_State), intent(inout) :: istate, ostate
     type(ESMF_Clock), intent(in) :: clock
     integer, intent(out) :: rc
@@ -58,7 +58,7 @@ subroutine comp2_init(gcomp, istate, ostate, clock, rc)
 end subroutine comp2_init
 
 subroutine comp_dummy(gcomp, rc)
-   type(ESMF_InternGridComp), intent(inout) :: gcomp
+   type(ESMF_IGridComp), intent(inout) :: gcomp
    integer, intent(out) :: rc
 
    rc = ESMF_SUCCESS
@@ -73,7 +73,7 @@ subroutine StateDestroyAll(state, rc)
    character(len=ESMF_MAXSTR) :: nameList(100)
 
    ! assumes all items are empty fields.  if that changes, this code has
-   ! to get the interngrid and delete that as well (after deleting the field) and
+   ! to get the igrid and delete that as well (after deleting the field) and
    ! get and delete the array after, too.
    call ESMF_StateGet(state, itemCount=itemCount, itemNameList=nameList, rc=rc)
    if (rc .ne. ESMF_SUCCESS) return
@@ -124,7 +124,7 @@ program ESMF_StateReconcileUTest
     ! Local variables
     integer :: rc
     type(ESMF_State) :: state1
-    type(ESMF_InternGridComp) :: comp1, comp2
+    type(ESMF_IGridComp) :: comp1, comp2
     type(ESMF_VM) :: vm
     character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename
     type(ESMF_Array):: array
@@ -153,18 +153,18 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     comp1name = "Atmosphere"
-    comp1 = ESMF_InternGridCompCreate(name=comp1name, petList=(/ 0, 1 /), rc=rc)
+    comp1 = ESMF_IGridCompCreate(name=comp1name, petList=(/ 0, 1 /), rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a InternGridded Component"
+    write(name, *) "Creating a IGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     comp2name = "Ocean"
-    comp2 = ESMF_InternGridCompCreate(name=comp2name, petList=(/ 2, 3 /), rc=rc)
+    comp2 = ESMF_IGridCompCreate(name=comp2name, petList=(/ 2, 3 /), rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a InternGridded Component"
+    write(name, *) "Creating a IGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -182,46 +182,46 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompSetServices(comp1, comp_dummy, rc)
+    call ESMF_IGridCompSetServices(comp1, comp_dummy, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompSetServices"
+    write(name, *) "Calling IGridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompSetServices(comp2, comp_dummy, rc)
+    call ESMF_IGridCompSetServices(comp2, comp_dummy, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompSetServices"
+    write(name, *) "Calling IGridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompSetEntryPoint(comp1, ESMF_SETINIT, &
+    call ESMF_IGridCompSetEntryPoint(comp1, ESMF_SETINIT, &
                                         comp1_init, ESMF_SINGLEPHASE, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompSetEntryPoint"
+    write(name, *) "Calling IGridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompSetEntryPoint(comp2, ESMF_SETINIT, &
+    call ESMF_IGridCompSetEntryPoint(comp2, ESMF_SETINIT, &
                                         comp2_init, ESMF_SINGLEPHASE, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompSetEntryPoint"
+    write(name, *) "Calling IGridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompInitialize(comp1, state1, rc=rc)
+    call ESMF_IGridCompInitialize(comp1, state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompInitialize"
+    write(name, *) "Calling IGridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompInitialize(comp2, state1, rc=rc)
+    call ESMF_IGridCompInitialize(comp2, state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompInitialize"
+    write(name, *) "Calling IGridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -247,16 +247,16 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompDestroy(comp1, rc=rc)
+    call ESMF_IGridCompDestroy(comp1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompDestroy"
+    write(name, *) "Calling IGridCompDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompDestroy(comp2, rc=rc)
+    call ESMF_IGridCompDestroy(comp2, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompDestroy"
+    write(name, *) "Calling IGridCompDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
     !-------------------------------------------------------------------------
@@ -277,17 +277,17 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     comp1name = "Atmosphere"
-    comp1 = ESMF_InternGridCompCreate(name=comp1name, rc=rc)
+    comp1 = ESMF_IGridCompCreate(name=comp1name, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a InternGridded Component"
+    write(name, *) "Creating a IGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     comp2name = "Ocean"
-    comp2 = ESMF_InternGridCompCreate(name=comp2name, rc=rc)
+    comp2 = ESMF_IGridCompCreate(name=comp2name, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a InternGridded Component"
+    write(name, *) "Creating a IGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -305,46 +305,46 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompSetServices(comp1, comp_dummy, rc)
+    call ESMF_IGridCompSetServices(comp1, comp_dummy, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompSetServices"
+    write(name, *) "Calling IGridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompSetServices(comp2, comp_dummy, rc)
+    call ESMF_IGridCompSetServices(comp2, comp_dummy, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompSetServices"
+    write(name, *) "Calling IGridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompSetEntryPoint(comp1, ESMF_SETINIT, &
+    call ESMF_IGridCompSetEntryPoint(comp1, ESMF_SETINIT, &
                                         comp1_init, ESMF_SINGLEPHASE, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompSetEntryPoint"
+    write(name, *) "Calling IGridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompSetEntryPoint(comp2, ESMF_SETINIT, &
+    call ESMF_IGridCompSetEntryPoint(comp2, ESMF_SETINIT, &
                                         comp2_init, ESMF_SINGLEPHASE, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompSetEntryPoint"
+    write(name, *) "Calling IGridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompInitialize(comp1, state1, rc=rc)
+    call ESMF_IGridCompInitialize(comp1, state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompInitialize"
+    write(name, *) "Calling IGridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompInitialize(comp2, state1, rc=rc)
+    call ESMF_IGridCompInitialize(comp2, state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompInitialize"
+    write(name, *) "Calling IGridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -371,16 +371,16 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompDestroy(comp1, rc=rc)
+    call ESMF_IGridCompDestroy(comp1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompDestroy"
+    write(name, *) "Calling IGridCompDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompDestroy(comp2, rc=rc)
+    call ESMF_IGridCompDestroy(comp2, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompDestroy"
+    write(name, *) "Calling IGridCompDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
     !-------------------------------------------------------------------------
@@ -403,18 +403,18 @@ program ESMF_StateReconcileUTest
     !NEX_UTest_Multi_Proc_Only
     comp1name = "Atmosphere"
     ! TODO: add the parent VM flag here
-    comp1 = ESMF_InternGridCompCreate(name=comp1name, rc=rc)
+    comp1 = ESMF_IGridCompCreate(name=comp1name, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a InternGridded Component"
+    write(name, *) "Creating a IGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     comp2name = "Ocean"
     ! TODO: add the parent VM flag here
-    comp2 = ESMF_InternGridCompCreate(name=comp2name, rc=rc)
+    comp2 = ESMF_IGridCompCreate(name=comp2name, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a InternGridded Component"
+    write(name, *) "Creating a IGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -432,46 +432,46 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompSetServices(comp1, comp_dummy, rc)
+    call ESMF_IGridCompSetServices(comp1, comp_dummy, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompSetServices"
+    write(name, *) "Calling IGridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompSetServices(comp2, comp_dummy, rc)
+    call ESMF_IGridCompSetServices(comp2, comp_dummy, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompSetServices"
+    write(name, *) "Calling IGridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompSetEntryPoint(comp1, ESMF_SETINIT, &
+    call ESMF_IGridCompSetEntryPoint(comp1, ESMF_SETINIT, &
                                         comp1_init, ESMF_SINGLEPHASE, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompSetEntryPoint"
+    write(name, *) "Calling IGridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompSetEntryPoint(comp2, ESMF_SETINIT, &
+    call ESMF_IGridCompSetEntryPoint(comp2, ESMF_SETINIT, &
                                         comp2_init, ESMF_SINGLEPHASE, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompSetEntryPoint"
+    write(name, *) "Calling IGridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompInitialize(comp1, state1, rc=rc)
+    call ESMF_IGridCompInitialize(comp1, state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompInitialize"
+    write(name, *) "Calling IGridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompInitialize(comp2, state1, rc=rc)
+    call ESMF_IGridCompInitialize(comp2, state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompInitialize"
+    write(name, *) "Calling IGridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -498,16 +498,16 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompDestroy(comp1, rc=rc)
+    call ESMF_IGridCompDestroy(comp1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompDestroy"
+    write(name, *) "Calling IGridCompDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_InternGridCompDestroy(comp2, rc=rc)
+    call ESMF_IGridCompDestroy(comp2, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling InternGridCompDestroy"
+    write(name, *) "Calling IGridCompDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
     !-------------------------------------------------------------------------

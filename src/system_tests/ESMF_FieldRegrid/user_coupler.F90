@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.13 2007/06/22 23:21:57 cdeluca Exp $
+! $Id: user_coupler.F90,v 1.14 2007/06/23 04:01:29 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -93,7 +93,7 @@
       ! Get VM from coupler component to send down to Regrid Store routine
       call ESMF_CplCompGet(comp, vm=vm, rc=rc)
 
-      ! These are fields on different InternGrids - call RegridStore to set
+      ! These are fields on different IGrids - call RegridStore to set
       ! up the Regrid structure
 
       call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
@@ -133,7 +133,7 @@
       call ESMF_StateGetField(exportState, "humidity", humidity2, rc=rc)
       ! call ESMF_FieldPrint(humidity2, rc=rc)
 
-      ! These are fields on different InternGrids - call Regrid to rearrange
+      ! These are fields on different IGrids - call Regrid to rearrange
       !  the data.   The communication pattern was computed at init,
       !  this simply has to execute the send and receive equivalents.
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.44 2007/06/22 23:21:39 cdeluca Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.45 2007/06/23 04:00:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -39,9 +39,9 @@
       use ESMF_InternArrayDataMapMod
       use ESMF_InternArrayMod ! ESMF internal array  class
       use ESMF_InternArrayGetMod    ! ESMF array  class
-      use ESMF_PhysCoordMod   ! ESMF physical interngrid domain class
-      use ESMF_PhysGridMod    ! ESMF physical interngrid class
-      use ESMF_InternGridMod        ! ESMF interngrid   class
+      use ESMF_PhysCoordMod   ! ESMF physical igrid domain class
+      use ESMF_PhysGridMod    ! ESMF physical igrid class
+      use ESMF_IGridMod        ! ESMF igrid   class
       use ESMF_FieldDataMapMod
       use ESMF_FieldMod       ! ESMF field  class
       use ESMF_BundleMod      ! ESMF bundle class
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.44 2007/06/22 23:21:39 cdeluca Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.45 2007/06/23 04:00:40 cdeluca Exp $'
 
 !==============================================================================
 
@@ -81,20 +81,20 @@
 
 ! !INTERFACE:
     subroutine ESMF_RegridConstructLinear(rh, &
-                                          srcArray, srcInternGrid, srcDataMap, &
+                                          srcArray, srcIGrid, srcDataMap, &
                                           hasSrcData, &
-                                          dstArray, dstInternGrid, dstDataMap, &
+                                          dstArray, dstIGrid, dstDataMap, &
                                           hasDstData, &
                                           parentVM, routeIndex, &
                                           srcMask, dstMask, rc) 
 ! !ARGUMENTS:
       type(ESMF_RouteHandle),  intent(inout) :: rh
       type(ESMF_InternArray),        intent(in ) :: srcArray
-      type(ESMF_InternGrid),         intent(inout) :: srcInternGrid
+      type(ESMF_IGrid),         intent(inout) :: srcIGrid
       type(ESMF_FieldDataMap), intent(inout) :: srcDataMap
       logical,                 intent(inout) :: hasSrcData
       type(ESMF_InternArray),        intent(in ) :: dstArray
-      type(ESMF_InternGrid),         intent(inout) :: dstInternGrid
+      type(ESMF_IGrid),         intent(inout) :: dstIGrid
       type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       logical,                 intent(inout) :: hasDstData
       type(ESMF_VM),           intent(in ) :: parentVM
@@ -105,7 +105,7 @@
 !
 ! !DESCRIPTION:
 !     Given a source field and destination field (and their attached
-!     interngrids), this routine constructs a new {\tt Regrid} object
+!     igrids), this routine constructs a new {\tt Regrid} object
 !     and fills it with information necessary for regridding the source
 !     field to the destination field using a linear interpolation.  
 !     Returns a pointer to a new {\tt Regrid}.
@@ -165,8 +165,8 @@
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDataMap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,recvDomainList)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,srcInternGrid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,dstInternGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,srcIGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,dstIGrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rh,rc)
 
@@ -192,14 +192,14 @@
 !                               ESMF_ERR_PASSTHRU, &
 !                               ESMF_CONTEXT, rc)) return
       
-      ! get destination interngrid info
-      !TODO: Get interngrid masks?
+      ! get destination igrid info
+      !TODO: Get igrid masks?
       call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstRelLoc, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_InternGridGetDELocalInfo(dstInternGrid, horzRelLoc=dstRelLoc, &
+      call ESMF_IGridGetDELocalInfo(dstIGrid, horzRelLoc=dstRelLoc, &
                                    localCellCountPerDim=dstCounts, &
                                    reorder=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -210,7 +210,7 @@
       if (ESMF_LogMsgFoundAllocError(localrc, "dstLocalCoordArray", &
                                      ESMF_CONTEXT, rc)) return
 
-      call ESMF_InternGridGetCoord(dstInternGrid, vertrelloc=dstRelLoc, &
+      call ESMF_IGridGetCoord(dstIGrid, vertrelloc=dstRelLoc, &
                              centerCoord=dstLocalCoordArray, &
                              reorder=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -220,13 +220,13 @@
       call ESMF_InternArrayGetData(dstLocalCoordArray(1), dstLocalCoordZ, &
                              ESMF_DATA_REF, localrc)
 
-      ! get source interngrid info
+      ! get source igrid info
       call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcRelLoc, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_InternGridGetDELocalInfo(srcInternGrid, horzRelLoc=srcRelLoc, &
+      call ESMF_IGridGetDELocalInfo(srcIGrid, horzRelLoc=srcRelLoc, &
                                    localCellCountPerDim=srcCounts, &
                                    reorder=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -237,7 +237,7 @@
       if (ESMF_LogMsgFoundAllocError(localrc, "srcLocalCoordArray", &
                                      ESMF_CONTEXT, rc)) return
 
-      call ESMF_InternGridGetCoord(srcInternGrid, vertrelloc=srcRelLoc, &
+      call ESMF_IGridGetCoord(srcIGrid, vertrelloc=srcRelLoc, &
                              centerCoord=srcLocalCoordArray, &
                              reorder=.false., total=.true., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -247,7 +247,7 @@
       call ESMF_InternArrayGetData(srcLocalCoordArray(1), srcLocalCoordZ, &
                              ESMF_DATA_REF, localrc)
 
-      call ESMF_InternGridGetCellMask(srcInternGrid, srcMaskArray, relloc=srcRelLoc, &
+      call ESMF_IGridGetCellMask(srcIGrid, srcMaskArray, relloc=srcRelLoc, &
                                 rc=localrc)
       call ESMF_InternArrayGetData(srcMaskArray, srcLocalMask, ESMF_DATA_REF, &
                              localrc)
@@ -259,7 +259,7 @@
    !              is used internal to this routine to get coordinate 
    !              information locally to calculate the regrid weights
 
-      route = ESMF_RegridRouteConstruct(3, srcInternGrid, dstInternGrid, &
+      route = ESMF_RegridRouteConstruct(3, srcIGrid, dstIGrid, &
                                         recvDomainList, parentVM, &
                                         srcDataMap=srcDataMap, &
                                         dstDataMap=dstDataMap, &
@@ -267,7 +267,7 @@
       call ESMF_RouteHandleSet(rh, which_route=routeIndex, &
                                route=route, rc=localrc)
 
-!      tempRoute = ESMF_RegridRouteConstruct(srcInternGrid, dstInternGrid, &
+!      tempRoute = ESMF_RegridRouteConstruct(srcIGrid, dstIGrid, &
 !                                            recvDomainListTot, parentVM, &
 !                                            srcDataMap=srcDataMap, &
 !                                            dstDataMap=dstDataMap, &
@@ -281,7 +281,7 @@
       if (ESMF_LogMsgFoundAllocError(localrc, "src gathered arrays", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! Execute Route now to gather interngrid center coordinates from source
+      ! Execute Route now to gather igrid center coordinates from source
       ! These arrays are just wrappers for the local coordinate data
       call ESMF_RouteRunF90PtrR811D(tempRoute, srcLocalCoordZ, &
                                     srcGatheredCoordZ, localrc)
@@ -325,7 +325,7 @@
       endif
      
       ! Loop through domains for the search routine
-      call ESMF_InternGridGet(srcInternGrid, vertCoordSystem=coordSystem, rc=localrc)
+      call ESMF_IGridGet(srcIGrid, vertCoordSystem=coordSystem, rc=localrc)
       num_domains = recvDomainList%num_domains
       start = 1
       startComp = 1
@@ -375,7 +375,7 @@
                                          srcSizeZ, srcStart, dstSizeZ, &
                                          found, foundCount, &
                                          srcCenterZ, dstCenterZ, &
-                                         srcInternGridMask, srcUserMask, dstUserMask, &
+                                         srcIGridMask, srcUserMask, dstUserMask, &
                                          rc)
 !
 ! !ARGUMENTS:
@@ -389,14 +389,14 @@
       integer, dimension(dstSizeZ), intent(inout) :: foundCount
       real(ESMF_KIND_R8), dimension(srcSizeZ), intent(in) :: srcCenterZ
       real(ESMF_KIND_R8), dimension(dstSizeZ), intent(in) :: dstCenterZ
-      integer, dimension(srcSizeZ), intent(in) :: srcInternGridMask
+      integer, dimension(srcSizeZ), intent(in) :: srcIGridMask
       logical, dimension(srcSizeZ), intent(in) :: srcUserMask
       logical, dimension(dstSizeZ), intent(in) :: dstUserMask
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Given a source field and destination field (and their attached
-!     interngrids), this routine constructs a new {\tt Regrid} object
+!     igrids), this routine constructs a new {\tt Regrid} object
 !     and fills it with information necessary for regridding the source
 !     field to the destination field using a linear interpolation.
 !     Returns a pointer to a new {\tt Regrid}.
@@ -428,12 +428,12 @@
          k,                &! loop counters
          kkk,              &! more loop counters
          kp1,              &! neighbor indices
-         kbDst, keDst,     &! beg, end of exclusive domain in k-dir of dest interngrid
-         kbSrc, keSrc,     &! beg, end of exclusive domain in k-dir of source interngrid
+         kbDst, keDst,     &! beg, end of exclusive domain in k-dir of dest igrid
+         kbSrc, keSrc,     &! beg, end of exclusive domain in k-dir of source igrid
          srcCount, srcValidCount
 
-      integer :: srcAdd,   &! address in gathered source interngrid
-                 dstAdd     ! address in dest interngrid
+      integer :: srcAdd,   &! address in gathered source igrid
+                 dstAdd     ! address in dest igrid
          
       real (ESMF_KIND_R8) ::  dstZ, sumWts
 
@@ -457,7 +457,7 @@
         ! only perform interpolation on un-masked and un-found points
         if (dstUserMask(k) .and. (.not.found(k))) then
           ! for this destination point, look for the proper neighbor cells in the
-          ! source interngrid 
+          ! source igrid 
           search_loop: do kkk=kbSrc,keSrc
                
             ! assume ghost cells filled so no worries about boundaries
@@ -478,17 +478,17 @@
           if (found(k)) then
 
             ! check to see if src masks are true at all points
-            ! check interngrid mask to see if it's a ghost cell
+            ! check igrid mask to see if it's a ghost cell
             srcCount = 0
-            if (srcUserMask(kkk) .and. (srcInternGridMask(kkk).ne.1)) &
+            if (srcUserMask(kkk) .and. (srcIGridMask(kkk).ne.1)) &
                 srcCount = srcCount + 1
-            if (srcUserMask(kp1) .and. (srcInternGridMask(kp1).ne.1)) &
+            if (srcUserMask(kp1) .and. (srcIGridMask(kp1).ne.1)) &
                 srcCount = srcCount + 1
 
             if (srcCount.ne.0) then
             ! compute linear weights
               sumWts = 0.0
-              if (srcUserMask(kkk) .and. (srcInternGridMask(kkk).ne.1)) then
+              if (srcUserMask(kkk) .and. (srcIGridMask(kkk).ne.1)) then
                 weights(1) = abs(srcZ(1) - dstZ)
                 if (weights(1).eq.0.0) then
                   weights(1) = 1.0e20   ! TODO: exit loop instead
@@ -497,7 +497,7 @@
                 endif
                 sumWts = sumWts + weights(1)
               endif
-              if (srcUserMask(kp1) .and. (srcInternGridMask(kp1).ne.1)) then
+              if (srcUserMask(kp1) .and. (srcIGridMask(kp1).ne.1)) then
                 weights(2) = abs(srcZ(2) - dstZ)
                 if (weights(2).eq.0.0) then
                   weights(2) = 1.0e20   ! TODO: exit loop instead
@@ -512,8 +512,8 @@
               ! not be assigned weights or marked found.  Keep track of the total
               ! number of valid computational source points 
               srcValidCount = 0
-              if (srcInternGridMask(kkk).eq.0) srcValidCount = srcValidCount + 1
-              if (srcInternGridMask(kp1).eq.0) srcValidCount = srcValidCount + 1
+              if (srcIGridMask(kkk).eq.0) srcValidCount = srcValidCount + 1
+              if (srcIGridMask(kp1).eq.0) srcValidCount = srcValidCount + 1
    
               if ((foundCount(k)+srcValidCount) .ne. srcCount) then
                 found(k) = .false.
@@ -521,12 +521,12 @@
               endif
 
               ! now store this link into address, weight arrays
-              if (srcUserMask(kkk) .and. (srcInternGridMask(kkk).eq.0)) then
+              if (srcUserMask(kkk) .and. (srcIGridMask(kkk).eq.0)) then
                 dstAdd = k
                 srcAdd = kkk + srcStart
                 call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), rc)
               endif
-              if (srcUserMask(kp1) .and. (srcInternGridMask(kp1).eq.0)) then
+              if (srcUserMask(kp1) .and. (srcIGridMask(kp1).eq.0)) then
                 dstAdd = k
                 srcAdd = kp1 + srcStart
                 call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(2), rc)
@@ -535,7 +535,7 @@
 
           endif ! found box
         endif ! dst mask            
-      enddo ! k loop on dst interngrid DE
+      enddo ! k loop on dst igrid DE
 
       if (present(rc)) rc = ESMF_SUCCESS
       

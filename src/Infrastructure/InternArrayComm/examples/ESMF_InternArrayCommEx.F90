@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayCommEx.F90,v 1.5 2007/06/22 23:21:34 cdeluca Exp $
+! $Id: ESMF_InternArrayCommEx.F90,v 1.6 2007/06/23 04:00:33 cdeluca Exp $
 !
 ! Example code which shows how to use Array Communication routines
 
@@ -30,7 +30,7 @@
     integer :: bytwo, byfour
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2
-    type(ESMF_InternGrid) :: interngrid1, interngrid2
+    type(ESMF_IGrid) :: igrid1, igrid2
     type(ESMF_FieldDataMap) :: datamap
     type(ESMF_VM) :: vm
     type(ESMF_DELayout) :: delayout1, delayout2
@@ -38,7 +38,7 @@
     integer :: g1_cells(ESMF_MAXIGRIDDIM), g2_cells(ESMF_MAXIGRIDDIM)
     real (ESMF_KIND_R8) :: min(2), max(2)
     real (ESMF_KIND_R8), pointer :: f90ptr1(:,:), f90ptr2(:,:)
-    type(ESMF_InternGridHorzStagger) :: horz_stagger
+    type(ESMF_IGridHorzStagger) :: horz_stagger
     character(len=32) :: gname
 !EOC
 
@@ -52,7 +52,7 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !-------------------------------------------------------------------------------
-!   Create the interngrid, datamap, and array objects here
+!   Create the igrid, datamap, and array objects here
 !   which will be needed for the examples below.
 
     call ESMF_VMGet(vm, petcount=nPETs, rc=rc)
@@ -79,7 +79,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     !------------------------------------------------------------------------
-    ! First interngrid
+    ! First igrid
     counts(1) = 48
     counts(2) = 24
     min(1) = 0.0
@@ -87,31 +87,31 @@
     min(2) = 0.0
     max(2) = 5.0
     horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
-    gname = "test interngrid 1"
+    gname = "test igrid 1"
 
-    interngrid1 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
+    igrid1 = ESMF_IGridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzStagger=horz_stagger, &
                               name=gname, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_InternGridDistribute(interngrid1, delayout=delayout1, rc=rc)
+    call ESMF_IGridDistribute(igrid1, delayout=delayout1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
    
 
     !------------------------------------------------------------------------
-    ! Second interngrid
-    gname = "test interngrid 2"
+    ! Second igrid
+    gname = "test igrid 2"
     horz_stagger = ESMF_IGRID_HORZ_STAGGER_D_NE
-    interngrid2 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
+    igrid2 = ESMF_IGridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzStagger=horz_stagger, &
                               name=gname, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_InternGridDistribute(interngrid2, delayout=delayout2, rc=rc)
+    call ESMF_IGridDistribute(igrid2, delayout=delayout2, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     !------------------------------------------------------------------------
@@ -120,14 +120,14 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! Array data
-    call ESMF_InternGridGetDELocalInfo(interngrid1, localCellCountPerDim=g1_cells, &
+    call ESMF_IGridGetDELocalInfo(igrid1, localCellCountPerDim=g1_cells, &
                           horzRelloc=ESMF_CELL_CENTER)
     allocate(f90ptr1(g1_cells(1)+4, g1_cells(2)+4))
     f90ptr1 = 10
     array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, haloWidth=2, rc=rc)
 
     ! Second array
-    call ESMF_InternGridGetDELocalInfo(interngrid2, localCellCountPerDim=g2_cells, &
+    call ESMF_IGridGetDELocalInfo(igrid2, localCellCountPerDim=g2_cells, &
                           horzRelloc=ESMF_CELL_CENTER)
     allocate(f90ptr2(g2_cells(1)+4, g2_cells(2)+4))
     f90ptr2 = -1
@@ -138,7 +138,7 @@
 
     call ESMF_FieldDataMapSetDefault(datamap, ESMF_INDEX_IJ)
 
-    !f1 = ESMF_FieldCreate(interngrid1, arr1, ESMF_DATA_REF, ESMF_CELL_CENTER, &
+    !f1 = ESMF_FieldCreate(igrid1, arr1, ESMF_DATA_REF, ESMF_CELL_CENTER, &
     !                        ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
 
 !-------------------------------------------------------------------------------

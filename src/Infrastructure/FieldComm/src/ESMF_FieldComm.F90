@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.93 2007/06/22 23:21:31 cdeluca Exp $
+! $Id: ESMF_FieldComm.F90,v 1.94 2007/06/23 04:00:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -50,8 +50,8 @@
       use ESMF_RouteMod
       use ESMF_InternArrayCommMod
       use ESMF_InternArrayDataMapMod
-      use ESMF_InternGridTypesMod
-      use ESMF_InternGridMod
+      use ESMF_IGridTypesMod
+      use ESMF_IGridMod
       use ESMF_FieldDataMapMod
       use ESMF_FieldMod
       use ESMF_RegridMod
@@ -75,9 +75,9 @@
    ! These are the recommended entry points; the code itself is in Array:
                              ! Synchronize boundary data between decompositions
    public ESMF_FieldHaloStore, ESMF_FieldHalo, ESMF_FieldHaloRelease 
-                             ! Redistribute existing arrays, matching interngrids
+                             ! Redistribute existing arrays, matching igrids
    public ESMF_FieldRedistStore, ESMF_FieldRedist, ESMF_FieldRedistRelease 
-                             ! Regridding and interpolation, different interngrids
+                             ! Regridding and interpolation, different igrids
    public ESMF_FieldRegridStore, ESMF_FieldRegrid, ESMF_FieldRegridRelease 
 
    public ESMF_FieldGather   ! Combine 1 decomposed field into 1 on 1 DE
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.93 2007/06/22 23:21:31 cdeluca Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.94 2007/06/23 04:00:25 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -178,8 +178,8 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-! Entry points for fuctionality which will happen mostly below at the InternGrid
-!   level, but needs a Data Pointer as well as interngrid info to operate.
+! Entry points for fuctionality which will happen mostly below at the IGrid
+!   level, but needs a Data Pointer as well as igrid info to operate.
 !   These include Reduction operations, Halo, and Transpose.
 !
 !------------------------------------------------------------------------------
@@ -213,7 +213,7 @@
 !           {\tt ESMF\_Field} containing data to be gathered.
 !     \item [array] 
 !           Newly created array containing the collected data.
-!           It is the size of the entire undecomposed interngrid.
+!           It is the size of the entire undecomposed igrid.
 !     \item [{[blockingflag]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
@@ -252,7 +252,7 @@
       ftypep => field%ftypep
 
       ! Call Array method to perform actual work
-      call ESMF_IArrayAllGather(ftypep%localfield%localdata, ftypep%interngrid, &
+      call ESMF_IArrayAllGather(ftypep%localfield%localdata, ftypep%igrid, &
                                ftypep%mapping, array, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -303,7 +303,7 @@
 !           Destination PET number where the gathered data is to be returned.
 !     \item [array] 
 !           Newly created {\tt ESMF\_Array} containing the collected data on 
-!           the specified PET.  It is the size of the entire undecomposed interngrid.
+!           the specified PET.  It is the size of the entire undecomposed igrid.
 !           On all other PETs this argument returns an invalid object.
 !           Note that the user should not create an {\tt ESMF\_Array} before
 !           making this call; the {\tt ESMF\_Array} should be an uninitialized
@@ -350,7 +350,7 @@
       ftypep => field%ftypep
 
       call ESMF_IArrayGather(ftypep%localfield%localdata, &
-                            ftypep%interngrid, ftypep%mapping, dstPET, &
+                            ftypep%igrid, ftypep%mapping, dstPET, &
                             array, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -555,7 +555,7 @@
 !     {\tt ESMF\_Field} containing the data to be updated and the
 !     {\tt ESMF\_RouteHandle} computed during this store call.
 !     If more than one {\tt ESMF\_Field} has identical
-!     {\tt ESMF\_InternGrid}s and {\tt ESMF\_FieldDataMap}s, then
+!     {\tt ESMF\_IGrid}s and {\tt ESMF\_FieldDataMap}s, then
 !     the same {\tt ESMF\_RouteHandle} can be computed once and used
 !     in multiple executions of the halo operation.
 
@@ -598,7 +598,7 @@
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      ! Sanity checks for good field, and that it has an associated interngrid
+      ! Sanity checks for good field, and that it has an associated igrid
       ! and data before going down to the next level.
       if (.not.associated(field%ftypep)) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -616,7 +616,7 @@
 
 
       call ESMF_IArrayHaloStore(ftypep%localfield%localdata, &
-        ftypep%localfield%localFlag, ftypep%interngrid, &
+        ftypep%localfield%localFlag, ftypep%igrid, &
         ftypep%mapping, routehandle, halodirection, routeOptions, rc=status)
       if (ESMF_LogMsgFoundError(status, &
         ESMF_ERR_PASSTHRU, &
@@ -782,12 +782,12 @@
 !     done only a single time; otherwise computing and reusing a communication
 !     pattern will be more efficient.
 !     This routine reads the source field and leaves 
-!     the data untouched.  It reads the {\t ESMF\_InternGrid} 
+!     the data untouched.  It reads the {\t ESMF\_IGrid} 
 !     and {\tt ESMF\_FieldDataMap}
 !     from the destination field and updates the array data in the destination.
-!     The {\tt ESMF\_InternGrid}s may have different decompositions (different
+!     The {\tt ESMF\_IGrid}s may have different decompositions (different
 !     {\tt ESMF\_DELayout}s) or different data maps, but the source and
-!     destination interngrids must describe the same set of coordinates.
+!     destination igrids must describe the same set of coordinates.
 !     Unlike {\tt ESMF\_FieldRegrid} this routine does not do interpolation,
 !     only data movement.
 !
@@ -796,7 +796,7 @@
 !     \item [srcField]
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstField]
-!           {\tt ESMF\_Field} containing destination interngrid.
+!           {\tt ESMF\_Field} containing destination igrid.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s,
 !           most commonly the VM of the Coupler if the redistribution is
@@ -894,12 +894,12 @@
 !     Perform a redistribution operation over the data
 !     in an {\tt ESMF\_Field}.  
 !     This routine reads the source field and leaves 
-!     the data untouched.  It reads the {\t ESMF\_InternGrid} 
+!     the data untouched.  It reads the {\t ESMF\_IGrid} 
 !     and {\tt ESMF\_FieldDataMap}
 !     from the destination field and updates the array data in the destination.
-!     The {\tt ESMF\_InternGrid}s may have different decompositions (different
+!     The {\tt ESMF\_IGrid}s may have different decompositions (different
 !     {\tt ESMF\_DELayout}s) or different data maps, but the source and
-!     destination interngrids must describe the same set of coordinates.
+!     destination igrids must describe the same set of coordinates.
 !     Unlike {\tt ESMF\_FieldRegrid} this routine does not do interpolation,
 !     only data movement.
 !
@@ -908,7 +908,7 @@
 !     \item [srcField]
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstField]
-!           {\tt ESMF\_Field} containing destination interngrid.
+!           {\tt ESMF\_Field} containing destination igrid.
 !     \item [routehandle]          
 !           {\tt ESMF\_RouteHandle} which was returned by the corresponding
 !           {\tt ESMF\_FieldRedistStore()} call. It is associated with
@@ -1045,9 +1045,9 @@
 !     in that redistribution does no interpolation, only a 1-for-1 movement
 !     of data from one location to another.
 !     Therefore, while
-!     the {\tt ESMF\_InternGrid}s for the source and destination may have
+!     the {\tt ESMF\_IGrid}s for the source and destination may have
 !     different decompositions (different {\tt ESMF\_DELayout}s)
-!     or different data maps, the source and destination interngrids
+!     or different data maps, the source and destination igrids
 !     must describe the same set of coordinates.
 
 !     The arguments are:
@@ -1055,7 +1055,7 @@
 !     \item [srcField] 
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstField] 
-!           {\tt ESMF\_Field} containing destination interngrid.
+!           {\tt ESMF\_Field} containing destination igrid.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s, 
 !           most commonly the VM
@@ -1132,9 +1132,9 @@
 
 
       call ESMF_IArrayRedistStore(srcFtypep%localfield%localdata, &
-        srcFtypep%localfield%localFlag, srcFtypep%interngrid, srcFtypep%mapping, &
+        srcFtypep%localfield%localFlag, srcFtypep%igrid, srcFtypep%mapping, &
         dstFtypep%localfield%localdata, dstFtypep%localfield%localFlag, &
-        dstFtypep%interngrid, dstFtypep%mapping, parentVM, &
+        dstFtypep%igrid, dstFtypep%mapping, parentVM, &
         routeOptions, routehandle, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -1171,8 +1171,8 @@
 !     Precompute a redistribution operation over the data
 !     in a {\tt ESMF\_Field}.  This routine reads the source field and leaves 
 !     the data untouched.  This version of RedistStore creates the
-!     destination {\tt ESMF\_Field} and its underlying {\tt ESMF\_InternGrid} and
-!     {\tt ESMF\_FieldDataMap} from the source interngrid and input decompIds.
+!     destination {\tt ESMF\_Field} and its underlying {\tt ESMF\_IGrid} and
+!     {\tt ESMF\_FieldDataMap} from the source igrid and input decompIds.
 !     Unlike {\tt ESMF\_FieldRegrid} this routine does not do interpolation,
 !     only data movement.
 !
@@ -1183,7 +1183,7 @@
 !     \item [decompIds] 
 !           Array of decomposition identifiers.
 !     \item [dstField] 
-!           {\tt ESMF\_Field} containing destination interngrid.
+!           {\tt ESMF\_Field} containing destination igrid.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s, 
 !           most commonly the VM
@@ -1206,7 +1206,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      !type(ESMF_InternGrid) :: dstInternGrid
+      !type(ESMF_IGrid) :: dstIGrid
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
    
       ! Initialize return code; assume routine not implemented  
@@ -1221,7 +1221,7 @@
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,dstField,rc)
 
-      ! Sanity checks for good source field, and that it has an associated interngrid
+      ! Sanity checks for good source field, and that it has an associated igrid
       ! and data before going down to the next level.
       if (.not.associated(srcField%ftypep)) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -1237,20 +1237,20 @@
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      ! create the destination interngrid by copying the source interngrid and adding
+      ! create the destination igrid by copying the source igrid and adding
       ! input decompids
-      ! dstInternGrid = ESMF_InternGridCreateCopy(srcInternGrid, rc)
-      ! TODO: finish interngrid routines to redistribute a interngrid or else query the
-      !       source interngrid for all necessary information to create a new interngrid
+      ! dstIGrid = ESMF_IGridCreateCopy(srcIGrid, rc)
+      ! TODO: finish igrid routines to redistribute a igrid or else query the
+      !       source igrid for all necessary information to create a new igrid
 
       ! dstField = ESMF_FieldCreate ...  TODO: pass in any other needed arguments
       ! dstFtypep => dstField%ftypep
 
 
       call ESMF_IArrayRedistStore(srcFtypep%localfield%localdata, &
-        srcFtypep%localfield%localFlag, srcFtypep%interngrid, srcFtypep%mapping, &
+        srcFtypep%localfield%localFlag, srcFtypep%igrid, srcFtypep%mapping, &
         dstFtypep%localfield%localdata, dstFtypep%localfield%localFlag, &
-        dstFtypep%interngrid, dstFtypep%mapping, parentVM, &
+        dstFtypep%igrid, dstFtypep%mapping, parentVM, &
         routeOptions, routehandle, status)
       if (ESMF_LogMsgFoundError(status, &
         ESMF_ERR_PASSTHRU, &
@@ -1290,7 +1290,7 @@
 !     \item [srcField]
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstField]
-!           {\tt ESMF\_Field} containing destination interngrid.
+!           {\tt ESMF\_Field} containing destination igrid.
 !     \item [routehandle]          
 !           {\tt ESMF\_RouteHandle} which was returned by the corresponding
 !           {\tt ESMF\_FieldRedistStore()} call. It is associated with
@@ -1438,8 +1438,8 @@
         rc = ESMF_RC_NOT_IMPL
       endif     
 
-!     Call InternGrid method to perform actual work
-      !call ESMF_InternGridReduce(field%ftypep%interngrid, &
+!     Call IGrid method to perform actual work
+      !call ESMF_IGridReduce(field%ftypep%igrid, &
       !                     field%ftypep%localfield%localdata, &
       !                     rtype, result, status)
       !if (ESMF_LogMsgFoundError(status, &
@@ -1486,7 +1486,7 @@
 !     done only a single time; otherwise computing and reusing a communication
 !     pattern will be more efficient.
 !     This routine reads the source field and 
-!     leaves the data untouched.  It uses the {\tt ESMF\_InternGrid} and
+!     leaves the data untouched.  It uses the {\tt ESMF\_IGrid} and
 !     {\tt ESMF\_FieldDataMap} information in the destination field to
 !     control the transformation of data.  The array data in the 
 !     destination field is overwritten by this call.
@@ -1496,7 +1496,7 @@
 !     \item [srcField] 
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstField] 
-!           {\tt ESMF\_Field} containing destination interngrid and data map.
+!           {\tt ESMF\_Field} containing destination igrid and data map.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s,
 !           most commonly the VM of the Coupler if the regridding is
@@ -1603,7 +1603,7 @@
 ! !DESCRIPTION:
 !     Perform a regrid operation over the data
 !     in an {\tt ESMF\_Field}.  This routine reads the source field and 
-!     leaves the data untouched.  It uses the {\tt ESMF\_InternGrid} and
+!     leaves the data untouched.  It uses the {\tt ESMF\_IGrid} and
 !     {\tt ESMF\_FieldDataMap} information in the destination field to
 !     control the transformation of data.  The array data in the 
 !     destination field is overwritten by this call.
@@ -1613,7 +1613,7 @@
 !     \item [srcField] 
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstField] 
-!           {\tt ESMF\_Field} containing destination interngrid and data map.
+!           {\tt ESMF\_Field} containing destination igrid and data map.
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} which was returned by the corresponding
 !           {\tt ESMF\_FieldRegridStore()} call. It is associated with 
@@ -1653,7 +1653,7 @@
       logical :: hasSrcData        ! does this DE contain localdata from src?
       logical :: hasDstData        ! does this DE contain localdata from dst?
       type(ESMF_InternArray) :: srcArray, dstArray
-      type(ESMF_InternGrid) :: srcInternGrid, dstInternGrid
+      type(ESMF_IGrid) :: srcIGrid, dstIGrid
       type(ESMF_FieldDataMap) :: srcDatamap, dstDatamap
       ! debug only
       type(ESMF_Route) :: thisroute
@@ -1686,19 +1686,19 @@
 
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
       call ESMF_FieldGet(srcField, array=srcArray, &
-                         datamap=srcDataMap, interngrid=srcInternGrid, rc=localrc)
+                         datamap=srcDataMap, igrid=srcIGrid, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      hasSrcData = ESMF_RegridHasData(srcInternGrid, srcDataMap)
+      hasSrcData = ESMF_RegridHasData(srcIGrid, srcDataMap)
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
       call ESMF_FieldGet(dstField, array=dstArray, &
-                         datamap=dstDataMap, interngrid=dstInternGrid, rc=localrc)
+                         datamap=dstDataMap, igrid=dstIGrid, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      hasDstData = ESMF_RegridHasData(dstInternGrid, dstDataMap)
+      hasDstData = ESMF_RegridHasData(dstIGrid, dstDataMap)
 
       ! if neither are true this DE cannot be involved in the communication
       !  and it can just return now.
@@ -1839,7 +1839,7 @@
 !     \item [srcField] 
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstField] 
-!           {\tt ESMF\_Field} containing destination interngrid and data map.
+!           {\tt ESMF\_Field} containing destination igrid and data map.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s, 
 !           most commonly the vm of the Coupler if the regridding is
@@ -1871,7 +1871,7 @@
       integer :: localrc              ! Error status
       type(ESMF_InternArray) :: srcArray, dstArray
       type(ESMF_FieldDataMap) :: srcDatamap, dstDatamap
-      type(ESMF_InternGrid) :: srcInternGrid, dstInternGrid
+      type(ESMF_IGrid) :: srcIGrid, dstIGrid
    
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1897,22 +1897,22 @@
       !                          ESMF_ERR_PASSTHRU, &
       !                          ESMF_CONTEXT, rc)) return
 
-      ! Get the interngrid, array, and field datamaps to pass down.
-      call ESMF_FieldGet(srcField, interngrid=srcInternGrid, array=srcArray, &
+      ! Get the igrid, array, and field datamaps to pass down.
+      call ESMF_FieldGet(srcField, igrid=srcIGrid, array=srcArray, &
                          datamap=srcDatamap, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_FieldGet(dstField, interngrid=dstInternGrid, array=dstArray, &
+      call ESMF_FieldGet(dstField, igrid=dstIGrid, array=dstArray, &
                          datamap=dstDatamap, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! Call the code which does the actual work.
-      call ESMF_IArrayRegridStore(srcArray, srcInternGrid, srcDatamap, & 
-                                 dstArray, dstInternGrid, dstDatamap, &
+      call ESMF_IArrayRegridStore(srcArray, srcIGrid, srcDatamap, & 
+                                 dstArray, dstIGrid, dstDatamap, &
                                  parentVM, routehandle, &
                                  regridmethod, regridnorm, &    
                                  srcMask, dstMask, routeOptions, localrc)
@@ -1957,7 +1957,7 @@
 !     \item [srcField] 
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstField] 
-!           {\tt ESMF\_Field} containing destination interngrid and data map.
+!           {\tt ESMF\_Field} containing destination igrid and data map.
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} which was returned by the corresponding
 !           {\tt ESMF\_FieldRegridStore()} call. It is associated with 
@@ -1980,7 +1980,7 @@
       logical :: hasSrcData        ! does this DE contain localdata from src?
       logical :: hasDstData        ! does this DE contain localdata from dst?
       type(ESMF_InternArray) :: srcArray, dstArray
-      type(ESMF_InternGrid) :: srcInternGrid, dstInternGrid
+      type(ESMF_IGrid) :: srcIGrid, dstIGrid
       type(ESMF_FieldDataMap) :: srcDatamap, dstDatamap
       ! debug only
       type(ESMF_Route) :: thisroute
@@ -2013,19 +2013,19 @@
 
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
       call ESMF_FieldGet(srcField, array=srcArray, &
-                         datamap=srcDataMap, interngrid=srcInternGrid, rc=localrc)
+                         datamap=srcDataMap, igrid=srcIGrid, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      hasSrcData = ESMF_RegridHasData(srcInternGrid, srcDataMap)
+      hasSrcData = ESMF_RegridHasData(srcIGrid, srcDataMap)
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
       call ESMF_FieldGet(dstField, array=dstArray, &
-                         datamap=dstDataMap, interngrid=dstInternGrid, rc=localrc)
+                         datamap=dstDataMap, igrid=dstIGrid, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      hasDstData = ESMF_RegridHasData(dstInternGrid, dstDataMap)
+      hasDstData = ESMF_RegridHasData(dstIGrid, dstDataMap)
 
 
       call ESMF_RouteHandleGet(routehandle, which_route=1, route=thisroute, &
@@ -2107,12 +2107,12 @@
 !     \begin{description}
 !     \item [array] 
 !      Input {\tt ESMF\_Array} containing the collected data.
-!      It must be the size of the entire undecomposed interngrid.
+!      It must be the size of the entire undecomposed igrid.
 !     \item [srcDe]
 !      Integer DE number where the data to be Scattered is located.
 !      The {\tt ESMF\_Array} input is ignored on all other DEs.
 !     \item [field] 
-!      Empty Field containing {\tt ESMF\_InternGrid} which will correspond to the 
+!      Empty Field containing {\tt ESMF\_IGrid} which will correspond to the 
 !      data in the array which will be scattered.  When this routine returns
 !      each {\tt ESMF\_Field} will contain a valid data array containing the 
 !      subset of the decomposed data.
@@ -2159,20 +2159,20 @@
 
       ftypep => field%ftypep
 
-      ! Query the datamap and set info for interngrid so it knows how to
-      !  match up the array indices and the interngrid indices.
+      ! Query the datamap and set info for igrid so it knows how to
+      !  match up the array indices and the igrid indices.
       call ESMF_FieldDataMapGet(ftypep%mapping, dataIndexList=dimorder, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_InternGridGet(ftypep%interngrid, dimCount=numDims, rc=status) 
+      call ESMF_IGridGet(ftypep%igrid, dimCount=numDims, rc=status) 
 
-      !call ESMF_InternGridGet(ftypep%interngrid, decomps, rc=status)   !TODO
+      !call ESMF_IGridGet(ftypep%igrid, decomps, rc=status)   !TODO
       !if (ESMF_LogMsgFoundError(status, &
       !                            ESMF_ERR_PASSTHRU, &
       !                            ESMF_CONTEXT, rc)) return
-      decomps(1) = 1    ! TODO: remove this once the interngrid call is created
+      decomps(1) = 1    ! TODO: remove this once the igrid call is created
       decomps(2) = 2
 
       ! And get the Array sizes
@@ -2188,7 +2188,7 @@
       enddo
 
       ! Call Array method to perform actual work
-      call ESMF_InternGridGet(ftypep%interngrid, delayout=delayout, rc=status)
+      call ESMF_IGridGet(ftypep%igrid, delayout=delayout, rc=status)
       call ESMF_IArrayScatter(array, delayout, decompids, srcDe, dstarray, &
                              status)
       if (ESMF_LogMsgFoundError(status, &
@@ -2289,9 +2289,9 @@
       ! check variable
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      ! Get the Layout from the Field's InternGrid
+      ! Get the Layout from the Field's IGrid
       ftypep => field%ftypep
-      call ESMF_InternGridGet(ftypep%interngrid, delayout=delayout, rc=status)
+      call ESMF_IGridGet(ftypep%igrid, delayout=delayout, rc=status)
       
       ! Get the associated VM
       call ESMF_DELayoutGet(delayout, vm=vm, rc=status)
@@ -2299,8 +2299,8 @@
       ! Our DE number in the layout
       call ESMF_DELayoutGetDeprecated(delayout, localDE=my_DE, rc=status)
 
-      ! Query the datamap and set info for interngrid so it knows how to
-      !  match up the array indices and the interngrid indices.
+      ! Query the datamap and set info for igrid so it knows how to
+      !  match up the array indices and the igrid indices.
       call ESMF_FieldDataMapGet(ftypep%mapping, &
                            horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                            dataIndexList=dimorder, rc=status)
@@ -2317,7 +2317,7 @@
 
       ! Get global starting counts and global counts
       call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=status)
-      call ESMF_InternGridGet(ftypep%interngrid, dimCount=numDims, rc=status)
+      call ESMF_IGridGet(ftypep%igrid, dimCount=numDims, rc=status)
       AI_count = nDEs
       allocate(global_count(numDims), stat=status)
       allocate(periodic(numDims), stat=status)
@@ -2327,7 +2327,7 @@
       allocate(gl_src_AI(nDEs, numDims), stat=status)
       allocate(gl_dst_AI(nDEs, numDims), stat=status)
 
-      call ESMF_InternGridGet(ftypep%interngrid, &
+      call ESMF_IGridGet(ftypep%igrid, &
                         horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                         globalCellCountPerDim=global_count, &
                         globalStartPerDEPerDim=globalStartPerDEPerDim, &
@@ -2337,19 +2337,19 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! set up things we need to find a cached route or precompute one
-      call ESMF_IArrayGetAllAxisIndices(ftypep%localfield%localdata, ftypep%interngrid, &
+      call ESMF_IArrayGetAllAxisIndices(ftypep%localfield%localdata, ftypep%igrid, &
                                        ftypep%mapping, totalindex=dst_AI, &
                                        compindex=src_AI, rc=status)       
 
       ! translate AI's into global numbering
-      call ESMF_InternGridDELocalToGlobalAI(ftypep%interngrid, horzRelLoc=horzRelLoc, &
+      call ESMF_IGridDELocalToGlobalAI(ftypep%igrid, horzRelLoc=horzRelLoc, &
                                       vertRelLoc=vertRelLoc, &
                                       localAI2D=dst_AI, &
                                       globalAI2D=gl_dst_AI, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-      call ESMF_InternGridDELocalToGlobalAI(ftypep%interngrid, horzRelLoc=horzRelLoc, &
+      call ESMF_IGridDELocalToGlobalAI(ftypep%igrid, horzRelLoc=horzRelLoc, &
                                       vertRelLoc=vertRelLoc, &
                                       localAI2D=src_AI, &
                                       globalAI2D=gl_src_AI, rc=status)

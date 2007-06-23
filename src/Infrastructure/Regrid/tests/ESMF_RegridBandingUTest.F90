@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBandingUTest.F90,v 1.8 2007/06/22 23:21:39 cdeluca Exp $
+! $Id: ESMF_RegridBandingUTest.F90,v 1.9 2007/06/23 04:00:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
 ! !DESCRIPTION:
 !
 ! This program runs Unit tests for F90 Field Regrid routines. 
-! It transfers data between InternGrids with row decomposition, where we have earlier
+! It transfers data between IGrids with row decomposition, where we have earlier
 ! seen banding problems.
 !-----------------------------------------------------------------------------
 
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridBandingUTest.F90,v 1.8 2007/06/22 23:21:39 cdeluca Exp $'
+      '$Id: ESMF_RegridBandingUTest.F90,v 1.9 2007/06/23 04:00:40 cdeluca Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -48,7 +48,7 @@
     
     ! Local variables
     type(ESMF_Field) :: field1, field2
-    type(ESMF_InternGrid) :: srcinterngrid, dstinterngrid
+    type(ESMF_IGrid) :: srcigrid, dstigrid
     type(ESMF_RouteHandle) :: regrid_rh
     type(ESMF_DELayout) :: layout1
     integer :: rc, loop_rc
@@ -81,7 +81,7 @@
 !-------------------------------------------------------------------------
 !   ! Setup:
 !   !
-!   !  Create a source and destination interngrid with data on it, to use
+!   !  Create a source and destination igrid with data on it, to use
 !   !  in the Regrid calls below.
  
     call ESMF_VMGetGlobal(vm, rc=rc)
@@ -95,40 +95,40 @@
     maxcoords = (/ 60.0, 50.0 /)
    !===========================
     !NEX_UTest
-    !Test source interngrid creation
+    !Test source igrid creation
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating source interngrid"
-    srcinterngrid = ESMF_InternGridCreateHorzXYUni((/ 60, 40 /), &
+    write(name, *) "Creating source igrid"
+    srcigrid = ESMF_IGridCreateHorzXYUni((/ 60, 40 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
-                   name="srcinterngrid", rc=rc)
+                   name="srcigrid", rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    !===========================
     !NEX_UTest
-    !Test source interngrid creation
+    !Test source igrid creation
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Distributing source interngrid"
-    call ESMF_InternGridDistribute(srcinterngrid, delayout=layout1, rc=rc)
+    write(name, *) "Distributing source igrid"
+    call ESMF_IGridDistribute(srcigrid, delayout=layout1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    !===========================
     !NEX_UTest
-    ! Create with similar interngrid coordinates, but different layout
+    ! Create with similar igrid coordinates, but different layout
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating destination interngrid"
-    dstinterngrid = ESMF_InternGridCreateHorzXYUni((/ 200, 100 /), &
+    write(name, *) "Creating destination igrid"
+    dstigrid = ESMF_IGridCreateHorzXYUni((/ 200, 100 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_IGRID_HORZ_STAGGER_D_NE, &
-                   name="srcinterngrid", rc=rc)
+                   name="srcigrid", rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    !===========================
     !NEX_UTest
-    !Test source interngrid creation
+    !Test source igrid creation
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Distributing destination interngrid"
-    call ESMF_InternGridDistribute(dstinterngrid, delayout=layout1, rc=rc)
+    write(name, *) "Distributing destination igrid"
+    call ESMF_IGridDistribute(dstigrid, delayout=layout1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    !===========================
@@ -145,7 +145,7 @@
     halo = 3
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Field creation"
-    field1 = ESMF_FieldCreate(srcinterngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+    field1 = ESMF_FieldCreate(srcigrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=3, name="src pressure", rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
                                 
@@ -159,23 +159,23 @@
     
    !===========================
     !NEX_UTest
-    !get the cell-centeredcoordinates of the source interngrid
+    !get the cell-centeredcoordinates of the source igrid
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Getting the c-c coordinate ESMF array of the source interngrid"
-    call ESMF_InternGridGetCoord(srcinterngrid, dim=1, horzRelLoc=ESMF_CELL_CENTER,  &
+    write(name, *) "Getting the c-c coordinate ESMF array of the source igrid"
+    call ESMF_IGridGetCoord(srcigrid, dim=1, horzRelLoc=ESMF_CELL_CENTER,  &
                            centercoord=x_coords, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
    !===========================
     !NEX_UTest
-    !get the cell-centeredcoordinates of the source interngrid
-    call ESMF_InternGridGetCoord(srcinterngrid, dim=2, horzRelLoc=ESMF_CELL_CENTER,  &
+    !get the cell-centeredcoordinates of the source igrid
+    call ESMF_IGridGetCoord(srcigrid, dim=2, horzRelLoc=ESMF_CELL_CENTER,  &
                            centercoord=y_coords, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     lb(:) = lbound(f90ptr1)
     ub(:) = ubound(f90ptr1)
     
-    !Set the values of the c-c interngrid points equal to their x-coordinate
+    !Set the values of the c-c igrid points equal to their x-coordinate
     f90ptr1(:,:) = 0.0
     do j=lb(2)+halo, ub(2)-halo
       do i=lb(1)+halo, ub(1)-halo
@@ -189,7 +189,7 @@
     !create the destination field
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Creating the destination field"
-    field2 = ESMF_FieldCreate(dstinterngrid, arrayspec, horzRelloc=ESMF_CELL_NFACE, &
+    field2 = ESMF_FieldCreate(dstigrid, arrayspec, horzRelloc=ESMF_CELL_NFACE, &
                               name="dst pressure", rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -200,7 +200,7 @@
 !BOE
 !\subsubsection{Precomputing and Executing a Regrid}
       
-!  The user has already created an {\tt ESMF\_InternGrid}, an
+!  The user has already created an {\tt ESMF\_IGrid}, an
 !  {\tt ESMF\_Array} with data, and put them together in an {\tt ESMF\_Field}.
 !  An {\tt ESMF\_RouteHandle} is created and the data movement needed to
 !  execute the regrid is stored with that handle by the store method. 
@@ -212,7 +212,7 @@
 !BOC
    !===========================
     !NEX_UTest
-    !Do all the calculations in preparation for the actual re-interngridding
+    !Do all the calculations in preparation for the actual re-igridding
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Do and Store all the Regrid calcuations"
     call ESMF_FieldRegridStore(field1, field2, vm, &
@@ -243,12 +243,12 @@
     ub(:) = ubound(f90ptr2)
     allocate(test(lb(1):ub(1), lb(2):ub(2)))
     
-    print *, localPet,'In interngrid 2 lb=',lb,'  ub=',ub
-  !  print *, localPet,'Array after re-interngridding is ',f90ptr2
+    print *, localPet,'In igrid 2 lb=',lb,'  ub=',ub
+  !  print *, localPet,'Array after re-igridding is ',f90ptr2
 
-    call ESMF_InternGridGetCoord(dstinterngrid, dim=1, horzRelLoc=ESMF_CELL_CENTER,  &
+    call ESMF_IGridGetCoord(dstigrid, dim=1, horzRelLoc=ESMF_CELL_CENTER,  &
            centercoord=x_coords2, rc=rc)
-    call ESMF_InternGridGetCoord(dstinterngrid, dim=2, horzRelLoc=ESMF_CELL_CENTER,  &
+    call ESMF_IGridGetCoord(dstigrid, dim=2, horzRelLoc=ESMF_CELL_CENTER,  &
            centercoord=y_coords2, rc=rc)
 
    loop_rc=ESMF_SUCCESS
@@ -287,9 +287,9 @@
 
     call ESMF_FieldDestroy(field2, rc=rc)
 
-    call ESMF_InternGridDestroy(srcinterngrid, rc=rc)
+    call ESMF_IGridDestroy(srcigrid, rc=rc)
 
-    call ESMF_InternGridDestroy(dstinterngrid, rc=rc)
+    call ESMF_IGridDestroy(dstigrid, rc=rc)
 
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 

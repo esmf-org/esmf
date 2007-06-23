@@ -301,7 +301,7 @@ contains
   character(ESMF_MAXSTR), parameter :: descriptor_name  = "problem_descriptor_string::"
 
   ! local character types
-  type (character_array), allocatable :: dist_files(:), interngrid_files(:)
+  type (character_array), allocatable :: dist_files(:), igrid_files(:)
 
   ! local character strings
   character(ESMF_MAXSTR) :: ltmp
@@ -311,7 +311,7 @@ contains
 
 ! local integer variables
   integer :: file, string, count, ncolumns, k
-  integer :: nInternGridFiles, nDistFiles
+  integer :: nIGridFiles, nDistFiles
   integer, allocatable :: nstrings(:), ncol(:)
 
   ! initialize return flag to success
@@ -436,7 +436,7 @@ contains
         call ESMF_ConfigNextLine(localcf, flag , rc=localrc)
      
         allocate( dist_files(ncol(string)-1) )
-        allocate( interngrid_files(ncol(string)-1) )
+        allocate( igrid_files(ncol(string)-1) )
 
         ! retrieve the problem descriptor filenames
         call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
@@ -475,7 +475,7 @@ contains
         ! initialize local counters
         !--------------------------------------------------------------------
         nDistFiles = 0
-        nInternGridFiles = 0
+        nIGridFiles = 0
 
         !--------------------------------------------------------------------
         ! check for specifier files
@@ -484,7 +484,7 @@ contains
         do while (len_trim(ltmp) /= 0 )
            select case( trim(ltmp) )
 
-           case('-d')     ! distInternGrid specifier files
+           case('-d')     ! distIGrid specifier files
               call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
               if (localrc .ne. ESMF_SUCCESS) then
                  print*,'error reading problem descriptor line #',file
@@ -498,7 +498,7 @@ contains
                  call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
               enddo  ! while
 
-           case('-g')     ! InternGrid specifier files
+           case('-g')     ! IGrid specifier files
               call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
               if (localrc .ne. ESMF_SUCCESS) then
                  print*,'error reading problem descriptor line #',file
@@ -507,8 +507,8 @@ contains
               endif
               ! once you find a flag, extract all the associated filenames 
               do while (trim(ltmp) /= '-d' .and. len_trim(ltmp) /= 0 )
-                 nInternGridFiles = nInternGridFiles + 1
-                 interngrid_files(nInternGridFiles)%name = trim(ltmp)
+                 nIGridFiles = nIGridFiles + 1
+                 igrid_files(nIGridFiles)%name = trim(ltmp)
                  call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
               enddo  ! while
 
@@ -522,10 +522,10 @@ contains
         enddo  ! while
 
         problem_descriptor(count)%distfiles%size = nDistFiles
-        problem_descriptor(count)%interngridfiles%size = nInternGridFiles
+        problem_descriptor(count)%igridfiles%size = nIGridFiles
 
         allocate( problem_descriptor(count)%distfiles%string(nDistFiles) )
-        allocate( problem_descriptor(count)%interngridfiles%string(nInternGridFiles) )
+        allocate( problem_descriptor(count)%igridfiles%string(nIGridFiles) )
 
         do  k=1,nDistFiles
           problem_descriptor(count)%distfiles%string(k)%name =dist_files(k)%name
@@ -533,11 +533,11 @@ contains
         ! clean up allocated workspace
         deallocate(dist_files)
 
-        do  k=1,nInternGridFiles
-          problem_descriptor(count)%interngridfiles%string(k)%name =interngrid_files(k)%name
+        do  k=1,nIGridFiles
+          problem_descriptor(count)%igridfiles%string(k)%name =igrid_files(k)%name
         enddo
         ! clean up allocated workspace
-        deallocate(interngrid_files)
+        deallocate(igrid_files)
      enddo   ! string
      deallocate( ncol )
   enddo   ! file
@@ -595,9 +595,9 @@ contains
         print*,k,problem_descriptor(count)%distfiles%string(k)%name
      enddo
 
-     print*,'nInternGridFiles:',problem_descriptor(count)%interngridfiles%size
-     do  k=1,problem_descriptor(count)%interngridfiles%size
-       print*,k,problem_descriptor(count)%interngridfiles%string(k)%name
+     print*,'nIGridFiles:',problem_descriptor(count)%igridfiles%size
+     do  k=1,problem_descriptor(count)%igridfiles%size
+       print*,k,problem_descriptor(count)%igridfiles%string(k)%name
      enddo
      print*,'------------------------------------------'
 
@@ -609,17 +609,17 @@ contains
   print*,'Source dist topology:',problem_descriptor(count)%src_dist%topology
   print*,'Source dist order:',problem_descriptor(count)%src_dist%order
   print*,'----'
-  print*,'Source interngrid rank:',problem_descriptor(count)%src_interngrid%rank
-  print*,'Source interngrid topology:',problem_descriptor(count)%src_interngrid%topology
-  print*,'Source interngrid order:',problem_descriptor(count)%src_interngrid%order
+  print*,'Source igrid rank:',problem_descriptor(count)%src_igrid%rank
+  print*,'Source igrid topology:',problem_descriptor(count)%src_igrid%topology
+  print*,'Source igrid order:',problem_descriptor(count)%src_igrid%order
   print*,'==========='
   print*,'Destination dist rank:',problem_descriptor(count)%dst_dist%rank
   print*,'Destination dist topology:',problem_descriptor(count)%dst_dist%topology
   print*,'Destination dist order:',problem_descriptor(count)%dst_dist%order
   print*,'----'
-  print*,'Destination interngrid rank:',problem_descriptor(count)%dst_interngrid%rank
-  print*,'Destination interngrid topology:',problem_descriptor(count)%dst_interngrid%topology
-  print*,'Destination interngrid order:',problem_descriptor(count)%dst_interngrid%order
+  print*,'Destination igrid rank:',problem_descriptor(count)%dst_igrid%rank
+  print*,'Destination igrid topology:',problem_descriptor(count)%dst_igrid%topology
+  print*,'Destination igrid order:',problem_descriptor(count)%dst_igrid%order
   enddo
 
      case(-1)

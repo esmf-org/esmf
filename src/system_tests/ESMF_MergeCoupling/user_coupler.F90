@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.14 2007/06/22 23:21:59 cdeluca Exp $
+! $Id: user_coupler.F90,v 1.15 2007/06/23 04:01:34 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -76,7 +76,7 @@
         ! Local variables
         type(ESMF_Field) :: humidity1, humidity2, humidity3
         type(ESMF_VM) :: vm
-        type(ESMF_InternGrid) :: interngrid1
+        type(ESMF_IGrid) :: igrid1
         type(ESMF_Array) :: array1
         type(ESMF_FieldDataMap) :: datamap1
         type(ESMF_ArraySpec) :: arrayspec1
@@ -119,7 +119,7 @@
         ! TODO: make this work: field create from field
         !humidityM = ESMF_FieldCreateFromField(humidity1, rc=rc)
 
-        call ESMF_FieldGet(humidity1, interngrid=interngrid1, datamap=datamap1, &
+        call ESMF_FieldGet(humidity1, igrid=igrid1, datamap=datamap1, &
                            array=array1, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_ArrayGet(array1, rank=rank1, typekind=dk1, rc=rc)
@@ -127,15 +127,15 @@
         call ESMF_ArraySpecSet(arrayspec1, rank1, dk1, rc)
         if (status .ne. ESMF_SUCCESS) goto 10
  
-        h1a = ESMF_FieldCreate(interngrid=interngrid1, arrayspec=arrayspec1, &
+        h1a = ESMF_FieldCreate(igrid=igrid1, arrayspec=arrayspec1, &
                                datamap=datamap1, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 10
 
-        h2a = ESMF_FieldCreate(interngrid=interngrid1, arrayspec=arrayspec1, &
+        h2a = ESMF_FieldCreate(igrid=igrid1, arrayspec=arrayspec1, &
                                datamap=datamap1, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 10
 
-        humidityM = ESMF_FieldCreate(interngrid=interngrid1, arrayspec=arrayspec1, &
+        humidityM = ESMF_FieldCreate(igrid=igrid1, arrayspec=arrayspec1, &
                                      datamap=datamap1, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 10
 

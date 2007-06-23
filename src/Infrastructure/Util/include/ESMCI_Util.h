@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.2 2007/06/22 23:21:41 cdeluca Exp $
+// $Id: ESMCI_Util.h,v 1.3 2007/06/23 04:00:45 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -103,7 +103,7 @@ enum ESMC_IndexFlag { ESMF_INDEX_DELOCAL=0,
 #endif
 
 // are the index numbers relative to a local chunk or the overall
-// combined interngrid?
+// combined igrid?
 typedef enum {
     ESMF_LOCAL  = 1, 
     ESMF_GLOBAL

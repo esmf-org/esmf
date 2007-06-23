@@ -1,4 +1,4 @@
-% $Id: AppDriver_desc.tex,v 1.16 2007/06/22 23:21:43 cdeluca Exp $
+% $Id: AppDriver_desc.tex,v 1.17 2007/06/23 04:00:49 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -26,23 +26,23 @@ application include choices about:
 
 \item[Sequential vs. Concurrent Execution]
 
-In a serial execution model every PET executes the same InternGridded 
+In a serial execution model every PET executes the same IGridded 
 Component code until it has produced data needed by another 
-InternGridded Component, and then all PETs change to running the next 
-InternGridded Component or Coupler Component.  This has the appeal of 
-simplicity of data consumption and production: when a InternGridded 
+IGridded Component, and then all PETs change to running the next 
+IGridded Component or Coupler Component.  This has the appeal of 
+simplicity of data consumption and production: when a IGridded 
 Component starts all required data is available for use, and when 
-a InternGridded Component finishes all data produced is ready for consumption 
-by the next InternGridded Component.  This approach also has
-the possibility of less data movement if the interngridding and
+a IGridded Component finishes all data produced is ready for consumption 
+by the next IGridded Component.  This approach also has
+the possibility of less data movement if the igridding and
 data decomposition is done such that each processor's memory contains
 the data needed by the next Component.
 
 In a concurrent execution model subgroups of PETs run
-InternGridded Components and all InternGridded Components are active at the 
-same time.  Data exchange must be coordinated between InternGridded 
+IGridded Components and all IGridded Components are active at the 
+same time.  Data exchange must be coordinated between IGridded 
 Components so that data deadlock does not occur.  This strategy 
-has the advantage of allowing coupling to other InternGridded Components 
+has the advantage of allowing coupling to other IGridded Components 
 at any time during the computational process, including not 
 having to return to the calling level of code before making 
 data available.  ESMF supports the concurrent mode of execution
@@ -52,13 +52,13 @@ executing Component at this time.
 \item[Pairwise vs. Hub and Spoke]
 
 Coupler Components are responsible for taking data from one
-InternGridded Component and putting it into the form expected by another 
-InternGridded Component.  This might include regridding, change of units, 
+IGridded Component and putting it into the form expected by another 
+IGridded Component.  This might include regridding, change of units, 
 averaging, or binning.
 
 Coupler Components can be written for {\it pairwise} data exchange: 
 the Coupler Component takes data from a single Component and transforms 
-it for use by another single InternGridded Component.  This simplifies the 
+it for use by another single IGridded Component.  This simplifies the 
 structure of the Coupler Component code.
 
 Couplers can also be written using a {\it hub and spoke} model where a

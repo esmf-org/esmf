@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistUTest.F90,v 1.7 2007/06/22 23:21:28 cdeluca Exp $
+! $Id: ESMF_BundleRedistUTest.F90,v 1.8 2007/06/23 04:00:12 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -24,11 +24,11 @@
 !
 ! The code in this file drives F90 Redist unit tests, using the Route code.
 !
-!  "Redist" is sending data from one field to another, where the interngrids 
+!  "Redist" is sending data from one field to another, where the igrids 
 !   themselves are identical, but the decompositions (which subsets of the
-!   interngrid are located on each processor) are different.  Redist sends data
+!   igrid are located on each processor) are different.  Redist sends data
 !   from one processor to another with no interpolation.  See Regrid for
-!   routines which do data interpolation from one interngrid to another.
+!   routines which do data interpolation from one igrid to another.
 !
 !-----------------------------------------------------------------------------
 ! !USES:
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleRedistUTest.F90,v 1.7 2007/06/22 23:21:28 cdeluca Exp $'
+      '$Id: ESMF_BundleRedistUTest.F90,v 1.8 2007/06/23 04:00:12 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -59,7 +59,7 @@
 
       ! local args needed to create/construct objects
       type(ESMF_RouteHandle) :: redist_rh
-      type(ESMF_InternGrid) :: interngrid1, interngrid2
+      type(ESMF_IGrid) :: igrid1, igrid2
       type(ESMF_Field) :: field1, field2, field3, field4
       type(ESMF_Bundle) :: bundle1, bundle2
       type(ESMF_VM) :: vm
@@ -77,16 +77,16 @@
 
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! create interngrids for later on
-      call Create2DInternGrids(interngrid1, interngrid2, rc=rc)
-      write(name, *) "Creating src and dest interngrids"
-      write(failMsg, *) "Unable to create src and/or dst interngrids"
+      ! create igrids for later on
+      call Create2DIGrids(igrid1, igrid2, rc=rc)
+      write(name, *) "Creating src and dest igrids"
+      write(failMsg, *) "Unable to create src and/or dst igrids"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields for later on
-      call CreateFields(interngrid1, field1, field3, halo1=2, halo2=4, rc=rc)
+      call CreateFields(igrid1, field1, field3, halo1=2, halo2=4, rc=rc)
       write(name, *) "Creating src and dest fields"
       write(failMsg, *) "Unable to create src and/or dst fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -94,7 +94,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields for later on
-      call CreateFields(interngrid2, field2, field4, rc=rc)
+      call CreateFields(igrid2, field2, field4, rc=rc)
       write(name, *) "Creating second src and dest fields"
       write(failMsg, *) "Unable to create second src and/or dst fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

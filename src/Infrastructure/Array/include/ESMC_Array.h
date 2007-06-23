@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.57 2007/06/22 23:21:26 cdeluca Exp $
+// $Id: ESMC_Array.h,v 1.58 2007/06/23 04:00:00 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     ESMC_TypeKind getTypekind(void)         const {return typekind;}
     int getRank(void)                       const {return rank;}
     ESMC_LocalArray **getLocalarrayList(void) const {return larrayList;}
-    DistGrid *getDistinterngrid(void)             const {return distgrid;}
+    DistGrid *getDistigrid(void)             const {return distgrid;}
     DELayout *getDelayout(void)             const {return delayout;}
     ESMC_IndexFlag getIndexflag(void)       const {return indexflag;}
     const int *getDimmap(void)              const {return dimmap;}

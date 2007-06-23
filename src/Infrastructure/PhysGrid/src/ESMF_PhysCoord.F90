@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.24 2007/06/22 23:21:38 cdeluca Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.25 2007/06/23 04:00:36 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -33,8 +33,8 @@
 ! responsible for describing a coordinate axis in the physical domain.
 ! A physical coordinate carries information describing coordinate attributes
 ! like names and flags for special properties of a coordinate axis.
-! This information is used by PhysGrid and InternGrid to help describe the complete 
-! physical properties of a interngrid.
+! This information is used by PhysGrid and IGrid to help describe the complete 
+! physical properties of a igrid.
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -73,14 +73,14 @@
         ! axis extents
         real (ESMF_KIND_R8) :: minVal         ! minimum value of coordinate
         real (ESMF_KIND_R8) :: maxVal         ! maximum value of coordinate
-        real (ESMF_KIND_R8) :: originOffset   ! use for interngrids in same coord
+        real (ESMF_KIND_R8) :: originOffset   ! use for igrids in same coord
                                               ! system but differ by simple
                                               ! shift, rotation
 #else
         ! axis extents
         real (ESMF_KIND_R8) :: minVal         ! minimum value of coordinate
         real (ESMF_KIND_R8) :: maxVal         ! maximum value of coordinate
-        real (ESMF_KIND_R8) :: originOffset   ! use for interngrids in same coord
+        real (ESMF_KIND_R8) :: originOffset   ! use for igrids in same coord
                                               ! system but differ by simple
                                               ! shift, rotation
         type (ESMF_CoordType) :: kind         ! type of coordinate
@@ -240,7 +240,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.24 2007/06/22 23:21:38 cdeluca Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.25 2007/06/23 04:00:36 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -259,7 +259,7 @@
 
 ! !DESCRIPTION:
 !     This interface overloads the equality operator for the specific
-!     ESMF interngrid coordinate data types.  It is provided for easy
+!     ESMF igrid coordinate data types.  It is provided for easy
 !     comparisons of coordinate systems or kinds with defined values.
 !
 !EOPI
@@ -276,7 +276,7 @@
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
-!     ESMF interngrid coordinate data types.  It is provided for easy
+!     ESMF igrid coordinate data types.  It is provided for easy
 !     comparisons of coordinate systems or kinds with defined values.
 !
 !EOPI
@@ -505,15 +505,15 @@
 !     \item[{[cyclic]}]
 !          True if coordinate is cyclic.
 !     \item[{[minVal]}]
-!          Minimum value for interngrid point along this coordinate.
+!          Minimum value for igrid point along this coordinate.
 !     \item[{[maxVal]}]
-!          Maximum value for interngrid point along this coordinate.
+!          Maximum value for igrid point along this coordinate.
 !     \item[{[originOffset]}]
-!          If the interngrid origin is offset or rotated from coordinate system
+!          If the igrid origin is offset or rotated from coordinate system
 !          origin, this specifies the offset in this coordinate direction.
-!          Note that this is the offset for the global interngrid, so if this
+!          Note that this is the offset for the global igrid, so if this
 !          is being defined for a local DE, the offset refers only to the
-!          origin of the full interngrid.
+!          origin of the full igrid.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -699,15 +699,15 @@
 !     \item[{[cyclic]}]
 !          True if coordinate is cyclic.
 !     \item[{[minVal]}]
-!          Minimum value for interngrid point along this coordinate.
+!          Minimum value for igrid point along this coordinate.
 !     \item[{[maxVal]}]
-!          Maximum value for interngrid point along this coordinate.
+!          Maximum value for igrid point along this coordinate.
 !     \item[{[originOffset]}]
-!          If the interngrid origin is offset or rotated from coordinate system
+!          If the igrid origin is offset or rotated from coordinate system
 !          origin, this specifies the offset in this coordinate direction.
-!          Note that this is the offset for the global interngrid, so if this
+!          Note that this is the offset for the global igrid, so if this
 !          is being defined for a local DE, the offset refers only to the
-!          origin of the full interngrid.
+!          origin of the full igrid.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -940,7 +940,7 @@
 ! !DESCRIPTION:
 !     Checks to see whether the physical coordinate defined in an
 !     {\tt ESMF\_PhysCoord} object is aligned with the logical axis.
-!     Such an alignment allows for some optimization of interngrid operations.
+!     Such an alignment allows for some optimization of igrid operations.
 !
 !     The arguments are:
 !     \begin{description}
@@ -997,7 +997,7 @@
 ! !DESCRIPTION:
 !     Checks to see whether the physical coordinate defined in an
 !     {\tt ESMF\_PhysCoord} object is equally-spaced.
-!     Such a condition allows for some optimization of interngrid operations.
+!     Such a condition allows for some optimization of igrid operations.
 !
 !     The arguments are:
 !     \begin{description}

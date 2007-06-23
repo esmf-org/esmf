@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.16 2007/06/22 23:21:30 cdeluca Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.17 2007/06/23 04:00:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -69,9 +69,9 @@
 !  \item[{[indexflag]}] @\
 !   See Section~\ref{opt:indexflag} for possible values.  Defaults @\
 !   to {\tt ESMF\_INDEX\_DELOCAL}.  If set to @\
-!   {\tt ESMF\_INDEX\_GLOBAL} and the {\tt ESMF\_InternGrid} associated with the @\
+!   {\tt ESMF\_INDEX\_GLOBAL} and the {\tt ESMF\_IGrid} associated with the @\
 !   {\tt ESMF\_Field} is regular, then the lower bounds and upper bounds will @\
-!   be allocated with global index numbers corresponding to the interngrid. @\
+!   be allocated with global index numbers corresponding to the igrid. @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
@@ -131,7 +131,7 @@
                                   ESMF_CONTEXT, rc)) return @\
  @\
         ! set array as data in field. @\
-        ! TODO: if interngrid present, call valiate to verify sizes match. @\
+        ! TODO: if igrid present, call valiate to verify sizes match. @\
         field%ftypep%localfield%localdata = array @\
         field%ftypep%datastatus = ESMF_STATUS_READY @\
  @\

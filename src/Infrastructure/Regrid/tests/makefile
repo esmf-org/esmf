@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.37 2007/06/22 23:21:40 cdeluca Exp $
+# $Id: makefile,v 1.38 2007/06/23 04:00:42 cdeluca Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -101,7 +101,7 @@ RUN_ESMF_RegridToolUTest:
 	cp -f ESMF_RegridTestList.rc $(ESMF_TESTDIR)
 	cp -f ESMF_RegridFunction.rc $(ESMF_TESTDIR)
 	cp -f ESMF_RegridMethod.rc $(ESMF_TESTDIR)
-	cp -f ESMF_InternGridHorzStagger.rc $(ESMF_TESTDIR)
+	cp -f ESMF_IGridHorzStagger.rc $(ESMF_TESTDIR)
 	cp -f ESMF_RegridDELayout.rc $(ESMF_TESTDIR)
 	cp -f ESMF_RegridHalo.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=RegridTool NP=8 ftest
@@ -110,7 +110,7 @@ RUN_ESMF_RegridToolUTestUNI:
 	cp -f ESMF_RegridTestList.rc $(ESMF_TESTDIR)
 	cp -f ESMF_RegridFunction.rc $(ESMF_TESTDIR)
 	cp -f ESMF_RegridMethod.rc $(ESMF_TESTDIR)
-	cp -f ESMF_InternGridHorzStagger.rc $(ESMF_TESTDIR)
+	cp -f ESMF_IGridHorzStagger.rc $(ESMF_TESTDIR)
 	cp -f ESMF_RegridDELayout.rc $(ESMF_TESTDIR)
 	cp -f ESMF_RegridHalo.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=RegridTool NP=1 ftest

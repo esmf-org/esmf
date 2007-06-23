@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.117 2007/06/22 23:21:39 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.118 2007/06/23 04:00:38 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 ! is responsible for any regridding and interpolation required for ESMF 
 ! applications.
 ! Regridding includes any process that transforms a field from one ESMF
-! interngrid to another, including:
+! igrid to another, including:
 ! \begin{itemize}
 ! \item bilinear or bicubic interpolation
 ! \item conservative remapping
@@ -50,8 +50,8 @@
       use ESMF_DELayoutMod       ! DE layout class
       use ESMF_InternArrayMod    ! internal array class
       use ESMF_InternArrayGetMod       ! array class
-      use ESMF_PhysGridMod       ! physical interngrid class
-      use ESMF_InternGridMod           ! interngrid class
+      use ESMF_PhysGridMod       ! physical igrid class
+      use ESMF_IGridMod           ! igrid class
       use ESMF_RHandleMod        ! route handle class
       use ESMF_RouteMod          ! route class
       use ESMF_InternArrayCommMod      ! array communications class
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.117 2007/06/22 23:21:39 cdeluca Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.118 2007/06/23 04:00:38 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -118,7 +118,7 @@
 !    This interface provides an entry point for methods that compute
 !    the data motion needed to execute a data regridding on either a 
 !    single {\tt ESMF\_Array}, or a collection of {\tt ESMF\_Array}s
-!    which are all based on the same {\tt ESMF\_InternGrid}, have the same
+!    which are all based on the same {\tt ESMF\_IGrid}, have the same
 !    {\tt ESMF\_FieldDataMap}, have the same {\tt ESMF\_RelLoc}, and
 !    are the same data type.
 
@@ -141,7 +141,7 @@
 !    This interface provides an entry point for methods that execute
 !    the precomputed data motion needed to regrid data from either a 
 !    single {\tt ESMF\_Array}, or a collection of {\tt ESMF\_Array}s
-!    which are all based on the same {\tt ESMF\_InternGrid}, have the same
+!    which are all based on the same {\tt ESMF\_IGrid}, have the same
 !    {\tt ESMF\_FieldDataMap}, have the same {\tt ESMF\_RelLoc}, and
 !    are the same data type.
 
@@ -158,7 +158,7 @@
 ! This section includes the Regrid Create, Run, and Destroy methods.
 !
 ! As part of adding optimized communication support for both packed and
-! loose bundles (which shared a common InternGrid, but may or may not have the
+! loose bundles (which shared a common IGrid, but may or may not have the
 ! same relloc, rank, datatype, etc.), the code must at some level support
 ! lists of arrays into a single subroutine call (as opposed to doing a user-
 ! level loop, passing each array into the subroutine one at a time) so that
@@ -181,10 +181,10 @@
 ! a subset of the bundle data to operate on.
 !
 ! So the initial strategy for the code in this file is:
-!   - keep a single Regrid Create call which takes a single array, interngrid,
+!   - keep a single Regrid Create call which takes a single array, igrid,
 !     and datamap for both source and destination.
 !   - make multiple entry points at the user API level for lists of arrays
-!     vs a single array (only a single interngrid, but maybe lists of datamaps also?)
+!     vs a single array (only a single igrid, but maybe lists of datamaps also?)
 !     and then decide internally whether to make a list of route tables or
 !     whether a single table can apply to all arrays.
 !   - if this strategy leads to convoluted or overly complex code, then
@@ -198,19 +198,19 @@
 ! !IROUTINE: ESMF_RegridCreate - Precomputes Regrid data
 
 ! !INTERFACE:
-      subroutine ESMF_RegridCreate(srcArray, srcInternGrid, srcDatamap, hasSrcData, &
-                                   dstArray, dstInternGrid, dstDatamap, hasDstData, &
+      subroutine ESMF_RegridCreate(srcArray, srcIGrid, srcDatamap, hasSrcData, &
+                                   dstArray, dstIGrid, dstDatamap, hasDstData, &
                                    parentVM, routehandle, routeIndex, &
                                    regridmethod, regridNorm, srcMask, dstMask, &
                                    rc)
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray),         intent(in   ) :: srcArray
-      type(ESMF_InternGrid),          intent(inout) :: srcInternGrid
+      type(ESMF_IGrid),          intent(inout) :: srcIGrid
       type(ESMF_FieldDataMap),  intent(inout) :: srcDatamap
       logical,                  intent(inout) :: hasSrcData
       type(ESMF_InternArray),         intent(in   ) :: dstArray
-      type(ESMF_InternGrid),          intent(inout) :: dstInternGrid
+      type(ESMF_IGrid),          intent(inout) :: dstIGrid
       type(ESMF_FieldDataMap),  intent(inout) :: dstDatamap
       logical,                  intent(inout) :: hasDstData
       type(ESMF_VM),            intent(in   ) :: parentVM
@@ -223,14 +223,14 @@
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Given a source array, interngrid, and datamap, this routine precomputes
+!     Given a source array, igrid, and datamap, this routine precomputes
 !     both the communication pattern needed to move data to the proper
 !     processors, and the sparse matrix of weights needed to compute the data
-!     interpolation for moving data from one interngrid to another.
+!     interpolation for moving data from one igrid to another.
 !     This routine returns a handle to the precomputed information in the
 !     {\tt routehandle} argument.  This same value should be supplied
 !     at run time, along with the actual data pointers.  The same precomputed
-!     handle can be used on any data which matches the data arrays, interngrid,
+!     handle can be used on any data which matches the data arrays, igrid,
 !     and datamaps supplied here, so one does not have to generate multiple
 !     routehandles for similar data values.
 !
@@ -238,22 +238,22 @@
 !     \begin{description}
 !     \item [srcArray]
 !           {\tt ESMF\_Array} containing source data.
-!     \item [srcInternGrid]
-!           {\tt ESMF\_InternGrid} which corresponds to how the data in the
+!     \item [srcIGrid]
+!           {\tt ESMF\_IGrid} which corresponds to how the data in the
 !           source array has been decomposed.
 !     \item [srcDatamap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array maps to
-!           the specified source interngrid.
+!           the specified source igrid.
 !     \item [hasSrcData]
 !           Logical specifier for whether or not this DE has source data.
 !     \item [dstArray]
 !           {\tt ESMF\_Array} containing destination data.
-!     \item [dstInternGrid]
-!           {\tt ESMF\_InternGrid} which corresponds to how the data in the
+!     \item [dstIGrid]
+!           {\tt ESMF\_IGrid} which corresponds to how the data in the
 !           destination array should be decomposed.
 !     \item [dstDatamap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array should map to
-!           the specified destination interngrid.
+!           the specified destination igrid.
 !     \item [hasDstData]
 !           Logical specifier for whether or not this DE has destination data.
 !     \item [routehandle]
@@ -277,7 +277,7 @@
 !
 !   The supported regridding methods for this create function are currently:
 !   \begin{description}
-!   \item[ESMF\_REGRID\_METHOD\_BILINEAR  ] bilinear (logically-rectangular interngrids)
+!   \item[ESMF\_REGRID\_METHOD\_BILINEAR  ] bilinear (logically-rectangular igrids)
 !   \item[ESMF\_REGRID\_METHOD\_CONSERV1  ] first-order conservative
 !   \item[ESMF\_REGRID\_METHOD\_LINEAR    ] linear for 1-d regridding
 !   \end{description}
@@ -286,7 +286,7 @@
 ! !REQUIREMENTS:  TODO
 
       ! TODO: the interfaces have changed - this will no longer be called
-      !  with fields, but with the interngrid, datamap, and array which are either
+      !  with fields, but with the igrid, datamap, and array which are either
       !  contained in a field or are specified by the user separately in an
       !  array method call.  i believe the code at this level needs to 
       !  take an already declared routehandle and fill it in with the
@@ -305,8 +305,8 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,srcInternGrid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,dstInternGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,srcIGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,dstIGrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
@@ -344,8 +344,8 @@
       ! ESMF_REGRID_METHOD_BILINEAR
       case(1)
         call ESMF_RegridConstructBilinear( routehandle,  &
-                           srcArray, srcInternGrid, srcDatamap, hasSrcData, &
-                           dstArray, dstInternGrid, dstDatamap, hasDstData, &
+                           srcArray, srcIGrid, srcDatamap, hasSrcData, &
+                           dstArray, dstIGrid, dstDatamap, hasDstData, &
                            parentVM, routeIndex, srcMask, dstMask, rc=localrc)
 
       !-------------
@@ -360,8 +360,8 @@
       ! ESMF_REGRID_METHOD_CONSERV1
       case(3)
         call ESMF_RegridConstructConserv( routehandle, &
-                                 srcArray, srcInternGrid, srcDatamap, hasSrcData, &
-                                 dstArray, dstInternGrid, dstDatamap, hasDstData, &
+                                 srcArray, srcIGrid, srcDatamap, hasSrcData, &
+                                 dstArray, dstIGrid, dstDatamap, hasDstData, &
                                  parentVM, routeIndex, srcMask, dstMask, &
                                  regridnorm=regridNorm, order=1, rc=localrc)
 
@@ -373,8 +373,8 @@
                    ESMF_CONTEXT, rc)
         return
       !   call ESMF_RegridConstructConserv(routehandle, &
-      !                          srcArray, srcInternGrid, srcDatamap, hasSrcData, &
-      !                          dstArray, dstInternGrid, dstDatamap, hasDstData, &
+      !                          srcArray, srcIGrid, srcDatamap, hasSrcData, &
+      !                          dstArray, dstIGrid, dstDatamap, hasDstData, &
       !                          parentVM, routeIndex, srcMask, dstMask, &
       !                          regridnorm=regridNorm, order=2, rc=localrc)
 
@@ -394,8 +394,8 @@
                    ESMF_CONTEXT, rc)
         return
       !   call ESMF_RegridConstructNearNbr(routehandle, &
-      !                          srcArray, srcInternGrid, srcDatamap, hasSrcData, &
-      !                          dstArray, dstInternGrid, dstDatamap, hasDstData, &
+      !                          srcArray, srcIGrid, srcDatamap, hasSrcData, &
+      !                          dstArray, dstIGrid, dstDatamap, hasDstData, &
       !                          parentVM, routeIndex, srcMask, dstMask, &
       !                          rc=localrc)
 
@@ -427,8 +427,8 @@
       ! ESMF_REGRID_METHOD_LINEAR
       case(10)
         call ESMF_RegridConstructLinear( routehandle,  &
-                            srcArray, srcInternGrid, srcDatamap, hasSrcData, &
-                            dstArray, dstInternGrid, dstDatamap, hasDstData, &
+                            srcArray, srcIGrid, srcDatamap, hasSrcData, &
+                            dstArray, dstIGrid, dstDatamap, hasDstData, &
                             parentVM, routeIndex, srcMask, dstMask, rc=localrc)
 
       !-------------
@@ -523,7 +523,7 @@
 ! !DESCRIPTION:
 !   Given a list of source arrays and precomputed regridding information, 
 !   this routine regrids the source arrays to new arrays on the destination
-!   interngrid.  
+!   igrid.  
 !
 !EOPI
 
@@ -688,7 +688,7 @@
      
           dstData3D = zero
   
-          !*** for cases where datarank>interngridrank, figure out the undecomposed
+          !*** for cases where datarank>igridrank, figure out the undecomposed
           dstUndecomp     = 0   !TODO: should be arrays to be general
           srcUndecomp     = 0
           srcUndecompSize = 0
@@ -869,7 +869,7 @@
 ! !DESCRIPTION:
 !   Given a list of source arrays and precomputed regridding information, 
 !   this routine regrids the source arrays to new arrays on the destination
-!   interngrid.  
+!   igrid.  
 !
 !EOPI
 
@@ -1039,7 +1039,7 @@
      
           dstData3D = zero
   
-          !*** for cases where datarank>interngridrank, figure out the undecomposed
+          !*** for cases where datarank>igridrank, figure out the undecomposed
           dstUndecomp     = 0   !TODO: should be arrays to be general
           srcUndecomp     = 0
           srcUndecompSize = 0
@@ -1340,22 +1340,22 @@
 ! These are the user-level, public entry points for calling regridding at
 ! the Array level. The Field and Bundle routines are expected to be more
 ! useful to the user. These exist, honestly, to fufill a user request that 
-! array-level calls exist, but they need both interngrid and datamap information, 
+! array-level calls exist, but they need both igrid and datamap information, 
 ! so they are not fundamentally different from the field level calls.   
 !
-! If this data is on a logically-rectangular interngrid, with no explicit coordinate
+! If this data is on a logically-rectangular igrid, with no explicit coordinate
 ! information other than the actual index numbers, than it is feasible to
 ! envision a new index-space array object which is lighter weight than a Field.
 ! This new array object would need to contain enough information to include 
 ! what this code needs -- for example: the data relative location (e.g. cell
 ! centered, north-east corner, north face, etc), how data array indices map 
-! to interngrid indices (these are both currently in the datamap), plus how this 
+! to igrid indices (these are both currently in the datamap), plus how this 
 ! local chunk is decomposed across processors, what the local zero offset is 
-! relative to the entire interngrid, and what the overall interngrid size is (this info 
-! is currently in the distgrid object internal to a interngrid) -- then these array
+! relative to the entire igrid, and what the overall igrid size is (this info 
+! is currently in the distgrid object internal to a igrid) -- then these array
 ! level routines might make more sense as public entry points because they
 ! could operate with only a single index-space array as an argument and drop
-! the interngrid and datamap (and hasdata) args for both source and destination.
+! the igrid and datamap (and hasdata) args for both source and destination.
 !
 ! nsc 27jun05
 !==============================================================================
@@ -1366,18 +1366,18 @@
 !BOP
 ! !INTERFACE:
       ! Private interface; call using ESMF_IArrayRegridStore()
-      subroutine ESMF_IArrayRegridStoreOne(srcArray, srcInternGrid, srcDatamap, &
-                                          dstArray, dstInternGrid, dstDatamap, &
+      subroutine ESMF_IArrayRegridStoreOne(srcArray, srcIGrid, srcDatamap, &
+                                          dstArray, dstIGrid, dstDatamap, &
                                           parentVM, routehandle, &
                                           regridmethod, regridnorm, &
                                           srcmask, dstmask, routeOptions, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray),         intent(in   ) :: srcArray
-      type(ESMF_InternGrid),          intent(inout) :: srcInternGrid
+      type(ESMF_IGrid),          intent(inout) :: srcIGrid
       type(ESMF_FieldDataMap),  intent(inout) :: srcDatamap
       type(ESMF_InternArray),         intent(in   ) :: dstArray
-      type(ESMF_InternGrid),          intent(inout) :: dstInternGrid
+      type(ESMF_IGrid),          intent(inout) :: dstIGrid
       type(ESMF_FieldDataMap),  intent(inout) :: dstDatamap
       type(ESMF_VM),            intent(in   ) :: parentVM
       type(ESMF_RouteHandle),   intent(out  ) :: routehandle
@@ -1394,20 +1394,20 @@
 !     \begin{description}
 !     \item [srcArray]
 !           {\tt ESMF\_Array} containing source data.
-!     \item [srcInternGrid]
-!           {\tt ESMF\_InternGrid} which corresponds to how the data in the
+!     \item [srcIGrid]
+!           {\tt ESMF\_IGrid} which corresponds to how the data in the
 !           source array has been decomposed.  
 !     \item [srcDatamap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array maps to
-!           the specified source interngrid.
+!           the specified source igrid.
 !     \item [dstArray]
 !           {\tt ESMF\_Array} containing destination data.
-!     \item [dstInternGrid]
-!           {\tt ESMF\_InternGrid} which corresponds to how the data in the
+!     \item [dstIGrid]
+!           {\tt ESMF\_IGrid} which corresponds to how the data in the
 !           destination array should be decomposed.  
 !     \item [dstDatamap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array should map to
-!           the specified destination interngrid.
+!           the specified destination igrid.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s,
 !           most commonly the vm of the Coupler if the regridding is
@@ -1441,12 +1441,12 @@
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,srcInternGrid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,dstInternGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,srcIGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,dstIGrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
 
-      call ESMF_IArrayRegridStoreIndex(srcArray, srcInternGrid, srcDatamap, &
-                                      dstArray, dstInternGrid, dstDatamap, &
+      call ESMF_IArrayRegridStoreIndex(srcArray, srcIGrid, srcDatamap, &
+                                      dstArray, dstIGrid, dstDatamap, &
                                       parentVM, routehandle, &
                                       1, ESMF_1TO1HANDLEMAP, 1, &
                                       regridmethod, regridnorm, &
@@ -1460,8 +1460,8 @@
 !BOP
 ! !INTERFACE:
       ! Private interface; call using ESMF_IArrayRegridStore()
-      subroutine ESMF_IArrayRegridStoreIndex(srcArray, srcInternGrid, srcDatamap, &
-                                           dstArray, dstInternGrid, dstDatamap, &
+      subroutine ESMF_IArrayRegridStoreIndex(srcArray, srcIGrid, srcDatamap, &
+                                           dstArray, dstIGrid, dstDatamap, &
                                            parentVM, routehandle, routeIndex, &
                                            handleMaptype, routeCount, &
                                            regridmethod, regridnorm, &
@@ -1469,10 +1469,10 @@
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray),         intent(in   ) :: srcArray
-      type(ESMF_InternGrid),          intent(inout) :: srcInternGrid
+      type(ESMF_IGrid),          intent(inout) :: srcIGrid
       type(ESMF_FieldDataMap),  intent(inout) :: srcDatamap
       type(ESMF_InternArray),         intent(in   ) :: dstArray
-      type(ESMF_InternGrid),          intent(inout) :: dstInternGrid
+      type(ESMF_IGrid),          intent(inout) :: dstIGrid
       type(ESMF_FieldDataMap),  intent(inout) :: dstDatamap
       type(ESMF_VM),            intent(in   ) :: parentVM
       type(ESMF_RouteHandle),   intent(inout) :: routehandle
@@ -1492,20 +1492,20 @@
 !     \begin{description}
 !     \item [srcArray]
 !           Representative {\tt ESMF\_Array} containing source data.
-!     \item [srcInternGrid]
-!           {\tt ESMF\_InternGrid} which corresponds to how the data in the
+!     \item [srcIGrid]
+!           {\tt ESMF\_IGrid} which corresponds to how the data in the
 !           source array has been decomposed.  
 !     \item [srcDatamap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array maps to
-!           the specified source interngrid.
+!           the specified source igrid.
 !     \item [dstArray]
 !           Representative {\tt ESMF\_Array} containing destination data. 
-!     \item [dstInternGrid]
-!           {\tt ESMF\_InternGrid} which corresponds to how the data in the
+!     \item [dstIGrid]
+!           {\tt ESMF\_IGrid} which corresponds to how the data in the
 !           destination array should be decomposed.  
 !     \item [dstDatamap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array should map to
-!           the specified destination interngrid.
+!           the specified destination igrid.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s,
 !           most commonly the vm of the Coupler if the regridding is
@@ -1553,8 +1553,8 @@
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
-    ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,srcInternGrid,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,dstInternGrid,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,srcIGrid,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,dstIGrid,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
 
     ! TODO: add code here
@@ -1591,8 +1591,8 @@
     endif
 
     ! determine if this local DE either src and/or dst data
-    hasSrcData = ESMF_RegridHasData(srcInternGrid, srcDatamap)
-    hasDstData = ESMF_RegridHasData(dstInternGrid, dstDatamap)
+    hasSrcData = ESMF_RegridHasData(srcIGrid, srcDatamap)
+    hasDstData = ESMF_RegridHasData(dstIGrid, dstDatamap)
 
     ! Before going further down into this code, make sure
     ! that this DE has at least src or dst data.   If neither, return now.
@@ -1602,8 +1602,8 @@
     endif
 
 
-    call ESMF_RegridCreate(srcArray, srcInternGrid, srcDatamap, hasSrcData, & 
-                           dstArray, dstInternGrid, dstDatamap, hasDstData, &
+    call ESMF_RegridCreate(srcArray, srcIGrid, srcDatamap, hasSrcData, & 
+                           dstArray, dstIGrid, dstDatamap, hasDstData, &
                            parentVM, routehandle, routeIndex, regridmethod, &
                            regridnorm=regridnorm, &
                            srcmask=srcmask, dstmask=dstmask, rc=localrc)
@@ -1670,14 +1670,14 @@
 !           {\tt ESMF\_Array} containing source data to be regridded.
 !     \item [srcDataMap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array maps to
-!           the specified source interngrid.
+!           the specified source igrid.
 !     \item [hasSrcData]
 !           Logical specifier for whether or not this DE has source data.
 !     \item [dstArray]
 !           {\tt ESMF\_Array} containing locations to put regridded data.
 !     \item [dstDataMap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array maps to
-!           the specified destination interngrid.
+!           the specified destination igrid.
 !     \item [hasDstData]
 !           Logical specifier for whether or not this DE has destination data.
 !     \item [routehandle]
@@ -1842,7 +1842,7 @@
 !           List of {\tt ESMF\_Array}s containing source data to be regridded.
 !     \item [srcDataMap]
 !           {\tt ESMF\_FieldDataMap} which describes how the arrays map to
-!           the specified source interngrid.
+!           the specified source igrid.
 !     \item [hasSrcData]
 !           Logical specifier for whether or not this DE has source data.
 !     \item [dstArrayList]
@@ -1850,7 +1850,7 @@
 !           data into.
 !     \item [dstDataMap]
 !           {\tt ESMF\_FieldDataMap} which describes how the arrays map to
-!           the specified destination interngrid.
+!           the specified destination igrid.
 !     \item [hasDstData]
 !           Logical specifier for whether or not this DE has destination data.
 !     \item [routehandle]
@@ -2016,13 +2016,13 @@
 #define ESMF_METHOD "ESMF_RegridHasData"
 !BOPI
 ! !INTERFACE:
-      function ESMF_RegridHasData(interngrid, datamap, rc)
+      function ESMF_RegridHasData(igrid, datamap, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_RegridHasData
 
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(inout) :: interngrid
+      type(ESMF_IGrid), intent(inout) :: igrid
       type(ESMF_FieldDatamap), intent(inout) :: datamap
       integer, intent(out), optional :: rc
 !
@@ -2030,8 +2030,8 @@
 !     Return whether this local DE contains any data values or not.
 !
 !     \begin{description}
-!     \item [interngrid]
-!           {\tt ESMF\_InternGrid}.
+!     \item [igrid]
+!           {\tt ESMF\_IGrid}.
 !     \item [datamap]
 !           {\tt ESMF\_FieldDataMap}.
 !     \item [{[rc]}]
@@ -2050,11 +2050,11 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       ESMF_RegridHasData = .false.
 
-      call ESMF_InternGridValidate(interngrid, rc=localrc)
+      call ESMF_IGridValidate(igrid, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2070,7 +2070,7 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_InternGridGetDELocalInfo(interngrid, horzRelLoc=relloc, &
+      call ESMF_IGridGetDELocalInfo(igrid, horzRelLoc=relloc, &
                                    localCellCount=itemcount, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &

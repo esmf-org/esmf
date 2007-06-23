@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.156 2007/06/22 23:21:46 cdeluca Exp $
+! $Id: ESMF_Comp.F90,v 1.157 2007/06/23 04:00:58 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
       use ESMF_ConfigMod
       use ESMF_CalendarMod
       use ESMF_ClockMod
-      use ESMF_InternGridTypesMod
+      use ESMF_IGridTypesMod
       use ESMF_StateTypesMod
       use ESMF_StateMod
       use ESMF_InitMacrosMod
@@ -70,23 +70,23 @@
                                         ESMF_COMPTYPE_CPL = ESMF_CompType(2)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_InternGridCompType
+!     ! ESMF_IGridCompType
 !
 !     ! Model type: Atmosphere, Land, Ocean, SeaIce, River runoff.
 !
-      type ESMF_InternGridCompType
+      type ESMF_IGridCompType
       sequence
       private
-        integer :: interngridcomptype
+        integer :: igridcomptype
       end type
 
-      type(ESMF_InternGridCompType), parameter :: &
-                  ESMF_ATM = ESMF_InternGridCompType(1), &
-                  ESMF_LAND = ESMF_InternGridCompType(2), &
-                  ESMF_OCEAN = ESMF_InternGridCompType(3), &
-                  ESMF_SEAICE = ESMF_InternGridCompType(4), &
-                  ESMF_RIVER = ESMF_InternGridCompType(5), &
-                  ESMF_OTHER = ESMF_InternGridCompType(6)
+      type(ESMF_IGridCompType), parameter :: &
+                  ESMF_ATM = ESMF_IGridCompType(1), &
+                  ESMF_LAND = ESMF_IGridCompType(2), &
+                  ESMF_OCEAN = ESMF_IGridCompType(3), &
+                  ESMF_SEAICE = ESMF_IGridCompType(4), &
+                  ESMF_RIVER = ESMF_IGridCompType(5), &
+                  ESMF_OTHER = ESMF_IGridCompType(6)
 
 !------------------------------------------------------------------------------
 !     ! ESMF Entry Point Names
@@ -140,13 +140,13 @@
 
          character(len=ESMF_MAXSTR) :: configFile ! resource filename
          character(len=ESMF_MAXSTR) :: dirPath    ! relative dirname, app only
-         type(ESMF_InternGrid) :: interngrid                  ! default interngrid, gcomp only
+         type(ESMF_IGrid) :: igrid                  ! default igrid, gcomp only
 #ifdef ESMF_IS_64BIT_MACHINE
 
          integer            :: npetlist           ! number of PETs in petlist
 #endif
 
-         type(ESMF_InternGridCompType) :: interngridcomptype  ! model type, gcomp only
+         type(ESMF_IGridCompType) :: igridcomptype  ! model type, gcomp only
 
          type(ESMF_CompClass), pointer :: parent  ! pointer to parent comp
          type(ESMF_CWrap)   :: compw              ! to satisfy the C interface
@@ -204,11 +204,11 @@
 
 
 !------------------------------------------------------------------------------
-!     ! ESMF_InternGridComp
+!     ! ESMF_IGridComp
 !
-!     ! InternGridcomp wrapper
+!     ! IGridcomp wrapper
 
-      type ESMF_InternGridComp
+      type ESMF_IGridComp
 #ifndef ESMF_SEQUENCE_BUG
       sequence
 #endif
@@ -225,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_Config   ! TODO: move to its own file 
-      public ESMF_InternGridCompType, ESMF_ATM, ESMF_LAND, ESMF_OCEAN, &
+      public ESMF_IGridCompType, ESMF_ATM, ESMF_LAND, ESMF_OCEAN, &
                              ESMF_SEAICE, ESMF_RIVER, ESMF_OTHER
       public ESMF_SETINIT, ESMF_SETRUN, ESMF_SETFINAL, ESMF_SINGLEPHASE
       
@@ -235,7 +235,7 @@
       public ESMF_CompClass, ESMF_CWrap
       public ESMF_CompType
       public ESMF_COMPTYPE_IGRID, ESMF_COMPTYPE_CPL 
-      public ESMF_CplComp, ESMF_InternGridComp
+      public ESMF_CplComp, ESMF_IGridComp
 
 !------------------------------------------------------------------------------
 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.156 2007/06/22 23:21:46 cdeluca Exp $'
+      '$Id: ESMF_Comp.F90,v 1.157 2007/06/23 04:00:58 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -446,20 +446,20 @@ function ESMF_ctne(ct1, ct2)
 end function
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_InternGridCompTypes to see if they're the same
+! function to compare two ESMF_IGridCompTypes to see if they're the same
 
 function ESMF_mteq(mt1, mt2)
  logical ESMF_mteq
- type(ESMF_InternGridCompType), intent(in) :: mt1, mt2
+ type(ESMF_IGridCompType), intent(in) :: mt1, mt2
 
- ESMF_mteq = (mt1%interngridcomptype .eq. mt2%interngridcomptype)
+ ESMF_mteq = (mt1%igridcomptype .eq. mt2%igridcomptype)
 end function
 
 function ESMF_mtne(mt1, mt2)
  logical ESMF_mtne
- type(ESMF_InternGridCompType), intent(in) :: mt1, mt2
+ type(ESMF_IGridCompType), intent(in) :: mt1, mt2
 
- ESMF_mtne = (mt1%interngridcomptype .ne. mt2%interngridcomptype)
+ ESMF_mtne = (mt1%igridcomptype .ne. mt2%igridcomptype)
 end function
 
 
@@ -476,19 +476,19 @@ end function
 ! !IROUTINE: ESMF_CompConstruct - Internal routine to fill in a comp struct
 
 ! !INTERFACE:
-      recursive subroutine ESMF_CompConstruct(compp, ctype, name, interngridcomptype, &
-                          dirPath, configFile, config, interngrid, clock, parent, &
+      recursive subroutine ESMF_CompConstruct(compp, ctype, name, igridcomptype, &
+                          dirPath, configFile, config, igrid, clock, parent, &
                           vm, petlist, contextflag, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
       type (ESMF_CompType), intent(in) :: ctype
       character(len=*), intent(in), optional :: name
-      type(ESMF_InternGridCompType), intent(in), optional :: interngridcomptype 
+      type(ESMF_IGridCompType), intent(in), optional :: igridcomptype 
       character(len=*), intent(in), optional :: dirPath
       character(len=*), intent(in), optional :: configFile
       type(ESMF_Config), intent(in), optional :: config
-      type(ESMF_InternGrid), intent(in), optional :: interngrid
+      type(ESMF_IGrid), intent(in), optional :: igrid
       type(ESMF_Clock), intent(in), optional :: clock
       type(ESMF_CompClass), pointer, optional :: parent
       type(ESMF_VM), intent(in), optional :: vm
@@ -507,7 +507,7 @@ end function
 !    Component type, where type is {\tt ESMF\_IGRIDCOMP} or {\tt ESMF\_CPLCOMP}.
 !   \item[{[name]}]
 !    Component name.
-!   \item[{[interngridcomptype]}]
+!   \item[{[igridcomptype]}]
 !    Component Model Type, where model includes {\tt ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER}.  
 !   \item[{[dirPath]}]
@@ -518,8 +518,8 @@ end function
 !    or relative to {\tt dirPath}.
 !   \item[{[config]}]
 !    Already created {\tt config} object.
-!   \item[{[interngrid]}]
-!    Default {\tt interngrid} for a InternGridded {\tt Component}.
+!   \item[{[igrid]}]
+!    Default {\tt igrid} for a IGridded {\tt Component}.
 !   \item[{[clock]}]
 !    Private {\tt clock} for this {\tt Component}.
 !   \item[{[parent]}]
@@ -582,9 +582,9 @@ end function
         ! type(ESMF_Clock) compp%clock                ! private component clock
         compp%configFile = "uninitialized"
         compp%dirPath = "uninitialized"
-        nullify(compp%interngrid%ptr)
+        nullify(compp%igrid%ptr)
         compp%npetlist = 0
-        ! type(ESMF_InternGridCompType) compp%interngridcomptype
+        ! type(ESMF_IGridCompType) compp%igridcomptype
         nullify(compp%parent)
         ! type(ESMF_CWrap)   compp%compw
         ! type(ESMF_VM)      compp%vm
@@ -630,11 +630,11 @@ end function
           endif
         endif
 
-        ! for interngridded components, the model type it represents
-        if (present(interngridcomptype)) then
-          compp%interngridcomptype = interngridcomptype
+        ! for igridded components, the model type it represents
+        if (present(igridcomptype)) then
+          compp%igridcomptype = igridcomptype
         else
-          compp%interngridcomptype = ESMF_OTHER
+          compp%igridcomptype = ESMF_OTHER
         endif
 
         ! for config files, store a directory path and subsequent opens can
@@ -686,11 +686,11 @@ end function
           ! compp%config = ?
         endif
 
-        ! default interngrid for a interngridded component
-        if (present(interngrid)) then
-          compp%interngrid = interngrid
+        ! default igrid for a igridded component
+        if (present(igrid)) then
+          compp%igrid = igrid
         else
-          ! TODO: do we need an "empty interngrid" object?
+          ! TODO: do we need an "empty igrid" object?
         endif
 
         ! default clock
@@ -887,7 +887,7 @@ end function
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-! This section includes the Component Execute method used by InternGridComp and 
+! This section includes the Component Execute method used by IGridComp and 
 ! CplComp for:
 !   * Initialize,
 !   * Run,
@@ -1330,7 +1330,7 @@ end function
 !
 ! !INTERFACE:
       recursive subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, &
-        vm_info, contextflag, interngridcomptype, interngrid, clock, dirPath, configFile, &
+        vm_info, contextflag, igridcomptype, igrid, clock, dirPath, configFile, &
         config, ctype, rc)
 !
 ! !ARGUMENTS:
@@ -1341,8 +1341,8 @@ end function
       type(ESMF_VMPlan), intent(out), optional :: vmplan
       type(ESMF_Pointer), intent(out), optional :: vm_info
       type(ESMF_ContextFlag), intent(out), optional :: contextflag
-      type(ESMF_InternGridCompType), intent(out), optional :: interngridcomptype 
-      type(ESMF_InternGrid), intent(out), optional :: interngrid
+      type(ESMF_IGridCompType), intent(out), optional :: igridcomptype 
+      type(ESMF_IGrid), intent(out), optional :: igrid
       type(ESMF_Clock), intent(out), optional :: clock
       character(len=*), intent(out), optional :: dirPath
       character(len=*), intent(out), optional :: configFile
@@ -1417,12 +1417,12 @@ end function
           contextflag = compp%contextflag
         endif
 
-        if (present(interngridcomptype)) then
-          interngridcomptype = compp%interngridcomptype
+        if (present(igridcomptype)) then
+          igridcomptype = compp%igridcomptype
         endif
 
-        if (present(interngrid)) then
-          interngrid = compp%interngrid
+        if (present(igrid)) then
+          igrid = compp%igrid
         endif
 
         if (present(clock)) then
@@ -1455,16 +1455,16 @@ end function
 ! !IROUTINE: ESMF_CompSet -- Query a component for various information
 !
 ! !INTERFACE:
-      recursive subroutine ESMF_CompSet(compp, name, vm, vm_info, interngridcomptype,&
-        interngrid, clock, dirPath, configFile, config, rc)
+      recursive subroutine ESMF_CompSet(compp, name, vm, vm_info, igridcomptype,&
+        igrid, clock, dirPath, configFile, config, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
       character(len=*), intent(in), optional :: name
       type(ESMF_VM), intent(in), optional :: vm
       type(ESMF_Pointer), intent(in), optional :: vm_info
-      type(ESMF_InternGridCompType), intent(in), optional :: interngridcomptype 
-      type(ESMF_InternGrid), intent(in), optional :: interngrid
+      type(ESMF_IGridCompType), intent(in), optional :: igridcomptype 
+      type(ESMF_IGrid), intent(in), optional :: igrid
       type(ESMF_Clock), intent(in), optional :: clock
       character(len=*), intent(in), optional :: dirPath
       character(len=*), intent(in), optional :: configFile
@@ -1522,12 +1522,12 @@ end function
           compp%vm_info = vm_info
         endif
 
-        if (present(interngridcomptype)) then
-          compp%interngridcomptype = interngridcomptype
+        if (present(igridcomptype)) then
+          compp%igridcomptype = igridcomptype
         endif
 
-        if (present(interngrid)) then
-          compp%interngrid = interngrid
+        if (present(igrid)) then
+          compp%igrid = igrid
         endif
 
         if (present(clock)) then
@@ -1689,7 +1689,7 @@ end function
 
 
 !       this is just to stop compiler warnings
-        a%interngridcomptype = ESMF_OTHER
+        a%igridcomptype = ESMF_OTHER
 
         ESMF_CompRead = a 
 

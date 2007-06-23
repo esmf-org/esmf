@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTestList.rc,v 1.4 2007/06/22 23:21:40 cdeluca Exp $
+! $Id: ESMF_RegridTestList.rc,v 1.5 2007/06/23 04:00:41 cdeluca Exp $
 This is the list of Regrid tests.
 When adding tests do not leave blank lines between tests.
 The tag behind the test string must be included. It is used to count the number of test by
@@ -22,9 +22,9 @@ First - See File: ESMF_RegridFunctions.rc
 
 Second - See File: ESMF_RegridMethod.rc
 
-Third - See File: ESMF_InternGridHorzStagger.rc for source
+Third - See File: ESMF_IGridHorzStagger.rc for source
 
-Fourth - See File: ESMF_InternGridHorzStagger.rc for destination
+Fourth - See File: ESMF_IGridHorzStagger.rc for destination
 
 Fifth - See File: ESMF_RegridDELayout.rc for source
 

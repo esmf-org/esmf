@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.27 2007/06/22 23:21:45 cdeluca Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.28 2007/06/23 04:00:55 cdeluca Exp $
 !
 ! Example code for a main Application program. 
 
@@ -10,14 +10,14 @@
 !
 ! !DESCRIPTION:
 ! Example of what a main program which uses ESMF might look like, along
-!  with 2 InternGridded Components and a Coupler Component.  
+!  with 2 IGridded Components and a Coupler Component.  
 !  (In a real application each Component would probably be in separate files.)
 !
 !EOP
 
 !BOC
 !-------------------------------------------------------------------------
-!   ! Example InternGridded Component that the main program will call.
+!   ! Example IGridded Component that the main program will call.
 
     module PHYS_mod
 
@@ -28,21 +28,21 @@
 !   ! Public subroutine which the main program will call to register the
 !   ! various user-supplied subroutines which make up this Component.
     subroutine PHYS_SetServices(gcomp, rc)
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       integer :: rc
 
-       call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, &
+       call ESMF_IGridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, &
                                                      ESMF_SINGLEPHASE, rc)
-       call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, &
+       call ESMF_IGridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, &
                                                      ESMF_SINGLEPHASE, rc)
-       call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, &
+       call ESMF_IGridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, &
                                                      ESMF_SINGLEPHASE, rc)
       
     end subroutine PHYS_SetServices
       
 !   ! User-written Initialization routine
     subroutine my_init(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
@@ -55,7 +55,7 @@
 
 !   ! User-written Run routine
     subroutine my_run(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
@@ -68,7 +68,7 @@
 
 !   ! User-written Finalization routine
     subroutine my_final(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
@@ -80,11 +80,11 @@
     end subroutine my_final
 
     end module
-!   ! End of InternGridded Component module
+!   ! End of IGridded Component module
 !-------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
-!   ! Start of a Second InternGridded Component module
+!   ! Start of a Second IGridded Component module
     module DYNM_mod
 
     use ESMF_Mod
@@ -94,21 +94,21 @@
 !   ! Public subroutine which the main program will call to register the
 !   ! various user-supplied subroutines which make up this Component.
     subroutine DYNM_SetServices(gcomp, rc)
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       integer :: rc
 
-       call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, &
+       call ESMF_IGridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, &
                                                      ESMF_SINGLEPHASE, rc)
-       call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, &
+       call ESMF_IGridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, &
                                                      ESMF_SINGLEPHASE, rc)
-       call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, &
+       call ESMF_IGridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, &
                                                      ESMF_SINGLEPHASE, rc)
       
     end subroutine DYNM_SetServices
       
 !   ! User-written Initialization routine
     subroutine my_init(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
@@ -121,7 +121,7 @@
 
 !   ! User-written Run routine
     subroutine my_run(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
@@ -134,7 +134,7 @@
 
 !   ! User-written Finalization routine
     subroutine my_final(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
@@ -146,7 +146,7 @@
     end subroutine my_final
 
     end module
-!   ! End of Second InternGridded Component module
+!   ! End of Second IGridded Component module
 !-------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -213,7 +213,7 @@
     end subroutine my_final
 
     end module
-!   ! End of InternGridded Component module
+!   ! End of IGridded Component module
 !-------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -239,8 +239,8 @@
     character(ESMF_MAXSTR) :: cname, cname1, cname2
     type(ESMF_VM) :: vm
     type(ESMF_State) :: states(2)
-    type(ESMF_InternGridComp) :: top
-    type(ESMF_InternGridComp) :: gcomp1, gcomp2
+    type(ESMF_IGridComp) :: top
+    type(ESMF_IGridComp) :: gcomp1, gcomp2
     type(ESMF_CplComp) :: cpl
         
 !EOC
@@ -270,12 +270,12 @@
     ! Create the top level application component
 
     cname = "Top Level Atmosphere Model Component"
-    top = ESMF_InternGridCompCreate(name=cname, configFile="setup.rc", rc=rc)  
+    top = ESMF_IGridCompCreate(name=cname, configFile="setup.rc", rc=rc)  
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     cname1 = "Atmosphere Physics"
-    gcomp1 = ESMF_InternGridCompCreate(name=cname1, interngridcomptype=ESMF_ATM, rc=rc)  
+    gcomp1 = ESMF_IGridCompCreate(name=cname1, igridcomptype=ESMF_ATM, rc=rc)  
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -283,7 +283,7 @@
     ! This single user-supplied subroutine must be a public entry point 
     !  and can renamed with the 'use localname => modulename' syntax if
     !  the name is not unique.
-    call ESMF_InternGridCompSetServices(gcomp1, PHYS_SetServices, rc)
+    call ESMF_IGridCompSetServices(gcomp1, PHYS_SetServices, rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -292,13 +292,13 @@
     print *, "Comp Create returned, name = ", trim(cname1)
 
     cname2 = "Atmosphere Dynamics"
-    gcomp2 = ESMF_InternGridCompCreate(name=cname2, interngridcomptype=ESMF_ATM, rc=rc)  
+    gcomp2 = ESMF_IGridCompCreate(name=cname2, igridcomptype=ESMF_ATM, rc=rc)  
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
 
     ! This single user-supplied subroutine must be a public entry point.
-    call ESMF_InternGridCompSetServices(gcomp2, DYNM_SetServices, rc)
+    call ESMF_IGridCompSetServices(gcomp2, DYNM_SetServices, rc)
 
     print *, "Comp Create returned, name = ", trim(cname2)
 
@@ -363,12 +363,12 @@
      
     ! Call each Init routine in turn.  There is an optional index number
     !  for those components which have multiple entry points.
-    call ESMF_InternGridCompInitialize(gcomp1, exportState=states(1), clock=tclock, &
+    call ESMF_IGridCompInitialize(gcomp1, exportState=states(1), clock=tclock, &
                                  rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_InternGridCompInitialize(gcomp2, importState=states(2), clock=tclock, &
+    call ESMF_IGridCompInitialize(gcomp2, importState=states(2), clock=tclock, &
                                  rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -382,7 +382,7 @@
     ! Main run loop.
     finished = .false.
     do while (.not. finished)
-        call ESMF_InternGridCompRun(gcomp1, exportState=states(1), clock=tclock, rc=rc)
+        call ESMF_IGridCompRun(gcomp1, exportState=states(1), clock=tclock, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -391,7 +391,7 @@
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-        call ESMF_InternGridCompRun(gcomp2, importState=states(2), clock=tclock, rc=rc)
+        call ESMF_IGridCompRun(gcomp2, importState=states(2), clock=tclock, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -404,11 +404,11 @@
     ! Give each component a chance to write out final results, clean up.
     ! Call each Finalize routine in turn.  There is an optional index number
     !  for those components which have multiple entry points.
-    call ESMF_InternGridCompFinalize(gcomp1, exportState=states(1), clock=tclock, rc=rc)
+    call ESMF_IGridCompFinalize(gcomp1, exportState=states(1), clock=tclock, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_InternGridCompFinalize(gcomp2, importState=states(2), clock=tclock, rc=rc)
+    call ESMF_IGridCompFinalize(gcomp2, importState=states(2), clock=tclock, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -427,11 +427,11 @@
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_InternGridCompDestroy(gcomp1, rc)
+    call ESMF_IGridCompDestroy(gcomp1, rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_InternGridCompDestroy(gcomp2, rc)
+    call ESMF_IGridCompDestroy(gcomp2, rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -461,10 +461,10 @@
     ! Each Component must supply a SetServices routine which makes the
     !  following types of calls:
     !
-    !! call ESMF_InternGridCompSetEntryPoint(gcomp1, ESMF_SETINIT, PHYS_Init, 1, rc)
-    !! call ESMF_InternGridCompSetEntryPoint(gcomp1, ESMF_SETINIT, PHYS_InitPhase2, 2, rc)
-    !! call ESMF_InternGridCompSetEntryPoint(gcomp1, ESMF_SETRUN, PHYS_Run, 0, rc)
-    !! call ESMF_InternGridCompSetEntryPoint(gcomp1, ESMF_SETFINAL, PHYS_Final, 0, rc)
+    !! call ESMF_IGridCompSetEntryPoint(gcomp1, ESMF_SETINIT, PHYS_Init, 1, rc)
+    !! call ESMF_IGridCompSetEntryPoint(gcomp1, ESMF_SETINIT, PHYS_InitPhase2, 2, rc)
+    !! call ESMF_IGridCompSetEntryPoint(gcomp1, ESMF_SETRUN, PHYS_Run, 0, rc)
+    !! call ESMF_IGridCompSetEntryPoint(gcomp1, ESMF_SETFINAL, PHYS_Final, 0, rc)
     !
     ! The arguments are: the component, the type of routine, 
     !  the name of the internal subroutine which contains the user code, 

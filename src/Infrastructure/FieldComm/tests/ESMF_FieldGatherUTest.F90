@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.18 2007/06/22 23:21:31 cdeluca Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.19 2007/06/23 04:00:26 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldGatherUTest.F90,v 1.18 2007/06/22 23:21:31 cdeluca Exp $'
+      '$Id: ESMF_FieldGatherUTest.F90,v 1.19 2007/06/23 04:00:26 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -59,10 +59,10 @@
       real(ESMF_KIND_R8), dimension(2) :: min, max
       real(ESMF_KIND_R8), dimension(:,:), pointer :: coordX, coordY
       real(ESMF_KIND_R8), dimension(:,:), pointer :: srcData, gatheredData
-      type(ESMF_InternGridHorzStagger) :: horzStagger
+      type(ESMF_IGridHorzStagger) :: horzStagger
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_InternArray) :: array2
-      type(ESMF_InternGrid)  ::  interngrid
+      type(ESMF_IGrid)  ::  igrid
       type(ESMF_Field) :: field
       type(ESMF_VM):: vm
       type(ESMF_DELayout) :: delayout
@@ -96,8 +96,8 @@
       if (rc .ne. ESMF_SUCCESS) goto 20
 
 !-----------------------------------------------------------------------------
-      ! Create a interngrid and corresponding Field.  Note that the counts are
-      ! prime numbers to ensure the interngrid can not be evenly distributed
+      ! Create a igrid and corresponding Field.  Note that the counts are
+      ! prime numbers to ensure the igrid can not be evenly distributed
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Array Spec Set Test"
@@ -117,12 +117,12 @@
 !-----------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "InternGrid Create Horz XYUni Test"
-      interngrid = ESMF_InternGridCreateHorzXYUni(counts=counts, &
+      write(name, *) "IGrid Create Horz XYUni Test"
+      igrid = ESMF_IGridCreateHorzXYUni(counts=counts, &
                                       minGlobalCoordPerDim=min, &
                                       maxGlobalCoordPerDim=max, &
                                       horzStagger=horzStagger, &
-                                      name="source interngrid", rc=rc)
+                                      name="source igrid", rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
@@ -130,8 +130,8 @@
 !-----------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "InternGrid Distribute Test"
-      call ESMF_InternGridDistribute(interngrid, delayout=delayout, rc=rc)
+      write(name, *) "IGrid Distribute Test"
+      call ESMF_IGridDistribute(igrid, delayout=delayout, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
@@ -139,7 +139,7 @@
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Create Test"
-      field = ESMF_FieldCreate(interngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+      field = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                haloWidth=hWidth, name="field", rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
@@ -148,8 +148,8 @@
       ! Get coordinate arrays available for setting the source data array
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "InternGrid Get Corrd Test"
-      call ESMF_InternGridGetCoord(interngrid, dim=1, horzRelloc=ESMF_CELL_CENTER, &
+      write(name, *) "IGrid Get Corrd Test"
+      call ESMF_IGridGetCoord(igrid, dim=1, horzRelloc=ESMF_CELL_CENTER, &
                              centerCoord=coordX, localCounts=localCounts, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
@@ -158,8 +158,8 @@
 !-----------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "InternGrid Get Corrd Test"
-      call ESMF_InternGridGetCoord(interngrid, dim=2, horzRelloc=ESMF_CELL_CENTER, &
+      write(name, *) "IGrid Get Corrd Test"
+      call ESMF_IGridGetCoord(igrid, dim=2, horzRelloc=ESMF_CELL_CENTER, &
                              centerCoord=coordY, localCounts=localCounts, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
@@ -247,8 +247,8 @@
 !-----------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "InternGrid Destroy Test"
-      call ESMF_InternGridDestroy(interngrid, rc)
+      write(name, *) "IGrid Destroy Test"
+      call ESMF_IGridDestroy(igrid, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 

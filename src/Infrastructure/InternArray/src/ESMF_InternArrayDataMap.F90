@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayDataMap.F90,v 1.10 2007/06/22 23:21:33 cdeluca Exp $
+! $Id: ESMF_InternArrayDataMap.F90,v 1.11 2007/06/23 04:00:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@ module ESMF_InternArrayDataMapMod
 !  C++ interface is provided for access.
 !
 ! ArrayDataMaps are used to store the mapping of the array index orders
-!   compared to the interngrid specifications; to indicate C++ vs Fortran
+!   compared to the igrid specifications; to indicate C++ vs Fortran
 !   index ordering, and to store complex data type interleave information.
 !
 !------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ module ESMF_InternArrayDataMapMod
 !------------------------------------------------------------------------------
 !
 ! This section contains the basic derived type for encapsulating the
-!  various mappings between interngrids, arrays, and interleaved arrays, including
+!  various mappings between igrids, arrays, and interleaved arrays, including
 !  the internal subroutines and functions which operate on them.
 !
 !
@@ -89,9 +89,9 @@ module ESMF_InternArrayDataMapMod
 !------------------------------------------------------------------------------
 !  ! This describes how the data items are located relative to an individual
 !  ! cell or element.  Putting this here means that different Fields which
-!  ! have different relative locations can still share the same InternGrid.
-!  ! See the InternGrid object for a description of 'staggering' which is a 
-!  ! per-InternGrid concept. 
+!  ! have different relative locations can still share the same IGrid.
+!  ! See the IGrid object for a description of 'staggering' which is a 
+!  ! per-IGrid concept. 
 
   type ESMF_RelLoc
   sequence
@@ -140,9 +140,9 @@ module ESMF_InternArrayDataMapMod
 !------------------------------------------------------------------------------
 !  ! ESMF_ArrayDataMap
 !  ! The data map type, which should fully describe the mapping
-!  ! between index orders in the interngrid and the memory layout of
+!  ! between index orders in the igrid and the memory layout of
 !  ! the data array, plus other metadata info such as where the
-!  ! data is relative to the interngrid, and any interleaving info needed.
+!  ! data is relative to the igrid, and any interleaving info needed.
 
   type ESMF_InternArrayDataMap
   sequence
@@ -152,13 +152,13 @@ module ESMF_InternArrayDataMapMod
 #else
     type(ESMF_Status) :: status 
 #endif
-    ! index orders - how the interngrid dims (X,Y,Z) or (u,v) or (i,j,k)
+    ! index orders - how the igrid dims (X,Y,Z) or (u,v) or (i,j,k)
     !  map onto the array memory layout as declared.  
     !  set dim numbers to 1-N, use 0 for dims which are part of data
-    !  items and do not map to the interngrid dims.
+    !  items and do not map to the igrid dims.
     integer :: dataRank                             ! scalar, vector, etc.
     integer, dimension(ESMF_MAXDIM) :: dataDimOrder ! 0 = not a data dim
-    integer, dimension(ESMF_MAXDIM) :: dataNonInternGridCounts ! for non-interngrid dims
+    integer, dimension(ESMF_MAXDIM) :: dataNonIGridCounts ! for non-igrid dims
     ! TODO: plus C++ vs F90 native index flag
     ! TODO: plus complex number interleave flag? (r,i) vs (rrr...) (iii...)
     ESMF_INIT_DECLARE
@@ -214,7 +214,7 @@ module ESMF_InternArrayDataMapMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version =  &
-    '$Id: ESMF_InternArrayDataMap.F90,v 1.10 2007/06/22 23:21:33 cdeluca Exp $'
+    '$Id: ESMF_InternArrayDataMap.F90,v 1.11 2007/06/23 04:00:30 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -346,14 +346,14 @@ end function
 !	    The number of dimensions in the data {\tt ESMF\_Array}.
 !     \item [{[dataIndexList]}] 
 !           An integer array, {\tt datarank} long, which specifies
-!           the mapping between rank numbers in the {\tt ESMF\_InternGrid}
+!           the mapping between rank numbers in the {\tt ESMF\_IGrid}
 !           and the {\tt ESMF\_Array}.  If there is no correspondance
 !           (because the {\tt ESMF\_Array} has a higher rank than the
-!           {\tt ESMF\_InternGrid}) the index value will be 0.
+!           {\tt ESMF\_IGrid}) the index value will be 0.
 !     \item [{[counts]}]
-!           An integer array, with length ({\tt datarank} minus the interngrid rank).
+!           An integer array, with length ({\tt datarank} minus the igrid rank).
 !           Each entry is the default item count which would be used
-!           for those ranks which do not correspond to interngrid ranks when
+!           for those ranks which do not correspond to igrid ranks when
 !           creating an {\tt ESMF\_Field} using only an 
 !           an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_ArrayDataMap}.
 !     \item [{[rc]}]
@@ -396,7 +396,7 @@ end function
         if (present(counts)) then
            dimlength = size(counts)
            do i=1, dimlength
-             counts(i) = arraydatamap%dataNonInternGridCounts(i)
+             counts(i) = arraydatamap%dataNonIGridCounts(i)
            enddo
         endif
 
@@ -455,20 +455,20 @@ end function
       !jw  write(msgbuf,*)  " Data rank = ", arraydatamap%dataRank
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*,*)  " Data rank = ", arraydatamap%dataRank
-      !jw  write(msgbuf,*)  " Data Index Order and Lengths for non-InternGrid Indices:"
+      !jw  write(msgbuf,*)  " Data Index Order and Lengths for non-IGrid Indices:"
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-        write(*,*)  " Data Index Order and Lengths for non-InternGrid Indices:"
+        write(*,*)  " Data Index Order and Lengths for non-IGrid Indices:"
         j = 1
         do i=1, ESMF_MAXDIM
             if (arraydatamap%dataDimOrder(i) .eq. 0) then
-      !jw         write(msgbuf,*)  i, "Non-InternGrid index, length = ", arraydatamap%dataNonInternGridCounts(j)
+      !jw         write(msgbuf,*)  i, "Non-IGrid index, length = ", arraydatamap%dataNonIGridCounts(j)
       !jw         call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-               write(*,*)  i, "Non-InternGrid index, length = ", arraydatamap%dataNonInternGridCounts(j)
+               write(*,*)  i, "Non-IGrid index, length = ", arraydatamap%dataNonIGridCounts(j)
                j = j + 1
             else
-      !jw         write(msgbuf,*)  i, "InternGrid index ", arraydatamap%dataDimOrder(i)
+      !jw         write(msgbuf,*)  i, "IGrid index ", arraydatamap%dataDimOrder(i)
       !jw         call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-               write(*,*)  i, "InternGrid index ", arraydatamap%dataDimOrder(i)
+               write(*,*)  i, "IGrid index ", arraydatamap%dataDimOrder(i)
             endif
         enddo
 
@@ -503,26 +503,26 @@ end function
 !	    The number of dimensions in the data {\tt ESMF\_Array}.
 !     \item [{[dataIndexList]}] 
 !           An integer array, {\tt datarank} long, which specifies
-!           the mapping between rank numbers in the {\tt ESMF\_InternGrid}
+!           the mapping between rank numbers in the {\tt ESMF\_IGrid}
 !           and the {\tt ESMF\_Array}.  If there is no correspondance
 !           (because the {\tt ESMF\_Array} has a higher rank than the
-!           {\tt ESMF\_InternGrid}) the index value must be 0. 
+!           {\tt ESMF\_IGrid}) the index value must be 0. 
 !
-!           For example, if the data array is 3D and the interngrid is 2D,
-!           and the first and second data indices correspond to the interngrid
+!           For example, if the data array is 3D and the igrid is 2D,
+!           and the first and second data indices correspond to the igrid
 !           and the last data index is to store duplicate values for the
-!           same interngrid location, then the value for this input would be
+!           same igrid location, then the value for this input would be
 !           {\tt 1, 2, 0}.  If the middle index was the one which was
 !           for the duplicate values, it would be {\tt 1, 0, 2}.
 !     \item [{[counts]}]
-!           An integer array, with length ({\tt datarank} minus the interngrid rank).
+!           An integer array, with length ({\tt datarank} minus the igrid rank).
 !           If the {\tt ESMF\_Array} is a higher rank than the
-!           {\tt ESMF\_InternGrid}, the additional dimensions may 
+!           {\tt ESMF\_IGrid}, the additional dimensions may 
 !           optionally each have an item count defined here.  
 !           This allows {\tt ESMF\_FieldCreate()} to take 
 !           an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_ArrayDataMap}
 !           and create the appropriately sized {\tt ESMF\_Array} for each DE.
-!           These values are unneeded if the ranks of the data and interngrid
+!           These values are unneeded if the ranks of the data and igrid
 !           are the same, and ignored if {\tt ESMF\_FieldCreate()} is called
 !           called with an already-created {\tt ESMF\_Array}.
 !     \item [{[rc]}]
@@ -564,10 +564,10 @@ end function
         endif
 
         if (present(counts)) then
-           arraydatamap%dataNonInternGridCounts(:) = 1
+           arraydatamap%dataNonIGridCounts(:) = 1
            dimlength = size(counts)
            do i=1, dimlength
-             arraydatamap%dataNonInternGridCounts(i) = counts(i)
+             arraydatamap%dataNonIGridCounts(i) = counts(i)
            enddo
         endif
 
@@ -607,29 +607,29 @@ end function
 !	    The number of dimensions in the data {\tt ESMF\_Array}.
 !     \item [{[dataIndexList]}] 
 !           An integer array, {\tt datarank} long, which specifies
-!           the mapping between rank numbers in the {\tt ESMF\_InternGrid}
+!           the mapping between rank numbers in the {\tt ESMF\_IGrid}
 !           and the {\tt ESMF\_Array}.  If there is no correspondance
 !           (because the {\tt ESMF\_Array} has a higher rank than the
-!           {\tt ESMF\_InternGrid}) the index value must be 0.  The default is
-!           a 1-to-1 mapping with the {\tt ESMF\_InternGrid}.
+!           {\tt ESMF\_IGrid}) the index value must be 0.  The default is
+!           a 1-to-1 mapping with the {\tt ESMF\_IGrid}.
 !
-!           For example, if the data array is 3D and the interngrid is 2D,
-!           and the first and second data indices correspond to the interngrid
+!           For example, if the data array is 3D and the igrid is 2D,
+!           and the first and second data indices correspond to the igrid
 !           and the last data index is to store duplicate values for the
-!           same interngrid location, then the value for this input would be
+!           same igrid location, then the value for this input would be
 !           {\tt 1, 2, 0}.  If the middle index was the one which was
 !           for the duplicate values, it would be {\tt 1, 0, 2}.
-!           The default values for this are {\tt 1, 0, ...} for a 1D interngrid
-!           and {\tt 1, 2, 0, ... } for a 2D interngrid.
+!           The default values for this are {\tt 1, 0, ...} for a 1D igrid
+!           and {\tt 1, 2, 0, ... } for a 2D igrid.
 !     \item [{[counts]}]
-!           An integer array, with length ({\tt datarank} minus the interngrid rank).
+!           An integer array, with length ({\tt datarank} minus the igrid rank).
 !           If the {\tt ESMF\_Array} is a higher rank than the
-!           {\tt ESMF\_InternGrid}, the additional dimensions may 
+!           {\tt ESMF\_IGrid}, the additional dimensions may 
 !           optionally each have an item count defined here.  
 !           This allows {\tt ESMF\_FieldCreate()} to take 
 !           an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_ArrayDataMap}
 !           and create the appropriately sized {\tt ESMF\_Array} for each DE.
-!           These values are unneeded if the ranks of the data and interngrid
+!           These values are unneeded if the ranks of the data and igrid
 !           are the same, and ignored if {\tt ESMF\_FieldCreate()} is called
 !           called with an already-created {\tt ESMF\_Array}.  If unspecified,
 !           the default lengths are 1.
@@ -678,10 +678,10 @@ end function
         endif
 
 
-        ! counts for dimensions not aligned with the interngrid
-        arraydatamap%dataNonInternGridCounts(:) = 1
+        ! counts for dimensions not aligned with the igrid
+        arraydatamap%dataNonIGridCounts(:) = 1
         if (present(counts)) then
-          arraydatamap%dataNonInternGridCounts(1:size(counts)) = counts(:)
+          arraydatamap%dataNonIGridCounts(1:size(counts)) = counts(:)
         endif
 
         ! mark object as initialized and ready to be used
@@ -719,19 +719,19 @@ end function
 !           An {\tt ESMF\_ArrayDataMap}.
 !     \item [indexorder]
 !           An {\tt ESMF\_DataIndexOrder} which specifies one of several
-!           common predefined mappings between the interngrid and data ranks.
+!           common predefined mappings between the igrid and data ranks.
 !           This is simply a convenience for the common cases; there is
 !           a more general form of this call which allows the mapping to
 !           be specified as an integer array of index numbers directly.
 !     \item [{[counts]}]
-!           An integer array, with length ({\tt datarank} minus the interngrid rank).
+!           An integer array, with length ({\tt datarank} minus the igrid rank).
 !           If the {\tt ESMF\_Array} is a higher rank than the
-!           {\tt ESMF\_InternGrid}, the additional dimensions may 
+!           {\tt ESMF\_IGrid}, the additional dimensions may 
 !           optionally each have an item count defined here.  
 !           This allows {\tt ESMF\_FieldCreate()} to take 
 !           an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_ArrayDataMap}
 !           and create the appropriately sized {\tt ESMF\_Array} for each DE.
-!           These values are unneeded if the ranks of the data and interngrid
+!           These values are unneeded if the ranks of the data and igrid
 !           are the same, and ignored if {\tt ESMF\_FieldCreate()} is called
 !           called with an already-created {\tt ESMF\_Array}.  If unspecified,
 !           the default lengths are 1.
@@ -759,7 +759,7 @@ end function
 
         ! initialize the contents of the arraydatamap
 
-        ! set up the mapping of interngrid indicies to array indicies
+        ! set up the mapping of igrid indicies to array indicies
         arraydatamap%dataDimOrder(:) = 0
 
         select case (indexorder%iorder)
@@ -815,13 +815,13 @@ end function
 
           case default 
             if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                 "unrecognized interngrid index order", &
+                                 "unrecognized igrid index order", &
                                  ESMF_CONTEXT, rc)) return
         end select
 
-        arraydatamap%dataNonInternGridCounts(:) = 1
+        arraydatamap%dataNonIGridCounts(:) = 1
         if (present(counts)) then
-          arraydatamap%dataNonInternGridCounts(1:size(counts)) = counts(:)
+          arraydatamap%dataNonIGridCounts(1:size(counts)) = counts(:)
         endif
 
         ! mark object as initialized and ready to be used

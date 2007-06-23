@@ -1,4 +1,4 @@
-// $Id: ESMC_CompCreate.C,v 1.11 2007/06/22 23:21:47 cdeluca Exp $
+// $Id: ESMC_CompCreate.C,v 1.12 2007/06/23 04:00:59 cdeluca Exp $
 //
 // Test code which creates a new Component.
 
@@ -25,7 +25,7 @@ int main(int argc, char **argv)
     int rc;
     char *cname;
     ESMC_DELayout *delayout;
-    ESMC_InternGridComp *comp1;
+    ESMC_IGridComp *comp1;
     ESMC_Clock *clock = NULL;
         
 //-------------------------------------------------------------------------
@@ -40,15 +40,15 @@ int main(int argc, char **argv)
     // TODO: query framework for default layout here
 
     cname = "Atmosphere";
-    comp1 = ESMC_InternGridCompCreate(cname, ESMF_ATM, NULL, "interngrid.rc", 
+    comp1 = ESMC_IGridCompCreate(cname, ESMF_ATM, NULL, "igrid.rc", 
                                 clock, &rc);
 
-    printf("InternGrid Comp Create returned, name = '%s'\n", cname);
+    printf("IGrid Comp Create returned, name = '%s'\n", cname);
 
-    rc = comp1->ESMC_InternGridCompPrint("");
+    rc = comp1->ESMC_IGridCompPrint("");
     printf("Comp Print returned\n");
 
-    rc = ESMC_InternGridCompDestroy(comp1);
+    rc = ESMC_IGridCompDestroy(comp1);
     printf("Comp Run returned\n");
 
     printf("Component Test 1 finished\n");

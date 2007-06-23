@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.106 2007/06/22 23:21:38 cdeluca Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.107 2007/06/23 04:00:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -25,14 +25,14 @@
 #include "ESMF.h"
 !==============================================================================
 !BOPI
-! !MODULE: ESMF_PhysGridMod - Physical properties of InternGrid
+! !MODULE: ESMF_PhysGridMod - Physical properties of IGrid
 !
 ! !DESCRIPTION:
 !
 ! The code in this file implements the {\tt ESMF\_PhysGrid} class and is 
-! responsible for computing or initializing physical properties of interngrids.   
+! responsible for computing or initializing physical properties of igrids.   
 ! {\tt ESMF\_PhysGrid} properties include coordinate information necessary 
-! for describing interngrids, interngrid metric information and interngrid masks.
+! for describing igrids, igrid metric information and igrid masks.
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -56,7 +56,7 @@
 !------------------------------------------------------------------------------
 !     !  ESMF_PhysLocation
 !
-!     !  Physical locations for a set of points defining the interngrid.
+!     !  Physical locations for a set of points defining the igrid.
 
       type ESMF_PhysLocation
       sequence
@@ -65,11 +65,11 @@
         ! One array per number of dimensions:
         type(ESMF_InternArray), dimension(:), pointer :: compLocations
                                         ! the coordinates for each point in the
-                                        ! interngrid.  If the coordinates are aligned,
+                                        ! igrid.  If the coordinates are aligned,
                                         ! then this array is a simple vector of
                                         ! values along the axis.  Otherwise the
                                         ! Array must have the coordinates for
-                                        ! all points in the InternGrid.
+                                        ! all points in the IGrid.
         type(ESMF_InternArray), dimension(:), pointer :: totalLocations
                                         ! same as above, but with an additional
                                         ! boundary layer of coordinates.  Only
@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 !     !  ESMF_PhysRegion
 !
-!     !  Physical locations for a set of points defining regions of the interngrid
+!     !  Physical locations for a set of points defining regions of the igrid
 !     !  (e.g. cell centers or domains of influence).
 
       type ESMF_PhysRegion
@@ -126,29 +126,29 @@
       end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_InternGridMaskType
+!     ! ESMF_IGridMaskType
 !
 !     ! Type to specify kind of region for defined PhysGrid regions.
 
-      type ESMF_InternGridMaskType
+      type ESMF_IGridMaskType
       sequence
         integer :: maskType
       end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_InternGridMask
+!     ! ESMF_IGridMask
 !
 !     ! Data type describing masks for a PhysGrid.  Masks are named and can
 !     ! be of different types, including logical masks, multiplicative masks,
 !     ! and integer region IDs.
 
-      type ESMF_InternGridMask
+      type ESMF_IGridMask
       sequence
 !      private
         type(ESMF_Base) :: base   ! ESMF Base class object
-        type(ESMF_InternGridMaskType) :: maskType
+        type(ESMF_IGridMaskType) :: maskType
                                   ! type of mask
-        type(ESMF_InternArray) :: data  ! mask data at each interngrid point
+        type(ESMF_InternArray) :: data  ! mask data at each igrid point
         ESMF_INIT_DECLARE
       end type
 
@@ -156,7 +156,7 @@
 !     ! ESMF_PhysGridOrientation
 !
 !     ! Type to specify orientation for defined PhysGrids.  Useful for
-!     !  queries of interngrid directions.
+!     !  queries of igrid directions.
 !     !  See the public parameters declared below for the possible valid
 !     !  values for this.  (They include horizontal, vertical, 3D)
 
@@ -182,7 +182,7 @@
         type(ESMF_Base) :: base   ! ESMF Base class object
         type(ESMF_RelLoc) :: relloc
                                   ! If this PhysGrid describes staggered part of
-                                  ! a interngrid, this is the Relative Location for 
+                                  ! a igrid, this is the Relative Location for 
                                   ! easy determination of PhysGrid associated
                                   ! with a staggered location.
         type(ESMF_CoordSystem) :: coordSystem
@@ -194,24 +194,24 @@
                                   ! (eg Horizontal, Vertical, Unknown)
         type(ESMF_PhysCoord), dimension(:), pointer :: coords
                                   ! Description of each physical coordinate axis,
-                                  ! including extents for this interngrid.  
+                                  ! including extents for this igrid.  
         type(ESMF_PhysLocation) :: locations
                                   ! Structure which holds the actual coordinates
-                                  ! for the interngrid locations.
+                                  ! for the igrid locations.
         type(ESMF_PhysRegion) :: regions
-                                  ! Information about interngrid regions, which
-                                  ! typically describe each interngrid cell, but can
+                                  ! Information about igrid regions, which
+                                  ! typically describe each igrid cell, but can
                                   ! be either polygons or circles/spheres/ellipses
         integer :: numMasks
-        type(ESMF_InternGridMask), dimension(:), pointer :: masks
-                                  ! InternGrid-based masks.  Includes both logical 
+        type(ESMF_IGridMask), dimension(:), pointer :: masks
+                                  ! IGrid-based masks.  Includes both logical 
                                   ! and multiplicative masks.  Default mask 
                                   ! (for query) is the first one if no name
                                   ! given.  Region IDs can be encoded as a mask
                                   ! as well.
         integer :: numMetrics
         type(ESMF_InternArray), dimension(:), pointer :: metrics
-                                  ! A place to store metrics for the interngrid.  
+                                  ! A place to store metrics for the igrid.  
                                   ! There is no support for the Framework to use
                                   ! these metrics, but they can be set and
                                   ! queried as a convenience to the user.  If
@@ -236,13 +236,13 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 
-      ! These are public primarily for use by the InternGrid module and
+      ! These are public primarily for use by the IGrid module and
       ! are not meant to be directly accessible to users.
       public ESMF_PhysLocation
       public ESMF_RegionType
       public ESMF_PhysRegion
-      public ESMF_InternGridMaskType
-      public ESMF_InternGridMask
+      public ESMF_IGridMaskType
+      public ESMF_IGridMask
       public ESMF_PhysGridOrientation
       public ESMF_PhysGrid
       public ESMF_PhysGridType
@@ -251,9 +251,9 @@
       public ESMF_PhysLocationValidate
       public ESMF_PhysLocationGetInit
 
-      public ESMF_InternGridMaskInit
-      public ESMF_InternGridMaskValidate
-      public ESMF_InternGridMaskGetInit
+      public ESMF_IGridMaskInit
+      public ESMF_IGridMaskValidate
+      public ESMF_IGridMaskGetInit
 
       public ESMF_PhysGridTypeInit
       public ESMF_PhysGridTypeValidate
@@ -302,13 +302,13 @@
 
       ! Supported ESMF PhysGrid Orientation Types
       !   UNKNOWN     = unknown or undefined orientation
-      !   HORIZONTAL  = PhysGrid is a horizontal interngrid
-      !   VERTICAL    = PhysGrid is a vertical interngrid
-      !   3D          = PhysGrid is a full 3-d description of interngrid space
+      !   HORIZONTAL  = PhysGrid is a horizontal igrid
+      !   VERTICAL    = PhysGrid is a vertical igrid
+      !   3D          = PhysGrid is a full 3-d description of igrid space
       !   XZ          = PhysGrid is a XZ (or zonal     ) slice out of 3-d space 
       !   YZ          = PhysGrid is a YZ (or meridional) slice out of 3-d space
 
-      type(ESMF_PhysGridOrientation), parameter, public :: &! interngrid direction
+      type(ESMF_PhysGridOrientation), parameter, public :: &! igrid direction
          ESMF_PHYSGRID_ORIENT_UNKNOWN     = ESMF_PhysGridOrientation( 0), &
          ESMF_PHYSGRID_ORIENT_HORIZONTAL  = ESMF_PhysGridOrientation( 1), &
          ESMF_PHYSGRID_ORIENT_VERTICAL    = ESMF_PhysGridOrientation( 2), &
@@ -319,7 +319,7 @@
       ! Supported ESMF PhysGrid Region Types
       !   UNKNOWN   = unknown or undefined region type
       !   POLYGON   = polygons defined by vertex coordinates
-      !   ELLIPSE   = ellipse centered on interngrid point, defined by two params
+      !   ELLIPSE   = ellipse centered on igrid point, defined by two params
 
       type(ESMF_RegionType), parameter, public :: &! types of PhysGrid regions
          ESMF_REGION_TYPE_UNKNOWN      = ESMF_RegionType( 0), &
@@ -332,18 +332,18 @@
       !   MULT      = multiplicative mask
       !   REGION_ID = integer assigning unique ID to each point
 
-      type(ESMF_InternGridMaskType), parameter, public :: &! types of interngrid masks
-         ESMF_GRID_MASKTYPE_UNKNOWN        = ESMF_InternGridMaskType( 0), &
-         ESMF_GRID_MASKTYPE_LOGICAL        = ESMF_InternGridMaskType( 1), &
-         ESMF_GRID_MASKTYPE_MULT           = ESMF_InternGridMaskType( 2), &
-         ESMF_GRID_MASKTYPE_REGION_ID      = ESMF_InternGridMaskType( 3)
+      type(ESMF_IGridMaskType), parameter, public :: &! types of igrid masks
+         ESMF_GRID_MASKTYPE_UNKNOWN        = ESMF_IGridMaskType( 0), &
+         ESMF_GRID_MASKTYPE_LOGICAL        = ESMF_IGridMaskType( 1), &
+         ESMF_GRID_MASKTYPE_MULT           = ESMF_IGridMaskType( 2), &
+         ESMF_GRID_MASKTYPE_REGION_ID      = ESMF_IGridMaskType( 3)
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.106 2007/06/22 23:21:38 cdeluca Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.107 2007/06/23 04:00:37 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -382,7 +382,7 @@
 !
 !! !DESCRIPTION:
 !!     This interface provides a single entry point for methods that 
-!!     search a interngrid for point(s) using a simple bounding box search
+!!     search a igrid for point(s) using a simple bounding box search
 !!     in spherical coordinates.
 !!
 !!EOPI
@@ -398,7 +398,7 @@
 !
 !! !DESCRIPTION:
 !!     This interface provides a single entry point for methods that 
-!!     search a interngrid for point(s) using a general (cross-product) search
+!!     search a igrid for point(s) using a general (cross-product) search
 !!     in spherical coordinates.
 !!
 !!EOPI
@@ -414,7 +414,7 @@
 !
 !! !DESCRIPTION:
 !!     This interface provides a single entry point for methods that 
-!!     search a interngrid for point(s) using a simple bounding box search
+!!     search a igrid for point(s) using a simple bounding box search
 !!     in Cartesian coordinates.
 !!
 !!EOPI
@@ -425,7 +425,7 @@
       interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_InternGridMaskTypeEqual
+         module procedure ESMF_IGridMaskTypeEqual
          module procedure ESMF_RegionTypeEqual
          module procedure ESMF_PhysGridOrientEqual
 
@@ -443,7 +443,7 @@
       interface operator (/=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_InternGridMaskTypeNotEqual
+         module procedure ESMF_IGridMaskTypeNotEqual
          module procedure ESMF_RegionTypeNotEqual
          module procedure ESMF_PhysGridOrientNotEqual
 
@@ -650,95 +650,95 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridMaskGetInit"
+#define ESMF_METHOD "ESMF_IGridMaskGetInit"
 !BOPI
-! !IROUTINE:  ESMF_InternGridMaskGetInit - Get initialization status.
+! !IROUTINE:  ESMF_IGridMaskGetInit - Get initialization status.
 
 ! !INTERFACE:
-    function ESMF_InternGridMaskGetInit(s)
+    function ESMF_IGridMaskGetInit(s)
 !
 ! !ARGUMENTS:
-       type(ESMF_InternGridMask), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_InternGridMaskGetInit
+       type(ESMF_IGridMask), intent(in), optional :: s
+       ESMF_INIT_TYPE :: ESMF_IGridMaskGetInit
 !
 ! !DESCRIPTION:
-!      Get the initialization status of the shallow class {\tt interngridmask}.
+!      Get the initialization status of the shallow class {\tt igridmask}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_InternGridMask} from which to retreive status.
+!           {\tt ESMF\_IGridMask} from which to retreive status.
 !     \end{description}
 !
 !EOPI
 
        if (present(s)) then
-         ESMF_InternGridMaskGetInit = ESMF_INIT_GET(s)
+         ESMF_IGridMaskGetInit = ESMF_INIT_GET(s)
        else
-         ESMF_InternGridMaskGetInit = ESMF_INIT_DEFINED
+         ESMF_IGridMaskGetInit = ESMF_INIT_DEFINED
        endif
 
-    end function ESMF_InternGridMaskGetInit
+    end function ESMF_IGridMaskGetInit
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridMaskInit"
+#define ESMF_METHOD "ESMF_IGridMaskInit"
 !BOPI
-! !IROUTINE:  ESMF_InternGridMaskInit - Initialize InternGridMask
+! !IROUTINE:  ESMF_IGridMaskInit - Initialize IGridMask
 
 ! !INTERFACE:
-    subroutine ESMF_InternGridMaskInit(s)
+    subroutine ESMF_IGridMaskInit(s)
 !
 ! !ARGUMENTS:
-       type(ESMF_InternGridMask) :: s
+       type(ESMF_IGridMask) :: s
 !
 ! !DESCRIPTION:
-!      Initialize the shallow class {\tt interngridmask}.
+!      Initialize the shallow class {\tt igridmask}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_InternGridMask} of which being initialized.
+!           {\tt ESMF\_IGridMask} of which being initialized.
 !     \end{description}
 !
 !EOPI
 
        ESMF_INIT_SET_DEFINED(s)
-    end subroutine ESMF_InternGridMaskInit
+    end subroutine ESMF_IGridMaskInit
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridMaskValidate"
+#define ESMF_METHOD "ESMF_IGridMaskValidate"
 !BOPI
-! !IROUTINE:  ESMF_InternGridMaskValidate - Check validity of a InternGridMask
+! !IROUTINE:  ESMF_IGridMaskValidate - Check validity of a IGridMask
 
 ! !INTERFACE:
-    subroutine ESMF_InternGridMaskValidate(s,rc)
+    subroutine ESMF_IGridMaskValidate(s,rc)
 !
 ! !ARGUMENTS:
-       type(ESMF_InternGridMask), intent(inout) :: s
+       type(ESMF_IGridMask), intent(inout) :: s
        integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Validates that the {\tt InternGridMask} is internally consistent.
+!      Validates that the {\tt IGridMask} is internally consistent.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_InternGridMask} to validate.
+!           {\tt ESMF\_IGridMask} to validate.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt interngridmask}
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt igridmask}
 !           is valid.
 !     \end{description}
 !
 !EOPI
-     ESMF_INIT_CHECK_SHALLOW(ESMF_InternGridMaskGetInit,ESMF_InternGridMaskInit,s)
+     ESMF_INIT_CHECK_SHALLOW(ESMF_IGridMaskGetInit,ESMF_IGridMaskInit,s)
 
      ! return success
      if(present(rc)) then
        rc = ESMF_SUCCESS
      endif
-    end subroutine ESMF_InternGridMaskValidate
+    end subroutine ESMF_IGridMaskValidate
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -903,9 +903,9 @@
 !     \item[numDims]
 !          Number of physical dimensions.
 !     \item[relloc]
-!          Relative location in interngrid cell for which this PhysGrid
-!          is being defined.  For example, in a staggered interngrid,
-!          this PhysGrid could be defined for the interngrid associated
+!          Relative location in igrid cell for which this PhysGrid
+!          is being defined.  For example, in a staggered igrid,
+!          this PhysGrid could be defined for the igrid associated
 !          with center points or corner points or face points.
 !     \item[{[name]}]
 !          {\tt ESMF\_PhysGrid} name.
@@ -1272,8 +1272,8 @@
 !     \item[{[name]}]
 !          {\tt ESMF\_PhysGrid} name.
 !     \item[{[relloc]}]
-!          {\tt ESMF\_RelLoc} referring to position in staggered interngrid
-!          to which interngrid quantities refer.
+!          {\tt ESMF\_RelLoc} referring to position in staggered igrid
+!          to which igrid quantities refer.
 !     \item[{[numDims]}]
 !          Number of physical dimensions.
 !     \item[{[coordSystem]}]
@@ -1519,7 +1519,7 @@
 !          physical dimension for each location.
 !          The array is assumed to be dimensioned (num\_dims)
 !          while the {\tt ESMF\_Array} would typically be consistent with
-!          other interngrid arrays.
+!          other igrid arrays.
 !     \item[{[total]}]
 !          Logical. If TRUE, return the total coordinates including internally
 !          generated boundary cells. If FALSE return the
@@ -1565,7 +1565,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PhysGridSetLocations"
 !BOPI
-! !IROUTINE: ESMF_PhysGridSetLocations - Sets interngrid locations from input array.
+! !IROUTINE: ESMF_PhysGridSetLocations - Sets igrid locations from input array.
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridSetLocations(physgrid, locationArray, name, &
@@ -1591,7 +1591,7 @@
 !          physical dimension for each location.
 !          The array is assumed to be dimensioned (num\_dims)
 !          while the {\tt ESMF\_Array} would typically be consistent with
-!          other interngrid arrays.
+!          other igrid arrays.
 !     \item[{[name]}]
 !          Optional name to assign to the locations.
 !     \item[{[total]}]
@@ -1646,7 +1646,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PhysGridSetRegions"
 !BOPI
-! !IROUTINE: ESMF_PhysGridSetRegions - Sets interngrid regions from input array.
+! !IROUTINE: ESMF_PhysGridSetRegions - Sets igrid regions from input array.
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridSetRegions(physgrid, regionType, name, &
@@ -1682,16 +1682,16 @@
 !          are defined with degenerate vertex points.
 !     \item[{[vertexArray]}]
 !          Array of {\tt ESMF\_Array}s containing the coordinates in each
-!          physical dimension for each vertex point at each logical interngrid point. 
+!          physical dimension for each vertex point at each logical igrid point. 
 !          The array is assumed to be dimensioned (num\_dims,num\_vertices)
 !          while the {\tt ESMF\_Array} would typically be consistent with
-!          other interngrid arrays. The order of dimensions is assumed to be the
+!          other igrid arrays. The order of dimensions is assumed to be the
 !          same order defined for the PhysGrid coordinates.
 !     \item[{[ellipseArray]}]
 !          Array of {\tt ESMF\_Array}s containing the two parameters
-!          necessary for describing the elliptical region at each interngrid point.
+!          necessary for describing the elliptical region at each igrid point.
 !          The array is dimensioned (2) while the {\tt ESMF\_Array} would 
-!          typically be consistent with other interngrid arrays.
+!          typically be consistent with other igrid arrays.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1802,15 +1802,15 @@
 !          are defined with degenerate vertex points.
 !     \item[{[vertexArray]}]
 !          Array of {\tt ESMF\_Array}s containing the coordinates in each
-!          physical dimension for each vertex point at each logical interngrid point. 
+!          physical dimension for each vertex point at each logical igrid point. 
 !          The array is assumed to be dimensioned (num\_dims,num\_vertices)
 !          while the {\tt ESMF\_Array} would typically be consistent with
-!          other interngrid arrays.
+!          other igrid arrays.
 !     \item[{[ellipseArray]}]
 !          Array of {\tt ESMF\_Array}s containing the two parameters
-!          necessary for describing the elliptical region at each interngrid point.
+!          necessary for describing the elliptical region at each igrid point.
 !          The array is dimensioned (2) while the {\tt ESMF\_Array} would 
-!          typically be consistent with other interngrid arrays.
+!          typically be consistent with other igrid arrays.
 !     \item[{[bboxArray]}]
 !          Array of {\tt ESMF\_Array}s containing the bounding box
 !          of each defined region.
@@ -1894,7 +1894,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PhysGridSetMask"
 !BOPI
-! !IROUTINE: ESMF_PhysGridSetMask - Sets interngrid mask from input array.
+! !IROUTINE: ESMF_PhysGridSetMask - Sets igrid mask from input array.
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridSetMask(physgrid, maskArray, maskType, &
@@ -1907,7 +1907,7 @@
       ! i will just take it out for now.   nsc 15oct03
       !type(ESMF_InternArray), intent(in) :: maskArray
       type(ESMF_InternArray) :: maskArray
-      type(ESMF_InternGridMaskType), intent(in) :: maskType
+      type(ESMF_IGridMaskType), intent(in) :: maskType
       character(*), intent(in), optional :: name
       integer, intent(out), optional :: id
       integer, intent(out), optional :: rc            
@@ -1922,9 +1922,9 @@
 !     \item[physgrid]
 !          {\tt ESMF\_PhysGrid} for which mask is to be added.
 !     \item[maskArray]
-!          Array containing mask values for each interngrid cell.
+!          Array containing mask values for each igrid cell.
 !     \item[maskType]
-!          {\tt ESMF\_InternGridMaskType} describing type of mask (e.g. logical,
+!          {\tt ESMF\_IGridMaskType} describing type of mask (e.g. logical,
 !          multiplicative, region ID).
 !     \item[{[name]}]
 !          Name to assign to mask.
@@ -1941,7 +1941,7 @@
       ! local variables
       integer :: localrc                             ! Error status
       integer :: n, numMaskOld, numMaskNew
-      type(ESMF_InternGridMask), dimension(:), allocatable :: tempMask
+      type(ESMF_IGridMask), dimension(:), allocatable :: tempMask
                                                      ! temporary array of masks
 
       ! Initialize return code; assume failure until success is certain
@@ -2013,7 +2013,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PhysGridGetMask"
 !BOPI
-! !IROUTINE: ESMF_PhysGridGetMask - Gets interngrid mask from PhysGrid object.
+! !IROUTINE: ESMF_PhysGridGetMask - Gets igrid mask from PhysGrid object.
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridGetMask(physgrid, maskArray, name, id, rc)
@@ -2035,7 +2035,7 @@
 !     \item[physgrid]
 !          {\tt ESMF\_PhysGrid} from which mask is to be retrieved.
 !     \item[maskArray]
-!          Array containing mask value at each interngrid cell.
+!          Array containing mask value at each igrid cell.
 !     \item[{[name]}]
 !          If supplied, mask matching this name will be returned.
 !     \item[{[id]}]
@@ -2118,7 +2118,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PhysGridSetMetric"
 !BOPI
-! !IROUTINE: ESMF_PhysGridSetMetric - Sets interngrid metric from input array.
+! !IROUTINE: ESMF_PhysGridSetMetric - Sets igrid metric from input array.
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridSetMetric(physgrid, metricArray, name, id, rc)
@@ -2139,7 +2139,7 @@
 !     \item[physgrid]
 !          {\tt ESMF\_PhysGrid} for which metric is to be added.
 !     \item[metricArray]
-!          Array containing metric values at each interngrid cell.
+!          Array containing metric values at each igrid cell.
 !     \item[name]
 !          Name to assign to metric.
 !     \item[{[id]}]
@@ -2225,7 +2225,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PhysGridGetMetric"
 !BOPI
-! !IROUTINE: ESMF_PhysGridGetMetric - Gets interngrid metric from PhysGrid object.
+! !IROUTINE: ESMF_PhysGridGetMetric - Gets igrid metric from PhysGrid object.
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridGetMetric(physgrid, metricArray, name, id, rc)
@@ -2246,7 +2246,7 @@
 !     \item[physgrid]
 !          {\tt ESMF\_PhysGrid} from which metric is to be retrieved.
 !     \item[metricArray]
-!          Array containing metric values at for each interngrid cell.
+!          Array containing metric values at for each igrid cell.
 !     \item[{[name]}]
 !          If supplied, metric matching this name will be returned.
 !     \item[{[id]}]
@@ -2406,7 +2406,7 @@
       ! This code will surely change, but for development purposes it
       ! is necessary to have some information available currently.
 
-      print *, 'Physinterngrid:'
+      print *, 'Physigrid:'
       print *, ' Dimensions:', physgrid%ptr%numDims
 
       print *, ' Coordinate Extents:'
@@ -2432,7 +2432,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PhysGridSearchBboxSphericalPoint"
 !!BOPI
-!! !IROUTINE: ESMF_PhysGridSearchBboxSphericalPoint - Search interngrid for a point
+!! !IROUTINE: ESMF_PhysGridSearchBboxSphericalPoint - Search igrid for a point
 !
 !! !INTERFACE:
 !      subroutine ESMF_PhysGridSearchBboxSphericalPoint(dst_add, x, y, DEid, &
@@ -2450,16 +2450,16 @@
 !
 !!
 !! !DESCRIPTION:
-!!     This routine searches for the location in the interngrid of a interngrid cell 
+!!     This routine searches for the location in the igrid of a igrid cell 
 !!     containing the point given by the input x,y coordinates.  This 
 !!     instantiation uses a simple bounding box check to search the
-!!     interngrid and is therefore only applicable to interngrids where the logical
+!!     igrid and is therefore only applicable to igrids where the logical
 !!     and physical axes are aligned and logically-rectangular.
 !!
 !!     The arguments are:
 !!     \begin{description}
 !!     \item[dst\_add]
-!!          Address of interngrid cell containing the search point.
+!!          Address of igrid cell containing the search point.
 !!     \item[x,y]
 !!          Coordinates of search point.
 !!     \item[DEid]
@@ -2507,7 +2507,7 @@
 !!
 !         
 !         extract local_min_x, local_min_y, local_max_x, local_max_y from
-!            phys_interngrid
+!            phys_igrid
 !
 !!
 !!        make sure these are all in the same longitude range
@@ -2530,13 +2530,13 @@
 !!        point may be somewhere in this DE, loop through the cells on the DE
 !!
 !
-!         get jb,je,ib,ie, interngrid corners, interngrid centers
+!         get jb,je,ib,ie, igrid corners, igrid centers
 !
 !         do j=jb,je     !jb,je correspond to exclusive domain on this DE
 !         do i=ib,ie     !ib,ie ditto
 !
 !!
-!!           check bounding box of local interngrid cell
+!!           check bounding box of local igrid cell
 !!
 !            local_min_x = minval(corner_x(:,i,j))
 !            local_max_x = maxval(corner_x(:,i,j))
@@ -2593,7 +2593,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PhysGridSearchMyDECartPt"
 !BOPI
-! !IROUTINE: ESMF_PhysGridSrchMyDECartPt - Search interngrid on this DE for a point
+! !IROUTINE: ESMF_PhysGridSrchMyDECartPt - Search igrid on this DE for a point
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridSearchMyDECartPt(physgrid, dstAdd, point, rc)
@@ -2606,10 +2606,10 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     This routine searches for the location in the interngrid of a interngrid cell 
+!     This routine searches for the location in the igrid of a igrid cell 
 !     containing the point given by the input x,y coordinates.  This 
 !     instantiation uses a simple bounding box check to search the
-!     interngrid and is therefore only applicable to interngrids where the logical
+!     igrid and is therefore only applicable to igrids where the logical
 !     and physical axes are aligned and logically-rectangular.
 !
 !     The arguments are:
@@ -2617,7 +2617,7 @@
 !     \item[physgrid]
 !          {\tt ESMF\_PhysGrid} to search for location.
 !     \item[dstAdd]
-!          Address of interngrid cell containing the search point.
+!          Address of igrid cell containing the search point.
 !     \item[point]
 !          Coordinates of search point.
 !     \item[{[rc]}]
@@ -2661,7 +2661,7 @@
 
       ! point may be somewhere in this DE, loop through the cells on the DE
 
-      ! get jb,je,ib,ie for the interngrid corners
+      ! get jb,je,ib,ie for the igrid corners
       ib = 2
       ie = size(cornerX,2) - 1
       jb = 2
@@ -2670,7 +2670,7 @@
       do j   = jb,je     !jb,je correspond to exclusive domain on this DE
         do i = ib,ie     !ib,ie ditto
 
-          ! check bounding box of local interngrid cell
+          ! check bounding box of local igrid cell
           cellMinX = minval(cornerX(:,i,j))
           cellMaxX = maxval(cornerX(:,i,j))
           cellMinY = minval(cornerY(:,i,j))
@@ -2696,7 +2696,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PhysGridSearchMyDERowCol"
 !BOPI
-! !IROUTINE: ESMF_PhysGridSrchMyDERowCol - Search interngrid on this DE for a row or column
+! !IROUTINE: ESMF_PhysGridSrchMyDERowCol - Search igrid on this DE for a row or column
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridSearchMyDERowCol(physgrid, dstAdd, point, option, &
@@ -2712,10 +2712,10 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     This routine searches for the location in the interngrid of a row and/or column
+!     This routine searches for the location in the igrid of a row and/or column
 !     containing the point given by the input x,y coordinates.  This 
 !     instantiation uses a simple bounding box check to search the
-!     interngrid and is therefore only applicable to interngrids where the logical
+!     igrid and is therefore only applicable to igrids where the logical
 !     and physical axes are aligned and logically-rectangular.
 !
 !     The arguments are:
@@ -2724,7 +2724,7 @@
 !          {\tt ESMF\_PhysGrid} to search for location.
 !     \item[dstAdd]
 !          Address pair of the corresponding row and/or column bounding
-!          the point.  In the case that the point is coincident with a interngrid
+!          the point.  In the case that the point is coincident with a igrid
 !          line, the min/max flag is used to determine which value to return.
 !     \item[point]
 !          Coordinates of search point.
@@ -2772,7 +2772,7 @@
       localMinY = minval(cornerY)
       localMaxY = maxval(cornerY)
 
-      ! get jb,je,ib,ie for the interngrid corners
+      ! get jb,je,ib,ie for the igrid corners
       ib = 1
       ie = size(cornerX,2)
       jb = 1
@@ -2799,7 +2799,7 @@
         do j   = jb,je     !jb,je correspond to exclusive domain on this DE
           do i = ib,ie     !ib,ie ditto
 
-            ! check bounding box of local interngrid cell
+            ! check bounding box of local igrid cell
             cellMinX = minval(cornerX(:,i,j))
             cellMaxX = maxval(cornerX(:,i,j))
             cellMinY = minval(cornerY(:,i,j))
@@ -2820,7 +2820,7 @@
         enddo
       endif
 
-      ! if total, modify the results slightly for internal interngrid halo width
+      ! if total, modify the results slightly for internal igrid halo width
       if (totalUse) then
         dstAdd(1) = dstAdd(1) + 1
         dstAdd(2) = dstAdd(2) + 1
@@ -2835,7 +2835,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PhysGridSearchBboxCartesianPoint"
 !!BOPI
-!! !IROUTINE: ESMF_PhysGridSearchBboxCartesianPoint - Search interngrid for a point
+!! !IROUTINE: ESMF_PhysGridSearchBboxCartesianPoint - Search igrid for a point
 !
 !! !INTERFACE:
 !      subroutine ESMF_PhysGridSearchBboxCartesianPoint(dst_add, x, y, DEid, &
@@ -2853,16 +2853,16 @@
 !
 !!
 !! !DESCRIPTION:
-!!     This routine searches for the location in the interngrid of a interngrid cell 
+!!     This routine searches for the location in the igrid of a igrid cell 
 !!     containing the point given by the input x,y coordinates.  This 
 !!     instantiation uses a simple bounding box check to search the
-!!     interngrid and is therefore only applicable to interngrids where the logical
+!!     igrid and is therefore only applicable to igrids where the logical
 !!     and physical axes are aligned and logically-rectangular.
 !!
 !!     The arguments are:
 !!     \begin{description}
 !!     \item[dst\_add]
-!!          Address of interngrid cell containing the search point.
+!!          Address of igrid cell containing the search point.
 !!     \item[x,y]
 !!          Coordinates of search point.
 !!     \item[DEid]
@@ -2910,7 +2910,7 @@
 !!
 !         
 !         extract local_min_x, local_min_y, local_max_x, local_max_y from
-!            phys_interngrid
+!            phys_igrid
 !
 !         if (point(1) < local_min_x .or. &
 !             point(1) > local_max_x .or. &
@@ -2921,13 +2921,13 @@
 !!        point may be somewhere in this DE, loop through the cells on the DE
 !!
 !
-!         get jb,je,ib,ie, interngrid corners, interngrid centers
+!         get jb,je,ib,ie, igrid corners, igrid centers
 !
 !         do j=jb,je     !jb,je correspond to exclusive domain on this DE
 !         do i=ib,ie     !ib,ie ditto
 !
 !!
-!!           check bounding box of local interngrid cell
+!!           check bounding box of local igrid cell
 !!
 !            local_min_x = minval(corner_x(:,i,j))
 !            local_max_x = maxval(corner_x(:,i,j))
@@ -2979,7 +2979,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PhysGridSearchGeneralSphericalPoint"
 !!BOPI
-!! !IROUTINE: ESMF_PhysGridSearchGeneralSphericalPoint - Search interngrid for a point
+!! !IROUTINE: ESMF_PhysGridSearchGeneralSphericalPoint - Search igrid for a point
 !
 !! !INTERFACE:
 !      subroutine ESMF_PhysGridSearchGeneralSphericalPoint(dst_add, x, y, DEid, &
@@ -2997,15 +2997,15 @@
 !
 !!
 !! !DESCRIPTION:
-!!     This routine searches for the location in the interngrid of a interngrid cell 
+!!     This routine searches for the location in the igrid of a igrid cell 
 !!     containing the point given by the input x,y coordinates.  This 
 !!     instantiation uses a general (cross-product) check to search the
-!!     interngrid and works for all cells that are non-convex.
+!!     igrid and works for all cells that are non-convex.
 !!
 !!     The arguments are:
 !!     \begin{description}
 !!     \item[dst\_add]
-!!          Address of interngrid cell containing the search point.
+!!          Address of igrid cell containing the search point.
 !!     \item[x,y]
 !!          Coordinates of search point.
 !!     \item[DEid]
@@ -3053,7 +3053,7 @@
 !!
 !         
 !         extract local_min_x, local_min_y, local_max_x, local_max_y from
-!            phys_interngrid
+!            phys_igrid
 !
 !!
 !!        make sure these are all in the same longitude range
@@ -3076,13 +3076,13 @@
 !!        point may be somewhere in this DE, loop through the cells on the DE
 !!
 !
-!         get jb,je,ib,ie, interngrid corners, interngrid centers
+!         get jb,je,ib,ie, igrid corners, igrid centers
 !
-!         interngrid_loop_j: do j=jb,je   !ib,ie,jb,je correspond to exclusive 
+!         igrid_loop_j: do j=jb,je   !ib,ie,jb,je correspond to exclusive 
 !         do i=ib,ie                !domain on this DE
 !
 !!
-!!           check bounding box of local interngrid cell
+!!           check bounding box of local igrid cell
 !!
 !            local_min_x = minval(corner_x(:,i,j))
 !            local_max_x = maxval(corner_x(:,i,j))
@@ -3184,9 +3184,9 @@
 !     \item[pointY]
 !          y-coordinate of search point.
 !     \item[cornerX]
-!          x-coordinate of interngrid cell corners.
+!          x-coordinate of igrid cell corners.
 !     \item[cornerY]
-!          y-coordinate of interngrid cell corners.
+!          y-coordinate of igrid cell corners.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3197,7 +3197,7 @@
       ! local variables
       !integer :: localrc                             ! Error status
       integer :: ncorn, next_n   ! corner index
-      integer :: num_corners     ! number of corners in each interngrid cell
+      integer :: num_corners     ! number of corners in each igrid cell
 
       real(kind=ESMF_KIND_R8) :: vec1X, vec1Y  ! components of the cell 
                                                ! side vector
@@ -3410,19 +3410,19 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridMaskTypeEqual"
+#define ESMF_METHOD "ESMF_IGridMaskTypeEqual"
 !BOPI
-! !IROUTINE: ESMF_InternGridMaskTypeEqual - equality of PhysGrid mask types
+! !IROUTINE: ESMF_IGridMaskTypeEqual - equality of PhysGrid mask types
 !
 ! !INTERFACE:
-      function ESMF_InternGridMaskTypeEqual(InternGridMaskType1, InternGridMaskType2)
+      function ESMF_IGridMaskTypeEqual(IGridMaskType1, IGridMaskType2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_InternGridMaskTypeEqual
+      logical :: ESMF_IGridMaskTypeEqual
 
 ! !ARGUMENTS:
-      type(ESMF_InternGridMaskType), intent(in) :: InternGridMaskType1
-      type(ESMF_InternGridMaskType), intent(in) :: InternGridMaskType2
+      type(ESMF_IGridMaskType), intent(in) :: IGridMaskType1
+      type(ESMF_IGridMaskType), intent(in) :: IGridMaskType2
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF PhysGrid mask types to see if
@@ -3430,34 +3430,34 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[InternGridMaskType1, InternGridMaskType2]
+!     \item[IGridMaskType1, IGridMaskType2]
 !          Two mask types to compare for equality
 !     \end{description}
 !
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-      ESMF_InternGridMaskTypeEqual = (InternGridMaskType1%maskType == &
-                                InternGridMaskType2%maskType)
+      ESMF_IGridMaskTypeEqual = (IGridMaskType1%maskType == &
+                                IGridMaskType2%maskType)
 
-      end function ESMF_InternGridMaskTypeEqual
+      end function ESMF_IGridMaskTypeEqual
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridMaskTypeNotEqual"
+#define ESMF_METHOD "ESMF_IGridMaskTypeNotEqual"
 !BOPI
-! !IROUTINE: ESMF_InternGridMaskTypeNotEqual - non-equality of PhysGrid mask types
+! !IROUTINE: ESMF_IGridMaskTypeNotEqual - non-equality of PhysGrid mask types
 !
 ! !INTERFACE:
-      function ESMF_InternGridMaskTypeNotEqual(InternGridMaskType1, InternGridMaskType2)
+      function ESMF_IGridMaskTypeNotEqual(IGridMaskType1, IGridMaskType2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_InternGridMaskTypeNotEqual
+      logical :: ESMF_IGridMaskTypeNotEqual
 
 ! !ARGUMENTS:
 
-      type(ESMF_InternGridMaskType), intent(in) :: InternGridMaskType1
-      type(ESMF_InternGridMaskType), intent(in) :: InternGridMaskType2
+      type(ESMF_IGridMaskType), intent(in) :: IGridMaskType1
+      type(ESMF_IGridMaskType), intent(in) :: IGridMaskType2
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF PhysGrid mask types to see if
@@ -3465,17 +3465,17 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[InternGridMaskType1, InternGridMaskType2]
+!     \item[IGridMaskType1, IGridMaskType2]
 !          Two kinds of PhysGrid mask types to compare for inequality
 !     \end{description}
 !
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-      ESMF_InternGridMaskTypeNotEqual = (InternGridMaskType1%maskType /= &
-                                   InternGridMaskType2%maskType)
+      ESMF_IGridMaskTypeNotEqual = (IGridMaskType1%maskType /= &
+                                   IGridMaskType2%maskType)
 
-      end function ESMF_InternGridMaskTypeNotEqual
+      end function ESMF_IGridMaskTypeNotEqual
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

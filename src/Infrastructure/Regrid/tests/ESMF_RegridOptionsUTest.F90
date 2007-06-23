@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridOptionsUTest.F90,v 1.17 2007/06/22 23:21:39 cdeluca Exp $
+! $Id: ESMF_RegridOptionsUTest.F90,v 1.18 2007/06/23 04:00:41 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_RegridOptionsUTest.F90,v 1.17 2007/06/22 23:21:39 cdeluca Exp $'
+      '$Id: ESMF_RegridOptionsUTest.F90,v 1.18 2007/06/23 04:00:41 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -101,7 +101,7 @@
 !   ! execute the regrid
 !-------------------------------------------------------------------------
 
-    ! These are fields on different InternGrids - call Regrid to rearrange
+    ! These are fields on different IGrids - call Regrid to rearrange
     !  the data.   The communication pattern was computed at init,
     !  this simply has to execute the send and receive equivalents.
 
@@ -344,12 +344,12 @@ contains
       integer :: status
       type(ESMF_DELayout) :: delayout
       type(ESMF_ArraySpec) :: arrayspec
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       integer :: npets, de_id, decount(2)
       integer :: counts(ESMF_MAXIGRIDDIM), order(ESMF_MAXDIM)
       real(ESMF_KIND_R8) :: mincoord(2), maxcoord(2)
       real(ESMF_KIND_R8), pointer :: idata(:,:,:)
-      type(ESMF_InternGridHorzStagger) :: horz_stagger
+      type(ESMF_IGridHorzStagger) :: horz_stagger
       type(ESMF_FieldDataMap) :: datamap
 
 
@@ -370,7 +370,7 @@ contains
       if (status .ne. ESMF_SUCCESS) goto 10
 
 
-      ! Set up the interngrid size
+      ! Set up the igrid size
       counts(1) = 4
       counts(2) = 60
       counts(3) = 40
@@ -384,14 +384,14 @@ contains
       ! Specify the places on each cell at which data might be located
       horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
 
-      interngrid = ESMF_InternGridCreateHorzXYUni(counts=counts(2:3), &
+      igrid = ESMF_IGridCreateHorzXYUni(counts=counts(2:3), &
                                       minGlobalCoordPerDim=mincoord, &
                                       maxGlobalCoordPerDim=maxcoord, &
                                       horzStagger=horz_stagger, &
-                                      name="source interngrid", rc=status)
+                                      name="source igrid", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_InternGridDistribute(interngrid, delayout=delayout, rc=status)
+      call ESMF_IGridDistribute(igrid, delayout=delayout, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Set up a 3D real array
@@ -400,8 +400,8 @@ contains
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Set up a datamap to tell the framework which of the 2 axes
-      ! correspond to the interngrid, and which one is multiple scalar
-      ! values for the same interngrid cell.
+      ! correspond to the igrid, and which one is multiple scalar
+      ! values for the same igrid cell.
       order(1) = 0
       order(2) = 1
       order(3) = 2
@@ -410,7 +410,7 @@ contains
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Create the field 
-      userfield = ESMF_FieldCreate(interngrid, arrayspec=arrayspec, datamap=datamap, &
+      userfield = ESMF_FieldCreate(igrid, arrayspec=arrayspec, datamap=datamap, &
                                   horzRelloc=ESMF_CELL_CENTER, &
                                   haloWidth=0, name="userfield", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
@@ -435,7 +435,7 @@ contains
 !-------------------------------------------------------------------------
 !--------------------------------------------------------------------------
 !   ! Make a Field where we specify the decomposition; the number of cells
-!   ! per processor is passed into the InternGridDistribute call.
+!   ! per processor is passed into the IGridDistribute call.
 
     subroutine createField2(userfield, vm, result, rc)
       type(ESMF_Field), intent(out) :: userfield
@@ -447,14 +447,14 @@ contains
       integer :: status
       type(ESMF_DELayout) :: delayout
       type(ESMF_ArraySpec) :: arrayspec
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       integer :: npets, countsPerDE1(8), countsPerDE2(2)
       integer :: nDE1, nDE2
       integer :: counts(3), order(3)
       real(ESMF_KIND_R8) :: mincoord(2)
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       real(ESMF_KIND_R8), pointer :: idata(:,:,:)
-      type(ESMF_InternGridHorzStagger) :: horz_stagger
+      type(ESMF_IGridHorzStagger) :: horz_stagger
       type(ESMF_FieldDataMap) :: datamap
 
 
@@ -503,12 +503,12 @@ contains
 
       horz_stagger = ESMF_IGRID_HORZ_STAGGER_D_NE
 
-      interngrid = ESMF_InternGridCreateHorzXY(minGlobalCoordPerDim=mincoord, &
+      igrid = ESMF_IGridCreateHorzXY(minGlobalCoordPerDim=mincoord, &
                                     delta1=delta1, delta2=delta2, &
                                     horzStagger=horz_stagger, &
-                                    name="source interngrid", rc=status)
+                                    name="source igrid", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_InternGridDistribute(interngrid, delayout=delayout, &
+      call ESMF_IGridDistribute(igrid, delayout=delayout, &
                                countsPerDEDim1=countsPerDE1(1:nDE1), &
                                countsPerDEDim2=countsPerDE2(1:nDE2), &
                                rc=status)
@@ -528,7 +528,7 @@ contains
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Create the field 
-      userfield = ESMF_FieldCreate(interngrid, arrayspec=arrayspec, datamap=datamap, &
+      userfield = ESMF_FieldCreate(igrid, arrayspec=arrayspec, datamap=datamap, &
                                   haloWidth=0, name="userfield", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
@@ -561,7 +561,7 @@ contains
 
       ! Local variables
       integer :: i, j, k, status
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       integer :: counts(ESMF_MAXIGRIDDIM)
       real(ESMF_KIND_R8), pointer :: coordX(:,:), coordY(:,:), idata(:,:,:)
       type(ESMF_RelLoc) :: relloc
@@ -569,15 +569,15 @@ contains
       !type(ESMF_FieldDataMap) :: datamap
 
 
-      ! get the interngrid and coordinates
-      call ESMF_FieldGet(userfield, interngrid=interngrid, horzRelloc=relloc, &
+      ! get the igrid and coordinates
+      call ESMF_FieldGet(userfield, igrid=igrid, horzRelloc=relloc, &
                          rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_InternGridGetCoord(interngrid, dim=1, horzRelloc=relloc, &
+      call ESMF_IGridGetCoord(igrid, dim=1, horzRelloc=relloc, &
                              centerCoord=coordX, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_InternGridGetCoord(interngrid, dim=2, horzRelloc=relloc, &
+      call ESMF_IGridGetCoord(igrid, dim=2, horzRelloc=relloc, &
                              centerCoord=coordY, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
@@ -620,7 +620,7 @@ contains
       ! Local variables
       integer :: status, i, j, k, myDE, counts(2)
       type(ESMF_RelLoc) :: relloc
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       real(ESMF_KIND_R8) :: pi, error, maxError, maxPerError
       real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
       real(ESMF_KIND_R8), dimension(:,:), pointer :: calc, coordX, coordY
@@ -629,20 +629,20 @@ contains
 
       pi = 3.14159
 
-      ! get the interngrid and coordinates
+      ! get the igrid and coordinates
 
-      call ESMF_FieldGet(userfield, interngrid=interngrid, horzRelloc=relloc, rc=status)
+      call ESMF_FieldGet(userfield, igrid=igrid, horzRelloc=relloc, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_InternGridGetDELocalInfo(interngrid, myDE=myDE, &
+      call ESMF_IGridGetDELocalInfo(igrid, myDE=myDE, &
                                    localCellCountPerDim=counts, &
                                    horzRelloc=ESMF_CELL_CENTER, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_InternGridGetCoord(interngrid, dim=1, horzRelloc=relloc, &
+      call ESMF_IGridGetCoord(igrid, dim=1, horzRelloc=relloc, &
                              centerCoord=coordX, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_InternGridGetCoord(interngrid, dim=2, horzRelloc=relloc, &
+      call ESMF_IGridGetCoord(igrid, dim=2, horzRelloc=relloc, &
                              centerCoord=coordY, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 

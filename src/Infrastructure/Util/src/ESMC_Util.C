@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.26 2007/06/22 23:21:42 cdeluca Exp $
+// $Id: ESMC_Util.C,v 1.27 2007/06/23 04:00:46 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.26 2007/06/22 23:21:42 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.27 2007/06/23 04:00:46 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -56,7 +56,7 @@ ESMC_ObjectID ESMC_ID_CONFIG = {14, "ESMF_Config"};
 ESMC_ObjectID ESMC_ID_ARRAY = {16, "ESMF_Array"};
 ESMC_ObjectID ESMC_ID_INTERNDG = {17, "ESMF_InternDG"};
 ESMC_ObjectID ESMC_ID_PHYSGRID = {18, "ESMF_PhysGrid"};
-ESMC_ObjectID ESMC_ID_IGRID = {19, "ESMF_InternGrid"};
+ESMC_ObjectID ESMC_ID_IGRID = {19, "ESMF_IGrid"};
 ESMC_ObjectID ESMC_ID_EXCHANGEPACKET = {20, "ESMF_ExchangePacket"};
 ESMC_ObjectID ESMC_ID_COMMTABLE = {21, "ESMF_CommTable"};
 ESMC_ObjectID ESMC_ID_ROUTETABLE = {22, "ESMF_RouteTable"};
@@ -70,7 +70,7 @@ ESMC_ObjectID ESMC_ID_TRANSFORMVALUES = {29, "ESMF_TransformValues"};
 ESMC_ObjectID ESMC_ID_REGRID = {30, "ESMF_Regrid"};
 ESMC_ObjectID ESMC_ID_TRANSFORM = {31, "ESMF_Transform"};
 ESMC_ObjectID ESMC_ID_STATE = {32, "ESMF_State"};
-ESMC_ObjectID ESMC_ID_IGRIDCOMPONENT = {33, "ESMF_InternGridComponent"};
+ESMC_ObjectID ESMC_ID_IGRIDCOMPONENT = {33, "ESMF_IGridComponent"};
 ESMC_ObjectID ESMC_ID_CPLCOMPONENT = {34, "ESMF_CplComponent"};
 ESMC_ObjectID ESMC_ID_COMPONENT = {35, "ESMF_Component"};
 ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
@@ -365,13 +365,13 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 // !DESCRIPTION:
 //   take a list of ndims AIs that are relative to the local decomposition,
 //   plus a list of offsets to the local chunks, and translate this into
-//   a list of AIs which are relative to the global interngrid, with (0,0) being
+//   a list of AIs which are relative to the global igrid, with (0,0) being
 //   the true origin, and not accounting for halo regions.
 //
-//   TODO: the global starts should be only for the interngrid axes, not the others.
+//   TODO: the global starts should be only for the igrid axes, not the others.
 //   do we fix that when we make global starts? (we think yes.)
-//   there are global interngrid starts which are the same dim as the interngrid.
-//   then based on the field datamap we need to add 0 for non-interngrid dims
+//   there are global igrid starts which are the same dim as the igrid.
+//   then based on the field datamap we need to add 0 for non-igrid dims
 //   and reorder if needed and then use the global starts which are the
 //   same dim as the data array from there onwards.  (these routines are
 //   assuming ndims == data array dims).

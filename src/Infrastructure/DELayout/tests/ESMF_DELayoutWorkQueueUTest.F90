@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.6 2007/06/22 23:21:29 cdeluca Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.7 2007/06/23 04:00:13 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -23,14 +23,14 @@ module ESMF_DELayoutWQUTest_mod
   contains !--------------------------------------------------------------------
 
   subroutine mygcomp_register_withoutthreads(gcomp, rc)
-    type(ESMF_InternGridComp), intent(inout):: gcomp
+    type(ESMF_IGridComp), intent(inout):: gcomp
     integer, intent(out):: rc
     
     print *, "*** hi from mygcomp_register ***"
     
     ! Run this VM default mode: single-threaded
     
-    call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETRUN, mygcomp_run, &
+    call ESMF_IGridCompSetEntryPoint(gcomp, ESMF_SETRUN, mygcomp_run, &
       ESMF_SINGLEPHASE, rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     
@@ -38,16 +38,16 @@ module ESMF_DELayoutWQUTest_mod
   end subroutine !--------------------------------------------------------------
   
   subroutine mygcomp_register_withthreads(gcomp, rc)
-    type(ESMF_InternGridComp), intent(inout):: gcomp
+    type(ESMF_IGridComp), intent(inout):: gcomp
     integer, intent(out):: rc
     
     print *, "*** hi from mygcomp_register ***"
     
     ! Run this VM as multi-threaded as resources will allow
-    call ESMF_InternGridCompSetVMMaxThreads(gcomp, rc=rc)
+    call ESMF_IGridCompSetVMMaxThreads(gcomp, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     
-    call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETRUN, mygcomp_run, &
+    call ESMF_IGridCompSetEntryPoint(gcomp, ESMF_SETRUN, mygcomp_run, &
       ESMF_SINGLEPHASE, rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     
@@ -55,7 +55,7 @@ module ESMF_DELayoutWQUTest_mod
   end subroutine !--------------------------------------------------------------
   
   recursive subroutine mygcomp_run(gcomp, istate, estate, clock, rc)
-    type(ESMF_InternGridComp), intent(inout):: gcomp
+    type(ESMF_IGridComp), intent(inout):: gcomp
     type(ESMF_State), intent(in):: istate, estate
     type(ESMF_Clock), intent(in):: clock
     integer, intent(out):: rc
@@ -71,7 +71,7 @@ module ESMF_DELayoutWQUTest_mod
 
     print *, "*** hi from mygcomp_run ***"
     
-    call ESMF_InternGridCompGet(gcomp, vm=vm)
+    call ESMF_IGridCompGet(gcomp, vm=vm)
 !    call ESMF_VMPrint(vm, rc)
 
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
@@ -164,7 +164,7 @@ program ESMF_DELayoutWQUTest
   
   ! local variables
   integer:: rc
-  type(ESMF_InternGridComp):: gcomp
+  type(ESMF_IGridComp):: gcomp
   type(ESMF_Clock):: dummyclock
   type(ESMF_State):: dummystate
   real(ESMF_KIND_R8):: timeStart, timeEnd
@@ -188,10 +188,10 @@ program ESMF_DELayoutWQUTest
   !----------------- test without threads ----------------------------
 
 
-  gcomp = ESMF_InternGridCompCreate(name="interngridded component", rc=rc)
+  gcomp = ESMF_IGridCompCreate(name="igridded component", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_InternGridCompSetServices(gcomp, mygcomp_register_withoutthreads, rc)
+  call ESMF_IGridCompSetServices(gcomp, mygcomp_register_withoutthreads, rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   !------------------------------------------------------------------------
@@ -199,24 +199,24 @@ program ESMF_DELayoutWQUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Run work queue without threads Test"
   call ESMF_VMWtime(timeStart)
-  call ESMF_InternGridCompRun(gcomp, dummystate, dummystate, dummyclock, rc=rc)
+  call ESMF_IGridCompRun(gcomp, dummystate, dummystate, dummyclock, rc=rc)
   call ESMF_VMWtime(timeEnd)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (rc.ne.ESMF_SUCCESS) goto 10
   
   print *, "<without threads> PET ", localPet, " time: ", timeEnd-timeStart
   
-  call ESMF_InternGridCompDestroy(gcomp, rc=rc)
+  call ESMF_IGridCompDestroy(gcomp, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 
   !----------------- test with threads -------------------------------
 
 
-  gcomp = ESMF_InternGridCompCreate(name="interngridded component", rc=rc)
+  gcomp = ESMF_IGridCompCreate(name="igridded component", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_InternGridCompSetServices(gcomp, mygcomp_register_withthreads, rc)
+  call ESMF_IGridCompSetServices(gcomp, mygcomp_register_withthreads, rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
  
   !------------------------------------------------------------------------
@@ -224,14 +224,14 @@ program ESMF_DELayoutWQUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Run work queue with threads Test"
   call ESMF_VMWtime(timeStart)
-  call ESMF_InternGridCompRun(gcomp, dummystate, dummystate, dummyclock, rc=rc)
+  call ESMF_IGridCompRun(gcomp, dummystate, dummystate, dummyclock, rc=rc)
   call ESMF_VMWtime(timeEnd)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (rc.ne.ESMF_SUCCESS) goto 10
 
   print *, "<with threads> PET ", localPet, " time: ", timeEnd-timeStart
 
-  call ESMF_InternGridCompDestroy(gcomp, rc=rc)
+  call ESMF_IGridCompDestroy(gcomp, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
  

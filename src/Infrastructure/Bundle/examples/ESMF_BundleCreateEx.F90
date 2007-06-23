@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.26 2007/06/22 23:21:26 cdeluca Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.27 2007/06/23 04:00:03 cdeluca Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -24,7 +24,7 @@
     
 !   ! Local variables
     integer :: i, rc, fieldcount
-    type(ESMF_InternGrid) :: interngrid
+    type(ESMF_IGrid) :: igrid
     type(ESMF_ArraySpec) :: arrayspec
     !type(ESMF_FieldDataMap) :: datamap
     type(ESMF_DELayout) :: delayout
@@ -57,9 +57,9 @@
     min_coord = (/  0.0,  0.0 /)
     max_coord = (/ 50.0, 60.0 /)
     delayout = ESMF_DELayoutCreate(vm, rc=rc)
-    interngrid = ESMF_InternGridCreateHorzXYUni(counts, min_coord, max_coord, &
+    igrid = ESMF_IGridCreateHorzXYUni(counts, min_coord, max_coord, &
                 horzStagger=ESMF_IGRID_HORZ_STAGGER_A, rc=rc)
-    call ESMF_InternGridDistribute(interngrid, delayout=delayout, rc=rc)
+    call ESMF_IGridDistribute(igrid, delayout=delayout, rc=rc)
 !EOC
     
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -67,7 +67,7 @@
 !BOC
 
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
-    field(1) = ESMF_FieldCreate(interngrid, arrayspec, &
+    field(1) = ESMF_FieldCreate(igrid, arrayspec, &
                                 horzRelloc=ESMF_CELL_CENTER, &
                                 name="pressure", rc=rc)
 !EOC
@@ -75,7 +75,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    field(2) = ESMF_FieldCreate(interngrid, arrayspec, &
+    field(2) = ESMF_FieldCreate(igrid, arrayspec, &
                                 horzRelloc=ESMF_CELL_CENTER, &
                                 name="temperature", rc=rc)
 !EOC
@@ -83,7 +83,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    field(3) = ESMF_FieldCreate(interngrid, arrayspec, &
+    field(3) = ESMF_FieldCreate(igrid, arrayspec, &
                                 horzRelloc=ESMF_CELL_CENTER, &
                                 name="heat flux", rc=rc)
 !EOC
@@ -103,7 +103,7 @@
 !   !  Create an empty Bundle and then add a single field to it.
 
 
-    simplefield = ESMF_FieldCreate(interngrid, arrayspec, &
+    simplefield = ESMF_FieldCreate(igrid, arrayspec, &
                                 horzRelloc=ESMF_CELL_CENTER, name="rh", rc=rc)
 !EOC
 

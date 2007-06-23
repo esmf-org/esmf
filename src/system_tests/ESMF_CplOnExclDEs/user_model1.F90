@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.11 2007/06/22 23:21:53 cdeluca Exp $
+! $Id: user_model1.F90,v 1.12 2007/06/23 04:01:21 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -43,7 +43,7 @@
 !   !   private to the module.
  
     subroutine userm1_register(comp, rc)
-        type(ESMF_InternGridComp), intent(inout) :: comp
+        type(ESMF_IGridComp), intent(inout) :: comp
         integer, intent(out) :: rc
 
         ! local variables
@@ -54,11 +54,11 @@
 
         ! Register the callback routines.
 
-        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETINIT, &
+        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, &
                                                user_init, ESMF_SINGLEPHASE, rc)
-        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETRUN, &
+        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETRUN, &
                                                 user_run, ESMF_SINGLEPHASE, rc)
-        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETFINAL, &
                                               user_final, ESMF_SINGLEPHASE, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
@@ -70,7 +70,7 @@
         mydatablock%scale_factor = 0.66
 
         wrap%ptr => mydatablock
-        call ESMF_InternGridCompSetInternalState(comp, wrap, rc)
+        call ESMF_IGridCompSetInternalState(comp, wrap, rc)
 
         print *, "Registered Private Data block for Internal State"
 
@@ -80,7 +80,7 @@
         ! your own code development you probably don't want to include the 
         ! following call unless you are interested in exploring ESMF's 
         ! threading features.
-        call ESMF_InternGridCompSetVMMinThreads(comp, rc=rc)
+        call ESMF_IGridCompSetVMMinThreads(comp, rc=rc)
 #endif
 
         rc = ESMF_SUCCESS
@@ -93,7 +93,7 @@
  
     
     subroutine user_init(comp, importState, exportState, clock, rc)
-        type(ESMF_InternGridComp), intent(inout) :: comp
+        type(ESMF_IGridComp), intent(inout) :: comp
         type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
@@ -102,7 +102,7 @@
         type(ESMF_Field) :: humidity
         type(ESMF_DELayout) :: layout
         integer :: i, x, y
-        type(ESMF_InternGrid) :: interngrid1
+        type(ESMF_IGrid) :: igrid1
         type(ESMF_Array) :: array1
         type(ESMF_ArraySpec) :: arrayspec
         integer, dimension(:,:), pointer :: idata
@@ -110,7 +110,7 @@
         real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
         integer :: counts(2)
         integer :: ni, nj, de_id
-        integer :: horz_interngridtype, vert_interngridtype
+        integer :: horz_igridtype, vert_igridtype
         integer :: horz_stagger, vert_stagger
         integer :: horz_coord_system, vert_coord_system
         integer :: status, myde
@@ -127,7 +127,7 @@
         !!if (.not.present(rc)) print *, "rc *not* present"
 
         ! query comp for layout
-        call ESMF_InternGridCompGet(comp, layout=layout, rc=status)
+        call ESMF_IGridCompGet(comp, layout=layout, rc=status)
 
         ! Add a "humidity" field to the export state.
         counts(1) = 40
@@ -136,24 +136,24 @@
         x_max = 20.0
         y_min = 0.0
         y_max = 5.0
-        horz_interngridtype = ESMF_InternGridType_XY
-        vert_interngridtype = ESMF_InternGridType_Unknown
-        horz_stagger = ESMF_InternGridStagger_A
-        vert_stagger = ESMF_InternGridStagger_Unknown
+        horz_igridtype = ESMF_IGridType_XY
+        vert_igridtype = ESMF_IGridType_Unknown
+        horz_stagger = ESMF_IGridStagger_A
+        vert_stagger = ESMF_IGridStagger_Unknown
         horz_coord_system = ESMF_CoordSystem_Cartesian
         vert_coord_system = ESMF_CoordSystem_Unknown
 
-        interngrid1 = ESMF_InternGridCreate(counts=counts, &
+        igrid1 = ESMF_IGridCreate(counts=counts, &
                                 x_min=x_min, x_max=x_max, &
                                 y_min=y_min, y_max=y_max, &
                                 layout=layout, &
-                                horz_interngridtype=horz_interngridtype, &
-                                vert_interngridtype=vert_interngridtype, &
+                                horz_igridtype=horz_igridtype, &
+                                vert_igridtype=vert_igridtype, &
                                 horz_stagger=horz_stagger, &
                                 vert_stagger=vert_stagger, &
                                 horz_coord_system=horz_coord_system, &
                                 vert_coord_system=vert_coord_system, &
-                                name="source interngrid", rc=status)
+                                name="source igrid", rc=status)
 
         ! Figure out our local processor id
         call ESMF_DELayoutGetDEID(layout, de_id, rc)
@@ -163,7 +163,7 @@
                                typekind=ESMF_TYPEKIND_I4)
 
         ! Create the field and have it create the array internally
-        humidity = ESMF_FieldCreate(interngrid1, arrayspec, relloc=ESMF_CELL_CENTER, &
+        humidity = ESMF_FieldCreate(igrid1, arrayspec, relloc=ESMF_CELL_CENTER, &
                                          name="humidity", rc=rc)
 
         ! Get the allocated array back and get an F90 array pointer
@@ -188,7 +188,7 @@
 !   !
  
     subroutine user_run(comp, importState, exportState, clock, rc)
-        type(ESMF_InternGridComp), intent(inout) :: comp
+        type(ESMF_IGridComp), intent(inout) :: comp
         type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
@@ -213,7 +213,7 @@
         !!if (.not.present(rc)) print *, "rc *not* present"
 
         ! Get our local info
-        call ESMF_InternGridCompGetInternalState(comp, wrap, status)
+        call ESMF_IGridCompGetInternalState(comp, wrap, status)
         mydatablock => wrap%ptr
 
         print *, "run, scale_factor = ", mydatablock%scale_factor
@@ -246,7 +246,7 @@
 !   !
  
     subroutine user_final(comp, importState, exportState, clock, rc)
-        type(ESMF_InternGridComp), intent(inout) :: comp
+        type(ESMF_IGridComp), intent(inout) :: comp
         type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
@@ -270,7 +270,7 @@
         ! Get our local info
         nullify(wrap%ptr)
         mydatablock => wrap%ptr
-        call ESMF_InternGridCompGetInternalState(comp, wrap, status)
+        call ESMF_IGridCompGetInternalState(comp, wrap, status)
 
         mydatablock => wrap%ptr
         print *, "before dealloc, runparam1 = ", mydatablock%runparam1

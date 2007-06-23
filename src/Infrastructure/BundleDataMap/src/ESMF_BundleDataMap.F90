@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.36 2007/06/22 23:21:28 cdeluca Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.37 2007/06/23 04:00:12 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !
 ! BundleDataMaps are used to store the mapping of multiple field data arrays
 !   into a single packed array.  Other DataMaps exist at the Field and
-!   Array level to indicate mappings of array to interngrid indices, data location
+!   Array level to indicate mappings of array to igrid indices, data location
 !   within a cell, vector interleave information, and any other items needed
 !   to define how data is mapped between ESMF objects.
 !
@@ -63,9 +63,9 @@
 !------------------------------------------------------------------------------
 !  ! ESMF_BundleDataMap
 !  ! The data map type, which should fully describe the mapping
-!  ! between index orders in the interngrid and the memory layout of
+!  ! between index orders in the igrid and the memory layout of
 !  ! the data array, plus other metadata info such as where the
-!  ! data is relative to the interngrid, and any interleaving info needed.
+!  ! data is relative to the igrid, and any interleaving info needed.
 
       type ESMF_BundleDataMap
       sequence
@@ -115,7 +115,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.36 2007/06/22 23:21:28 cdeluca Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.37 2007/06/23 04:00:12 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 

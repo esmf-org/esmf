@@ -1,4 +1,4 @@
-! $Id: ESMF_Overloads.F90,v 1.9 2007/06/22 23:21:49 cdeluca Exp $
+! $Id: ESMF_Overloads.F90,v 1.10 2007/06/23 04:01:07 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Overloads.F90,v 1.9 2007/06/22 23:21:49 cdeluca Exp $'
+      '$Id: ESMF_Overloads.F90,v 1.10 2007/06/23 04:01:07 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -84,7 +84,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_FieldAttrSetChar
-      !module procedure ESMF_InternGridAttrSetChar
+      !module procedure ESMF_IGridAttrSetChar
       !module procedure ESMF_ArrayAttrSetChar
       !module procedure ESMF_ClockAttrSetChar
       ! etc
@@ -103,7 +103,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_FieldAttrGetChar
-      !module procedure ESMF_InternGridAttrGetChar
+      !module procedure ESMF_IGridAttrGetChar
       !module procedure ESMF_ArrayAttrGetChar
       !module procedure ESMF_ClockAttrGetChar
       ! etc
@@ -122,7 +122,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_FieldAttrSetInt
-      !module procedure ESMF_InternGridAttrSetInt
+      !module procedure ESMF_IGridAttrSetInt
       !module procedure ESMF_ArrayAttrSetInt
       !module procedure ESMF_ClockAttrSetInt
       ! etc
@@ -141,7 +141,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_FieldAttrGetInt
-      !module procedure ESMF_InternGridAttrGetInt
+      !module procedure ESMF_IGridAttrGetInt
       !module procedure ESMF_ArrayAttrGetInt
       !module procedure ESMF_ClockAttrGetInt
       ! etc

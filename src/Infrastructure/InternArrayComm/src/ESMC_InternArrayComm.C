@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArrayComm.C,v 1.10 2007/06/22 23:21:34 cdeluca Exp $
+// $Id: ESMC_InternArrayComm.C,v 1.11 2007/06/23 04:00:34 cdeluca Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -33,13 +33,13 @@
 #include "ESMC_InternArray.h"
 #include "ESMC_LogErr.h"
 #include "ESMC_DELayout.h"
-#include "ESMC_InternGrid.h"        // interngrid info
+#include "ESMC_InternGrid.h"        // igrid info
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArrayComm.C,v 1.10 2007/06/22 23:21:34 cdeluca Exp $";
+            "$Id: ESMC_InternArrayComm.C,v 1.11 2007/06/23 04:00:34 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //

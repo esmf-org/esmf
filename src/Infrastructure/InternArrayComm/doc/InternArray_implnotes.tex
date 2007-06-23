@@ -1,4 +1,4 @@
-% $Id: InternArray_implnotes.tex,v 1.2 2007/06/22 23:21:34 cdeluca Exp $
+% $Id: InternArray_implnotes.tex,v 1.3 2007/06/23 04:00:32 cdeluca Exp $
 
 %\subsection{Design and Implementation Notes}
 
@@ -29,7 +29,7 @@ is always the one which varies fastest in linearized memory regardless of
 interface language used to create or access the array.
 
 The LocalArray type is defined separately because it is used by the
-Fortran code in Fields, InternGrids, Route, and Regrid to refer to data 
+Fortran code in Fields, IGrids, Route, and Regrid to refer to data 
 independent of Type/Kind/Rank differences.  This abstraction removes
 the need for these other objects to provide
 heavily-overloaded interface blocks to hide the number of
@@ -91,12 +91,12 @@ size is to explicitly limit the number of supported user datatypes to:
 \item{\bf ArrayComm design.}
 The source of the ESMF\_Array communication routines are separated out into 
 an ESMF\_ArrayComm directory.  This allows basic Array functions to be
-compiled and used by InternGrid, Field, and Bundle code before the communication
+compiled and used by IGrid, Field, and Bundle code before the communication
 code has been compiled.  
 
-The Array communication routines require InternGrid and DataMap information in 
+The Array communication routines require IGrid and DataMap information in 
 addition to the Array itself.   The ArrayDataMap is needed to identify which
-axes in the Array correspond to InternGrid axes.  The InternGrid is needed to compute
+axes in the Array correspond to IGrid axes.  The IGrid is needed to compute
 where in the overall object this Array is located and which pieces of
 the overall object are located on which DE.
 

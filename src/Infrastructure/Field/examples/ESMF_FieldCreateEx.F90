@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.41 2007/06/22 23:21:29 cdeluca Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.42 2007/06/23 04:00:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -29,8 +29,8 @@
     
     ! Local variables
     integer :: rc, mycell
-    integer :: interngridCount(2)
-    type(ESMF_InternGrid) :: interngrid
+    integer :: igridCount(2)
+    type(ESMF_IGrid) :: igrid
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_InternArray) :: iarray1, iarray2
     type(ESMF_DELayout) :: layout
@@ -51,24 +51,24 @@
 !-------------------------------------------------------------------------
 !   ! Example 1:
 !   !
-!   !  The user has already created a InternGrid and has Field data
+!   !  The user has already created a IGrid and has Field data
 !   !  stored in an InternArray object.  This version of create simply
-!   !  associates the data with the InternGrid.  The data is referenced
+!   !  associates the data with the IGrid.  The data is referenced
 !   !  by default.  The DataMap is created with defaults.
  
     call ESMF_VMGetGlobal(vm, rc)
     layout = ESMF_DELayoutCreate(vm, rc=rc)
     origin = (/ 0.0, 0.0 /)
-    interngrid = ESMF_InternGridCreateHorzXYUni((/ 10, 20 /), origin, &
+    igrid = ESMF_IGridCreateHorzXYUni((/ 10, 20 /), origin, &
                                     deltaPerDim=(/ 1.0d0, 1.0d0 /), &
-                                    name="atminterngrid", rc=rc)
-    call ESMF_InternGridDistribute(interngrid, delayout=layout, rc=rc)
-    ! InternArray size has to match the InternGrid (plus any halo width), so query interngrid for
+                                    name="atmigrid", rc=rc)
+    call ESMF_IGridDistribute(igrid, delayout=layout, rc=rc)
+    ! InternArray size has to match the IGrid (plus any halo width), so query igrid for
     ! local cell counts to determine allocation
-    call ESMF_InternGridGetDELocalInfo(interngrid, horzrelloc=ESMF_CELL_CENTER, &
-                                 localCellCountPerDim=interngridCount, rc=rc)
+    call ESMF_IGridGetDELocalInfo(igrid, horzrelloc=ESMF_CELL_CENTER, &
+                                 localCellCountPerDim=igridCount, rc=rc)
 
-    allocate(f90ptr1(interngridCount(1),interngridCount(2)))
+    allocate(f90ptr1(igridCount(1),igridCount(2)))
 
     iarray1 = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -77,15 +77,15 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Field Create with InternGrid and InternArray}
+!\subsubsection{Field Create with IGrid and InternArray}
       
-!  The user has already created an {\tt ESMF\_InternGrid} and an
+!  The user has already created an {\tt ESMF\_IGrid} and an
 !  {\tt ESMF\_InterArray} with data.  This create associates the
 !  two objects.  An {\tt ESMF\_FieldDataMap} is created with all defaults.
 !EOE
       
 !BOC
-    field1 = ESMF_FieldCreate(interngrid, iarray1, &
+    field1 = ESMF_FieldCreate(igrid, iarray1, &
                          horzRelloc=ESMF_CELL_CENTER, name="pressure", rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -96,11 +96,11 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Field Create with InternGrid and ArraySpec}
+!\subsubsection{Field Create with IGrid and ArraySpec}
       
-!  The user has already created an {\tt ESMF\_InternGrid} and an
+!  The user has already created an {\tt ESMF\_IGrid} and an
 !  {\tt ESMF\_ArraySpec} which describes the data.  This version of 
-!  create will create an {\tt ESMF\_Array} based on the interngrid size
+!  create will create an {\tt ESMF\_Array} based on the igrid size
 !  and the {\tt ESMF\_ArraySpec}. 
 !  An {\tt ESMF\_FieldDataMap} is created with all defaults.
 !EOE
@@ -117,7 +117,7 @@
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    field2 = ESMF_FieldCreate(interngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+    field2 = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               name="rh", rc=rc)
 !EOC
     print *, "Field example 2 returned"
@@ -135,9 +135,9 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    ! the size of the data in the array still has to line up with the InternGrid
+    ! the size of the data in the array still has to line up with the IGrid
     ! and its decomposition
-    allocate(f90ptr2(interngridCount(1),interngridCount(2)))
+    allocate(f90ptr2(igridCount(1),igridCount(2)))
     iarray2 = ESMF_InternArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)  
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -152,14 +152,14 @@
 !\subsubsection{Empty Field Create}
 
 !  The user creates an empty {\tt ESMF\_Field} object.
-!  The {\tt ESMF\_InternGrid}, {\tt ESMF\_InternArray}, and {\tt ESMF\_FieldDataMap}
+!  The {\tt ESMF\_IGrid}, {\tt ESMF\_InternArray}, and {\tt ESMF\_FieldDataMap}
 !  can be added later using the set methods.
 !EOE
 
 !-------------------------------------------------------------------------
 !   ! Example 4:
 !   !
-!   !  The user creates an empty Field, and adds the InternGrid and 
+!   !  The user creates an empty Field, and adds the IGrid and 
 !   !  data in later calls.
 
 !BOC
@@ -167,8 +167,8 @@
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !
-!    ! At some later time, associate a InternGrid with this Field
-     call ESMF_FieldSetInternGrid(field3, interngrid, rc)
+!    ! At some later time, associate a IGrid with this Field
+     call ESMF_FieldSetIGrid(field3, igrid, rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -181,10 +181,10 @@
 !-------------------------------------------------------------------------
 !   ! Example 5:
 !   !
-!   ! Query a Field for number of local interngrid cells.
+!   ! Query a Field for number of local igrid cells.
 !   COMMENT THIS TEST OUT FOR NOW BECAUSE THE SUBROUTINE
 !   IS UNIMPLEMENTED CAN TURN BACK ON WHEN INITMACROS ARE ON
-!     call ESMF_FieldGetLocalInternGridInfo(field3, ncell=mycell, rc=rc)
+!     call ESMF_FieldGetLocalIGridInfo(field3, ncell=mycell, rc=rc)
 !     print *, "Field example 5 returned"
 !
 !    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -195,7 +195,7 @@
 !  When finished with an {\tt ESMF\_Field}, the destroy method
 !  removes it.  However, the objects inside the {\tt ESMF\_Field}
 !  should be deleted separately, since objects can be added to
-!  more than one {\tt ESMF\_Field}, for example the same {\tt ESMF\_InternGrid}
+!  more than one {\tt ESMF\_Field}, for example the same {\tt ESMF\_IGrid}
 !  can be used in multiple {\tt ESMF\_Field}s.
 !EOE
 

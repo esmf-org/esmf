@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.94 2007/06/22 23:21:40 cdeluca Exp $
+! $Id: ESMF_Route.F90,v 1.95 2007/06/23 04:00:43 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.94 2007/06/22 23:21:40 cdeluca Exp $'
+      '$Id: ESMF_Route.F90,v 1.95 2007/06/23 04:00:43 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -537,9 +537,9 @@ end subroutine rias
 !     \item[rank]
 !          Data rank.
 !     \item[srcDELayout]
-!          The {\tt ESMF\_DELayout} of the source interngrid.
+!          The {\tt ESMF\_DELayout} of the source igrid.
 !     \item[dstDELayout]
-!          The {\tt ESMF\_DELayout} of the destination interngrid.
+!          The {\tt ESMF\_DELayout} of the destination igrid.
 !     \item[srcDomainList]
 !          An {\tt ESMF\_DomainList} which contains a list of rectangular
 !          regions of a larger rectangular block of memory, to be sent 
@@ -1160,8 +1160,8 @@ end subroutine rias
 !
 ! !DESCRIPTION:
 !     Precompute the data movement needed to execute a data redistribution
-!     operation from an arbitrarily distributed interngrid to an arbitrary 
-!     distributed interngrid
+!     operation from an arbitrarily distributed igrid to an arbitrary 
+!     distributed igrid
 !
 !     The arguments are:
 !     \begin{description}

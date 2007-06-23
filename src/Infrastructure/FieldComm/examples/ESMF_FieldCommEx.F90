@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.17 2007/06/22 23:21:31 cdeluca Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.18 2007/06/23 04:00:24 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
     integer :: rc, finalrc, npets
     integer :: i, j
     integer :: lb(2), ub(2), halo
-    type(ESMF_InternGrid) :: srcinterngrid, dstinterngrid
+    type(ESMF_IGrid) :: srcigrid, dstigrid
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_DELayout) :: layout1, layout2
     type(ESMF_VM) :: vm
@@ -51,7 +51,7 @@
 !-------------------------------------------------------------------------
 !   ! Setup:
 !   !
-!   !  Create a source and destination interngrid with data on it, to use
+!   !  Create a source and destination igrid with data on it, to use
 !   !  in the Halo, Redist, and Regrid calls below.
  
     call ESMF_Initialize(rc=rc)
@@ -69,18 +69,18 @@
 
     mincoords = (/  0.0,  0.0 /)
     maxcoords = (/ 20.0, 30.0 /)
-    srcinterngrid = ESMF_InternGridCreateHorzXYUni((/ 90, 180 /), &
+    srcigrid = ESMF_IGridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
-                   name="srcinterngrid", rc=rc)
-    call ESMF_InternGridDistribute(srcinterngrid, delayout=layout1, rc=rc)
+                   name="srcigrid", rc=rc)
+    call ESMF_IGridDistribute(srcigrid, delayout=layout1, rc=rc)
 
-    ! same interngrid coordinates, but different layout
-    dstinterngrid = ESMF_InternGridCreateHorzXYUni((/ 90, 180 /), &
+    ! same igrid coordinates, but different layout
+    dstigrid = ESMF_IGridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
-                   name="dstinterngrid", rc=rc)
-    call ESMF_InternGridDistribute(dstinterngrid, delayout=layout2, rc=rc)
+                   name="dstigrid", rc=rc)
+    call ESMF_IGridDistribute(dstigrid, delayout=layout2, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
@@ -88,7 +88,7 @@
 
     ! allow for a halo width of 3
     halo = 3
-    field1 = ESMF_FieldCreate(srcinterngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+    field1 = ESMF_FieldCreate(srcigrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=halo, name="src pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -106,7 +106,7 @@
     enddo
 
 
-    field2 = ESMF_FieldCreate(dstinterngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+    field2 = ESMF_FieldCreate(dstigrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=halo, name="dst pressure", rc=rc)
 
  
@@ -116,7 +116,7 @@
 !BOE
 !\subsubsection{Field Halo operation}
       
-!  The user has already created an {\tt ESMF\_InternGrid}, an
+!  The user has already created an {\tt ESMF\_IGrid}, an
 !  {\tt ESMF\_Array} with data, and used them to create an {\tt ESMF\_Field}.
 !
 !  Now that field is used in the store call which precomputes the
@@ -147,11 +147,11 @@
 !BOE
 !\subsubsection{Field Data Redistribution operation}
       
-!  The user has already created an {\tt ESMF\_InternGrid}, an 
+!  The user has already created an {\tt ESMF\_IGrid}, an 
 !  {\tt ESMF\_Array} with data, and used them to create an {\tt ESMF\_Field}.
 !
 !  The data redistribution operation does not do interpolation; it 
-!  is used when the same interngrid is decomposed differently - perhaps along
+!  is used when the same igrid is decomposed differently - perhaps along
 !  different indices, or on different numbers of PETs.
 !
 !  The store call will precompute the data movement necessary, and the
@@ -182,11 +182,11 @@
 !BOE
 !\subsubsection{Field Regridding operation}
       
-!  The user has already created an {\tt ESMF\_InternGrid}, an
+!  The user has already created an {\tt ESMF\_IGrid}, an
 !  {\tt ESMF\_Array} with data, and used them to create an {\tt ESMF\_Field}.
 !
 !  The regridding operation can interpolate data values to move data
-!  from one interngrid to another.
+!  from one igrid to another.
 !
 !  The store call will precompute the data movement necessary, and the
 !  call to {\tt ESMF\_FieldRegrid()} will perform the actual movement.
@@ -222,10 +222,10 @@
     call ESMF_FieldDestroy(field2, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_InternGridDestroy(srcinterngrid, rc=rc)
+    call ESMF_IGridDestroy(srcigrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_InternGridDestroy(dstinterngrid, rc=rc)
+    call ESMF_IGridDestroy(dstigrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     if (finalrc.EQ.ESMF_SUCCESS) then

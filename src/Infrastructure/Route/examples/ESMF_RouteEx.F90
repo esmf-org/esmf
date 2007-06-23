@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.30 2007/06/22 23:21:40 cdeluca Exp $
+! $Id: ESMF_RouteEx.F90,v 1.31 2007/06/23 04:00:42 cdeluca Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -29,7 +29,7 @@
     integer :: rc, finalrc, npets
     integer :: i, j
     integer :: lb(2), ub(2), halo
-    type(ESMF_InternGrid) :: srcinterngrid, dstinterngrid
+    type(ESMF_IGrid) :: srcigrid, dstigrid
     type(ESMF_ArraySpec) :: arrayspec
     !type(ESMF_FieldDataMap) :: datamap
     type(ESMF_DELayout) :: layout1, layout2
@@ -44,7 +44,7 @@
 !-------------------------------------------------------------------------
 !   ! Setup:
 !   !
-!   !  Create a source and destination interngrid with data on it, to use
+!   !  Create a source and destination igrid with data on it, to use
 !   !  in the Halo, Redist, and Regrid calls below.
  
     call ESMF_Initialize(rc=rc)
@@ -63,18 +63,18 @@
 
     mincoords = (/  0.0,  0.0 /)
     maxcoords = (/ 20.0, 30.0 /)
-    srcinterngrid = ESMF_InternGridCreateHorzXYUni((/ 90, 180 /), &
+    srcigrid = ESMF_IGridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
-                   name="srcinterngrid", rc=rc)
-    call ESMF_InternGridDistribute(srcinterngrid, delayout=layout1, rc=rc)
+                   name="srcigrid", rc=rc)
+    call ESMF_IGridDistribute(srcigrid, delayout=layout1, rc=rc)
 
-    ! same interngrid coordinates, but different layout
-    dstinterngrid = ESMF_InternGridCreateHorzXYUni((/ 90, 180 /), &
+    ! same igrid coordinates, but different layout
+    dstigrid = ESMF_IGridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
-                   name="srcinterngrid", rc=rc)
-    call ESMF_InternGridDistribute(dstinterngrid, delayout=layout2, rc=rc)
+                   name="srcigrid", rc=rc)
+    call ESMF_IGridDistribute(dstigrid, delayout=layout2, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -85,7 +85,7 @@
     
     ! allow for a halo width of 3, let the field allocate the proper space
     halo = 3
-    field1 = ESMF_FieldCreate(srcinterngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+    field1 = ESMF_FieldCreate(srcigrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=3, name="src pressure", rc=rc)
                                 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -106,7 +106,7 @@
     enddo
 
 
-    field2 = ESMF_FieldCreate(dstinterngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+    field2 = ESMF_FieldCreate(dstigrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                     haloWidth=3,  name="dst pressure", rc=rc)
 
  
@@ -181,10 +181,10 @@
     call ESMF_FieldDestroy(field2, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_InternGridDestroy(srcinterngrid, rc=rc)
+    call ESMF_IGridDestroy(srcigrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_InternGridDestroy(dstinterngrid, rc=rc)
+    call ESMF_IGridDestroy(dstigrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 

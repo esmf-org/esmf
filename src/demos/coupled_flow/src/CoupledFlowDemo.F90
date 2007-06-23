@@ -1,12 +1,12 @@
-! $Id: CoupledFlowDemo.F90,v 1.2 2007/06/22 23:21:51 cdeluca Exp $
+! $Id: CoupledFlowDemo.F90,v 1.3 2007/06/23 04:01:14 cdeluca Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
 !
-! !MODULE: CoupledFlowDemo.F90 - Top level InternGridded Component source
+! !MODULE: CoupledFlowDemo.F90 - Top level IGridded Component source
 !
 ! !DESCRIPTION:
-! ESMF Coupled Flow Demo - A InternGridded Component which can be called either 
+! ESMF Coupled Flow Demo - A IGridded Component which can be called either 
 !   directly from an Application Driver or nested in a larger application.
 !   It contains 2 nested subcomponents and 1 Coupler Component which does 
 !   two-way coupling between the subcomponents.
@@ -30,7 +30,7 @@
     private
     
     ! Subcomponents
-    type(ESMF_InternGridComp), save :: INcomp, FScomp
+    type(ESMF_IGridComp), save :: INcomp, FScomp
     type(ESMF_CplComp), save :: cpl
 
     ! States and DELayouts for the Subcomponents
@@ -54,7 +54,7 @@
       subroutine CoupledFlow_register(comp, rc)
 !
 ! !ARGUMENTS:
-     type(ESMF_InternGridComp), intent(inout) :: comp
+     type(ESMF_IGridComp), intent(inout) :: comp
      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -83,11 +83,11 @@
 !\begin{verbatim}
         ! Register the callback routines.
 
-        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETINIT, &
+        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, &
                                         coupledflow_init, ESMF_SINGLEPHASE, rc)
-        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETRUN, &
+        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETRUN, &
                                         coupledflow_run, ESMF_SINGLEPHASE, rc)
-        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETFINAL, &
                                         coupledflow_final, ESMF_SINGLEPHASE, rc)
 
 !\end{verbatim}
@@ -104,7 +104,7 @@
       subroutine coupledflow_init(gcomp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
-     type(ESMF_InternGridComp), intent(inout) :: gcomp
+     type(ESMF_IGridComp), intent(inout) :: gcomp
      type(ESMF_State), intent(inout) :: importState, exportState
      type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
@@ -131,17 +131,17 @@
     integer :: npets
     integer :: mid, by2, quart, by4
 
-    type(ESMF_InternGrid) :: interngridTop, interngridIN, interngridFS
+    type(ESMF_IGrid) :: igridTop, igridIN, igridFS
     real(ESMF_KIND_R8) :: mincoords(ESMF_MAXIGRIDDIM), maxcoords(ESMF_MAXIGRIDDIM)
     integer :: counts(ESMF_MAXIGRIDDIM)
-    type(ESMF_InternGridHorzStagger) :: horz_stagger
+    type(ESMF_IGridHorzStagger) :: horz_stagger
     type(ESMF_VM) :: vm
     integer :: halo_width = 1
 
 
-    ! Get our vm and interngrid from the component
-    call ESMF_InternGridCompGet(gcomp, vm=vm, interngrid=interngridTop, rc=rc)
-    call ESMF_InternGridGet(interngridTop, delayout=layoutTop, rc=rc)
+    ! Get our vm and igrid from the component
+    call ESMF_IGridCompGet(gcomp, vm=vm, igrid=igridTop, rc=rc)
+    call ESMF_IGridGet(igridTop, delayout=layoutTop, rc=rc)
 
     ! Sanity check the number of PETs we were started on.
     call ESMF_VMGet(vm, petCount=npets, rc=rc)
@@ -177,17 +177,17 @@
 ! !DESCRIPTION:
 ! \subsubsection{Example of Component Creation:}
 !
-!   The following code creates 2 InternGridded Components on the same set of PETs 
+!   The following code creates 2 IGridded Components on the same set of PETs 
 !   (persistent execution threads) as the top level Component, but each 
-!   of the InternGrids useds by these Components will have a different connectivity.
+!   of the IGrids useds by these Components will have a different connectivity.
 !   It also creates a Coupler Component on the same PET set.
 !
 !\begin{verbatim}
     cnameIN = "Injector model"
-    INcomp = ESMF_InternGridCompCreate(name=cnameIN, rc=rc)
+    INcomp = ESMF_IGridCompCreate(name=cnameIN, rc=rc)
 
     cnameFS = "Flow Solver model"
-    FScomp = ESMF_InternGridCompCreate(name=cnameFS, rc=rc)
+    FScomp = ESMF_IGridCompCreate(name=cnameFS, rc=rc)
 
     cplname = "Two-way coupler"
     cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
@@ -202,10 +202,10 @@
 !  Register section for subcomponents
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-    call ESMF_InternGridCompSetServices(INcomp, Injector_register, rc)
+    call ESMF_IGridCompSetServices(INcomp, Injector_register, rc)
     print *, "Injector Comp SetServices finished, rc= ", rc
 
-    call ESMF_InternGridCompSetServices(FScomp, FlowSolver_register, rc)
+    call ESMF_IGridCompSetServices(FScomp, FlowSolver_register, rc)
     print *, "FlowSolver Comp SetServices finished, rc= ", rc
 
     call ESMF_CplCompSetServices(cpl, Coupler_register, rc)
@@ -214,15 +214,15 @@
  
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!  Init section for subcomponents.  Create subinterngrids on separate DELayouts,
+!  Init section for subcomponents.  Create subigrids on separate DELayouts,
 !    and create import/export states for subcomponents.
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
  
     ! 
-    ! Create and attach subinterngrids to the subcomponents.
+    ! Create and attach subigrids to the subcomponents.
     !
-    call ESMF_InternGridGet(interngridTop, horzRelLoc=ESMF_CELL_CENTER, &
+    call ESMF_IGridGet(igridTop, horzRelLoc=ESMF_CELL_CENTER, &
                                globalCellCountPerDim=counts, &
                                minGlobalCoordPerDim=mincoords, &
                                maxGlobalCoordPerDim=maxcoords, &
@@ -230,28 +230,28 @@
                                rc=rc)
 
 
-    interngridIN = ESMF_InternGridCreateHorzXYUni(counts=counts, &
+    igridIN = ESMF_IGridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=mincoords, &
                              maxGlobalCoordPerDim=maxcoords, &
                              horzstagger=horz_stagger, &      
-                             name="Injector interngrid", rc=rc)
+                             name="Injector igrid", rc=rc)
 
     layoutIN = ESMF_DELayoutCreate(vm, (/ mid, by2 /), rc=rc)
-    call ESMF_InternGridDistribute(interngridIN, delayout=layoutIN, rc=rc)
+    call ESMF_IGridDistribute(igridIN, delayout=layoutIN, rc=rc)
 
 
-    call ESMF_InternGridCompSet(INcomp, interngrid=interngridIN, rc=rc)
+    call ESMF_IGridCompSet(INcomp, igrid=igridIN, rc=rc)
 
-    interngridFS = ESMF_InternGridCreateHorzXYUni(counts=counts, &
+    igridFS = ESMF_IGridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=mincoords, &
                              maxGlobalCoordPerDim=maxcoords, &
                              horzstagger=horz_stagger, &      
-                             name="Flow Solver interngrid", rc=rc)
+                             name="Flow Solver igrid", rc=rc)
 
     layoutFS = ESMF_DELayoutCreate(vm, (/ quart, by4 /), rc=rc)
-    call ESMF_InternGridDistribute(interngridFS, delayout=layoutFS, rc=rc)
+    call ESMF_IGridDistribute(igridFS, delayout=layoutFS, rc=rc)
 
-    call ESMF_InternGridCompSet(FScomp, interngrid=interngridFS, rc=rc)
+    call ESMF_IGridCompSet(FScomp, igrid=igridFS, rc=rc)
 
 
     !
@@ -273,7 +273,7 @@
     ! 
     ! Initialize the injector component, first phase 
     !
-    call ESMF_InternGridCompInitialize(INcomp, INimp, INexp, clock, 1, rc=rc)
+    call ESMF_IGridCompInitialize(INcomp, INimp, INexp, clock, 1, rc=rc)
     print *, "Injection Model Initialize finished, rc =", rc
  
     !
@@ -285,7 +285,7 @@
     !
     ! Initialize the flow solver component, first phase
     !
-    call ESMF_InternGridCompInitialize(FScomp, FSimp, FSexp, clock, 1, rc=rc)
+    call ESMF_IGridCompInitialize(FScomp, FSimp, FSexp, clock, 1, rc=rc)
     print *, "Flow Model Initialize finished, rc =", rc
 
     !
@@ -299,10 +299,10 @@
     !
     ! Second phase of init
     !
-    call ESMF_InternGridCompInitialize(INcomp, INimp, INexp, clock, 2, rc=rc)
+    call ESMF_IGridCompInitialize(INcomp, INimp, INexp, clock, 2, rc=rc)
     print *, "Injection Model Initialize finished, rc =", rc
  
-    call ESMF_InternGridCompInitialize(FScomp, FSimp, FSexp, clock, 2, rc=rc)
+    call ESMF_IGridCompInitialize(FScomp, FSimp, FSexp, clock, 2, rc=rc)
     print *, "Flow Model Initialize finished, rc =", rc
 
     end subroutine coupledflow_init
@@ -315,7 +315,7 @@
       subroutine coupledflow_run(comp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
-     type(ESMF_InternGridComp), intent(inout) :: comp
+     type(ESMF_IGridComp), intent(inout) :: comp
      type(ESMF_State), intent(inout) :: importState, exportState
      type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
@@ -353,13 +353,13 @@
      do while (.not. ESMF_ClockIsStopTime(localclock, rc))
 
         ! Run FlowSolver Component
-        call ESMF_InternGridCompRun(FScomp, FSimp, FSexp, localclock, rc=rc)
+        call ESMF_IGridCompRun(FScomp, FSimp, FSexp, localclock, rc=rc)
 
         ! Couple export state of FlowSolver to import of Injector
         call ESMF_CplCompRun(cpl, FSexp, INimp, localclock, rc=rc)
   
         ! Run Injector Component
-        call ESMF_InternGridCompRun(INcomp, INimp, INexp, localclock, rc=rc)
+        call ESMF_IGridCompRun(INcomp, INimp, INexp, localclock, rc=rc)
   
         ! Couple export state of Injector to import of FlowSolver
         call ESMF_CplCompRun(cpl, INexp, FSimp, localclock, rc=rc)
@@ -390,7 +390,7 @@ end subroutine coupledflow_run
       subroutine coupledflow_final(comp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
-     type(ESMF_InternGridComp), intent(inout) :: comp
+     type(ESMF_IGridComp), intent(inout) :: comp
      type(ESMF_State), intent(inout) :: importState, exportState
      type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
@@ -418,14 +418,14 @@ end subroutine coupledflow_run
       ! First finalize all subcomponents
 
       ! Finalize Injector Component    
-      call ESMF_InternGridCompFinalize(INcomp, INimp, INexp, clock, rc=rc)
+      call ESMF_IGridCompFinalize(INcomp, INimp, INexp, clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) then
           print *, "Injector Component Finalize routine returned error"
           return
       endif
 
       ! Finalize FlowSolver Component
-      call ESMF_InternGridCompFinalize(FScomp, FSimp, FSimp, clock, rc=rc)
+      call ESMF_IGridCompFinalize(FScomp, FSimp, FSimp, clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) then
           print *, "FlowSolver Component Finalize routine returned error"
           return
@@ -449,8 +449,8 @@ end subroutine coupledflow_run
       call ESMF_StateDestroy(FSexp, rc)
 
       print *, "ready to destroy all components"
-      call ESMF_InternGridCompDestroy(INcomp, rc)
-      call ESMF_InternGridCompDestroy(FScomp, rc)
+      call ESMF_IGridCompDestroy(INcomp, rc)
+      call ESMF_IGridCompDestroy(FScomp, rc)
       call ESMF_CplCompDestroy(cpl, rc)
 
       print *, "ready to destroy all delayouts"

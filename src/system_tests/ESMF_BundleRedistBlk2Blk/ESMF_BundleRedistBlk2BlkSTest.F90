@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistBlk2BlkSTest.F90,v 1.7 2007/06/22 23:21:52 cdeluca Exp $
+! $Id: ESMF_BundleRedistBlk2BlkSTest.F90,v 1.8 2007/06/23 04:01:20 cdeluca Exp $
 !
 ! System test BundleRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -12,15 +12,15 @@
 ! !DESCRIPTION:
 ! System test BundleRedistBlk2Blk.
 !
-! This system test checks the functionality of the interngrid distribution
+! This system test checks the functionality of the igrid distribution
 ! routines by redistributing data from one Bundle distributed in the normal
 ! block structure to another Bundle that has been distributed regularly
 ! and then back again.  The original data should exactly match the final
 ! data, which serves as the test for SUCCESS.  This program creates two
-! identical InternGrids with different distributions, one with the normal block
+! identical IGrids with different distributions, one with the normal block
 ! structure and the other with a different block distribution.  The first
-! InternGrid has two Bundle created from it, the first as the source for the test
-! and the second for the final results.  The second InternGrid has a single Bundle
+! IGrid has two Bundle created from it, the first as the source for the test
+! and the second for the final results.  The second IGrid has a single Bundle
 ! that serves as an intermediate result between the two redistributions.
 !
 !\begin{verbatim}
@@ -49,8 +49,8 @@
      type(ESMF_DELayout) :: delayout1, delayout2
      type(ESMF_Field) :: humidity1, humidity2, humidity3
      type(ESMF_Bundle) :: bundle1, bundle2, bundle3
-     type(ESMF_InternGrid) :: interngrid1, interngrid2
-     type(ESMF_InternGridHorzStagger) :: horz_stagger
+     type(ESMF_IGrid) :: igrid1, igrid2
+     type(ESMF_IGridHorzStagger) :: horz_stagger
      type(ESMF_RouteHandle) :: rh12, rh23
      type(ESMF_VM) :: vm
 
@@ -108,7 +108,7 @@
      call ESMF_DELayoutGetDeprecated(delayout1, localDE=myDE, rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
-     ! Create the interngrids and corresponding Fields
+     ! Create the igrids and corresponding Fields
      counts(1) = 60
      counts(2) = 40
      min(1) = 0.0
@@ -117,24 +117,24 @@
      max(2) = 50.0
      horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
 
-     ! make two identical interngrids, both are distributed in the normal
+     ! make two identical igrids, both are distributed in the normal
      ! block style but different layout
-     interngrid1 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
+     igrid1 = ESMF_IGridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=min, &
                              maxGlobalCoordPerDim=max, &
                              horzStagger=horz_stagger, &
-                             name="source interngrid", rc=status)
+                             name="source igrid", rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
-     call ESMF_InternGridDistribute(interngrid1, delayout=delayout1, rc=status)
+     call ESMF_IGridDistribute(igrid1, delayout=delayout1, rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
-     interngrid2 = ESMF_InternGridCreateHorzXYUni(counts=counts, &
+     igrid2 = ESMF_IGridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=min, &
                              maxGlobalCoordPerDim=max, &
                              horzStagger=horz_stagger, &
-                             name="source interngrid", rc=status)
+                             name="source igrid", rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
-     call ESMF_InternGridDistribute(interngrid2, delayout=delayout2, rc=status)
+     call ESMF_IGridDistribute(igrid2, delayout=delayout2, rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Set up a 2D (distributed Field) and a 2D real array
@@ -146,29 +146,29 @@
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Create bundles
-     bundle1 = ESMF_BundleCreate(interngrid1, 'Bundle1', rc=status)
+     bundle1 = ESMF_BundleCreate(igrid1, 'Bundle1', rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
-     bundle2 = ESMF_BundleCreate(interngrid2, 'Bundle2', rc=status)
+     bundle2 = ESMF_BundleCreate(igrid2, 'Bundle2', rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
-     bundle3 = ESMF_BundleCreate(interngrid1, 'Bundle3', rc=status)
+     bundle3 = ESMF_BundleCreate(igrid1, 'Bundle3', rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
-     ! Create the field and have it create the array internally for each interngrid
-     humidity1 = ESMF_FieldCreate(interngrid1, arrayspec1, &
+     ! Create the field and have it create the array internally for each igrid
+     humidity1 = ESMF_FieldCreate(igrid1, arrayspec1, &
                                   horzRelloc=ESMF_CELL_CENTER, &
                                   haloWidth=0, name="humidity1", rc=status)
      call ESMF_BundleAddField(bundle1, humidity1, rc=status)
 
      if (status .ne. ESMF_SUCCESS) goto 20
-     humidity2 = ESMF_FieldCreate(interngrid2, arrayspec2, &
+     humidity2 = ESMF_FieldCreate(igrid2, arrayspec2, &
                                   horzRelloc=ESMF_CELL_CENTER, &
                                   haloWidth=0, name="humidity2", rc=status)
      call ESMF_BundleAddField(bundle2, humidity2, rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
-     humidity3 = ESMF_FieldCreate(interngrid1, arrayspec1, &
+     humidity3 = ESMF_FieldCreate(igrid1, arrayspec1, &
                                   horzRelloc=ESMF_CELL_CENTER, &
                                   haloWidth=0, name="humidity3", rc=status)
      call ESMF_BundleAddField(bundle3, humidity3, rc=status)
@@ -182,10 +182,10 @@
      call ESMF_BundleRedistStore(bundle2, bundle3, vm, rh23, rc=status)
 
     ! get coordinate arrays available for setting the source data array
-    call ESMF_InternGridGetCoord(interngrid1, dim=1, horzRelloc=ESMF_CELL_CENTER, &
+    call ESMF_IGridGetCoord(igrid1, dim=1, horzRelloc=ESMF_CELL_CENTER, &
       centerCoord=coordX, localCounts=localCounts, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_InternGridGetCoord(interngrid1, dim=2, horzRelloc=ESMF_CELL_CENTER, &
+    call ESMF_IGridGetCoord(igrid1, dim=2, horzRelloc=ESMF_CELL_CENTER, &
       centerCoord=coordY, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
@@ -300,9 +300,9 @@
     if (status .ne. ESMF_SUCCESS) goto 20
     call ESMF_FieldDestroy(humidity3, status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_InternGridDestroy(interngrid1, status)
+    call ESMF_IGridDestroy(igrid1, status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_InternGridDestroy(interngrid2, status)
+    call ESMF_IGridDestroy(igrid2, status)
     if (status .ne. ESMF_SUCCESS) goto 20
     call ESMF_DELayoutDestroy(delayout1, status)
     if (status .ne. ESMF_SUCCESS) goto 20

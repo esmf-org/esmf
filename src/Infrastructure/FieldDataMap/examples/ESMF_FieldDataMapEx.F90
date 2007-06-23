@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMapEx.F90,v 1.9 2007/06/22 23:21:32 cdeluca Exp $
+! $Id: ESMF_FieldDataMapEx.F90,v 1.10 2007/06/23 04:00:27 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -61,7 +61,7 @@
 
 !BOC
       ! Set up a default data map for a Field with 2D data,
-      ! and a 1-for-1 mapping with the InternGrid.
+      ! and a 1-for-1 mapping with the IGrid.
       call ESMF_FieldDataMapSetDefault(fieldDM, 2, rc=rc)
 !EOC
 
@@ -134,7 +134,7 @@
                                 horzRelloc=relativeLocation, rc=rc)
       print *, "Returned values from Field DataMap:"
       print *, "data rank: ", dataRank
-      print *, "mapping of interngrid to data indices: ", dataIndexList
+      print *, "mapping of igrid to data indices: ", dataIndexList
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

@@ -1,4 +1,4 @@
-! $Id: ESMF_RedistHelpers.F90,v 1.8 2007/06/22 23:21:41 cdeluca Exp $
+! $Id: ESMF_RedistHelpers.F90,v 1.9 2007/06/23 04:00:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -24,11 +24,11 @@
 !
 ! The code in this file drives F90 Redist unit tests, using the Route code.
 !
-!  "Redist" is sending data from one field to another, where the interngrids 
+!  "Redist" is sending data from one field to another, where the igrids 
 !   themselves are identical, but the decompositions (which subsets of the
-!   interngrid are located on each processor) are different.  Redist sends data
+!   igrid are located on each processor) are different.  Redist sends data
 !   from one processor to another with no interpolation.  See Regrid for
-!   routines which do data interpolation from one interngrid to another.
+!   routines which do data interpolation from one igrid to another.
 !
 !-----------------------------------------------------------------------------
 ! !USES:
@@ -44,7 +44,7 @@
 
 
 !
-! Create 2 fields with the same interngrid but different layouts.
+! Create 2 fields with the same igrid but different layouts.
 !
 subroutine CreateFields(field1, field2, rc)
     type(ESMF_Field), intent(out) :: field1, field2
@@ -52,7 +52,7 @@ subroutine CreateFields(field1, field2, rc)
     
     ! Local variables
     integer :: npets, halo
-    type(ESMF_InternGrid) :: srcinterngrid, dstinterngrid
+    type(ESMF_IGrid) :: srcigrid, dstigrid
     type(ESMF_ArraySpec) :: arrayspec
     !type(ESMF_FieldDataMap) :: datamap
     type(ESMF_DELayout) :: layout1, layout2
@@ -79,21 +79,21 @@ subroutine CreateFields(field1, field2, rc)
 
     mincoords = (/  0.0,  0.0 /)
     maxcoords = (/ 20.0, 30.0 /)
-    srcinterngrid = ESMF_InternGridCreateHorzXYUni((/ 90, 180 /), &
+    srcigrid = ESMF_IGridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
-                   name="srcinterngrid", rc=rc)
+                   name="srcigrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
-    call ESMF_InternGridDistribute(srcinterngrid, delayout=layout1, rc=rc)
+    call ESMF_IGridDistribute(srcigrid, delayout=layout1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
-    ! same interngrid coordinates, but different layout
-    dstinterngrid = ESMF_InternGridCreateHorzXYUni((/ 90, 180 /), &
+    ! same igrid coordinates, but different layout
+    dstigrid = ESMF_IGridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
-                   name="srcinterngrid", rc=rc)
+                   name="srcigrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
-    call ESMF_InternGridDistribute(dstinterngrid, delayout=layout2, rc=rc)
+    call ESMF_IGridDistribute(dstigrid, delayout=layout2, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
 
@@ -102,13 +102,13 @@ subroutine CreateFields(field1, field2, rc)
     if (rc.NE.ESMF_SUCCESS) return
     
     ! allow for a halo width of 3, let the field allocate the proper space
-    field1 = ESMF_FieldCreate(srcinterngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+    field1 = ESMF_FieldCreate(srcigrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo, name="src pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
                                 
  
     ! allow for a halo width of 3, let the field allocate the proper space
-    field2 = ESMF_FieldCreate(dstinterngrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+    field2 = ESMF_FieldCreate(dstigrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo, name="dst pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
                                 
@@ -136,9 +136,9 @@ subroutine FillConstantField(field, val, rc)
     ! as what is in the field.
 
     ! TODO: if it is important to set the halo to something other than the
-    ! constant value, then we will need the halo width and the interngrid info.
+    ! constant value, then we will need the halo width and the igrid info.
     ! for now, simply set the entire data space to the constant value.
-    !call ESMF_FieldGet(field, haloWidth=halo, interngrid=interngrid, rc=rc)
+    !call ESMF_FieldGet(field, haloWidth=halo, igrid=igrid, rc=rc)
 
     ! get a Fortran 90 pointer back to the data block
     call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
@@ -161,24 +161,24 @@ subroutine FillIndexField(field, rc)
     ! Local variables
     integer :: i, j
     integer :: lb(2), ub(2), haloWidth, cellNum, rownum, colnum
-    integer :: localCellCounts(2), globalCellCounts(2), interngridOffsets(2)
+    integer :: localCellCounts(2), globalCellCounts(2), igridOffsets(2)
     real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
-    type(ESMF_InternGrid) :: interngrid
+    type(ESMF_IGrid) :: igrid
 
     rc = ESMF_FAILURE
           
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
 
-    call ESMF_FieldGet(field, haloWidth=haloWidth, interngrid=interngrid, rc=rc)
+    call ESMF_FieldGet(field, haloWidth=haloWidth, igrid=igrid, rc=rc)
 
-    call ESMF_InternGridGet(interngrid, horzrelloc=ESMF_CELL_CENTER, &
+    call ESMF_IGridGet(igrid, horzrelloc=ESMF_CELL_CENTER, &
                       globalCellCountPerDim=globalCellCounts, rc=rc)
 
-    ! get interngrid information used to calculate global indices
-    call ESMF_InternGridGetDELocalInfo(interngrid, horzrelloc=ESMF_CELL_CENTER, &
+    ! get igrid information used to calculate global indices
+    call ESMF_IGridGetDELocalInfo(igrid, horzrelloc=ESMF_CELL_CENTER, &
                                  localCellCountPerDim=localCellCounts, &
-                                 globalStartPerDim=interngridOffsets, rc=rc)
+                                 globalStartPerDim=igridOffsets, rc=rc)
 
     ! get a Fortran 90 pointer back to the data
     call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
@@ -190,8 +190,8 @@ subroutine FillIndexField(field, rc)
     ! Set the data values to the global cell index number.
     do j=lb(2)+haloWidth, ub(2)-haloWidth
       rownum = j - halowidth - 1
-      cellNum = (interngridOffsets(1) + 1) + &
-                ((interngridOffsets(2)+rownum) * globalCellCounts(1)) 
+      cellNum = (igridOffsets(1) + 1) + &
+                ((igridOffsets(2)+rownum) * globalCellCounts(1)) 
       do i=lb(1)+haloWidth, ub(1)-haloWidth
         colnum = i - haloWidth - 1
         f90ptr(i, j) = cellNum + colnum
@@ -351,24 +351,24 @@ subroutine ValidateIndexField(field, rc)
     ! Local variables
     integer :: i, j
     integer :: lb(2), ub(2), haloWidth, cellNum, rownum, colnum
-    integer :: localCellCounts(2), globalCellCounts(2), interngridOffsets(2)
+    integer :: localCellCounts(2), globalCellCounts(2), igridOffsets(2)
     real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
-    type(ESMF_InternGrid) :: interngrid
+    type(ESMF_IGrid) :: igrid
 
     rc = ESMF_FAILURE
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
 
-    call ESMF_FieldGet(field, haloWidth=haloWidth, interngrid=interngrid, rc=rc)
+    call ESMF_FieldGet(field, haloWidth=haloWidth, igrid=igrid, rc=rc)
 
-    call ESMF_InternGridGet(interngrid, horzrelloc=ESMF_CELL_CENTER, &
+    call ESMF_IGridGet(igrid, horzrelloc=ESMF_CELL_CENTER, &
                       globalCellCountPerDim=globalCellCounts, rc=rc)
 
-    ! get interngrid information used to calculate global indices
-    call ESMF_InternGridGetDELocalInfo(interngrid, horzrelloc=ESMF_CELL_CENTER, &
+    ! get igrid information used to calculate global indices
+    call ESMF_IGridGetDELocalInfo(igrid, horzrelloc=ESMF_CELL_CENTER, &
                                  localCellCountPerDim=localCellCounts, &
-                                 globalStartPerDim=interngridOffsets, rc=rc)
+                                 globalStartPerDim=igridOffsets, rc=rc)
 
     ! get a Fortran 90 pointer back to the data
     call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
@@ -383,8 +383,8 @@ subroutine ValidateIndexField(field, rc)
     ! Check the data values against the global cell index number.
     do j=lb(2)+haloWidth, ub(2)-haloWidth
       rownum = j - halowidth - 1
-      cellNum = (interngridOffsets(1) + 1) + &
-                ((interngridOffsets(2)+rownum) * globalCellCounts(1)) 
+      cellNum = (igridOffsets(1) + 1) + &
+                ((igridOffsets(2)+rownum) * globalCellCounts(1)) 
       do i=lb(1)+haloWidth, ub(1)-haloWidth
         colnum = i - haloWidth - 1
         if (f90ptr(i, j) .ne. cellNum + colnum) then
@@ -410,15 +410,15 @@ subroutine Cleanup(field1, field2, rc)
     integer, intent(out) :: rc
     
     ! Local variables
-    type(ESMF_InternGrid) :: srcinterngrid, dstinterngrid
+    type(ESMF_IGrid) :: srcigrid, dstigrid
 
     rc = ESMF_FAILURE
 
-    ! query for interngrids
-    call ESMF_FieldGet(field1, interngrid=srcinterngrid, rc=rc)
+    ! query for igrids
+    call ESMF_FieldGet(field1, igrid=srcigrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
-    call ESMF_FieldGet(field2, interngrid=dstinterngrid, rc=rc)
+    call ESMF_FieldGet(field2, igrid=dstigrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
     ! plus arrays need cleanup
@@ -429,10 +429,10 @@ subroutine Cleanup(field1, field2, rc)
     call ESMF_FieldDestroy(field2, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
-    call ESMF_InternGridDestroy(srcinterngrid, rc=rc)
+    call ESMF_IGridDestroy(srcigrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
-    call ESMF_InternGridDestroy(dstinterngrid, rc=rc)
+    call ESMF_IGridDestroy(dstigrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
     rc = ESMF_SUCCESS

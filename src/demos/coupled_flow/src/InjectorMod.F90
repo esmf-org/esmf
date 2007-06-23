@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.2 2007/06/22 23:21:51 cdeluca Exp $
+! $Id: InjectorMod.F90,v 1.3 2007/06/23 04:01:16 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -63,7 +63,7 @@
       subroutine Injector_register(comp, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGridComp), intent(inout) :: comp
+      type(ESMF_IGridComp), intent(inout) :: comp
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -76,7 +76,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp]
-!          A InternGridded Component.
+!          A IGridded Component.
 !     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors,
 !          {\tt ESMF\_FAILURE} othewise.
@@ -94,13 +94,13 @@
         !
         !  This Component has a 2 phase initialization, and a single
         !   phase run and finalize.
-        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETINIT, &
+        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, &
                                                         injector_init1, 1, rc)
-        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETINIT, &
+        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, &
                                                         injector_init2, 2, rc)
-        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETRUN, &
+        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETRUN, &
                                            injector_run, ESMF_SINGLEPHASE, rc)
-        call ESMF_InternGridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETFINAL, &
                                          injector_final, ESMF_SINGLEPHASE, rc)
 
         print *, "InjectorMod: Registered Initialize, Run, and Finalize routines"
@@ -109,7 +109,7 @@
         ! Allocate private persistent space
         allocate(datablock)
         wrap%ptr => datablock
-        call ESMF_InternGridCompSetInternalState(comp, wrap, rc)
+        call ESMF_IGridCompSetInternalState(comp, wrap, rc)
 
         print *, "InjectorMod: Registered Private Data block for Internal State"
     end subroutine
@@ -122,7 +122,7 @@
       subroutine injector_init1(gcomp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGridComp), intent(inout) :: gcomp
+      type(ESMF_IGridComp), intent(inout) :: gcomp
       type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
@@ -138,7 +138,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[gcomp]
-!           A InternGridded Component.
+!           A IGridded Component.
 !     \item[importState]
 !           State containing the import list.
 !     \item[exportState]
@@ -155,7 +155,7 @@
       ! Local variables
       !
       type(ESMF_DELayout) :: layout
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       integer :: on_month, on_day, on_hour, on_min
       integer :: off_month, off_day, off_hour, off_min
       real :: in_energy, in_velocity, in_rho
@@ -215,7 +215,7 @@
    20 continue
 
       ! Set peristent values in saved data block
-      call ESMF_InternGridCompGetInternalState(gcomp, wrap, rc)
+      call ESMF_IGridCompGetInternalState(gcomp, wrap, rc)
       datablock => wrap%ptr
 
       ! initialize start time to 12May2003, 3:00 pm
@@ -237,8 +237,8 @@
       !
       ! Query component for information.
       !
-      call ESMF_InternGridCompGet(gcomp, interngrid=interngrid, rc=rc)
-      call ESMF_InternGridGet(interngrid, delayout=layout, rc=rc)
+      call ESMF_IGridCompGet(gcomp, igrid=igrid, rc=rc)
+      call ESMF_IGridGet(igrid, delayout=layout, rc=rc)
       if (rc .ne. ESMF_SUCCESS) then
          print *, "ERROR in injector_init: getting info from component"
          return
@@ -247,7 +247,7 @@
       !
       ! create space for data arrays
       !
-      call InjectArraysAlloc(interngrid, rc)
+      call InjectArraysAlloc(igrid, rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in injector_init:  injectarraysalloc"
         return
@@ -291,7 +291,7 @@
       subroutine injector_init2(gcomp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
-     type(ESMF_InternGridComp), intent(inout) :: gcomp
+     type(ESMF_IGridComp), intent(inout) :: gcomp
      type(ESMF_State), intent(inout) :: importState, exportState
      type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
@@ -304,7 +304,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp] 
-!           A InternGridded Component.
+!           A IGridded Component.
 !     \item[importState]
 !           State containing the import list.
 !     \item[exportState]
@@ -359,7 +359,7 @@
       subroutine injector_run(comp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
-     type(ESMF_InternGridComp), intent(inout) :: comp
+     type(ESMF_IGridComp), intent(inout) :: comp
      type(ESMF_State), intent(inout) :: importState, exportState
      type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
@@ -373,7 +373,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp] 
-!           A InternGridded Component.
+!           A IGridded Component.
 !     \item[importState]
 !           State containing the import list.
 !     \item[exportState]
@@ -410,7 +410,7 @@
         datanames(7) = "FLAG"
 
         ! Get our local info
-        call ESMF_InternGridCompGetInternalState(comp, wrap, rc)
+        call ESMF_IGridCompGetInternalState(comp, wrap, rc)
         datablock => wrap%ptr
 
 
@@ -486,7 +486,7 @@
       subroutine injector_final(comp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGridComp), intent(inout) :: comp
+      type(ESMF_IGridComp), intent(inout) :: comp
       type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
@@ -498,7 +498,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp] 
-!           A InternGridded Component.
+!           A IGridded Component.
 !     \item[importState]
 !           State containing the import list.
 !     \item[exportState]
@@ -525,7 +525,7 @@
         ! Get our local info and release it
         nullify(wrap%ptr)
         datablock => wrap%ptr
-        call ESMF_InternGridCompGetInternalState(comp, wrap, rc)
+        call ESMF_IGridCompGetInternalState(comp, wrap, rc)
 
         datablock => wrap%ptr
         deallocate(datablock, stat=allocrc)

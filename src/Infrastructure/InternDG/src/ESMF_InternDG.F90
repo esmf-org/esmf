@@ -1,4 +1,4 @@
-! $Id: ESMF_InternDG.F90,v 1.10 2007/06/22 23:21:34 cdeluca Exp $
+! $Id: ESMF_InternDG.F90,v 1.11 2007/06/23 04:00:35 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -25,15 +25,15 @@ module ESMF_InternDGMod
 #include "ESMF.h"
 !==============================================================================
 !BOPI
-! !MODULE: ESMF_InternDGMod - contains InternGrid decompostion methods
+! !MODULE: ESMF_InternDGMod - contains IGrid decompostion methods
 !
 ! !DESCRIPTION:
 !
 ! The code in this file implements the {\tt ESMF\_InternDG} class, which 
-! contains a collection of subinterngrids which constitute a single logical
-! {\tt ESMF\_InternGrid}. The subinterngrids can be operated on in parallel on a
+! contains a collection of subigrids which constitute a single logical
+! {\tt ESMF\_IGrid}. The subigrids can be operated on in parallel on a
 ! multiprocessor machine. The {\tt ESMF\_InternDG} class contains the mapping
-! between the local interngrid decompositions and the global logical {\tt ESMF\_InternGrid}.
+! between the local igrid decompositions and the global logical {\tt ESMF\_IGrid}.
 ! It contains methods to synchronize data values between the boundaries of
 ! subsets, and to collect and communicate global data values. It interacts closely
 ! with the {\tt ESMF\_PhysGrid} object.
@@ -56,7 +56,7 @@ module ESMF_InternDGMod
 !------------------------------------------------------------------------------
 !     ! ESMF_InternDGLocal
 !
-!     ! The InternDGLocal type contains detailed subinterngrid information for
+!     ! The InternDGLocal type contains detailed subigrid information for
 !     ! the data located on this PE.  When we implement multiple DEs
 !     ! per PE then we will have a list of these instead of a single one
 !     ! in the InternDGType type.
@@ -69,16 +69,16 @@ module ESMF_InternDGMod
     integer :: MyDE                     ! identifier for this DE
     integer :: localCellCount           ! total number of cells for this DE
 
-    ! one value per axis/dimension of the InternGrid:
+    ! one value per axis/dimension of the IGrid:
 
     integer, dimension(:), pointer :: localCellCountPerDim
                                             ! number of cells per dim
     integer, dimension(:), pointer :: globalStartPerDim
                                             ! offset, per dim, for this DE from
-                                            ! the global interngrid origin
+                                            ! the global igrid origin
     type (ESMF_AxisIndex), dimension(:), pointer :: globalAIPerDim
                                             ! (min/max/stride) per axis relative
-                                            ! to the global interngrid origin
+                                            ! to the global igrid origin
     integer, dimension(:,:), pointer :: localIndices
   end type
 
@@ -86,7 +86,7 @@ module ESMF_InternDGMod
 !     ! ESMF_InternDGGlobal
 !
 !     ! The InternDGGlobal type contains general information about each of 
-!     ! the subinterngrids that the entire interngrid has been decomposed into. This
+!     ! the subigrids that the entire igrid has been decomposed into. This
 !     ! includes information about how each part relates to the whole, how
 !     ! many points/cells there are per decomposition, etc.  This information
 !     ! allows InternDG to compute information about other decompositions on
@@ -96,21 +96,21 @@ module ESMF_InternDGMod
   sequence
   !private
  
-    ! values where there are only a single one per InternGrid:
-    integer :: globalCellCount      ! total number of cells in the entire interngrid
+    ! values where there are only a single one per IGrid:
+    integer :: globalCellCount      ! total number of cells in the entire igrid
     integer :: maxLocalCellCount    ! maximum number of cells in the largest
-                                    ! single DE for this interngrid
+                                    ! single DE for this igrid
 
-    ! values where there are 1 per dimension of the InternGrid:
+    ! values where there are 1 per dimension of the IGrid:
     integer, dimension(:), pointer :: globalCellCountPerDim
-                                      ! number of cells in the entire interngrid,
+                                      ! number of cells in the entire igrid,
                                       ! per axis/dimension
     integer, dimension(:), pointer :: maxLocalCellCountPerDim
                                       ! the largest number of cells per axis
-                                      ! in any single DE for this interngrid 
+                                      ! in any single DE for this igrid 
 
-    ! values where there are 1 per DE in this InternGrid:  (For the 2d values
-    ! below, one dim is per DE, the other dim is per InternGrid dimension.)
+    ! values where there are 1 per DE in this IGrid:  (For the 2d values
+    ! below, one dim is per DE, the other dim is per IGrid dimension.)
 
     integer, dimension(:), pointer :: cellCountPerDE
                                         ! total number of cells per each DE
@@ -118,26 +118,26 @@ module ESMF_InternDGMod
                                         ! number of cells per axis, one for each DE
     integer, dimension(:,:), pointer :: globalStartPerDEPerDim
                                         ! offset from the origin of the entire
-                                        ! interngrid, per axis, per DE
+                                        ! igrid, per axis, per DE
     type (ESMF_AxisIndex), dimension(:,:), pointer :: AIPerDEPerDim
                                         ! (min/max/stride) per axis, per DE 
-                                        ! relative to the entire interngrid
+                                        ! relative to the entire igrid
   end type
 
 !------------------------------------------------------------------------------
 !     !  ESMF_InternDGType
 !
-!     !  There is one of these types per InternGrid.  It contains both detailed 
+!     !  There is one of these types per IGrid.  It contains both detailed 
 !     !  information about the local decomposition on this PE as well as
 !     !  general information about the rest of the other decompositions on
 !     !  other PEs which avoids additional communication overhead.
 !     !  For each of the local and global types there are two versions:
 !     !  one for the computational area, which is the unique set of
-!     !  cells in the interngrid where each cell belongs to one and only one DE.
+!     !  cells in the igrid where each cell belongs to one and only one DE.
 !     !  The other is the total area, which includes the computational cells
 !     !  as well as a layer of boundary cells around the edges.  
 !     !  These are not the same as a data halo; this information is used by
-!     !  the InternGrid code in conjunction with PhysGrid information to compute 
+!     !  the IGrid code in conjunction with PhysGrid information to compute 
 !     !  Regridding exterior boundary conditions and relative weightings for
 !     !  contributions on the interior edges of decompositions without 
 !     !  requiring additional interprocessor communication.
@@ -147,9 +147,9 @@ module ESMF_InternDGMod
   !private
 
     type(ESMF_Base)     :: base         ! standard ESMF base object
-    type(ESMF_DELayout) :: delayout     ! the delayout for this interngrid
+    type(ESMF_DELayout) :: delayout     ! the delayout for this igrid
 
-    ! 1 per dimension of the InternGrid
+    ! 1 per dimension of the IGrid
     integer, dimension(:), pointer :: decompIDs
                                       ! decomposition identifiers
     logical, dimension(:), pointer :: coversDomain
@@ -165,7 +165,7 @@ module ESMF_InternDGMod
 
     integer :: dimCount               ! Number of dimensions
     integer :: arbitrary              ! identifier for arbitrary storage
-    integer :: interngridBoundaryWidth      ! # of exterior cells/edge
+    integer :: igridBoundaryWidth      ! # of exterior cells/edge
 
   end type
 
@@ -184,7 +184,7 @@ module ESMF_InternDGMod
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_InternDG
-  public ESMF_InternDGType   ! TODO: this is really internal to InternGrid
+  public ESMF_InternDGType   ! TODO: this is really internal to IGrid
   public ESMF_InternDGLocal, ESMF_InternDGGlobal  ! ditto
 !------------------------------------------------------------------------------
 !
@@ -216,7 +216,7 @@ module ESMF_InternDGMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternDG.F90,v 1.10 2007/06/22 23:21:34 cdeluca Exp $'
+    '$Id: ESMF_InternDG.F90,v 1.11 2007/06/23 04:00:35 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -359,7 +359,7 @@ module ESMF_InternDGMod
       if (ESMF_LogMsgFoundAllocError(localrc, "InternDG type", &
                                      ESMF_CONTEXT, rc)) return
 
-!     Call construction method to allocate and initialize interngrid internals.
+!     Call construction method to allocate and initialize igrid internals.
       call ESMF_InternDGConstructNew(dgtype, name, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -416,12 +416,12 @@ module ESMF_InternDGMod
 !     \item[delayout]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[decompIDs]
-!          Identifier for which InternGrid axes are decomposed.
+!          Identifier for which IGrid axes are decomposed.
 !     \item[countsPerDEDim1]
-!          Array of number of interngrid increments per DE in the first decomposed 
+!          Array of number of igrid increments per DE in the first decomposed 
 !          direction.
 !     \item[{[countsPerDEDim2]}]
-!          Array of number of interngrid increments per DE in the second decomposed
+!          Array of number of igrid increments per DE in the second decomposed
 !          direction.
 !     \item[{[periodic]}] 
 !          Logical specifier (array) to denote periodicity along the coordinate
@@ -452,7 +452,7 @@ module ESMF_InternDGMod
       if (ESMF_LogMsgFoundAllocError(localrc, "InternDG type", &
                                      ESMF_CONTEXT, rc)) return
 
-!     Call construction method to allocate and initialize interngrid internals.
+!     Call construction method to allocate and initialize igrid internals.
       call ESMF_InternDGConstruct(dgtype, dimCount, delayout, decompIDs, &
                                   counts, countsPerDEDim1, countsPerDEDim2, &
                                   periodic=periodic, &
@@ -508,16 +508,16 @@ module ESMF_InternDGMod
 !     \item[myCount]
 !          Number of computational cells on this DE.
 !     \item[myIndices]
-!          Array of interngrid indices to be distributed to this DE, as (i,j) pairs.
+!          Array of igrid indices to be distributed to this DE, as (i,j) pairs.
 !          The size of this array must be at least [myCount] in the first
 !          dimension and 2 in the second.
 !     \item[counts]
 !          Array of global numbers of computational cells per dimension for
-!          the InternGrid.
+!          the IGrid.
 !     \item[delayout]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[decompIDs]
-!          Identifier for which InternGrid axes are decomposed.
+!          Identifier for which IGrid axes are decomposed.
 !     \item[{[name]}] 
 !          {\tt ESMF\_InternDG} name.
 !     \item[{[rc]}] 
@@ -541,7 +541,7 @@ module ESMF_InternDGMod
       if (ESMF_LogMsgFoundAllocError(localrc, "InternDG type", &
                                      ESMF_CONTEXT, rc)) return
 
-!     Call construction method to allocate and initialize interngrid internals.
+!     Call construction method to allocate and initialize igrid internals.
       call ESMF_InternDGConstructArb(dgtype, dimCount, delayout, decompIDs, &
                                   myCount, myIndices, counts, name, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -673,7 +673,7 @@ module ESMF_InternDGMod
 !     InternDGType contents here:
       dgtype%dimCount          = 0
       dgtype%arbitrary         = 0
-      dgtype%interngridBoundaryWidth = 1   ! TODO: this must be settable
+      dgtype%igridBoundaryWidth = 1   ! TODO: this must be settable
       nullify(dgtype%decompIDs)
       nullify(dgtype%coversDomain)
 
@@ -732,7 +732,7 @@ module ESMF_InternDGMod
       subroutine ESMF_InternDGConstructBlock(dgtype, dimCount, delayout, &
                                              decompIDs, counts, &
                                              countsPerDEDim1, countsPerDEDim2, &
-                                             interngridBoundaryWidth, periodic, &
+                                             igridBoundaryWidth, periodic, &
                                              coversDomain, name, rc)
 !
 ! !ARGUMENTS:
@@ -743,7 +743,7 @@ module ESMF_InternDGMod
       integer, dimension(dimCount), intent(in) :: counts
       integer, dimension(:), intent(in) :: countsPerDEDim1
       integer, dimension(:), intent(in), optional :: countsPerDEDim2
-      integer, intent(in), optional :: interngridBoundaryWidth
+      integer, intent(in), optional :: igridBoundaryWidth
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: periodic
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: coversDomain
       character (len = *), intent(in), optional :: name  
@@ -766,7 +766,7 @@ module ESMF_InternDGMod
 !     \item[delayout]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[decompIDs]
-!          Identifier for which InternGrid axes are decomposed by the layout.
+!          Identifier for which IGrid axes are decomposed by the layout.
 !     \item[counts]
 !          Array of number of computational cells along each axis.
 !     \item[countsPerDEDim1]
@@ -862,8 +862,8 @@ module ESMF_InternDGMod
       do i = 1,dimCount
         dgtype%decompIDs(i) = decompIDs(i)
       enddo
-      if (present(interngridBoundaryWidth)) &
-        dgtype%interngridBoundaryWidth = interngridBoundaryWidth
+      if (present(igridBoundaryWidth)) &
+        dgtype%igridBoundaryWidth = igridBoundaryWidth
       if (present(coversDomain)) then
         do i = 1,dimCount
           dgtype%coversDomain(i) = coversDomain(i)
@@ -914,7 +914,7 @@ module ESMF_InternDGMod
       ! now repeat the process, accounting for boundary cells
       glob => dgtype%globalTotal
       me   => dgtype%myDETotal
-      bnd = dgtype%interngridBoundaryWidth
+      bnd = dgtype%igridBoundaryWidth
       globalCellCount = 1
       do i = 1,dimCount
         globalCellCountPerDim(i) = counts(i) + 2*bnd  ! TODO: fix for reordering
@@ -992,16 +992,16 @@ module ESMF_InternDGMod
 !     \item[delayout]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[decompIDs]
-!          Identifier for which InternGrid axes are decomposed by the layout.
+!          Identifier for which IGrid axes are decomposed by the layout.
 !     \item[myCount]
 !          Number of computational cells on this DE.
 !     \item[myIndices]
-!          Array of interngrid indices to be distributed to this DE, as (i,j) pairs.
+!          Array of igrid indices to be distributed to this DE, as (i,j) pairs.
 !          The size of this array must be at least [myCount] in the first
 !          dimension and 2 in the second.
 !     \item[counts]
 !          Array of global numbers of computational cells per dimension for
-!          the InternGrid.
+!          the IGrid.
 !     \item[{[name]}] 
 !          {\tt ESMF\_InternDG} name.
 !     \item[{[rc]}] 
@@ -1326,8 +1326,8 @@ module ESMF_InternDGMod
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! TODO: Agree that this is correct.  The InternGrid is passed in a layout
-      !  created outside this interngrid (and perhaps shared amongst many interngrids)
+      ! TODO: Agree that this is correct.  The IGrid is passed in a layout
+      !  created outside this igrid (and perhaps shared amongst many igrids)
       !  so it seems that it should not be destroyed here.)
       !call ESMF_DELayoutDestroy(dgtype%delayout, localrc)
       !if (ESMF_LogMsgFoundError(localrc, &
@@ -1509,7 +1509,7 @@ module ESMF_InternDGMod
 !     \item[{[coversDomain]}]
 !        Array of logical identifiers if InternDG covers the entire physical domain.
 !     \item[{[decompIDs]}]
-!          Identifier for which InternGrid axes are decomposed.
+!          Identifier for which IGrid axes are decomposed.
 !     \item[{[globalCellCount]}]
 !        Global total number of cells.
 !     \item[{[globalCellCountPerDim]}]
@@ -1647,7 +1647,7 @@ module ESMF_InternDGMod
       if (present(total)) then
         if (total) then
           glob => dgtype%globalTotal
-          bnd  = dgtype%interngridBoundaryWidth * 2
+          bnd  = dgtype%igridBoundaryWidth * 2
         endif
       endif
 
@@ -1853,7 +1853,7 @@ module ESMF_InternDGMod
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[counts]
 !          Array of global numbers of computational cells per dimension for
-!          the InternGrid.
+!          the IGrid.
 !     \item[myCount]
 !          Number of computational cells on this DE.
 !     \item[{[rc]}] 
@@ -2703,9 +2703,9 @@ module ESMF_InternDGMod
           return
         endif
 
-!     the following code works only for interngrid where the global data is
+!     the following code works only for igrid where the global data is
 !     organized (indexed) by DE  !TODO add coding for other cases
-!     TODO: decide where enumerator for interngrid organization should be
+!     TODO: decide where enumerator for igrid organization should be
 !     TODO: this assumes exclusive indexing for local cells - total too?
 !jw        base = dgtype%MyDE%globalStartPerDim()
 ! TODO: check this!!
@@ -2960,9 +2960,9 @@ module ESMF_InternDGMod
                                      ESMF_CONTEXT, rc)
           return
         endif
-        ! the following code works only for interngrid where the global data is
+        ! the following code works only for igrid where the global data is
         ! organized (indexed) by DE  !TODO add coding for other cases
-        ! TODO: decide where enumerator for interngrid organization should be
+        ! TODO: decide where enumerator for igrid organization should be
         ! TODO: this assumes exclusive indexing for local cells - total too?
         base = 0
         if (me%MyDE.ne.1) then
@@ -3341,7 +3341,7 @@ module ESMF_InternDGMod
 !      Takes an {\tt ESMF\_InternDG} object and adds all the information needed
 !      to save the information to a file or recreate the object based on this
 !      information.   Expected to be used by {\tt ESMF\_StateReconcile()} and
-!      by {\tt ESMF\_InternGridWrite()} and {\tt ESMF\_InternGridRead()}.
+!      by {\tt ESMF\_IGridWrite()} and {\tt ESMF\_IGridRead()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3382,7 +3382,7 @@ module ESMF_InternDGMod
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! serialize the interngrid derived type
+      ! serialize the igrid derived type
       call c_ESMC_InternDGSerialize(InternDG%ptr%dimCount, nDEs, &
                                     InternDG%ptr%decompIDs, &
                                     glob%cellCountPerDEPerDim, &
@@ -3397,10 +3397,10 @@ module ESMF_InternDGMod
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridDeserialize"
+#define ESMF_METHOD "ESMF_IGridDeserialize"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridDeserialize - Deserialize a byte stream into a InternGrid
+! !IROUTINE: ESMF_IGridDeserialize - Deserialize a byte stream into a IGrid
 !
 ! !INTERFACE:
       subroutine ESMF_InternDGDeserialize(buffer, offset, decompIDs, &
@@ -3417,10 +3417,10 @@ module ESMF_InternDGMod
 !
 ! !DESCRIPTION:
 !      Takes a byte-stream buffer and reads the information needed to
-!      recreate a InternGrid object.  Recursively calls the deserialize routines
+!      recreate a IGrid object.  Recursively calls the deserialize routines
 !      needed to recreate the subobjects.
 !      Expected to be used by {\tt ESMF\_StateReconcile()} and
-!      by {\tt ESMF\_InternGridWrite()} and {\tt ESMF\_InternGridRead()}.
+!      by {\tt ESMF\_IGridWrite()} and {\tt ESMF\_IGridRead()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3457,7 +3457,7 @@ module ESMF_InternDGMod
       if (ESMF_LogMsgFoundAllocError(status, "cellCountPerDEPerDim", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! deserialize the interngrid derived type
+      ! deserialize the igrid derived type
       call c_ESMC_InternDGDeserialize(decompIDs, &
                                       cellCountPerDEPerDim, &
                                       buffer(1), offset, localrc)

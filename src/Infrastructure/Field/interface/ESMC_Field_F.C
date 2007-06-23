@@ -1,4 +1,4 @@
-// $Id: ESMC_Field_F.C,v 1.7 2007/06/22 23:21:29 cdeluca Exp $
+// $Id: ESMC_Field_F.C,v 1.8 2007/06/23 04:00:19 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Field_F.C,v 1.7 2007/06/22 23:21:29 cdeluca Exp $";
+             "$Id: ESMC_Field_F.C,v 1.8 2007/06/23 04:00:19 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -48,19 +48,19 @@ extern "C" {
      type ESMF_FieldType
         type (ESMF_Base) :: base             ! base class object
         type (ESMF_Status) :: fieldstatus
-        type (ESMF_Status) :: interngridstatus
+        type (ESMF_Status) :: igridstatus
         type (ESMF_Status) :: datastatus
         type (ESMF_Status) :: datamapstatus
-        type (ESMF_InternGrid) :: interngrid             ! save to satisfy query routines
+        type (ESMF_IGrid) :: igrid             ! save to satisfy query routines
         type (ESMF_LocalField) :: localfield ! this differs per DE
-        type (ESMF_FieldDataMap) :: mapping  ! mapping of array indices to interngrid
+        type (ESMF_FieldDataMap) :: mapping  ! mapping of array indices to igrid
         type (ESMF_IOSpec) :: iospec         ! iospec values
         type (ESMF_Status) :: iostatus       ! if unset, inherit from gcomp
 #endif
 
 // non-method functions
 void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus, 
-                           ESMC_Status *interngridstatus, 
+                           ESMC_Status *igridstatus, 
                            ESMC_Status *datastatus, 
                            ESMC_Status *datamapstatus, 
                            ESMC_Status *iostatus, 
@@ -87,7 +87,7 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
 
     sp = (ESMC_Status *)((char *)(buffer) + *offset);
     *sp++ = *fieldstatus;
-    *sp++ = *interngridstatus; 
+    *sp++ = *igridstatus; 
     *sp++ = *datastatus; 
     *sp++ = *datamapstatus; 
     *sp++ = *iostatus; 
@@ -101,7 +101,7 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
 
 
 void FTN(c_esmc_fielddeserialize)(ESMC_Status *fieldstatus, 
-                             ESMC_Status *interngridstatus, 
+                             ESMC_Status *igridstatus, 
                              ESMC_Status *datastatus, 
                              ESMC_Status *datamapstatus, 
                              ESMC_Status *iostatus, 
@@ -114,7 +114,7 @@ void FTN(c_esmc_fielddeserialize)(ESMC_Status *fieldstatus,
 
     sp = (ESMC_Status *)((char *)(buffer) + *offset);
     *fieldstatus = *sp++;
-    *interngridstatus = *sp++;
+    *igridstatus = *sp++;
     *datastatus = *sp++;
     *datamapstatus = *sp++;
     *iostatus = *sp++;

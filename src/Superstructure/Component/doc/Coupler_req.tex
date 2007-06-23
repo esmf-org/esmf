@@ -1,4 +1,4 @@
-% $Id: Coupler_req.tex,v 1.3 2007/06/22 23:21:44 cdeluca Exp $
+% $Id: Coupler_req.tex,v 1.4 2007/06/23 04:00:53 cdeluca Exp $
 
 \req{Components}
 \label{req:compall}
@@ -406,12 +406,12 @@ sets of tasks are aligned efficiently on compute resources.
 {\bf Status:} Approved-1. \\
 {\bf Verification:} System test.\\
 {\bf Notes:}  We want to have the application component task for a particular
-  spatial interngrid region aligned with the physical model components and
+  spatial igrid region aligned with the physical model components and
   coupler components that operate on that region.  Binding
   encompasses both associating tasks with specific PE lists and
   creating the necessary communication substrate to connect tasks that
   need to communicate.  This involves interactions with distributed
-  interngrid and communication kernel elements.
+  igrid and communication kernel elements.
 \end{reqlist}
 
 \sreq{Application component as main}
@@ -539,17 +539,17 @@ Application components shall be scalable.
 {\bf Notes:}  The control mechanism should not be a sequential bottleneck.
 \end{reqlist}
 
-\req{InternGridded components}
+\req{IGridded components}
 
 In addition to the general requirements for  a component described in 
-\ref{req:compall}, interngridded components are required to provide the
+\ref{req:compall}, igridded components are required to provide the
 following capabilities.
 
-\sreq{InternGridded components have one or more associated interngrids}
-A interngridded component shall be associated with one or more interngrids.
-A default interngrid shall be associated with 
-each interngridded component and shall default to the first interngrid created 
-in the component.  The default interngrid may be assigned.
+\sreq{IGridded components have one or more associated igrids}
+A igridded component shall be associated with one or more igrids.
+A default igrid shall be associated with 
+each igridded component and shall default to the first igrid created 
+in the component.  The default igrid may be assigned.
 \begin{reqlist}
 {\bf Priority:} 1\\
 {\bf Source:} NSIPP, GFDL, MIT \\
@@ -558,9 +558,9 @@ in the component.  The default interngrid may be assigned.
 \end{reqlist}
 
 \sreq{Creation}
-The creation method of a interngridded component shall require as an 
-argument either a fully created interngrid or the parameters
-required to create a interngrid.
+The creation method of a igridded component shall require as an 
+argument either a fully created igrid or the parameters
+required to create a igrid.
 \begin{reqlist}
 {\bf Priority:} 1\\
 {\bf Source:} Required by NSIPP, MIT, CCSM-CPL, GFDL \\
@@ -570,8 +570,8 @@ required to create a interngrid.
 
 \sreq{Queries}
 
-\ssreq{Query interngrids}
-A interngridded component can return a list of its interngrids.
+\ssreq{Query igrids}
+A igridded component can return a list of its igrids.
 \begin{reqlist}
 {\bf Priority:} 3\\
 {\bf Source:} \\
@@ -579,8 +579,8 @@ A interngridded component can return a list of its interngrids.
 {\bf Verification:} Unit test.
 \end{reqlist}
 
-\ssreq{Query default interngrid}
-A interngridded component can return its default interngrid.
+\ssreq{Query default igrid}
+A igridded component can return its default igrid.
 \begin{reqlist}
 {\bf Priority:} 2\\
 {\bf Source:} GFDL, MIT\\

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2007/06/22 23:21:46 cdeluca Exp $
+# $Id: makefile,v 1.23 2007/06/23 04:00:57 cdeluca Exp $
 
 # Leave alone.
 ALL: build_here 
@@ -10,7 +10,7 @@ CFLAGS    += ${MPI_INCLUDE}
 FFLAGS    =
 
 # If you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_FTable_F.C ESMC_Comp.C ESMC_Comp_F.C ESMC_InternGridComp.C \
+SOURCEC	  = ESMC_FTable_F.C ESMC_Comp.C ESMC_Comp_F.C ESMC_IGridComp.C \
             ESMC_CplComp.C
 # If you have F90 files in this directory, list them all on the line below.
 SOURCEF	  =  ESMF_Comp_C.F90 

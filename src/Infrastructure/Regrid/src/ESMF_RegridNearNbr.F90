@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridNearNbr.F90,v 1.24 2007/06/22 23:21:39 cdeluca Exp $
+! $Id: ESMF_RegridNearNbr.F90,v 1.25 2007/06/23 04:00:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,8 +37,8 @@
       use ESMF_UtilTypesMod
       use ESMF_BaseMod      ! ESMF base   class
       use ESMF_InternArrayMod ! ESMF internal array  class
-      use ESMF_PhysGridMod  ! ESMF physical interngrid class
-      use ESMF_InternGridMod      ! ESMF interngrid   class
+      use ESMF_PhysGridMod  ! ESMF physical igrid class
+      use ESMF_IGridMod      ! ESMF igrid   class
       use ESMF_FieldMod     ! ESMF field  class
       use ESMF_BundleMod
       use ESMF_RegridTypesMod ! ESMF regrid data structures
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridNearNbr.F90,v 1.24 2007/06/22 23:21:39 cdeluca Exp $'
+      '$Id: ESMF_RegridNearNbr.F90,v 1.25 2007/06/23 04:00:40 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -106,7 +106,7 @@
 
       type (ESMF_Field), intent(in) :: &
          src_field,          &! field to be regridded
-         dst_field            ! destination (incl interngrid) of resulting regridded field
+         dst_field            ! destination (incl igrid) of resulting regridded field
 
       character (len = *), intent(in) :: name
 
@@ -117,7 +117,7 @@
 !
 ! !DESCRIPTION:
 !     Given a source field and destination field (and their attached
-!     interngrids), this routine constructs a new {\tt Regrid} object
+!     igrids), this routine constructs a new {\tt Regrid} object
 !     and fills it with information necessary for regridding the source
 !     field to the destination field using a nearest-neighbor distance-weighted
 !     interpolation.  Returns a pointer to a new {\tt Regrid}.
@@ -143,15 +143,15 @@
       !  i,j,n,iDE,iter,   &! loop counters
       !  iii,jjj,          &! more loop counters
       !  inbr,nnbrs,       &! number of neighbors
-      !  tot_dst_DEs,      &! total num DEs in destination interngrid distribution
-      !  tot_src_DEs,      &! total num DEs in source      interngrid distribution
+      !  tot_dst_DEs,      &! total num DEs in destination igrid distribution
+      !  tot_src_DEs,      &! total num DEs in source      igrid distribution
       !  loc_dst_DEs,      &! num of local DEs in dest   distribution
       !  loc_src_DEs,      &! num of local DEs in source distribution
       !  nx_src,           &! dimension size of local DE in i-direction
       !  ny_src,           &! dimension size of local DE in j-direction
       !  noverlap_src_DEs, &! num overlapping source DEs
-      !  ib_dst, ie_dst,   &! beg, end of exclusive domain in i-dir of dest interngrid
-      !  jb_dst, je_dst,   &! beg, end of exclusive domain in j-dir of dest interngrid
+      !  ib_dst, ie_dst,   &! beg, end of exclusive domain in i-dir of dest igrid
+      !  jb_dst, je_dst,   &! beg, end of exclusive domain in j-dir of dest igrid
 
       integer ::           &
          localrc            ! error flag
@@ -160,7 +160,7 @@
       !   srcAdd             ! src neighbor addresses (nnbr,3)
 
       !integer, dimension(:,:,:), allocatable :: &
-      !   dstadd             ! address in dest interngrid (i,j,DE)
+      !   dstadd             ! address in dest igrid (i,j,DE)
          
       !real(ESMF_KIND_R8), dimension(:), allocatable :: &
       !   weights,          &! normalized distance to each neighbor
@@ -168,12 +168,12 @@
 
       !real(ESMF_KIND_R8) :: &
       !   distance,         &! distance to current neighbor
-      !   x1, y1,           &! dst interngrid x,y coordinates
-      !   x2, y2             ! src interngrid x,y coordinates
+      !   x1, y1,           &! dst igrid x,y coordinates
+      !   x2, y2             ! src igrid x,y coordinates
 
       !real (ESMF_KIND_R8), dimension(:,:,:), allocatable :: &
-      !   src_center_x,      &! cell center x-coord for gathered source interngrid
-      !   src_center_y        ! cell center y-coord for gathered source interngrid
+      !   src_center_x,      &! cell center x-coord for gathered source igrid
+      !   src_center_y        ! cell center y-coord for gathered source igrid
 
 !
 !     Construct an empty regrid structure
@@ -200,21 +200,21 @@
                                 ESMF_CONTEXT, rc)) return
       
       !
-      ! Extract some interngrid information for use in this regrid.
+      ! Extract some igrid information for use in this regrid.
       !
       
       !For both src,dst fields:
-      !Get interngrid associated with this field
-      !dst_interngrid = ?
-      !src_interngrid = ?
-      !call ESMF_InternGridGet(dst_interngrid, coord_system=coord_system, localrc)
-      !Check that src interngrid in same coord system
+      !Get igrid associated with this field
+      !dst_igrid = ?
+      !src_igrid = ?
+      !call ESMF_IGridGet(dst_igrid, coord_system=coord_system, localrc)
+      !Check that src igrid in same coord system
 
 
       !
-      !  Find all DEs on source interngrid whose domain overlaps
-      !  local dest interngrid domains (using bounding boxes).
-      !  Gather up interngrid info (primarily center coords) from 
+      !  Find all DEs on source igrid whose domain overlaps
+      !  local dest igrid domains (using bounding boxes).
+      !  Gather up igrid info (primarily center coords) from 
       !  those source DEs that overlap.
       !
 
@@ -230,7 +230,7 @@
       !create Route
       
       !
-      ! use Route to gather interngrid center coordinates from source
+      ! use Route to gather igrid center coordinates from source
       ! DEs that overlap local dest DEs
       !
       
@@ -238,11 +238,11 @@
       !allocate (src_center_x(nx_src,ny_src,noverlap_src_DEs), &
       !          src_center_y(nx_src,ny_src,noverlap_src_DEs))
       !....
-      !call ESMF_RouteRun(regrid%gather, src_interngrid%center_coord, &
+      !call ESMF_RouteRun(regrid%gather, src_igrid%center_coord, &
       !                                  src_center_coord, rc)
       !src_center_x = src_center_coord(1,:,:,?)
       !src_center_y = src_center_coord(2,:,:,?)
-      !need to get other interngrid info too ?
+      !need to get other igrid info too ?
       
       !
       ! now all necessary data is local
@@ -271,9 +271,9 @@
       !   jb_dst = beginning index in 2nd dir of exclusive domain on dst DE
       !   je_dst = ending    index in 2nd dir of exclusive domain on dst DE
 
-      !   dst_center_x = get center x coords from appropriate dst phys interngrid
+      !   dst_center_x = get center x coords from appropriate dst phys igrid
       !   dst_center_y = ...........y....etc
-      !   dst_mask     = get mask assoc with field from phys interngrid
+      !   dst_mask     = get mask assoc with field from phys igrid
 
       !   do j=jb_dst,je_dst
       !   do i=ib_dst,ie_dst
@@ -283,7 +283,7 @@
       !      if (dst_mask(i,j)) then ! only perform interpolation on un-masked points
 
                !
-               ! for each un-masked cell on the gathered source interngrid DEs,
+               ! for each un-masked cell on the gathered source igrid DEs,
                ! compute the distance and store the nearest neighbor
                ! addresses and distances
                !
@@ -305,7 +305,7 @@
       !               x2 = src_center_x(iii,jjj,n)
       !               y2 = src_center_y(iii,jjj,n)
       !
-      !               distance = ESMF_InternGridComputeDistance(x1,y1,x2,y2,&
+      !               distance = ESMF_IGridComputeDistance(x1,y1,x2,y2,&
       !                                               coord_system, localrc)
 
 !
@@ -342,7 +342,7 @@
       !            iii = srcAdd(inbr,1)
       !            jjj = srcAdd(inbr,2)
       !            n   = srcAdd(inbr,3)
-      !            if (src_interngrid_mask(iii,jjj,n)) then
+      !            if (src_igrid_mask(iii,jjj,n)) then
       !               weights(inbr) = one/weights(inbr)
       !               dist_tot = dist_tot + weights(inbr)
       !            else
@@ -368,8 +368,8 @@
       !         endif
 
         !    endif ! dst mask            
-        ! end do ! i loop on dst interngrid DE
-        ! end do ! j loop on dst interngrid DE
+        ! end do ! i loop on dst igrid DE
+        ! end do ! j loop on dst igrid DE
       !end do    ! loop over local dst DEs
       
       !deallocate(src_center_x, src_center_y)
@@ -394,7 +394,7 @@
 
       type (ESMF_Bundle), intent(in) :: &
          src_bundle,          &! field bundle to be regridded
-         dst_bundle            ! destination (incl interngrid) of resulting regridded bundle
+         dst_bundle            ! destination (incl igrid) of resulting regridded bundle
 
       character (len = *), intent(in) :: name
 
@@ -402,7 +402,7 @@
 !
 ! !DESCRIPTION:
 !     Given a source field bundle and destination field bundle (and their attached
-!     interngrids), this routine constructs a new {\tt Regrid} object
+!     igrids), this routine constructs a new {\tt Regrid} object
 !     and fills it with information necessary for regridding the source
 !     bundle to the destination bundle using nearest-neighbor
 !     distance-weighted interpolation.

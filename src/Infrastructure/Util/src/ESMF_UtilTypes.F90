@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.49 2007/06/22 23:21:42 cdeluca Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.50 2007/06/23 04:00:46 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -231,7 +231,7 @@
          ESMF_ID_ARRAY = ESMF_ObjectID(16, "ESMF_Array"), &
          ESMF_ID_INTERNDG = ESMF_ObjectID(17, "ESMF_InternDG"), &
          ESMF_ID_PHYSGRID = ESMF_ObjectID(18, "ESMF_PhysGrid"), &
-         ESMF_ID_IGRID = ESMF_ObjectID(19, "ESMF_InternGrid"), &
+         ESMF_ID_IGRID = ESMF_ObjectID(19, "ESMF_IGrid"), &
          ESMF_ID_EXCHANGEPACKET = ESMF_ObjectID(20, "ESMF_ExchangePacket"), &
          ESMF_ID_COMMTABLE = ESMF_ObjectID(21, "ESMF_CommTable"), &
          ESMF_ID_ROUTETABLE = ESMF_ObjectID(22, "ESMF_RouteTable"), &
@@ -245,7 +245,7 @@
          ESMF_ID_REGRID = ESMF_ObjectID(30, "ESMF_Regrid"), &
          ESMF_ID_TRANSFORM = ESMF_ObjectID(31, "ESMF_Transform"), &
          ESMF_ID_STATE = ESMF_ObjectID(32, "ESMF_State"), &
-         ESMF_ID_IGRIDCOMPONENT = ESMF_ObjectID(33, "ESMF_InternGridComponent"), &
+         ESMF_ID_IGRIDCOMPONENT = ESMF_ObjectID(33, "ESMF_IGridComponent"), &
          ESMF_ID_CPLCOMPONENT = ESMF_ObjectID(34, "ESMF_CplComponent"), &
          ESMF_ID_COMPONENT = ESMF_ObjectID(35, "ESMF_Component"), &
          ESMF_ID_INTERNARRAY = ESMF_ObjectID(36, "ESMF_InternArray"), &
@@ -292,10 +292,10 @@
 
 !------------------------------------------------------------------------------
 !
-      ! For logically rectangular interngridded data, are the index numbers being
+      ! For logically rectangular igridded data, are the index numbers being
       ! computed/retrieved/exchanged relative to an origin of (0,0) on our
       ! local chunk (local), or are they global index numbers relative to 
-      ! all index numbers across the entire interngrid (global!). 
+      ! all index numbers across the entire igrid (global!). 
       type ESMF_LocalGlobalFlag
       sequence
           integer :: value
@@ -307,7 +307,7 @@
 
 !------------------------------------------------------------------------------
 !
-      ! Once a large interngrid of data is decomposed into various local chunks
+      ! Once a large igrid of data is decomposed into various local chunks
       ! there are several different "item counts" or "domains" of interest.  
       ! They include:
       !

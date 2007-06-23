@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.2 2007/06/22 23:21:51 cdeluca Exp $
+! $Id: CoupledFlowApp.F90,v 1.3 2007/06/23 04:01:14 cdeluca Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -7,7 +7,7 @@
 !
 ! !DESCRIPTION:
 ! ESMF Application Wrapper for Coupled Flow Demo.  This file contains the
-!  main program, and creates a top level ESMF InternGridded Component to contain
+!  main program, and creates a top level ESMF IGridded Component to contain
 !  all other Components.
 !
 !
@@ -26,7 +26,7 @@
     ! Local variables
 
     ! Components
-    type(ESMF_InternGridComp) :: compInternGridded
+    type(ESMF_IGridComp) :: compIGridded
 
     ! State, Virtual Machine, and DELayout
     type(ESMF_VM) :: vm
@@ -34,8 +34,8 @@
     type(ESMF_DELayout) :: DELayoutTop
     integer :: pet_id
 
-    ! A common interngrid
-    type(ESMF_InternGrid) :: interngrid
+    ! A common igrid
+    type(ESMF_IGrid) :: igrid
 
     ! A clock, a calendar, and timesteps
     type(ESMF_Clock) :: clock
@@ -43,7 +43,7 @@
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
 
-    ! Variables related to interngrid and clock
+    ! Variables related to igrid and clock
     integer :: counts(2)
     integer :: i_max, j_max
     real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max, g_min(2), g_max(2)
@@ -64,17 +64,17 @@
 !     The variables are:
 !     \begin{description}
 !     \item [i\_max]
-!           Global number of cells in the first interngrid direction.
+!           Global number of cells in the first igrid direction.
 !     \item [j\_max]
-!           Global number of cells in the second interngrid direction.
+!           Global number of cells in the second igrid direction.
 !     \item [x\_min]
-!           Minimum interngrid coordinate in the first direction.
+!           Minimum igrid coordinate in the first direction.
 !     \item [x\_max]
-!           Maximum interngrid coordinate in the first direction.
+!           Maximum igrid coordinate in the first direction.
 !     \item [y\_min]
-!           Minimum interngrid coordinate in the second direction.
+!           Minimum igrid coordinate in the second direction.
 !     \item [y\_max]
-!           Maximum interngrid coordinate in the second direction.
+!           Maximum igrid coordinate in the second direction.
 !     \item [s\_month]
 !           Simulation start time month (integer).
 !     \item [s\_day]
@@ -154,8 +154,8 @@
 
 !BOP
 !\begin{verbatim}
-    ! Create the top level InternGridded Component.
-    compInternGridded = ESMF_InternGridCompCreate(name="Coupled Flow Demo", rc=rc)
+    ! Create the top level IGridded Component.
+    compIGridded = ESMF_IGridCompCreate(name="Coupled Flow Demo", rc=rc)
 !\end{verbatim}
 !EOP 
 
@@ -167,13 +167,13 @@
 !  Register section
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-      call ESMF_InternGridCompSetServices(compInternGridded, CoupledFlow_register, rc)
+      call ESMF_IGridCompSetServices(compIGridded, CoupledFlow_register, rc)
       print *, "Comp SetServices finished, rc= ", rc
 
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!  Create and initialize a clock, and a interngrid.
+!  Create and initialize a clock, and a igrid.
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
@@ -207,22 +207,22 @@
 !     current time from the start time by the timestep.
 !EOP 
       !
-      ! Create the InternGrid and attach it to the Component
+      ! Create the IGrid and attach it to the Component
       !
 
-      ! Create a default DELayout for the interngrid based on the global VM
+      ! Create a default DELayout for the igrid based on the global VM
       DELayoutTop = ESMF_DELayoutCreate(vm, rc=rc)
 !BOP
 !
 ! !DESCRIPTION:
-! \subsubsection{Example of InternGrid Creation:}
+! \subsubsection{Example of IGrid Creation:}
 !
-!  The following piece of code provides an example of InternGrid creation used in
-!  the Demo.  The extents of the InternGrid were previously read in from an input
-!  file, but the rest of the InternGrid parameters are set here by default.  The
-!  InternGrid spans the Application's PET list, while the type of the InternGrid is 
+!  The following piece of code provides an example of IGrid creation used in
+!  the Demo.  The extents of the IGrid were previously read in from an input
+!  file, but the rest of the IGrid parameters are set here by default.  The
+!  IGrid spans the Application's PET list, while the type of the IGrid is 
 !  assumed to be horizontal and cartesian x-y with an Arakawa C staggering.  
-!  The InternGrid name is set to "source interngrid":
+!  The IGrid name is set to "source igrid":
 !\begin{verbatim}
       counts(1) = i_max
       counts(2) = j_max
@@ -230,17 +230,17 @@
       g_min(2) = y_min
       g_max(1) = x_max
       g_max(2) = y_max
-      interngrid = ESMF_InternGridCreateHorzXYUni(counts=counts, &
+      igrid = ESMF_IGridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
                              horzStagger=ESMF_IGRID_HORZ_STAGGER_C_NE, &
-                             name="source interngrid", rc=rc)
-      call ESMF_InternGridDistribute(interngrid, delayout=DELayoutTop, rc=rc)
+                             name="source igrid", rc=rc)
+      call ESMF_IGridDistribute(igrid, delayout=DELayoutTop, rc=rc)
 
 !\end{verbatim}
-!     The InternGrid can then be attached to the InternGridded Component with a set call:
+!     The IGrid can then be attached to the IGridded Component with a set call:
 !\begin{verbatim}
-     call ESMF_InternGridCompSet(compInternGridded, interngrid=interngrid, rc=rc)
+     call ESMF_IGridCompSet(compIGridded, igrid=igrid, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -258,18 +258,18 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
  
-      call ESMF_InternGridCompInitialize(compInternGridded, flowstate, flowstate, &
+      call ESMF_IGridCompInitialize(compIGridded, flowstate, flowstate, &
                                                                  clock, rc=rc)
       print *, "Coupled Flow Component Initialize finished, rc =", rc
  
 
 
-      call ESMF_InternGridCompRun(compInternGridded, flowstate, flowstate, clock, rc=rc)
+      call ESMF_IGridCompRun(compIGridded, flowstate, flowstate, clock, rc=rc)
       print *, "Coupled Flow Component Run finished, rc =", rc
  
 
 
-      call ESMF_InternGridCompFinalize(compInternGridded, flowstate, flowstate, clock, rc=rc)
+      call ESMF_IGridCompFinalize(compIGridded, flowstate, flowstate, clock, rc=rc)
       print *, "Coupled Flow Component Finalize finished, rc =", rc
  
  
@@ -282,11 +282,11 @@
 
       call ESMF_StateDestroy(flowstate, rc)
 
-      call ESMF_InternGridDestroy(interngrid, rc)
+      call ESMF_IGridDestroy(igrid, rc)
 
       call ESMF_ClockDestroy(clock, rc)
 
-      call ESMF_InternGridCompDestroy(compInternGridded, rc)
+      call ESMF_IGridCompDestroy(compIGridded, rc)
 
       call ESMF_DELayoutDestroy(DELayoutTop, rc)
 

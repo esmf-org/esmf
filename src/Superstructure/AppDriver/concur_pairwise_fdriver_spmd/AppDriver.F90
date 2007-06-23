@@ -2,10 +2,10 @@
 ! MODULE AppDriver.F90 - generic main program for an ESMF Application
 !
 ! !DESCRIPTION:
-! ESMF Application Driver for any InternGridded Component.  Creates the top 
-!  InternGridded Component and calls the Initialize, Run, and Finalize routines
+! ESMF Application Driver for any IGridded Component.  Creates the top 
+!  IGridded Component and calls the Initialize, Run, and Finalize routines
 !  for it.  
-!  This InternGridded Component will most likely create and manage subcomponents
+!  This IGridded Component will most likely create and manage subcomponents
 !  internally, so that this generic file becomes the "Cap" or root 
 !  of a tree of components.
 !
@@ -29,7 +29,7 @@
     ! ESMF module, defines all ESMF data types and procedures
     use ESMF_Mod
     
-    ! InternGridded Component registration routines.  Defined in "ChangeMe.F90"
+    ! IGridded Component registration routines.  Defined in "ChangeMe.F90"
     use USER_APP_Mod, only : SetServices => USER_APP_SetServices
 
     implicit none
@@ -37,7 +37,7 @@
     ! Local variables
 
     ! Components
-    type(ESMF_InternGridComp) :: compInternGridded
+    type(ESMF_IGridComp) :: compIGridded
 
     ! States, Virtual Machines, and Layouts
     type(ESMF_VM) :: defaultvm
@@ -47,8 +47,8 @@
     ! Configuration information
     type(ESMF_Config) :: config
 
-    ! A common interngrid
-    type(ESMF_InternGrid) :: interngrid
+    ! A common igrid
+    type(ESMF_IGrid) :: igrid
 
     ! A clock, a calendar, and timesteps
     type(ESMF_Clock) :: clock
@@ -56,7 +56,7 @@
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
 
-    ! Variables related to interngrid and clock
+    ! Variables related to igrid and clock
     integer :: i_max, j_max
     real(ESMF_KIND_R4) :: x_min4, x_max4, y_min4, y_max4
     real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
@@ -84,7 +84,7 @@
 
     ! Get standard config parameters, for example:
 
-    ! the default interngrid size and type
+    ! the default igrid size and type
     ! the default start time, stop time, and running intervals
     !  for the main time loop.
     !
@@ -108,8 +108,8 @@
     ! Get the default VM which contains all PEs this job was started on.
     call ESMF_VMGetGlobal(defaultvm, rc)
 
-    ! Create the top InternGridded component, passing in the default layout.
-    compInternGridded = ESMF_InternGridCompCreate(name="ESMF InternGridded Component", rc=rc)
+    ! Create the top IGridded component, passing in the default layout.
+    compIGridded = ESMF_IGridCompCreate(name="ESMF IGridded Component", rc=rc)
 
     call ESMF_LogWrite("Component Create finished", ESMF_LOG_INFO)
 
@@ -119,17 +119,17 @@
 !!  Register section
 !!------------------------------------------------------------------------------
 !!------------------------------------------------------------------------------
-      call ESMF_InternGridCompSetServices(compInternGridded, SetServices, rc)
+      call ESMF_IGridCompSetServices(compIGridded, SetServices, rc)
       if (ESMF_LogMsgFoundError(rc, "Registration failed", rc)) goto 10
 
 
 !!------------------------------------------------------------------------------
 !!------------------------------------------------------------------------------
-!!  Create and initialize a clock, and a interngrid.
+!!  Create and initialize a clock, and a igrid.
 !!------------------------------------------------------------------------------
 !!------------------------------------------------------------------------------
 
-     ! Based on values from the Config file, create a default InternGrid
+     ! Based on values from the Config file, create a default IGrid
      ! and Clock.  We assume we have read in the variables below from
      ! the config file.
 
@@ -144,22 +144,22 @@
                                 stopTime, rc=rc)
 
 
-      ! Same with the interngrid.  Get a default layout based on the VM.
+      ! Same with the igrid.  Get a default layout based on the VM.
       defaultlayout = ESMF_DELayoutCreate(defaultvm, rc=rc)
 
       x_min = x_min4
       y_min = y_min4
       x_max = x_max4
       y_max = y_max4
-      interngrid = ESMF_InternGridCreateHorzXYUni(counts=(/i_max, j_max/), &
+      igrid = ESMF_IGridCreateHorzXYUni(counts=(/i_max, j_max/), &
                              minGlobalCoordPerDim=(/x_min, y_min/), &
                              maxGlobalCoordPerDim=(/x_max, y_max/), &
                              horzStagger=ESMF_IGRID_HORZ_STAGGER_C_SE, &
-                             name="source interngrid", rc=rc)
-      call ESMF_InternGridDistribute(interngrid, delayout=defaultlayout, rc=rc)
+                             name="source igrid", rc=rc)
+      call ESMF_IGridDistribute(igrid, delayout=defaultlayout, rc=rc)
 
-      ! Attach the InternGrid to the Component
-      call ESMF_InternGridCompSet(compInternGridded, interngrid=interngrid, rc=rc)
+      ! Attach the IGrid to the Component
+      call ESMF_IGridCompSet(compIGridded, igrid=igrid, rc=rc)
 
 
 !!------------------------------------------------------------------------------
@@ -168,7 +168,7 @@
 !!------------------------------------------------------------------------------
 !!------------------------------------------------------------------------------
 
-      defaultstate = ESMF_StateCreate("Default InternGridded State", rc=rc)
+      defaultstate = ESMF_StateCreate("Default IGridded State", rc=rc)
      
 !!------------------------------------------------------------------------------
 !!------------------------------------------------------------------------------
@@ -176,19 +176,19 @@
 !!------------------------------------------------------------------------------
 !!------------------------------------------------------------------------------
  
-      call ESMF_InternGridCompInitialize(compInternGridded, defaultstate, defaultstate, &
+      call ESMF_IGridCompInitialize(compIGridded, defaultstate, defaultstate, &
                                                                   clock, rc=rc)
       if (ESMF_LogMsgFoundError(rc, "Initialize failed", rc)) goto 10
  
 
 
-      call ESMF_InternGridCompRun(compInternGridded, defaultstate, defaultstate, &
+      call ESMF_IGridCompRun(compIGridded, defaultstate, defaultstate, &
                                                                   clock, rc=rc)
       if (ESMF_LogMsgFoundError(rc, "Run failed", rc)) goto 10
  
 
 
-      call ESMF_InternGridCompFinalize(compInternGridded, defaultstate, defaultstate, &
+      call ESMF_IGridCompFinalize(compIGridded, defaultstate, defaultstate, &
                                                                   clock, rc=rc)
       if (ESMF_LogMsgFoundError(rc, "Finalize failed", rc)) goto 10
  
@@ -205,7 +205,7 @@
 
       call ESMF_StateDestroy(defaultstate, rc)
 
-      call ESMF_InternGridCompDestroy(compInternGridded, rc)
+      call ESMF_IGridCompDestroy(compIGridded, rc)
 
       call ESMF_DELayoutDestroy(defaultLayout, rc)
 

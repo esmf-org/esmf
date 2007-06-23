@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.48 2007/06/22 23:21:27 cdeluca Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.49 2007/06/23 04:00:06 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,13 +36,13 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.48 2007/06/22 23:21:27 cdeluca Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.49 2007/06/23 04:00:06 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
       integer :: rc, fieldcount, count, countlist(2)
       integer :: number, i
-      type(ESMF_InternGrid) :: interngrid, interngrid2
+      type(ESMF_IGrid) :: igrid, igrid2
       type(ESMF_DELayout) :: layout
       type(ESMF_VM) :: vm
       character (len = ESMF_MAXSTR) :: bname1, fname1, fname2, fname3
@@ -129,18 +129,18 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Set InternGrid in deleted Bundle Test
-      call ESMF_BundleSetInternGrid(bundle2, interngrid, rc=rc)
+      ! Set IGrid in deleted Bundle Test
+      call ESMF_BundleSetIGrid(bundle2, igrid, rc=rc)
       write(failMsg, *) "Did not Return ESMF_RC_OBJ_DELETED"
-      write(name, *) "Set InternGrid in deleted Bundle  Test"
+      write(name, *) "Set IGrid in deleted Bundle  Test"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Set InternGrid in enon-created Bundle Test
-      call ESMF_BundleSetInternGrid(bundle1, interngrid, rc=rc)
+      ! Set IGrid in enon-created Bundle Test
+      call ESMF_BundleSetIGrid(bundle1, igrid, rc=rc)
       write(failMsg, *) "Did not Return ESMF_RC_OBJ_NOT_CREATED"
-      write(name, *) "Set InternGrid in non-created Bundle  Test"
+      write(name, *) "Set IGrid in non-created Bundle  Test"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -311,23 +311,23 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Creating a InternGrid
+      ! Creating a IGrid
       countlist(:) = (/ 180, 90 /)
       mincoord(:) = 1.0
-      interngrid = ESMF_InternGridCreateHorzXYUni(counts=countlist, &
+      igrid = ESMF_IGridCreateHorzXYUni(counts=countlist, &
                               minGlobalCoordPerDim=mincoord, &
-                              name="InternGrid",  rc=rc) 
-      call ESMF_InternGridDistribute(interngrid, delayout=layout, rc=rc)
+                              name="IGrid",  rc=rc) 
+      call ESMF_IGridDistribute(igrid, delayout=layout, rc=rc)
 
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Create a InternGrid Test"
+      write(name, *) "Create a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
       !EX_UTest
       ! Creating a Field Test
-      simplefield = ESMF_FieldCreateNoData(interngrid=interngrid, name="rh", rc=rc)
+      simplefield = ESMF_FieldCreateNoData(igrid=igrid, name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Create a Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -335,10 +335,10 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Bundle Set InternGrid Test
-      call ESMF_BundleSetInternGrid(bundle2, interngrid, rc=rc)
+      ! Bundle Set IGrid Test
+      call ESMF_BundleSetIGrid(bundle2, igrid, rc=rc)
       write(failMsg, *) "Did not Return ESMF_SUCCESS"
-      write(name, *) "Bundle Set InternGrid Test"
+      write(name, *) "Bundle Set IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -453,10 +453,10 @@
 
 
       !EX_UTest
-      !  Test Requirement FLD2.5.7 Return InternGrid
-      call ESMF_BundleGet(bundle2, interngrid=interngrid2, rc=rc)
+      !  Test Requirement FLD2.5.7 Return IGrid
+      call ESMF_BundleGet(bundle2, igrid=igrid2, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Getting a InternGrid from a Bundle Test Req. FLD2.5.7"
+      write(name, *) "Getting a IGrid from a Bundle Test Req. FLD2.5.7"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -711,10 +711,10 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroying a interngrid
-      call ESMF_InternGridDestroy(interngrid, rc=rc)
-      write(failMsg, *) "Destroying a InternGrid"
-      write(name, *) "Destroying a InternGrid"
+      ! Destroying a igrid
+      call ESMF_IGridDestroy(igrid, rc=rc)
+      write(failMsg, *) "Destroying a IGrid"
+      write(name, *) "Destroying a IGrid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 

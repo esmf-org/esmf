@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.11 2007/06/22 23:21:29 cdeluca Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.12 2007/06/23 04:00:13 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@ program ESMF_DistGridEx
 !  1st dimension
 ! \end{verbatim}
 !
-! By default interngrid points along all dimensions are homogeneously divided between
+! By default igrid points along all dimensions are homogeneously divided between
 ! the DEs. The maximum cell count difference between DEs along any dimension is
 ! 1. The (min) $\sim$ (max) corners of the DE-local LR domains of the above 
 ! example are as follows:
@@ -146,10 +146,10 @@ program ESMF_DistGridEx
 ! The specifics of the patch decomposition into DE-local LR domains can be
 ! modified by the optional {\tt decompflag} argument. The following line shows
 ! how this argument is used to keep ESMF's default decomposition in the first
-! dimension but move extra interngrid points of the second dimension to the last DEs
+! dimension but move extra igrid points of the second dimension to the last DEs
 ! in that direction. Extra cells occur if the number of DEs for a certain
 ! dimension does not evenly divide its extent. In this example there are
-! 2 extra interngrid points for the second dimension because its extent is 5 but there
+! 2 extra igrid points for the second dimension because its extent is 5 but there
 ! are 3 DEs along this index space axis.
 !EOE
 !BOC
@@ -752,7 +752,7 @@ program ESMF_DistGridEx
 ! \end{verbatim}
 !
 ! The {\tt decompflag} and {\tt deLabelList} arguments can be used much like
-! in the single LR domain case to overwrite the default interngrid decomposition 
+! in the single LR domain case to overwrite the default igrid decomposition 
 ! (per patch) and to change the overall DE labeling sequence, respectively.
 !EOE
 
@@ -772,7 +772,7 @@ program ESMF_DistGridEx
 !
 ! Starting point is the patchwork domain of the previous section. It 
 ! consists of 3 LR patches and may be viewed to represent one half of one of 
-! the representations of a cubed sphere interngrid. The sphere, of course, is a
+! the representations of a cubed sphere igrid. The sphere, of course, is a
 ! closed 2D surface. It requires extra information to incorporate this fact into
 ! the index space representation of the DistGrid. 
 !

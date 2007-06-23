@@ -1,4 +1,4 @@
-! $Id: ESMF_UserGComp.F90,v 1.6 2007/06/22 23:21:49 cdeluca Exp $
+! $Id: ESMF_UserGComp.F90,v 1.7 2007/06/23 04:01:03 cdeluca Exp $
 !
 ! Test code which supplies a user-written component.
 
@@ -13,7 +13,7 @@
 !
 !\begin{verbatim}
 
-    module UserInternGridCompMod
+    module UserIGridCompMod
     
 !   ! ESMF Framework module
     use ESMF_Mod
@@ -34,28 +34,28 @@
     contains
 
     subroutine User_SetServices(gcomp, rc)
-       type(ESMF_InternGridComp) :: gcomp
+       type(ESMF_IGridComp) :: gcomp
        integer :: rc
        type(mydata), pointer :: privatedata
        type(datawrapper) :: wrapper
 
-       call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, &
+       call ESMF_IGridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, &
                                                      ESMF_SINGLEPHASE, rc)
-       call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, &
+       call ESMF_IGridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, &
                                                      ESMF_SINGLEPHASE, rc)
-       call ESMF_InternGridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, &
+       call ESMF_IGridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, &
                                                      ESMF_SINGLEPHASE, rc)
 
        allocate(privatedata)
        wrapper%wrap => privatedata
 
-       call ESMF_InternGridCompSetInternalState(gcomp, wrapper, rc)
+       call ESMF_IGridCompSetInternalState(gcomp, wrapper, rc)
 
     end subroutine User_SetServices
 
 
     subroutine my_init(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
@@ -67,7 +67,7 @@
 
 
     subroutine my_run(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
@@ -79,7 +79,7 @@
 
 
     subroutine my_final(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_InternGridComp) :: gcomp
+      type(ESMF_IGridComp) :: gcomp
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
@@ -89,7 +89,7 @@
 
     end subroutine my_final
 
-    end module UserInternGridCompMod
+    end module UserIGridCompMod
 
 !\end{verbatim}
     

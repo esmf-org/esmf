@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.8 2007/06/22 23:21:45 cdeluca Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.9 2007/06/23 04:00:55 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -20,8 +20,8 @@
 !  Example of using the Component level Internal State routines.
 
 !  These include:
-!   ESMF_InternGridCompGetInternalState
-!   ESMF_InternGridCompSetInternalState
+!   ESMF_IGridCompGetInternalState
+!   ESMF_IGridCompSetInternalState
 !   ESMF_CplCompGetInternalState
 !   ESMF_CplCompSetInternalState
 !
@@ -39,7 +39,7 @@
     use ESMF_Mod
     implicit none
     
-    type(ESMF_InternGridComp) :: comp1
+    type(ESMF_IGridComp) :: comp1
     integer :: rc, finalrc
 
     ! Internal State Variables
@@ -68,7 +68,7 @@
 !-------------------------------------------------------------------------
 
 !   !  Creation of a Component
-    comp1 = ESMF_InternGridCompCreate(name="test", rc=rc)  
+    comp1 = ESMF_IGridCompCreate(name="test", rc=rc)  
     if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
 
 !-------------------------------------------------------------------------
@@ -79,7 +79,7 @@
     data1%testScaling = 0.5
     wrap1%p => data1
 
-    call ESMF_InternGridCompSetInternalState(comp1, wrap1, rc)
+    call ESMF_IGridCompSetInternalState(comp1, wrap1, rc)
     if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
 
 !-------------------------------------------------------------------------
@@ -88,7 +88,7 @@
 !   ! Get Internal State
 !   !   note that we do not assign the pointer inside wrap2 - this call
 !   !   does that.
-    call ESMF_InternGridCompGetInternalState(comp1, wrap2, rc)
+    call ESMF_IGridCompGetInternalState(comp1, wrap2, rc)
     if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
 
     data2 = wrap2%p 
@@ -104,7 +104,7 @@
 !-------------------------------------------------------------------------
 !   !  Destroying a component
 
-    call ESMF_InternGridCompDestroy(comp1, rc=rc)
+    call ESMF_IGridCompDestroy(comp1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
 
     call ESMF_Finalize(rc=rc)
