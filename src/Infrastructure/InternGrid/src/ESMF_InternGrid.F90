@@ -1,4 +1,4 @@
-! $Id: ESMF_InternGrid.F90,v 1.1 2007/06/22 23:21:37 cdeluca Exp $
+! $Id: ESMF_InternGrid.F90,v 1.2 2007/06/23 04:25:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -10,14 +10,14 @@
 !
 !==============================================================================
 !
-#define ESMF_FILENAME "ESMF_InternGrid.F90"
+#define ESMF_FILENAME "ESMF_IGrid.F90"
 !
-!     ESMF InternGrid Module
-      module ESMF_InternGridMod
+!     ESMF IGrid Module
+      module ESMF_IGridMod
 !
 !==============================================================================
 !
-! This file contains the InternGrid class definition and all InternGrid class
+! This file contains the IGrid class definition and all IGrid class
 ! methods.
 !
 !------------------------------------------------------------------------------
@@ -25,14 +25,14 @@
 #include "ESMF.h"
 !==============================================================================
 !BOPI
-! !MODULE: ESMF_InternGridMod - InternGrid class
+! !MODULE: ESMF_IGridMod - IGrid class
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt ESMF\_InternGrid} class.  This class
+! The code in this file implements the {\tt ESMF\_IGrid} class.  This class
 ! provides a unified interface for both {\tt ESMF\_PhysGrid} and 
-! {\tt ESMF\_InternDG} information for model InternGrids.  
-! Functions for defining and computing {\tt ESMF\_InternGrid}
+! {\tt ESMF\_InternDG} information for model IGrids.  
+! Functions for defining and computing {\tt ESMF\_IGrid}
 ! information are available through this class.
 !
 !------------------------------------------------------------------------------
@@ -49,11 +49,11 @@
       use ESMF_DELayoutMod ! ESMF layout class
       use ESMF_InternArrayMod
       use ESMF_InternArrayGetMod
-      use ESMF_InternDGMod    ! ESMF distributed InternGrid class
+      use ESMF_InternDGMod    ! ESMF distributed IGrid class
       use ESMF_PhysCoordMod   ! ESMF physical Coord class
-      use ESMF_PhysGridMod    ! ESMF physical InternGrid class
-      use ESMF_InternGridTypesMod   ! ESMF basic InternGrid types and primitives
-      use ESMF_LogRectInternGridMod ! ESMF logically rectangular InternGrid routines
+      use ESMF_PhysGridMod    ! ESMF physical IGrid class
+      use ESMF_IGridTypesMod   ! ESMF basic IGrid types and primitives
+      use ESMF_LogRectIGridMod ! ESMF logically rectangular IGrid routines
       implicit none
 
 !------------------------------------------------------------------------------
@@ -68,36 +68,36 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 
-    public ESMF_InternGridAddVertHeight
-    public ESMF_InternGridCreate
-    public ESMF_InternGridDestroy
-    public ESMF_InternGridDistribute
-    public ESMF_InternGridGet
-    public ESMF_InternGridGetAttribute
-    public ESMF_InternGridGetAttributeCount
-    public ESMF_InternGridGetAttributeInfo
-    public ESMF_InternGridGetCoord
-    public ESMF_InternGridGetDELocalInfo
-    !public ESMF_InternGridGetMask
-    !public ESMF_InternGridGetMetric
-    public ESMF_InternGridGlobalToDELocalIndex
-    public ESMF_InternGridDELocalToGlobalIndex
-    public ESMF_InternGridPrint
-    public ESMF_InternGridSet
-    public ESMF_InternGridSetAttribute
-    public ESMF_InternGridValidate
-    public ESMF_InternGridBoxIntersectRecv
-    public ESMF_InternGridBoxIntersectSend
-    public ESMF_InternGridComputeDistance
-    public ESMF_InternGridGetAllAxisIndex
-    public ESMF_InternGridGetAIsAllDEs
-    public ESMF_InternGridGetCellMask
-    public ESMF_InternGridGetDELocalAI
-    public ESMF_InternGridGlobalToDELocalAI
-    public ESMF_InternGridDELocalToGlobalAI
-    !public ESMF_InternGridSearch
-    public ESMF_InternGridSerialize
-    public ESMF_InternGridDeserialize
+    public ESMF_IGridAddVertHeight
+    public ESMF_IGridCreate
+    public ESMF_IGridDestroy
+    public ESMF_IGridDistribute
+    public ESMF_IGridGet
+    public ESMF_IGridGetAttribute
+    public ESMF_IGridGetAttributeCount
+    public ESMF_IGridGetAttributeInfo
+    public ESMF_IGridGetCoord
+    public ESMF_IGridGetDELocalInfo
+    !public ESMF_IGridGetMask
+    !public ESMF_IGridGetMetric
+    public ESMF_IGridGlobalToDELocalIndex
+    public ESMF_IGridDELocalToGlobalIndex
+    public ESMF_IGridPrint
+    public ESMF_IGridSet
+    public ESMF_IGridSetAttribute
+    public ESMF_IGridValidate
+    public ESMF_IGridBoxIntersectRecv
+    public ESMF_IGridBoxIntersectSend
+    public ESMF_IGridComputeDistance
+    public ESMF_IGridGetAllAxisIndex
+    public ESMF_IGridGetAIsAllDEs
+    public ESMF_IGridGetCellMask
+    public ESMF_IGridGetDELocalAI
+    public ESMF_IGridGlobalToDELocalAI
+    public ESMF_IGridDELocalToGlobalAI
+    !public ESMF_IGridSearch
+    public ESMF_IGridSerialize
+    public ESMF_IGridDeserialize
 
 !------------------------------------------------------------------------------
 !
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_InternGrid.F90,v 1.1 2007/06/22 23:21:37 cdeluca Exp $'
+      '$Id: ESMF_InternGrid.F90,v 1.2 2007/06/23 04:25:45 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -117,18 +117,18 @@
 !==============================================================================
 !BOPI
 ! !INTERFACE:
-      interface ESMF_InternGridCreate
+      interface ESMF_IGridCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_InternGridCreateEmpty
-         module procedure ESMF_InternGridCreateRead
-         module procedure ESMF_InternGridCreateCopy
-         module procedure ESMF_InternGridCreateCutout
-         module procedure ESMF_InternGridCreateDiffRes
-         module procedure ESMF_InternGridCreateExchange
+         module procedure ESMF_IGridCreateEmpty
+         module procedure ESMF_IGridCreateRead
+         module procedure ESMF_IGridCreateCopy
+         module procedure ESMF_IGridCreateCutout
+         module procedure ESMF_IGridCreateDiffRes
+         module procedure ESMF_IGridCreateExchange
 
 ! !DESCRIPTION:
-!     This interface provides a single entry point for {\tt ESMF\_InternGrid} create
+!     This interface provides a single entry point for {\tt ESMF\_IGrid} create
 !     methods.
 
 !EOPI
@@ -136,127 +136,127 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_InternGridDistribute - InternGrid Distribute routines
+! !IROUTINE: ESMF_IGridDistribute - IGrid Distribute routines
 !
 ! !INTERFACE:
-      interface ESMF_InternGridDistribute
+      interface ESMF_IGridDistribute
 
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_InternGridDistributeBlock
-        module procedure ESMF_InternGridDistributeArbitrary
+        module procedure ESMF_IGridDistributeBlock
+        module procedure ESMF_IGridDistributeArbitrary
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that distribute
-!     (or decompose) an {\tt ESMF\_InternGrid}.
+!     (or decompose) an {\tt ESMF\_IGrid}.
 
 !EOPI
       end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_InternGridGet - InternGrid Get routines
+! !IROUTINE: ESMF_IGridGet - IGrid Get routines
 !
 ! !INTERFACE:
-      interface ESMF_InternGridGet
+      interface ESMF_IGridGet
 
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_InternGridGetGeneral
-        module procedure ESMF_InternGridGetWithRelloc
+        module procedure ESMF_IGridGetGeneral
+        module procedure ESMF_IGridGetWithRelloc
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that retrieve
-!     a variety of information about an {\tt ESMF\_InternGrid}.
+!     a variety of information about an {\tt ESMF\_IGrid}.
 
 !EOPI
       end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_InternGridGetAttribute  - Get InternGrid attributes
+! !IROUTINE: ESMF_IGridGetAttribute  - Get IGrid attributes
 !
 ! !INTERFACE:
-      interface ESMF_InternGridGetAttribute
+      interface ESMF_IGridGetAttribute
 
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_InternGridGetInt4Attr
-        module procedure ESMF_InternGridGetInt4ListAttr
-        module procedure ESMF_InternGridGetInt8Attr
-        module procedure ESMF_InternGridGetInt8ListAttr
-        module procedure ESMF_InternGridGetReal4Attr
-        module procedure ESMF_InternGridGetReal4ListAttr
-        module procedure ESMF_InternGridGetReal8Attr
-        module procedure ESMF_InternGridGetReal8ListAttr
-        module procedure ESMF_InternGridGetLogicalAttr
-        module procedure ESMF_InternGridGetLogicalListAttr
-        module procedure ESMF_InternGridGetCharAttr
+        module procedure ESMF_IGridGetInt4Attr
+        module procedure ESMF_IGridGetInt4ListAttr
+        module procedure ESMF_IGridGetInt8Attr
+        module procedure ESMF_IGridGetInt8ListAttr
+        module procedure ESMF_IGridGetReal4Attr
+        module procedure ESMF_IGridGetReal4ListAttr
+        module procedure ESMF_IGridGetReal8Attr
+        module procedure ESMF_IGridGetReal8ListAttr
+        module procedure ESMF_IGridGetLogicalAttr
+        module procedure ESMF_IGridGetLogicalListAttr
+        module procedure ESMF_IGridGetCharAttr
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that retrieve
-!     attributes from an {\tt ESMF\_InternGrid}.
+!     attributes from an {\tt ESMF\_IGrid}.
 
 !EOPI
       end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_InternGridGetAttributeInfo - Get type, count from a InternGrid attribute
+! !IROUTINE: ESMF_IGridGetAttributeInfo - Get type, count from a IGrid attribute
 !     
 ! !INTERFACE:
-      interface ESMF_InternGridGetAttributeInfo
+      interface ESMF_IGridGetAttributeInfo
 
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_InternGridGetAttrInfoByName
-        module procedure ESMF_InternGridGetAttrInfoByNum
+        module procedure ESMF_IGridGetAttrInfoByName
+        module procedure ESMF_IGridGetAttrInfoByNum
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that retrieve
-!     information about attributes from an {\tt ESMF\_InternGrid}.
+!     information about attributes from an {\tt ESMF\_IGrid}.
 
 !EOPI
       end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_InternGridGetCoord - 
+! !IROUTINE: ESMF_IGridGetCoord - 
 !     
 ! !INTERFACE:
-      interface ESMF_InternGridGetCoord
+      interface ESMF_IGridGetCoord
 
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_InternGridGetCoord
-        module procedure ESMF_InternGridGetCoordByDim1D
-        module procedure ESMF_InternGridGetCoordByDim2D
+        module procedure ESMF_IGridGetCoord
+        module procedure ESMF_IGridGetCoordByDim1D
+        module procedure ESMF_IGridGetCoordByDim2D
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that retrieve
-!     information about coordinates from an {\tt ESMF\_InternGrid}.
+!     information about coordinates from an {\tt ESMF\_IGrid}.
 
 !EOPI
       end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_InternGridSetAttribute  - Set InternGrid attributes
+! !IROUTINE: ESMF_IGridSetAttribute  - Set IGrid attributes
 !
 ! !INTERFACE:
-      interface ESMF_InternGridSetAttribute
+      interface ESMF_IGridSetAttribute
 
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_InternGridSetInt4Attr
-        module procedure ESMF_InternGridSetInt4ListAttr
-        module procedure ESMF_InternGridSetInt8Attr
-        module procedure ESMF_InternGridSetInt8ListAttr
-        module procedure ESMF_InternGridSetReal4Attr
-        module procedure ESMF_InternGridSetReal4ListAttr
-        module procedure ESMF_InternGridSetReal8Attr
-        module procedure ESMF_InternGridSetReal8ListAttr
-        module procedure ESMF_InternGridSetLogicalAttr
-        module procedure ESMF_InternGridSetLogicalListAttr
-        module procedure ESMF_InternGridSetCharAttr
+        module procedure ESMF_IGridSetInt4Attr
+        module procedure ESMF_IGridSetInt4ListAttr
+        module procedure ESMF_IGridSetInt8Attr
+        module procedure ESMF_IGridSetInt8ListAttr
+        module procedure ESMF_IGridSetReal4Attr
+        module procedure ESMF_IGridSetReal4ListAttr
+        module procedure ESMF_IGridSetReal8Attr
+        module procedure ESMF_IGridSetReal8ListAttr
+        module procedure ESMF_IGridSetLogicalAttr
+        module procedure ESMF_IGridSetLogicalListAttr
+        module procedure ESMF_IGridSetCharAttr
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that attach
-!     attributes to an {\tt ESMF\_InternGrid}.
+!     attributes to an {\tt ESMF\_IGrid}.
 
 !EOPI
       end interface
@@ -264,15 +264,15 @@
 !------------------------------------------------------------------------------
 !!BOPI
 !! !INTERFACE:
-!      interface ESMF_InternGridSearch
+!      interface ESMF_IGridSearch
 !
 !! !PRIVATE MEMBER FUNCTIONS:
-!         module procedure ESMF_InternGridSearchPoint
-!         module procedure ESMF_InternGridSearchList
+!         module procedure ESMF_IGridSearchPoint
+!         module procedure ESMF_IGridSearchList
 !
 !! !DESCRIPTION:
 !!     This interface provides a single entry point for methods that
-!!     search an {\tt ESMF\_InternGrid} for point(s).
+!!     search an {\tt ESMF\_IGrid} for point(s).
 !!
 !!EOPI
 !      end interface
@@ -287,38 +287,38 @@
 
 !==============================================================================
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridAddVertHeight"
+#define ESMF_METHOD "ESMF_IGridAddVertHeight"
 !BOP
-! !IROUTINE: ESMF_InternGridAddVertHeight - Add a vertical subInternGrid to an existing InternGrid
+! !IROUTINE: ESMF_IGridAddVertHeight - Add a vertical subIGrid to an existing IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridAddVertHeight(interngrid, delta, coord, vertstagger, &
+      subroutine ESMF_IGridAddVertHeight(igrid, delta, coord, vertstagger, &
                                         dimName, dimUnit, name, rc)
 
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord
-      type(ESMF_InternGridVertStagger), intent(in), optional :: vertstagger
+      type(ESMF_IGridVertStagger), intent(in), optional :: vertstagger
       character(len=*), intent(in), optional :: dimName
       character(len=*), intent(in), optional :: dimUnit
       character(len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This routine adds a vertical subInternGrid (or subInternGrids) to an already
-!     allocated InternGrid.  The {\tt ESMF\_InternGridAddVertHeight} interface only
-!     creates vertical subInternGrids with coordinate systems where the zero point is
-!     defined at the bottom.  An {\tt ESMF\_InternGridAddVert<InternGridVertType>()} can
-!     only be called for any {\tt ESMF\_InternGrid} once;  if a vertical subInternGrid
-!     already exists for the {\tt ESMF\_InternGrid} that is passed in, an error
+!     This routine adds a vertical subIGrid (or subIGrids) to an already
+!     allocated IGrid.  The {\tt ESMF\_IGridAddVertHeight} interface only
+!     creates vertical subIGrids with coordinate systems where the zero point is
+!     defined at the bottom.  An {\tt ESMF\_IGridAddVert<IGridVertType>()} can
+!     only be called for any {\tt ESMF\_IGrid} once;  if a vertical subIGrid
+!     already exists for the {\tt ESMF\_IGrid} that is passed in, an error
 !     is returned.  Please note that this subroutine may create more than one
-!     subInternGrid because some vertical staggerings infer more than one vertical
+!     subIGrid because some vertical staggerings infer more than one vertical
 !     relative location (for example, {\tt ESMF\_IGRID\_VERT\_STAGGER\_BOTTOM}
 !     staggering indicates that some Fields are represented at the vertical cell
 !     centers and some at the cell bottom faces).  
-!     This routine generates {\tt ESMF\_InternGrid} coordinates from either of two
+!     This routine generates {\tt ESMF\_IGrid} coordinates from either of two
 !     optional sets of arguments:
 !     \begin{enumerate}
 !       \item given array of coordinate increments or spacings, assuming 0 is 
@@ -330,21 +330,21 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          Existing {\tt ESMF\_InternGrid} the vertical subInternGrid(s) is being added to.
+!     \item[igrid]
+!          Existing {\tt ESMF\_IGrid} the vertical subIGrid(s) is being added to.
 !     \item[{[delta]}]
 !          Array of physical increments in the vertical direction.
 !     \item[{[coord]}]
 !          Array of physical coordinates in the vertical direction.
 !     \item[{[vertstagger]}]
-!          {\tt ESMF\_InternGridVertStagger} specifier denoting vertical subInternGrid
+!          {\tt ESMF\_IGridVertStagger} specifier denoting vertical subIGrid
 !          stagger.  The default value is ESMF\_IGRID\_VERT\_STAGGER\_CENTER.
 !     \item[{[dimName]}]
 !          Dimension name.
 !     \item[{[dimUnit]}]
 !          Dimension unit.
 !     \item[{[name]}]
-!          Name for the vertical subInternGrid(s).
+!          Name for the vertical subIGrid(s).
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -355,48 +355,48 @@
       integer :: localrc                          ! local error status
       logical :: dummy
       real(ESMF_KIND_R8) :: minGlobalCoord
-      type(ESMF_InternGridVertType) :: vertInternGridType
+      type(ESMF_IGridVertType) :: vertIGridType
       type(ESMF_CoordSystem) :: vertCoordSystem
-      type(ESMF_InternGridVertStagger) :: vertStaggerUse
+      type(ESMF_IGridVertStagger) :: vertStaggerUse
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       ! Set default values
-      vertInternGridType    = ESMF_IGRID_VERT_TYPE_HEIGHT
+      vertIGridType    = ESMF_IGRID_VERT_TYPE_HEIGHT
       vertCoordSystem = ESMF_COORD_SYSTEM_HEIGHT
       vertStaggerUse  = ESMF_IGRID_VERT_STAGGER_CENTER
       if (present(vertstagger)) vertstaggerUse = vertStagger
       minGlobalCoord  = 0.0d0
 
-      ! Call InternGridAddVert routines based on InternGridStructure
+      ! Call IGridAddVert routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       !  ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                      "InternGridStructureUnknown not supported", &
+                                      "IGridStructureUnknown not supported", &
                                       ESMF_CONTEXT, rc)
         return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridAddVert(interngrid%ptr, minGlobalCoord, delta, coord, &
-                                vertInternGridType, vertStaggerUse, &
+        call ESMF_LRIGridAddVert(igrid%ptr, minGlobalCoord, delta, coord, &
+                                vertIGridType, vertStaggerUse, &
                                 vertCoordSystem, dimName, dimUnit, &
                                 name, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                      "InternGridStructureLogRectBlock not supported", &
+                                      "IGridStructureLogRectBlock not supported", &
                                       ESMF_CONTEXT, rc)
         return
 
@@ -404,7 +404,7 @@
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                      "InternGridStructureUnstruct not supported", &
+                                      "IGridStructureUnstruct not supported", &
                                       ESMF_CONTEXT, rc)
         return
 
@@ -412,14 +412,14 @@
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                      "InternGridStructureUser not supported", &
+                                      "IGridStructureUser not supported", &
                                       ESMF_CONTEXT, rc)
         return
 
       !-------------
       case default
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                      "Invalid interngrid structure", &
+                                      "Invalid igrid structure", &
                                       ESMF_CONTEXT, rc)
         return
       end select
@@ -431,34 +431,34 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridAddVertHeight
+      end subroutine ESMF_IGridAddVertHeight
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridCreateEmpty"
+#define ESMF_METHOD "ESMF_IGridCreateEmpty"
 !BOP
-! !IROUTINE: ESMF_InternGridCreate - Create a new InternGrid with no contents
+! !IROUTINE: ESMF_IGridCreate - Create a new IGrid with no contents
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridCreate()
-      function ESMF_InternGridCreateEmpty(name, rc)
+      ! Private name; call using ESMF_IGridCreate()
+      function ESMF_IGridCreateEmpty(name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_InternGrid) :: ESMF_InternGridCreateEmpty
+      type(ESMF_IGrid) :: ESMF_IGridCreateEmpty
 !
 ! !ARGUMENTS:
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt ESMF\_InternGrid} object and constructs its
+!     Allocates memory for a new {\tt ESMF\_IGrid} object and constructs its
 !     internal derived types, but does not fill in any contents.  Returns a
-!     pointer to the new {\tt ESMF\_InternGrid}.
+!     pointer to the new {\tt ESMF\_IGrid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{[name]}]
-!          {\tt ESMF\_InternGrid} name.
+!          {\tt ESMF\_IGrid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -466,70 +466,70 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      type(ESMF_InternGridClass), pointer :: interngrid       ! Pointer to new interngrid
+      type(ESMF_IGridClass), pointer :: igrid       ! Pointer to new igrid
       integer :: localrc                          ! local error status
 
       ! Initialize pointers
-      nullify(interngrid)
-      nullify(ESMF_InternGridCreateEmpty%ptr)
+      nullify(igrid)
+      nullify(ESMF_IGridCreateEmpty%ptr)
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      allocate(interngrid, stat=localrc)
+      allocate(igrid, stat=localrc)
       ! If error write message and return.
-      if (ESMF_LogMsgFoundAllocError(localrc, "InternGrid type", &
+      if (ESMF_LogMsgFoundAllocError(localrc, "IGrid type", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize interngrid internals.
-      call ESMF_InternGridConstructNew(interngrid, name, localrc)
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_IGridConstructNew(igrid, name, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      ESMF_InternGridCreateEmpty%ptr => interngrid
+      ESMF_IGridCreateEmpty%ptr => igrid
 
-      ! set the interngrid as valid
-      ESMF_INIT_SET_CREATED(ESMF_InternGridCreateEmpty)
+      ! set the igrid as valid
+      ESMF_INIT_SET_CREATED(ESMF_IGridCreateEmpty)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_InternGridCreateEmpty
+      end function ESMF_IGridCreateEmpty
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridCreateRead"
+#define ESMF_METHOD "ESMF_IGridCreateRead"
 ! TODO: make BOP when filled
 !BOPI
-! !IROUTINE: ESMF_InternGridCreate - Create a new InternGrid by reading in from a file
+! !IROUTINE: ESMF_IGridCreate - Create a new IGrid by reading in from a file
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridCreate()
-      function ESMF_InternGridCreateRead(interngridStructure, iospec, name, rc)
+      ! Private name; call using ESMF_IGridCreate()
+      function ESMF_IGridCreateRead(igridStructure, iospec, name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_InternGrid) :: ESMF_InternGridCreateRead
+      type(ESMF_IGrid) :: ESMF_IGridCreateRead
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: interngridStructure
+      integer, intent(in) :: igridStructure
       type(ESMF_IOSpec), intent(in) :: iospec   ! file specs
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt ESMF\_InternGrid} object, constructs its
-!     internals, and reads an {\tt ESMF\_InternGrid} in from a file.  Return a pointer to
-!     the new {\tt ESMF\_InternGrid}.
+!     Allocates memory for a new {\tt ESMF\_IGrid} object, constructs its
+!     internals, and reads an {\tt ESMF\_IGrid} in from a file.  Return a pointer to
+!     the new {\tt ESMF\_IGrid}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngridStructure]
-!          InternGrid structure specification.
+!     \item[igridStructure]
+!          IGrid structure specification.
 !     \item[iospec]
 !          File I/O specification.
 !     \item[{[name]}]
-!          {\tt ESMF\_InternGrid} name.
+!          {\tt ESMF\_IGrid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -540,52 +540,52 @@
       integer :: localrc                          ! local error status
 
       ! Initialize pointers
-      nullify(ESMF_InternGridCreateRead%ptr)
+      nullify(ESMF_IGridCreateRead%ptr)
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      ! Call InternGridCreateRead routines based on InternGridStructure
+      ! Call IGridCreateRead routines based on IGridStructure
 
-      select case(interngridStructure)
+      select case(igridStructure)
 
       !-------------
       !  ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        ESMF_InternGridCreateRead = ESMF_LRInternGridCreateRead(iospec, name, localrc)
+        ESMF_IGridCreateRead = ESMF_LRIGridCreateRead(iospec, name, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -593,44 +593,44 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! initialize interngrid as created
-      ESMF_INIT_SET_CREATED(ESMF_InternGridCreateRead)
+      ! initialize igrid as created
+      ESMF_INIT_SET_CREATED(ESMF_IGridCreateRead)
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_InternGridCreateRead
+      end function ESMF_IGridCreateRead
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridCreateCopy"
+#define ESMF_METHOD "ESMF_IGridCreateCopy"
 ! TODO: make BOP when filled
 !BOPI
-! !IROUTINE: ESMF_InternGridCreate - Create a new InternGrid by copying another InternGrid
+! !IROUTINE: ESMF_IGridCreate - Create a new IGrid by copying another IGrid
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridCreate()
-      function ESMF_InternGridCreateCopy(interngridIn, name, rc)
+      ! Private name; call using ESMF_IGridCreate()
+      function ESMF_IGridCreateCopy(igridIn, name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_InternGrid) :: ESMF_InternGridCreateCopy
+      type(ESMF_IGrid) :: ESMF_IGridCreateCopy
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngridIn
+      type(ESMF_IGrid), intent(in) :: igridIn
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt ESMF\_InternGrid} object, constructs its
-!     internals, and copies attributes from another {\tt ESMF\_InternGrid}.  Return a
-!     pointer to the new {\tt ESMF\_InternGrid}.
+!     Allocates memory for a new {\tt ESMF\_IGrid} object, constructs its
+!     internals, and copies attributes from another {\tt ESMF\_IGrid}.  Return a
+!     pointer to the new {\tt ESMF\_IGrid}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngridIn]
-!          {\tt ESMF\_InternGrid} to be copied.
+!     \item[igridIn]
+!          {\tt ESMF\_IGrid} to be copied.
 !     \item[{[name]}]
-!          {\tt ESMF\_InternGrid} name.
+!          {\tt ESMF\_IGrid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -641,52 +641,52 @@
       integer :: localrc                          ! local error status
 
       ! Initialize pointers
-      nullify(ESMF_InternGridCreateCopy%ptr)
+      nullify(ESMF_IGridCreateCopy%ptr)
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      ! Call InternGridCreateCopy routines based on InternGridStructure
+      ! Call IGridCreateCopy routines based on IGridStructure
 
-      select case(interngridIn%ptr%interngridStructure%interngridStructure)
+      select case(igridIn%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        ESMF_InternGridCreateCopy = ESMF_LRInternGridCreateCopy(interngridIn, name, localrc)
+        ESMF_IGridCreateCopy = ESMF_LRIGridCreateCopy(igridIn, name, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -694,50 +694,50 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! initialize interngrid as created
-      ESMF_INIT_SET_CREATED(ESMF_InternGridCreateCopy)
+      ! initialize igrid as created
+      ESMF_INIT_SET_CREATED(ESMF_IGridCreateCopy)
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_InternGridCreateCopy
+      end function ESMF_IGridCreateCopy
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridCreateCutout"
+#define ESMF_METHOD "ESMF_IGridCreateCutout"
 ! TODO: make BOP when filled
 !BOPI
-! !IROUTINE: ESMF_InternGridCreate - Create a new InternGrid as a subset of an existing InternGrid
+! !IROUTINE: ESMF_IGridCreate - Create a new IGrid as a subset of an existing IGrid
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridCreate()
-      function ESMF_InternGridCreateCutout(interngridIn, min, max, name, rc)
+      ! Private name; call using ESMF_IGridCreate()
+      function ESMF_IGridCreateCutout(igridIn, min, max, name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_InternGrid) :: ESMF_InternGridCreateCutout
+      type(ESMF_IGrid) :: ESMF_IGridCreateCutout
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngridIn
+      type(ESMF_IGrid), intent(in) :: igridIn
       integer, dimension(:), intent(in) :: min
       integer, dimension(:), intent(in) :: max
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt ESMF\_InternGrid} object, constructs its
-!     internals, and copies a region from an existing {\tt ESMF\_InternGrid}.
-!     Return a pointer to the new {\tt ESMF\_InternGrid}.
+!     Allocates memory for a new {\tt ESMF\_IGrid} object, constructs its
+!     internals, and copies a region from an existing {\tt ESMF\_IGrid}.
+!     Return a pointer to the new {\tt ESMF\_IGrid}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngridIn]
-!          {\tt ESMF\_InternGrid} to be partially copied.
+!     \item[igridIn]
+!          {\tt ESMF\_IGrid} to be partially copied.
 !     \item[min]
-!          Minimum global indices for the region of the interngrid to be cutout.
+!          Minimum global indices for the region of the igrid to be cutout.
 !     \item[max]
-!          Maximum global indices for the region of the interngrid to be cutout.
+!          Maximum global indices for the region of the igrid to be cutout.
 !     \item[{[name]}]
-!          {\tt ESMF\_InternGrid} name.
+!          {\tt ESMF\_IGrid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -749,56 +749,56 @@
 
 
       ! Initialize pointers
-      nullify(ESMF_InternGridCreateCutout%ptr)
+      nullify(ESMF_IGridCreateCutout%ptr)
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngridIn,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igridIn,rc)
 
-      ! Call InternGridCreateCutout routines based on InternGridStructure
+      ! Call IGridCreateCutout routines based on IGridStructure
 
-      select case(interngridIn%ptr%interngridStructure%interngridStructure)
+      select case(igridIn%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        ESMF_InternGridCreateCutout = ESMF_LRInternGridCreateCutout(interngridIn, min, max, &
+        ESMF_IGridCreateCutout = ESMF_LRIGridCreateCutout(igridIn, min, max, &
                                                         name, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -807,55 +807,55 @@
                                 ESMF_CONTEXT, rc)) return
 
 
-      ! initialize interngrid as created
-      ESMF_INIT_SET_CREATED(ESMF_InternGridCreateCutout)
+      ! initialize igrid as created
+      ESMF_INIT_SET_CREATED(ESMF_IGridCreateCutout)
 
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_InternGridCreateCutout
+      end function ESMF_IGridCreateCutout
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridCreateDiffRes"
+#define ESMF_METHOD "ESMF_IGridCreateDiffRes"
 ! TODO: make BOP when filled
 !BOPI
-! !IROUTINE: ESMF_InternGridCreate - Create a new InternGrid by coarsening or refining an existing InternGrid
+! !IROUTINE: ESMF_IGridCreate - Create a new IGrid by coarsening or refining an existing IGrid
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridCreate()
-      function ESMF_InternGridCreateDiffRes(interngridIn, resolution, name, rc)
+      ! Private name; call using ESMF_IGridCreate()
+      function ESMF_IGridCreateDiffRes(igridIn, resolution, name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_InternGrid) :: ESMF_InternGridCreateDiffRes
+      type(ESMF_IGrid) :: ESMF_IGridCreateDiffRes
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngridIn
+      type(ESMF_IGrid), intent(in) :: igridIn
       integer, dimension(:), intent(in) :: resolution
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt ESMF\_InternGrid} object, constructs its
-!     internals, and creates an {\tt ESMF\_InternGrid} by either coarsening or refining an
-!     existing {\tt ESMF\_InternGrid}.  Return a pointer to the new {\tt ESMF\_InternGrid}.
+!     Allocates memory for a new {\tt ESMF\_IGrid} object, constructs its
+!     internals, and creates an {\tt ESMF\_IGrid} by either coarsening or refining an
+!     existing {\tt ESMF\_IGrid}.  Return a pointer to the new {\tt ESMF\_IGrid}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngridIn]
-!          Source {\tt ESMF\_InternGrid} to be coarsened or refined.
+!     \item[igridIn]
+!          Source {\tt ESMF\_IGrid} to be coarsened or refined.
 !     \item[resolution]
 !          Integer resolution factors in each direction.
 !          Note:  The above arguments assume refinement by factor if positive
 !          and coarsening by absolute value of the factor if negative.  For
-!          example, resolution(1)=4 indicates the new {\tt ESMF\_InternGrid} will be
+!          example, resolution(1)=4 indicates the new {\tt ESMF\_IGrid} will be
 !          four times as resolved in the first direction as the source
-!          {\tt ESMF\_InternGrid}, whereas resolution(2)=-3 means the new
-!          {\tt ESMF\_InternGrid} will sample every third point in the second 
+!          {\tt ESMF\_IGrid}, whereas resolution(2)=-3 means the new
+!          {\tt ESMF\_IGrid} will sample every third point in the second 
 !          direction.
 !     \item[{[name]}]
-!          {\tt ESMF\_InternGrid} name.
+!          {\tt ESMF\_IGrid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -866,56 +866,56 @@
       integer :: localrc                          ! local error status
 
       ! Initialize pointers
-      nullify(ESMF_InternGridCreateDiffRes%ptr)
+      nullify(ESMF_IGridCreateDiffRes%ptr)
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngridIn,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igridIn,rc)
 
-      ! Call InternGridCreateDiffRes routines based on InternGridStructure
+      ! Call IGridCreateDiffRes routines based on IGridStructure
 
-      select case(interngridIn%ptr%interngridStructure%interngridStructure)
+      select case(igridIn%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        ESMF_InternGridCreateDiffRes = &
-          ESMF_LRInternGridCreateDiffRes(interngridIn, resolution, name, localrc)
+        ESMF_IGridCreateDiffRes = &
+          ESMF_LRIGridCreateDiffRes(igridIn, resolution, name, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -924,47 +924,47 @@
                                 ESMF_CONTEXT, rc)) return
 
 
-      ! initialize interngrid as created
-      ESMF_INIT_SET_CREATED(ESMF_InternGridCreateDiffRes)
+      ! initialize igrid as created
+      ESMF_INIT_SET_CREATED(ESMF_IGridCreateDiffRes)
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_InternGridCreateDiffRes
+      end function ESMF_IGridCreateDiffRes
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridCreateExchange"
+#define ESMF_METHOD "ESMF_IGridCreateExchange"
 ! TODO: make BOP when filled
 !BOPI
-! !IROUTINE: ESMF_InternGridCreate - Create a new InternGrid from the intersection of two existing interngrids
+! !IROUTINE: ESMF_IGridCreate - Create a new IGrid from the intersection of two existing igrids
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridCreate()
-      function ESMF_InternGridCreateExchange(interngridIn1, interngridIn2, name, rc)
+      ! Private name; call using ESMF_IGridCreate()
+      function ESMF_IGridCreateExchange(igridIn1, igridIn2, name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_InternGrid) :: ESMF_InternGridCreateExchange
+      type(ESMF_IGrid) :: ESMF_IGridCreateExchange
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngridIn1
-      type(ESMF_InternGrid), intent(in) :: interngridIn2
+      type(ESMF_IGrid), intent(in) :: igridIn1
+      type(ESMF_IGrid), intent(in) :: igridIn2
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt ESMF\_InternGrid} object, constructs its
-!     internals, and creates a new {\tt ESMF\_InternGrid} from the intersection of two
-!     existing {\tt ESMF\_InternGrids}.  Return a pointer to the new {\tt ESMF\_InternGrid}.
+!     Allocates memory for a new {\tt ESMF\_IGrid} object, constructs its
+!     internals, and creates a new {\tt ESMF\_IGrid} from the intersection of two
+!     existing {\tt ESMF\_IGrids}.  Return a pointer to the new {\tt ESMF\_IGrid}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngridIn1]
-!          First source {\tt ESMF\_InternGrid}.
-!     \item[interngridIn2]
-!          Second source {\tt ESMF\_InternGrid}.
+!     \item[igridIn1]
+!          First source {\tt ESMF\_IGrid}.
+!     \item[igridIn2]
+!          Second source {\tt ESMF\_IGrid}.
 !     \item[{[name]}]
-!          New {\tt ESMF\_InternGrid} name.
+!          New {\tt ESMF\_IGrid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -975,57 +975,57 @@
       integer :: localrc                          ! local error status
 
       ! Initialize pointers
-      nullify(ESMF_InternGridCreateExchange%ptr)
+      nullify(ESMF_IGridCreateExchange%ptr)
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngridIn1,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngridIn2,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igridIn1,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igridIn2,rc)
 
-      ! Call InternGridCreateExchange routines based on InternGridStructure
+      ! Call IGridCreateExchange routines based on IGridStructure
 
-      select case(interngridIn1%ptr%interngridStructure%interngridStructure)
+      select case(igridIn1%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        ESMF_InternGridCreateExchange = ESMF_LRInternGridCreateExchange(interngridIn1, interngridIn2, &
+        ESMF_IGridCreateExchange = ESMF_LRIGridCreateExchange(igridIn1, igridIn2, &
                                                             name, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -1033,35 +1033,35 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! initialize interngrid as created
-      ESMF_INIT_SET_CREATED(ESMF_InternGridCreateExchange)
+      ! initialize igrid as created
+      ESMF_INIT_SET_CREATED(ESMF_IGridCreateExchange)
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_InternGridCreateExchange
+      end function ESMF_IGridCreateExchange
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridDestroy"
+#define ESMF_METHOD "ESMF_IGridDestroy"
 !BOP
-! !IROUTINE: ESMF_InternGridDestroy - Free all resources associated with a InternGrid 
+! !IROUTINE: ESMF_IGridDestroy - Free all resources associated with a IGrid 
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridDestroy(interngrid, rc)
+      subroutine ESMF_IGridDestroy(igrid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Destroys an {\tt ESMF\_InternGrid} object and all related internal structures
-!     previously allocated via an {\tt ESMF\_InternGridCreate routine}.
+!     Destroys an {\tt ESMF\_IGrid} object and all related internal structures
+!     previously allocated via an {\tt ESMF\_IGridCreate routine}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_InternGrid} to be destroyed.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to be destroyed.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1076,57 +1076,57 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       ! If already destroyed or never created, return ok
-      if (.not. associated(interngrid%ptr)) then
+      if (.not. associated(igrid%ptr)) then
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                      "Uninitialized or destroyed InternGrid", &
+                                      "Uninitialized or destroyed IGrid", &
                                       ESMF_CONTEXT, rc)
         return
       endif
 
-      ! Call InternGridDestruct routines based on InternGridStructure
+      ! Call IGridDestruct routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
-        ! allow a user to create an empty interngrid and then delete 
+        ! allow a user to create an empty igrid and then delete 
         ! it without being created further.
         localrc = ESMF_SUCCESS
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridDestruct(interngrid%ptr, localrc)
+        call ESMF_LRIGridDestruct(igrid%ptr, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -1136,39 +1136,39 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! delete the base class
-      call ESMF_BaseDestroy(interngrid%ptr%base, localrc)
+      call ESMF_BaseDestroy(igrid%ptr%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! free interngrid memory.
-      deallocate(interngrid%ptr, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate InternGrid type", &
+      ! free igrid memory.
+      deallocate(igrid%ptr, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate IGrid type", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! so we can detect reuse of a deleted interngrid object
-      nullify(interngrid%ptr)
+      ! so we can detect reuse of a deleted igrid object
+      nullify(igrid%ptr)
 
-      ! initialize interngrid as deleted
-      ESMF_INIT_SET_DELETED(interngrid)
+      ! initialize igrid as deleted
+      ESMF_INIT_SET_DELETED(igrid)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridDestroy
+      end subroutine ESMF_IGridDestroy
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridDistributeBlock"
+#define ESMF_METHOD "ESMF_IGridDistributeBlock"
 !BOP
-! !IROUTINE: ESMF_InternGridDistribute - Distribute a InternGrid with block storage 
+! !IROUTINE: ESMF_IGridDistribute - Distribute a IGrid with block storage 
 
 ! !INTERFACE:
-     ! Private name; call using ESMF_InternGridDistribute()
-      subroutine ESMF_InternGridDistributeBlock(interngrid, delayout, countsPerDEDim1, &
+     ! Private name; call using ESMF_IGridDistribute()
+      subroutine ESMF_IGridDistributeBlock(igrid, delayout, countsPerDEDim1, &
                                           countsPerDEDim2, decompIds, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_DELayout), intent(in) :: delayout
       integer, dimension(:), intent(in), optional :: countsPerDEDim1
       integer, dimension(:), intent(in), optional :: countsPerDEDim2
@@ -1176,50 +1176,50 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Sets the decomposition of an {\tt ESMF\_InternGrid}.
+!     Sets the decomposition of an {\tt ESMF\_IGrid}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_InternGrid} to be distributed.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to be distributed.
 !     \item[delayout]
-!         {\tt ESMF\_DELayout} on which {\tt interngrid} is to be decomposed.
+!         {\tt ESMF\_DELayout} on which {\tt igrid} is to be decomposed.
 !     \item[{[countsPerDEDim1]}]
-!          Array denoting the number of interngrid cells per DE in the first
-!          decomposition axis.  By default, the number of interngrid cells per DE
+!          Array denoting the number of igrid cells per DE in the first
+!          decomposition axis.  By default, the number of igrid cells per DE
 !          in a decomposition is calculated internally by an algorithm
 !          designed to distribute the cells as evenly as possible.
 !          This optional argument is available to allow users to instead
-!          specify the decomposition of a InternGrid axis by a related
+!          specify the decomposition of a IGrid axis by a related
 !          DELayout axis.  The number of elements in this array must be
 !          greater than or equal to the number of DE's along the first axis of
 !          the attached DELayout.  The sum of this array must equal exactly
-!          the number of interngrid cells along a related InternGrid axis, which is the
+!          the number of igrid cells along a related IGrid axis, which is the
 !          first axis by default but can also be set by the {\tt decompIds}
 !          argument in this call.
 !     \item[{[countsPerDEDim2]}]
-!          Array denoting the number of interngrid cells per DE in the second
+!          Array denoting the number of igrid cells per DE in the second
 !          decomposition axis.  Please see the description of
 !          {\tt countsPerDEDim1} above for more details
 !     \item[{[decompIds]}]
-!          Integer array identifying which InternGrid axes are decomposed.
-!          This array describes the relationship between the InternGrid and the
+!          Integer array identifying which IGrid axes are decomposed.
+!          This array describes the relationship between the IGrid and the
 !          DELayout.  The elements of this array contains decompostion
-!          information for the corresponding InternGrid axis.  The following is a
+!          information for the corresponding IGrid axis.  The following is a
 !          list of valid values and the meaning of each:
 !          \begin{description}
-!            \item 0 \  the InternGrid axis is not distributed;
-!            \item 1 \  the InternGrid axis is distributed by the first 
+!            \item 0 \  the IGrid axis is not distributed;
+!            \item 1 \  the IGrid axis is distributed by the first 
 !                       decomposition axis in the DELayout;
-!            \item 2 \  the InternGrid axis is distributed by the second 
+!            \item 2 \  the IGrid axis is distributed by the second 
 !                       decomposition axis in the DELayout.
 !          \end{description}
 !          The number of array elements should be greater or equal to the number
-!          of InternGrid dimensions.  The default is that the first InternGrid axis is
-!          distributed by the first decompostion axis, the second InternGrid axis is
-!          distributed by the second decomposition axis, and the third InternGrid axis
+!          of IGrid dimensions.  The default is that the first IGrid axis is
+!          distributed by the first decompostion axis, the second IGrid axis is
+!          distributed by the second decomposition axis, and the third IGrid axis
 !          (if applicable) is not distributed.  The relationship between data
-!          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and InternGrid
+!          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and IGrid
 !          axes are defined elsewhere in {\tt ESMF\_FieldDataMap} and
 !          {\tt ESMF\_ArrayDataMap} interfaces.
 !     \item[{[rc]}]
@@ -1235,51 +1235,51 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,delayout,rc)
 
-      ! Call InternGridDistribute routines based on InternGridStructure
+      ! Call IGridDistribute routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridDistributeBlock(interngrid%ptr, delayout, countsPerDEDim1, &
+        call ESMF_LRIGridDistributeBlock(igrid%ptr, delayout, countsPerDEDim1, &
                                         countsPerDEDim2, decompIds, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -1289,21 +1289,21 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridDistributeBlock
+      end subroutine ESMF_IGridDistributeBlock
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridDistributeArbitrary"
+#define ESMF_METHOD "ESMF_IGridDistributeArbitrary"
 !BOP
-! !IROUTINE: ESMF_InternGridDistribute - Distribute a InternGrid as an arbitrary vector of points
+! !IROUTINE: ESMF_IGridDistribute - Distribute a IGrid as an arbitrary vector of points
 
 ! !INTERFACE:
-     ! Private name; call using ESMF_InternGridDistribute()
-      subroutine ESMF_InternGridDistributeArbitrary(interngrid, delayout, myCount, &
+     ! Private name; call using ESMF_IGridDistribute()
+      subroutine ESMF_IGridDistributeArbitrary(igrid, delayout, myCount, &
                                               myIndices, decompIds, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_DELayout), intent(in) :: delayout
       integer, intent(in) :: myCount
       integer, dimension(:,:), intent(in) :: myIndices
@@ -1311,39 +1311,39 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Sets the decomposition of an {\tt ESMF\_InternGrid}.
+!     Sets the decomposition of an {\tt ESMF\_IGrid}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_InternGrid} to be distributed.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to be distributed.
 !     \item[delayout]
-!         {\tt ESMF\_DELayout} on which {\tt interngrid} is to be decomposed.
+!         {\tt ESMF\_DELayout} on which {\tt igrid} is to be decomposed.
 !     \item[myCount]
-!          Number of interngrid cells to be distributed to this DE.
+!          Number of igrid cells to be distributed to this DE.
 !     \item[myIndices]
-!          Array of InternGrid indices to be distributed to this DE, as (i,j) pairs.
+!          Array of IGrid indices to be distributed to this DE, as (i,j) pairs.
 !          The size of this array must be at least {\tt myCount} in the first
 !          dimension and 2 in the second.
 !     \item[{[decompIds]}]
-!          Integer array identifying which InternGrid axes are decomposed.
-!          This array describes the relationship between the InternGrid and the
+!          Integer array identifying which IGrid axes are decomposed.
+!          This array describes the relationship between the IGrid and the
 !          DELayout.  The elements of this array contains decompostion
-!          information for the corresponding InternGrid axis.  The following is a
+!          information for the corresponding IGrid axis.  The following is a
 !          list of valid values and the meaning of each:
 !          \begin{description}
-!            \item 0 \  the InternGrid axis is not distributed;
-!            \item 1 \  the InternGrid axis is distributed by the first 
+!            \item 0 \  the IGrid axis is not distributed;
+!            \item 1 \  the IGrid axis is distributed by the first 
 !                       decomposition axis in the DELayout;
-!            \item 2 \  the InternGrid axis is distributed by the second 
+!            \item 2 \  the IGrid axis is distributed by the second 
 !                       decomposition axis in the DELayout.
 !          \end{description}
 !          The number of array elements should be greater or equal to the number
-!          of InternGrid dimensions.  The default is that the first InternGrid axis is
-!          distributed by the first decomposition axis, the second InternGrid axis is
-!          distributed by the second decomposition axis, and the third InternGrid axis
+!          of IGrid dimensions.  The default is that the first IGrid axis is
+!          distributed by the first decomposition axis, the second IGrid axis is
+!          distributed by the second decomposition axis, and the third IGrid axis
 !          (if applicable) is not distributed.  The relationship between data
-!          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and InternGrid
+!          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and IGrid
 !          axes are defined elsewhere in {\tt ESMF\_FieldDataMap} and
 !          {\tt ESMF\_ArrayDataMap} interfaces.
 !     \item[{[rc]}]
@@ -1359,51 +1359,51 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit,delayout,rc)
 
-      ! Call InternGridDistribute routines based on InternGridStructure
+      ! Call IGridDistribute routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridDistributeArbitrary(interngrid%ptr, delayout, myCount, &
+        call ESMF_LRIGridDistributeArbitrary(igrid%ptr, delayout, myCount, &
                                             myIndices, decompIds, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -1413,37 +1413,37 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridDistributeArbitrary
+      end subroutine ESMF_IGridDistributeArbitrary
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetGeneral"
+#define ESMF_METHOD "ESMF_IGridGetGeneral"
 !BOP
-! !IROUTINE: ESMF_InternGridGet - Get a variety of general information about a InternGrid
+! !IROUTINE: ESMF_IGridGet - Get a variety of general information about a IGrid
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridGet()
-      subroutine ESMF_InternGridGetGeneral(interngrid, &
-                                     horzinterngridtype, vertinterngridtype, &
+      ! Private name; call using ESMF_IGridGet()
+      subroutine ESMF_IGridGetGeneral(igrid, &
+                                     horzigridtype, vertigridtype, &
                                      horzstagger, vertstagger, &
                                      horzcoordsystem, vertcoordsystem, &
                                      coordorder, &
-                                     dimCount, distDimCount, interngridstorage, &
+                                     dimCount, distDimCount, igridstorage, &
                                      minGlobalCoordPerDim, maxGlobalCoordPerDim, &
                                      periodic, delayout, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(inout) :: interngrid
-      type(ESMF_InternGridType),     intent(out), optional :: horzinterngridtype
-      type(ESMF_InternGridVertType), intent(out), optional :: vertinterngridtype
-      type(ESMF_InternGridHorzStagger), intent(out), optional :: horzstagger
-      type(ESMF_InternGridVertStagger), intent(out), optional :: vertstagger
+      type(ESMF_IGrid), intent(inout) :: igrid
+      type(ESMF_IGridType),     intent(out), optional :: horzigridtype
+      type(ESMF_IGridVertType), intent(out), optional :: vertigridtype
+      type(ESMF_IGridHorzStagger), intent(out), optional :: horzstagger
+      type(ESMF_IGridVertStagger), intent(out), optional :: vertstagger
       type(ESMF_CoordSystem), intent(out), optional :: horzcoordsystem
       type(ESMF_CoordSystem), intent(out), optional :: vertcoordsystem
       type(ESMF_CoordOrder),  intent(out), optional :: coordorder
       integer, intent(out), optional :: dimCount
       integer, intent(out), optional :: distDimCount
-      type(ESMF_InternGridStorage), intent(out), optional :: interngridstorage
+      type(ESMF_IGridStorage), intent(out), optional :: igridstorage
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
                             minGlobalCoordPerDim
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
@@ -1454,42 +1454,42 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Gets general information about an {\tt ESMF\_InternGrid}, depending
+!     Gets general information about an {\tt ESMF\_IGrid}, depending
 !     on a list of optional arguments.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_InternGrid} to be queried.
-!     \item[{[horzinterngridtype]}]
-!          {\tt ESMF\_InternGridType} specifier denoting horizontal InternGrid type.
-!     \item[{[vertinterngridtype]}]
-!          {\tt ESMF\_InternGridVertType} specifier denoting vertical subInternGrid type.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to be queried.
+!     \item[{[horzigridtype]}]
+!          {\tt ESMF\_IGridType} specifier denoting horizontal IGrid type.
+!     \item[{[vertigridtype]}]
+!          {\tt ESMF\_IGridVertType} specifier denoting vertical subIGrid type.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_InternGridHorzStagger} specifier denoting horizontal InternGrid
+!          {\tt ESMF\_IGridHorzStagger} specifier denoting horizontal IGrid
 !          stagger.
 !     \item[{[vertstagger]}]
-!          {\tt ESMF\_InternGridHorzStagger} specifier denoting vertical subInternGrid
+!          {\tt ESMF\_IGridHorzStagger} specifier denoting vertical subIGrid
 !          stagger.
 !     \item[{[horzcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the horizontal InternGrid.
+!          the horizontal IGrid.
 !     \item[{[vertcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the vertical subInternGrid.
+!          the vertical subIGrid.
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
-!          ordering for the InternGrid and all related Fields (i.e. ZXY).
+!          ordering for the IGrid and all related Fields (i.e. ZXY).
 !     \item[{[dimCount]}]
-!          Number of dimensions represented by this InternGrid.
+!          Number of dimensions represented by this IGrid.
 !     \item[{[distDimCount]}]
-!          Number of dimensions represented by the distribution of this InternGrid.
-!          For InternGrids distributed arbitrarily, this could be different than the
-!          rank of the underlying InternGrid.
-!     \item[{[interngridstorage]}]
-!          {\tt ESMF\_InternGridStorage} specifier denoting InternGrid storage.
+!          Number of dimensions represented by the distribution of this IGrid.
+!          For IGrids distributed arbitrarily, this could be different than the
+!          rank of the underlying IGrid.
+!     \item[{[igridstorage]}]
+!          {\tt ESMF\_IGridStorage} specifier denoting IGrid storage.
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
@@ -1497,9 +1497,9 @@
 !     \item[{[periodic]}]
 !          Logical array that returns the periodicity of the coordinate axes.
 !     \item[{[delayout]}]
-!          {\tt delayout} that this InternGrid was distributed over.
+!          {\tt delayout} that this IGrid was distributed over.
 !     \item[{[name]}]
-!          {\tt ESMF\_InternGrid} name.
+!          {\tt ESMF\_IGrid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1513,40 +1513,40 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
       
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      ! Call InternGridGet routines based on InternGridStructure
+      ! Call IGridGet routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       !  ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
-        ! the only thing that can be retrieved from an empty interngrid is the name
+        ! the only thing that can be retrieved from an empty igrid is the name
         if (present(name)) then
-          call ESMF_GetName(interngrid%ptr%base, name, localrc)
+          call ESMF_GetName(igrid%ptr%base, name, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
         endif 
-        if (present(horzinterngridtype           ) .OR. &
-            present(vertinterngridtype           ) .OR. &
+        if (present(horzigridtype           ) .OR. &
+            present(vertigridtype           ) .OR. &
             present(horzstagger            ) .OR. &
             present(vertstagger            ) .OR. &
             present(horzcoordsystem        ) .OR. &
@@ -1554,59 +1554,59 @@
             present(coordorder             ) .OR. &
             present(dimCount               ) .OR. &
             present(distDimCount           ) .OR. &
-            present(interngridstorage            ) .OR. &
+            present(igridstorage            ) .OR. &
             present(minGlobalCoordPerDim   ) .OR. &
             present(maxGlobalCoordPerDim   ) .OR. &
             present(periodic               ) .OR. &
             present(delayout               )) then
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                    "Unknown interngrid structure", &
+                                    "Unknown igrid structure", &
                                     ESMF_CONTEXT, rc)) return
         endif
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridGet(interngrid, &
-                            horzInternGridType=horzinterngridtype, &
-                            vertInternGridType=vertinterngridtype, &
+        call ESMF_LRIGridGet(igrid, &
+                            horzIGridType=horzigridtype, &
+                            vertIGridType=vertigridtype, &
                             horzStagger=horzstagger, &
                             vertStagger=vertstagger, &
                             horzCoordSystem=horzcoordsystem, &
                             vertCoordSystem=vertcoordsystem, &
                             coordOrder=coordorder, &
                             dimCount=dimCount, distDimCount=distDimCount, &
-                            interngridStorage=interngridstorage, &
+                            igridStorage=igridstorage, &
                             minGlobalCoordPerDim=minGlobalCoordPerDim, &
                             maxGlobalCoordPerDim=maxGlobalCoordPerDim, &
                             periodic=periodic, delayout=delayout, &
                             name=name, rc=localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -1617,22 +1617,22 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetGeneral
+      end subroutine ESMF_IGridGetGeneral
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetWithRelloc"
+#define ESMF_METHOD "ESMF_IGridGetWithRelloc"
 !BOP
-! !IROUTINE: ESMF_InternGridGet - Get a variety of relloc-specified information about a InternGrid
+! !IROUTINE: ESMF_IGridGet - Get a variety of relloc-specified information about a IGrid
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridGet()
-      subroutine ESMF_InternGridGetWithRelloc(interngrid, horzrelloc, vertrelloc, &
-                                        horzinterngridtype, vertinterngridtype, &
+      ! Private name; call using ESMF_IGridGet()
+      subroutine ESMF_IGridGetWithRelloc(igrid, horzrelloc, vertrelloc, &
+                                        horzigridtype, vertigridtype, &
                                         horzstagger, vertstagger, &
                                         horzcoordsystem, vertcoordsystem, &
                                         coordorder, &
-                                        dimCount, distDimCount, interngridstorage, &
+                                        dimCount, distDimCount, igridstorage, &
                                         minGlobalCoordPerDim, &
                                         maxGlobalCoordPerDim, &
                                         globalCellCountPerDim, &
@@ -1642,19 +1642,19 @@
                                         delayout, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(inout) :: interngrid
+      type(ESMF_IGrid), intent(inout) :: igrid
       type(ESMF_RelLoc), intent(in) :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
-      type(ESMF_InternGridType),     intent(out), optional :: horzinterngridtype
-      type(ESMF_InternGridVertType), intent(out), optional :: vertinterngridtype
-      type(ESMF_InternGridHorzStagger), intent(out), optional :: horzstagger
-      type(ESMF_InternGridVertStagger), intent(out), optional :: vertstagger
+      type(ESMF_IGridType),     intent(out), optional :: horzigridtype
+      type(ESMF_IGridVertType), intent(out), optional :: vertigridtype
+      type(ESMF_IGridHorzStagger), intent(out), optional :: horzstagger
+      type(ESMF_IGridVertStagger), intent(out), optional :: vertstagger
       type(ESMF_CoordSystem), intent(out), optional :: horzcoordsystem
       type(ESMF_CoordSystem), intent(out), optional :: vertcoordsystem
       type(ESMF_CoordOrder),  intent(out), optional :: coordorder
       integer, intent(out), optional :: dimCount
       integer, intent(out), optional :: distDimCount
-      type(ESMF_InternGridStorage), intent(out), optional :: interngridstorage
+      type(ESMF_IGridStorage), intent(out), optional :: igridstorage
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
                             minGlobalCoordPerDim
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
@@ -1669,62 +1669,62 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Gets information about an {\tt ESMF\_InternGrid} or specified subInternGrid, depending
+!     Gets information about an {\tt ESMF\_IGrid} or specified subIGrid, depending
 !     on user-supplied relative locations, and a list of optional arguments.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_InternGrid} to be queried.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to be queried.
 !     \item[horzrelloc]
-!          Horizontal relative location of the subInternGrid to be queried.
+!          Horizontal relative location of the subIGrid to be queried.
 !     \item[[{vertrelloc]}]
-!          Vertical relative location of the subInternGrid to be queried.
-!     \item[{[horzinterngridtype]}]
-!          {\tt ESMF\_InternGridType} specifier denoting horizontal InternGrid type.
-!     \item[{[vertinterngridtype]}]
-!          {\tt ESMF\_InternGridVertType} specifier denoting vertical subInternGrid type.
+!          Vertical relative location of the subIGrid to be queried.
+!     \item[{[horzigridtype]}]
+!          {\tt ESMF\_IGridType} specifier denoting horizontal IGrid type.
+!     \item[{[vertigridtype]}]
+!          {\tt ESMF\_IGridVertType} specifier denoting vertical subIGrid type.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_InternGridHorzStagger} specifier denoting horizontal InternGrid
+!          {\tt ESMF\_IGridHorzStagger} specifier denoting horizontal IGrid
 !          stagger.
 !     \item[{[vertstagger]}]
-!          {\tt ESMF\_InternGridHorzStagger} specifier denoting vertical subInternGrid
+!          {\tt ESMF\_IGridHorzStagger} specifier denoting vertical subIGrid
 !          stagger.
 !     \item[{[horzcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the horizontal interngrid.
+!          the horizontal igrid.
 !     \item[{[vertcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the vertical subInternGrid.
+!          the vertical subIGrid.
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
-!          ordering for the InternGrid and all related Fields (i.e. ZXY).
+!          ordering for the IGrid and all related Fields (i.e. ZXY).
 !     \item[{[dimCount]}]
-!          Number of dimensions represented by this InternGrid.
+!          Number of dimensions represented by this IGrid.
 !     \item[{[distDimCount]}]
-!          Number of dimensions represented by the distribution of this InternGrid.
-!     \item[{[interngridstorage]}]
-!          {\tt ESMF\_InternGridStorage} specifier denoting InternGrid storage.
+!          Number of dimensions represented by the distribution of this IGrid.
+!     \item[{[igridstorage]}]
+!          {\tt ESMF\_IGridStorage} specifier denoting IGrid storage.
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum global physical coordinates in each direction.
 !     \item[{[globalCellCountPerDim]}]
-!          Array of numbers of global InternGrid increments in each direction.
+!          Array of numbers of global IGrid increments in each direction.
 !     \item[{[globalStartPerDEPerDim]}]
 !          Array of global starting locations for each DE and in each direction.
 !     \item[{[maxLocalCellCountPerDim]}]
-!          Array of maximum number of InternGrid cells on any DE in each direction.
+!          Array of maximum number of IGrid cells on any DE in each direction.
 !     \item[{[cellCountPerDEPerDim]}]
-!          2-D array of number of InternGrid cells on each DE and in each direction.
+!          2-D array of number of IGrid cells on each DE and in each direction.
 !     \item[{[periodic]}]
 !          Logical array that returns the periodicity of the coordinate axes.
 !     \item[{[delayout]}]
-!          {\tt delayout} that this InternGrid was distributed over.
+!          {\tt delayout} that this IGrid was distributed over.
 !     \item[{[name]}]
-!          {\tt ESMF\_InternGrid} name.
+!          {\tt ESMF\_IGrid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1738,40 +1738,40 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      ! Call InternGridGet routines based on InternGridStructure
+      ! Call IGridGet routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       !  ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
-        ! the only thing that can be retrieved from an empty interngrid is the name
+        ! the only thing that can be retrieved from an empty igrid is the name
         if (present(name)) then
-          call ESMF_GetName(interngrid%ptr%base, name, localrc)
+          call ESMF_GetName(igrid%ptr%base, name, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
         endif 
-        if (present(horzinterngridtype           ) .OR. &
-            present(vertinterngridtype           ) .OR. &
+        if (present(horzigridtype           ) .OR. &
+            present(vertigridtype           ) .OR. &
             present(horzstagger            ) .OR. &
             present(vertstagger            ) .OR. &
             present(horzcoordsystem        ) .OR. &
@@ -1779,7 +1779,7 @@
             present(coordorder             ) .OR. &
             present(dimCount               ) .OR. &
             present(distDimCount           ) .OR. &
-            present(interngridstorage            ) .OR. &
+            present(igridstorage            ) .OR. &
             present(minGlobalCoordPerDim   ) .OR. &
             present(maxGlobalCoordPerDim   ) .OR. &
             present(globalCellCountPerDim  ) .OR. &
@@ -1789,18 +1789,18 @@
             present(periodic               ) .OR. &
             present(delayout               )) then
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                    "Unknown interngrid structure", &
+                                    "Unknown igrid structure", &
                                     ESMF_CONTEXT, rc)) return
         endif
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridGet(interngrid, horzrelloc, vertrelloc, &
-                            horzinterngridtype, vertinterngridtype, &
+        call ESMF_LRIGridGet(igrid, horzrelloc, vertrelloc, &
+                            horzigridtype, vertigridtype, &
                             horzstagger, vertstagger, &
                             horzcoordsystem, vertcoordsystem, &
-                            coordorder, dimCount, distDimCount, interngridstorage, &
+                            coordorder, dimCount, distDimCount, igridstorage, &
                             minGlobalCoordPerDim, maxGlobalCoordPerDim, &
                             globalCellCountPerDim, maxLocalCellCountPerDim, &
                             globalStartPerDEPerDim, cellCountPerDEPerDim, &
@@ -1808,30 +1808,30 @@
                             name=name, rc=localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -1842,23 +1842,23 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetWithRelloc
+      end subroutine ESMF_IGridGetWithRelloc
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_InternGridGetAttribute  - Retrieve an attribute
+! !IROUTINE: ESMF_IGridGetAttribute  - Retrieve an attribute
 !
 ! !INTERFACE:
-!      subroutine ESMF_InternGridGetAttribute(interngrid, name, <value argument>, rc)
+!      subroutine ESMF_IGridGetAttribute(igrid, name, <value argument>, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_InternGrid), intent(in) :: interngrid
+!      type(ESMF_IGrid), intent(in) :: igrid
 !      character (len = *), intent(in) :: name
 !      <value argument>, see below for supported values
 !      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns an attribute from the {\tt interngrid}.
+!      Returns an attribute from the {\tt igrid}.
 !      Supported values for <value argument> are:
 !     \begin{description}
 !     \item integer(ESMF\_KIND\_I4), intent(out) :: value
@@ -1876,8 +1876,8 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to retrieve.
 !     \item [<value argument>]
@@ -1890,28 +1890,28 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetInt4Attr"
+#define ESMF_METHOD "ESMF_IGridGetInt4Attr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridGetAttribute  - Retrieve a 4-byte integer attribute
+! !IROUTINE: ESMF_IGridGetAttribute  - Retrieve a 4-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridGetAttribute()
-      subroutine ESMF_InternGridGetInt4Attr(interngrid, name, value, rc)
+      ! Private name; call using ESMF_IGridGetAttribute()
+      subroutine ESMF_IGridGetInt4Attr(igrid, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I4), intent(out) :: value
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte integer attribute from the InternGrid.
+!      Returns a 4-byte integer attribute from the IGrid.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to retrieve.
 !     \item [value]
@@ -1929,25 +1929,25 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      call c_ESMC_AttributeGetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeGetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1955,33 +1955,33 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetInt4Attr
+      end subroutine ESMF_IGridGetInt4Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetInt4ListAttr"
+#define ESMF_METHOD "ESMF_IGridGetInt4ListAttr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridGetAttribute - Retrieve a 4-byte integer list attribute
+! !IROUTINE: ESMF_IGridGetAttribute - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridGetAttribute()
-      subroutine ESMF_InternGridGetInt4ListAttr(interngrid, name, count, valueList, rc)
+      ! Private name; call using ESMF_IGridGetAttribute()
+      subroutine ESMF_IGridGetInt4ListAttr(igrid, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       integer, intent(in) :: count
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte integer list attribute from the InternGrid.
+!      Returns a 4-byte integer list attribute from the IGrid.
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to retrieve.
 !     \item [count]
@@ -2003,19 +2003,19 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
@@ -2028,7 +2028,7 @@
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeGetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeGetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2036,33 +2036,33 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetInt4ListAttr
+      end subroutine ESMF_IGridGetInt4ListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetInt8Attr"
+#define ESMF_METHOD "ESMF_IGridGetInt8Attr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridGetAttribute  - Retrieve an 8-byte integer attribute
+! !IROUTINE: ESMF_IGridGetAttribute  - Retrieve an 8-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridGetAttribute()
-      subroutine ESMF_InternGridGetInt8Attr(interngrid, name, value, rc)
+      ! Private name; call using ESMF_IGridGetAttribute()
+      subroutine ESMF_IGridGetInt8Attr(igrid, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I8), intent(out) :: value
       integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte integer attribute from the InternGrid.
+!      Returns an 8-byte integer attribute from the IGrid.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to retrieve.
 !     \item [value]
@@ -2080,25 +2080,25 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      call c_ESMC_AttributeGetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeGetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2106,21 +2106,21 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetInt8Attr
+      end subroutine ESMF_IGridGetInt8Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetIntList8Attr"
+#define ESMF_METHOD "ESMF_IGridGetIntList8Attr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridGetAttribute - Retrieve an 8-byte integer list attribute
+! !IROUTINE: ESMF_IGridGetAttribute - Retrieve an 8-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridGetAttribute()
-      subroutine ESMF_InternGridGetInt8ListAttr(interngrid, name, count, valueList, rc)
+      ! Private name; call using ESMF_IGridGetAttribute()
+      subroutine ESMF_IGridGetInt8ListAttr(igrid, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       integer, intent(in) :: count
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
@@ -2128,12 +2128,12 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte integer list attribute from the InternGrid.
+!      Returns an 8-byte integer list attribute from the IGrid.
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to retrieve.
 !     \item [count]
@@ -2155,19 +2155,19 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
@@ -2180,7 +2180,7 @@
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeGetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeGetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2188,32 +2188,32 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetInt8ListAttr
+      end subroutine ESMF_IGridGetInt8ListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetReal4Attr"
+#define ESMF_METHOD "ESMF_IGridGetReal4Attr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridGetAttribute - Retrieve a 4-byte real attribute
+! !IROUTINE: ESMF_IGridGetAttribute - Retrieve a 4-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridGetAttribute()
-      subroutine ESMF_InternGridGetReal4Attr(interngrid, name, value, rc)
+      ! Private name; call using ESMF_IGridGetAttribute()
+      subroutine ESMF_IGridGetReal4Attr(igrid, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R4), intent(out) :: value
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from the InternGrid.
+!      Returns a 4-byte real attribute from the IGrid.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to retrieve.
 !     \item [value]
@@ -2231,25 +2231,25 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      call c_ESMC_AttributeGetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeGetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2257,33 +2257,33 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetReal4Attr
+      end subroutine ESMF_IGridGetReal4Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetReal4ListAttr"
+#define ESMF_METHOD "ESMF_IGridGetReal4ListAttr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridGetAttribute - Retrieve a 4-byte real list attribute
+! !IROUTINE: ESMF_IGridGetAttribute - Retrieve a 4-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridGetAttribute()
-      subroutine ESMF_InternGridGetReal4ListAttr(interngrid, name, count, valueList, rc)
+      ! Private name; call using ESMF_IGridGetAttribute()
+      subroutine ESMF_IGridGetReal4ListAttr(igrid, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       integer, intent(in) :: count
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real list attribute from the InternGrid.
+!      Returns a 4-byte real list attribute from the IGrid.
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to retrieve.
 !     \item [count]
@@ -2305,19 +2305,19 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
@@ -2330,7 +2330,7 @@
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeGetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeGetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2338,32 +2338,32 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetReal4ListAttr
+      end subroutine ESMF_IGridGetReal4ListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetReal8Attr"
+#define ESMF_METHOD "ESMF_IGridGetReal8Attr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridGetAttribute - Retrieve an 8-byte real attribute
+! !IROUTINE: ESMF_IGridGetAttribute - Retrieve an 8-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridGetAttribute()
-      subroutine ESMF_InternGridGetReal8Attr(interngrid, name, value, rc)
+      ! Private name; call using ESMF_IGridGetAttribute()
+      subroutine ESMF_IGridGetReal8Attr(igrid, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R8), intent(out) :: value
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from the InternGrid.
+!      Returns an 8-byte real attribute from the IGrid.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to retrieve.
 !     \item [value]
@@ -2381,25 +2381,25 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      call c_ESMC_AttributeGetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeGetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2407,21 +2407,21 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetReal8Attr
+      end subroutine ESMF_IGridGetReal8Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetReal8ListAttr"
+#define ESMF_METHOD "ESMF_IGridGetReal8ListAttr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridGetAttribute - Retrieve an 8-byte real list attribute
+! !IROUTINE: ESMF_IGridGetAttribute - Retrieve an 8-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridGetAttribute()
-      subroutine ESMF_InternGridGetReal8ListAttr(interngrid, name, count, valueList, rc)
+      ! Private name; call using ESMF_IGridGetAttribute()
+      subroutine ESMF_IGridGetReal8ListAttr(igrid, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       integer, intent(in) :: count
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
@@ -2429,12 +2429,12 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real list attribute from the InternGrid.
+!      Returns an 8-byte real list attribute from the IGrid.
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to retrieve.
 !     \item [count]
@@ -2456,19 +2456,19 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
@@ -2481,7 +2481,7 @@
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeGetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeGetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2489,32 +2489,32 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetReal8ListAttr
+      end subroutine ESMF_IGridGetReal8ListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetLogicalAttr"
+#define ESMF_METHOD "ESMF_IGridGetLogicalAttr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridGetAttribute - Retrieve a logical attribute
+! !IROUTINE: ESMF_IGridGetAttribute - Retrieve a logical attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridGetAttribute()
-      subroutine ESMF_InternGridGetLogicalAttr(interngrid, name, value, rc)
+      ! Private name; call using ESMF_IGridGetAttribute()
+      subroutine ESMF_IGridGetLogicalAttr(igrid, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       type(ESMF_Logical), intent(out) :: value
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a logical attribute from the InternGrid.
+!      Returns a logical attribute from the IGrid.
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to retrieve.
 !     \item [value]
@@ -2532,25 +2532,25 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      call c_ESMC_AttributeGetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeGetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2558,33 +2558,33 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetLogicalAttr
+      end subroutine ESMF_IGridGetLogicalAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetLogicalListAttr"
+#define ESMF_METHOD "ESMF_IGridGetLogicalListAttr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridGetAttribute - Retrieve a logical list attribute
+! !IROUTINE: ESMF_IGridGetAttribute - Retrieve a logical list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridGetAttribute()
-      subroutine ESMF_InternGridGetLogicalListAttr(interngrid, name, count, valueList, rc)
+      ! Private name; call using ESMF_IGridGetAttribute()
+      subroutine ESMF_IGridGetLogicalListAttr(igrid, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       integer, intent(in) :: count
       type(ESMF_Logical), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a logical list attribute from the InternGrid.
+!      Returns a logical list attribute from the IGrid.
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to retrieve.
 !     \item [count]
@@ -2606,19 +2606,19 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
@@ -2631,7 +2631,7 @@
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeGetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeGetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2639,32 +2639,32 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetLogicalListAttr
+      end subroutine ESMF_IGridGetLogicalListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetCharAttr"
+#define ESMF_METHOD "ESMF_IGridGetCharAttr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridGetAttribute - Retrieve a character attribute
+! !IROUTINE: ESMF_IGridGetAttribute - Retrieve a character attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridGetAttribute()
-      subroutine ESMF_InternGridGetCharAttr(interngrid, name, value, rc)
+      ! Private name; call using ESMF_IGridGetAttribute()
+      subroutine ESMF_IGridGetCharAttr(igrid, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       character (len = *), intent(out) :: value
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a character attribute from the InternGrid.
+!      Returns a character attribute from the IGrid.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to retrieve.
 !     \item [value]
@@ -2682,57 +2682,57 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      call c_ESMC_AttributeGetChar(interngrid%ptr%base, name, value, localrc)
+      call c_ESMC_AttributeGetChar(igrid%ptr%base, name, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetCharAttr
+      end subroutine ESMF_IGridGetCharAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetAttributeCount"
+#define ESMF_METHOD "ESMF_IGridGetAttributeCount"
 
 !BOP
-! !IROUTINE: ESMF_InternGridGetAttributeCount - Query the number of attributes
+! !IROUTINE: ESMF_IGridGetAttributeCount - Query the number of attributes
 !
 ! !INTERFACE:
-      subroutine ESMF_InternGridGetAttributeCount(interngrid, count, rc)
+      subroutine ESMF_IGridGetAttributeCount(igrid, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       integer, intent(out) :: count
       integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
-!      Returns the number of attributes associated with the given InternGrid in
+!      Returns the number of attributes associated with the given IGrid in
 !      the argument {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [count]
 !           The number of attributes associated with this object.
 !     \item [{[rc]}] 
@@ -2748,46 +2748,46 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      call c_ESMC_AttributeGetCount(interngrid%ptr%base, count, localrc)
+      call c_ESMC_AttributeGetCount(igrid%ptr%base, count, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetAttributeCount
+      end subroutine ESMF_IGridGetAttributeCount
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetAttrInfoByName"
+#define ESMF_METHOD "ESMF_IGridGetAttrInfoByName"
 
 !BOP
-! !IROUTINE: ESMF_InternGridGetAttributeInfo - Query InternGrid attributes by name
+! !IROUTINE: ESMF_IGridGetAttributeInfo - Query IGrid attributes by name
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridGetAttributeInfo()
-      subroutine ESMF_InternGridGetAttrInfoByName(interngrid, name, typekind, count, rc)
+      ! Private name; call using ESMF_IGridGetAttributeInfo()
+      subroutine ESMF_IGridGetAttrInfoByName(igrid, name, typekind, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character(len=*), intent(in) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
       integer, intent(out), optional :: count
@@ -2799,8 +2799,8 @@
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to query.
 !     \item [{[typekind]}]
@@ -2823,25 +2823,25 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      call c_ESMC_AttributeGetAttrInfoName(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeGetAttrInfoName(igrid%ptr%base, name, &
         localTk, localCount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2852,22 +2852,22 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetAttrInfoByName
+      end subroutine ESMF_IGridGetAttrInfoByName
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetAttrInfoByNum"
+#define ESMF_METHOD "ESMF_IGridGetAttrInfoByNum"
 
 !BOP
-! !IROUTINE: ESMF_InternGridGetAttributeInfo - Query InternGrid attributes by index number
+! !IROUTINE: ESMF_IGridGetAttributeInfo - Query IGrid attributes by index number
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridGetAttributeInfo()
-      subroutine ESMF_InternGridGetAttrInfoByNum(interngrid, attributeIndex, name, &
+      ! Private name; call using ESMF_IGridGetAttributeInfo()
+      subroutine ESMF_IGridGetAttrInfoByNum(igrid, attributeIndex, name, &
         typekind, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out), optional :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
@@ -2881,8 +2881,8 @@
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [attributeIndex]
 !           The index number of the attribute to query.
 !     \item [name]
@@ -2908,25 +2908,25 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      call c_ESMC_AttributeGetAttrInfoNum(interngrid%ptr%base, attributeIndex, &
+      call c_ESMC_AttributeGetAttrInfoNum(igrid%ptr%base, attributeIndex, &
         localName, localTk, localCount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2938,20 +2938,20 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetAttrInfoByNum
+      end subroutine ESMF_IGridGetAttrInfoByNum
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetCoord"
+#define ESMF_METHOD "ESMF_IGridGetCoord"
 !BOP
-! !IROUTINE: ESMF_InternGridGetCoord - Get the horizontal and/or vertical coordinates of a InternGrid
+! !IROUTINE: ESMF_IGridGetCoord - Get the horizontal and/or vertical coordinates of a IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridGetCoord(interngrid, horzrelloc, vertrelloc, centerCoord, &
+      subroutine ESMF_IGridGetCoord(igrid, horzrelloc, vertrelloc, centerCoord, &
                                    cornerCoord, faceCoord, reorder, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(inout) :: interngrid
+      type(ESMF_IGrid), intent(inout) :: igrid
       type(ESMF_RelLoc), intent(in), optional :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       type(ESMF_InternArray), intent(out), dimension(:), optional :: centerCoord
@@ -2962,16 +2962,16 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Returns coordinate information for the {\tt interngrid}.
+!     Returns coordinate information for the {\tt igrid}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_InternGrid} to be queried.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to be queried.
 !     \item[{[horzrelloc]}]
-!          Horizontal relative location of the subInternGrid to be queried.
+!          Horizontal relative location of the subIGrid to be queried.
 !     \item[[{vertrelloc]}]
-!          Vertical relative location of the subInternGrid to be queried.
+!          Vertical relative location of the subIGrid to be queried.
 !     \item[{[centerCoord]}]
 !          Coordinates of each cell center.  The dimension index should
 !          be defined first (e.g. x = coord(1,i,j), y=coord(2,i,j)).
@@ -2979,7 +2979,7 @@
 !          Coordinates of corners of each cell.  The dimension index should
 !          be defined first, followed by the corner index.  Corners can
 !          be numbered in either clockwise or counter-clockwise direction,
-!          but must be numbered consistently throughout the InternGrid.
+!          but must be numbered consistently throughout the IGrid.
 !     \item[{[faceCoord]}]
 !          Coordinates of face centers of each cell.  The dimension index should
 !          be defined first, followed by the face index.  Faces should
@@ -3009,66 +3009,66 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      ! Call InternGridGetCoord routines based on InternGridStructure
+      ! Call IGridGetCoord routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridGetCoord(interngrid, horzrelloc, vertrelloc, centerCoord, &
+        call ESMF_LRIGridGetCoord(igrid, horzrelloc, vertrelloc, centerCoord, &
                                  cornerCoord, faceCoord, reorder, total, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -3078,22 +3078,22 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetCoord
+      end subroutine ESMF_IGridGetCoord
       
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetCoordByDim1D"
+#define ESMF_METHOD "ESMF_IGridGetCoordByDim1D"
 !BOP
-! !IROUTINE: ESMF_InternGridGetCoordByDim1D - Get the horizontal and/or vertical coordinates of a InternGrid
+! !IROUTINE: ESMF_IGridGetCoordByDim1D - Get the horizontal and/or vertical coordinates of a IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridGetCoordByDim1D(interngrid, dim, horzrelloc, vertrelloc, &
+      subroutine ESMF_IGridGetCoordByDim1D(igrid, dim, horzrelloc, vertrelloc, &
         centerCoord, cornerCoord, faceCoord, reorder, total, localCounts, &
         docopy, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(inout) :: interngrid
+      type(ESMF_IGrid), intent(inout) :: igrid
       integer, intent(in) :: dim
       type(ESMF_RelLoc), intent(in), optional :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
@@ -3107,18 +3107,18 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Returns coordinate information for the {\tt interngrid}.
+!     Returns coordinate information for the {\tt igrid}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_InternGrid} to be queried.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to be queried.
 !     \item[dim]
 !          dimension to be queried.
 !     \item[{[horzrelloc]}]
-!          Horizontal relative location of the subInternGrid to be queried.
+!          Horizontal relative location of the subIGrid to be queried.
 !     \item[[{vertrelloc]}]
-!          Vertical relative location of the subInternGrid to be queried.
+!          Vertical relative location of the subIGrid to be queried.
 !     \item[{[centerCoord]}]
 !          Coordinates of each cell center.  The dimension index should
 !          be defined first (e.g. x = coord(1,i,j), y=coord(2,i,j)).
@@ -3126,7 +3126,7 @@
 !          Coordinates of corners of each cell.  The dimension index should
 !          be defined first, followed by the corner index.  Corners can
 !          be numbered in either clockwise or counter-clockwise direction,
-!          but must be numbered consistently throughout the InternGrid.
+!          but must be numbered consistently throughout the IGrid.
 !     \item[{[faceCoord]}]
 !          Coordinates of face centers of each cell.  The dimension index should
 !          be defined first, followed by the face index.  Faces should
@@ -3161,42 +3161,42 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      ! Call InternGridGetCoord routines based on InternGridStructure
+      ! Call IGridGetCoord routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
         allocate(localCenterCoord(2))
         allocate(localCornerCoord(2))
         allocate(localFaceCoord(2))
-        call ESMF_LRInternGridGetCoord(interngrid, horzrelloc, vertrelloc, &
+        call ESMF_LRIGridGetCoord(igrid, horzrelloc, vertrelloc, &
           localCenterCoord, localCornerCoord, localFaceCoord, &
           reorder, total, localrc)
         if (present(localCounts)) then
@@ -3219,30 +3219,30 @@
         deallocate(localFaceCoord)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -3252,21 +3252,21 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetCoordByDim1D
+      end subroutine ESMF_IGridGetCoordByDim1D
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetCoordByDim2D"
+#define ESMF_METHOD "ESMF_IGridGetCoordByDim2D"
 !BOP
-! !IROUTINE: ESMF_InternGridGetCoordByDim2D - Get the horizontal and/or vertical coordinates of a InternGrid
+! !IROUTINE: ESMF_IGridGetCoordByDim2D - Get the horizontal and/or vertical coordinates of a IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridGetCoordByDim2D(interngrid, dim, horzrelloc, vertrelloc, &
+      subroutine ESMF_IGridGetCoordByDim2D(igrid, dim, horzrelloc, vertrelloc, &
         centerCoord, cornerCoord, faceCoord, reorder, total, localCounts, &
         docopy, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(inout) :: interngrid
+      type(ESMF_IGrid), intent(inout) :: igrid
       integer, intent(in) :: dim
       type(ESMF_RelLoc), intent(in), optional :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
@@ -3280,18 +3280,18 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Returns coordinate information for the {\tt interngrid}.
+!     Returns coordinate information for the {\tt igrid}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_InternGrid} to be queried.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to be queried.
 !     \item[dim]
 !          dimension to be queried.
 !     \item[{[horzrelloc]}]
-!          Horizontal relative location of the subInternGrid to be queried.
+!          Horizontal relative location of the subIGrid to be queried.
 !     \item[[{vertrelloc]}]
-!          Vertical relative location of the subInternGrid to be queried.
+!          Vertical relative location of the subIGrid to be queried.
 !     \item[{[centerCoord]}]
 !          Coordinates of each cell center.  The dimension index should
 !          be defined first (e.g. x = coord(1,i,j), y=coord(2,i,j)).
@@ -3299,7 +3299,7 @@
 !          Coordinates of corners of each cell.  The dimension index should
 !          be defined first, followed by the corner index.  Corners can
 !          be numbered in either clockwise or counter-clockwise direction,
-!          but must be numbered consistently throughout the InternGrid.
+!          but must be numbered consistently throughout the IGrid.
 !     \item[{[faceCoord]}]
 !          Coordinates of face centers of each cell.  The dimension index should
 !          be defined first, followed by the face index.  Faces should
@@ -3334,42 +3334,42 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      ! Call InternGridGetCoord routines based on InternGridStructure
+      ! Call IGridGetCoord routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
         allocate(localCenterCoord(2))
         allocate(localCornerCoord(2))
         allocate(localFaceCoord(2))
-        call ESMF_LRInternGridGetCoord(interngrid, horzrelloc, vertrelloc, &
+        call ESMF_LRIGridGetCoord(igrid, horzrelloc, vertrelloc, &
           localCenterCoord, localCornerCoord, localFaceCoord, &
           reorder, total, localrc)
         if (present(localCounts)) then
@@ -3392,30 +3392,30 @@
         deallocate(localFaceCoord)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -3425,22 +3425,22 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetCoordByDim2D
+      end subroutine ESMF_IGridGetCoordByDim2D
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetDELocalInfo"
+#define ESMF_METHOD "ESMF_IGridGetDELocalInfo"
 !BOP
-! !IROUTINE: ESMF_InternGridGetDELocalInfo - Get DE-local information for a InternGrid
+! !IROUTINE: ESMF_IGridGetDELocalInfo - Get DE-local information for a IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridGetDELocalInfo(interngrid, horzrelloc, vertrelloc, &
+      subroutine ESMF_IGridGetDELocalInfo(igrid, horzrelloc, vertrelloc, &
                                 myDE, localCellCount, localCellCountPerDim, &
                                 minLocalCoordPerDim, maxLocalCoordPerDim, &
                                 globalStartPerDim, reorder, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_RelLoc), intent(in) :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       integer, intent(out), optional :: myDE
@@ -3456,18 +3456,18 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Gets InternGrid or subInternGrid information for a particular Decomposition
+!     Gets IGrid or subIGrid information for a particular Decomposition
 !     Element (DE) assigned to this PET.  This routine cannot retrieve
 !     information about a DE on an different PET.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_InternGrid} to be queried.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to be queried.
 !     \item[horzrelloc]
-!          Horizontal relative location of the subInternGrid to be queried.
+!          Horizontal relative location of the subIGrid to be queried.
 !     \item[[{vertrelloc]}]
-!          Vertical relative location of the subInternGrid to be queried.
+!          Vertical relative location of the subIGrid to be queried.
 !     \item[{[myDE]}]
 !          Identifier for this {\tt ESMF\_DE}, zero-based.  Note that this is 
 !          a returned value, not an input one.
@@ -3478,15 +3478,15 @@
 !     \item[{[minLocalCoordPerDim]}]
 !          Array of minimum local coordinate values on this DE in each dimension.
 !          The number of array elements should be greater or equal to the number
-!          of InternGrid dimensions.
+!          of IGrid dimensions.
 !     \item[{[maxLocalCoordPerDim]}]
 !          Array of maximum local coordinate values on this DE in each dimension.
 !          The number of array elements should be greater or equal to the number
-!          of InternGrid dimensions.
+!          of IGrid dimensions.
 !     \item[{[globalStartPerDim]}]
 !          Global index of starting counts for each dimension.
 !          The number of array elements should be greater or equal to the number
-!          of InternGrid dimensions.
+!          of IGrid dimensions.
 !     \item[{[reorder]}]
 !          If TRUE, reorder any results using a previously set CoordOrder
 !          before returning.  If FALSE, do not reorder.  The default
@@ -3511,69 +3511,69 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      ! Call InternGridGetDELocalInfo routines based on InternGridStructure
+      ! Call IGridGetDELocalInfo routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridGetDELocalInfo(interngrid, horzrelloc, vertrelloc, &
+        call ESMF_LRIGridGetDELocalInfo(igrid, horzrelloc, vertrelloc, &
                               myDE, localCellCount, localCellCountPerDim, &
                               minLocalCoordPerDim, maxLocalCoordPerDim, &
                               globalStartPerDim, reorder=reorder, &
                               total=total, rc=localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -3583,22 +3583,22 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetDELocalInfo
+      end subroutine ESMF_IGridGetDELocalInfo
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGlobalToDELocalIndex"
+#define ESMF_METHOD "ESMF_IGridGlobalToDELocalIndex"
 !BOP
-! !IROUTINE: ESMF_InternGridGlobalToDELocalIndex - Translate global indexing to DE-local
+! !IROUTINE: ESMF_IGridGlobalToDELocalIndex - Translate global indexing to DE-local
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridGlobalToDELocalIndex(interngrid, horzrelloc, vertrelloc, &
+      subroutine ESMF_IGridGlobalToDELocalIndex(igrid, horzrelloc, vertrelloc, &
                                                global1D, local1D, &
                                                global2D, local2D, &
                                                dimOrder, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_RelLoc), intent(in) :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       integer(ESMF_KIND_I4), dimension(:), optional, intent(in) :: global1D
@@ -3611,22 +3611,22 @@
 ! !DESCRIPTION:
 !     Translates an array of integer cell identifiers from global indexing 
 !     to DE-local indexing.  This routine is intended to identify equivalent
-!     positions of interngrid elements in distributed (DE-local) arrays and gathered
+!     positions of igrid elements in distributed (DE-local) arrays and gathered
 !     (global) arrays, either by memory location or index pairs.
 !     WARNING:  This routine is meant for very limited user access.  It works
-!               with InternGrid indices and will give erroneous results if applied to
+!               with IGrid indices and will give erroneous results if applied to
 !               Field or Array indices.  In the future, this should be a Field
 !               method, but in the meantime it will be left available here.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_InternGrid} to be used.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to be used.
 !     \item[{[horzrelloc]}]
-!          Horizontal relative location of the subInternGrid to be used for the
+!          Horizontal relative location of the subIGrid to be used for the
 !          translation.
 !     \item[[{vertrelloc]}]
-!          Vertical relative location of the subInternGrid to be used for the
+!          Vertical relative location of the subIGrid to be used for the
 !          translation.
 !     \item[{[global1D]}]
 !          One-dimensional array of global identifiers to be translated.
@@ -3644,8 +3644,8 @@
 !          Usage of this optional argument infers translating between indices
 !          in IJ space.  This array is assumed to be dimensioned (N,2), where
 !          N is the number of index locations to be translated and the second
-!          dimension corresponds to the two InternGrid indices that are distributed 
-!          (currently any two dimensions of a three-dimensional InternGrid can be
+!          dimension corresponds to the two IGrid indices that are distributed 
+!          (currently any two dimensions of a three-dimensional IGrid can be
 !          distributed).  So to translate three sets of global indices to
 !          DE-local indexing,
 !          \begin{description}
@@ -3674,68 +3674,68 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      ! Call InternGridGlobalToDELocalIndex routines based on InternGridStructure
+      ! Call IGridGlobalToDELocalIndex routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridGlobalToDELocalIndex(interngrid, horzrelloc, vertrelloc, &
+        call ESMF_LRIGridGlobalToDELocalIndex(igrid, horzrelloc, vertrelloc, &
                                              global1D, local1D, &
                                              global2D, local2D, &
                                              dimOrder, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -3745,21 +3745,21 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGlobalToDELocalIndex
+      end subroutine ESMF_IGridGlobalToDELocalIndex
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridDELocalToGlobalIndex"
+#define ESMF_METHOD "ESMF_IGridDELocalToGlobalIndex"
 !BOP
-! !IROUTINE: ESMF_InternGridDELocalToGlobalIndex - Translate DE-local indexing to global
+! !IROUTINE: ESMF_IGridDELocalToGlobalIndex - Translate DE-local indexing to global
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridDELocalToGlobalIndex(interngrid, horzrelloc, vertrelloc, &
+      subroutine ESMF_IGridDELocalToGlobalIndex(igrid, horzrelloc, vertrelloc, &
                                                local1D, global1D, &
                                                local2D, global2D, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_RelLoc), intent(in) :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       integer(ESMF_KIND_I4), dimension(:), optional, intent(in) ::  local1D
@@ -3771,27 +3771,27 @@
 ! !DESCRIPTION:
 !     Translates an array of integer cell identifiers from DE-local indexing 
 !     to global indexing.  This routine is intended to identify equivalent
-!     positions of interngrid elements in distributed (DE-local) arrays and gathered
+!     positions of igrid elements in distributed (DE-local) arrays and gathered
 !     (global) arrays, either by memory location or index pairs.
 !     WARNING:  This routine is meant for very limited user access.  It works
-!               with InternGrid indices and will give erroneous results if applied to
+!               with IGrid indices and will give erroneous results if applied to
 !               Field or Array indices.  In the future, this should be a Field
 !               method, but in the meantime it will be left available here.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_InternGrid} to be used.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to be used.
 !     \item[{[horzrelloc]}]
-!          Horizontal relative location of the subInternGrid to be used for the
+!          Horizontal relative location of the subIGrid to be used for the
 !          translation.
 !     \item[[{vertrelloc]}]
-!          Vertical relative location of the subInternGrid to be used for the
+!          Vertical relative location of the subIGrid to be used for the
 !          translation.
 !     \item[{[local1D]}]
 !          One-dimensional array of DE-local identifiers to be translated.
 !          Usage of this optional argument infers translating between positions
-!          in memory from a DE-local (or distributed) InternGrid array to a global one.
+!          in memory from a DE-local (or distributed) IGrid array to a global one.
 !          This array is dimensioned (N), where N is the number of memory
 !          locations to be translated.
 !     \item[{[global1D]}]
@@ -3804,8 +3804,8 @@
 !          Usage of this optional argument infers translating between indices
 !          in IJ space.  This array is assumed to be dimensioned (N,2), where
 !          N is the number of index locations to be translated and the second
-!          dimension corresponds to the two InternGrid indices that are distributed 
-!          (currently any two dimensions of a three-dimensional InternGrid can be
+!          dimension corresponds to the two IGrid indices that are distributed 
+!          (currently any two dimensions of a three-dimensional IGrid can be
 !          distributed).  So to translate three sets of DE-local indices to
 !          global indexing,
 !          \begin{description}
@@ -3834,67 +3834,67 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! check if interngrid%ptr is associated
-      if (.not. associated(interngrid%ptr)) then
+      ! check if igrid%ptr is associated
+      if (.not. associated(igrid%ptr)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized InternGrid argument", &
+          "Uninitialized IGrid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
 
-      ! check interngrid status
-      if (interngrid%ptr%interngridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to query an uninitialized interngrid", &
+      ! check igrid status
+      if (igrid%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to query an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      ! Call InternGridDELocalToGlobalIndex routines based on InternGridStructure
+      ! Call IGridDELocalToGlobalIndex routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridDELocalToGlobalIndex(interngrid, horzrelloc, vertrelloc, &
+        call ESMF_LRIGridDELocalToGlobalIndex(igrid, horzrelloc, vertrelloc, &
                                              local1D, global1D, &
                                              local2D, global2D, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -3904,29 +3904,29 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridDELocalToGlobalIndex
+      end subroutine ESMF_IGridDELocalToGlobalIndex
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridPrint"
+#define ESMF_METHOD "ESMF_IGridPrint"
 !BOP
-! !IROUTINE: ESMF_InternGridPrint - Print the contents of a InternGrid
+! !IROUTINE: ESMF_IGridPrint - Print the contents of a IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridPrint(interngrid, options, rc)
+      subroutine ESMF_IGridPrint(igrid, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid),   intent(in) :: interngrid
+      type(ESMF_IGrid),   intent(in) :: igrid
       character (len=*), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Prints information about the {\tt interngrid} to {\tt stdout}.
+!      Prints information about the {\tt igrid} to {\tt stdout}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_InternGrid} to print.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to print.
 !     \item[{[options]}]
 !          Print options are not yet supported.
 !     \item[{[rc]}]
@@ -3936,7 +3936,7 @@
 !EOP
 
       !character(len=ESMF_MAXSTR) :: name, str
-      type(ESMF_InternGridClass), pointer :: gp
+      type(ESMF_IGridClass), pointer :: gp
       integer :: i
       integer :: localrc                          ! local error status
 
@@ -3944,23 +3944,23 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      print *, "********Begin InternGrid Print:"
-      if (.not. associated(interngrid%ptr)) then
-        print *, "Empty or Uninitialized InternGrid"
+      print *, "********Begin IGrid Print:"
+      if (.not. associated(igrid%ptr)) then
+        print *, "Empty or Uninitialized IGrid"
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
       !TODO: complete prints
 
-      gp => interngrid%ptr
-  !    call ESMF_StatusString(gp%interngridStatus, str, rc)
-  !    print *, "InternGrid status = ", trim(str)
+      gp => igrid%ptr
+  !    call ESMF_StatusString(gp%igridStatus, str, rc)
+  !    print *, "IGrid status = ", trim(str)
 
-      if ((gp%interngridStatus.ne.ESMF_IGRID_STATUS_READY) .AND. &
-          (gp%interngridStatus.ne.ESMF_IGRID_STATUS_INIT)) then
+      if ((gp%igridStatus.ne.ESMF_IGRID_STATUS_READY) .AND. &
+          (gp%igridStatus.ne.ESMF_IGRID_STATUS_INIT)) then
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
         return
       endif
@@ -3971,48 +3971,48 @@
                                 ESMF_CONTEXT, rc)) return
 
 
-      ! if the interngrid has been distributed, then print the associated
+      ! if the igrid has been distributed, then print the associated
       ! physgrids and interndgs
-      if (gp%interngridStatus.eq.ESMF_IGRID_STATUS_READY) then
+      if (gp%igridStatus.eq.ESMF_IGRID_STATUS_READY) then
 
         ! Print the Associated physgrids
-        print *, 'PhysGrids associated with this interngrid:'
+        print *, 'PhysGrids associated with this igrid:'
         do i=1, gp%numPhysGrids
           call ESMF_PhysGridPrint(gp%physgrids(i), 'no-opt')
         enddo
 
         ! Print the InternDG
-        print *, 'InternDGs associated with this InternGrid:'
+        print *, 'InternDGs associated with this IGrid:'
         do i=1, gp%numInternDGs
           call ESMF_InternDGPrint(gp%interndgs(i), 'no-opt')
         enddo
       endif
 
-      print *, "*********End InternGrid Print"
+      print *, "*********End IGrid Print"
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridPrint
+      end subroutine ESMF_IGridPrint
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridSet"
+#define ESMF_METHOD "ESMF_IGridSet"
 !BOP
-! !IROUTINE: ESMF_InternGridSet - Set a variety of information about a InternGrid
+! !IROUTINE: ESMF_IGridSet - Set a variety of information about a IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridSet(interngrid, horzinterngridtype, vertinterngridtype, &
+      subroutine ESMF_IGridSet(igrid, horzigridtype, vertigridtype, &
                               horzstagger, vertstagger, &
                               horzcoordsystem, vertcoordsystem, &
                               coordorder, minGlobalCoordPerDim, &
                               maxGlobalCoordPerDim, periodic, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: interngrid
-      type(ESMF_InternGridType),     intent(in), optional :: horzinterngridtype
-      type(ESMF_InternGridVertType), intent(in), optional :: vertinterngridtype
-      type(ESMF_InternGridHorzStagger), intent(in), optional :: horzstagger
-      type(ESMF_InternGridVertStagger), intent(in), optional :: vertstagger
+      type(ESMF_IGrid) :: igrid
+      type(ESMF_IGridType),     intent(in), optional :: horzigridtype
+      type(ESMF_IGridVertType), intent(in), optional :: vertigridtype
+      type(ESMF_IGridHorzStagger), intent(in), optional :: horzstagger
+      type(ESMF_IGridVertStagger), intent(in), optional :: vertstagger
       type(ESMF_CoordSystem), intent(in), optional :: horzcoordsystem
       type(ESMF_CoordSystem), intent(in), optional :: vertcoordsystem
       type(ESMF_CoordOrder), intent(in), optional :: coordorder
@@ -4023,38 +4023,38 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Sets information for the InternGrid that may not have been included at
-!     InternGrid creation.
-!     WARNING:  This routine does not automatically regenerate the InternGrid
+!     Sets information for the IGrid that may not have been included at
+!     IGrid creation.
+!     WARNING:  This routine does not automatically regenerate the IGrid
 !               when used to reset its values, some of which may significantly
-!               alter the existing InternGrid.  Therefore this routine may only
-!               be used prior to the {\tt ESMF\_InternGridDistribute()} call.
+!               alter the existing IGrid.  Therefore this routine may only
+!               be used prior to the {\tt ESMF\_IGridDistribute()} call.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_InternGrid} to be modified.
-!     \item[{[horzinterngridType]}]
-!          {\tt ESMF\_InternGridType} specifier denoting horizontal InternGrid type.
-!     \item[{[vertinterngridType]}]
-!          {\tt ESMF\_InternGridVertType} specifier denoting vertical subInternGrid type.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to be modified.
+!     \item[{[horzigridType]}]
+!          {\tt ESMF\_IGridType} specifier denoting horizontal IGrid type.
+!     \item[{[vertigridType]}]
+!          {\tt ESMF\_IGridVertType} specifier denoting vertical subIGrid type.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_InternGridHorzStagger} specifier denoting horizontal InternGrid
+!          {\tt ESMF\_IGridHorzStagger} specifier denoting horizontal IGrid
 !          stagger.
 !     \item[{[vertstagger]}]
-!          {\tt ESMF\_InternGridVertStagger} specifier denoting vertical subInternGrid
+!          {\tt ESMF\_IGridVertStagger} specifier denoting vertical subIGrid
 !          stagger.
 !     \item[{[horzcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the horizontal InternGrid.
+!          the horizontal IGrid.
 !     \item[{[vertcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the vertical subInternGrid.
+!          the vertical subIGrid.
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
-!          ordering for the InternGrid and all related Fields (i.e. ZXY).
+!          ordering for the IGrid and all related Fields (i.e. ZXY).
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
@@ -4062,7 +4062,7 @@
 !     \item[{[periodic]}]
 !          Logical array that returns the periodicity of the coordinate axes.
 !     \item[{[name]}]
-!          Character string name of {\tt ESMF\_InternGrid}.
+!          Character string name of {\tt ESMF\_IGrid}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4072,47 +4072,47 @@
 
       integer :: localrc                          ! local error status
       integer :: i                                ! loop index
-      type(ESMF_InternGridClass), pointer :: interngridp      ! Pointer to new interngrid
+      type(ESMF_IGridClass), pointer :: igridp      ! Pointer to new igrid
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       ! Initialize other variables
-      interngridp => interngrid%ptr
+      igridp => igrid%ptr
 
-      ! if present, set information filling in interngrid derived type
-      if (present(horzinterngridtype   )) interngridp%horzInternGridType    = horzinterngridtype
-      if (present(vertinterngridtype   )) interngridp%vertInternGridType    = vertinterngridtype
-      if (present(horzstagger    )) interngridp%horzStagger     = horzstagger
-      if (present(vertstagger    )) interngridp%vertStagger     = vertstagger
-      if (present(horzcoordsystem)) interngridp%horzCoordSystem = horzcoordsystem
-      if (present(vertcoordsystem)) interngridp%vertCoordSystem = vertcoordsystem
-      if (present(coordorder     )) interngridp%coordOrder      = coordorder
+      ! if present, set information filling in igrid derived type
+      if (present(horzigridtype   )) igridp%horzIGridType    = horzigridtype
+      if (present(vertigridtype   )) igridp%vertIGridType    = vertigridtype
+      if (present(horzstagger    )) igridp%horzStagger     = horzstagger
+      if (present(vertstagger    )) igridp%vertStagger     = vertstagger
+      if (present(horzcoordsystem)) igridp%horzCoordSystem = horzcoordsystem
+      if (present(vertcoordsystem)) igridp%vertCoordSystem = vertcoordsystem
+      if (present(coordorder     )) igridp%coordOrder      = coordorder
       if (present(periodic)) then
         do i=1,ESMF_MAXIGRIDDIM
           if (i > size(periodic)) exit
-          interngridp%periodic(i) = periodic(i)
+          igridp%periodic(i) = periodic(i)
         enddo
       endif
 
       if (present(minGlobalCoordPerDim)) then
    !     if (size(minGlobalCoordPerDim) .gt. ESMF_MAXIGRIDDIM) exit  ! TODO
         do i=1,size(minGlobalCoordPerDim)
-          interngridp%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
+          igridp%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
         enddo
       endif
       if (present(maxGlobalCoordPerDim)) then
    !     if (size(maxGlobalCoordPerDim) .gt. ESMF_MAXIGRIDDIM) exit  ! TODO
         do i=1,size(maxGlobalCoordPerDim)
-          interngridp%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
+          igridp%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
         enddo
       endif
 
       if (present(name)) then
-          call ESMF_SetName(interngridp%base, name, "InternGrid", localrc)
+          call ESMF_SetName(igridp%base, name, "IGrid", localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -4120,23 +4120,23 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridSet
+      end subroutine ESMF_IGridSet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_InternGridSetAttribute - Set an attribute
+! !IROUTINE: ESMF_IGridSetAttribute - Set an attribute
 !
 ! !INTERFACE:
-!      subroutine ESMF_InternGridSetAttribute(interngrid, name, <value argument>, rc)
+!      subroutine ESMF_IGridSetAttribute(igrid, name, <value argument>, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_InternGrid), intent(inout) :: interngrid
+!      type(ESMF_IGrid), intent(inout) :: igrid
 !      character (len = *), intent(in) :: name
 !      <value argument>, see below for supported values    
 !      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Attaches an attribute to the {\tt interngrid}.
+!     Attaches an attribute to the {\tt igrid}.
 !     The attribute has a {\tt name} and either a {\tt value} or a
 !     {\tt valueList}.
 !     Supported values for the <value argument> are:
@@ -4156,8 +4156,8 @@
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to set.
 !     \item [<value argument>]
@@ -4170,29 +4170,29 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridSetInt4Attr"
+#define ESMF_METHOD "ESMF_IGridSetInt4Attr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridSetAttribute - Set a 4-byte integer attribute
+! !IROUTINE: ESMF_IGridSetAttribute - Set a 4-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridSetAttribute()
-      subroutine ESMF_InternGridSetInt4Attr(interngrid, name, value, rc)
+      ! Private name; call using ESMF_IGridSetAttribute()
+      subroutine ESMF_IGridSetInt4Attr(igrid, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(inout) :: interngrid
+      type(ESMF_IGrid), intent(inout) :: igrid
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I4), intent(in) :: value
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte integer attribute to the InternGrid.
+!      Attaches a 4-byte integer attribute to the IGrid.
 !      The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to add.
 !     \item [value]
@@ -4210,9 +4210,9 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      call c_ESMC_AttributeSetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeSetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4220,36 +4220,36 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridSetInt4Attr
+      end subroutine ESMF_IGridSetInt4Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridSetInt4ListAttr"
+#define ESMF_METHOD "ESMF_IGridSetInt4ListAttr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridSetAttribute - Set a 4-byte integer list attribute
+! !IROUTINE: ESMF_IGridSetAttribute - Set a 4-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridSetAttribute()
-      subroutine ESMF_InternGridSetInt4ListAttr(interngrid, name, count, valueList, rc)
+      ! Private name; call using ESMF_IGridSetAttribute()
+      subroutine ESMF_IGridSetInt4ListAttr(igrid, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       integer, intent(in) :: count
       integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte integer list attribute to the InternGrid.
+!     Attaches a 4-byte integer list attribute to the IGrid.
 !     The attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to add.
 !     \item [count]
@@ -4270,7 +4270,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
   
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -4279,7 +4279,7 @@
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeSetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeSetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4287,33 +4287,33 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridSetInt4ListAttr
+      end subroutine ESMF_IGridSetInt4ListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridSetInt8Attr"
+#define ESMF_METHOD "ESMF_IGridSetInt8Attr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridSetAttribute - Set an 8-byte integer attribute
+! !IROUTINE: ESMF_IGridSetAttribute - Set an 8-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridSetAttribute()
-      subroutine ESMF_InternGridSetInt8Attr(interngrid, name, value, rc)
+      ! Private name; call using ESMF_IGridSetAttribute()
+      subroutine ESMF_IGridSetInt8Attr(igrid, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(inout) :: interngrid
+      type(ESMF_IGrid), intent(inout) :: igrid
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I8), intent(in) :: value
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte integer attribute to the InternGrid.
+!      Attaches an 8-byte integer attribute to the IGrid.
 !      The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to add.
 !     \item [value]
@@ -4331,9 +4331,9 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      call c_ESMC_AttributeSetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeSetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4341,36 +4341,36 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridSetInt8Attr
+      end subroutine ESMF_IGridSetInt8Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridSetInt8ListAttr"
+#define ESMF_METHOD "ESMF_IGridSetInt8ListAttr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridSetAttribute - Set an 8-byte integer list attribute
+! !IROUTINE: ESMF_IGridSetAttribute - Set an 8-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridSetAttribute()
-      subroutine ESMF_InternGridSetInt8ListAttr(interngrid, name, count, valueList, rc)
+      ! Private name; call using ESMF_IGridSetAttribute()
+      subroutine ESMF_IGridSetInt8ListAttr(igrid, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       integer, intent(in) :: count
       integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Attaches a 8-byte integer list attribute to the InternGrid.
+!     Attaches a 8-byte integer list attribute to the IGrid.
 !     The attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to add.
 !     \item [count]
@@ -4391,7 +4391,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
   
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -4400,7 +4400,7 @@
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeSetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeSetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4408,33 +4408,33 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridSetInt8ListAttr
+      end subroutine ESMF_IGridSetInt8ListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridSetReal4Attr"
+#define ESMF_METHOD "ESMF_IGridSetReal4Attr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridSetAttribute - Set a 4-byte real attribute
+! !IROUTINE: ESMF_IGridSetAttribute - Set a 4-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridSetAttribute()
-      subroutine ESMF_InternGridSetReal4Attr(interngrid, name, value, rc)
+      ! Private name; call using ESMF_IGridSetAttribute()
+      subroutine ESMF_IGridSetReal4Attr(igrid, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R4), intent(in) :: value
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte real attribute to the InternGrid.
+!      Attaches a 4-byte real attribute to the IGrid.
 !      The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to add.
 !     \item [value]
@@ -4452,9 +4452,9 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      call c_ESMC_AttributeSetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeSetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4462,36 +4462,36 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridSetReal4Attr
+      end subroutine ESMF_IGridSetReal4Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridSetReal4ListAttr"
+#define ESMF_METHOD "ESMF_IGridSetReal4ListAttr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridSetAttribute - Set a 4-byte real list attribute
+! !IROUTINE: ESMF_IGridSetAttribute - Set a 4-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridSetAttribute()
-      subroutine ESMF_InternGridSetReal4ListAttr(interngrid, name, count, valueList, rc)
+      ! Private name; call using ESMF_IGridSetAttribute()
+      subroutine ESMF_IGridSetReal4ListAttr(igrid, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       integer, intent(in) :: count
       real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte real list attribute to the InternGrid.
+!     Attaches a 4-byte real list attribute to the IGrid.
 !     The attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to add.
 !     \item [count]
@@ -4512,7 +4512,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -4521,7 +4521,7 @@
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeSetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeSetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4529,33 +4529,33 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridSetReal4ListAttr
+      end subroutine ESMF_IGridSetReal4ListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridSetReal8Attr"
+#define ESMF_METHOD "ESMF_IGridSetReal8Attr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridSetAttribute - Set an 8-byte real attribute
+! !IROUTINE: ESMF_IGridSetAttribute - Set an 8-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridSetAttribute()
-      subroutine ESMF_InternGridSetReal8Attr(interngrid, name, value, rc)
+      ! Private name; call using ESMF_IGridSetAttribute()
+      subroutine ESMF_IGridSetReal8Attr(igrid, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R8), intent(in) :: value
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte real attribute to the InternGrid.
+!      Attaches an 8-byte real attribute to the IGrid.
 !      The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to add.
 !     \item [value]
@@ -4573,9 +4573,9 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      call c_ESMC_AttributeSetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeSetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4583,36 +4583,36 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridSetReal8Attr
+      end subroutine ESMF_IGridSetReal8Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridSetReal8ListAttr"
+#define ESMF_METHOD "ESMF_IGridSetReal8ListAttr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridSetAttribute - Set an 8-byte real list attribute
+! !IROUTINE: ESMF_IGridSetAttribute - Set an 8-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridSetAttribute()
-      subroutine ESMF_InternGridSetReal8ListAttr(interngrid, name, count, valueList, rc)
+      ! Private name; call using ESMF_IGridSetAttribute()
+      subroutine ESMF_IGridSetReal8ListAttr(igrid, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       integer, intent(in) :: count
       real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte real list attribute to the InternGrid.
+!     Attaches an 8-byte real list attribute to the IGrid.
 !     The attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to add.
 !     \item [count]
@@ -4633,7 +4633,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -4642,7 +4642,7 @@
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeSetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeSetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4650,33 +4650,33 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridSetReal8ListAttr
+      end subroutine ESMF_IGridSetReal8ListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridSetLogicalAttr"
+#define ESMF_METHOD "ESMF_IGridSetLogicalAttr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridSetAttribute - Set a logical attribute
+! !IROUTINE: ESMF_IGridSetAttribute - Set a logical attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridSetAttribute()
-      subroutine ESMF_InternGridSetLogicalAttr(interngrid, name, value, rc)
+      ! Private name; call using ESMF_IGridSetAttribute()
+      subroutine ESMF_IGridSetLogicalAttr(igrid, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       type(ESMF_Logical), intent(in) :: value
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Attaches a logical attribute to the InternGrid.
+!     Attaches a logical attribute to the IGrid.
 !     The attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to add.
 !     \item [value]
@@ -4694,9 +4694,9 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      call c_ESMC_AttributeSetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeSetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4704,36 +4704,36 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridSetLogicalAttr
+      end subroutine ESMF_IGridSetLogicalAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridSetLogicalListAttr"
+#define ESMF_METHOD "ESMF_IGridSetLogicalListAttr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridSetAttribute - Set a logical list attribute
+! !IROUTINE: ESMF_IGridSetAttribute - Set a logical list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridSetAttribute()
-      subroutine ESMF_InternGridSetLogicalListAttr(interngrid, name, count, valueList, rc)
+      ! Private name; call using ESMF_IGridSetAttribute()
+      subroutine ESMF_IGridSetLogicalListAttr(igrid, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       integer, intent(in) :: count
       type(ESMF_Logical), dimension(:), intent(in) :: valueList
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Attaches a logical list attribute to the InternGrid.
+!     Attaches a logical list attribute to the IGrid.
 !     The attribute has a {\tt name} and a {\tt valueList}.
 !     The number of logical items in the {\tt valueList} is
 !     given by {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to add.
 !     \item [count]
@@ -4754,7 +4754,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       limit = size(valueList)
       if (count > limit) then
@@ -4763,7 +4763,7 @@
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeSetValue(interngrid%ptr%base, name, &
+      call c_ESMC_AttributeSetValue(igrid%ptr%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4771,33 +4771,33 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridSetLogicalListAttr
+      end subroutine ESMF_IGridSetLogicalListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridSetCharAttr"
+#define ESMF_METHOD "ESMF_IGridSetCharAttr"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridSetAttribute - Set a character attribute
+! !IROUTINE: ESMF_IGridSetAttribute - Set a character attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_InternGridSetAttribute()
-      subroutine ESMF_InternGridSetCharAttr(interngrid, name, value, rc)
+      ! Private name; call using ESMF_IGridSetAttribute()
+      subroutine ESMF_IGridSetCharAttr(igrid, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len = *), intent(in) :: name
       character (len = *), intent(in) :: value
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to the InternGrid.
+!      Attaches a character attribute to the IGrid.
 !     The attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           An {\tt ESMF\_InternGrid} object.
+!     \item [igrid]
+!           An {\tt ESMF\_IGrid} object.
 !     \item [name]
 !           The name of the attribute to add.
 !     \item [value]
@@ -4815,43 +4815,43 @@
       localrc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      call c_ESMC_AttributeSetChar(interngrid%ptr%base, name, value, localrc)
+      call c_ESMC_AttributeSetChar(igrid%ptr%base, name, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridSetCharAttr
+      end subroutine ESMF_IGridSetCharAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridValidate"
+#define ESMF_METHOD "ESMF_IGridValidate"
 !BOP
-! !IROUTINE: ESMF_InternGridValidate - Check validity of a InternGrid
+! !IROUTINE: ESMF_IGridValidate - Check validity of a IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridValidate(interngrid, options, rc)
+      subroutine ESMF_IGridValidate(igrid, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(in) :: interngrid
+      type(ESMF_IGrid), intent(in) :: igrid
       character (len=*), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Validates that an {\tt ESMF\_InternGrid} is internally consistent.  Currently
+!     Validates that an {\tt ESMF\_IGrid} is internally consistent.  Currently
 !     checks to ensure:
 !     \begin{enumerate}
-!        \item the pointer to the InternGrid is associated; and
-!        \item the InternGrid status indicates the InternGrid is ready to use.
+!        \item the pointer to the IGrid is associated; and
+!        \item the IGrid status indicates the IGrid is ready to use.
 !     \end{enumerate}
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_InternGrid} to be validated.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to be validated.
 !     \item[{[options]}]
 !          Validation options are not yet supported.
 !     \item[{[rc]}]
@@ -4867,57 +4867,57 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      if (.not. associated(interngrid%ptr)) then
+      if (.not. associated(igrid%ptr)) then
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                      "Empty or Uninitialized InternGrid", &
+                                      "Empty or Uninitialized IGrid", &
                                       ESMF_CONTEXT, rc)
         return
       endif
 
-      ! Call validate routines based on InternGridStructure
+      ! Call validate routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                      "Unknown interngrid structure", &
+                                      "Unknown igrid structure", &
                                       ESMF_CONTEXT, rc)
         return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridValidate(interngrid, options, localrc)
+        call ESMF_LRIGridValidate(igrid, options, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "InternGrid structure Log Rect Block", &
+                                "IGrid structure Log Rect Block", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "InternGrid structure Unstructured", &
+                                "IGrid structure Unstructured", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "InternGrid structure User", &
+                                "IGrid structure User", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid InternGrid structure", &
+                                "Invalid IGrid structure", &
                                  ESMF_CONTEXT, rc)) return
       end select
 
@@ -4927,23 +4927,23 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridValidate
+      end subroutine ESMF_IGridValidate
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridBoxIntersectRecv"
+#define ESMF_METHOD "ESMF_IGridBoxIntersectRecv"
 !BOPI
-! !IROUTINE: ESMF_InternGridBoxIntersectRecv - Determine a DomainList covering a box
+! !IROUTINE: ESMF_IGridBoxIntersectRecv - Determine a DomainList covering a box
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridBoxIntersectRecv(srcInternGrid, dstInternGrid, parentVM, &
+      subroutine ESMF_IGridBoxIntersectRecv(srcIGrid, dstIGrid, parentVM, &
                                            domainList, hasSrcData, hasDstData, &
                                            total, layer, &
                                            srcrelloc, dstrelloc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: srcInternGrid
-      type(ESMF_InternGrid) :: dstInternGrid
+      type(ESMF_IGrid) :: srcIGrid
+      type(ESMF_IGrid) :: dstIGrid
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_DomainList), intent(out) :: domainList ! BOB changed this to just out
       logical, intent(in) :: hasSrcData
@@ -4956,32 +4956,32 @@
 
 ! !DESCRIPTION:
 !     This routine computes the DomainList that must be received in order to
-!     cover the de-local "boxes" of a destination InternGrid.  This routine is for the
-!     case of a DE that is part of a destination InternGrid determining which DEs it
+!     cover the de-local "boxes" of a destination IGrid.  This routine is for the
+!     case of a DE that is part of a destination IGrid determining which DEs it
 !     will receive data from.  All PETs that are part of either the source or
 !     destination DELayouts must call this routine, due to some necessary
 !     global communication calls.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[srcInternGrid]
-!          Source {\tt ESMF\_InternGrid} to use to calculate the resulting
+!     \item[srcIGrid]
+!          Source {\tt ESMF\_IGrid} to use to calculate the resulting
 !          {\tt ESMF\_DomainList}.
-!     \item[dstInternGrid]
-!          Destination {\tt ESMF\_InternGrid} to use to calculate the resulting
+!     \item[dstIGrid]
+!          Destination {\tt ESMF\_IGrid} to use to calculate the resulting
 !          {\tt ESMF\_DomainList}.
 !     \item[parentVM]
 !          {\tt ESMF\_VM} covering the union of the source and destination
-!          InternGrids.
+!          IGrids.
 !     \item[domainList]
 !          Resulting {\tt ESMF\_DomainList} containing the set of
 !          {\tt ESMF\_Domains} necessary to cover the box.
 !     \item[hasSrcData]
 !          Logical flag to indicate whether or not the local PET has data
-!          on the source InternGrid.
+!          on the source IGrid.
 !     \item[hasDstData]
 !          Logical flag to indicate whether or not the local PET has data
-!          on the destination InternGrid.
+!          on the destination IGrid.
 !     \item[total]
 !          If TRUE, return DomainLists based on the total coordinates including
 !          internally generated boundary cells. If FALSE, return DomainLists
@@ -4993,10 +4993,10 @@
 !          some situations.
 !     \item[{[srcrelloc]}]
 !          Optional argument to set the relative location of the source
-!          subInternGrid for all searches.  The default is ESMF_CELL_CENTER.
+!          subIGrid for all searches.  The default is ESMF_CELL_CENTER.
 !     \item[{[dstrelloc]}]
 !          Optional argument to set the relative location of the destination
-!          subInternGrid for all searches.  The default is ESMF_CELL_CENTER.
+!          subIGrid for all searches.  The default is ESMF_CELL_CENTER.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5010,64 +5010,64 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,srcinterngrid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,dstinterngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,srcigrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,dstigrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
 
 
-      if ((.not. associated(srcInternGrid%ptr)) .OR. &
-          (.not. associated(dstInternGrid%ptr))) then
+      if ((.not. associated(srcIGrid%ptr)) .OR. &
+          (.not. associated(dstIGrid%ptr))) then
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                      "Empty or Uninitialized InternGrid", &
+                                      "Empty or Uninitialized IGrid", &
                                       ESMF_CONTEXT, rc)
         return
       endif
 
-      ! Call intersect routines based on InternGridStructure
+      ! Call intersect routines based on IGridStructure
 
-      select case(srcInternGrid%ptr%interngridStructure%interngridStructure)
+      select case(srcIGrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                      "Unknown interngrid structure", &
+                                      "Unknown igrid structure", &
                                       ESMF_CONTEXT, rc)
         return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridBoxIntersectRecv(srcInternGrid, dstInternGrid, parentVM, &
+        call ESMF_LRIGridBoxIntersectRecv(srcIGrid, dstIGrid, parentVM, &
                                          domainList, hasSrcData, hasDstData, &
                                          total, layer, &
                                          srcrelloc, dstrelloc, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "InternGrid structure Log Rect Block", &
+                                "IGrid structure Log Rect Block", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "InternGrid structure Unstructured", &
+                                "IGrid structure Unstructured", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "InternGrid structure User", &
+                                "IGrid structure User", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid InternGrid structure", &
+                                "Invalid IGrid structure", &
                                  ESMF_CONTEXT, rc)) return
       end select
 
@@ -5077,22 +5077,22 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridBoxIntersectRecv
+      end subroutine ESMF_IGridBoxIntersectRecv
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridBoxIntersectSend"
+#define ESMF_METHOD "ESMF_IGridBoxIntersectSend"
 !BOPI
-! !IROUTINE: ESMF_InternGridBoxIntersectSend - Determine a DomainList covering a box
+! !IROUTINE: ESMF_IGridBoxIntersectSend - Determine a DomainList covering a box
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridBoxIntersectSend(srcInternGrid, dstInternGrid, domainList, &
+      subroutine ESMF_IGridBoxIntersectSend(srcIGrid, dstIGrid, domainList, &
                                            total, layer, &
                                            srcrelloc, dstrelloc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: srcInternGrid
-      type(ESMF_InternGrid) :: dstInternGrid
+      type(ESMF_IGrid) :: srcIGrid
+      type(ESMF_IGrid) :: dstIGrid
       type(ESMF_DomainList), intent(out) :: domainList !BOB changed this to just out
       logical, intent(in) :: total
       logical, intent(in) :: layer
@@ -5102,18 +5102,18 @@
 
 ! !DESCRIPTION:
 !     This routine computes the DomainList that must be sent in order to cover
-!     the de-local "boxes" of a destination InternGrid.  This routine is for the case
-!     of a DE that is part of a source InternGrid determining which DEs it will send
+!     the de-local "boxes" of a destination IGrid.  This routine is for the case
+!     of a DE that is part of a source IGrid determining which DEs it will send
 !     its data to.  This routine should not be called if this PET does not
 !     have any source data.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[srcInternGrid]
-!          Source {\tt ESMF\_InternGrid} to use to calculate the resulting
+!     \item[srcIGrid]
+!          Source {\tt ESMF\_IGrid} to use to calculate the resulting
 !          {\tt ESMF\_DomainList}.
-!     \item[dstInternGrid]
-!          Destination {\tt ESMF\_InternGrid} to use to calculate the resulting
+!     \item[dstIGrid]
+!          Destination {\tt ESMF\_IGrid} to use to calculate the resulting
 !          {\tt ESMF\_DomainList}.
 !     \item[domainList]
 !          Resulting {\tt ESMF\_DomainList} containing the set of
@@ -5129,10 +5129,10 @@
 !          some situations.
 !     \item[{[srcrelloc]}]
 !          Optional argument to set the relative location of the source
-!          subInternGrid for all searches.  The default is ESMF_CELL_CENTER.
+!          subIGrid for all searches.  The default is ESMF_CELL_CENTER.
 !     \item[{[dstrelloc]}]
 !          Optional argument to set the relative location of the destination
-!          subInternGrid for all searches.  The default is ESMF_CELL_CENTER.
+!          subIGrid for all searches.  The default is ESMF_CELL_CENTER.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5146,61 +5146,61 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,srcInternGrid,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,dstInternGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,srcIGrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,dstIGrid,rc)
 
-      if ((.not. associated(dstInternGrid%ptr)) .or. &
-          (.not. associated(srcInternGrid%ptr))) then
+      if ((.not. associated(dstIGrid%ptr)) .or. &
+          (.not. associated(srcIGrid%ptr))) then
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                      "Empty or Uninitialized InternGrid", &
+                                      "Empty or Uninitialized IGrid", &
                                       ESMF_CONTEXT, rc)
         return
       endif
 
-      ! Call intersect routines based on InternGridStructure
+      ! Call intersect routines based on IGridStructure
 
-      select case(srcInternGrid%ptr%interngridStructure%interngridStructure)
+      select case(srcIGrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                      "Unknown interngrid structure", &
+                                      "Unknown igrid structure", &
                                       ESMF_CONTEXT, rc)
         return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridBoxIntersectSend(srcInternGrid, dstInternGrid, domainList, &
+        call ESMF_LRIGridBoxIntersectSend(srcIGrid, dstIGrid, domainList, &
                                          total, layer, srcrelloc, dstrelloc, &
                                          localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "InternGrid structure Log Rect Block", &
+                                "IGrid structure Log Rect Block", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "InternGrid structure Unstructured", &
+                                "IGrid structure Unstructured", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "InternGrid structure User", &
+                                "IGrid structure User", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid InternGrid structure", &
+                                "Invalid IGrid structure", &
                                  ESMF_CONTEXT, rc)) return
       end select
 
@@ -5210,19 +5210,19 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridBoxIntersectSend
+      end subroutine ESMF_IGridBoxIntersectSend
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridComputeDistance"
+#define ESMF_METHOD "ESMF_IGridComputeDistance"
 !BOPI
-! !IROUTINE: ESMF_InternGridComputeDistance - Compute distance between points
+! !IROUTINE: ESMF_IGridComputeDistance - Compute distance between points
 !
 ! !INTERFACE:
-      function ESMF_InternGridComputeDistance(x1, y1, x2, y2, coordSystem, rc)
+      function ESMF_IGridComputeDistance(x1, y1, x2, y2, coordSystem, rc)
 
 ! !RETURN VALUE:
-      real(ESMF_KIND_R8) :: ESMF_InternGridComputeDistance
+      real(ESMF_KIND_R8) :: ESMF_IGridComputeDistance
 
 ! !ARGUMENTS:
 
@@ -5260,10 +5260,10 @@
 
       ! branch to appropriate PhysGrid routine to compute distance
       if (coordSystem .eq. ESMF_COORD_SYSTEM_SPHERICAL) then
-        ESMF_InternGridComputeDistance = &
+        ESMF_IGridComputeDistance = &
           ESMF_PhysGridCompDistSpherical(x1, y1, x2, y2, rc=localrc)
       elseif (coordSystem .eq. ESMF_COORD_SYSTEM_CARTESIAN) then
-        ESMF_InternGridComputeDistance = &
+        ESMF_IGridComputeDistance = &
           ESMF_PhysGridCompDistCartesian(x1, y1, x2, y2, rc=localrc)
       else
         dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
@@ -5279,20 +5279,20 @@
       ! set return code and exit
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_InternGridComputeDistance
+      end function ESMF_IGridComputeDistance
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetAllAxisIndex"
+#define ESMF_METHOD "ESMF_IGridGetAllAxisIndex"
 !BOPI
-! !IROUTINE: ESMF_InternGridGetAllAxisIndex - Get all axis indices for a InternGrid
+! !IROUTINE: ESMF_IGridGetAllAxisIndex - Get all axis indices for a IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridGetAllAxisIndex(interngrid, globalAI, horzrelloc, &
+      subroutine ESMF_IGridGetAllAxisIndex(igrid, globalAI, horzrelloc, &
                                           vertrelloc, AICountPerDE, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_AxisIndex), dimension(:,:), pointer :: globalAI
       type(ESMF_RelLoc), intent(in) :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
@@ -5305,20 +5305,20 @@
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[interngrid]
-!        InternGrid to be queried.
+!   \item[igrid]
+!        IGrid to be queried.
 !   \item[globalAI]
-!        2D Array of AxisIndex types, must be (number of DEs, interngrid rank) long,
+!        2D Array of AxisIndex types, must be (number of DEs, igrid rank) long,
 !        intent(out) for this routine.
 !   \item[horzrelloc]
-!        Required for a 2D interngrid; controls which of the InternDGs will be
+!        Required for a 2D igrid; controls which of the InternDGs will be
 !        used to answer the query.  (e.g. Cell-centered data will return
 !        different counts than vertex-based data.)
 !   \item[{[vertrelloc]}]
-!        Not required by the fortran interface, but required if the InternGrid
+!        Not required by the fortran interface, but required if the IGrid
 !        is 3D.
 !   \item[{[AICountPerDE]}]
-!        Required if the InternGrid has an ARBITRARY distribution; ignored if it
+!        Required if the IGrid has an ARBITRARY distribution; ignored if it
 !        does not.
 !   \item[{[total]}]
 !        If TRUE, return queries based on the total coordinates including
@@ -5338,50 +5338,50 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! Call InternGridGetAllAxisIndex routines based on InternGridStructure
+      ! Call IGridGetAllAxisIndex routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown interngrid structure", &
+                                "Unknown igrid structure", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridGetAllAxisIndex(interngrid, globalAI, horzrelloc, vertrelloc, &
+        call ESMF_LRIGridGetAllAxisIndex(igrid, globalAI, horzrelloc, vertrelloc, &
                                         AICountPerDE, total, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "InternGrid structure Log Rect Block", &
+                                "IGrid structure Log Rect Block", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "InternGrid structure Unstructured", &
+                                "IGrid structure Unstructured", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "InternGrid structure User", &
+                                "IGrid structure User", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid InternGrid structure", &
+                                "Invalid IGrid structure", &
                                  ESMF_CONTEXT, rc)) return
       end select
 
@@ -5391,21 +5391,21 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetAllAxisIndex
+      end subroutine ESMF_IGridGetAllAxisIndex
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetAIsAllDEs"
+#define ESMF_METHOD "ESMF_IGridGetAIsAllDEs"
 !BOPI
-! !IROUTINE: ESMF_InternGridGetAIsAllDEs - Get a InternGrid's AIs for all DEs
+! !IROUTINE: ESMF_IGridGetAIsAllDEs - Get a IGrid's AIs for all DEs
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridGetAIsAllDEs(interngrid, localGlobalFlag, &
+      subroutine ESMF_IGridGetAIsAllDEs(igrid, localGlobalFlag, &
                                        AIListPerDEPerRank, &
                                        horzRelLoc, vertRelLoc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_LocalGlobalFlag), intent(in) :: localGlobalFlag
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AIListPerDEPerRank
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
@@ -5417,21 +5417,21 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Class to be queried.
 !     \item[horzrelloc]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
-!          interngrid.
+!          igrid.
 !     \item[localGlobalFlag]
 !          {\tt ESMF\_LocalGlobalFlag] identifier indicating whether the returned
 !          array of {\tt ESMF\_AxisIndex} types should be in local or global
 !          index space.
 !     \item[AIListPerDEPerRank]
 !          2D array of {\tt ESMF\_AxisIndex} types containing results.  If
-!          allocated, it must be of size (nDEs,interngridrank).
+!          allocated, it must be of size (nDEs,igridrank).
 !     \item[{[vertrelloc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
-!          interngrid.
+!          igrid.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5445,50 +5445,50 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! Call InternGridGetAllAxisIndex routines based on InternGridStructure
+      ! Call IGridGetAllAxisIndex routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                   "Unknown interngrid structure", &
+                                   "Unknown igrid structure", &
                                    ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridGetAIsAllDEs(interngrid, localGlobalFlag, AIListPerDEPerRank, &
+        call ESMF_LRIGridGetAIsAllDEs(igrid, localGlobalFlag, AIListPerDEPerRank, &
                                      horzRelLoc, vertRelLoc, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                   "InternGrid structure Log Rect Block", &
+                                   "IGrid structure Log Rect Block", &
                                    ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                   "InternGrid structure Unstructured", &
+                                   "IGrid structure Unstructured", &
                                    ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                   "InternGrid structure User", &
+                                   "IGrid structure User", &
                                    ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                   "Invalid InternGrid structure", &
+                                   "Invalid IGrid structure", &
                                    ESMF_CONTEXT, rc)) return
       end select
 
@@ -5498,34 +5498,34 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetAIsAllDEs
+      end subroutine ESMF_IGridGetAIsAllDEs
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetCellMask"
+#define ESMF_METHOD "ESMF_IGridGetCellMask"
 !BOPI
-! !IROUTINE: ESMF_InternGridGetCellMask - Retrieves cell identifier mask for a InternGrid
+! !IROUTINE: ESMF_IGridGetCellMask - Retrieves cell identifier mask for a IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridGetCellMask(interngrid, maskArray, relloc, rc)
+      subroutine ESMF_IGridGetCellMask(igrid, maskArray, relloc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_InternArray), intent(out) :: maskArray !BOB switched from inout to out
       type(ESMF_RelLoc), intent(in) :: relloc
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of get retrieves an {\tt ESMF\_Array} of cell types for an
-!     {\tt ESMF\_InternGrid} from a corresponding {\tt ESMF\_PhysGrid}.
+!     {\tt ESMF\_IGrid} from a corresponding {\tt ESMF\_PhysGrid}.
 !     This mask is intended for internal use to indicate which cells are in
 !     the computational regime (cellType=0), a ghost region (cellType=1), or a
 !     halo region (cellType=2).
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
-!          {\tt ESMF\_InternGrid} to be queried.
+!     \item[igrid]
+!          {\tt ESMF\_IGrid} to be queried.
 !     \item[maskArray]
 !          {\tt ESMF\_Array} to contain the internally-used cell array denoting
 !          whether cells are in the computational regime, a ghost region, or a
@@ -5546,49 +5546,49 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! Call InternGridGetCellMask routines based on InternGridStructure
+      ! Call IGridGetCellMask routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       !  ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown interngrid structure", &
+                                "Unknown igrid structure", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridGetCellMask(interngrid, maskArray, relloc, localrc)
+        call ESMF_LRIGridGetCellMask(igrid, maskArray, relloc, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "InternGrid structure Log Rect Block", &
+                                "IGrid structure Log Rect Block", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "InternGrid structure Unstructured", &
+                                "IGrid structure Unstructured", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "InternGrid structure User", &
+                                "IGrid structure User", &
                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid InternGrid structure", &
+                                "Invalid IGrid structure", &
                                  ESMF_CONTEXT, rc)) return
       end select
 
@@ -5598,20 +5598,20 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetCellMask
+      end subroutine ESMF_IGridGetCellMask
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGetDELocalAI"
+#define ESMF_METHOD "ESMF_IGridGetDELocalAI"
 !BOPI
-! !IROUTINE: ESMF_InternGridGetDELocalAI - Get local aixs index DE information for a InternGrid
+! !IROUTINE: ESMF_IGridGetDELocalAI - Get local aixs index DE information for a IGrid
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridGetDELocalAI(interngrid, AIPerDim, horzrelloc, &
+      subroutine ESMF_IGridGetDELocalAI(igrid, AIPerDim, horzrelloc, &
                                        vertrelloc, reorder, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_AxisIndex), dimension(:), intent(out) :: AIPerDim
       type(ESMF_RelLoc), intent(in) :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
@@ -5621,25 +5621,25 @@
 
 ! !DESCRIPTION:
 !     Get an {\tt ESMF\_InternDG} attribute with the given value.  Since a single
-!     {\tt ESMF\_InternGrid} can have many {\tt ESMF\_InternDGs}, the correct
+!     {\tt ESMF\_IGrid} can have many {\tt ESMF\_InternDGs}, the correct
 !     {\tt ESMF\_InternDG} must be identified by this calling routine.  For a 3D
-!     {\tt ESMF\_InternGrid}, the user must supply identifiers for both the horizontal
-!     and vertical interngrids if querying for an array of values, like 
+!     {\tt ESMF\_IGrid}, the user must supply identifiers for both the horizontal
+!     and vertical igrids if querying for an array of values, like 
 !     localCellCountPerDim.  The {\tt ESMF\_InternDG(s)} are identified
 !     using the set of input variables:  horzrelloc and/or vertrelloc.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Class to be queried.
 !     \item[AIPerDim]
 !          Global axis indices for each dimension.
 !     \item[horzrelloc]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
-!          interngrid.
+!          igrid.
 !     \item[{[vertrelloc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
-!          interngrid.
+!          igrid.
 !     \item[{[reorder]}]
 !          If TRUE, reorder any results using a previously set CoordOrder
 !          before returning.  If FALSE, do not reorder.  The default
@@ -5665,51 +5665,51 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
-      ! Call InternGridGetDELocalInfo routines based on InternGridStructure
+      ! Call IGridGetDELocalInfo routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridGetDELocalInfo(interngrid, horzrelloc, vertrelloc, &
+        call ESMF_LRIGridGetDELocalInfo(igrid, horzrelloc, vertrelloc, &
                                        globalAIPerDim=AIPerDim, &
                                        reorder=reorder, total=total, rc=localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -5719,22 +5719,22 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGetDELocalAI
+      end subroutine ESMF_IGridGetDELocalAI
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridGlobalToDELocalAI"
+#define ESMF_METHOD "ESMF_IGridGlobalToDELocalAI"
 !BOPI
-! !IROUTINE: ESMF_InternGridGlobalToDELocalAI - Translate global axis index to DE local
+! !IROUTINE: ESMF_IGridGlobalToDELocalAI - Translate global axis index to DE local
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridGlobalToDELocalAI(interngrid, horzrelloc, vertrelloc, &
+      subroutine ESMF_IGridGlobalToDELocalAI(igrid, horzrelloc, vertrelloc, &
                                             globalAI1D, localAI1D, &
                                             globalAI2D, localAI2D, &
                                             dimOrder, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_RelLoc), intent(in) :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       type(ESMF_AxisIndex), dimension(:), optional, intent(inout) :: globalAI1D
@@ -5750,7 +5750,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Class to be used.
 !     \item[{[globalAI1D]}]
 !          One-dimensional array of global AxisIndices to be translated.
@@ -5774,7 +5774,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       if (present(globalAI1D)) then
           do i=1,size(globalAI1D)
@@ -5791,50 +5791,50 @@
       endif
 
 
-      ! Call InternGridGlobalToDELocalAI routines based on InternGridStructure
+      ! Call IGridGlobalToDELocalAI routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridGlobalToDELocalAI(interngrid, horzrelloc, vertrelloc, &
+        call ESMF_LRIGridGlobalToDELocalAI(igrid, horzrelloc, vertrelloc, &
                                           globalAI1D, localAI1D, &
                                           globalAI2D, localAI2D, &
                                           dimOrder, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -5844,21 +5844,21 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridGlobalToDELocalAI
+      end subroutine ESMF_IGridGlobalToDELocalAI
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridDELocalToGlobalAI"
+#define ESMF_METHOD "ESMF_IGridDELocalToGlobalAI"
 !BOPI
-! !IROUTINE: ESMF_InternGridDELocalToGlobalAI - Translate DE local axis index to global
+! !IROUTINE: ESMF_IGridDELocalToGlobalAI - Translate DE local axis index to global
 
 ! !INTERFACE:
-      subroutine ESMF_InternGridDELocalToGlobalAI(interngrid, horzrelloc, vertrelloc, &
+      subroutine ESMF_IGridDELocalToGlobalAI(igrid, horzrelloc, vertrelloc, &
                                             localAI1D, globalAI1D, &
                                             localAI2D, globalAI2D, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid) :: interngrid
+      type(ESMF_IGrid) :: igrid
       type(ESMF_RelLoc), intent(in) :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       type(ESMF_AxisIndex), dimension(:), optional, intent(inout) ::  localAI1D
@@ -5873,7 +5873,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[interngrid]
+!     \item[igrid]
 !          Class to be used.
 !     \item[{[localAI1D]}]
 !          One-dimensional array of local AxisIndices to be translated.
@@ -5897,7 +5897,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
       if (present(localAI1D)) then
           do i=1,size(localAI1D)
@@ -5913,49 +5913,49 @@
           enddo
       endif
 
-      ! Call InternGridDELocalToGlobalAI routines based on InternGridStructure
+      ! Call IGridDELocalToGlobalAI routines based on IGridStructure
 
-      select case(interngrid%ptr%interngridStructure%interngridStructure)
+      select case(igrid%ptr%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridDELocalToGlobalAI(interngrid, horzrelloc, vertrelloc, &
+        call ESMF_LRIGridDELocalToGlobalAI(igrid, horzrelloc, vertrelloc, &
                                           localAI1D, globalAI1D, &
                                           localAI2D, globalAI2D, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
@@ -5965,52 +5965,52 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridDELocalToGlobalAI
+      end subroutine ESMF_IGridDELocalToGlobalAI
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridSearchPoint"
+#define ESMF_METHOD "ESMF_IGridSearchPoint"
 !!BOPI
-!! !IROUTINE: ESMF_InternGridSearchPoint - Search the interngrid for a cell containing point
+!! !IROUTINE: ESMF_IGridSearchPoint - Search the igrid for a cell containing point
 !
 ! !INTERFACE:
-!      subroutine ESMF_InternGridSearchPoint(dstAdd, x, y, DEID, searchInternGrid, &
-!                                      physInternGridID, rc)
+!      subroutine ESMF_IGridSearchPoint(dstAdd, x, y, DEID, searchIGrid, &
+!                                      physIGridID, rc)
 !!
 !! !ARGUMENTS:
 !
-!      integer, dimension(?) :: dstAdd       ! location in interngrid of interngrid cell
+!      integer, dimension(?) :: dstAdd       ! location in igrid of igrid cell
 !                                            ! containing search point
 !      real (kind=?), intent(in) :: x        ! x coordinates of search point 
 !      real (kind=?), intent(in) :: y        ! y coordinates of search point 
 !      integer, intent(in) :: DEID           ! DE which owns the search point
-!      type(ESMF_InternGrid), intent(in) :: searchInternGrid
-!                                            ! interngrid to search for location of point
-!      integer, intent(in), optional :: physInternGridID
-!                                            ! id of the subinterngrid to search
-!                                            ! (if more than one subinterngrid)
+!      type(ESMF_IGrid), intent(in) :: searchIGrid
+!                                            ! igrid to search for location of point
+!      integer, intent(in), optional :: physIGridID
+!                                            ! id of the subigrid to search
+!                                            ! (if more than one subigrid)
 !      integer, intent(out), optional :: rc  ! return code
 !
 !!
 !! !DESCRIPTION:
-!!     This routine searches for the location in the interngrid of a interngrid cell 
+!!     This routine searches for the location in the igrid of a igrid cell 
 !!     containing the point given by the input x,y coordinates.
 !!
 !!     The arguments are:
 !!     \begin{description}
 !!     \item[dstAdd]
-!!          Address of interngrid cell containing the search point.
+!!          Address of igrid cell containing the search point.
 !!     \item[x]
 !!          X coordinates of search point.
 !!     \item[y]
 !!          Y coordinates of search point.
 !!     \item[DEID]
 !!          id of {\tt ESMF\_DE} that owns search point.
-!!     \item[searchInternGrid]
-!!          ESMF {\tt ESMF\_InternGrid} to search for location.
-!!     \item[{[physInternGridID]}]
+!!     \item[searchIGrid]
+!!          ESMF {\tt ESMF\_IGrid} to search for location.
+!!     \item[{[physIGridID]}]
 !!          If more than one {\tt ESMF\_PhysGrid} is contained in 
-!!          {\tt ESMF\_InternGrid}, choose which interngrid to search (default is 1st
+!!          {\tt ESMF\_IGrid}, choose which igrid to search (default is 1st
 !!          {\tt ESMF\_PhysGrid}?).
 !!     \item[{[rc]}]
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -6024,29 +6024,29 @@
 !      ! Initialize return code; assume routine not implemented
 !      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 !
-!!     Call Search routines based on InternGridStructure
+!!     Call Search routines based on IGridStructure
 !
-!      select case(interngrid%ptr%interngridStructure%interngridStructure)
+!      select case(igrid%ptr%igridStructure%igridStructure)
 !
 !      !-------------
 !      ! ESMF_IGRID_STRUCTURE_UNKNOWN
 !      case(0)
 !        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-!                                      "Unknown interngrid structure", &
+!                                      "Unknown igrid structure", &
 !                                      ESMF_CONTEXT, rc))
 !        return
 !
 !      !-------------
-!      ! ESMF_IGRID_STRUCTURE_LOGRECT
+!      ! ESMF_IGRID_STRUCT_LOGRECT
 !      case(1)
-!        call ESMF_LRInternGridSearchPoint(dstAdd, x, y, DEID, searchInternGrid, &
-!                                    physInternGridID, localrc)
+!        call ESMF_LRIGridSearchPoint(dstAdd, x, y, DEID, searchIGrid, &
+!                                    physIGridID, localrc)
 !
 !      !-------------
-!      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+!      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
 !      case(2)
 !        dummy = (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-!                                       "InternGrid structure Log Rect Block", &
+!                                       "IGrid structure Log Rect Block", &
 !                                       ESMF_CONTEXT, rc))
 !        return
 !
@@ -6054,7 +6054,7 @@
 !      ! ESMF_IGRID_STRUCTURE_UNSTRUCT
 !      case(3)
 !        dummy =  ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-!                                       "InternGrid structure Unstructured", &
+!                                       "IGrid structure Unstructured", &
 !                                       ESMF_CONTEXT, rc))
 !        return
 !
@@ -6062,14 +6062,14 @@
 !      ! ESMF_IGRID_STRUCTURE_USER
 !      case(4)
 !        dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-!                                      "InternGrid structure User", &
+!                                      "IGrid structure User", &
 !                                      ESMF_CONTEXT, rc))
 !        return
 !
 !      !-------------
 !      case default
 !        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-!                                      "Invalid InternGrid structure", &
+!                                      "Invalid IGrid structure", &
 !                                      ESMF_CONTEXT, rc))
 !        return
 !      end select
@@ -6080,36 +6080,36 @@
 !
 !      if (present(rc)) rc = ESMF_SUCCESS
 !
-!      end subroutine ESMF_InternGridSearchPoint
+!      end subroutine ESMF_IGridSearchPoint
 !
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridSerialize"
+#define ESMF_METHOD "ESMF_IGridSerialize"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridSerialize - Serialize interngrid info into a byte stream
+! !IROUTINE: ESMF_IGridSerialize - Serialize igrid info into a byte stream
 !
 ! !INTERFACE:
-      subroutine ESMF_InternGridSerialize(interngrid, buffer, length, offset, rc) 
+      subroutine ESMF_IGridSerialize(igrid, buffer, length, offset, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_InternGrid), intent(inout) :: interngrid 
+      type(ESMF_IGrid), intent(inout) :: igrid 
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Takes an {\tt ESMF\_InternGrid} object and adds all the information needed
+!      Takes an {\tt ESMF\_IGrid} object and adds all the information needed
 !      to save the information to a file or recreate the object based on this
 !      information.   Expected to be used by {\tt ESMF\_StateReconcile()} and
-!      by {\tt ESMF\_InternGridWrite()} and {\tt ESMF\_InternGridRead()}.
+!      by {\tt ESMF\_IGridWrite()} and {\tt ESMF\_IGridRead()}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [interngrid]
-!           {\tt ESMF\_InternGrid} object to be serialized.
+!     \item [igrid]
+!           {\tt ESMF\_IGrid} object to be serialized.
 !     \item [buffer]
 !           Data buffer which will hold the serialized information.
 !     \item [length]
@@ -6129,14 +6129,14 @@
       integer :: localrc                     ! Error status
       integer :: i
       type(ESMF_DELayout) :: delayout
-      type(ESMF_InternGridClass), pointer :: gp    ! interngrid class
+      type(ESMF_IGridClass), pointer :: gp    ! igrid class
 
       ! shortcut to internals
-      gp => interngrid%ptr
+      gp => igrid%ptr
 
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_InternGridGetInit,interngrid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
 
       call c_ESMC_BaseSerialize(gp%base, buffer(1), length, offset, localrc)
@@ -6144,11 +6144,11 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! serialize the interngrid derived type 
-      call c_ESMC_InternGridSerialize(gp%dimCount,        gp%interngridStructure, &
-                                gp%horzInternGridType,    gp%vertInternGridType, &
+      ! serialize the igrid derived type 
+      call c_ESMC_IGridSerialize(gp%dimCount,        gp%igridStructure, &
+                                gp%horzIGridType,    gp%vertIGridType, &
                                 gp%horzStagger,     gp%vertStagger, &
-                                gp%interngridStorage, &
+                                gp%igridStorage, &
                                 gp%horzCoordSystem, gp%vertCoordSystem, &
                                 gp%coordOrder,      gp%coordIndex, &
                                 gp%periodic(1), &
@@ -6164,46 +6164,46 @@
         call c_ESMC_StringSerialize(gp%dimUnits(i), buffer(1), length, offset, localrc)
       enddo
 
-      ! serialize the interngrid specific information
-      select case(gp%interngridStructure%interngridStructure)
+      ! serialize the igrid specific information
+      select case(gp%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridSerialize(interngrid%ptr, buffer, length, offset, localrc)
+        call ESMF_LRIGridSerialize(igrid%ptr, buffer, length, offset, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
       ! check local error code from the above case statement
@@ -6212,7 +6212,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! serialize the delayout
-      call ESMF_InternGridGet(interngrid, delayout=delayout, rc=localrc)
+      call ESMF_IGridGet(igrid, delayout=delayout, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -6231,20 +6231,20 @@
 
       if  (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_InternGridSerialize
+      end subroutine ESMF_IGridSerialize
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternGridDeserialize"
+#define ESMF_METHOD "ESMF_IGridDeserialize"
 
 !BOPI
-! !IROUTINE: ESMF_InternGridDeserialize - Deserialize a byte stream into a InternGrid
+! !IROUTINE: ESMF_IGridDeserialize - Deserialize a byte stream into a IGrid
 !
 ! !INTERFACE:
-      function ESMF_InternGridDeserialize(vm, buffer, offset, rc) 
+      function ESMF_IGridDeserialize(vm, buffer, offset, rc) 
 !
 ! !RETURN VALUE:
-      type(ESMF_InternGrid) :: ESMF_InternGridDeserialize   
+      type(ESMF_IGrid) :: ESMF_IGridDeserialize   
 !
 ! !ARGUMENTS:
       type(ESMF_VM) :: vm
@@ -6254,10 +6254,10 @@
 !
 ! !DESCRIPTION:
 !      Takes a byte-stream buffer and reads the information needed to
-!      recreate a InternGrid object.  Recursively calls the deserialize routines
+!      recreate a IGrid object.  Recursively calls the deserialize routines
 !      needed to recreate the subobjects.
 !      Expected to be used by {\tt ESMF\_StateReconcile()} and
-!      by {\tt ESMF\_InternGridWrite()} and {\tt ESMF\_InternGridRead()}.
+!      by {\tt ESMF\_IGridWrite()} and {\tt ESMF\_IGridRead()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -6285,27 +6285,27 @@
       integer, dimension(:), allocatable :: oldCountPerDE1, oldCountPerDE2
       integer, dimension(:), allocatable :: petList, petListHelper, petTrack
       type(ESMF_DELayout) :: newDELayout, oldDELayout
-      type(ESMF_InternGridClass), pointer :: gp
+      type(ESMF_IGridClass), pointer :: gp
 
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
 
       ! in case of error, make sure this is invalid.
-      nullify(ESMF_InternGridDeserialize%ptr)
+      nullify(ESMF_IGridDeserialize%ptr)
 
       ! shortcut to internals
       allocate(gp, stat=status)
       if (ESMF_LogMsgFoundAllocError(status, &
-                                     "space for new InternGrid object", &
+                                     "space for new IGrid object", &
                                      ESMF_CONTEXT, rc)) return
 
-      call ESMF_InternGridConstructNew(gp, "dummy", localrc)
+      call ESMF_IGridConstructNew(gp, "dummy", localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      call ESMF_BaseCreate(gp%base, "InternGrid", "dummy", 0, localrc)
+      call ESMF_BaseCreate(gp%base, "IGrid", "dummy", 0, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -6316,10 +6316,10 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_InternGridDeserialize(gp%dimCount,        gp%interngridStructure, &
-                                  gp%horzInternGridType,    gp%vertInternGridType, &
+      call c_ESMC_IGridDeserialize(gp%dimCount,        gp%igridStructure, &
+                                  gp%horzIGridType,    gp%vertIGridType, &
                                   gp%horzStagger,     gp%vertStagger, &
-                                  gp%interngridStorage, &
+                                  gp%igridStorage, &
                                   gp%horzCoordSystem, gp%vertCoordSystem, &
                                   gp%coordOrder,      gp%coordIndex, &
                                   gp%periodic(1), &
@@ -6335,55 +6335,55 @@
         call c_ESMC_StringDeserialize(gp%dimUnits(i), buffer(1), offset, localrc)
       enddo
 
-      select case(gp%interngridStructure%interngridStructure)
+      select case(gp%igridStructure%igridStructure)
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNKNOWN
       case(0)
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "Unknown interngrid structure", &
+                                  "Unknown igrid structure", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT
+      ! ESMF_IGRID_STRUCT_LOGRECT
       case(1)
-        call ESMF_LRInternGridDeserialize(gp, buffer, offset, localrc)
+        call ESMF_LRIGridDeserialize(gp, buffer, offset, localrc)
 
       !-------------
-      ! ESMF_IGRID_STRUCTURE_LOGRECT_BLK
+      ! ESMF_IGRID_STRUCT_LOGRECT_BLK
       case(2)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Log Rect Block", &
+                                  "IGrid structure Log Rect Block", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_UNSTRUCT
       case(3)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure Unstructured", &
+                                  "IGrid structure Unstructured", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_IGRID_STRUCTURE_USER
       case(4)
         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                  "InternGrid structure User", &
+                                  "IGrid structure User", &
                                   ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "Invalid InternGrid structure", &
+                                  "Invalid IGrid structure", &
                                   ESMF_CONTEXT, rc)) return
       end select
 
-      ! TODO: call the appropriate interngrid create function?  is this necessary?
-      ! set the interngrid status
-      gp%interngridStatus = ESMF_IGRID_STATUS_INIT
-      ESMF_InternGridDeserialize%ptr => gp
+      ! TODO: call the appropriate igrid create function?  is this necessary?
+      ! set the igrid status
+      gp%igridStatus = ESMF_IGRID_STATUS_INIT
+      ESMF_IGridDeserialize%ptr => gp
 
       ! turn on created flag
-      ESMF_INIT_SET_CREATED(ESMF_InternGridDeserialize)
+      ESMF_INIT_SET_CREATED(ESMF_IGridDeserialize)
 
       ! deserialize the old delayout
       oldDELayout = ESMF_DELayoutDeserialize(buffer, offset, localrc)
@@ -6416,7 +6416,7 @@
       ! old one
       ! first, figure out the size of the layout.  the new layout has to be the same
       ! size in the second direction as the old one in order to correctly spawn the
-      ! deserialized interngrids
+      ! deserialized igrids
       call ESMF_VMGet(vm, petCount=npets, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -6503,7 +6503,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! call distribute function
-      call ESMF_InternGridDistribute(ESMF_InternGridDeserialize, newDELayout, &
+      call ESMF_IGridDistribute(ESMF_IGridDeserialize, newDELayout, &
                                countsPerDEDim1=newCountPerDE1, &
                                countsPerDEDim2=newCountPerDE2, &
                                decompIds=decompIds, rc=localrc)
@@ -6545,9 +6545,9 @@
 
       if  (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_InternGridDeserialize
+      end function ESMF_IGridDeserialize
 !------------------------------------------------------------------------------
 
 
-      end module ESMF_InternGridMod
+      end module ESMF_IGridMod
 
