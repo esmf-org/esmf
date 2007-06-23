@@ -484,7 +484,7 @@ contains
         do while (len_trim(ltmp) /= 0 )
            select case( trim(ltmp) )
 
-           case('-d')     ! distIGrid specifier files
+           case('-d')     ! distgrid specifier files
               call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
               if (localrc .ne. ESMF_SUCCESS) then
                  print*,'error reading problem descriptor line #',file

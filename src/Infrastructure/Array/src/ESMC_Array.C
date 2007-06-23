@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.87 2007/06/23 04:00:01 cdeluca Exp $
+// $Id: ESMC_Array.C,v 1.88 2007/06/23 17:50:59 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.87 2007/06/23 04:00:01 cdeluca Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.88 2007/06/23 17:50:59 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -172,10 +172,10 @@ Array::Array(
   
   for (int i=0; i<deCount; i++){
     deList[i] = -1; // reset -> indicate not a local DE
-    int distIGridDeCellCount = distgrid->getDeCellCount(i, &localrc);
+    int distgridDeCellCount = distgrid->getDeCellCount(i, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
-    deCellCount[i] = distIGridDeCellCount;  // prime deCellCount element
+    deCellCount[i] = distgridDeCellCount;  // prime deCellCount element
     for (int k=0; k<tensorCount; k++){
       // multiply in tensor extents
       deCellCount[i] *= (ubounds[k] - lbounds[k] + 1);

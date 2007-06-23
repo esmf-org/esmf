@@ -1,4 +1,4 @@
-! $Id: UserCodeMod.F90,v 1.7 2007/06/23 04:00:18 cdeluca Exp $
+! $Id: UserCodeMod.F90,v 1.8 2007/06/23 17:51:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -15,12 +15,12 @@
     use ESMF_Mod
 
     implicit none
-    private :: countX, countY, haloWidth, nPEsX, nPEsY, distIGridX, distIGridY
+    private :: countX, countY, haloWidth, nPEsX, nPEsY, distgridX, distgridY
     integer :: countX=50, countY=30
     integer :: haloWidth=2
     integer :: nPEsX=3, nPEsY=2
-    integer, dimension(3) :: distIGridX = (/ 10, 15, 25 /)
-    integer, dimension(2) :: distIGridY = (/ 12, 18 /)
+    integer, dimension(3) :: distgridX = (/ 10, 15, 25 /)
+    integer, dimension(2) :: distgridY = (/ 12, 18 /)
 
     public UserGetPEDecomposition
     public UserGetIGridCoords
@@ -77,11 +77,11 @@
     integer, dimension(:), pointer :: distX
     integer, dimension(:), pointer :: distY
 
-    allocate(distX(size(distIGridX)), &
-             distY(size(distIGridY)))
+    allocate(distX(size(distgridX)), &
+             distY(size(distgridY)))
 
-    distX = distIGridX
-    distY = distIGridY
+    distX = distgridX
+    distY = distgridY
 
     end subroutine UserGetIGridDistribution
 
@@ -95,7 +95,7 @@
     integer, intent(in) :: myX
     integer, intent(in) :: myY
 
-    allocate(f90ptr(distIGridX(myX)+2*haloWidth,distIGridY(myY)+2*haloWidth))
+    allocate(f90ptr(distgridX(myX)+2*haloWidth,distgridY(myY)+2*haloWidth))
     f90ptr = 1.0d0
 
     end subroutine UserGetPointer2D
@@ -110,7 +110,7 @@
     integer, intent(in) :: myX
     integer, intent(in) :: myY
 
-    allocate(f90ptr(5,distIGridX(myX)+2*haloWidth,distIGridY(myY)+2*haloWidth))
+    allocate(f90ptr(5,distgridX(myX)+2*haloWidth,distgridY(myY)+2*haloWidth))
     f90ptr = 2.0d0
 
     end subroutine UserGetPointer3D

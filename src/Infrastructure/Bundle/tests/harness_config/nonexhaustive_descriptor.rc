@@ -13,12 +13,12 @@
 #
 # Specification files
 # Following the problem descriptor string are filename(s) with the complete problem specification.
-#       -d DeLayout/distIGrid specification
+#       -d DeLayout/distgrid specification
 #       -g IGrid Specification
 # Multiple filenames can be used to specify the respective parameter space.       
 #
 # ex.
-#       '[B1G1;B2G2] --> [B1G1;B2G2]' -d distIGrid.rc otherdistIGrid.rc -g igrid.rc
+#       '[B1G1;B2G2] --> [B1G1;B2G2]' -d distgrid.rc otherdistgrid.rc -g igrid.rc
 # specifies that a redistribution test is to be conducted where the range of distributions 
 # is specified by two files and the range of igrid types is specified by a single file.
 ########################################################################################
