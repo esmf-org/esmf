@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.25 2007/06/23 04:01:33 cdeluca Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.26 2007/06/23 07:01:02 cdeluca Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -36,7 +36,7 @@
     ! Local variables
 
     ! Components
-    type(ESMF_IGridComp) :: INcomp, FScomp
+    type(ESMF_GridComp) :: INcomp, FScomp
     type(ESMF_CplComp) :: cpl
     character(len=ESMF_MAXSTR) :: cnameIN, cnameFS, cplname
 
@@ -99,11 +99,11 @@
 
     ! Create the 2 model components and coupler.
     cnameIN = "Injector model"
-    INcomp = ESMF_IGridCompCreate(name=cnameIN, rc=rc)
+    INcomp = ESMF_GridCompCreate(name=cnameIN, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cnameFS = "Flow Solver model"
-    FScomp = ESMF_IGridCompCreate(name=cnameFS, rc=rc)
+    FScomp = ESMF_GridCompCreate(name=cnameFS, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cplname = "Two-way coupler"
@@ -119,11 +119,11 @@
 !  Register section
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-      call ESMF_IGridCompSetServices(INcomp, Injector_register, rc)
+      call ESMF_GridCompSetServices(INcomp, Injector_register, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp SetServices finished, rc= ", rc
 
-      call ESMF_IGridCompSetServices(FScomp, FlowSolver_register, rc)
+      call ESMF_GridCompSetServices(FScomp, FlowSolver_register, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp SetServices finished, rc= ", rc
 
@@ -172,7 +172,7 @@
       INimp = ESMF_StateCreate("Injection Input", ESMF_STATE_IMPORT, rc=rc)
       INexp = ESMF_StateCreate("Injection Feedback", ESMF_STATE_EXPORT, rc=rc)
 
-      call ESMF_IGridCompInitialize(INcomp, INimp, INexp, clock, rc=rc)
+      call ESMF_GridCompInitialize(INcomp, INimp, INexp, clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Injection Model Initialize finished, rc =", rc
  
@@ -180,7 +180,7 @@
       FSimp = ESMF_StateCreate("FlowSolver Input", ESMF_STATE_IMPORT, rc=rc)
       FSexp = ESMF_StateCreate("FlowSolver Feedback ", ESMF_STATE_EXPORT, rc=rc)
 
-      call ESMF_IGridCompInitialize(FScomp, FSimp, FSexp, clock, rc=rc)
+      call ESMF_GridCompInitialize(FScomp, FSimp, FSexp, clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Flow Model Initialize finished, rc =", rc
 
@@ -206,7 +206,7 @@
       do while (.not. ESMF_ClockIsStopTime(clock, rc))
 
         ! Run FlowSolver Component
-        call ESMF_IGridCompRun(FScomp, FSimp, FSexp, clock, rc=rc)
+        call ESMF_GridCompRun(FScomp, FSimp, FSexp, clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
 
         ! Couple export state of FlowSolver to import of Injector
@@ -214,7 +214,7 @@
         if (rc .ne. ESMF_SUCCESS) goto 10
   
         ! Run Injector Component
-        call ESMF_IGridCompRun(INcomp, INimp, INexp, clock, rc=rc)
+        call ESMF_GridCompRun(INcomp, INimp, INexp, clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
   
         ! Couple export state of Injector to import of FlowSolver
@@ -239,11 +239,11 @@
 !------------------------------------------------------------------------------
 
       ! Finalize Injector Component    
-      call ESMF_IGridCompFinalize(INcomp, INimp, INexp, clock, rc=rc)
+      call ESMF_GridCompFinalize(INcomp, INimp, INexp, clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! Finalize FlowSolver Component
-      call ESMF_IGridCompFinalize(FScomp, FSimp, FSimp, clock, rc=rc)
+      call ESMF_GridCompFinalize(FScomp, FSimp, FSimp, clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! Finalize Coupler
@@ -271,9 +271,9 @@
       call ESMF_CalendarDestroy(gregorianCalendar, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_IGridCompDestroy(INcomp, rc)
+      call ESMF_GridCompDestroy(INcomp, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_IGridCompDestroy(FScomp, rc)
+      call ESMF_GridCompDestroy(FScomp, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_CplCompDestroy(cpl, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10

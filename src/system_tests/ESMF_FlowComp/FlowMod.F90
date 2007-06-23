@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.23 2007/06/23 04:01:33 cdeluca Exp $
+! $Id: FlowMod.F90,v 1.24 2007/06/23 07:01:02 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -30,16 +30,16 @@
 
     subroutine FlowMod_register(comp, rc)
 
-        type(ESMF_IGridComp) :: comp
+        type(ESMF_GridComp) :: comp
         integer :: rc
 
         print *, "in user register routine"
 
         ! Register the callback routines.
 
-        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, User1_Init, 0, rc)
-        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, rc)
-        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETFINAL, User1_Final, 0, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, User1_Init, 0, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, User1_Final, 0, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
 
@@ -49,7 +49,7 @@
         ! your own code development you probably don't want to include the 
         ! following call unless you are interested in exploring ESMF's 
         ! threading features.
-        call ESMF_IGridCompSetVMMinThreads(comp, rc=rc)
+        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
 #endif
 
         rc = ESMF_SUCCESS
@@ -60,7 +60,7 @@
  
     subroutine User1_Init(gcomp, import_state, export_state, clock, rc)
 
-      type(ESMF_IGridComp) :: gcomp
+      type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
@@ -82,7 +82,7 @@
 !
 ! Query component for number of PETs, and create a layout which corresponds
 !
-      call ESMF_IGridCompGet(gcomp, vm=vm, rc=rc)
+      call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
@@ -120,7 +120,7 @@
         return
       endif
 
-      call  ESMF_IGridCompSet(gcomp, igrid=igrid, rc=rc)
+      call  ESMF_GridCompSet(gcomp, igrid=igrid, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in User1_init:  igrid comp set"
         return
@@ -141,7 +141,7 @@
     subroutine FlowInit(gcomp, clock, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_IGridComp), intent(inout) :: gcomp
+      type(ESMF_GridComp), intent(inout) :: gcomp
       type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
 !
@@ -161,7 +161,7 @@
 !
 ! get IGrid from Component
 !
-      call ESMF_IGridCompGet(gcomp, igrid=igrid, rc=rc)
+      call ESMF_GridCompGet(gcomp, igrid=igrid, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  igrid comp get"
         return
@@ -377,7 +377,7 @@
 
     subroutine FlowSolve(gcomp, import_state, export_state, clock, rc)
 
-      type(ESMF_IGridComp) :: gcomp
+      type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
@@ -907,7 +907,7 @@
 
       subroutine User1_Final(gcomp, import_state, export_state, clock, rc)
 
-      type(ESMF_IGridComp) :: gcomp
+      type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
@@ -932,7 +932,7 @@
       ! call ESMF_StateGetField(import_state, "U", field_u, rc)
 
       ! Collect results on DE 0 and output to a file
-      call ESMF_IGridCompGet(gcomp, igrid=igrid, rc=rc)
+      call ESMF_GridCompGet(gcomp, igrid=igrid, rc=rc)
       call ESMF_IGridGet(igrid, delayout=layout, rc=rc)
       call ESMF_DELayoutGetDeprecated(layout, localDe=de_id, rc=rc)
 

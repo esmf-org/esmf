@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.16 2007/06/23 04:01:32 cdeluca Exp $
+! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.17 2007/06/23 07:01:01 cdeluca Exp $
 !
 ! System test code FieldRegridOrder
 !  Description on Sourceforge under System Test #xxxxxx
@@ -45,7 +45,7 @@
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
     type(ESMF_VM):: vm
     type(ESMF_State) :: c1exp, c2imp
-    type(ESMF_IGridComp) :: comp1, comp2
+    type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
 
     ! instantiate a clock, a calendar, and timesteps
@@ -94,16 +94,16 @@
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    comp1 = ESMF_IGridCompCreate(name=cname1, rc=rc)
+    comp1 = ESMF_GridCompCreate(name=cname1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname1), "rc =", rc
-    !  call ESMF_IGridCompPrint(comp1, "", rc)
+    !  call ESMF_GridCompPrint(comp1, "", rc)
 
     cname2 = "user model 2"
-    comp2 = ESMF_IGridCompCreate(name=cname2, rc=rc)
+    comp2 = ESMF_GridCompCreate(name=cname2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname2), "rc =", rc
-    !  call ESMF_IGridCompPrint(comp2, "", rc)
+    !  call ESMF_GridCompPrint(comp2, "", rc)
 
     cplname = "user one-way coupler"
     cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
@@ -118,11 +118,11 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-    call ESMF_IGridCompSetServices(comp1, userm1_register, rc)
+    call ESMF_GridCompSetServices(comp1, userm1_register, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp SetServices finished, rc= ", rc
 
-    call ESMF_IGridCompSetServices(comp2, userm2_register, rc)
+    call ESMF_GridCompSetServices(comp2, userm2_register, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp SetServices finished, rc= ", rc
 
@@ -166,13 +166,13 @@
  
     c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_IGridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
+    call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp 1 Initialize finished, rc =", rc
  
     c2imp = ESMF_StateCreate("comp2 import", ESMF_STATE_IMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_IGridCompInitialize(comp2, importState=c2imp, clock=clock, rc=rc)
+    call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp 2 Initialize finished, rc =", rc
  
@@ -189,7 +189,7 @@
 
     do while (.not. ESMF_ClockIsStopTime(clock, rc))
 
-      call ESMF_IGridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
+      call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1 Run returned, rc =", rc
 
@@ -197,7 +197,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Coupler Run returned, rc =", rc
 
-      call ESMF_IGridCompRun(comp2, importState=c2imp, clock=clock, rc=rc)
+      call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 2 Run returned, rc =", rc
 
@@ -214,11 +214,11 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-    call ESMF_IGridCompFinalize(comp1, exportState=c1exp, clock=clock, rc=rc)
+    call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp 1 Finalize finished, rc =", rc
 
-    call ESMF_IGridCompFinalize(comp2, importState=c2imp, clock=clock, rc=rc)
+    call ESMF_GridCompFinalize(comp2, importState=c2imp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp 2 Finalize finished, rc =", rc
 
@@ -249,8 +249,8 @@
     call ESMF_ClockDestroy(clock, rc)
     call ESMF_CalendarDestroy(gregorianCalendar, rc)
 
-    call ESMF_IGridCompDestroy(comp1, rc)
-    call ESMF_IGridCompDestroy(comp2, rc)
+    call ESMF_GridCompDestroy(comp1, rc)
+    call ESMF_GridCompDestroy(comp2, rc)
     call ESMF_CplCompDestroy(cpl, rc)
 
     print *, "All Destroy routines done"

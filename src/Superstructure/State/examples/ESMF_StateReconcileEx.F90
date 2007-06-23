@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.14 2007/06/23 04:01:10 cdeluca Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.15 2007/06/23 07:00:55 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -26,7 +26,7 @@ contains
 !BOC
 ! Initialize routine which creates "field1" on PETs 0 and 1
 subroutine comp1_init(gcomp, istate, ostate, clock, rc)
-    type(ESMF_IGridComp), intent(inout) :: gcomp
+    type(ESMF_GridComp), intent(inout) :: gcomp
     type(ESMF_State), intent(inout) :: istate, ostate
     type(ESMF_Clock), intent(in) :: clock
     integer, intent(out) :: rc
@@ -46,7 +46,7 @@ end subroutine comp1_init
 
 ! Initialize routine which creates "field2" on PETs 2 and 3
 subroutine comp2_init(gcomp, istate, ostate, clock, rc)
-    type(ESMF_IGridComp), intent(inout) :: gcomp
+    type(ESMF_GridComp), intent(inout) :: gcomp
     type(ESMF_State), intent(inout) :: istate, ostate
     type(ESMF_Clock), intent(in) :: clock
     integer, intent(out) :: rc
@@ -65,7 +65,7 @@ subroutine comp2_init(gcomp, istate, ostate, clock, rc)
 end subroutine comp2_init
 
 subroutine comp_dummy(gcomp, rc)
-   type(ESMF_IGridComp), intent(inout) :: gcomp
+   type(ESMF_GridComp), intent(inout) :: gcomp
    integer, intent(out) :: rc
 
    rc = ESMF_SUCCESS
@@ -100,7 +100,7 @@ end module ESMF_StateReconcileEx_Mod
     ! Local variables
     integer :: rc, petCount
     type(ESMF_State) :: state1
-    type(ESMF_IGridComp) :: comp1, comp2
+    type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_VM) :: vm
     character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename
 
@@ -136,12 +136,12 @@ end module ESMF_StateReconcileEx_Mod
     call ESMF_VMGetGlobal(vm=vm, rc=rc)
 
     comp1name = "Atmosphere"
-    comp1 = ESMF_IGridCompCreate(name=comp1name, petList=(/ 0, 1 /), rc=rc)
-    print *, "IGridComp Create returned, name = ", trim(comp1name)
+    comp1 = ESMF_GridCompCreate(name=comp1name, petList=(/ 0, 1 /), rc=rc)
+    print *, "GridComp Create returned, name = ", trim(comp1name)
 
     comp2name = "Ocean"
-    comp2 = ESMF_IGridCompCreate(name=comp2name, petList=(/ 2, 3 /), rc=rc)
-    print *, "IGridComp Create returned, name = ", trim(comp2name)
+    comp2 = ESMF_GridCompCreate(name=comp2name, petList=(/ 2, 3 /), rc=rc)
+    print *, "GridComp Create returned, name = ", trim(comp2name)
 
     statename = "Ocn2Atm"
     state1 = ESMF_StateCreate(statename, rc=rc)  
@@ -156,7 +156,7 @@ end module ESMF_StateReconcileEx_Mod
 !\subsubsection{Invoking Components on a subset of the Parent PETs}
 !   
 !  Here we register the subroutines which should be called for initialization.
-!  Then we call ESMF\_IGridCompInitialize() on all PETs, but the code runs
+!  Then we call ESMF\_GridCompInitialize() on all PETs, but the code runs
 !  only on the PETs given in the petList when the Component was created.
 !
 !  Because this example is so short, we call the entry point code
@@ -171,22 +171,22 @@ end module ESMF_StateReconcileEx_Mod
     ! but to make this example very short, they are called inline below.
     ! This is o.k. because the SetServices routine must execute from within
     ! the parent component VM.
-    call ESMF_IGridCompSetServices(comp1, comp_dummy, rc)
-    call ESMF_IGridCompSetServices(comp2, comp_dummy, rc)
+    call ESMF_GridCompSetServices(comp1, comp_dummy, rc)
+    call ESMF_GridCompSetServices(comp2, comp_dummy, rc)
 
     print *, "ready to set entry point 1"
-    call ESMF_IGridCompSetEntryPoint(comp1, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, &
                                         comp1_init, ESMF_SINGLEPHASE, rc)
 
     print *, "ready to set entry point 2"
-    call ESMF_IGridCompSetEntryPoint(comp2, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETINIT, &
                                         comp2_init, ESMF_SINGLEPHASE, rc)
 
 
     print *, "ready to call init for comp 1"
-    call ESMF_IGridCompInitialize(comp1, state1, rc=rc)
+    call ESMF_GridCompInitialize(comp1, state1, rc=rc)
     print *, "ready to call init for comp 2"
-    call ESMF_IGridCompInitialize(comp2, state1, rc=rc)
+    call ESMF_GridCompInitialize(comp2, state1, rc=rc)
 !EOC
 
     print *, "State Example 2 finished"

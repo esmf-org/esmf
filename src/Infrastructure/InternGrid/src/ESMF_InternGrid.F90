@@ -1,4 +1,4 @@
-! $Id: ESMF_InternGrid.F90,v 1.3 2007/06/23 06:03:25 cdeluca Exp $
+! $Id: ESMF_InternGrid.F90,v 1.4 2007/06/23 07:00:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -88,7 +88,7 @@
     public ESMF_IGridValidate
     public ESMF_IGridBoxIntersectRecv
     public ESMF_IGridBoxIntersectSend
-    public ESMF_IGridComputeDistance
+    public ESMF_GridComputeDistance
     public ESMF_IGridGetAllAxisIndex
     public ESMF_IGridGetAIsAllDEs
     public ESMF_IGridGetCellMask
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_InternGrid.F90,v 1.3 2007/06/23 06:03:25 cdeluca Exp $'
+      '$Id: ESMF_InternGrid.F90,v 1.4 2007/06/23 07:00:48 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -5214,15 +5214,15 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_IGridComputeDistance"
+#define ESMF_METHOD "ESMF_GridComputeDistance"
 !BOPI
-! !IROUTINE: ESMF_IGridComputeDistance - Compute distance between points
+! !IROUTINE: ESMF_GridComputeDistance - Compute distance between points
 !
 ! !INTERFACE:
-      function ESMF_IGridComputeDistance(x1, y1, x2, y2, coordSystem, rc)
+      function ESMF_GridComputeDistance(x1, y1, x2, y2, coordSystem, rc)
 
 ! !RETURN VALUE:
-      real(ESMF_KIND_R8) :: ESMF_IGridComputeDistance
+      real(ESMF_KIND_R8) :: ESMF_GridComputeDistance
 
 ! !ARGUMENTS:
 
@@ -5260,10 +5260,10 @@
 
       ! branch to appropriate PhysGrid routine to compute distance
       if (coordSystem .eq. ESMF_COORD_SYSTEM_SPHERICAL) then
-        ESMF_IGridComputeDistance = &
+        ESMF_GridComputeDistance = &
           ESMF_PhysGridCompDistSpherical(x1, y1, x2, y2, rc=localrc)
       elseif (coordSystem .eq. ESMF_COORD_SYSTEM_CARTESIAN) then
-        ESMF_IGridComputeDistance = &
+        ESMF_GridComputeDistance = &
           ESMF_PhysGridCompDistCartesian(x1, y1, x2, y2, rc=localrc)
       else
         dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
@@ -5279,7 +5279,7 @@
       ! set return code and exit
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_IGridComputeDistance
+      end function ESMF_GridComputeDistance
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

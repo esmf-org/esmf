@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.6 2007/06/23 04:01:00 cdeluca Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.7 2007/06/23 07:00:51 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !   ! Local variables
     integer :: rc
     character(ESMF_MAXSTR) :: cname
-    type(ESMF_IGridComp) :: comp1
+    type(ESMF_GridComp) :: comp1
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -73,7 +73,7 @@
     !NEX_UTest
 !   !  Create a Component
     cname = "Atmosphere"
-    comp1 = ESMF_IGridCompCreate(name=cname, igridcompType=ESMF_ATM, &
+    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
                                              configFile="igrid.rc", rc=rc)  
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -86,7 +86,7 @@
     !NEX_UTest
 !   !  Set Services
 
-    call ESMF_IGridCompSetServices(comp1, SetServ1, rc)
+    call ESMF_GridCompSetServices(comp1, SetServ1, rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Setting Component Services"
@@ -98,7 +98,7 @@
     !NEX_UTest
 !   !  Call init
 
-    call ESMF_IGridCompInitialize(comp1, rc=rc)
+    call ESMF_GridCompInitialize(comp1, rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling Component Init"
@@ -112,7 +112,7 @@
     !EX_UTest
 !   !  Re-Set Services
 
-    call ESMF_IGridCompSetServices(comp1, SetServ2, rc)
+    call ESMF_GridCompSetServices(comp1, SetServ2, rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Setting Component Services"
@@ -124,7 +124,7 @@
     !EX_UTest
 !   !  Call new init
 
-    call ESMF_IGridCompInitialize(comp1, rc=rc)
+    call ESMF_GridCompInitialize(comp1, rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling Component Init"
@@ -138,7 +138,7 @@
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set Internal State Test"
-    call ESMF_IGridCompSetInternalState(comp1, wrap1, rc)
+    call ESMF_GridCompSetInternalState(comp1, wrap1, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
@@ -148,7 +148,7 @@
     !wrap2%p=>data2
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Get Internal State Test"
-    call ESMF_IGridCompGetInternalState(comp1, wrap2, rc)
+    call ESMF_GridCompGetInternalState(comp1, wrap2, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
@@ -167,7 +167,7 @@
     !EX_UTest
 !   !  Destroying a component
 
-    call ESMF_IGridCompDestroy(comp1, rc=rc)
+    call ESMF_GridCompDestroy(comp1, rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Destroying a Component Test"
@@ -178,7 +178,7 @@
     !EX_UTest
 !   !  Create a Component
     cname = "Atmosphere - child in parent VM context"
-    comp1 = ESMF_IGridCompCreate(name=cname, igridcompType=ESMF_ATM, &
+    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
       configFile="igrid.rc", contextflag=ESMF_CHILD_IN_PARENT_VM, rc=rc)  
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -191,7 +191,7 @@
     !EX_UTest
 !   !  Set Services
 
-    call ESMF_IGridCompSetServices(comp1, SetServ1, rc)
+    call ESMF_GridCompSetServices(comp1, SetServ1, rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Setting Component Services"
@@ -203,7 +203,7 @@
     !EX_UTest
 !   !  Call init
 
-    call ESMF_IGridCompInitialize(comp1, rc=rc)
+    call ESMF_GridCompInitialize(comp1, rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling Component Init"
@@ -217,7 +217,7 @@
     !NEX_UTest
 !   !  Destroying a component
 
-    call ESMF_IGridCompDestroy(comp1, rc=rc)
+    call ESMF_GridCompDestroy(comp1, rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Destroying a Component Test"

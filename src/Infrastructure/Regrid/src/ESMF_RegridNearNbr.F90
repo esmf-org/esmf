@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridNearNbr.F90,v 1.25 2007/06/23 04:00:40 cdeluca Exp $
+! $Id: ESMF_RegridNearNbr.F90,v 1.26 2007/06/23 07:00:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridNearNbr.F90,v 1.25 2007/06/23 04:00:40 cdeluca Exp $'
+      '$Id: ESMF_RegridNearNbr.F90,v 1.26 2007/06/23 07:00:48 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -305,7 +305,7 @@
       !               x2 = src_center_x(iii,jjj,n)
       !               y2 = src_center_y(iii,jjj,n)
       !
-      !               distance = ESMF_IGridComputeDistance(x1,y1,x2,y2,&
+      !               distance = ESMF_GridComputeDistance(x1,y1,x2,y2,&
       !                                               coord_system, localrc)
 
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.105 2007/06/23 04:00:38 cdeluca Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.106 2007/06/23 07:00:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.105 2007/06/23 04:00:38 cdeluca Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.106 2007/06/23 07:00:48 cdeluca Exp $'
 
 !==============================================================================
 
@@ -861,7 +861,7 @@
 
               sumWts = zero
               if (srcUserMask(iii,jjj) .and. (srcIGridMask(iii,jjj).ne.1)) then
-                weights(1) = ESMF_IGridComputeDistance(srcX(1),srcY(1), &
+                weights(1) = ESMF_GridComputeDistance(srcX(1),srcY(1), &
                                                       dstX, dstY,      &
                                                       coordSystem, localrc)
                 if (weights(1).eq.0.0) then
@@ -872,7 +872,7 @@
                 sumWts = sumWts + weights(1)
               endif
               if (srcUserMask(ip1,jjj) .and. (srcIGridMask(ip1,jjj).ne.1)) then
-                weights(2) = ESMF_IGridComputeDistance(srcX(2),srcY(2), &
+                weights(2) = ESMF_GridComputeDistance(srcX(2),srcY(2), &
                                                       dstX, dstY,      &
                                                       coordSystem, localrc)
                 if (weights(2).eq.0.0) then
@@ -883,7 +883,7 @@
                 sumWts = sumWts + weights(2)
               endif
               if (srcUserMask(ip1,jp1) .and. (srcIGridMask(ip1,jp1).ne.1)) then
-                weights(3) = ESMF_IGridComputeDistance(srcX(3),srcY(3), &
+                weights(3) = ESMF_GridComputeDistance(srcX(3),srcY(3), &
                                                       dstX, dstY,      &
                                                       coordSystem, localrc)
                 if (weights(3).eq.0.0) then
@@ -894,7 +894,7 @@
                 sumWts = sumWts + weights(3)
               endif
               if (srcUserMask(iii,jp1) .and. (srcIGridMask(iii,jp1).ne.1)) then
-                weights(4) = ESMF_IGridComputeDistance(srcX(4),srcY(4), &
+                weights(4) = ESMF_GridComputeDistance(srcX(4),srcY(4), &
                                                       dstX, dstY,      &
                                                       coordSystem, localrc)
                 if (weights(4).eq.0.0) then

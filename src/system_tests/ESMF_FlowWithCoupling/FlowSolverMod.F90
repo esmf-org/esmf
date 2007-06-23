@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.30 2007/06/23 04:01:33 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.31 2007/06/23 07:01:03 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -38,7 +38,7 @@
       subroutine FlowSolver_register(comp, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp) :: comp
+      type(ESMF_GridComp) :: comp
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -63,9 +63,9 @@
 !
 ! Register the callback routines.
 !
-      call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init, 0, rc)
-      call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, rc)
-      call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETFINAL, Flow_Final, 0, rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init, 0, rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, Flow_Final, 0, rc)
 
       print *, "Registered Initialize, Run, and Finalize routines"
 
@@ -75,7 +75,7 @@
         ! your own code development you probably don't want to include the 
         ! following call unless you are interested in exploring ESMF's 
         ! threading features.
-        call ESMF_IGridCompSetVMMinThreads(comp, rc=rc)
+        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
 #endif
 
       rc = ESMF_SUCCESS
@@ -90,7 +90,7 @@
       subroutine Flow_Init(gcomp, import_state, export_state, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp) :: gcomp
+      type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
@@ -164,7 +164,7 @@
 !
 
       ! Find out how many PETs we were given to run on
-      call ESMF_IGridCompGet(gcomp, vm=vm, rc=status)
+      call ESMF_GridCompGet(gcomp, vm=vm, rc=status)
       call ESMF_VMGet(vm, petCount=npets, rc=status)
 
       ! Set up the component layouts so they are different, so we can show
@@ -193,7 +193,7 @@
 !
 ! Set the IGrid in the igridded Component
 !
-      call  ESMF_IGridCompSet(gcomp, igrid=igrid, rc=status)
+      call  ESMF_GridCompSet(gcomp, igrid=igrid, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flow_init:  igrid comp set"
         return
@@ -248,7 +248,7 @@
       subroutine FlowInit(gcomp, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp), intent(inout) :: gcomp
+      type(ESMF_GridComp), intent(inout) :: gcomp
       type(ESMF_Clock), intent(inout) :: clock
       integer, optional, intent(out) :: rc
 !
@@ -291,7 +291,7 @@
 !
 ! get IGrid from Component
 !
-      call ESMF_IGridCompGet(gcomp, igrid=igrid, rc=status)
+      call ESMF_GridCompGet(gcomp, igrid=igrid, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  igrid comp get"
         return
@@ -550,7 +550,7 @@
       subroutine FlowSolve(gcomp, import_state, export_state, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp) :: gcomp
+      type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
@@ -1337,7 +1337,7 @@
       subroutine FlowPrint(gcomp, clock, file_no, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp) :: gcomp
+      type(ESMF_GridComp) :: gcomp
       type(ESMF_Clock) :: clock
       integer, intent(in) :: file_no
       integer, optional, intent(out) :: rc
@@ -1385,7 +1385,7 @@
 !
 ! Collect results on DE 0 and output to a file
 !
-      call ESMF_IGridCompGet(gcomp, igrid=igrid, rc=status)
+      call ESMF_GridCompGet(gcomp, igrid=igrid, rc=status)
       call ESMF_IGridGet(igrid, delayout=layout, rc=status)
       call ESMF_DELayoutGetDeprecated(layout, localDe=de_id, rc=status)
 !
@@ -1441,7 +1441,7 @@
       subroutine Flow_Final(gcomp, import_state, export_state, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp) :: gcomp
+      type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock

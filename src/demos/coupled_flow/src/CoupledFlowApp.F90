@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.3 2007/06/23 04:01:14 cdeluca Exp $
+! $Id: CoupledFlowApp.F90,v 1.4 2007/06/23 07:00:56 cdeluca Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -26,7 +26,7 @@
     ! Local variables
 
     ! Components
-    type(ESMF_IGridComp) :: compIGridded
+    type(ESMF_GridComp) :: compIGridded
 
     ! State, Virtual Machine, and DELayout
     type(ESMF_VM) :: vm
@@ -155,7 +155,7 @@
 !BOP
 !\begin{verbatim}
     ! Create the top level IGridded Component.
-    compIGridded = ESMF_IGridCompCreate(name="Coupled Flow Demo", rc=rc)
+    compIGridded = ESMF_GridCompCreate(name="Coupled Flow Demo", rc=rc)
 !\end{verbatim}
 !EOP 
 
@@ -167,7 +167,7 @@
 !  Register section
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-      call ESMF_IGridCompSetServices(compIGridded, CoupledFlow_register, rc)
+      call ESMF_GridCompSetServices(compIGridded, CoupledFlow_register, rc)
       print *, "Comp SetServices finished, rc= ", rc
 
 
@@ -240,7 +240,7 @@
 !\end{verbatim}
 !     The IGrid can then be attached to the IGridded Component with a set call:
 !\begin{verbatim}
-     call ESMF_IGridCompSet(compIGridded, igrid=igrid, rc=rc)
+     call ESMF_GridCompSet(compIGridded, igrid=igrid, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -258,18 +258,18 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
  
-      call ESMF_IGridCompInitialize(compIGridded, flowstate, flowstate, &
+      call ESMF_GridCompInitialize(compIGridded, flowstate, flowstate, &
                                                                  clock, rc=rc)
       print *, "Coupled Flow Component Initialize finished, rc =", rc
  
 
 
-      call ESMF_IGridCompRun(compIGridded, flowstate, flowstate, clock, rc=rc)
+      call ESMF_GridCompRun(compIGridded, flowstate, flowstate, clock, rc=rc)
       print *, "Coupled Flow Component Run finished, rc =", rc
  
 
 
-      call ESMF_IGridCompFinalize(compIGridded, flowstate, flowstate, clock, rc=rc)
+      call ESMF_GridCompFinalize(compIGridded, flowstate, flowstate, clock, rc=rc)
       print *, "Coupled Flow Component Finalize finished, rc =", rc
  
  
@@ -286,7 +286,7 @@
 
       call ESMF_ClockDestroy(clock, rc)
 
-      call ESMF_IGridCompDestroy(compIGridded, rc)
+      call ESMF_GridCompDestroy(compIGridded, rc)
 
       call ESMF_DELayoutDestroy(DELayoutTop, rc)
 

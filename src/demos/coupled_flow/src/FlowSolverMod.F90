@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.3 2007/06/23 04:01:15 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.4 2007/06/23 07:00:56 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -90,7 +90,7 @@
       subroutine FlowSolver_register(comp, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp) :: comp
+      type(ESMF_GridComp) :: comp
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -115,10 +115,10 @@
 !
 ! Register the callback routines.
 !
-      call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init1, 1, rc)
-      call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init2, 2, rc)
-      call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, rc)
-      call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETFINAL, Flow_Final, 0, rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init1, 1, rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init2, 2, rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, Flow_Final, 0, rc)
 
       print *, "FlowSolverMod: Registered Initialize, Run, and Finalize routines"
 
@@ -134,7 +134,7 @@
       subroutine Flow_Init1(gcomp, import_state, export_state, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp) :: gcomp
+      type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock), intent(inout) :: clock
@@ -254,7 +254,7 @@
 !
 ! Query component for information.
 !
-      call ESMF_IGridCompGet(gcomp, igrid=igrid, rc=rc)
+      call ESMF_GridCompGet(gcomp, igrid=igrid, rc=rc)
 
       call ESMF_IGridGet(igrid, horzRelLoc=ESMF_CELL_CENTER, &
                               delayout=layout, &
@@ -324,7 +324,7 @@
       subroutine Flow_Init2(gcomp, import_state, export_state, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp) :: gcomp
+      type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock), intent(inout) :: clock
@@ -395,7 +395,7 @@
       subroutine FlowInit(gcomp, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp), intent(inout) :: gcomp
+      type(ESMF_GridComp), intent(inout) :: gcomp
       type(ESMF_Clock), intent(inout) :: clock
       integer, optional, intent(out) :: rc
 !
@@ -438,7 +438,7 @@
 !
 ! get IGrid from Component
 !
-      call ESMF_IGridCompGet(gcomp, igrid=igrid, rc=status)
+      call ESMF_GridCompGet(gcomp, igrid=igrid, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  igrid comp get"
         return
@@ -700,7 +700,7 @@
       subroutine FlowSolve(gcomp, import_state, export_state, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp) :: gcomp
+      type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
@@ -1571,7 +1571,7 @@
       subroutine FlowPrint(gcomp, clock, file_no, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp) :: gcomp
+      type(ESMF_GridComp) :: gcomp
       type(ESMF_Clock), intent(inout) :: clock
       integer, intent(in) :: file_no
       integer, optional, intent(out) :: rc
@@ -1618,7 +1618,7 @@
 !
 ! Collect results on DE 0 and output to a file
 !
-      call ESMF_IGridCompGet(gcomp, vm=vm, rc=status)
+      call ESMF_GridCompGet(gcomp, vm=vm, rc=status)
       call ESMF_VMGet(vm, localPet=pet_id, rc=status)
 !
 ! Frame number from computation
@@ -1685,7 +1685,7 @@
       subroutine Flow_Final(gcomp, import_state, export_state, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp) :: gcomp
+      type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock), intent(inout) :: clock

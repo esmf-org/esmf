@@ -1,8 +1,8 @@
       subroutine ExternalUser_SetServices(gcomp, rc)
         use ESMF_CompMod
-        use UserIGridCompMod
+        use UserGridCompMod
 
-        type(ESMF_IGridComp) :: gcomp
+        type(ESMF_GridComp) :: gcomp
         integer :: rc
 
         call User_SetServices(gcomp, rc)

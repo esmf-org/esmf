@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.12 2007/06/23 04:01:22 cdeluca Exp $
+! $Id: user_model2.F90,v 1.13 2007/06/23 07:00:57 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -38,7 +38,7 @@
 !   !   private to the module.
  
     subroutine userm2_register(comp, rc)
-        type(ESMF_IGridComp) :: comp
+        type(ESMF_GridComp) :: comp
         integer :: rc
 
         ! local variables
@@ -49,11 +49,11 @@
 
         ! Register the callback routines.
 
-        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
                                             user_init, ESMF_SINGLEPHASE, rc)
-        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETRUN, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
                                             user_run, ESMF_SINGLEPHASE, rc)
-        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
                                             user_final, ESMF_SINGLEPHASE, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
@@ -64,7 +64,7 @@
         mydatablock%dataoffset = 52
 
         wrap%ptr => mydatablock
-        call ESMF_IGridCompSetInternalState(comp, wrap, rc)
+        call ESMF_GridCompSetInternalState(comp, wrap, rc)
 
         print *, "Registered Private Data block for Internal State"
 
@@ -74,7 +74,7 @@
         ! your own code development you probably don't want to include the 
         ! following call unless you are interested in exploring ESMF's 
         ! threading features.
-        call ESMF_IGridCompSetVMMinThreads(comp, rc=rc)
+        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
 #endif
 
         rc = ESMF_SUCCESS
@@ -87,7 +87,7 @@
  
     
     subroutine user_init(comp, importState, exportState, clock, rc)
-        type(ESMF_IGridComp), intent(inout) :: comp
+        type(ESMF_GridComp), intent(inout) :: comp
         type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
@@ -113,7 +113,7 @@
         print *, "User Comp Init starting"
 
         ! Initially import state contains a field with a igrid but no data.
-        call ESMF_IGridCompGet(comp, layout=layout, rc=status)
+        call ESMF_GridCompGet(comp, layout=layout, rc=status)
 
         ! Add a "humidity" field to the import state.
         counts(1) = 40
@@ -175,7 +175,7 @@
 !   !
  
     subroutine user_run(comp, importState, exportState, clock, rc)
-        type(ESMF_IGridComp), intent(inout) :: comp
+        type(ESMF_GridComp), intent(inout) :: comp
         type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
@@ -211,7 +211,7 @@
 !   !
  
     subroutine user_final(comp, importState, exportState, clock, rc)
-        type(ESMF_IGridComp), intent(inout) :: comp
+        type(ESMF_GridComp), intent(inout) :: comp
         type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
@@ -227,7 +227,7 @@
         nullify(wrap%ptr)
         mydatablock => wrap%ptr
         
-        call ESMF_IGridCompGetInternalState(comp, wrap, status)
+        call ESMF_GridCompGetInternalState(comp, wrap, status)
 
         mydatablock => wrap%ptr
         print *, "before deallocate, dataoffset = ", mydatablock%dataoffset

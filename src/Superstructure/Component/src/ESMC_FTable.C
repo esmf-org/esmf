@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.30 2007/06/23 04:00:57 cdeluca Exp $
+// $Id: ESMC_FTable.C,v 1.31 2007/06/23 07:00:50 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
 #include "ESMC_Start.h"
 #include "ESMC_LogErr.h"
 #include "ESMC_Comp.h"
-#include "ESMC_IGridComp.h"
+#include "ESMC_GridComp.h"
 #include "ESMC_CplComp.h"
 
 //-----------------------------------------------------------------------------
@@ -50,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.30 2007/06/23 04:00:57 cdeluca Exp $";
+           "$Id: ESMC_FTable.C,v 1.31 2007/06/23 07:00:50 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -771,8 +771,8 @@
             ESMC_CompType ctype;
             // Replicate the component object on the heap for this thread
             FTN(f_esmf_compget)((ESMC_Comp *)funcs[i].funcarg[0], &ctype, &rrc);
-            if (ctype == ESMF_COMPTYPE_IGRID)
-              comp = (void *) new ESMC_IGridComp;
+            if (ctype == ESMF_COMPTYPE_GRID)
+              comp = (void *) new ESMC_GridComp;
             else if (ctype == ESMF_COMPTYPE_CPL)
               comp = (void *) new ESMC_CplComp;
             else
@@ -804,8 +804,8 @@
               // Replicate the component object on the heap for this thread
               FTN(f_esmf_compget)((ESMC_Comp *)funcs[i].funcarg[0], &ctype,
                 &rrc);
-              if (ctype == ESMF_COMPTYPE_IGRID)
-                comp = (void *) new ESMC_IGridComp;
+              if (ctype == ESMF_COMPTYPE_GRID)
+                comp = (void *) new ESMC_GridComp;
               else if (ctype == ESMF_COMPTYPE_CPL)
                 comp = (void *) new ESMC_CplComp;
               else
@@ -847,8 +847,8 @@
             ESMC_CompType ctype;
             // Replicate the component object on the heap for this thread
             FTN(f_esmf_compget)((ESMC_Comp *)funcs[i].funcarg[0], &ctype, &rrc);
-            if (ctype == ESMF_COMPTYPE_IGRID)
-              comp = (void *) new ESMC_IGridComp;
+            if (ctype == ESMF_COMPTYPE_GRID)
+              comp = (void *) new ESMC_GridComp;
             else if (ctype == ESMF_COMPTYPE_CPL)
               comp = (void *) new ESMC_CplComp;
             else

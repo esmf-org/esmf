@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.41 2007/06/23 04:01:04 cdeluca Exp $ 
+# $Id: makefile,v 1.42 2007/06/23 07:00:54 cdeluca Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -38,17 +38,17 @@ LOCDIR	  = src/Superstructure/Component/tests
 #
 
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_ComponentUTest \
-		$(ESMF_TESTDIR)/ESMF_IGridCompCreateUTest \
+		$(ESMF_TESTDIR)/ESMF_GridCompCreateUTest \
 		$(ESMF_TESTDIR)/ESMF_CompSetServUTest \
 		$(ESMF_TESTDIR)/ESMF_CplCompCreateUTest
 
 TESTS_RUN     =	RUN_ESMF_ComponentUTest \
-		RUN_ESMF_IGridCompCreateUTest \
+		RUN_ESMF_GridCompCreateUTest \
 		RUN_ESMF_CompSetServUTest \
 		RUN_ESMF_CplCompCreateUTest
 
 TESTS_RUN_UNI =	RUN_ESMF_ComponentUTestUNI \
-		RUN_ESMF_IGridCompCreateUTestUNI \
+		RUN_ESMF_GridCompCreateUTestUNI \
 		RUN_ESMF_CompSetServUTestUNI \
 		RUN_ESMF_CplCompCreateUTestUNI
 
@@ -79,13 +79,13 @@ RUN_ESMF_ComponentUTestUNI:
 	$(MAKE) TNAME=Component NP=1 ftest
 
 
-RUN_ESMF_IGridCompCreateUTest:
+RUN_ESMF_GridCompCreateUTest:
 	cp -f igrid.rc $(ESMF_TESTDIR)
-	$(MAKE) TNAME=IGridCompCreate NP=4 ftest
+	$(MAKE) TNAME=GridCompCreate NP=4 ftest
 
-RUN_ESMF_IGridCompCreateUTestUNI:
+RUN_ESMF_GridCompCreateUTestUNI:
 	cp -f igrid.rc $(ESMF_TESTDIR)
-	$(MAKE) TNAME=IGridCompCreate NP=1 ftest
+	$(MAKE) TNAME=GridCompCreate NP=1 ftest
 
 
 RUN_ESMF_CplCompCreateUTest:

@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.3 2007/06/23 04:01:16 cdeluca Exp $
+! $Id: InjectorMod.F90,v 1.4 2007/06/23 07:00:56 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -63,7 +63,7 @@
       subroutine Injector_register(comp, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp), intent(inout) :: comp
+      type(ESMF_GridComp), intent(inout) :: comp
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -94,13 +94,13 @@
         !
         !  This Component has a 2 phase initialization, and a single
         !   phase run and finalize.
-        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
                                                         injector_init1, 1, rc)
-        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
                                                         injector_init2, 2, rc)
-        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETRUN, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
                                            injector_run, ESMF_SINGLEPHASE, rc)
-        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
                                          injector_final, ESMF_SINGLEPHASE, rc)
 
         print *, "InjectorMod: Registered Initialize, Run, and Finalize routines"
@@ -109,7 +109,7 @@
         ! Allocate private persistent space
         allocate(datablock)
         wrap%ptr => datablock
-        call ESMF_IGridCompSetInternalState(comp, wrap, rc)
+        call ESMF_GridCompSetInternalState(comp, wrap, rc)
 
         print *, "InjectorMod: Registered Private Data block for Internal State"
     end subroutine
@@ -122,7 +122,7 @@
       subroutine injector_init1(gcomp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp), intent(inout) :: gcomp
+      type(ESMF_GridComp), intent(inout) :: gcomp
       type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
@@ -215,7 +215,7 @@
    20 continue
 
       ! Set peristent values in saved data block
-      call ESMF_IGridCompGetInternalState(gcomp, wrap, rc)
+      call ESMF_GridCompGetInternalState(gcomp, wrap, rc)
       datablock => wrap%ptr
 
       ! initialize start time to 12May2003, 3:00 pm
@@ -237,7 +237,7 @@
       !
       ! Query component for information.
       !
-      call ESMF_IGridCompGet(gcomp, igrid=igrid, rc=rc)
+      call ESMF_GridCompGet(gcomp, igrid=igrid, rc=rc)
       call ESMF_IGridGet(igrid, delayout=layout, rc=rc)
       if (rc .ne. ESMF_SUCCESS) then
          print *, "ERROR in injector_init: getting info from component"
@@ -291,7 +291,7 @@
       subroutine injector_init2(gcomp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
-     type(ESMF_IGridComp), intent(inout) :: gcomp
+     type(ESMF_GridComp), intent(inout) :: gcomp
      type(ESMF_State), intent(inout) :: importState, exportState
      type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
@@ -359,7 +359,7 @@
       subroutine injector_run(comp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
-     type(ESMF_IGridComp), intent(inout) :: comp
+     type(ESMF_GridComp), intent(inout) :: comp
      type(ESMF_State), intent(inout) :: importState, exportState
      type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
@@ -410,7 +410,7 @@
         datanames(7) = "FLAG"
 
         ! Get our local info
-        call ESMF_IGridCompGetInternalState(comp, wrap, rc)
+        call ESMF_GridCompGetInternalState(comp, wrap, rc)
         datablock => wrap%ptr
 
 
@@ -486,7 +486,7 @@
       subroutine injector_final(comp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_IGridComp), intent(inout) :: comp
+      type(ESMF_GridComp), intent(inout) :: comp
       type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
@@ -525,7 +525,7 @@
         ! Get our local info and release it
         nullify(wrap%ptr)
         datablock => wrap%ptr
-        call ESMF_IGridCompGetInternalState(comp, wrap, rc)
+        call ESMF_GridCompGetInternalState(comp, wrap, rc)
 
         datablock => wrap%ptr
         deallocate(datablock, stat=allocrc)

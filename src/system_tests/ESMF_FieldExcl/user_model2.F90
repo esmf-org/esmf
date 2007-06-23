@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.25 2007/06/23 04:01:24 cdeluca Exp $
+! $Id: user_model2.F90,v 1.26 2007/06/23 07:00:58 cdeluca Exp $
 !
 ! System test for Exclusive Components, user-written component 2.
 
@@ -30,7 +30,7 @@
 !   !   private to the module.
  
     subroutine userm2_register(comp, rc)
-        type(ESMF_IGridComp) :: comp
+        type(ESMF_GridComp) :: comp
         integer :: rc
 
         integer :: localrc
@@ -39,11 +39,11 @@
 
         ! Register the callback routines.
 
-        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
                                         user_init, ESMF_SINGLEPHASE, localrc)
-        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETRUN, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
                                         user_run, ESMF_SINGLEPHASE, localrc)
-        call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
                                        user_final, ESMF_SINGLEPHASE, localrc)
 
         !print *, "Registered Initialize, Run, and Finalize routines"
@@ -54,7 +54,7 @@
         ! your own code development you probably don't want to include the 
         ! following call unless you are interested in exploring ESMF's 
         ! threading features.
-        call ESMF_IGridCompSetVMMinThreads(comp, rc=rc)
+        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
 #endif
 
         rc = localrc
@@ -66,7 +66,7 @@
 !   !   Initialization routine.
  
     subroutine user_init(comp, importState, exportState, clock, rc)
-      type(ESMF_IGridComp), intent(inout) :: comp
+      type(ESMF_GridComp), intent(inout) :: comp
       type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc
@@ -90,7 +90,7 @@
       status = ESMF_FAILURE
 
       ! Query component for VM and create a layout with the right breakdown
-      call ESMF_IGridCompGet(comp, vm=vm, rc=status)
+      call ESMF_GridCompGet(comp, vm=vm, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
       call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
@@ -200,7 +200,7 @@
 !   !
  
     subroutine user_run(comp, importState, exportState, clock, rc)
-      type(ESMF_IGridComp), intent(inout) :: comp
+      type(ESMF_GridComp), intent(inout) :: comp
       type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc
@@ -233,7 +233,7 @@
 !   !
  
     subroutine user_final(comp, importState, exportState, clock, rc)
-      type(ESMF_IGridComp), intent(inout) :: comp
+      type(ESMF_GridComp), intent(inout) :: comp
       type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc

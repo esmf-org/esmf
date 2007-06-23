@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.34 2007/06/23 04:00:53 cdeluca Exp $
+% $Id: Component_refdoc.ctex,v 1.35 2007/06/23 07:00:49 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -46,53 +46,53 @@
 #endif
 
 %%%%%%%%%%%%% IGridded Component Class %%%%%%%%%
-\section{IGridComp Class}
+\section{GridComp Class}
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{IGridComp_desc}
+\input{GridComp_desc}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/IGridComp_desc}
+\input{../Superstructure/Component/doc/GridComp_desc}
 #endif
 
-\subsection{IGridComp Options}
+\subsection{GridComp Options}
 #ifdef STANDALONE
-\input{IGridComp_options}
+\input{GridComp_options}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/IGridComp_options}
+\input{../Superstructure/Component/doc/GridComp_options}
 #endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{IGridComp_usage}
+\input{GridComp_usage}
 \input{ESMF_GCompEx_fapi}
 \input{ESMF_InternalStateEx_fapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/IGridComp_usage}
+\input{../Superstructure/Component/doc/GridComp_usage}
 \input{../Superstructure/Component/doc/ESMF_GCompEx_fapi}
 \input{../Superstructure/Component/doc/ESMF_InternalStateEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
 #ifdef STANDALONE
-\input{IGridComp_rest}
+\input{GridComp_rest}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/IGridComp_rest}
+\input{../Superstructure/Component/doc/GridComp_rest}
 #endif
 
-\subsection{Class API: Basic IGridComp Methods}
+\subsection{Class API: Basic GridComp Methods}
 #ifdef STANDALONE
-\input{ESMF_IGridComp_fapi}
+\input{ESMF_GridComp_fapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_IGridComp_fapi}
+\input{../Superstructure/Component/doc/ESMF_GridComp_fapi}
 #endif
 
 \subsection{Class API: SetServices and Related Methods}
 \label{sec:IGridSetServ}
 #ifdef STANDALONE
-\input{ESMF_IGridCompSetServ_fapi}
+\input{ESMF_GridCompSetServ_fapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_IGridCompSetServ_fapi}
+\input{../Superstructure/Component/doc/ESMF_GridCompSetServ_fapi}
 #endif
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_CompRun.C,v 1.13 2007/06/23 04:01:00 cdeluca Exp $
+// $Id: ESMC_CompRun.C,v 1.14 2007/06/23 07:00:51 cdeluca Exp $
 //
 // Test code which creates a new Component in C++.  The called
 // component is still in F90.
@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include "ESMCI.h"
 
-extern "C" void FTN(externaluser_setservices)(ESMC_IGridComp *, int *rc);
+extern "C" void FTN(externaluser_setservices)(ESMC_GridComp *, int *rc);
 
 main(int argc, char **argv)
 {
@@ -27,7 +27,7 @@ main(int argc, char **argv)
     int rc;
     char *cname;
     ESMC_DELayout *delayout;
-    ESMC_IGridComp *comp1;
+    ESMC_GridComp *comp1;
     ESMC_State *instate, *outstate;
     ESMC_Clock *clock = NULL;
         
@@ -43,37 +43,37 @@ main(int argc, char **argv)
     // TODO: query framework for default layout here
 
     cname = "Atmosphere";
-    comp1 = ESMC_IGridCompCreate(cname, ESMF_ATM, NULL, "igrid.rc", clock, &rc);
+    comp1 = ESMC_GridCompCreate(cname, ESMF_ATM, NULL, "igrid.rc", clock, &rc);
 
     printf("IGrid Comp Create returned, name = '%s'\n", cname);
 
 
-    rc = comp1->ESMC_IGridCompPrint("");
+    rc = comp1->ESMC_GridCompPrint("");
     printf("IGrid Comp Print returned\n");
 
     // register other entry points
-    rc = comp1->ESMC_IGridCompSetServices(FTN(externaluser_setservices));
+    rc = comp1->ESMC_GridCompSetServices(FTN(externaluser_setservices));
 
     // in a real application, these need to be created first.
     instate = NULL;
     outstate = NULL;
     clock = NULL;
-    rc = comp1->ESMC_IGridCompInitialize(instate, outstate, clock, 0, ESMF_BLOCKING);
+    rc = comp1->ESMC_GridCompInitialize(instate, outstate, clock, 0, ESMF_BLOCKING);
     printf("IGrid Comp Initialize returned\n");
 
-    rc = comp1->ESMC_IGridCompRun(instate, outstate, clock, 0, ESMF_BLOCKING);
+    rc = comp1->ESMC_GridCompRun(instate, outstate, clock, 0, ESMF_BLOCKING);
     printf("IGrid Comp Run returned\n");
 
-    rc = comp1->ESMC_IGridCompRun(instate, outstate, clock, 0, ESMF_BLOCKING);
+    rc = comp1->ESMC_GridCompRun(instate, outstate, clock, 0, ESMF_BLOCKING);
     printf("IGrid Comp Run returned\n");
 
-    rc = comp1->ESMC_IGridCompFinalize(instate, outstate, clock, 0, ESMF_BLOCKING);
+    rc = comp1->ESMC_GridCompFinalize(instate, outstate, clock, 0, ESMF_BLOCKING);
     printf("IGrid Comp Finalize returned\n");
 
-    rc = comp1->ESMC_IGridCompPrint("");
+    rc = comp1->ESMC_GridCompPrint("");
     printf("Comp Print returned\n");
 
-    rc = ESMC_IGridCompDestroy(comp1);
+    rc = ESMC_GridCompDestroy(comp1);
     printf("Comp Run returned\n");
 
     printf("Component Test 1 finished\n");

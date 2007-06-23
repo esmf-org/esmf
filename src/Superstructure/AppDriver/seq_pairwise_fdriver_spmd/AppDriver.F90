@@ -37,7 +37,7 @@
     ! Local variables
 
     ! Components
-    type(ESMF_IGridComp) :: compIGridded
+    type(ESMF_GridComp) :: compIGridded
 
     ! States, Virtual Machines, and Layouts
     type(ESMF_VM) :: defaultvm
@@ -109,7 +109,7 @@
     call ESMF_VMGetGlobal(defaultvm, rc)
 
     ! Create the top IGridded component, passing in the default layout.
-    compIGridded = ESMF_IGridCompCreate(name="ESMF IGridded Component", rc=rc)
+    compIGridded = ESMF_GridCompCreate(name="ESMF IGridded Component", rc=rc)
 
     call ESMF_LogWrite("Component Create finished", ESMF_LOG_INFO)
 
@@ -119,7 +119,7 @@
 !!  Register section
 !!------------------------------------------------------------------------------
 !!------------------------------------------------------------------------------
-      call ESMF_IGridCompSetServices(compIGridded, SetServices, rc)
+      call ESMF_GridCompSetServices(compIGridded, SetServices, rc)
       if (ESMF_LogMsgFoundError(rc, "Registration failed", rc)) goto 10
 
 
@@ -159,7 +159,7 @@
       call ESMF_IGridDistribute(igrid, delayout=defaultlayout, rc=rc)
 
       ! Attach the IGrid to the Component
-      call ESMF_IGridCompSet(compIGridded, igrid=igrid, rc=rc)
+      call ESMF_GridCompSet(compIGridded, igrid=igrid, rc=rc)
 
 
 !!------------------------------------------------------------------------------
@@ -176,19 +176,19 @@
 !!------------------------------------------------------------------------------
 !!------------------------------------------------------------------------------
  
-      call ESMF_IGridCompInitialize(compIGridded, defaultstate, defaultstate, &
+      call ESMF_GridCompInitialize(compIGridded, defaultstate, defaultstate, &
                                                                   clock, rc=rc)
       if (ESMF_LogMsgFoundError(rc, "Initialize failed", rc)) goto 10
  
 
 
-      call ESMF_IGridCompRun(compIGridded, defaultstate, defaultstate, &
+      call ESMF_GridCompRun(compIGridded, defaultstate, defaultstate, &
                                                                   clock, rc=rc)
       if (ESMF_LogMsgFoundError(rc, "Run failed", rc)) goto 10
  
 
 
-      call ESMF_IGridCompFinalize(compIGridded, defaultstate, defaultstate, &
+      call ESMF_GridCompFinalize(compIGridded, defaultstate, defaultstate, &
                                                                   clock, rc=rc)
       if (ESMF_LogMsgFoundError(rc, "Finalize failed", rc)) goto 10
  
@@ -205,7 +205,7 @@
 
       call ESMF_StateDestroy(defaultstate, rc)
 
-      call ESMF_IGridCompDestroy(compIGridded, rc)
+      call ESMF_GridCompDestroy(compIGridded, rc)
 
       call ESMF_DELayoutDestroy(defaultLayout, rc)
 

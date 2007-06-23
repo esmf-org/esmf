@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.8 2007/06/23 04:01:01 cdeluca Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.9 2007/06/23 07:00:51 cdeluca Exp $
 !
 ! Test code which creates a new Component.
 
@@ -34,7 +34,7 @@
 
     ! other local variables
     character(ESMF_MAXSTR) :: cname
-    type(ESMF_IGridComp) :: comp1, comp2
+    type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_VM) :: vm
         
 !-------------------------------------------------------------------------
@@ -47,7 +47,7 @@
     !NEX_UTest
     ! Verifing that a IGridded Component can be created
     cname = "Atmosphere - default context"
-    comp1 = ESMF_IGridCompCreate(name=cname, igridcompType=ESMF_ATM, &
+    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
       configFile="igrid.rc", rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a IGridded Component"
@@ -56,7 +56,7 @@
     !------------------------------------------------------------------------
     !NEX_UTest
     ! Verifing that a IGridded Component can be printed
-    call ESMF_IGridCompPrint(comp1, rc=rc)
+    call ESMF_GridCompPrint(comp1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Printing a IGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -64,7 +64,7 @@
     !------------------------------------------------------------------------
     !NEX_UTest
     ! Verifing that a IGridded Component can be destroyed
-    call ESMF_IGridCompDestroy(comp1, rc=rc)
+    call ESMF_GridCompDestroy(comp1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Destroying a IGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -74,7 +74,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     ! Query the run status of a deleted IGridded Component 
-    bool = ESMF_IGridCompIsPetLocal(comp1, rc=rc)  
+    bool = ESMF_GridCompIsPetLocal(comp1, rc=rc)  
     write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
     write(name, *) "Query run status of a deleted IGridded Component"
     call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
@@ -90,7 +90,7 @@
     !EX_UTest
     ! Verifing that a IGridded Component can be created in parent VM context
     cname = "Atmosphere - child in parent VM context"
-    comp1 = ESMF_IGridCompCreate(name=cname, igridcompType=ESMF_ATM, &
+    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
       configFile="igrid.rc", contextflag=ESMF_CHILD_IN_PARENT_VM, rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a IGridded Component"
@@ -99,7 +99,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     ! Query the run status of a IGridded Component 
-    bool = ESMF_IGridCompIsPetLocal(comp1, rc=rc)  
+    bool = ESMF_GridCompIsPetLocal(comp1, rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Query run status of a IGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -115,8 +115,8 @@
     !EX_UTest
     ! Create a IGridded Component setting the petlist to 1
     ! to force run status to be set to false for all other PETs
-    cname = "IGridComp with PetList"
-    comp2 = ESMF_IGridCompCreate(name=cname, petList=(/1/), rc=rc)  
+    cname = "GridComp with PetList"
+    comp2 = ESMF_GridCompCreate(name=cname, petList=(/1/), rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a IGridded Component with petList"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -124,7 +124,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     ! Query the run status of a IGridded Component 
-    bool = ESMF_IGridCompIsPetLocal(comp2, rc=rc)  
+    bool = ESMF_GridCompIsPetLocal(comp2, rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Query run status of a IGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -159,7 +159,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     ! Verifing that a IGridded Component can be destroyed
-    call ESMF_IGridCompDestroy(comp2, rc=rc)
+    call ESMF_GridCompDestroy(comp2, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Destroying a IGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -167,7 +167,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     ! Verifing that a IGridded Component can be printed
-    call ESMF_IGridCompPrint(comp1, rc=rc)
+    call ESMF_GridCompPrint(comp1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Printing a IGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -175,7 +175,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     ! Verifing that a IGridded Component can be destroyed
-    call ESMF_IGridCompDestroy(comp1, rc=rc)
+    call ESMF_GridCompDestroy(comp1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Destroying a IGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -184,7 +184,7 @@
     !EX_UTest
     ! Verifing that a IGridded Component can be created in new VM context
     cname = "Atmosphere - child in new VM context"
-    comp1 = ESMF_IGridCompCreate(name=cname, igridcompType=ESMF_ATM, &
+    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
       configFile="igrid.rc", contextflag=ESMF_CHILD_IN_NEW_VM, rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a IGridded Component"
@@ -193,7 +193,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     ! Verifing that a IGridded Component can be printed
-    call ESMF_IGridCompPrint(comp1, rc=rc)
+    call ESMF_GridCompPrint(comp1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Printing a IGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -201,7 +201,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     ! Verifing that a IGridded Component can be destroyed
-    call ESMF_IGridCompDestroy(comp1, rc=rc)
+    call ESMF_GridCompDestroy(comp1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Destroying a IGridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

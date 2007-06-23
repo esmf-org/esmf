@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.50 2007/06/23 04:00:46 cdeluca Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.51 2007/06/23 07:00:49 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -245,7 +245,7 @@
          ESMF_ID_REGRID = ESMF_ObjectID(30, "ESMF_Regrid"), &
          ESMF_ID_TRANSFORM = ESMF_ObjectID(31, "ESMF_Transform"), &
          ESMF_ID_STATE = ESMF_ObjectID(32, "ESMF_State"), &
-         ESMF_ID_IGRIDCOMPONENT = ESMF_ObjectID(33, "ESMF_IGridComponent"), &
+         ESMF_ID_GRIDCOMPONENT = ESMF_ObjectID(33, "ESMF_GridComponent"), &
          ESMF_ID_CPLCOMPONENT = ESMF_ObjectID(34, "ESMF_CplComponent"), &
          ESMF_ID_COMPONENT = ESMF_ObjectID(35, "ESMF_Component"), &
          ESMF_ID_INTERNARRAY = ESMF_ObjectID(36, "ESMF_InternArray"), &
@@ -539,7 +539,7 @@
       public ESMF_ID_ROUTEHANDLE, ESMF_ID_FIELDDATAMAP, ESMF_ID_FIELD
       public ESMF_ID_BUNDLEDATAMAP, ESMF_ID_BUNDLE, ESMF_ID_TRANSFORMVALUES
       public ESMF_ID_REGRID, ESMF_ID_TRANSFORM, ESMF_ID_STATE
-      public ESMF_ID_IGRIDCOMPONENT, ESMF_ID_CPLCOMPONENT, ESMF_ID_COMPONENT
+      public ESMF_ID_GRIDCOMPONENT, ESMF_ID_CPLCOMPONENT, ESMF_ID_COMPONENT
 
       public ESMF_LOCAL, ESMF_GLOBAL
 

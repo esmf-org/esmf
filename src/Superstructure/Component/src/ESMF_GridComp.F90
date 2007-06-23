@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.90 2007/05/11 21:34:32 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.91 2007/06/23 07:00:50 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
       use ESMF_ConfigMod
       use ESMF_ClockMod
       use ESMF_ClockTypeMod
-      use ESMF_GridTypesMod
+      use ESMF_IGridTypesMod
       use ESMF_StateTypesMod
       use ESMF_StateMod
       use ESMF_CompMod
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.90 2007/05/11 21:34:32 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.91 2007/06/23 07:00:50 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -144,7 +144,7 @@
 ! !IROUTINE: ESMF_GridCompCreate - Create a Gridded Component
 !
 ! !INTERFACE:
-      recursive function ESMF_GridCompCreate(name, gridcomptype, grid, &
+      recursive function ESMF_GridCompCreate(name, gridcomptype, igrid, &
         config, configFile, clock, petList, contextflag, parentVm, rc)
 !
 ! !RETURN VALUE:
@@ -154,7 +154,7 @@
       !external :: services
       character(len=*),        intent(in),    optional :: name
       type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
-      type(ESMF_Grid),         intent(inout),    optional :: grid
+      type(ESMF_IGrid),         intent(inout),    optional :: igrid
       type(ESMF_Config),       intent(inout),    optional :: config
       character(len=*),        intent(in),    optional :: configFile
       type(ESMF_Clock),        intent(inout), optional :: clock
@@ -179,8 +179,8 @@
 !    {\tt ESMF\_ATM, ESMF\_LAND, ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER}.  
 !    Note that this has no meaning to the framework, it is an
 !    annotation for user code to query.
-!   \item[{[grid]}]
-!    Default {\tt ESMF\_Grid} associated with this {\tt gridcomp}.
+!   \item[{[igrid]}]
+!    Default {\tt ESMF\_IGrid} associated with this {\tt gridcomp}.
 !   \item[{[config]}]
 !    An already-created {\tt ESMF\_Config} configuration object
 !    from which the new component
@@ -223,7 +223,7 @@
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
         integer :: localrc                               ! local error status
 
-        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVm,rc)
@@ -245,7 +245,7 @@
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
                                 gridcomptype=gridcomptype, &
                                 configFile=configFile, &
-                                config=config, grid=grid, clock=clock, &
+                                config=config, igrid=igrid, clock=clock, &
                                 vm=parentVm, petList=petList, &
                                 contextflag=contextflag, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -444,13 +444,13 @@
 !
 ! !INTERFACE:
       subroutine ESMF_GridCompGet(gridcomp, name, gridcomptype, &
-        grid, config, configFile, clock, vm, contextflag, rc)
+        igrid, config, configFile, clock, vm, contextflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp),     intent(inout)            :: gridcomp
       character(len=*),        intent(out), optional :: name
       type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
-      type(ESMF_Grid),         intent(out), optional :: grid
+      type(ESMF_IGrid),         intent(out), optional :: igrid
       type(ESMF_Config),       intent(out), optional :: config
       character(len=*),        intent(out), optional :: configFile
       type(ESMF_Clock),        intent(out), optional :: clock
@@ -474,8 +474,8 @@
 !    Return the name of the {\tt ESMF\_GridComp}.
 !   \item[{[gridcomptype]}]
 !    Return the model type of this {\tt ESMF\_GridComp}.
-!   \item[{[grid]}]
-!    Return the {\tt ESMF\_Grid} associated with this {\tt ESMF\_GridComp}.
+!   \item[{[igrid]}]
+!    Return the {\tt ESMF\_IGrid} associated with this {\tt ESMF\_GridComp}.
 !   \item[{[config]}]
 !    Return the {\tt ESMF\_Config} object for this {\tt ESMF\_GridComp}.
 !   \item[{[configFile]}]
@@ -499,7 +499,7 @@
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         call ESMF_CompGet(gridcomp%compp, name, vm=vm, contextflag=contextflag,&
-                          gridcomptype=gridcomptype, grid=grid, clock=clock, &
+                          gridcomptype=gridcomptype, igrid=igrid, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
 
         end subroutine ESMF_GridCompGet
@@ -782,14 +782,14 @@
 ! !IROUTINE: ESMF_GridCompSet - Set or reset information about the GridComp
 !
 ! !INTERFACE:
-      subroutine ESMF_GridCompSet(gridcomp, name, gridcomptype, grid, &
+      subroutine ESMF_GridCompSet(gridcomp, name, gridcomptype, igrid, &
                                   config, configFile, clock, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp),     intent(inout)         :: gridcomp
       character(len=*),        intent(in),  optional :: name
       type(ESMF_GridCompType), intent(in),  optional :: gridcomptype 
-      type(ESMF_Grid),         intent(inout),  optional :: grid
+      type(ESMF_IGrid),        intent(inout),  optional :: igrid
       type(ESMF_Config),       intent(inout),  optional :: config
       character(len=*),        intent(in),  optional :: configFile
       type(ESMF_Clock),        intent(inout),  optional :: clock
@@ -811,8 +811,8 @@
 !    Set the name of the {\tt ESMF\_GridComp}.
 !   \item[{[gridcomptype]}]
 !    Set the model type for this {\tt ESMF\_GridComp}.
-!   \item[{[grid]}]
-!    Set the {\tt ESMF\_Grid} associated with the {\tt ESMF\_GridComp}.
+!   \item[{[igrid]}]
+!    Set the {\tt ESMF\_IGrid} associated with the {\tt ESMF\_GridComp}.
 !   \item[{[config]}]
 !    Set the configuration information for the {\tt ESMF\_GridComp} from
 !    this already created {\tt ESMF\_Config} object.   
@@ -831,7 +831,7 @@
 !EOP
 
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
-        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
@@ -839,7 +839,7 @@
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         call ESMF_CompSet(gridcomp%compp, name, &
-                          gridcomptype=gridcomptype, grid=grid, clock=clock, &
+                          gridcomptype=gridcomptype, igrid=igrid, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
 
         end subroutine ESMF_GridCompSet

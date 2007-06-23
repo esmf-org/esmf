@@ -1,4 +1,4 @@
-// $Id: ESMC_GCompEx.C,v 1.20 2007/06/23 04:00:55 cdeluca Exp $
+// $Id: ESMC_GCompEx.C,v 1.21 2007/06/23 07:00:49 cdeluca Exp $
 //
 // Example/test code which creates a new comp.
 
@@ -46,7 +46,7 @@ main(int argc, char **argv) {
 //   // Example 1:
 //   //
 
-     //comp1 = ESMC_CompCreate("Atmosphere", layout, ESMF_IGRIDCOMP,
+     //comp1 = ESMC_CompCreate("Atmosphere", layout, ESMF_GRIDCOMP,
      //                         ESMF_ATM, "/usr/local', &rc);
 
      //rc = ESMC_CompRegMethod(comp1, "initialize", ATM_Init);

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2007/06/23 04:00:59 cdeluca Exp $
+# $Id: makefile,v 1.29 2007/06/23 07:00:51 cdeluca Exp $
 
 # leave alone.
 ALL: build_here 
@@ -13,12 +13,12 @@ FFLAGS    =
 SOURCEC	  = ESMC_FTable.C
 
 # If you have F90 files in this directory, list them all on the line below.
-SOURCEF	  = ESMF_Comp.F90 ESMF_IGridComp.F90 ESMF_CplComp.F90 
+SOURCEF	  = ESMF_Comp.F90 ESMF_GridComp.F90 ESMF_CplComp.F90 
 
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # If you have public .h files in this dir, list them here
-STOREH    = ESMC_Comp.h ESMC_FTable.h ESMC_IGridComp.h ESMC_CplComp.h
+STOREH    = ESMC_Comp.h ESMC_FTable.h ESMC_GridComp.h ESMC_CplComp.h
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
@@ -46,5 +46,5 @@ CLOBBERDIRS =
 
 ESMF_CplComp.o:  ESMF_Comp.o
 
-ESMF_IGridComp.o: ESMF_Comp.o
+ESMF_GridComp.o: ESMF_Comp.o
 

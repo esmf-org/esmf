@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.7 2007/06/23 04:01:16 cdeluca Exp $
+! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.8 2007/06/23 07:00:56 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !SYSTEM_TEST        String used by test script to count system tests.
@@ -52,7 +52,7 @@ program ArraySparseMatMul
   character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
   type(ESMF_VM):: vm
   type(ESMF_State) :: c1exp, c2imp
-  type(ESMF_IGridComp) :: comp1, comp2
+  type(ESMF_GridComp) :: comp1, comp2
   type(ESMF_CplComp) :: cpl
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -94,17 +94,17 @@ program ArraySparseMatMul
   ! Create the 2 model components and coupler
   cname1 = "user model 1"
   ! use petList to define comp1 on PET 0,1,2,3
-  comp1 = ESMF_IGridCompCreate(name=cname1, petList=(/0,1,2,3/), rc=rc)
+  comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0,1,2,3/), rc=rc)
   print *, "Created component ", trim(cname1), "rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
-  !  call ESMF_IGridCompPrint(comp1, "", rc)
+  !  call ESMF_GridCompPrint(comp1, "", rc)
 
   cname2 = "user model 2"
   ! use petList to define comp2 on PET 4,5
-  comp2 = ESMF_IGridCompCreate(name=cname2, petList=(/4,5/), rc=rc)
+  comp2 = ESMF_GridCompCreate(name=cname2, petList=(/4,5/), rc=rc)
   print *, "Created component ", trim(cname2), "rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
-  !  call ESMF_IGridCompPrint(comp2, "", rc)
+  !  call ESMF_GridCompPrint(comp2, "", rc)
 
   cplname = "user one-way coupler"
   ! no petList means that coupler component runs on all PETs
@@ -121,11 +121,11 @@ program ArraySparseMatMul
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_IGridCompSetServices(comp1, userm1_register, rc)
+  call ESMF_GridCompSetServices(comp1, userm1_register, rc)
   print *, "Comp SetServices finished, rc= ", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
 
-  call ESMF_IGridCompSetServices(comp2, userm2_register, rc)
+  call ESMF_GridCompSetServices(comp2, userm2_register, rc)
   print *, "Comp SetServices finished, rc= ", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -141,13 +141,13 @@ program ArraySparseMatMul
  
   c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
-  call ESMF_IGridCompInitialize(comp1, exportState=c1exp, rc=rc)
+  call ESMF_GridCompInitialize(comp1, exportState=c1exp, rc=rc)
   print *, "Comp 1 Initialize finished, rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
  
   c2imp = ESMF_StateCreate("comp2 import", ESMF_STATE_IMPORT, rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
-  call ESMF_IGridCompInitialize(comp2, importState=c2imp, rc=rc)
+  call ESMF_GridCompInitialize(comp2, importState=c2imp, rc=rc)
   print *, "Comp 2 Initialize finished, rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
  
@@ -163,7 +163,7 @@ program ArraySparseMatMul
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_IGridCompRun(comp1, exportState=c1exp, rc=rc)
+  call ESMF_GridCompRun(comp1, exportState=c1exp, rc=rc)
   print *, "Comp 1 Run returned, rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -171,7 +171,7 @@ program ArraySparseMatMul
   print *, "Coupler Run returned, rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
 
-  call ESMF_IGridCompRun(comp2, importState=c2imp, rc=rc)
+  call ESMF_GridCompRun(comp2, importState=c2imp, rc=rc)
   print *, "Comp 2 Run returned, rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
  
@@ -181,11 +181,11 @@ program ArraySparseMatMul
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_IGridCompFinalize(comp1, exportState=c1exp, rc=rc)
+  call ESMF_GridCompFinalize(comp1, exportState=c1exp, rc=rc)
   print *, "Comp 1 Finalize finished, rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
 
-  call ESMF_IGridCompFinalize(comp2, importState=c2imp, rc=rc)
+  call ESMF_GridCompFinalize(comp2, importState=c2imp, rc=rc)
   print *, "Comp 2 Finalize finished, rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -202,8 +202,8 @@ program ArraySparseMatMul
   call ESMF_StateDestroy(c1exp, rc)
   call ESMF_StateDestroy(c2imp, rc)
 
-  call ESMF_IGridCompDestroy(comp1, rc)
-  call ESMF_IGridCompDestroy(comp2, rc)
+  call ESMF_GridCompDestroy(comp1, rc)
+  call ESMF_GridCompDestroy(comp2, rc)
   call ESMF_CplCompDestroy(cpl, rc)
 
   print *, "All Destroy routines done"

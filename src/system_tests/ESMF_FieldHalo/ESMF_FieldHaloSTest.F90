@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.48 2007/06/23 04:01:26 cdeluca Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.49 2007/06/23 07:00:59 cdeluca Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -30,7 +30,7 @@
     external setserv
 
     ! Module Local variables
-    type(ESMF_IGridComp) :: comp1
+    type(ESMF_GridComp) :: comp1
     type(ESMF_VM) :: vm
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_State) :: import
@@ -77,12 +77,12 @@
     endif
 
     cname = "System Test FieldHalo"
-    comp1 = ESMF_IGridCompCreate(name=cname, rc=rc)
+    comp1 = ESMF_GridCompCreate(name=cname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Create finished, name = ", trim(cname)
 
-    call ESMF_IGridCompSetServices(comp1, setserv, rc)
+    call ESMF_GridCompSetServices(comp1, setserv, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
 !
@@ -91,7 +91,7 @@
 !
     import = ESMF_StateCreate("igridded comp import", ESMF_STATE_IMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_IGridCompInitialize(comp1, importState=import, rc=rc)
+    call ESMF_GridCompInitialize(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Init returned"
@@ -101,7 +101,7 @@
 !     Run section
 !
 
-    call ESMF_IGridCompRun(comp1, importState=import, rc=rc)
+    call ESMF_GridCompRun(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Run returned"
@@ -110,7 +110,7 @@
 !-------------------------------------------------------------------------
 !     Finalize section
 
-    call ESMF_IGridCompFinalize(comp1, importState=import, rc=rc)
+    call ESMF_GridCompFinalize(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Finalize returned without error"
@@ -120,7 +120,7 @@
 !     Destroy section
 ! 
 
-    call ESMF_IGridCompDestroy(comp1, rc)
+    call ESMF_GridCompDestroy(comp1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_StateDestroy(import, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -178,18 +178,18 @@
     subroutine setserv(comp, rc)
       use ESMF_Mod
 
-      type(ESMF_IGridComp) :: comp
+      type(ESMF_GridComp) :: comp
       integer :: rc
 
       external myinit, myrun, myfinal
        
-      call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETINIT, myinit, &
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, myinit, &
                                                           ESMF_SINGLEPHASE, rc)
       if (rc .ne. ESMF_SUCCESS) return
-      call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETRUN, myrun, &
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, myrun, &
                                                           ESMF_SINGLEPHASE, rc)
       if (rc .ne. ESMF_SUCCESS) return
-      call ESMF_IGridCompSetEntryPoint(comp, ESMF_SETFINAL, myfinal, &
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, myfinal, &
                                                           ESMF_SINGLEPHASE, rc)
       if (rc .ne. ESMF_SUCCESS) return
   
@@ -199,7 +199,7 @@
         ! your own code development you probably don't want to include the 
         ! following call unless you are interested in exploring ESMF's 
         ! threading features.
-        call ESMF_IGridCompSetVMMinThreads(comp, rc=rc)
+        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
 #endif
 
       rc = ESMF_SUCCESS
@@ -215,7 +215,7 @@
       use ESMF_Mod
       use shared
 
-      type(ESMF_IGridComp) :: comp
+      type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
@@ -239,7 +239,7 @@
 
       ! Query the component for how many pets we have, and make a layout 
       ! based on that.
-      call ESMF_IGridCompGet(comp, vm=vm, rc=rc)
+      call ESMF_GridCompGet(comp, vm=vm, rc=rc)
 
       ! Make sure we were given enough pets for what we expected.
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
@@ -345,7 +345,7 @@
       use ESMF_Mod
       use shared
 
-      type(ESMF_IGridComp) :: comp
+      type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
@@ -394,7 +394,7 @@
       use ESMF_Mod
       use shared
 
-      type(ESMF_IGridComp) :: comp
+      type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc

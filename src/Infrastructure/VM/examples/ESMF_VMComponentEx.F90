@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentEx.F90,v 1.9 2007/06/23 04:00:47 cdeluca Exp $
+! $Id: ESMF_VMComponentEx.F90,v 1.10 2007/06/23 07:00:49 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -49,33 +49,33 @@ module ESMF_VMComponentEx_gcomp_mod
   subroutine mygcomp_register(gcomp, rc)
 !EOC
     ! arguments
-    type(ESMF_IGridComp), intent(inout):: gcomp
+    type(ESMF_GridComp), intent(inout):: gcomp
     integer, intent(out):: rc
     
     print *, '*** hi from mygcomp_register ***'
     
     ! Currently only the MPI-only VM is accessible!!!
     ! Optionally set properties for this component's VM via one of three methods
-    !    call ESMF_IGridCompSetVMMaxThreads(gcomp, ...)
-    !    call ESMF_IGridCompSetVMMinThreads(gcomp, ...)
-    !    call ESMF_IGridCompSetVMMaxPEs(gcomp, ...)
+    !    call ESMF_GridCompSetVMMaxThreads(gcomp, ...)
+    !    call ESMF_GridCompSetVMMinThreads(gcomp, ...)
+    !    call ESMF_GridCompSetVMMaxPEs(gcomp, ...)
     
 !BOC
     ! register INIT method
-    call ESMF_IGridCompSetEntryPoint(gcomp, ESMF_SETINIT, mygcomp_init, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, mygcomp_init, &
       ESMF_SINGLEPHASE, rc)
     ! register RUN method
-    call ESMF_IGridCompSetEntryPoint(gcomp, ESMF_SETRUN, mygcomp_run, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, mygcomp_run, &
       ESMF_SINGLEPHASE, rc)
     ! register FINAL method
-    call ESMF_IGridCompSetEntryPoint(gcomp, ESMF_SETFINAL, mygcomp_final, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, mygcomp_final, &
       ESMF_SINGLEPHASE, rc)
   end subroutine !--------------------------------------------------------------
   
   recursive subroutine mygcomp_init(gcomp, istate, estate, clock, rc)
 !EOC
     ! arguments
-    type(ESMF_IGridComp), intent(inout):: gcomp
+    type(ESMF_GridComp), intent(inout):: gcomp
     type(ESMF_State), intent(in):: istate, estate
     type(ESMF_Clock), intent(in):: clock
     integer, intent(out):: rc
@@ -87,7 +87,7 @@ module ESMF_VMComponentEx_gcomp_mod
     
 !BOC
     ! get this component's vm    
-    call ESMF_IGridCompGet(gcomp, vm=vm)
+    call ESMF_GridCompGet(gcomp, vm=vm)
 
     call ESMF_VMPrint(vm, rc)
 !EOC
@@ -101,7 +101,7 @@ module ESMF_VMComponentEx_gcomp_mod
 !EOC
     ! like mygcomp_init...
     ! arguments
-    type(ESMF_IGridComp), intent(inout):: gcomp
+    type(ESMF_GridComp), intent(inout):: gcomp
     type(ESMF_State), intent(in):: istate, estate
     type(ESMF_Clock), intent(in):: clock
     integer, intent(out):: rc
@@ -113,7 +113,7 @@ module ESMF_VMComponentEx_gcomp_mod
     
 !BOC
     ! get this component's vm    
-    call ESMF_IGridCompGet(gcomp, vm=vm)
+    call ESMF_GridCompGet(gcomp, vm=vm)
 
     call ESMF_VMPrint(vm, rc)
 !EOC
@@ -127,7 +127,7 @@ module ESMF_VMComponentEx_gcomp_mod
 !EOC
     ! like mygcomp_init...
     ! arguments
-    type(ESMF_IGridComp), intent(inout):: gcomp
+    type(ESMF_GridComp), intent(inout):: gcomp
     type(ESMF_State), intent(in):: istate, estate
     type(ESMF_Clock), intent(in):: clock
     integer, intent(out):: rc
@@ -139,7 +139,7 @@ module ESMF_VMComponentEx_gcomp_mod
 
 !BOC
     ! get this component's vm    
-    call ESMF_IGridCompGet(gcomp, vm=vm)
+    call ESMF_GridCompGet(gcomp, vm=vm)
 
     call ESMF_VMPrint(vm, rc)
 !EOC
@@ -164,7 +164,7 @@ program ESMF_VMComponentEx
   
   ! local variables
   integer:: rc
-  type(ESMF_IGridComp):: gcomp
+  type(ESMF_GridComp):: gcomp
   ! result code
   integer :: finalrc
   finalrc = ESMF_SUCCESS
@@ -173,30 +173,30 @@ program ESMF_VMComponentEx
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC  
-  gcomp = ESMF_IGridCompCreate(name='My igridded component', rc=rc)
+  gcomp = ESMF_GridCompCreate(name='My igridded component', rc=rc)
 !EOC  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC  
-  call ESMF_IGridCompSetServices(gcomp, mygcomp_register, rc)
+  call ESMF_GridCompSetServices(gcomp, mygcomp_register, rc)
 !EOC  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC  
-  call ESMF_IGridCompInitialize(gcomp, rc=rc)
+  call ESMF_GridCompInitialize(gcomp, rc=rc)
 !EOC  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC  
-  call ESMF_IGridCompRun(gcomp, rc=rc)
+  call ESMF_GridCompRun(gcomp, rc=rc)
 !EOC  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC  
-  call ESMF_IGridCompFinalize(gcomp, rc=rc)
+  call ESMF_GridCompFinalize(gcomp, rc=rc)
 !EOC  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC  
-  call ESMF_IGridCompDestroy(gcomp, rc=rc)
+  call ESMF_GridCompDestroy(gcomp, rc=rc)
 !EOC  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
