@@ -1,4 +1,4 @@
-// $Id: ESMC_LRInternGrid_F.C,v 1.1 2007/06/22 23:21:36 cdeluca Exp $
+// $Id: ESMC_LRInternGrid_F.C,v 1.2 2007/06/23 04:37:05 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -14,7 +14,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt ESMC\_LRInternGrid} methods declared
+// The code in this file implements the C++ {\tt ESMC\_LRIGrid} methods declared
 // in the companion file ESMC_LRInternGrid.h
 //
 // 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_LRInternGrid_F.C,v 1.1 2007/06/22 23:21:36 cdeluca Exp $";
+             "$Id: ESMC_LRInternGrid_F.C,v 1.2 2007/06/23 04:37:05 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -40,12 +40,12 @@ extern "C" {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
-// This section includes all the InternGrid routines
+// This section includes all the IGrid routines
 //
 //
 
 // non-method functions
-void FTN(c_esmc_lrinterngridserialize)(int *dimCount,
+void FTN(c_esmc_lrigridserialize)(int *dimCount,
                                  int *countPerDim,               // array of ints
                                  ESMC_R8 *deltaPerDim,            // array of reals
                                  void *buffer, int *length, 
@@ -63,7 +63,7 @@ void FTN(c_esmc_lrinterngridserialize)(int *dimCount,
     if ((*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                            "Buffer too short to add a InternGrid object", localrc);
+                            "Buffer too short to add a IGrid object", localrc);
          return;
  
         //buffer = (char *)realloc((void *)buffer,
@@ -96,7 +96,7 @@ void FTN(c_esmc_lrinterngridserialize)(int *dimCount,
 } 
 
 
-void FTN(c_esmc_lrinterngriddeserialize)(int *countPerDim,            // array of ints
+void FTN(c_esmc_lrigriddeserialize)(int *countPerDim,            // array of ints
                                    ESMC_R8 *deltaPerDim,            // array of reals
                                    void *buffer, int *offset, int *localrc){
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_InternGrid_F.C,v 1.1 2007/06/22 23:21:36 cdeluca Exp $
+// $Id: ESMC_InternGrid_F.C,v 1.2 2007/06/23 04:37:05 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -14,7 +14,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt ESMC\_InternGrid} methods declared
+// The code in this file implements the C++ {\tt ESMC\_IGrid} methods declared
 // in the companion file ESMC_InternGrid.h
 //
 // 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_InternGrid_F.C,v 1.1 2007/06/22 23:21:36 cdeluca Exp $";
+             "$Id: ESMC_InternGrid_F.C,v 1.2 2007/06/23 04:37:05 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -40,18 +40,18 @@ extern "C" {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
-// This section includes all the InternGrid routines
+// This section includes all the IGrid routines
 //
 //
 
 // non-method functions
-void FTN(c_esmc_interngridserialize)(int *dimCount, 
-                               int *interngridStructure, 
-                               int *horzInternGridType, 
-                               int *vertInternGridType, 
+void FTN(c_esmc_igridserialize)(int *dimCount, 
+                               int *igridStructure, 
+                               int *horzIGridType, 
+                               int *vertIGridType, 
                                int *horzStagger, 
                                int *vertStagger,
-                               int *interngridStorage,
+                               int *igridStorage,
                                int *horzCoordSystem,
                                int *vertCoordSystem,
                                int *coordOrder,
@@ -74,7 +74,7 @@ void FTN(c_esmc_interngridserialize)(int *dimCount,
     if ((*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                           "Buffer too short to add a InternGrid object", localrc);
+                           "Buffer too short to add a IGrid object", localrc);
          return;
  
         //buffer = (char *)realloc((void *)buffer,
@@ -85,12 +85,12 @@ void FTN(c_esmc_interngridserialize)(int *dimCount,
 
     ip = (int *)((char *)(buffer) + *offset);
     *ip++ = *dimCount; 
-    *ip++ = *interngridStructure; 
-    *ip++ = *horzInternGridType; 
-    *ip++ = *vertInternGridType; 
+    *ip++ = *igridStructure; 
+    *ip++ = *horzIGridType; 
+    *ip++ = *vertIGridType; 
     *ip++ = *horzStagger; 
     *ip++ = *vertStagger; 
-    *ip++ = *interngridStorage;
+    *ip++ = *igridStorage;
     *ip++ = *horzCoordSystem;
     *ip++ = *vertCoordSystem;
     *ip++ = *coordOrder;
@@ -119,13 +119,13 @@ void FTN(c_esmc_interngridserialize)(int *dimCount,
 } 
 
 
-void FTN(c_esmc_interngriddeserialize)(int *dimCount, 
-                                 int *interngridStructure, 
-                                 int *horzInternGridType, 
-                                 int *vertInternGridType, 
+void FTN(c_esmc_igriddeserialize)(int *dimCount, 
+                                 int *igridStructure, 
+                                 int *horzIGridType, 
+                                 int *vertIGridType, 
                                  int *horzStagger, 
                                  int *vertStagger,
-                                 int *interngridStorage,
+                                 int *igridStorage,
                                  int *horzCoordSystem,
                                  int *vertCoordSystem,
                                  int *coordOrder,
@@ -144,12 +144,12 @@ void FTN(c_esmc_interngriddeserialize)(int *dimCount,
 
     ip = (int *)((char *)(buffer) + *offset);
     *dimCount        = *ip++; 
-    *interngridStructure   = *ip++; 
-    *horzInternGridType    = *ip++; 
-    *vertInternGridType    = *ip++; 
+    *igridStructure   = *ip++; 
+    *horzIGridType    = *ip++; 
+    *vertIGridType    = *ip++; 
     *horzStagger     = *ip++; 
     *vertStagger     = *ip++; 
-    *interngridStorage     = *ip++;
+    *igridStorage     = *ip++;
     *horzCoordSystem = *ip++;
     *vertCoordSystem = *ip++;
     *coordOrder      = *ip++;

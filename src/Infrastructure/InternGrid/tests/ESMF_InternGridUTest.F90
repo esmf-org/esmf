@@ -1,4 +1,4 @@
-! $Id: ESMF_InternGridUTest.F90,v 1.1 2007/06/22 23:21:38 cdeluca Exp $
+! $Id: ESMF_InternGridUTest.F90,v 1.2 2007/06/23 04:37:05 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_InternGridUTest
+      program ESMF_IGridUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -19,13 +19,13 @@
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_InternGridUTest - One line general statement about this test
+! !PROGRAM: ESMF_IGridUTest - One line general statement about this test
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 InternGrid unit tests.
-! The companion file ESMF\_InternGrid.F90 contains the definitions for the
-! InternGrid methods.
+! The code in this file drives F90 IGrid unit tests.
+! The companion file ESMF\_IGrid.F90 contains the definitions for the
+! IGrid methods.
 !
 !-----------------------------------------------------------------------------
 ! !USES:
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternGridUTest.F90,v 1.1 2007/06/22 23:21:38 cdeluca Exp $'
+      '$Id: ESMF_InternGridUTest.F90,v 1.2 2007/06/23 04:37:05 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -57,18 +57,18 @@
       !character(ESMF_MAXSTR) :: validate_options
       !character(ESMF_MAXSTR) :: print_options, gname
       character(ESMF_MAXSTR) :: gname
-      !type(ESMF_InternGridConfig) :: config_set
-      !type(ESMF_InternGridConfig) :: config_get
+      !type(ESMF_IGridConfig) :: config_set
+      !type(ESMF_IGridConfig) :: config_get
 
 
 
       integer :: counts(ESMF_MAXIGRIDDIM)
       integer :: nDE_i, nDE_j
-      type(ESMF_InternGridType) :: horz_interngridtype
-      type(ESMF_InternGridHorzStagger) :: horz_stagger
+      type(ESMF_IGridType) :: horz_igridtype
+      type(ESMF_IGridHorzStagger) :: horz_stagger
       integer :: status
-      real(ESMF_KIND_R8) :: interngrid_min(3), interngrid_max(3)
-      type(ESMF_InternGrid) :: interngrid, interngrid1
+      real(ESMF_KIND_R8) :: igrid_min(3), igrid_max(3)
+      type(ESMF_IGrid) :: igrid, igrid1
       type(ESMF_DELayout) :: layout, layout2
       type(ESMF_VM) :: vm
 
@@ -92,11 +92,11 @@
       nDE_i = 2
       nDE_j = 2
       horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
-      interngrid_min(1) = 0.0
-      interngrid_max(1) = 10.0
-      interngrid_min(2) = 0.0
-      interngrid_max(2) = 12.0
-      name = "test interngrid 1"
+      igrid_min(1) = 0.0
+      igrid_max(1) = 10.0
+      igrid_min(2) = 0.0
+      igrid_max(2) = 12.0
+      name = "test igrid 1"
 
 
 
@@ -110,307 +110,307 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !NEX_UTest
-      interngrid = ESMF_InternGridCreateHorzXYUni(counts=counts, &
-                              minGlobalCoordPerDim=interngrid_min, &
-                              maxGlobalCoordPerDim=interngrid_max, &
+      igrid = ESMF_IGridCreateHorzXYUni(counts=counts, &
+                              minGlobalCoordPerDim=igrid_min, &
+                              maxGlobalCoordPerDim=igrid_max, &
                               horzstagger=horz_stagger, &
                               name=name, rc=status)
       write(failMsg, *) "Returned ESMF_FAILURE"
-      write(name, *) "Creating a InternGrid Test"
+      write(name, *) "Creating a IGrid Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
-      call ESMF_InternGridDistribute(interngrid, delayout=layout, rc=status)
+      call ESMF_IGridDistribute(igrid, delayout=layout, rc=status)
       write(failMsg, *) "Returned ESMF_FAILURE"
-      write(name, *) "Distributing a InternGrid Test"
+      write(name, *) "Distributing a IGrid Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! Printing a InternGrid
-      call ESMF_InternGridPrint(interngrid, "", rc=rc)
+      ! Printing a IGrid
+      call ESMF_IGridPrint(igrid, "", rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Printing a InternGrid Test"
+      write(name, *) "Printing a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! Destroying a InternGrid
-      call ESMF_InternGridDestroy(interngrid, rc=rc)
+      ! Destroying a IGrid
+      call ESMF_IGridDestroy(igrid, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Destroying a InternGrid Test"
+      write(name, *) "Destroying a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Create a interngrid to use in next test
-      interngrid = ESMF_InternGridCreateHorzXYUni(counts=counts, &
-                              minGlobalCoordPerDim=interngrid_min, &
-                              maxGlobalCoordPerDim=interngrid_max, &
+      ! Create a igrid to use in next test
+      igrid = ESMF_IGridCreateHorzXYUni(counts=counts, &
+                              minGlobalCoordPerDim=igrid_min, &
+                              maxGlobalCoordPerDim=igrid_max, &
                               horzstagger=horz_stagger, &
                               name=name, rc=status)
       write(failMsg, *) "Returned ESMF_FAILURE"
-      write(name, *) "Distributing a InternGrid  with negative x_max Test"
+      write(name, *) "Distributing a IGrid  with negative x_max Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
       ! The following code works ok because the layout is explicitly 
-      ! destroyed first before being used in the interngrid distribute (which is 
+      ! destroyed first before being used in the igrid distribute (which is 
       ! expected to fail).  but this still crashes randomly if the layout
       ! object is left completely uninitialized.  this should be addressed.
       layout2 = ESMF_DELayoutCreate(vm, rc=rc)
       call ESMF_DELayoutDestroy(layout2, status)
-      call ESMF_InternGridDistribute(interngrid, delayout=layout2, rc=status)
+      call ESMF_IGridDistribute(igrid, delayout=layout2, rc=status)
       write(failMsg, *) "Returned ESMF_SUCCESS"
-      write(name, *) "Distributing a InternGrid with a non-created layout Test"
+      write(name, *) "Distributing a IGrid with a non-created layout Test"
       call ESMF_Test((status.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
 
-      interngrid_min(1) = 7.0
-      interngrid_max(1) = -10.0
-      interngrid_min(2) = 5.0
-      interngrid_max(2) = 1.0
+      igrid_min(1) = 7.0
+      igrid_max(1) = -10.0
+      igrid_min(2) = 5.0
+      igrid_max(2) = 1.0
 
-      interngrid = ESMF_InternGridCreateHorzXYUni(counts=counts, &
-                              minGlobalCoordPerDim=interngrid_min, &
-                              maxGlobalCoordPerDim=interngrid_max, &
+      igrid = ESMF_IGridCreateHorzXYUni(counts=counts, &
+                              minGlobalCoordPerDim=igrid_min, &
+                              maxGlobalCoordPerDim=igrid_max, &
                               horzstagger=horz_stagger, &
                               name=name, rc=status)
       write(failMsg, *) "Returned ESMF_FAILURE"
-      write(name, *) "Creating a InternGrid  with negative x_max Test"
+      write(name, *) "Creating a IGrid  with negative x_max Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      call ESMF_InternGridDistribute(interngrid, delayout=layout, rc=status)
+      call ESMF_IGridDistribute(igrid, delayout=layout, rc=status)
       write(failMsg, *) "Returned ESMF_FAILURE"
-      write(name, *) "Distributing a InternGrid  with negative x_max Test"
+      write(name, *) "Distributing a IGrid  with negative x_max Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get Coord from a InternGrid
-      call ESMF_InternGridGetCoord(interngrid, rc=rc)
+      ! Get Coord from a IGrid
+      call ESMF_IGridGetCoord(igrid, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Get Coord from a InternGrid Test"
+      write(name, *) "Get Coord from a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Setting the horzInternGridType of a InternGrid
-      horz_interngridtype = ESMF_IGRID_TYPE_LATLON
-      call ESMF_InternGridSet(interngrid, horzinterngridtype=horz_interngridtype,rc=rc)
+      ! Setting the horzIGridType of a IGrid
+      horz_igridtype = ESMF_IGRID_TYPE_LATLON
+      call ESMF_IGridSet(igrid, horzigridtype=horz_igridtype,rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting the horz_interngridtype of  InternGrid Test"
+      write(name, *) "Setting the horz_igridtype of  IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Printing a InternGrid
-      call ESMF_InternGridPrint(interngrid, "", rc=rc)
+      ! Printing a IGrid
+      call ESMF_IGridPrint(igrid, "", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Printing a InternGrid Test"
+      write(name, *) "Printing a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test creating an internal InternGrid
-      interngrid = ESMF_InternGridCreateHorzXYUni(counts=counts, &
-                              minGlobalCoordPerDim=interngrid_min, &
-                              maxGlobalCoordPerDim=interngrid_max, &
+      ! Test creating an internal IGrid
+      igrid = ESMF_IGridCreateHorzXYUni(counts=counts, &
+                              minGlobalCoordPerDim=igrid_min, &
+                              maxGlobalCoordPerDim=igrid_max, &
                               horzstagger=horz_stagger, &
                               name=name, rc=status)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating an Internal InternGrid Test"
+      write(name, *) "Creating an Internal IGrid Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      call ESMF_InternGridDistribute(interngrid, delayout=layout, rc=status)
+      call ESMF_IGridDistribute(igrid, delayout=layout, rc=status)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Distributing an Internal InternGrid Test"
+      write(name, *) "Distributing an Internal IGrid Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Printing a InternGrid
-      call ESMF_InternGridPrint(interngrid, "", rc=rc)
+      ! Printing a IGrid
+      call ESMF_IGridPrint(igrid, "", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Printing a InternGrid Test"
+      write(name, *) "Printing a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test destroy subroutine
-      call  ESMF_InternGridDestroy(interngrid, rc=rc)
+      call  ESMF_IGridDestroy(igrid, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying a InternGrid Test"
+      write(name, *) "Destroying a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test creation of empty interngrid
-      interngrid1 =  ESMF_InternGridCreate(rc=rc)
+      ! Test creation of empty igrid
+      igrid1 =  ESMF_IGridCreate(rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating an empty InternGrid Test"
+      write(name, *) "Creating an empty IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test adding a name to an empty InternGrid
-      call ESMF_InternGridSet(interngrid1, name="IGRID_ONE", rc=rc)
+      ! Test adding a name to an empty IGrid
+      call ESMF_IGridSet(igrid1, name="IGRID_ONE", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding a name to a InternGrid Test"
+      write(name, *) "Adding a name to a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test getting the name from an empty InternGrid
-      call ESMF_InternGridGet(interngrid1, name=gname, rc=rc)
+      ! Test getting the name from an empty IGrid
+      call ESMF_IGridGet(igrid1, name=gname, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting a name from a InternGrid Test"
+      write(name, *) "Getting a name from a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Verify the name from an empty InternGrid is correct
+      ! Verify the name from an empty IGrid is correct
       write(failMsg, *) "Returned wrong name"
-      write(name, *) "Verifying a name from a InternGrid Test"
+      write(name, *) "Verifying a name from a IGrid Test"
       call ESMF_Test((gname.eq."IGRID_ONE"), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *, "gname= ", gname
 
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Get Attribute count from a InternGrid
-      call ESMF_InternGridGetAttributeCount(interngrid1, attribute, rc=rc)
+      !  Get Attribute count from a IGrid
+      call ESMF_IGridGetAttributeCount(igrid1, attribute, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS" 
-      write(name, *) "Get Attribute from a InternGrid Test"
+      write(name, *) "Get Attribute from a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Verify Attribute count from a InternGrid
+      !  Verify Attribute count from a IGrid
       write(failMsg, *) "Attribute count is incorrect" 
-      write(name, *) "Verify Attribute count from a InternGrid Test"
+      write(name, *) "Verify Attribute count from a IGrid Test"
       call ESMF_Test((attribute.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Set Attributes in a empty InternGrid 
+      ! Set Attributes in a empty IGrid 
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting Attributes in a InternGrid Test"
-      call ESMF_InternGridSetAttribute(interngrid1, "test_attribute", 123456789, rc=rc)
+      write(name, *) "Setting Attributes in a IGrid Test"
+      call ESMF_IGridSetAttribute(igrid1, "test_attribute", 123456789, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !-------------------------------------------------------------------------
       !EX_UTest
-      !  Set an Attribute in a InternGrid
-      call ESMF_InternGridSetAttribute(interngrid1, "test_attribute", 123456789, rc=rc)
+      !  Set an Attribute in a IGrid
+      call ESMF_IGridSetAttribute(igrid1, "test_attribute", 123456789, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Set an Attribute in a InternGrid Test"
+      write(name, *) "Set an Attribute in a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
       !-------------------------------------------------------------------------
       !EX_UTest
-      !  Set an Attribute in a InternGrid
-      call ESMF_InternGridSetAttribute(interngrid1, "test_attribute1", 0, rc=rc)
+      !  Set an Attribute in a IGrid
+      call ESMF_IGridSetAttribute(igrid1, "test_attribute1", 0, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Set an Attribute in a InternGrid Test"
+      write(name, *) "Set an Attribute in a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
       !-------------------------------------------------------------------------
       !EX_UTest
-      !  Set an Attribute in an InternGrid
-      call ESMF_InternGridSetAttribute(interngrid1, "test_attribute2", 0.0, rc=rc)
+      !  Set an Attribute in an IGrid
+      call ESMF_IGridSetAttribute(igrid1, "test_attribute2", 0.0, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Set an Attribute in a InternGrid Test"
+      write(name, *) "Set an Attribute in a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
       !-------------------------------------------------------------------------
       !EX_UTest
-      !  Set an Attribute in a InternGrid
-      call ESMF_InternGridSetAttribute(interngrid1, "test_attribute3", 6789, rc=rc)
+      !  Set an Attribute in a IGrid
+      call ESMF_IGridSetAttribute(igrid1, "test_attribute3", 6789, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS" 
-      write(name, *) "Set an Attribute in a InternGrid Test"
+      write(name, *) "Set an Attribute in a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !-------------------------------------------------------------------------
       !EX_UTest
-      !  Set an Attribute in a InternGrid
-      call ESMF_InternGridSetAttribute(interngrid1, "test_attribute4", 5.87, rc=rc)
+      !  Set an Attribute in a IGrid
+      call ESMF_IGridSetAttribute(igrid1, "test_attribute4", 5.87, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Set an Attribute in a InternGrid Test"
+      write(name, *) "Set an Attribute in a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
        
       !-------------------------------------------------------------------------
       !EX_UTest
-      !  Get Attribute count from a InternGrid
-      call ESMF_InternGridGetAttributeCount(interngrid1, attribute, rc=rc)
+      !  Get Attribute count from a IGrid
+      call ESMF_IGridGetAttributeCount(igrid1, attribute, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS" 
-      write(name, *) "Get an Attribute from a InternGrid Test"
+      write(name, *) "Get an Attribute from a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
        
       !-------------------------------------------------------------------------
       !EX_UTest
-      !  Verify Attribute count from a InternGrid
+      !  Verify Attribute count from a IGrid
       write(failMsg, *) "Attribute count is incorrect" 
-      write(name, *) "Verify Attribute count from a InternGrid Test"
+      write(name, *) "Verify Attribute count from a IGrid Test"
       call ESMF_Test((attribute.eq.5), name, failMsg, result, ESMF_SRCLINE)
  
       !-------------------------------------------------------------------------
       !EX_UTest
-      !  Get an Attribute from a InternGrid
-      call ESMF_InternGridGetAttribute(interngrid1, "test_attribute", attribute, rc=rc)
+      !  Get an Attribute from a IGrid
+      call ESMF_IGridGetAttribute(igrid1, "test_attribute", attribute, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Get an Attribute from a InternGrid Test"
+      write(name, *) "Get an Attribute from a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
       !-------------------------------------------------------------------------
       !EX_UTest
       !  Verify the value of the Attribute
       write(failMsg, *) "Attribute value is wrong"
-      write(name, *) "Verify Attribute value from a InternGrid Test"
+      write(name, *) "Verify Attribute value from a IGrid Test"
       call ESMF_Test((attribute.eq.123456789), name, failMsg, result, ESMF_SRCLINE)
  
       !-------------------------------------------------------------------------
       !EX_UTest
-      !  Get an Attribute from a InternGrid
-      call ESMF_InternGridGetAttribute(interngrid1, "test_attribute", attribute, rc=rc)
+      !  Get an Attribute from a IGrid
+      call ESMF_IGridGetAttribute(igrid1, "test_attribute", attribute, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Get an Attribute from a InternGrid Test"
+      write(name, *) "Get an Attribute from a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
       !-------------------------------------------------------------------------
       !EX_UTest
       !  Verify the value of the Attribute
       write(failMsg, *) "Attribute value is wrong"
-      write(name, *) "Verify Attribute value from a InternGrid Test"
+      write(name, *) "Verify Attribute value from a IGrid Test"
       call ESMF_Test((attribute.eq.123456789), name, failMsg, result, ESMF_SRCLINE)
 
       !-------------------------------------------------------------------------
       !EX_UTest
-      !  Get Attribute Info from a InternGrid Test
+      !  Get Attribute Info from a IGrid Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Get Attribute Info from a InternGrid Test"
-      call ESMF_InternGridGetAttributeInfo(interngrid1, "test_attribute", &
+      write(name, *) "Get Attribute Info from a IGrid Test"
+      call ESMF_IGridGetAttributeInfo(igrid1, "test_attribute", &
         typekind=att_typekind, count=att_count, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -418,30 +418,30 @@
       !EX_UTest
       !  Verify typekind of Attribute
       write(failMsg, *) "Attribute typekind is wrong"
-      write(name, *) "Verify Attribute typekind from a InternGrid Test"
+      write(name, *) "Verify Attribute typekind from a IGrid Test"
       call ESMF_Test((att_typekind.eq.ESMF_TYPEKIND_I4), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
       !  Verify count of Attribute
       write(failMsg, *) "Attribute count is wrong"
-      write(name, *) "Verify Attribute count from a InternGrid Test"
+      write(name, *) "Verify Attribute count from a IGrid Test"
       call ESMF_Test((att_count.eq.1), name, failMsg, result, ESMF_SRCLINE)
  
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Get an Attribute from InternGrid with wrong data type
-      call ESMF_InternGridGetAttribute(interngrid1, "test_attribute4", attribute, rc=rc)
+      !  Get an Attribute from IGrid with wrong data type
+      call ESMF_IGridGetAttribute(igrid1, "test_attribute4", attribute, rc=rc)
       write(failMsg, *) "Should not return ESMF_SUCCESS"
-      write(name, *) "Get a Wrong Data type Attribute from a InternGrid Test"
+      write(name, *) "Get a Wrong Data type Attribute from a IGrid Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test destroy subroutine
-      call  ESMF_InternGridDestroy(interngrid1, rc=rc)
+      call  ESMF_IGridDestroy(igrid1, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying a InternGrid Test"
+      write(name, *) "Destroying a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -450,4 +450,4 @@
   
       call ESMF_TestEnd(result, ESMF_SRCLINE)
 
-      end program ESMF_InternGridUTest
+      end program ESMF_IGridUTest

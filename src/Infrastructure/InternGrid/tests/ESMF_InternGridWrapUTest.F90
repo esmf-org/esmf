@@ -1,4 +1,4 @@
-! $Id: ESMF_InternGridWrapUTest.F90,v 1.1 2007/06/22 23:21:38 cdeluca Exp $
+! $Id: ESMF_InternGridWrapUTest.F90,v 1.2 2007/06/23 04:37:05 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-    program ESMF_InternGridWrapUTest
+    program ESMF_IGridWrapUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -19,11 +19,11 @@
 !
 !==============================================================================
 !BOC
-! !PROGRAM: ESMF_InternGridWrapUTest - Tests related to periodic interngrids
+! !PROGRAM: ESMF_IGridWrapUTest - Tests related to periodic igrids
 !
 ! !DESCRIPTION:
 !
-! The code in this file tests things specific to periodic interngrids.
+! The code in this file tests things specific to periodic igrids.
 !
 !-----------------------------------------------------------------------------
 
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternGridWrapUTest.F90,v 1.1 2007/06/22 23:21:38 cdeluca Exp $'
+      '$Id: ESMF_InternGridWrapUTest.F90,v 1.2 2007/06/23 04:37:05 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -53,12 +53,12 @@
 
     ! Local variables
     integer :: haloWidth
-    integer :: interngridCount(2), interngridStart(2)
+    integer :: igridCount(2), igridStart(2)
     integer :: dataIndexList(3), lbounds(3), localCount(3), ubounds(3)
     real (ESMF_KIND_R8), dimension(:,:,:), pointer :: f90ptr1
     real (ESMF_KIND_R8), dimension(2) :: origin
     type(ESMF_DELayout)     :: layout
-    type(ESMF_InternGrid)         :: interngrid
+    type(ESMF_IGrid)         :: igrid
     type(ESMF_VM)           :: vm
 
 
@@ -94,129 +94,129 @@
 
     !--------------------------------------------------------------------------
     !NEX_UTest
-    interngrid = ESMF_InternGridCreateHorzXYUni((/ 50, 30 /), origin, &
+    igrid = ESMF_IGridCreateHorzXYUni((/ 50, 30 /), origin, &
                                     deltaPerDim=(/ 1.0d0, 1.0d0 /), &
 	                            periodic=(/ ESMF_FALSE, ESMF_FALSE /), &
-                                    name="atminterngrid", rc=rc)
-    write(name, *) "ESMF_InternGridCreate Test"
+                                    name="atmigrid", rc=rc)
+    write(name, *) "ESMF_IGridCreate Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !NEX_UTest
-    call ESMF_InternGridDistribute(interngrid, delayout=layout, rc=rc)
-    write(name, *) "ESMF_InternGridDistribute Test"
+    call ESMF_IGridDistribute(igrid, delayout=layout, rc=rc)
+    write(name, *) "ESMF_IGridDistribute Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !--------------------------------------------------------------------------
-    ! the interngridStart lines should all print the same values (and do not).
+    ! the igridStart lines should all print the same values (and do not).
     ! this is support request 1095990, bug 1156870.
     !--------------------------------------------------------------------------
     !--------------------------------------------------------------------------
     !NEX_UTest
-    ! get interngrid information used to calculate global indices
-    call ESMF_InternGridGetDELocalInfo(interngrid, horzrelloc=ESMF_CELL_CENTER, &
-                                 localCellCountPerDim=interngridCount, &
-                                 globalStartPerDim=interngridStart, rc=rc)
-    print *, "F/F interngridStart=", interngridStart
-    write(name, *) "ESMF_InternGridGetDELocalInfo Test"
+    ! get igrid information used to calculate global indices
+    call ESMF_IGridGetDELocalInfo(igrid, horzrelloc=ESMF_CELL_CENTER, &
+                                 localCellCountPerDim=igridCount, &
+                                 globalStartPerDim=igridStart, rc=rc)
+    print *, "F/F igridStart=", igridStart
+    write(name, *) "ESMF_IGridGetDELocalInfo Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !NEX_UTest
-    interngrid = ESMF_InternGridCreateHorzXYUni((/ 50, 30 /), origin, &
+    igrid = ESMF_IGridCreateHorzXYUni((/ 50, 30 /), origin, &
                                     deltaPerDim=(/ 1.0d0, 1.0d0 /), &
 	                            periodic=(/ ESMF_FALSE, ESMF_TRUE /), &
-                                    name="atminterngrid", rc=rc)
-    write(name, *) "ESMF_InternGridCreate Test"
+                                    name="atmigrid", rc=rc)
+    write(name, *) "ESMF_IGridCreate Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !NEX_UTest
-    call ESMF_InternGridDistribute(interngrid, delayout=layout, rc=rc)
-    write(name, *) "ESMF_InternGridDistribute Test"
+    call ESMF_IGridDistribute(igrid, delayout=layout, rc=rc)
+    write(name, *) "ESMF_IGridDistribute Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !NEX_UTest
-    ! get interngrid information used to calculate global indices
-    call ESMF_InternGridGetDELocalInfo(interngrid, horzrelloc=ESMF_CELL_CENTER, &
-                                 localCellCountPerDim=interngridCount, &
-                                 globalStartPerDim=interngridStart, rc=rc)
-    print *, "F/T interngridStart=", interngridStart
-    write(name, *) "ESMF_InternGridGetDELocalInfo Test"
+    ! get igrid information used to calculate global indices
+    call ESMF_IGridGetDELocalInfo(igrid, horzrelloc=ESMF_CELL_CENTER, &
+                                 localCellCountPerDim=igridCount, &
+                                 globalStartPerDim=igridStart, rc=rc)
+    print *, "F/T igridStart=", igridStart
+    write(name, *) "ESMF_IGridGetDELocalInfo Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !NEX_UTest
-    interngrid = ESMF_InternGridCreateHorzXYUni((/ 50, 30 /), origin, &
+    igrid = ESMF_IGridCreateHorzXYUni((/ 50, 30 /), origin, &
                                     deltaPerDim=(/ 1.0d0, 1.0d0 /), &
 	                            periodic=(/ ESMF_TRUE, ESMF_FALSE /), &
-                                    name="atminterngrid", rc=rc)
-    write(name, *) "ESMF_InternGridCreate Test"
+                                    name="atmigrid", rc=rc)
+    write(name, *) "ESMF_IGridCreate Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !NEX_UTest
-    call ESMF_InternGridDistribute(interngrid, delayout=layout, rc=rc)
-    write(name, *) "ESMF_InternGridDistribute Test"
+    call ESMF_IGridDistribute(igrid, delayout=layout, rc=rc)
+    write(name, *) "ESMF_IGridDistribute Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !NEX_UTest
-    ! get interngrid information used to calculate global indices
-    call ESMF_InternGridGetDELocalInfo(interngrid, horzrelloc=ESMF_CELL_CENTER, &
-                                 localCellCountPerDim=interngridCount, &
-                                 globalStartPerDim=interngridStart, rc=rc)
-    print *, "T/F interngridStart=", interngridStart
-    write(name, *) "ESMF_InternGridGetDELocalInfo Test"
+    ! get igrid information used to calculate global indices
+    call ESMF_IGridGetDELocalInfo(igrid, horzrelloc=ESMF_CELL_CENTER, &
+                                 localCellCountPerDim=igridCount, &
+                                 globalStartPerDim=igridStart, rc=rc)
+    print *, "T/F igridStart=", igridStart
+    write(name, *) "ESMF_IGridGetDELocalInfo Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !NEX_UTest
-    interngrid = ESMF_InternGridCreateHorzXYUni((/ 50, 30 /), origin, &
+    igrid = ESMF_IGridCreateHorzXYUni((/ 50, 30 /), origin, &
                                     deltaPerDim=(/ 1.0d0, 1.0d0 /), &
 	                            periodic=(/ ESMF_TRUE, ESMF_TRUE /), &
-                                    name="atminterngrid", rc=rc)
-    write(name, *) "ESMF_InternGridCreate Test"
+                                    name="atmigrid", rc=rc)
+    write(name, *) "ESMF_IGridCreate Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !NEX_UTest
-    call ESMF_InternGridDistribute(interngrid, delayout=layout, rc=rc)
-    write(name, *) "ESMF_InternGridDistribute Test"
+    call ESMF_IGridDistribute(igrid, delayout=layout, rc=rc)
+    write(name, *) "ESMF_IGridDistribute Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !NEX_UTest
-    ! get interngrid information used to calculate global indices
-    call ESMF_InternGridGetDELocalInfo(interngrid, horzrelloc=ESMF_CELL_CENTER, &
-                                 localCellCountPerDim=interngridCount, &
-                                 globalStartPerDim=interngridStart, rc=rc)
-    print *, "T/T interngridStart=", interngridStart
-    write(name, *) "ESMF_InternGridGetDELocalInfo Test"
+    ! get igrid information used to calculate global indices
+    call ESMF_IGridGetDELocalInfo(igrid, horzrelloc=ESMF_CELL_CENTER, &
+                                 localCellCountPerDim=igridCount, &
+                                 globalStartPerDim=igridStart, rc=rc)
+    print *, "T/T igridStart=", igridStart
+    write(name, *) "ESMF_IGridGetDELocalInfo Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
@@ -232,21 +232,21 @@
 ! globalOffsetPerDim because it refers to the amount that must be added to a
 ! local index to translate it to a global index.  So the globalStart referring
 ! to an index instead of an offset should be this value plus one
-    interngridStart(1) = interngridStart(1) + 1
-    interngridStart(2) = interngridStart(2) + 1
+    igridStart(1) = igridStart(1) + 1
+    igridStart(2) = igridStart(2) + 1
 
 ! set local counts for the Field.  For this example, the second dimension of the
-! data will correspond to the first InternGrid dimension and the third data dimension
-! will correspond to the second InternGrid dimension
+! data will correspond to the first IGrid dimension and the third data dimension
+! will correspond to the second IGrid dimension
     dataIndexList(1) = 0
     dataIndexList(2) = 1
     dataIndexList(3) = 2
-    lbounds(2)    = interngridStart(1)
-    localCount(2) = interngridCount(1)
-    lbounds(3)    = interngridStart(2)
-    localCount(3) = interngridCount(2)
+    lbounds(2)    = igridStart(1)
+    localCount(2) = igridCount(1)
+    lbounds(3)    = igridStart(2)
+    localCount(3) = igridCount(2)
 
-! the first data dimension is unrelated to the interngrid, so it has a user-specified
+! the first data dimension is unrelated to the igrid, so it has a user-specified
 ! count and its local index is assumed to start at one, although that is not
 ! necessarily true
     lbounds(1)    = 1
@@ -262,7 +262,7 @@
 
 ! modify the lower and upper bounds by the haloWidth
 ! Currently ESMF requires that all dimensions include the halo width, even if
-! they are not related to the interngrid.  Hopefully that will no longer be
+! they are not related to the igrid.  Hopefully that will no longer be
 ! required soon.
     do i = 1,3
       lbounds(i) = lbounds(i) - haloWidth
@@ -283,6 +283,6 @@
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
 
-    end program ESMF_InternGridWrapUTest
+    end program ESMF_IGridWrapUTest
 
     
