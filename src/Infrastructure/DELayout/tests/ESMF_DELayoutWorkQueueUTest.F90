@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.8 2007/06/23 07:00:48 cdeluca Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.9 2007/06/25 05:57:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -188,7 +188,7 @@ program ESMF_DELayoutWQUTest
   !----------------- test without threads ----------------------------
 
 
-  gcomp = ESMF_GridCompCreate(name="igridded component", rc=rc)
+  gcomp = ESMF_GridCompCreate(name="gridded component", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_GridCompSetServices(gcomp, mygcomp_register_withoutthreads, rc)
@@ -213,7 +213,7 @@ program ESMF_DELayoutWQUTest
   !----------------- test with threads -------------------------------
 
 
-  gcomp = ESMF_GridCompCreate(name="igridded component", rc=rc)
+  gcomp = ESMF_GridCompCreate(name="gridded component", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_GridCompSetServices(gcomp, mygcomp_register_withthreads, rc)

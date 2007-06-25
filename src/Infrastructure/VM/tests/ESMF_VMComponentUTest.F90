@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.9 2007/06/23 07:00:49 cdeluca Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.10 2007/06/25 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -176,7 +176,7 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.9 2007/06/23 07:00:49 cdeluca Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.10 2007/06/25 05:57:29 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -212,7 +212,7 @@ program ESMF_VMComponentUTest
   do j=1, 2
     do i=1, 100
 
-      gcomp(i) = ESMF_GridCompCreate(name='My igridded component', rc=loop_rc)
+      gcomp(i) = ESMF_GridCompCreate(name='My gridded component', rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
   
       call ESMF_GridCompSetServices(gcomp(i), mygcomp_register_nexh, loop_rc)
@@ -244,7 +244,7 @@ program ESMF_VMComponentUTest
   do j=1, 20
     do i=1, ConThreads
 
-      gcomp(i) = ESMF_GridCompCreate(name='My igridded component', rc=loop_rc)
+      gcomp(i) = ESMF_GridCompCreate(name='My gridded component', rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 20
   
       call ESMF_GridCompSetServices(gcomp(i), mygcomp_register_exh, loop_rc)

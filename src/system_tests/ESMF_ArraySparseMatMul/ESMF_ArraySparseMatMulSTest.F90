@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.8 2007/06/23 07:00:56 cdeluca Exp $
+! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.9 2007/06/25 06:02:05 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !SYSTEM_TEST        String used by test script to count system tests.
@@ -8,11 +8,11 @@
 !
 ! !DESCRIPTION:
 ! System test ArraySparseMatMul.  
-!    Two igridded components and one coupler component, one-way coupling.
+!    Two gridded components and one coupler component, one-way coupling.
 !
-!    First igridded component runs on 4 PETs and defines a 2D source Array 
-!    100x150. Second igridded component defines a destination Array also 
-!    100x150 but runs on only 2 PETs. Both igridded components use DELayouts 
+!    First gridded component runs on 4 PETs and defines a 2D source Array 
+!    100x150. Second gridded component defines a destination Array also 
+!    100x150 but runs on only 2 PETs. Both gridded components use DELayouts 
 !    with 1 DE per PET. The decomposition of the source Array is defined as 
 !    (petCount x 1) = (4 x 1) while the destination Array is decomposed as 
 !    (1 x petCount) = (1 x 2).
@@ -27,7 +27,7 @@
 !    This amounts to a redistribution of the source Array data onto the 
 !    destination Array.
 !    
-!    Finally the second igridded component compares the data stored in the
+!    Finally the second gridded component compares the data stored in the
 !    destination Array to the exact solution of the above function as a measure
 !    of the accuracy of the ArraySparseMat() method.
 !
