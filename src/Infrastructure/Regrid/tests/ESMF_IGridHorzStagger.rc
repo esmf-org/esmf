@@ -1,7 +1,7 @@
-&gridHStagger index = "A", grid = 1, relloc = 1, gridStaggerString = "ESMF_GRID_HORZ_STAGGER_A  ESMF_CELL_CENTER" /
-&gridHStagger index = "B", grid = 10, relloc = 4, gridStaggerString = "ESMF_GRID_HORZ_STAGGER_D_NE  ESMF_CELL_EFACE" /
-&gridHStagger index = "C", grid = 2, relloc = 6, gridStaggerString = "ESMF_GRID_HORZ_STAGGER_B_NE ESMF_CELL_NECORNER" /
-&gridHStagger index = "D", grid = 6, relloc = 2, gridStaggerString = "ESMF_GRID_HORZ_STAGGER_C_NE ESMF_CELL_NFACE" /
-! $Id: ESMF_IGridHorzStagger.rc,v 1.1 2007/06/24 23:24:10 cdeluca Exp $
+&gridHStagger index = "A", grid = 1, relloc = 1, gridStaggerString = "ESMF_IGRID_HORZ_STAGGER_A  ESMF_CELL_CENTER" /
+&gridHStagger index = "B", grid = 10, relloc = 4, gridStaggerString = "ESMF_IGRID_HORZ_STAGGER_D_NE  ESMF_CELL_EFACE" /
+&gridHStagger index = "C", grid = 2, relloc = 6, gridStaggerString = "ESMF_IGRID_HORZ_STAGGER_B_NE ESMF_CELL_NECORNER" /
+&gridHStagger index = "D", grid = 6, relloc = 2, gridStaggerString = "ESMF_IGRID_HORZ_STAGGER_C_NE ESMF_CELL_NFACE" /
+! $Id: ESMF_IGridHorzStagger.rc,v 1.2 2007/06/25 16:36:54 cdeluca Exp $
 
 This file provides the Horozontal Stagger pairs.
