@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.11 2007/06/25 16:13:30 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.12 2007/06/25 16:21:02 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@ public ESMF_newGrid
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.11 2007/06/25 16:13:30 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.12 2007/06/25 16:21:02 oehmke Exp $'
 
 
 
@@ -101,6 +101,7 @@ public ESMF_newGrid
       contains
 
 !==============================================================================
+#define OUT ! put in for documentation 
 #ifdef OUT  ! Take out so you don't have to worry about compiler warnings for now
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -253,7 +254,6 @@ public ESMF_newGrid
     type(ESMF_InterfaceInt) :: coordRanksArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
 
-   write(*,*) "GC1"
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -271,14 +271,12 @@ public ESMF_newGrid
 
     !! coordTypeKind
     ! It doesn't look like it needs to be translated, but test to make sure
-   write(*,*) "GC2"
-
 
     !! dimmap
     dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-   write(*,*) "GC3"
+
     !! tensor bounds
     lboundsArg = ESMF_InterfaceIntCreate(lbounds, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -295,7 +293,6 @@ public ESMF_newGrid
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-   write(*,*) "GC4"
     ! Initialize this grid object as invalid
     grid%this = ESMF_NULL_POINTER
 
@@ -305,8 +302,6 @@ public ESMF_newGrid
       indexflag, gridtype, rc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-   write(*,*) "GC5"
 
     ! Deallocate helper variables
     call ESMF_InterfaceIntDestroy(dimmapArg, rc=localrc)
@@ -324,7 +319,6 @@ public ESMF_newGrid
     call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
 
     ! Set return value
     ESMF_newGridCreateFromDistGrid = grid
