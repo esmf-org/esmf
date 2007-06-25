@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.12 2007/06/25 16:21:02 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.13 2007/06/25 16:28:55 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@ public ESMF_newGrid
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.12 2007/06/25 16:21:02 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.13 2007/06/25 16:28:55 oehmke Exp $'
 
 
 
@@ -101,8 +101,8 @@ public ESMF_newGrid
       contains
 
 !==============================================================================
-#define OUT ! put in for documentation 
-#ifdef OUT  ! Take out so you don't have to worry about compiler warnings for now
+#define NEWGRID_OUT ! put in for documentation 
+#ifdef NEWGRID_OUT  ! Take out so you don't have to worry about compiler warnings for now
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_newGridCommit"
@@ -331,7 +331,7 @@ public ESMF_newGrid
 
     end function ESMF_newGridCreateFromDistGrid
 
-#ifdef OUT ! Take out so you don't have to worry about compiler warnings for now
+#ifdef NEWGRID_OUT ! Take out so you don't have to worry about compiler warnings for now
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_newGridCreateEmpty"
@@ -771,7 +771,7 @@ public ESMF_newGrid
 
  end subroutine ESMF_newGridDestroy
 
-#ifdef OUT ! Take out so you don't have to worry about compiler warnings for now
+#ifdef NEWGRID_OUT ! Take out so you don't have to worry about compiler warnings for now
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -989,7 +989,7 @@ end subroutine ESMF_newGridGet
     end function ESMF_newGridGetInit
 !------------------------------------------------------------------------------
 
-#ifdef OUT  ! Take out so you don't have to worry about compiler warnings for now
+#ifdef NEWGRID_OUT  ! Take out so you don't have to worry about compiler warnings for now
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
