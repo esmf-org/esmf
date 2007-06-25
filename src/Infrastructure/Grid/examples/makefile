@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2007/06/25 18:28:09 cdeluca Exp $
+# $Id: makefile,v 1.18 2007/06/25 20:15:52 cdeluca Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -14,7 +14,7 @@ OBJSF     =
 TEXFILES  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/Infrastructure/newGrid/examples
+LOCDIR	  = src/Infrastructure/Grid/examples
 
 
 EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_GridCreateEx

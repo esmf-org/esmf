@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateTripoleEx.F90,v 1.5 2007/06/07 06:34:23 oehmke Exp $
+! $Id: ESMF_GridCreateTripoleEx.F90,v 1.1 2007/06/25 20:15:51 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,

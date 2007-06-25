@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2007/06/25 18:28:10 cdeluca Exp $ 
+# $Id: makefile,v 1.11 2007/06/25 20:15:53 cdeluca Exp $ 
 
 ALL: build_here 
 
@@ -16,7 +16,7 @@ OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 MANSEC	  = Gridobj
 LIBBASE	  = libesmf
 DIRS	  = 
-LOCDIR	  = src/Infrastructure/newGrid/interface
+LOCDIR	  = src/Infrastructure/Grid/interface
 
 include $(ESMF_DIR)/makefile
 
