@@ -1,5 +1,5 @@
 
-! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.1 2007/06/13 18:23:52 cdeluca Exp $
+! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.1 2007/06/25 18:28:09 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,

@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.8 2004/03/18 18:34:57 nscollins Exp $
+# $Id: makefile,v 1.9 2007/06/25 18:28:05 cdeluca Exp $
 
 ALL: build_here
 
 # This needs to be the path of this directory relative to the
 # top level esmf directory.
-LOCDIR	  = src/Infrastructure/Grid/
+LOCDIR	  = src/Infrastructure/newGrid/
 
 # Leave this line alone.
 include $(ESMF_DIR)/makefile
@@ -12,7 +12,7 @@ include $(ESMF_DIR)/makefile
 # The DIRS line needs to contain all subdirectories which exist 
 # directly below this directory, and have either library,
 # example/test code, or documents which need to be generated.
-DIRS	  = src interface examples doc tests
+DIRS	  = doc
 
 CLEANDIRS   =
 CLEANFILES  =

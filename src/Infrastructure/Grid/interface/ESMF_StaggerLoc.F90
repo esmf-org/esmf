@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.2 2007/06/25 16:13:30 oehmke Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.1 2007/06/25 18:28:10 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -150,7 +150,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.2 2007/06/25 16:13:30 oehmke Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.1 2007/06/25 18:28:10 cdeluca Exp $'
 
 
 !==============================================================================
