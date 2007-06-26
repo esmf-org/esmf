@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2007/06/25 20:15:53 cdeluca Exp $ 
+# $Id: makefile,v 1.12 2007/06/26 20:08:08 oehmke Exp $ 
 
 ALL: build_here 
 
@@ -6,7 +6,7 @@ CFLAGS    =
 FFLAGS    = -free
 SOURCEC	  = ESMCI_Grid_F.C
 
-SOURCEF	  = ESMF_Grid.F90 ESMF_StaggerLoc.F90
+SOURCEF	  = ESMF_StaggerLoc.F90 ESMF_Grid.F90 
 
 SOURCEH	  = 
 STOREH    = 

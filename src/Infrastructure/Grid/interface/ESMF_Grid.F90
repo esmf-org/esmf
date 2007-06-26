@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.2 2007/06/25 20:15:52 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.3 2007/06/26 20:08:07 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_UtilTypesMod   ! ESMF base class
+~      use ESMF_UtilTypesMod   ! ESMF base class
       use ESMF_BaseMod        ! ESMF base class
       use ESMF_IOSpecMod      ! ESMF I/O class
       use ESMF_LogErrMod
@@ -43,6 +43,7 @@
       use ESMF_LogErrMod        ! ESMF error handling
       use ESMF_VMMod
       use ESMF_DELayoutMod
+      use ESMF_StaggerLocMod
       use ESMF_DistGridMod
       use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
       
@@ -66,11 +67,43 @@
     ESMF_INIT_DECLARE
   end type
 
+
+!------------------------------------------------------------------------------
+! ! ESMF_GridStatus
+!
+!------------------------------------------------------------------------------
+  type ESMF_GridStatus
+  sequence
+!  private
+     integer :: gridstatus
+  end type
+
+!------------------------------------------------------------------------------
+! ! ESMF_GridConn
+!
+!------------------------------------------------------------------------------
+  type ESMF_GridConn
+  sequence
+!  private
+     integer :: gridconn
+  end type
+
+!------------------------------------------------------------------------------
+! ! ESMF_DefaultFlag
+!
+!------------------------------------------------------------------------------
+! TODO: eventually move this elsewhere (e.g. Util)
+  type ESMF_DefaultFlag
+  sequence
+!  private
+     integer :: defaultflag
+  end type
+
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC TYPES:
 !
-public ESMF_Grid
+public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag
 
 
 !------------------------------------------------------------------------------
@@ -92,7 +125,7 @@ public ESMF_Grid
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.2 2007/06/25 20:15:52 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.3 2007/06/26 20:08:07 oehmke Exp $'
 
 
 
@@ -101,8 +134,8 @@ public ESMF_Grid
       contains
 
 !==============================================================================
-#define NEWGRID_OUT ! put in for documentation 
-#ifdef NEWGRID_OUT  ! Take out so you don't have to worry about compiler warnings for now
+#define NEWGRID_NOTYET ! put in for documentation 
+#ifdef NEWGRID_NOTYET  ! Take out so you don't have to worry about compiler warnings for now
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCommit"
@@ -110,7 +143,7 @@ public ESMF_Grid
 ! !IROUTINE: ESMF_GridCommit - Commit a Grid to a specified completion level
 
 ! !INTERFACE:
-      subroutine ESMF_GridCommit(grid, status, rc)
+      subroutine ESMF_GridCommit(grid, status, defaultflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout)     :: grid
@@ -331,7 +364,7 @@ public ESMF_Grid
 
     end function ESMF_GridCreateFromDistGrid
 
-#ifdef NEWGRID_OUT ! Take out so you don't have to worry about compiler warnings for now
+#ifdef NEWGRID_NOTYET ! Take out so you don't have to worry about compiler warnings for now
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateEmpty"
@@ -389,7 +422,7 @@ public ESMF_Grid
       character (len=*), intent(in), optional :: name 
        type(ESMF_TypeKind),  intent(in),    optional  :: coordTypeKind
        integer,               intent(in),   optional  :: minIndex(:)
-       integer,               intent(in),             :: maxIndex(:)
+       integer,               intent(in)              :: maxIndex(:)
        integer,               intent(in),   optional  :: regDecomp(:)
        type(ESMF_GridConn),   intent(in),   optional  :: connDim1(2)
        type(ESMF_GridConn),   intent(in),   optional  :: connDim2(2)
@@ -405,6 +438,7 @@ public ESMF_Grid
        integer,               intent(in),   optional  :: coordDep3(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: haloDepth
+       integer,               intent(in),   optional  :: gridtype
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
 !
@@ -552,8 +586,8 @@ public ESMF_Grid
       character (len=*), intent(in), optional :: name 
        type(ESMF_TypeKind),  intent(in),    optional  :: coordTypeKind
        integer,               intent(in),   optional  :: minIndex(:)
-       integer,               intent(in),             :: countsPerDEDim1(:)
-       integer,               intent(in),             :: countsPerDEDim2(:)
+       integer,               intent(in)              :: countsPerDEDim1(:)
+       integer,               intent(in)              :: countsPerDEDim2(:)
        integer,               intent(in),   optional  :: countsPerDEDim3(:)
        type(ESMF_GridConn),   intent(in),   optional  :: connDim1(2)
        type(ESMF_GridConn),   intent(in),   optional  :: connDim2(2)
@@ -569,6 +603,7 @@ public ESMF_Grid
        integer,               intent(in),   optional  :: coordDep3(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: haloDepth
+       integer,               intent(in),   optional  :: gridType
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
 !
@@ -716,7 +751,7 @@ public ESMF_Grid
 !
 !EOP
 
-      end function ESMF_GridCreateShapeReg
+      end function ESMF_GridCreateShapeIrreg
 
 #endif ! Take out so you don't have to worry about compiler warnings for now
 
@@ -771,7 +806,7 @@ public ESMF_Grid
 
  end subroutine ESMF_GridDestroy
 
-#ifdef NEWGRID_OUT ! Take out so you don't have to worry about compiler warnings for now
+#ifdef NEWGRID_NOTYET ! Take out so you don't have to worry about compiler warnings for now
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -831,8 +866,7 @@ public ESMF_Grid
       subroutine ESMF_GridGet(grid, name, coordTypeKind, rank,  &
           tileCount, distGrid, delayout, staggerLocsCount,  &
           staggerLocs, coordRanks, coordDimMap, dimmap, &
-          staggerLocLWidth, staggerLocUWidth, &
-          staggerLocAligns, lbounds, ubounds, gridType, rc)
+          lbounds, ubounds, gridType, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),       intent(in)            :: grid
@@ -921,7 +955,7 @@ end subroutine ESMF_GridGet
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       type (ESMF_StaggerLoc), intent(in),optional  :: staggerLoc
-      integer, intent(in),  :: coord
+      integer, intent(in)  :: coord
       type(ESMF_Array), intent(out) :: array
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -989,7 +1023,7 @@ end subroutine ESMF_GridGet
     end function ESMF_GridGetInit
 !------------------------------------------------------------------------------
 
-#ifdef NEWGRID_OUT  ! Take out so you don't have to worry about compiler warnings for now
+#ifdef NEWGRID_NOTYET  ! Take out so you don't have to worry about compiler warnings for now
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1139,8 +1173,8 @@ end subroutine ESMF_GridGet
 ! !IROUTINE: ESMF_GridGetStaggerLocInfo - Get information about a stagger location 
 
 ! !INTERFACE:
-     subroutine ESMF_GridGetStaggerLocInfo(grid, staggerLoc, coord, isAllocated &
-                        coordLWidth, coordLocUWidth, coordAlign, rc)
+     subroutine ESMF_GridGetStaggerLocInfo(grid, staggerLoc, coord, isAllocated, &
+                        coordLWidth, coordUWidth, coordAlign, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)              :: grid 
@@ -1148,7 +1182,7 @@ end subroutine ESMF_GridGet
       integer,                intent(in)              :: coord
       logical,                intent(in),   optional  :: isAllocated
       integer,                intent(in),   optional  :: coordLWidth(:)
-      integer,                intent(in),   optional  :: coordWidth(:)
+      integer,                intent(in),   optional  :: coordUWidth(:)
       integer,                intent(in),   optional  :: coordAlign(:)
       integer,                intent(out),  optional  :: rc
 !
@@ -1188,18 +1222,18 @@ end subroutine ESMF_GridGet
 !
 !EOP
 
-      end function ESMF_GridGetStaggerLocInfo
+      end subroutine ESMF_GridGetStaggerLocInfo
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridSet"
+#define ESMF_METHOD "ESMF_GridSetFromDistGrid"
 !BOP
 ! !IROUTINE: ESMF_GridSet - Set the values in a Grid which has been created with CreateEmpty. 
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSet()
-      function ESMF_GridSetFromDistGrid(grid,name,coordTypeKind,distgrid, dimmap, &
+    subroutine ESMF_GridSetFromDistGrid(grid,name,coordTypeKind,distgrid, dimmap, &
                         lbounds, ubounds, indexflag, gridType, rc)
 !
 ! !RETURN VALUE:
@@ -1256,7 +1290,7 @@ end subroutine ESMF_GridGet
 ! \end{description}
 !
 !EOP
-      end function ESMF_GridSetFromDistGrid
+      end subroutine ESMF_GridSetFromDistGrid
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1267,7 +1301,7 @@ end subroutine ESMF_GridGet
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSetCoord()
-     function ESMF_GridSetCoordNoValues(grid, staggerLoc, coord,  &
+     subroutine ESMF_GridSetCoordNoValues(grid, staggerLoc, coord,  &
                 coordLWidth, coordUWidth, coordAlign, &
                 computationalLWidth, computationalUWidth, &
                 totalLWidth, totalUWidth,rc)
@@ -1276,7 +1310,7 @@ end subroutine ESMF_GridGet
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)              :: grid 
       type (ESMF_StaggerLoc), intent(in),optional     :: staggerLoc
-      integer,                intent(in),             :: coord
+      integer,                intent(in)              :: coord
       integer,                intent(in),optional     :: coordLWidth(:)
       integer,                intent(in),optional     :: coordUWidth(:)
       integer,                intent(in),optional     :: coordAlign(:)
@@ -1336,7 +1370,7 @@ end subroutine ESMF_GridGet
 !
 !EOP
 
-      end function ESMF_GridSetCoordNoValues
+      end subroutine ESMF_GridSetCoordNoValues
 
 
 !------------------------------------------------------------------------------
@@ -1346,14 +1380,14 @@ end subroutine ESMF_GridGet
 ! !IROUTINE: ESMF_GridSetCoord - Set coordinates using ESMF Arrays
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetCoordFromArray(grid, staggerLoc, coord, coordDep, &
+      subroutine ESMF_GridSetCoordFromArray(grid, staggerLoc, coord, &
                             array, doCopy, coordAlign, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid),        intent(in),           :: grid
+      type(ESMF_Grid),        intent(in)            :: grid
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
-      integer,                intent(in),           :: coord
-      type(ESMF_Array),       intent(in),           :: array
+      integer,                intent(in)            :: coord
+      type(ESMF_Array),       intent(in)            :: array
       type(ESMF_CopyFlag),    intent(in), optional  :: docopy
       integer,                intent(in), optional  :: coordAlign(:)
       integer,                intent(out), optional :: rc
@@ -1407,9 +1441,9 @@ end subroutine ESMF_GridGet
                    totalLWidth, totalUWidth,rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid),        intent(in),           :: grid
+      type(ESMF_Grid),        intent(in)            :: grid
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerLoc
-      integer,                intent(in),           :: coord
+      integer,                intent(in)            :: coord
       real(ESMF_KIND_R8),     intent(out), optional :: fptr(:,:)
       type(ESMF_CopyFlag),    intent(in),  optional :: docopy
       integer,                intent(in),  optional :: coordLWidth(:)
@@ -1490,13 +1524,13 @@ end subroutine ESMF_GridGet
 ! !IROUTINE: ESMF_GridSetLocalTileCoord - Set the coordinates for a local tile from a Fortran array
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetLocalTileCoord2R8(grid, staggerLoc, coord, tile, localDE, &
+      subroutine ESMF_GridSetLocalTileCoord2DR8(grid, staggerLoc, coord, tile, localDE, &
                              fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
       type (ESMF_StaggerLoc), intent(in),optional   :: staggerLoc
-      integer,                intent(in),           :: coord
+      integer,                intent(in)            :: coord
       integer,                intent(in),optional   :: tile
       integer,                intent(in),optional   :: localDE
       real(ESMF_KIND_R8),     intent(out),optional  :: fptr(:,:)
@@ -1534,8 +1568,8 @@ end subroutine ESMF_GridGet
 !
 !EOP
 
-      end subroutine ESMF_GridSetLocalTileCoord
-
+      end subroutine ESMF_GridSetLocalTileCoord2DR8
+#endif ! take out warnings
 
 
 !------------------------------------------------------------------------------
@@ -1544,6 +1578,7 @@ end subroutine ESMF_GridGet
 ! UNREVIEWED AND UNIMPLEMENTED METHODS
 !==============================================================================
 
+#ifdef NEWGRID_NOT_THIS_PHASE
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAddMetricFromArray"
@@ -1552,13 +1587,12 @@ end subroutine ESMF_GridGet
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAddMetric()
-      subroutine ESMF_GridSetMetricFromArray(grid, name, metricTag, staggerLoc, &
+      subroutine ESMF_GridSetMetricFromArray(grid, name, staggerLoc, &
                             array, metricDep, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       character (len=*), intent(in) :: name
-      type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
       type(ESMF_Array), intent(in) :: array
       integer,               intent(in),   optional  :: metricDep(:)
@@ -1574,9 +1608,6 @@ end subroutine ESMF_GridGet
 !          The grid to set the metric in.
 !     \item [name]
 !           The name of the attribute to set.
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE.            
 !     \item[{[staggerLoc]}]
 !          The stagger location into which to copy the arrays. If not set,
 !          defaults to center. 
@@ -1610,13 +1641,12 @@ end subroutine ESMF_GridGet
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAddMetric()
-      subroutine ESMF_GridSetMetricFromFptr(grid, name, metricTag, staggerLoc, metricDep, &
+      subroutine ESMF_GridSetMetricFromFptr(grid, name, staggerLoc, metricDep, &
                             fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       character (len=*), intent(in) :: name
-       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
       real, intent(in), pointer :: fptr
       integer,               intent(in),   optional  :: metricDep(:)
@@ -1635,9 +1665,6 @@ end subroutine ESMF_GridGet
 !          The grid to set the metric in.
 !     \item [name]
 !           The name of the attribute to set.
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE.            
 !     \item[{[staggerLoc]}]
 !          The stagger location into which to copy the arrays. If not set,
 !          defaults to center. 
@@ -1668,7 +1695,7 @@ end subroutine ESMF_GridGet
 
 ! !INTERFACE:
 ! Private name; call using ESMF_GridAddMetric()
-      subroutine ESMF_GridAddMetricNoSet(grid, name, metricTag, metricTypeKind, 
+      subroutine ESMF_GridAddMetricNoSet(grid, name, metricTypeKind, 
                    staggerLoc, metricDep, lbounds, ubounds, &                         
                    metricLWidth, metricUWidth, metricAlign, &
                    computationalLWidth, computationalUWidth, rc)
@@ -1676,7 +1703,6 @@ end subroutine ESMF_GridGet
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       character (len=*), intent(in) :: name
-       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
        type(ESMF_TypeKind),  intent(in),    optional  :: metricTypeKind
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
       integer,               intent(in),   optional  :: metricDep(:)
@@ -1699,9 +1725,6 @@ end subroutine ESMF_GridGet
 !          The grid to set the metric in.
 !     \item [name]
 !           The name of the attribute to set.           
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE. 
 !      \item[{[metricTypeKind]}] 
 !           The type/kind of the grid coordinate data. 
 !           If not specified then the type/kind will be 8 byte reals. 
@@ -1765,7 +1788,7 @@ end subroutine ESMF_GridGet
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAddMetric()
-      subroutine ESMF_GridAddMetricSub(grid, name, metricTag, metricTypeKind, 
+      subroutine ESMF_GridAddMetricSub(grid, name, metricTypeKind, 
                    staggerLoc, metricDep, lbounds, ubounds, &                         
                    metricLWidth, metricUWidth, metricAlign, &
                    computationalLWidth, computationalUWidth,&
@@ -1774,7 +1797,6 @@ end subroutine ESMF_GridGet
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       character (len=*), intent(in) :: name
-       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
        type(ESMF_TypeKind),  intent(in),    optional  :: metricTypeKind
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
       integer,               intent(in),   optional  :: metricDep(:)
@@ -1786,7 +1808,7 @@ end subroutine ESMF_GridGet
       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
       integer,               intent(in),   optional  :: computationalLWidth(:)
       integer,               intent(in),   optional  :: computationalUWidth(:)
-      subroutine             intent(in),             :: sub
+      integer,               intent(in),             :: sub
       real(ESMF_KIND_R4),    intent(in),   optional  :: userDataR4(:)
       real(ESMF_KIND_R4),    intent(in),   optional  :: userDataR8(:)
       integer, intent(out), optional :: rc
@@ -1801,9 +1823,6 @@ end subroutine ESMF_GridGet
 !          The grid to set the metric in.
 !     \item [name]
 !           The name of the attribute to set.           
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE. 
 !      \item[{[metricTypeKind]}] 
 !           The type/kind of the grid coordinate data. 
 !           If not specified then the type/kind will be 8 byte reals. 
@@ -1932,8 +1951,8 @@ end subroutine ESMF_GridGet
        type (ESMF_StaggerLoc), intent(in),optional :: staggerLocs(:)
        type(ESMF_TypeKind),  intent(in),optional  :: coordTypeKind
        integer,               intent(in),   optional  :: minIndex(:)
-       integer,               intent(in),             :: maxIndex(:)
-       integer,               intent(in),             :: localIndices(:,:)
+       integer,               intent(in)              :: maxIndex(:)
+       integer,               intent(in)              :: localIndices(:,:)
        integer,               intent(in),   optional  :: dimmap(:)
        integer,               intent(in),   optional  :: lbounds(:)
        integer,               intent(in),   optional  :: ubounds(:)
@@ -2165,7 +2184,7 @@ end subroutine ESMF_GridGet
        character (len=*), intent(in), optional :: name
        type(ESMF_TypeKind),  intent(in),optional  :: coordTypeKind
        integer,               intent(in),   optional  :: minIndex(:)
-       integer,               intent(in),             :: maxIndex(:)
+       integer,               intent(in)              :: maxIndex(:)
        integer,               intent(in),   optional  :: blockDecomp(:)
        integer,               intent(in),   optional  :: dimmap(:)
        integer,               intent(in),   optional  :: lbounds(:)
@@ -2322,7 +2341,7 @@ end subroutine ESMF_GridGet
 ! !ARGUMENTS:
        character (len=*), intent(in), optional :: name
        type(ESMF_TypeKind),  intent(in),optional  :: coordTypeKind
-       integer,               intent(in),         ::   countPerDE(:,:)
+       integer,               intent(in)          ::   countPerDE(:,:)
        integer,               intent(in),   optional  :: dimmap(:)
        integer,               intent(in),   optional  :: minIndex(:)
        integer,               intent(in),   optional  :: lbounds(:)
@@ -2651,8 +2670,8 @@ end subroutine ESMF_GridGet
       character (len=*), intent(in), optional :: name 
        type(ESMF_TypeKind),  intent(in),    optional  :: coordTypeKind
        integer,               intent(in),   optional  :: minIndex(:)
-       integer,               intent(in),             :: maxIndex(:)
-       integer,               intent(in),             :: localIndices(:,:)
+       integer,               intent(in)              :: maxIndex(:)
+       integer,               intent(in)              :: localIndices(:,:)
        type(ESMF_GridConn),   intent(in),   optional  :: connDim1(2)
        type(ESMF_GridConn),   intent(in),   optional  :: connDim2(2)
        type(ESMF_GridConn),   intent(in),   optional  :: connDim3(2)
@@ -2889,13 +2908,12 @@ end subroutine ESMF_GridGet
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetMetric()
-      subroutine ESMF_GridGetMetricIntoFptr(grid, name, metricTag, staggerLoc, dep, &
+      subroutine ESMF_GridGetMetricIntoFptr(grid, name, staggerLoc, dep, &
                             fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       character (len=*), intent(in) :: name
-      type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
       type (ESMF_StaggerLoc), intent(out), optional  :: staggerLoc
       real, intent(in), pointer :: fptr
       integer,               intent(out),   optional  :: dep(:)
@@ -2914,9 +2932,6 @@ end subroutine ESMF_GridGet
 !          The grid to get the metric from.
 !     \item [name]
 !           The name of the metric to get.
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE. 
 !     \item[{[staggerLoc]}]
 !          The stagger location where the metric is located.            
 !     \item[{[dep]}]
@@ -3120,13 +3135,12 @@ end subroutine ESMF_GridGet
 ! !IROUTINE: ESMF_GridLocalTileGetMetric - get the fortran data pointer for the piece of  metic data on this tile on this DE.
 
 ! !INTERFACE:
-      subroutine ESMF_GridLocalTileGetMetric(grid, name, metricTag, tile, localDE, &
+      subroutine ESMF_GridLocalTileGetMetric(grid, name, tile, localDE, &
                                       fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       character (len=*), intent(in) :: name
-       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
       integer, intent(in),optional :: tile
       integer, intent(in),optional :: localDE
       real, intent(out), optional :: fptr(:,:)
@@ -3144,9 +3158,6 @@ end subroutine ESMF_GridGet
 !          Grid to get the information from.
 !     \item [name]
 !           The name of the metric to get.
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE. 
 !     \item[{[tile]}]
 !          The grid tile to get the information for. If not set, defaults to 
 !          the first tile. 
@@ -3224,13 +3235,12 @@ end subroutine ESMF_GridGet
 ! !IROUTINE: ESMF_GridLocalTileSetMetric - set the metic data on this tile on this DE using a fortran pointer.
 
 ! !INTERFACE:
-      subroutine ESMF_GridLocalTileSetMetric(grid, name, metricTag, tile, localDE, &
+      subroutine ESMF_GridLocalTileSetMetric(grid, name, tile, localDE, &
                                       fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       character (len=*), intent(in) :: name
-      type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
       integer, intent(in),optional :: tile
       integer, intent(in),optional :: localDE
       real, intent(out), optional :: fptr(:,:)
@@ -3248,9 +3258,6 @@ end subroutine ESMF_GridGet
 !          Grid to get the information from.
 !     \item [name]
 !           The name of the metric to set.
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE. 
 !     \item[{[tile]}]
 !          The grid tile to set the information in. If not set, defaults to 
 !          the first tile. 
@@ -3279,7 +3286,7 @@ end subroutine ESMF_GridGet
 ! !IROUTINE: ESMF_GridMetricGet - Get information about a particular metric. 
 
 ! !INTERFACE:
-     subroutine ESMF_GridMetricGet(grid, name, metricTag, staggerLoc, &
+     subroutine ESMF_GridMetricGet(grid, name, staggerLoc, &
                         metricLWidth, metricUWidth, &
                         metricAlign, rc)
 !
@@ -3287,7 +3294,6 @@ end subroutine ESMF_GridGet
       type(ESMF_Grid), intent(in) :: grid 
       character (len=*), intent(in) :: name
       type (ESMF_StaggerLoc), intent(out), optional  :: staggerLoc
-      type(ESMF_MetricTag),  intent(out),   optional  :: metricTag
       integer,               intent(out),   optional  :: metricLWidth(:)
       integer,               intent(out),   optional  :: metricUWidth(:)
       integer,               intent(out),   optional  :: metricAlign(:)
@@ -3302,8 +3308,6 @@ end subroutine ESMF_GridGet
 !          Grid to get information from.
 !\item [name]
 !           The name of the metric to set.
-!\item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. 
 !\item[{staggerLoc}]
 !        The stagger location at which the metric is located.
 !\item[{[metricLWidth]}] 
@@ -3339,13 +3343,12 @@ end subroutine ESMF_GridGet
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetMetric()
-      subroutine ESMF_GridGetMetricIntoArray(grid, name, metricTag, staggerLoc, &
+      subroutine ESMF_GridGetMetricIntoArray(grid, name, staggerLoc, &
                             array, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       character (len=*), intent(in) :: name
-       type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
       type (ESMF_StaggerLoc), intent(out), optional  :: staggerLoc
       type(ESMF_Array), intent(inout) :: array
       type(ESMF_CopyFlag), intent(in), optional :: docopy
@@ -3360,9 +3363,6 @@ end subroutine ESMF_GridGet
 !          The grid to get the metric from.
 !     \item [name]
 !           The name of the attribute to get.
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE.            
 !     \item[{[staggerLoc]}]
 !          The stagger location where the metric is located. 
 !     \item[{array}]
@@ -3702,13 +3702,12 @@ end subroutine ESMF_GridGet
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSetMetric()
-      subroutine ESMF_GridSetMetricFromArray(grid, name, metricTag, &
+      subroutine ESMF_GridSetMetricFromArray(grid, name, &
                             array, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       character (len=*), intent(in) :: name
-      type(ESMF_MetricTag),  intent(in),    optional  :: metricTag
       type(ESMF_Array), intent(in) :: array
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -3722,9 +3721,6 @@ end subroutine ESMF_GridGet
 !          The grid to set the metric in.
 !     \item [name]
 !           The name of the attribute to set.
-!      \item[{[metricTag]}] 
-!           Identifies the type of metric to ESMF. If not present, defaults
-!           to ESMF\_METRICTAG\_NONE.            
 !     \item[{array}]
 !          An array to set the grid metric information from.
 !     \item[{[doCopy]}]
