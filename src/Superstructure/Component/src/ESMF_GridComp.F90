@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.91 2007/06/23 07:00:50 cdeluca Exp $
+! $Id: ESMF_GridComp.F90,v 1.92 2007/06/26 17:55:40 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.91 2007/06/23 07:00:50 cdeluca Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.92 2007/06/26 17:55:40 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -421,19 +421,25 @@
 !   \end{description}
 !
 !EOP
+        integer :: localrc                        ! local return code
+
+        ! Assume failure until success
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
 
-        ! Initialize return code; assume routine not implemented
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
         call ESMF_CompExecute(gridcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETFINAL, phase=phase, &
-          blockingflag=blockingflag, rc=rc)
+          blockingflag=blockingflag, rc=localrc)
+        ! Use LogErr to handle return code
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
+        if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_GridCompFinalize
 
 !------------------------------------------------------------------------------
@@ -568,19 +574,25 @@
 !   \end{description}
 !
 !EOP
+        integer :: localrc                        ! local return code
+
+        ! Assume failure until success
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
 
-        ! Initialize return code; assume routine not implemented
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
         call ESMF_CompExecute(gridcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETINIT, phase=phase, &
-          blockingflag=blockingflag, rc=rc)
+          blockingflag=blockingflag, rc=localrc)
+        ! Use LogErr to handle return code
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+        if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_GridCompInitialize
 
 !------------------------------------------------------------------------------
@@ -682,16 +694,23 @@
 !   \end{description}
 !
 !EOP
+        integer :: localrc                        ! local return code
+
+        ! Assume failure until success
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
+
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-        ! Initialize return code; assume routine not implemented
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
 	! Change BOPI to BOP when implemented.
         call ESMF_CompReadRestart(gridcomp%compp, iospec, clock, phase, &
-                                  blockingflag, rc)
+                                  blockingflag, rc=localrc)
+        ! Use LogErr to handle return code
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
+        if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_GridCompReadRestart
 
 !------------------------------------------------------------------------------
@@ -760,19 +779,25 @@
 !   \end{description}
 !
 !EOP
+        integer :: localrc                        ! local return code
+
+        ! Assume failure until success
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
 
-        ! Initialize return code; assume routine not implemented
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
         call ESMF_CompExecute(gridcomp%compp, importState, exportState, &
           clock=clock, methodtype=ESMF_SETRUN, phase=phase, &
-          blockingflag=blockingflag, rc=rc)
-          
+          blockingflag=blockingflag, rc=localrc)
+        ! Use LogErr to handle return code
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_GridCompRun
 
 !------------------------------------------------------------------------------
@@ -829,19 +854,25 @@
 !   \end{description}
 !
 !EOP
+        integer :: localrc                        ! local return code
+
+        ! Assume failure until success
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-        ! Initialize return code; assume routine not implemented
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
         call ESMF_CompSet(gridcomp%compp, name, &
                           gridcomptype=gridcomptype, igrid=igrid, clock=clock, &
-                          configFile=configFile, config=config, rc=rc)
+                          configFile=configFile, config=config, rc=localrc)
+        ! Use LogErr to handle return code
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
+        if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_GridCompSet
 
 
@@ -895,7 +926,6 @@
     ! call CompClass method
     call ESMF_CompSetVMMaxThreads(gridcomp%compp, max, &
                  pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
-    ! if (ESMF_LogPassFoundError(localrc, rc)) return
     if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -955,7 +985,6 @@
     ! call CompClass method
     call ESMF_CompSetVMMinThreads(gridcomp%compp, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
-    ! if (ESMF_LogPassFoundError(localrc, rc)) return
     if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1016,7 +1045,6 @@
     ! call CompClass method
     call ESMF_CompSetVMMaxPEs(gridcomp%compp, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
-    ! if (ESMF_LogPassFoundError(localrc, rc)) return
     if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1056,21 +1084,26 @@
 !   \end{description}
 !
 !EOP
+      integer :: localrc                        ! local return code
 
-       call ESMF_CompValidate(gridcomp%compp, options, rc)
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
-       ! TODO: also need to validate grid if it's associated here
+      call ESMF_CompValidate(gridcomp%compp, options, localrc)
+      ! Use LogErr to handle return code
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! TODO: also need to validate grid if it's associated here
 
       ! Check Init Status
       ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
       ! If all checks pass return success
       if (present(rc)) rc = ESMF_SUCCESS
  
-       end subroutine ESMF_GridCompValidate
+      end subroutine ESMF_GridCompValidate
 
 
 !------------------------------------------------------------------------------
@@ -1183,7 +1216,6 @@
 
     ! call CompClass method
     call ESMF_CompWait(gridcomp%compp, blockingFlag, localrc)
-    ! if (ESMF_LogPassFoundError(localrc, rc)) return
     if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1240,7 +1272,6 @@
 
     ! call CompClass method
     localresult = ESMF_CompIsPetLocal(gridcomp%compp, localrc)
-    ! if (ESMF_LogPassFoundError(localrc, rc)) return
     if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return

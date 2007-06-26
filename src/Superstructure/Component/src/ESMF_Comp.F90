@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.158 2007/06/23 07:00:50 cdeluca Exp $
+! $Id: ESMF_Comp.F90,v 1.159 2007/06/26 17:55:40 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.158 2007/06/23 07:00:50 cdeluca Exp $'
+      '$Id: ESMF_Comp.F90,v 1.159 2007/06/26 17:55:40 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -326,13 +326,13 @@ end interface
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, cc, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments.
     !todo: call c_ESMC_CompClassValidate(cc, localrc)
-    localrc = ESMF_SUCCESS  ! remove when todo is done.
     
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1085,6 +1085,11 @@ end function
 !        call ESMF_LogMsgSetError(status, &
 !          "Registered component method returned error", &
 !          ESMF_CONTEXT, rc)
+        ! Use LogErr to handle return code
+        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Return success
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_CompExecute
 
@@ -1762,6 +1767,10 @@ end function
        endif
 
        ! TODO: add code here
+
+       ! Use LogErr to handle return code
+       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! set return values
        if (rcpresent) rc = ESMF_SUCCESS
