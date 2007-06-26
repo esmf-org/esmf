@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.21 2006/09/22 23:55:39 theurich Exp $
+# $Id: build_rules.mk,v 1.22 2007/06/26 22:31:42 dneckels Exp $
 #
 # Linux.lahey.default
 #
@@ -8,7 +8,8 @@
 #
 ESMF_F90DEFAULT         = lf95
 ESMF_CXXDEFAULT         = g++
-
+ESMF_F90LINKERDEFAULT   = g++
+ESMF_F90LINKLIBS       += $(shell $(ESMF_DIR)/scripts/libpath.lf95 $(ESMF_F90COMPILER))/fj90rt0.o
 ############################################################
 # Default MPI setting.
 #
