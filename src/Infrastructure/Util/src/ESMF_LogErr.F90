@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.35 2007/05/11 02:40:14 rosalind Exp $
+! $Id: ESMF_LogErr.F90,v 1.36 2007/06/26 22:00:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1158,7 +1158,7 @@ end subroutine ESMF_LogInitialize
             rcToReturn=ESMF_RC_MEM
         endif
         allocmsg=tempmsg(1:msglen)
-	call ESMF_LogWrite(trim(allocmsg)//msg,ESMF_LOG_ERROR,line,file,method,log)	
+	call ESMF_LogWrite(trim(allocmsg)//" "//msg,ESMF_LOG_ERROR,line,file,method,log)	
 	ESMF_LogMsgFoundAllocError=.TRUE.
 #ifdef ESMF_SUCCESS_DEFAULT_ON
     else
@@ -1228,6 +1228,9 @@ end function ESMF_LogMsgFoundAllocError
     integer:: i
     logical:: masked = .false.
     type(ESMF_LogPrivate), pointer          :: alog
+    character(len=ESMF_MAXSTR)::tempmsg
+    character(len=ESMF_MAXSTR)::allocmsg
+    integer::msglen=0
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
@@ -1257,7 +1260,10 @@ end function ESMF_LogMsgFoundAllocError
           if (alog%errorMask(i) .eq. rcToCheck) masked = .true.
         enddo
         if (.not.masked) then
-          call ESMF_LogWrite(msg,ESMF_LOG_ERROR,line,file,method,log)
+          call c_esmc_loggeterrormsg(rcToCheck,tempmsg,msglen)
+          allocmsg=tempmsg(1:msglen)
+	  call ESMF_LogWrite(trim(allocmsg)//" "//msg,ESMF_LOG_ERROR,line,file,&
+            method,log)	
           ESMF_LogMsgFoundError=.TRUE.
           if (present(rcToReturn)) rcToReturn = rcToCheck
         endif
@@ -1326,6 +1332,9 @@ end function ESMF_LogMsgFoundError
     integer:: i
     logical:: masked = .false.
     type(ESMF_LogPrivate), pointer          :: alog
+    character(len=ESMF_MAXSTR)::tempmsg
+    character(len=ESMF_MAXSTR)::allocmsg
+    integer::msglen=0
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
@@ -1352,7 +1361,10 @@ end function ESMF_LogMsgFoundError
           if (alog%errorMask(i) .eq. rcValue) masked = .true.
         enddo
         if (.not.masked) then
-          call ESMF_LogWrite(msg,ESMF_LOG_ERROR,line,file,method,log)
+          call c_esmc_loggeterrormsg(rcValue,tempmsg,msglen)
+          allocmsg=tempmsg(1:msglen)
+	  call ESMF_LogWrite(trim(allocmsg)//" "//msg,ESMF_LOG_ERROR,line,file,&
+            method,log)	
           if (present(rcToReturn)) rcToReturn = rcValue
         endif
       endif	
