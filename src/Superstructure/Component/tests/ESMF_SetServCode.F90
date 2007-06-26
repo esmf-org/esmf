@@ -1,4 +1,4 @@
-! $Id: ESMF_SetServCode.F90,v 1.6 2007/06/23 07:00:52 cdeluca Exp $
+! $Id: ESMF_SetServCode.F90,v 1.7 2007/06/26 21:25:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -70,6 +70,7 @@ contains
       integer :: rc
      
       print *, "User initialize 1 routine called"
+      rc = ESMF_SUCCESS
 
     end subroutine my_init1
 
@@ -82,6 +83,7 @@ contains
       integer :: rc
      
       print *, "User run routine 1 called"
+      rc = ESMF_SUCCESS
 
     end subroutine my_run1
 
@@ -94,6 +96,7 @@ contains
       integer :: rc
      
       print *, "User finalize 1 routine called"
+      rc = ESMF_SUCCESS
 
     end subroutine my_final1
 
@@ -106,6 +109,7 @@ contains
       integer :: rc
      
       print *, "User initialize 2 routine called"
+      rc = ESMF_SUCCESS
 
     end subroutine my_init2
 
@@ -118,6 +122,7 @@ contains
       integer :: rc
      
       print *, "User run routine 2 called"
+      rc = ESMF_SUCCESS
 
     end subroutine my_run2
 
@@ -130,6 +135,7 @@ contains
       integer :: rc
      
       print *, "User finalize 2 routine called"
+      rc = ESMF_SUCCESS
 
     end subroutine my_final2
 
