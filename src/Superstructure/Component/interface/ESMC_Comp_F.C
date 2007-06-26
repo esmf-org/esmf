@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.49 2007/06/23 07:00:50 cdeluca Exp $
+// $Id: ESMC_Comp_F.C,v 1.50 2007/06/26 21:30:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -432,10 +432,10 @@ void FTN(c_esmc_ftablecallentrypointvm)(
 void FTN(c_esmc_compwait)(
   ESMCI::VM **ptr_vm_parent,  // p2 to the parent VM
   ESMCI::VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
-  void **vm_info,           // p2 to member which holds info
-  void **vm_cargo,          // p2 to member which holds cargo
-  int *callrc,              // return code of the user component method
-  int *status) {            // return error code in status
+  void **vm_info,             // p2 to member which holds info
+  void **vm_cargo,            // p2 to member which holds cargo
+  int *callrc,                // return code of the user component method
+  int *esmfrc) {              // esmf internal return error code
 
   // Things get a little confusing here with pointers, so I will define
   // some temp. variables that make matters a little clearer I hope:
@@ -444,8 +444,8 @@ void FTN(c_esmc_compwait)(
   cargotype *cargo = (cargotype *)*vm_cargo;  // pointer to cargo
   
   // initialize the return codes
-  *status = ESMC_RC_NOT_IMPL; // return code of ESMF callback code
-  *callrc = ESMC_RC_NOT_IMPL; // return code of registered user code
+  *esmfrc = ESMC_RC_NOT_SET; // return code of ESMF callback code
+  *callrc = ESMC_RC_NOT_SET; // return code of registered user code
 
   // Now call the vmk_exit function which will block respective PETs
   vm_parent->exit(static_cast<ESMCI::VMKPlan *>(vmplan), *vm_info);
@@ -453,16 +453,21 @@ void FTN(c_esmc_compwait)(
   // return with errors if there is no cargo to obtain error codes
   if (cargo == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "No cargo structure to obtain error codes", status);
+      " - No cargo structure to obtain error codes", esmfrc);
     return;
   }
   
   // obtain return codes out of cargo
-  *status = cargo->esmfrc;
+  *esmfrc = cargo->esmfrc;
   *callrc = cargo->userrc;
   
   // delete cargo structure
   delete cargo;
+  
+  // error check esmfrc
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(*esmfrc,
+    " - ESMF internal error during user function callback", NULL)) return;
+  
 }
 
   
