@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.65 2007/05/01 15:35:36 rosalind Exp $
+! $Id: ESMF_DELayout.F90,v 1.66 2007/06/26 19:02:47 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -132,7 +132,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.65 2007/05/01 15:35:36 rosalind Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.66 2007/06/26 19:02:47 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -1015,6 +1015,8 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_DELayoutGetDeprecated
 !------------------------------------------------------------------------------
 
@@ -1121,6 +1123,8 @@ contains
       enddo
     endif
 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_DELayoutGetDELocalInfo
 !------------------------------------------------------------------------------
 
@@ -1205,6 +1209,8 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_DELayoutGetDEMatchDE
 !------------------------------------------------------------------------------
 
@@ -1289,6 +1295,8 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_DELayoutGetDEMatchPET
 !------------------------------------------------------------------------------
 
@@ -1400,6 +1408,8 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_DELayoutPrint
 !------------------------------------------------------------------------------
 
@@ -1656,6 +1666,8 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_DELayoutVASMatch
 !------------------------------------------------------------------------------
 
@@ -1718,6 +1730,8 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_DELayoutSerialize
 !------------------------------------------------------------------------------
 
