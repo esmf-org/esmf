@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.44 2007/04/24 01:55:40 rosalind Exp $
+! $Id: ESMF_Init.F90,v 1.45 2007/06/26 17:51:07 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -185,6 +185,7 @@
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_Initialize
 
 !------------------------------------------------------------------------------
