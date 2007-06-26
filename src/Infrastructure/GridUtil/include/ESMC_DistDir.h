@@ -1,4 +1,4 @@
-// $Id: ESMC_DistDir.h,v 1.4 2007/06/20 01:29:21 theurich Exp $
+// $Id: ESMC_DistDir.h,v 1.5 2007/06/26 22:55:20 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -54,11 +54,8 @@ class DistDir_hash {
 public:
 DistDir_hash() {}
 UInt operator()(id_type gid, UInt npet, id_type min, id_type max) const {
-  double frac = (double) (gid-min)/(max-min);
-  id_type val = (id_type) std::floor(frac*npet);
-  typename to_unsigned<id_type>::type uval = val; // avoid signed/unsigned comparison
-  if (uval > (npet-1)) val = npet -1; // slight rounding errors can bump result above this
-  return val;
+  UInt num_per_pet = ((max-min+1) + npet -1) / npet;
+  return (gid - min)/ num_per_pet;
 }
 };
 

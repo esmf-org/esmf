@@ -1,4 +1,4 @@
-// $Id: ESMC_DistDir.C,v 1.3 2007/06/20 01:29:21 theurich Exp $
+// $Id: ESMC_DistDir.C,v 1.4 2007/06/26 22:55:20 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistDir.C,v 1.3 2007/06/20 01:29:21 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistDir.C,v 1.4 2007/06/26 22:55:20 dneckels Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -107,16 +107,14 @@ my_managed()
   std::vector<UInt> send_sizes_all(npet, 0);
   for (UInt i = 0; i < ngid; i++) {
     UInt tpet = hash_func(gid[i], npet, gmin, gmax);
-    to_pet.push_back(tpet);
+    std::vector<UInt>::iterator lb = std::lower_bound(to_pet.begin(), to_pet.end(), tpet);
+    if (lb == to_pet.end() || *lb != tpet)
+      to_pet.push_back(tpet);
     // gid
     send_sizes_all[tpet] += SparsePack<id_type>::size();
     // lid 
     send_sizes_all[tpet] += SparsePack<id_type>::size();
   }
-
-  // Uniq the pet list.  Required by SparseMsg object.
-  std::sort(to_pet.begin(), to_pet.end());
-  to_pet.erase(std::unique(to_pet.begin(), to_pet.end()), to_pet.end());
 
   UInt nsend = to_pet.size();
   std::vector<UInt> sizes(nsend, 0);
@@ -242,14 +240,13 @@ bool id_found[])              // (out) true=found, false=not in directory
     std::vector<UInt> send_sizes_all(npet, 0);
     for (UInt i = 0; i < ngid; i++) {
       UInt tpet = hash_func(gid[i], npet, gmin, gmax);
-      to_pet.push_back(tpet);
+      std::vector<UInt>::iterator lb = std::lower_bound(to_pet.begin(), to_pet.end(), tpet);
+      if (lb == to_pet.end() || *lb != tpet)
+        to_pet.push_back(tpet);
       // gid
       send_sizes_all[tpet] += SparsePack<id_type>::size();
     }
   
-    // Uniq the pet list
-    std::sort(to_pet.begin(), to_pet.end());
-    to_pet.erase(std::unique(to_pet.begin(), to_pet.end()), to_pet.end());
   
     UInt nsend = to_pet.size();
     std::vector<UInt> sizes(nsend, 0);
@@ -322,7 +319,9 @@ bool id_found[])              // (out) true=found, false=not in directory
     for (UInt i = 0; i < req_size; i++) {
       dentry &req = requests[i];
       UInt tpet = req.req_pet; // back to requestor
-      to_pet.push_back(tpet);
+      std::vector<UInt>::iterator lb = std::lower_bound(to_pet.begin(), to_pet.end(), tpet);
+      if (lb == to_pet.end() || *lb != tpet)
+        to_pet.push_back(tpet);
       // lid
       send_sizes_all[tpet] += SparsePack<id_type>::size();
       // origin pet
@@ -332,9 +331,6 @@ bool id_found[])              // (out) true=found, false=not in directory
       send_sizes_all[tpet] += SparsePack<UInt>::size();
     }
 
-    // Uniq the pet list.  Required by sparsemsg object
-    std::sort(to_pet.begin(), to_pet.end());
-    to_pet.erase(std::unique(to_pet.begin(), to_pet.end()), to_pet.end());
   
     UInt nsend = to_pet.size();
     std::vector<UInt> sizes(nsend, 0);
