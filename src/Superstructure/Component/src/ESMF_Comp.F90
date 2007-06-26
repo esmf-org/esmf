@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.159 2007/06/26 17:55:40 samsoncheung Exp $
+! $Id: ESMF_Comp.F90,v 1.160 2007/06/26 21:30:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.159 2007/06/26 17:55:40 samsoncheung Exp $'
+      '$Id: ESMF_Comp.F90,v 1.160 2007/06/26 21:30:35 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1064,7 +1064,7 @@ end function
           ! TODO: we need to be able to return two return codes here,
           ! "callrc" for the registered user callback method and "status"
           ! for to indicate ESMF internal issues. For now, if we haven't
-          ! bailed out down to this point becaue of ESMF internal error
+          ! bailed out down to this point because of ESMF internal error
           ! codes in status the status variable will be set to the "callrc"
           ! code that the user method returned.
           status = callrc
@@ -1074,20 +1074,18 @@ end function
         ! separate return codes things are inconsistent here. In the 
         ! blocking cases status holds the return code of the registered
         ! user method, while in the non-blocking case status holds the
-        ! ESMF internal return code.
+        ! ESMF internal return code of calling into 
+        ! c_ESMC_FTableCallEntryPointVM() [which has been error checked above
+        ! already!].
         
         ! TODO: not sure we want to log an error for user return codes. Are
         ! users required to abide to the ESMF error code convention? The least
         ! restrictive thing to do is to just pass the user return code through
         ! to the parent component and have the user code interpret what it 
         ! means.
-! gjt: taking this out because somehow RC_NOT_IMPL comes back from user code now
-!        call ESMF_LogMsgSetError(status, &
-!          "Registered component method returned error", &
-!          ESMF_CONTEXT, rc)
-        ! Use LogErr to handle return code
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
         ! Return success
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2195,7 +2193,7 @@ end function
       ! TODO: we need to be able to return two return codes here,
       ! "callrc" for the registered user callback method and "status"
       ! for to indicate ESMF internal issues. For now, if we haven't
-      ! bailed out down to this point becaue of ESMF internal error
+      ! bailed out down to this point because of ESMF internal error
       ! codes in status the status variable will be set to the "callrc"
       ! code that the user method returned.
       status = callrc
@@ -2217,9 +2215,11 @@ end function
     ! restrictive thing to do is to just pass the user return code through
     ! to the parent component and have the user code interpret what it 
     ! means.
-    call ESMF_LogMsgSetError(status, &
-      "Registered component method returned error", &
-      ESMF_CONTEXT, rc)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_CompWait
 !------------------------------------------------------------------------------
