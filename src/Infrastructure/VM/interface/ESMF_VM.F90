@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.91 2007/06/21 05:05:09 samsoncheung Exp $
+! $Id: ESMF_VM.F90,v 1.92 2007/06/26 23:22:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.91 2007/06/21 05:05:09 samsoncheung Exp $"
+      "$Id: ESMF_VM.F90,v 1.92 2007/06/26 23:22:37 cdeluca Exp $"
 
 !==============================================================================
 
@@ -5015,9 +5015,9 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    integer :: size
-    logical :: blocking
-    type(ESMF_CommHandle):: localcommhandle
+!    integer :: size
+!    logical :: blocking
+!    type(ESMF_CommHandle):: localcommhandle
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -5094,9 +5094,9 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    integer :: size
-    logical :: blocking
-    type(ESMF_CommHandle):: localcommhandle
+!    integer :: size
+!    logical :: blocking
+!    type(ESMF_CommHandle):: localcommhandle
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -5173,9 +5173,9 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    integer :: size
-    logical :: blocking
-    type(ESMF_CommHandle):: localcommhandle
+!    integer :: size
+!    logical :: blocking
+!    type(ESMF_CommHandle):: localcommhandle
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.34 2007/05/09 05:13:04 theurich Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.35 2007/06/26 23:22:36 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -681,10 +681,10 @@
 ! <Created by macro - do not edit directly >  @\
 !BOPI @\
 ! !INTERFACE: @\
-!     subroutine ESMF_LocalArrayCopy<rank><type><kind>(arrayIn, array, rc) @\
+!     subroutine ESMF_LocalArrayCopy<rank><type><kind>(arrayIn, arrayOut, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!     type(ESMF_LocalArray), intent(in) :: array @\
+!     type(ESMF_LocalArray), intent(in) :: arrayIn @\
 !     type(ESMF_LocalArray), intent(inout) :: arrayOut @\
 !     type(ESMF_CopyFlag), intent(in), optional :: docopy @\
 !     integer, intent(out), optional :: rc @\
@@ -698,10 +698,10 @@
 ! @\
 ! The arguments are: @\
 !  \begin{description} @\
-!  \item[array] @\
-!   The {\tt ESMF\_LocalArray} to get the value from. @\
-!  \item[fptr] @\
-!   An unassociated Fortran pointer. @\
+!  \item[arrayIn] @\
+!   The {\tt ESMF\_LocalArray} to copy. @\
+!  \item[arrayOut] @\
+!   The copied array. @\
 !  \item[{[docopy]}] @\
 !   An optional copy flag which can be specified. @\
 !   Can either make a new copy of the data or reference existing data. @\
@@ -724,7 +724,6 @@
       type(ESMF_LocalArray) :: arrayOut @\
       integer, intent(out), optional :: rc @\
  @\
-        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
  @\

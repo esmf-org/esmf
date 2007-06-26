@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.160 2007/06/26 21:30:35 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.161 2007/06/26 23:22:38 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.160 2007/06/26 21:30:35 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.161 2007/06/26 23:22:38 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -320,7 +320,6 @@ end interface
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
@@ -372,9 +371,7 @@ end interface
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2211,7 +2208,7 @@ end function
     ! ESMF internal return code.
 
     ! TODO: not sure we want to log an error for user return codes. Are
-    ! users required to abide to the ESMF error code convention? The least
+    ! users required to abide by the ESMF error code convention? The least
     ! restrictive thing to do is to just pass the user return code through
     ! to the parent component and have the user code interpret what it 
     ! means.

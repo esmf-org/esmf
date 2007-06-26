@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.18 2007/05/11 02:43:20 rosalind Exp $
+! $Id: ESMF_StateTypes.F90,v 1.19 2007/06/26 23:22:38 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -282,7 +282,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.18 2007/05/11 02:43:20 rosalind Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.19 2007/06/26 23:22:38 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -418,9 +418,7 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -458,7 +456,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     ESMF_INIT_SET_DEFINED(dh)
   end subroutine ESMF_DataHolderInit
@@ -529,9 +526,7 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -569,7 +564,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     ESMF_INIT_SET_DEFINED(si)
   end subroutine ESMF_StateItemInit
@@ -639,7 +633,6 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.8 2007/03/31 05:51:34 cdeluca Exp $
+! $Id: ESMF_Test.F90,v 1.9 2007/06/26 23:22:38 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.8 2007/03/31 05:51:34 cdeluca Exp $'
+      '$Id: ESMF_Test.F90,v 1.9 2007/06/26 23:22:38 cdeluca Exp $'
 
 !==============================================================================
 
@@ -132,7 +132,7 @@
 !EOP
 !-------------------------------------------------------------------------------
 
-      character(2*ESMF_MAXSTR) :: msg
+!      character(2*ESMF_MAXSTR) :: msg
       type(ESMF_VM):: vm
       integer:: petCount, localPet, localResult, localrc
 
@@ -446,7 +446,8 @@
 !
 !EOP
 !-------------------------------------------------------------------------------
-      character(ESMF_MAXSTR) :: msg, failMsg
+      character(ESMF_MAXSTR) :: msg
+!      character(ESMF_MAXSTR) :: failMsg
       integer, allocatable:: array1(:), array2(:)	
       integer:: finalrc, gatherRoot, i, localrc
 

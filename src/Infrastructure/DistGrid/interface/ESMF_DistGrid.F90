@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.17 2007/06/26 23:01:32 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.18 2007/06/26 23:22:35 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -2036,7 +2036,7 @@ contains
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    type(ESMF_DELayout):: dummy
+!    type(ESMF_DELayout):: dummy
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2180,7 +2180,7 @@ contains
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    type(ESMF_DELayout):: dummy
+!    type(ESMF_DELayout):: dummy
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL

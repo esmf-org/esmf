@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.95 2007/06/23 04:00:43 cdeluca Exp $
+! $Id: ESMF_Route.F90,v 1.96 2007/06/26 23:22:36 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.95 2007/06/23 04:00:43 cdeluca Exp $'
+      '$Id: ESMF_Route.F90,v 1.96 2007/06/26 23:22:36 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -186,9 +186,7 @@ end interface
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -708,7 +706,6 @@ end subroutine rias
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status
@@ -1207,7 +1204,6 @@ end subroutine rias
         integer :: i,j                     ! counters
         integer :: dstAICount, srcAICount
         integer :: dstGSCount, srcGSCount
-        type(ESMF_Logical) :: dstESMFVector, srcESMFVector
 
         ! Set initial values
         status = ESMF_RC_NOT_IMPL
@@ -1703,7 +1699,6 @@ end subroutine rias
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
        character (len=6) :: defaultopts      ! default print options
        integer :: status                     ! local error status
@@ -1770,7 +1765,6 @@ end subroutine rias
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status
@@ -1863,7 +1857,6 @@ end subroutine rias
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status

@@ -1,4 +1,4 @@
-! $Id: ESMF_InternDG.F90,v 1.11 2007/06/23 04:00:35 cdeluca Exp $
+! $Id: ESMF_InternDG.F90,v 1.12 2007/06/26 23:22:36 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -216,7 +216,7 @@ module ESMF_InternDGMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternDG.F90,v 1.11 2007/06/23 04:00:35 cdeluca Exp $'
+    '$Id: ESMF_InternDG.F90,v 1.12 2007/06/26 23:22:36 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1864,7 +1864,7 @@ module ESMF_InternDGMod
 ! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
-      integer :: j, thisCount(1), nDEs, myDE, thisDE
+      integer :: j, thisCount(1), nDEs, myDE
       type(ESMF_InternDGGlobal), pointer :: glob
       type(ESMF_VM) :: vm
       integer, dimension(:), allocatable :: allCounts
@@ -1894,7 +1894,6 @@ module ESMF_InternDGMod
                                 ESMF_CONTEXT, rc)) return
       call ESMF_DELayoutGet(delayout, vm=vm, rc=localrc)
  
-#if 1
       ! collective call to gather count from all DEs
       ! New implementation (P. Li, 7/2006) -- This implementation calls
       ! ESMF_VMAllGather instead of ESMF_VMBroadcast() to collect count 
@@ -1907,21 +1906,7 @@ module ESMF_InternDGMod
         glob%cellCountPerDEPerDim(j,1) = allCounts(j)
       enddo
       deallocate(allCounts, stat=localrc)
-#else
-      ! collective call to gather count from all DEs
-      ! Old implementation -- This implementation calls n ESMF_VMBroadcast()
-      ! (n is total number of DEs) in order to collect the count from all DEs.
-      ! It performs very poorly on Cray X1 system.  
-      do j = 1,nDEs
-        thisDE = j - 1
-        if (myDE.eq.thisDE) then
-          thisCount(1) = myCount
-        endif
-        call ESMF_VMBroadcast(vm, thisCount, 1, thisDE, rc=localrc)
-        glob%cellCountPerDE(j)         = thisCount(1)
-        glob%cellCountPerDEPerDim(j,1) = thisCount(1)
-      enddo
-#endif
+
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_InternDGSetCountsArb
 
@@ -2372,8 +2357,8 @@ module ESMF_InternDGMod
 ! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
-      integer :: i, i1, i2, i3, j, badcount
-      integer :: nDEs, myDE, thisDE
+      integer :: i, i1, i2, i3, j
+      integer :: nDEs, myDE
       integer, dimension(:), allocatable :: indices, globalIndices
       integer, dimension(:), allocatable :: disp, bufsize
       type(ESMF_InternDGGlobal), pointer :: glob
@@ -2396,36 +2381,6 @@ module ESMF_InternDGMod
       call ESMF_DELayoutGet(dgtype%delayout, vm=vm, deCount=nDEs, rc=localrc)
       call ESMF_VMGet(vm, localPet=myDE, rc=localrc)   ! fix this
 
-#if 0
-      ! This is the old implementation that uses a loop of ESMF_VMBroadcast to
-      ! collect the localIndices from all the DEs and put them into the AI
-      ! array.  It performs very poorly on Cray X1.
-       i1    = 0
-      do j  = 1,nDEs
-        thisDE = j - 1
-        if (myDE.eq.thisDE) then
-          do i = 1,me%localCellCount
-            i2 = i + me%localCellCount
-            indices(i)  = me%localIndices(i,1)
-            indices(i2) = me%localIndices(i,2)
-          enddo
-        endif
-        call ESMF_VMBroadcast(vm, indices, 2*glob%cellCountPerDE(j), &
-                              thisDE, rc=localrc)
-        ! unload into the big AI array
-        AICountPerDE(j) = glob%cellCountPerDE(j)
-        do i = 1,glob%cellCountPerDE(j)
-          i1 = i1 + 1
-          i2 = i + glob%cellCountPerDE(j)
-          AI(i1,1)%min    = indices(i)
-          AI(i1,1)%max    = indices(i)
-          AI(i1,1)%stride = glob%globalCellCountPerDim(1)
-          AI(i1,2)%min    = indices(i2)
-          AI(i1,2)%max    = indices(i2)
-          AI(i1,2)%stride = glob%globalCellCountPerDim(2)
-        enddo
-      enddo
-#else
       ! globalIndices is a global indices array used by MPI_AllGatherV
       ! New implementation (P.Li - 7/2006):  Use ESMF_VMAllGatherV() to replace
       ! a loop of ESMF_VMBroadcast().  This implementation requires more
@@ -2482,7 +2437,6 @@ module ESMF_InternDGMod
       deallocate(bufsize, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
                                      ESMF_CONTEXT, rc)) return
-#endif
       deallocate(indices, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
                                      ESMF_CONTEXT, rc)) return

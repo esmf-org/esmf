@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.94 2007/06/23 04:00:25 cdeluca Exp $
+! $Id: ESMF_FieldComm.F90,v 1.95 2007/06/26 23:22:35 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.94 2007/06/23 04:00:25 cdeluca Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.95 2007/06/26 23:22:35 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -232,7 +232,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -330,7 +329,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -427,7 +425,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -581,7 +578,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -671,7 +667,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -824,7 +819,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
@@ -936,7 +930,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
       integer :: htype
@@ -1074,12 +1067,13 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
-      integer :: srcHalo, dstHalo
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
-   
+#ifdef NOSKIP
+      integer :: srcHalo, dstHalo
+#endif   
+
       ! Initialize return code; assume routine not implemented  
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1202,7 +1196,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1301,7 +1294,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
       integer :: htype
@@ -1425,7 +1417,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1535,7 +1526,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
       type(ESMF_RouteHandle) :: routehandle
@@ -1647,7 +1637,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
       logical :: hasSrcData        ! does this DE contain localdata from src?
@@ -1792,7 +1781,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1866,7 +1854,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       integer :: localrc              ! Error status
       type(ESMF_InternArray) :: srcArray, dstArray
@@ -1974,7 +1961,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
       logical :: hasSrcData        ! does this DE contain localdata from src?
@@ -2134,7 +2120,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -2255,7 +2240,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present

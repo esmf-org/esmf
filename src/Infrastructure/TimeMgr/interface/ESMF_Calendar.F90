@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.88 2007/04/23 17:30:08 rosalind Exp $
+! $Id: ESMF_Calendar.F90,v 1.89 2007/06/26 23:22:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -145,7 +145,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.88 2007/04/23 17:30:08 rosalind Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.89 2007/06/26 23:22:37 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -185,8 +185,6 @@
 ! !PRIVATE MEMBER FUNCTIONS:
        module procedure ESMF_CalendarEQ      ! internal implementation
 !
-! !REQUIREMENTS:
-!     TMGx.x.x
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -222,9 +220,6 @@
 ! !PRIVATE MEMBER FUNCTIONS:
        module procedure ESMF_CalendarTypeEQ      ! internal implementation
 !
-! !REQUIREMENTS:
-!     TMGx.x.x
-!
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_CalendarOperator(==) - Test if Calendar is equal to Calendar Type
@@ -259,10 +254,6 @@
 ! !PRIVATE MEMBER FUNCTIONS:
        module procedure ESMF_CalendarCalAndTypeEQ      ! internal implementation
 !
-! !REQUIREMENTS:
-!     TMGx.x.x
-!
-!
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_CalendarOperator(==) - Test if Calendar Type is equal to Calendar
@@ -296,9 +287,6 @@
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
        module procedure ESMF_CalendarTypeAndCalEQ      ! internal implementation
-!
-! !REQUIREMENTS:
-!     TMGx.x.x
 !
        end interface    
 !
@@ -336,9 +324,6 @@
 ! !PRIVATE MEMBER FUNCTIONS:
        module procedure ESMF_CalendarNE      ! internal implementation
 !
-! !REQUIREMENTS:
-!     TMGx.x.x
-!
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_CalendarOperator(/=) - Test if Calendar Type 1 is not equal to Calendar Type 2
@@ -372,9 +357,6 @@
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
        module procedure ESMF_CalendarTypeNE      ! internal implementation
-!
-! !REQUIREMENTS:
-!     TMGx.x.x
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -410,9 +392,6 @@
 ! !PRIVATE MEMBER FUNCTIONS:
        module procedure ESMF_CalendarCalAndTypeNE      ! internal implementation
 !
-! !REQUIREMENTS:
-!     TMGx.x.x
-!
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_CalendarOperator(/=) - Test if Calendar Type is not equal to Calendar
@@ -446,9 +425,6 @@
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
        module procedure ESMF_CalendarTypeAndCalNE      ! internal implementation
-!
-! !REQUIREMENTS:
-!     TMGx.x.x
 !
        end interface    
 
@@ -587,11 +563,8 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    ! Assume failure until success
+    ! Set return code to not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Set init code
@@ -646,8 +619,6 @@
 !     \end{description}
 !    
 !EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
 
       ! initialize name length to zero for non-existent name
       integer :: nameLen
@@ -695,7 +666,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
 !     invoke C to C++ entry point to copy calendar
       call c_ESMC_CalendarCreateCopy(ESMF_CalendarCreateCopy, calendar, rc)
@@ -765,8 +735,6 @@
 !     \end{description}
 !     
 !EOP
-! !REQUIREMENTS:
-!     TMG2.3.4
 
       ! initialize name length to zero for non-existent name
       !   and initialize number of months per year to zero for not-present
@@ -830,7 +798,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
@@ -860,7 +827,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
 
 !     invoke C to C++ entry point
       call c_ESMC_CalendarFinalize(rc)
@@ -930,8 +896,6 @@
 !     \end{description}
 !     
 !EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
 
       ! temp name for C++ to fill
       character (len=ESMF_MAXSTR) :: tempName
@@ -1008,8 +972,6 @@
 !     \end{description}
 !    
 !EOPI
-! !REQUIREMENTS:
-!     TMGn.n.n
     
 !     invoke C to C++ entry point
       call c_ESMC_CalendarInitialize(calendartype, rc)
@@ -1050,8 +1012,6 @@
 !     \end{description}
 !    
 !EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
@@ -1096,8 +1056,6 @@
 !     \end{description}
 !    
 !EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
     
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
@@ -1148,8 +1106,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
   
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
@@ -1189,8 +1145,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
-!     TMGn.n.n
 
       ! get length of given name for C++ validation
       integer :: nameLen
@@ -1242,8 +1196,6 @@
 !     \end{description}
 !    
 !EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
     
       ! initialize name length to zero for non-existent name
       integer :: nameLen
@@ -1323,8 +1275,6 @@
 !     \end{description}
 !     
 !EOP
-! !REQUIREMENTS:
-!     TMG2.3.4
 
       ! initialize name length to zero for non-existent name
       !   and initialize number of months per year to zero for not-present
@@ -1398,8 +1348,6 @@
 !     \end{description}
 !    
 !EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
     
 !     invoke C to C++ entry point
       call c_ESMC_CalendarSetDefaultType(calendartype, rc)
@@ -1435,8 +1383,6 @@
 !     \end{description}
 !    
 !EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
     
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
@@ -1474,8 +1420,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
       
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
@@ -1512,8 +1456,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
-!     TMGn.n.n
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)

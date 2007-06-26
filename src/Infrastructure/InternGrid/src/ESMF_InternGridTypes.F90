@@ -1,4 +1,4 @@
-! $Id: ESMF_InternGridTypes.F90,v 1.3 2007/06/23 06:03:25 cdeluca Exp $
+! $Id: ESMF_InternGridTypes.F90,v 1.4 2007/06/26 23:22:36 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -566,7 +566,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_InternGridTypes.F90,v 1.3 2007/06/23 06:03:25 cdeluca Exp $'
+      '$Id: ESMF_InternGridTypes.F90,v 1.4 2007/06/26 23:22:36 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -658,7 +658,6 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS: TODO
 !EOPI
 
       integer :: localrc                          ! Error status
@@ -732,7 +731,6 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOP
 
       integer :: localrc                          ! Error status
@@ -784,7 +782,6 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-! !REQUIREMENTS:  TODO
 !EOPI
 
       integer :: localrc                          ! Error status
@@ -843,7 +840,6 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
  
        ! note: this is an internal routine.  rc isn't optional - so we
@@ -951,7 +947,6 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-! !REQUIREMENTS:  TODO
 !EOPI
 
       integer :: localrc                          ! Error status
@@ -1010,7 +1005,6 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
 
       ! note: this is an internal routine.  rc isn't optional - so we
@@ -1144,7 +1138,6 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-! !REQUIREMENTS:  TODO
 !EOPI
 
       integer :: n                              ! search loop index
@@ -1247,7 +1240,6 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
 
       integer :: localrc                          ! Error status
@@ -1318,7 +1310,6 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-! !REQUIREMENTS:  TODO
 !EOPI
 
       integer :: n                              ! search loop index
@@ -1384,7 +1375,6 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
 
       !integer :: localrc                          ! Error status
@@ -1434,7 +1424,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_IGridPointerEqual = Associated(IGrid1%ptr, IGrid2%ptr)
 
@@ -1469,7 +1458,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_IGridStatusEqual = (IGridStatus1%igridStatus == &
                               IGridStatus2%igridStatus)
@@ -1505,7 +1493,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_IGridStructureEqual = (IGridStructure1%igridStructure == &
                                  IGridStructure2%igridStructure)
@@ -1541,7 +1528,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_IGridTypeEqual = (IGridType1%igridType == &
                             IGridType2%igridType)
@@ -1577,7 +1563,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_IGridVertTypeEqual = (IGridVertType1%igridVertType == &
                             IGridVertType2%igridVertType)
@@ -1613,7 +1598,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_IGridHorzStaggerEqual = (IGridHorzStagger1%stagger == &
                                    IGridHorzStagger2%stagger)
@@ -1649,7 +1633,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_IGridVertStaggerEqual = (IGridVertStagger1%stagger == &
                                    IGridVertStagger2%stagger)
@@ -1685,7 +1668,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_IGridStorageEqual = (IGridStorage1%storage == &
                                IGridStorage2%storage)
@@ -1721,7 +1703,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_CoordOrderEqual = (CoordOrder1%order == &
                               CoordOrder2%order)
@@ -1757,7 +1738,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_CoordIndexEqual = (CoordIndex1%index == &
                               CoordIndex2%index)
@@ -1796,7 +1776,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_IGridPointerNotEqual = .not.Associated(IGrid1%ptr, IGrid2%ptr)
 
@@ -1831,7 +1810,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_IGridStatusNotEqual = (IGridStatus1%igridStatus /= &
                                  IGridStatus2%igridStatus)
@@ -1867,7 +1845,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_IGridStructureNotEq = (IGridStructure1%igridStructure /= &
                                     IGridStructure2%igridStructure)
@@ -1973,7 +1950,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_IGridHorzStagNotEq = (IGridHorzStagger1%stagger /= &
                                       IGridHorzStagger2%stagger)
@@ -2009,7 +1985,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_IGridVertStagNotEq = (IGridVertStagger1%stagger /= &
                                       IGridVertStagger2%stagger)
@@ -2045,7 +2020,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_IGridStorageNotEqual = (IGridStorage1%storage /= &
                                   IGridStorage2%storage)
@@ -2081,7 +2055,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_CoordOrderNotEqual = (CoordOrder1%order /= &
                                  CoordOrder2%order)
@@ -2117,7 +2090,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_CoordIndexNotEqual = (CoordIndex1%index /= &
                                  CoordIndex2%index)
@@ -2153,9 +2125,7 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2193,7 +2163,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     ESMF_INIT_SET_DEFINED(lrg)
   end subroutine ESMF_LogRectIGridInit
@@ -2262,9 +2231,7 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2302,7 +2269,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     ESMF_INIT_SET_DEFINED(gs)
   end subroutine ESMF_IGridSpecificInit
@@ -2372,9 +2338,7 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2450,9 +2414,7 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL

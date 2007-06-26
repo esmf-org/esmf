@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArray.F90,v 1.18 2007/05/05 03:05:48 rosalind Exp $
+! $Id: ESMF_InternArray.F90,v 1.19 2007/06/26 23:22:36 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -142,7 +142,7 @@ module ESMF_InternArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArray.F90,v 1.18 2007/05/05 03:05:48 rosalind Exp $'
+    '$Id: ESMF_InternArray.F90,v 1.19 2007/06/26 23:22:36 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -1471,7 +1471,6 @@ end subroutine
 !
 !
 !EOPI
-! !REQUIREMENTS:
 
 !
 !	Changed BOP/EOP to BOPI/EOPI until function is implemented.
@@ -1529,7 +1528,6 @@ end subroutine
 !
 !
 !EOPI
-! !REQUIREMENTS:
 
         type (ESMF_InternArray) :: a 
 
@@ -2459,7 +2457,7 @@ end subroutine
 !EOP
 
     character(len=6)  :: defaultopts      ! default print options 
-    integer           :: status           ! local error status
+!    integer           :: status           ! local error status
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2580,7 +2578,6 @@ end subroutine
 !
 !
 !EOPI
-! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
@@ -2617,9 +2614,8 @@ end subroutine
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
+
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2694,7 +2690,6 @@ end subroutine
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     ESMF_INIT_SET_DEFINED(halodirection)
   end subroutine ESMF_HaloDirectionInit
@@ -2760,7 +2755,6 @@ end subroutine
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     nullify(mask%maskvals)
     ESMF_INIT_SET_DEFINED(mask)

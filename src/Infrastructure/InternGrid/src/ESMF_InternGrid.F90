@@ -1,4 +1,4 @@
-! $Id: ESMF_InternGrid.F90,v 1.4 2007/06/23 07:00:48 cdeluca Exp $
+! $Id: ESMF_InternGrid.F90,v 1.5 2007/06/26 23:22:36 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_InternGrid.F90,v 1.4 2007/06/23 07:00:48 cdeluca Exp $'
+      '$Id: ESMF_InternGrid.F90,v 1.5 2007/06/26 23:22:36 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -5659,7 +5659,6 @@
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
-      integer :: i,j
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
