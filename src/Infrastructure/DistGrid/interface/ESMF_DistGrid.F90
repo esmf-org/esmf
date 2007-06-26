@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.15 2007/06/12 21:29:42 dneckels Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.16 2007/06/26 21:08:07 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -2039,6 +2039,7 @@ contains
     type(ESMF_DELayout):: dummy
 
     ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
@@ -2051,6 +2052,8 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_DistGridGetPDe
 !------------------------------------------------------------------------------
 
@@ -2180,6 +2183,7 @@ contains
     type(ESMF_DELayout):: dummy
 
     ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
@@ -2192,6 +2196,8 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_DistGridGetLinksPDe
 !------------------------------------------------------------------------------
 
@@ -2281,6 +2287,7 @@ contains
     integer :: localrc                        ! local return code
 
     ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -2288,7 +2295,6 @@ contains
     
     ! Call into the C++ interface, which will sort out optional arguments.
     !todo: call c_ESMC_DistGridValidate(vm, localrc)
-    localrc = ESMF_SUCCESS  ! remove when todo is done.
     
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2365,7 +2371,6 @@ contains
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2533,6 +2538,7 @@ contains
     integer :: localrc                        ! local return code
 
     ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface, which will sort out optional arguments.
@@ -2542,6 +2548,8 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_ConnectionTransform
 !------------------------------------------------------------------------------
 
