@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.17 2007/06/22 16:45:55 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.18 2007/06/26 23:01:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -271,10 +271,19 @@ extern "C" {
   void FTN(c_esmc_distgridprint)(ESMCI::DistGrid **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridprint()"
-  if (rc!=NULL)
-    *rc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->print(),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN(c_esmc_distgridvalidate)(ESMCI::DistGrid **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_distgridvalidate()"
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->validate(),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

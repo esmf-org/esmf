@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.20 2007/06/22 20:52:31 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.21 2007/06/26 23:01:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.20 2007/06/22 20:52:31 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.21 2007/06/26 23:01:32 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1388,6 +1388,41 @@ int DistGrid::print()const{
   printf("--- ESMCI::DistGrid::print end ---\n");
 
   // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::validate()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::validate
+//
+// !INTERFACE:
+int DistGrid::validate()const{
+//
+// !RETURN VALUE:
+//    int return code
+//
+//
+// !DESCRIPTION:
+//    Validate details of DistGrid object 
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // Initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+  // check against NULL pointer
+  if (this == ESMC_NULL_POINTER){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+       " - 'this' pointer is NULL.", &rc);
+    return rc;
+  }
+
+  // Return successfully
   rc = ESMF_SUCCESS;
   return rc;
 }

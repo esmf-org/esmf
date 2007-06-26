@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.20 2007/06/22 16:45:55 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.21 2007/06/26 23:01:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
       int *minIndex, int *maxIndex, int *dimContigFlag, 
       int *dimExtent, int **indexList, ESMC_Logical regDecompFlagArg,
       InterfaceInt *connectionList, DELayout *delayout, VM *vm);
-    int destruct(void);
+    int destruct();
   public:
     // create() and destroy()
     static DistGrid *create(InterfaceInt *minIndex,
@@ -139,7 +139,8 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int *const*getIndexList()       const {return indexList;}
     int setArbIdx(InterfaceInt *argIndices);
     // misc.
-    int print(void) const;
+    int print() const;
+    int validate() const;
     // serialize() and deserialize()
     int serialize(char *buffer, int *length, int *offset) const;
     static DistGrid *deserialize(char *buffer, int *offset);

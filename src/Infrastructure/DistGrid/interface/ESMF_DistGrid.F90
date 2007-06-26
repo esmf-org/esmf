@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.16 2007/06/26 21:08:07 samsoncheung Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.17 2007/06/26 23:01:32 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2294,7 +2294,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments.
-    !todo: call c_ESMC_DistGridValidate(vm, localrc)
+    call c_ESMC_DistGridValidate(distgrid, localrc)
     
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
