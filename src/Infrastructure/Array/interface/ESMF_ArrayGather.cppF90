@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGather.cppF90,v 1.5 2007/06/27 18:47:14 cdeluca Exp $
+! $Id: ESMF_ArrayGather.cppF90,v 1.6 2007/06/27 20:24:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_ArrayGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGather.cppF90,v 1.5 2007/06/27 18:47:14 cdeluca Exp $'
+    '$Id: ESMF_ArrayGather.cppF90,v 1.6 2007/06/27 20:24:53 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -229,7 +229,7 @@ contains
 !      ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Return successfully @\
-    if (present(rc)) rc = ESMF_SUCCESS @\
+    !if (present(rc)) rc = ESMF_SUCCESS todo: enable once implemented @\
 @\
   end subroutine ESMF_ArrayGather##mrank##D##mtypekind @\
 !---------------------------------------------------------------------------- @\
@@ -265,7 +265,7 @@ TypeKindRankDeclarationMacro(ArrayGather)
 !      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
+    !if (present(rc)) rc = ESMF_SUCCESS  todo: enable once implemented
 
   end subroutine ESMF_ArrayGatherNotRoot
 !----------------------------------------------------------------------------
