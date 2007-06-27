@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: testing.tex,v 1.10 2007/02/13 16:46:04 murphysj Exp $
+% CVS $Id: testing.tex,v 1.11 2007/06/27 21:00:08 svasquez Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/testing.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -82,6 +82,67 @@ developers will use stubs as necessary.
 values.
 \item Unit tests should verify that error handling works correctly.
 \end{itemize}
+
+\paragraph{Writing Unit Tests}
+
+Unit tests usually test a single argument of a method to make it easier to
+identify the bug when a unit test fails.
+There are several steps to writing a unit test.
+First the unit test must be labled, with one of the following tags:
+\begin{itemize}
+\item NEX\_UTest - This tag signifies a non-exhaustive test. These tests are always run and
+are considered to be sanity tests they usually consist of creating and destroying a specific class.
+\item EX\_UTest - This tag signifies an exhaustive unit test. These tests are more rigorous and
+are run when the ESMF\_EXHAUSTIVE environmental variable is set to ON. These unit test must be between the \#ifdef ESMF\_EXHAUSTIVE
+and \#endif definitions in the unit test file.
+\item NEX\_UTest\_Multi\_Proc\_Only - These are non-exhaustive multi-processor unit tests that will not be
+run when the run\_unit\_tests\_uni or unit\_test\_uni targets are specified.
+\item EX\_UTest\_Multi\_Proc\_Only - These are exhaustive multi-proccesor unit tests that will not be
+run when the run\_unit\_tests\_uni or unit\_tests\_uni targets are specified.
+\end{itemize}
+Note that when the NEX\_UTest\_Multi\_Proc\_Only or EX\_UTest\_Multi\_Proc\_Only tags are used, all the unit tests in
+the file must be labeled as such. You may not mix these tags with the other tags. In addition, verify that the makefile
+does not allow the unit tests with these tags to be run uni.
+
+Second a string is specified describing the test, for example:
+\begin{verbatim}
+
+	write(name, *) "Grid Destroy Test"
+
+\end{verbatim}
+Third a string to be printed  when the test fails is specified, for example:
+\begin{verbatim}
+
+	write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+\end{verbatim}
+The following two tests are good examples of how unit tests should be written.
+The first test verify that getting the attribute count from a Field returns ESMF\_SUCCESS, while
+the second verifies the attribute count is correct. These two tests could be combined into one
+with a logical AND statement when calling ESMF\_Test, but breaking the tests up makes it easier
+to identify the source of the bug immediately.
+\begin{verbatim}
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Getting Attrubute count from a Field
+      call ESMF_FieldGetAttributeCount(f1, count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Attribute count from a Field "
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Verify Attribute Count Test
+      write(failMsg, *) "Incorrect count"
+      write(name, *) "Verify Attribute count from a Field "
+      call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+\end{verbatim}
+
+
 
 \subsubsection{System Tests}
 
