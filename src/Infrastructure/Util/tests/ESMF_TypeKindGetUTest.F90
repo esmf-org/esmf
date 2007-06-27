@@ -1,4 +1,4 @@
-! $Id: ESMF_TypeKindGetUTest.F90,v 1.6 2007/05/16 19:03:08 samsoncheung Exp $
+! $Id: ESMF_TypeKindGetUTest.F90,v 1.7 2007/06/27 20:36:10 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TypeKindGetUTest.F90,v 1.6 2007/05/16 19:03:08 samsoncheung Exp $'
+      '$Id: ESMF_TypeKindGetUTest.F90,v 1.7 2007/06/27 20:36:10 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -46,7 +46,6 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
-      character(len=8) :: strvalue
 
     ! local variables
     integer :: vint

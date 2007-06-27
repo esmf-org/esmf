@@ -1,4 +1,4 @@
-! $Id: ESMF_InternGridWrapUTest.F90,v 1.2 2007/06/23 04:37:05 cdeluca Exp $
+! $Id: ESMF_InternGridWrapUTest.F90,v 1.3 2007/06/27 20:36:07 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternGridWrapUTest.F90,v 1.2 2007/06/23 04:37:05 cdeluca Exp $'
+      '$Id: ESMF_InternGridWrapUTest.F90,v 1.3 2007/06/27 20:36:07 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -46,16 +46,13 @@
     integer :: rc
       
     ! individual test name 
-    character(ESMF_MAXSTR) :: name, gName, Rgname
+    character(ESMF_MAXSTR) :: name
       
     ! individual test failure messages
     character(ESMF_MAXSTR*2) :: failMsg
 
     ! Local variables
-    integer :: haloWidth
     integer :: igridCount(2), igridStart(2)
-    integer :: dataIndexList(3), lbounds(3), localCount(3), ubounds(3)
-    real (ESMF_KIND_R8), dimension(:,:,:), pointer :: f90ptr1
     real (ESMF_KIND_R8), dimension(2) :: origin
     type(ESMF_DELayout)     :: layout
     type(ESMF_IGrid)         :: igrid
@@ -220,61 +217,6 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
-
-    !--------------------------------------------------------------------------
-    
-#if 0
-    ! these tests could be extended to compute the lbounds and ubounds
-    ! for a global index, and tested.  this is the code, copied from the
-    ! field global example, which would be used.
-
-! globalStartPerDim really should be called something more descriptive like
-! globalOffsetPerDim because it refers to the amount that must be added to a
-! local index to translate it to a global index.  So the globalStart referring
-! to an index instead of an offset should be this value plus one
-    igridStart(1) = igridStart(1) + 1
-    igridStart(2) = igridStart(2) + 1
-
-! set local counts for the Field.  For this example, the second dimension of the
-! data will correspond to the first IGrid dimension and the third data dimension
-! will correspond to the second IGrid dimension
-    dataIndexList(1) = 0
-    dataIndexList(2) = 1
-    dataIndexList(3) = 2
-    lbounds(2)    = igridStart(1)
-    localCount(2) = igridCount(1)
-    lbounds(3)    = igridStart(2)
-    localCount(3) = igridCount(2)
-
-! the first data dimension is unrelated to the igrid, so it has a user-specified
-! count and its local index is assumed to start at one, although that is not
-! necessarily true
-    lbounds(1)    = 1
-    localCount(1) = 32
-
-! calculate upper bounds from lower bounds and counts
-    do i = 1,3
-      ubounds(i) = lbounds(i) + localCount(i) - 1
-    enddo
-
-! set the haloWidth of the Array
-    haloWidth = 3
-
-! modify the lower and upper bounds by the haloWidth
-! Currently ESMF requires that all dimensions include the halo width, even if
-! they are not related to the igrid.  Hopefully that will no longer be
-! required soon.
-    do i = 1,3
-      lbounds(i) = lbounds(i) - haloWidth
-      ubounds(i) = ubounds(i) + haloWidth
-    enddo
-
-! allocate the F90 pointer with the calculated bounds
-    allocate(f90ptr1(lbounds(1):ubounds(1), &
-                     lbounds(2):ubounds(2), &
-                     lbounds(3):ubounds(3)))
-
-#endif
 
     !--------------------------------------------------------------------------
     !--------------------------------------------------------------------------

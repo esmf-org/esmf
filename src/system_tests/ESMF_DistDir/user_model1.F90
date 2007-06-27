@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.4 2007/06/23 07:00:58 cdeluca Exp $
+! $Id: user_model1.F90,v 1.5 2007/06/27 20:36:11 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -70,9 +70,9 @@ module user_model1
     integer, intent(out) :: rc
 
     ! Local variables
-    type(ESMF_ArraySpec)  :: arrayspec
-    type(ESMF_DistGrid)   :: distgrid
-    type(ESMF_Array)      :: array
+!    type(ESMF_ArraySpec)  :: arrayspec
+!    type(ESMF_DistGrid)   :: distgrid
+!    type(ESMF_Array)      :: array
     type(ESMF_VM)         :: vm
     integer               :: petCount, status
     
@@ -134,9 +134,6 @@ module user_model1
     type(ESMF_State), intent(inout) :: importState, exportState
     type(ESMF_Clock), intent(in) :: clock
     integer, intent(out) :: rc
-
-    ! Local variables
-    integer :: status
 
     print *, "User Comp Final starting"
 

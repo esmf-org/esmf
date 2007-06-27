@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.13 2007/06/23 07:00:57 cdeluca Exp $
+! $Id: user_model2.F90,v 1.14 2007/06/27 20:36:11 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -128,7 +128,7 @@ module user_model2
     real(ESMF_KIND_R8)    :: pi
     type(ESMF_Array)      :: array
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
-    integer               :: i, j, petCount, status
+    integer               :: i, j, status
     
     print *, "User Comp Run starting"
 
@@ -171,8 +171,6 @@ module user_model2
     type(ESMF_Clock), intent(in) :: clock
     integer, intent(out) :: rc
 
-    ! Local variables
-    integer :: status
 
     print *, "User Comp Final starting"
 

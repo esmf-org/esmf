@@ -1,4 +1,4 @@
-! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.9 2007/03/31 05:51:28 cdeluca Exp $
+! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.10 2007/06/27 20:36:10 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,10 +36,16 @@ program ESMF_VMGetMPICommunicatorEx
   !include 'mpif.h'
   
   ! local variables
-  integer:: rc, ierr
+  integer:: rc
+#ifndef ESMF_MPIUNI     
+  integer:: ierr
+#endif
   type(ESMF_VM):: vm
 !BOC
-  integer:: mpic, mpic2
+  integer:: mpic
+#ifndef ESMF_MPIUNI     
+  integer:: mpic2
+#endif
 !EOC
   ! result code
   integer :: finalrc

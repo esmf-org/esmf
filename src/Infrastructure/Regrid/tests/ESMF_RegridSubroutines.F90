@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.26 2007/06/23 04:00:41 cdeluca Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.27 2007/06/27 20:36:09 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -458,8 +458,6 @@ contains
     integer ::  n_cells(2), sub_rc
     type(ESMF_ArraySpec) :: arrayspec
     real(ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2, f90ptr3
-    type(ESMF_Array), dimension(2) :: ESMF_coords
-    ! type(ESMF_Array), dimension(2) :: ESMF_coords2
     real(ESMF_KIND_R8), dimension(:,:), pointer :: x_coords,y_coords
     real(ESMF_KIND_R8), dimension(:,:), pointer :: x_coords2,y_coords2
     real(ESMF_KIND_R8), dimension(:,:), pointer :: x_coords3,y_coords3

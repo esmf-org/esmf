@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataUTest.F90,v 1.7 2007/06/23 17:51:00 cdeluca Exp $
+! $Id: ESMF_ArrayDataUTest.F90,v 1.8 2007/06/27 20:36:05 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayDataUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayDataUTest.F90,v 1.7 2007/06/23 17:51:00 cdeluca Exp $'
+    '$Id: ESMF_ArrayDataUTest.F90,v 1.8 2007/06/27 20:36:05 cdeluca Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@ program ESMF_ArrayDataUTest
 
   ! F90 array pointer of 4-byte integers
   integer (ESMF_KIND_I4),dimension(:), pointer :: fdata
-  integer (ESMF_KIND_I4),dimension(:), pointer :: fptr, fptr2
+  integer (ESMF_KIND_I4),dimension(:), pointer :: fptr
 
   type(ESMF_DistGrid) :: distgrid
   type(ESMF_Array)    :: array

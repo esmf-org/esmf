@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.42 2007/06/23 04:00:15 cdeluca Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.43 2007/06/27 20:36:06 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -28,7 +28,8 @@
     implicit none
     
     ! Local variables
-    integer :: rc, mycell
+    integer :: rc
+    integer :: mycell
     integer :: igridCount(2)
     type(ESMF_IGrid) :: igrid
     type(ESMF_ArraySpec) :: arrayspec

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiInitUTest.F90,v 1.7 2007/03/31 05:51:29 cdeluca Exp $
+! $Id: ESMF_VMUserMpiInitUTest.F90,v 1.8 2007/06/27 20:36:10 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -518,13 +518,15 @@
       use ESMF_VMSubrs     ! VM specific subroutines
 
       implicit none
-      
+
+#ifndef ESMF_MPIUNI           
       integer:: ierr
+#endif
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUserMpiInitUTest.F90,v 1.7 2007/03/31 05:51:29 cdeluca Exp $'
+      '$Id: ESMF_VMUserMpiInitUTest.F90,v 1.8 2007/06/27 20:36:10 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------

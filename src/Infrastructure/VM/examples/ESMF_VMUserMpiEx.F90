@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiEx.F90,v 1.6 2007/03/31 05:51:28 cdeluca Exp $
+! $Id: ESMF_VMUserMpiEx.F90,v 1.7 2007/06/27 20:36:10 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,10 @@ program ESMF_VMUserMpiEx
 #endif
   
   ! local variables
-  integer:: rc, ierr
+  integer:: rc
+#ifndef ESMF_MPIUNI     
+  integer:: ierr
+#endif
   ! result code
   integer :: finalrc
   finalrc = ESMF_SUCCESS

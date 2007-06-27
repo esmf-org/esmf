@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.13 2007/06/23 07:00:55 cdeluca Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.14 2007/06/27 20:36:10 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -127,7 +127,6 @@ program ESMF_StateReconcileUTest
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_VM) :: vm
     character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename
-    type(ESMF_Array):: array
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg

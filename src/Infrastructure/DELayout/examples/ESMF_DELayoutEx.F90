@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.13 2007/03/31 05:50:56 cdeluca Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.14 2007/06/27 20:36:05 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@ program ESMF_DELayoutEx
   implicit none
   
   ! local variables
-  integer:: rc, i, k, localPET, petCount, localDeCount, myDe, workDe, de
+  integer:: rc, i, localPET, petCount, localDeCount, myDe, workDe
   integer, allocatable:: commWeights(:,:), compWeights(:), localDeList(:)
   type(ESMF_VM):: vm
   type(ESMF_DELayout):: delayout
@@ -30,7 +30,6 @@ program ESMF_DELayoutEx
   ! result code
   integer :: finalrc
   finalrc = ESMF_SUCCESS
-  
   
   call ESMF_Initialize(vm=vm, rc=rc)
   if (rc /= ESMF_SUCCESS) goto 99
