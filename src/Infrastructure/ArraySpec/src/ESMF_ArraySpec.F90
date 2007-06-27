@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.25 2007/06/27 21:48:12 oehmke Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.26 2007/06/27 23:38:19 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -56,8 +56,8 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
   ! Status of Array Spec
   type ESMF_ArraySpecStatus
-  sequence
-    integer             :: status
+    sequence
+    integer  :: status
   end type
 
   ! Supported ESMF Array Spec Statuses:
@@ -68,7 +68,7 @@ module ESMF_ArraySpecMod
    type (ESMF_ArraySpecStatus), parameter, public ::             &
       ESMF_ARRAYSPEC_STATUS_UNKNOWN  =  ESMF_ArraySpecStatus(0), &
       ESMF_ARRAYSPEC_STATUS_UNINIT   =  ESMF_ArraySpecStatus(1), &
-      ESMF_ARRAYSPEC_STATUS_READY    =  ESMF_ArraySpecStatus(2)  &
+      ESMF_ARRAYSPEC_STATUS_READY    =  ESMF_ArraySpecStatus(2)
 
 
 !------------------------------------------------------------------------------
@@ -76,8 +76,8 @@ module ESMF_ArraySpecMod
 !
 ! ! Data array specification, with no associated data buffer.
   type ESMF_ArraySpec
-  sequence
-  private
+    sequence
+    private
 #ifdef ESMF_NO_INITIALIZERS
     type (ESMF_ArraySpecStatus) :: status
 #else
@@ -115,7 +115,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.25 2007/06/27 21:48:12 oehmke Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.26 2007/06/27 23:38:19 oehmke Exp $'
 
 !==============================================================================
 
