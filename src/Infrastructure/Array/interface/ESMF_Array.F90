@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.52 2007/04/26 16:10:13 rosalind Exp $
+! $Id: ESMF_Array.F90,v 1.53 2007/06/27 18:47:14 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.52 2007/04/26 16:10:13 rosalind Exp $'
+    '$Id: ESMF_Array.F90,v 1.53 2007/06/27 18:47:14 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -271,9 +271,7 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
 
     ! Use LogErr to handle return code
 !    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -331,9 +329,7 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
 
     ! Use LogErr to handle return code
 !    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -373,7 +369,6 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                 :: status       ! local error status
 
@@ -919,7 +914,6 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
@@ -1003,7 +997,6 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
@@ -1055,7 +1048,6 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                       :: status         ! local error status
 
@@ -1105,7 +1097,6 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
@@ -1192,7 +1183,6 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
@@ -1263,7 +1253,6 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
@@ -1332,7 +1321,6 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
@@ -1402,7 +1390,6 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
@@ -1456,7 +1443,6 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
@@ -1566,7 +1552,6 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
@@ -2099,7 +2084,6 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
