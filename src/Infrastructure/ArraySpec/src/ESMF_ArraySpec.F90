@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.24 2007/04/26 17:29:25 rosalind Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.25 2007/06/27 21:48:12 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -54,13 +54,36 @@ module ESMF_ArraySpecMod
   private
 
 !------------------------------------------------------------------------------
+  ! Status of Array Spec
+  type ESMF_ArraySpecStatus
+  sequence
+    integer             :: status
+  end type
+
+  ! Supported ESMF Array Spec Statuses:
+  !    ESMF_ARRAYSPEC_STATUS_UNKNOWN   Not Known
+  !    ESMF_ARRAYSPEC_STATUS_UNINIT    Array Spec hasn't been set yet
+  !    ESMF_ARRAYSPEC_STATUS_READY     Array Spec has been set and can be used
+
+   type (ESMF_ArraySpecStatus), parameter, public ::             &
+      ESMF_ARRAYSPEC_STATUS_UNKNOWN  =  ESMF_ArraySpecStatus(0), &
+      ESMF_ARRAYSPEC_STATUS_UNINIT   =  ESMF_ArraySpecStatus(1), &
+      ESMF_ARRAYSPEC_STATUS_READY    =  ESMF_ArraySpecStatus(2)  &
+
+
+!------------------------------------------------------------------------------
 ! ! ESMF_ArraySpec
 !
 ! ! Data array specification, with no associated data buffer.
-
   type ESMF_ArraySpec
   sequence
   private
+#ifdef ESMF_NO_INITIALIZERS
+    type (ESMF_ArraySpecStatus) :: status
+#else
+    type (ESMF_ArraySpecStatus) :: status = ESMF_ARRAYSPEC_STATUS_UNINIT 
+#endif
+
     integer             :: rank       ! number of dimensions
     type(ESMF_TypeKind) :: typekind   ! fortran type and kind enum/integer
     ESMF_INIT_DECLARE
@@ -69,7 +92,7 @@ module ESMF_ArraySpecMod
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-  public ESMF_ArraySpec
+  public ESMF_ArraySpec, ESMF_ArraySpecStatus
 
 !------------------------------------------------------------------------------
 
@@ -84,13 +107,54 @@ module ESMF_ArraySpecMod
   public ESMF_ArraySpecInit
   public ESMF_ArraySpecGetInit
 
+  public operator(==), operator(/=) ! for overloading 
+                                      ! comparison functions
+
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.24 2007/04/26 17:29:25 rosalind Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.25 2007/06/27 21:48:12 oehmke Exp $'
 
+!==============================================================================
+
+!==============================================================================
+!
+! INTERFACE BLOCKS
+!
+!==============================================================================
+!BOPI
+! !INTERFACE:
+      interface operator (==)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_ArraySpecStatusEqual
+
+! !DESCRIPTION:
+!     This interface overloads the equality operator for the specific
+!     ESMF ArraySpec ids (enums).  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (/=)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_ArraySpecStatusNotEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF ArraySpec ids (enums).  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!
 !==============================================================================
 
   contains
@@ -143,6 +207,13 @@ module ESMF_ArraySpecMod
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
+
+    ! check status
+    if (arrayspec%status .ne. ESMF_ARRAYSPEC_STATUS_READY) then
+       ! Use LogErr to handle return code (to record other info for logfile)
+       if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_UNINIT, "ArraySpec hasn't been set", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Get arrayspec contents
     if(present(rank)) rank = arrayspec%rank
@@ -218,6 +289,10 @@ module ESMF_ArraySpecMod
     ! illegal values, and no additional validity tests are needed.
     arrayspec%typekind = typekind
 
+    ! set status to indicate that arrayspec has now been defined
+    arrayspec%status = ESMF_ARRAYSPEC_STATUS_READY
+
+    ! set return code
     if (rcpresent) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySpecSet
@@ -263,11 +338,17 @@ module ESMF_ArraySpecMod
     ! Call into the C++ interface, which will sort out optional arguments.
     !todo: call c_ESMC_ArraySpecValidate(arrayspec, localrc)
     localrc = ESMF_SUCCESS  ! remove when todo is done.
-    
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+    
+    ! check status
+    if (arrayspec%status .ne. ESMF_ARRAYSPEC_STATUS_READY) then
+       ! Use LogErr to handle return code (to record other info for logfile)
+       if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_UNINIT, "ArraySpec hasn't been set", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -300,6 +381,8 @@ module ESMF_ArraySpecMod
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
+    arrayspec%status = ESMF_ARRAYSPEC_STATUS_UNINIT 
+
     ESMF_INIT_SET_DEFINED(arrayspec)
   end subroutine ESMF_ArraySpecInit
 !------------------------------------------------------------------------------
@@ -338,6 +421,80 @@ module ESMF_ArraySpecMod
     endif
 
   end function ESMF_ArraySpecGetInit
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySpecStatusEqual"
+!BOPI
+! !IROUTINE: ESMF_ArraySpecStatusEqual - equality of ArraySpec statuses
+!
+! !INTERFACE:
+      function ESMF_ArraySpecStatusEqual(ArraySpecStatus1, ArraySpecStatus2)
+
+! !RETURN VALUE:
+      logical :: ESMF_ArraySpecStatusEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_ArraySpecStatus), intent(in) :: &
+         ArraySpecStatus1,      &! Two igrid statuses to compare for
+         ArraySpecStatus2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF ArraySpec statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[ArraySpecStatus1, ArraySpecStatus2]
+!          Two igrid statuses to compare for equality
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_ArraySpecStatusEqual = (ArraySpecStatus1%status == &
+                              ArraySpecStatus2%status)
+
+      end function ESMF_ArraySpecStatusEqual
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySpecStatusNotEqual"
+!BOPI
+! !IROUTINE: ESMF_ArraySpecStatusNotEqual - non-equality of ArraySpec statuses
+!
+! !INTERFACE:
+      function ESMF_ArraySpecStatusNotEqual(ArraySpecStatus1, ArraySpecStatus2)
+
+! !RETURN VALUE:
+      logical :: ESMF_ArraySpecStatusNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_ArraySpecStatus), intent(in) :: &
+         ArraySpecStatus1,      &! Two ArraySpec Statuses to compare for
+         ArraySpecStatus2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF ArraySpec statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[ArraySpecStatus1, ArraySpecStatus2]
+!          Two statuses of ArraySpecs to compare for inequality
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_ArraySpecStatusNotEqual = (ArraySpecStatus1%status /= &
+                                 ArraySpecStatus2%status)
+
+      end function ESMF_ArraySpecStatusNotEqual
+
+
 !------------------------------------------------------------------------------
 
 
