@@ -1,4 +1,4 @@
-// $Id: ESMC_DistDir.h,v 1.5 2007/06/26 22:55:20 dneckels Exp $
+// $Id: ESMC_DistDir.h,v 1.6 2007/06/27 17:28:27 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,7 +55,8 @@ public:
 DistDir_hash() {}
 UInt operator()(id_type gid, UInt npet, id_type min, id_type max) const {
   UInt num_per_pet = ((max-min+1) + npet -1) / npet;
-  return (gid - min)/ num_per_pet;
+  UInt pet = (gid-min) / num_per_pet;
+  return pet > npet-1 ? npet-1 : pet;
 }
 };
 

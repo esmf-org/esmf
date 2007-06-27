@@ -1,4 +1,4 @@
-// $Id: ESMC_DistDir.C,v 1.4 2007/06/26 22:55:20 dneckels Exp $
+// $Id: ESMC_DistDir.C,v 1.5 2007/06/27 17:28:27 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistDir.C,v 1.4 2007/06/26 22:55:20 dneckels Exp $";
+static const char *const version = "$Id: ESMC_DistDir.C,v 1.5 2007/06/27 17:28:27 dneckels Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -109,7 +109,7 @@ my_managed()
     UInt tpet = hash_func(gid[i], npet, gmin, gmax);
     std::vector<UInt>::iterator lb = std::lower_bound(to_pet.begin(), to_pet.end(), tpet);
     if (lb == to_pet.end() || *lb != tpet)
-      to_pet.push_back(tpet);
+      to_pet.insert(lb, tpet);
     // gid
     send_sizes_all[tpet] += SparsePack<id_type>::size();
     // lid 
@@ -242,7 +242,7 @@ bool id_found[])              // (out) true=found, false=not in directory
       UInt tpet = hash_func(gid[i], npet, gmin, gmax);
       std::vector<UInt>::iterator lb = std::lower_bound(to_pet.begin(), to_pet.end(), tpet);
       if (lb == to_pet.end() || *lb != tpet)
-        to_pet.push_back(tpet);
+        to_pet.insert(lb, tpet);
       // gid
       send_sizes_all[tpet] += SparsePack<id_type>::size();
     }
@@ -321,7 +321,7 @@ bool id_found[])              // (out) true=found, false=not in directory
       UInt tpet = req.req_pet; // back to requestor
       std::vector<UInt>::iterator lb = std::lower_bound(to_pet.begin(), to_pet.end(), tpet);
       if (lb == to_pet.end() || *lb != tpet)
-        to_pet.push_back(tpet);
+        to_pet.insert(lb, tpet);
       // lid
       send_sizes_all[tpet] += SparsePack<id_type>::size();
       // origin pet
