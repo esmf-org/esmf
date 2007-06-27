@@ -1,0 +1,6 @@
+Settings for Cygwin, using the g95 fortran compiler and the GCC C++ compiler.
+ 
+Requires the following environment settings:
+
+ESMF_COMPILER g95
+
