@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.44 2007/06/27 20:36:08 cdeluca Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.45 2007/06/27 21:57:36 oehmke Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -81,10 +81,10 @@
 
     !--------------------------------------------------------------------------
     !EX_UTest
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(failMsg, *) "Returned ESMF_SUCCESS for uninitialized ArraySpec"
     write(name, *) "Validate a non-set ArraySpec"
     call ESMF_ArraySpecValidate(arrayspec1, rc)
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc .ne. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !EX_UTest
