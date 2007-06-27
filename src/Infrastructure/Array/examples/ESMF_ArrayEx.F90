@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.18 2007/06/25 05:57:28 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.19 2007/06/27 19:38:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -21,39 +21,41 @@ program ESMF_ArrayEx
   implicit none
   
   ! local variables
-  integer:: rc, de, i, j, k, dim, nodeCount, petCount, dimCount, localDeCount
-  integer:: deNeighborCount, linkCount, idm1, idm3, localPet
+  integer:: rc, de, i, j, k, petCount, localDeCount, localPet
+!  integer:: dim, nodeCount, dimCount
+!  integer:: deNeighborCount, linkCount, idm1, idm3
   type(ESMF_VM):: vm
   type(ESMF_DELayout):: delayout
   type(ESMF_DistGrid):: distgrid, distgrid3D, distgrid2D, distgrid1D
   type(ESMF_DistGrid):: distgrid1, distgrid2
   type(ESMF_ArraySpec):: arrayspec
   type(ESMF_Array):: array, array1, array2, array1D, array2D, array3D
-  type(ESMF_Array):: arrayTracer, arrayNScalar, arrayNEu, arrayNEv
-  type(ESMF_ArrayBundle):: arrayBundle
-  type(ESMF_Array), allocatable:: arrayList(:)
+!  type(ESMF_Array):: arrayTracer, arrayNScalar, arrayNEu, arrayNEv
+!  type(ESMF_ArrayBundle):: arrayBundle
+!  type(ESMF_Array), allocatable:: arrayList(:)
   type(ESMF_LocalArray), allocatable:: larrayList(:)
   type(ESMF_LocalArray), allocatable:: larrayList1(:), larrayList2(:)
   real(ESMF_KIND_R8), pointer:: myF90Array(:,:)
-  real(ESMF_KIND_R8), pointer:: myF90Array1(:,:), myF90Array2(:,:)
-  real(ESMF_KIND_R8), pointer:: myF90Array3(:,:,:)
+!  real(ESMF_KIND_R8), pointer:: myF90Array1(:,:), myF90Array2(:,:)
+!  real(ESMF_KIND_R8), pointer:: myF90Array3(:,:,:)
   real(ESMF_KIND_R8), pointer:: myF90Array2D(:,:), myF90Array3D(:,:,:)
   real(ESMF_KIND_R8):: dummySum
   type(ESMF_IndexFlag):: indexflag
-  integer, allocatable:: dimExtent(:,:), indexList(:), regDecompDeCoord(:)
-  integer, allocatable:: minIndex(:,:), maxIndex(:,:), regDecomp(:,:)
-  integer, allocatable:: deBlockList(:,:), connectionList(:,:), connectionTransformList(:,:)
-  integer, allocatable:: deNeighborList(:), deNeighborInterface(:,:)
-  integer, allocatable:: localDeList(:), linkList(:,:), inverseDimmap(:)
+!  integer, allocatable:: dimExtent(:,:), indexList(:), regDecompDeCoord(:)
+!  integer, allocatable:: minIndex(:,:), maxIndex(:,:), regDecomp(:,:)
+!  integer, allocatable:: deBlockList(:,:), connectionList(:,:), connectionTransformList(:,:)
+!  integer, allocatable:: deNeighborList(:), deNeighborInterface(:,:)
+!  integer, allocatable:: linkList(:,:), inverseDimmap(:)
+  integer, allocatable:: localDeList(:)
   integer, allocatable:: exclusiveLBound(:,:), exclusiveUBound(:,:)
   integer, allocatable:: totalLWidth(:,:), totalUWidth(:,:)
   integer, allocatable:: totalLBound(:,:), totalUBound(:,:)
-  integer, allocatable:: totalCellMask(:,:)
+!  integer, allocatable:: totalCellMask(:,:)
   integer, allocatable:: computationalLWidth(:,:), computationalUWidth(:,:)
   integer, allocatable:: computationalLBound(:,:), computationalUBound(:,:)
-  integer, allocatable:: haloLDepth(:), haloUDepth(:)
-  type(ESMF_Logical):: regDecompFlag
-  type(ESMF_RouteHandle):: haloHandle, haloHandle2
+!  integer, allocatable:: haloLDepth(:), haloUDepth(:)
+!  type(ESMF_Logical):: regDecompFlag
+!  type(ESMF_RouteHandle):: haloHandle, haloHandle2
   type(ESMF_RouteHandle):: sparseMatMulHandle
   real(ESMF_KIND_R8), allocatable:: factorList(:)
   integer, allocatable:: factorIndexList(:,:)

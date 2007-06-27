@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.13 2007/06/25 05:57:28 theurich Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.14 2007/06/27 19:38:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -21,17 +21,20 @@ program ESMF_DistGridEx
   implicit none
   
   ! local variables
-  integer:: rc, de, i, dim, nodeCount, petCount, dimCount, localDeCount
-  integer:: deNeighborCount, linkCount, localPet
+  integer:: rc, de, i, dim, petCount
+!  integer:: nodeCount, dimCount, localDeCount, deNeighborCount, linkCount
+  integer:: localPet
   type(ESMF_VM):: vm
   type(ESMF_DELayout):: delayout
-  type(ESMF_DistGrid):: distgrid, distgrid3D, distgrid2D
-  integer, allocatable:: dimExtent(:,:), indexList(:), regDecompDeCoord(:)
+  type(ESMF_DistGrid):: distgrid
+!  type(ESMF_DistGrid):: distgrid3D, distgrid2D
+  integer, allocatable:: dimExtent(:,:), indexList(:)
+!  integer, allocatable:: regDecompDeCoord(:), connectionTransformList(:,:)
   integer, allocatable:: minIndex(:,:), maxIndex(:,:), regDecomp(:,:)
-  integer, allocatable:: deBlockList(:,:,:), connectionList(:,:), connectionTransformList(:,:)
-  integer, allocatable:: deNeighborList(:), deNeighborInterface(:,:)
-  integer, allocatable:: localDeList(:), linkList(:,:)
-  type(ESMF_Logical):: regDecompFlag
+  integer, allocatable:: deBlockList(:,:,:), connectionList(:,:)
+!  integer, allocatable:: deNeighborList(:), deNeighborInterface(:,:)
+!  integer, allocatable:: localDeList(:), linkList(:,:)
+!  type(ESMF_Logical):: regDecompFlag
   ! result code
   integer :: finalrc
   
