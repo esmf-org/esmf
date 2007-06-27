@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.22 2007/06/23 04:00:33 cdeluca Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.23 2007/06/27 22:30:38 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.22 2007/06/23 04:00:33 cdeluca Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.23 2007/06/27 22:30:38 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -208,7 +208,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGather"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayGather - Gather an Array onto one DE
 !
 ! !INTERFACE:
@@ -245,7 +245,7 @@ module ESMF_InternArrayCommMod
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
     integer :: status         ! local error status
     integer :: igridrank, datarank
@@ -805,7 +805,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayHaloList"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayHalo - Halo a list of Arrays
 !
 ! !INTERFACE:
@@ -853,7 +853,7 @@ module ESMF_InternArrayCommMod
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 
     integer :: status         ! local error status
     integer :: i, nitems
@@ -917,7 +917,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayHaloOne"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayHalo - Halo an Array
 !
 ! !INTERFACE:
@@ -965,7 +965,7 @@ module ESMF_InternArrayCommMod
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 
     integer :: status         ! local error status
     type(ESMF_LocalArray) :: local_array
@@ -1015,7 +1015,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayHaloRelease"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayHaloRelease - Release resources stored for halo operation
 !
 ! !INTERFACE:
@@ -1037,7 +1037,7 @@ module ESMF_InternArrayCommMod
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
      ! initialize return code; assume routine not implemented
      if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1052,7 +1052,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayHaloStoreOne"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayHaloStore - Store resources for a halo operation
 !
 ! !INTERFACE:
@@ -1101,7 +1101,7 @@ module ESMF_InternArrayCommMod
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
       ! note that the routehandle coming in here is intent(out) because
       ! it is going to be created from scratch in the subsequent call.
       ! however, the StoreIndex() call has to have the routehandle intent
@@ -1408,7 +1408,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayHaloValidateList"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayHaloValidate - Validate a list of Arrays
 !
 ! !INTERFACE:
@@ -1444,7 +1444,7 @@ module ESMF_InternArrayCommMod
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 
       integer :: status         ! local error status
       integer :: i, j, nitems
@@ -1512,7 +1512,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayHaloValidateOne"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayHaloValidate - Validate an Array
 !
 ! !INTERFACE:
@@ -1547,7 +1547,7 @@ module ESMF_InternArrayCommMod
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 
       integer :: status         ! local error status
       type(ESMF_Route) :: route
@@ -1601,7 +1601,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayRedistList"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayRedist - Redistribute a list of Arrays
 !
 ! !INTERFACE:
@@ -1662,7 +1662,7 @@ module ESMF_InternArrayCommMod
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status         ! local error status
       integer :: i, nitemsSrc, nitemsDst
@@ -1755,7 +1755,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayRedistOne"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayRedist - Redistribute an Array
 !
 ! !INTERFACE:
@@ -1816,7 +1816,7 @@ module ESMF_InternArrayCommMod
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status         ! local error status
       type(ESMF_LocalArray) :: dstLocalArray, srcLocalArray
@@ -1885,7 +1885,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayRedistRelease"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayRedistRelease - Release resources stored for redist operation
 !
 ! !INTERFACE:
@@ -1908,7 +1908,7 @@ module ESMF_InternArrayCommMod
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
      ! initialize return code; assume routine not implemented
      if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1923,7 +1923,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayRedistStoreOne"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayRedistStore - Store resources for a redist operation
 !
 ! !INTERFACE:
@@ -1988,7 +1988,7 @@ module ESMF_InternArrayCommMod
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 
     ! if problems compiling, see the comment in HaloStore() for
     ! suggestions regarding intent(out) vs intent(inout).
@@ -2813,7 +2813,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayRedistValidateList"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayRedistValidate - Validate Redist for a list of Arrays
 !
 ! !INTERFACE:
@@ -2853,7 +2853,7 @@ module ESMF_InternArrayCommMod
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status         ! local error status
       integer :: i, j, nitemsSrc, nitemsDst
@@ -2940,7 +2940,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayRedistValidateOne"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayRedistValidate - Validate an Array Redist
 !
 ! !INTERFACE:
@@ -2980,7 +2980,7 @@ module ESMF_InternArrayCommMod
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status         ! local error status
       type(ESMF_Route) :: route

@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArray.F90,v 1.19 2007/06/26 23:22:36 cdeluca Exp $
+! $Id: ESMF_InternArray.F90,v 1.20 2007/06/27 22:30:38 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -142,7 +142,7 @@ module ESMF_InternArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArray.F90,v 1.19 2007/06/26 23:22:36 cdeluca Exp $'
+    '$Id: ESMF_InternArray.F90,v 1.20 2007/06/27 22:30:38 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -266,7 +266,7 @@ end subroutine
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InternArrayGet"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_InternArrayGet
 !
 ! !INTERFACE:
@@ -324,7 +324,7 @@ end subroutine
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: status      ! Error status
       logical :: rcpresent   ! Return code present
@@ -402,7 +402,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGetInt4Attr"
 
-!BOP
+!BOPI	
 ! !IROUTINE: ESMF_IArrayGetAttribute  - Retrieve a 4-byte integer attribute
 !
 ! !INTERFACE:
@@ -432,7 +432,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -456,7 +456,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGetInt4ListAttr"
 
-!BOP
+!BOPI	
 ! !IROUTINE: ESMF_IArrayGetAttribute - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
@@ -490,7 +490,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -522,7 +522,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGetInt8Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayGetAttribute  - Retrieve an 8-byte integer attribute
 !
 ! !INTERFACE:
@@ -552,7 +552,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -576,7 +576,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGetInt8ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayGetAttribute - Retrieve an 8-byte integer list attribute
 !
 ! !INTERFACE:
@@ -610,7 +610,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -642,7 +642,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGetReal4Attr"
 
-!BOP
+!BOPI	
 ! !IROUTINE: ESMF_IArrayGetAttribute - Retrieve a 4-byte real attribute
 !
 ! !INTERFACE:
@@ -672,7 +672,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -696,7 +696,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGetReal4ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayGetAttribute - Retrieve a 4-byte real list attribute
 !
 ! !INTERFACE:
@@ -730,7 +730,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -762,7 +762,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGetReal8Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayGetAttribute - Retrieve an 8-byte real attribute
 !
 ! !INTERFACE:
@@ -792,7 +792,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -816,7 +816,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGetReal8ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayGetAttribute - Retrieve an 8-byte real list attribute
 !
 ! !INTERFACE:
@@ -850,7 +850,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -882,7 +882,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGetLogicalAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayGetAttribute - Retrieve a logical attribute
 !
 ! !INTERFACE:
@@ -912,7 +912,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -936,7 +936,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGetLogicalListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayGetAttribute - Retrieve a logical list attribute
 !
 ! !INTERFACE:
@@ -970,7 +970,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -1002,7 +1002,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGetCharAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayGetAttribute - Retrieve a character attribute
 !
 ! !INTERFACE:
@@ -1032,7 +1032,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1056,7 +1056,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGetAttributeCount"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayGetAttributeCount - Query the number of attributes
 !
 ! !INTERFACE:
@@ -1083,7 +1083,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1106,7 +1106,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGetAttrInfoByName"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayGetAttributeInfo - Query Array attributes by name
 !
 ! !INTERFACE:
@@ -1141,7 +1141,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       type(ESMF_TypeKind) :: localTk
@@ -1170,7 +1170,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArrayGetAttrInfoByNum"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArrayGetAttributeInfo - Query Array attributes by index number
 !
 ! !INTERFACE:
@@ -1209,7 +1209,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       character(len=ESMF_MAXSTR) :: localName
@@ -1381,7 +1381,7 @@ end subroutine
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InterArrayPrint"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_InternArrayPrint - Print contents of an Array object
 !
 ! !INTERFACE:
@@ -1405,7 +1405,7 @@ end subroutine
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
        character (len=6) :: defaultopts      ! default print options 
        integer :: status                     ! local error status
@@ -1551,7 +1551,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArraySetInt4Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArraySetAttribute - Set a 4-byte integer attribute
 !
 ! !INTERFACE:
@@ -1582,7 +1582,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1606,7 +1606,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArraySetInt4ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArraySetAttribute - Set a 4-byte integer list attribute
 !
 ! !INTERFACE:
@@ -1642,7 +1642,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -1674,7 +1674,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArraySetInt8Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArraySetAttribute - Set an 8-byte integer attribute
 !
 ! !INTERFACE:
@@ -1705,7 +1705,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1729,7 +1729,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArraySetInt8ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArraySetAttribute - Set an 8-byte integer list attribute
 !
 ! !INTERFACE:
@@ -1765,7 +1765,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -1797,7 +1797,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArraySetReal4Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArraySetAttribute - Set a 4-byte real attribute
 !
 ! !INTERFACE:
@@ -1828,7 +1828,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1852,7 +1852,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArraySetReal4ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArraySetAttribute - Set a 4-byte real list attribute
 !
 ! !INTERFACE:
@@ -1888,7 +1888,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -1920,7 +1920,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArraySetReal8Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArraySetAttribute - Set an 8-byte real attribute
 !
 ! !INTERFACE:
@@ -1951,7 +1951,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1975,7 +1975,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArraySetReal8ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArraySetAttribute - Set an 8-byte real list attribute
 !
 ! !INTERFACE:
@@ -2011,7 +2011,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -2043,7 +2043,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArraySetLogicalAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArraySetAttribute - Set a logical attribute
 !
 ! !INTERFACE:
@@ -2074,7 +2074,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -2098,7 +2098,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArraySetLogicalListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArraySetAttribute - Set a logical list attribute
 !
 ! !INTERFACE:
@@ -2134,7 +2134,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -2166,7 +2166,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IArraySetCharAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IArraySetAttribute - Set a character attribute
 !
 ! !INTERFACE:
@@ -2197,7 +2197,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -2365,7 +2365,7 @@ end subroutine
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InternArraySet"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_InternArraySet - Set information about an Array
 !
 ! !INTERFACE:
@@ -2394,7 +2394,7 @@ end subroutine
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -2425,7 +2425,7 @@ end subroutine
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InternArrayValidate"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_InternArrayValidate - Check validity of an Array 
 !
 ! !INTERFACE:
@@ -2454,7 +2454,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
     character(len=6)  :: defaultopts      ! default print options 
 !    integer           :: status           ! local error status
@@ -2482,7 +2482,7 @@ end subroutine
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InternArrayWrite"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_InternArrayWrite
 !
 ! !INTERFACE:
@@ -2511,7 +2511,7 @@ end subroutine
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
        character (len=16) :: defaultopts      ! default write options 
        character (len=16) :: defaultfile      ! default filename
