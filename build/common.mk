@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.191 2007/06/12 20:14:16 theurich Exp $
+#  $Id: common.mk,v 1.192 2007/06/28 21:54:18 cdeluca Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -578,10 +578,9 @@ endif
 #-------------------------------------------------------------------------------
 # Up to here there have only been definitions, no targets.  This is the 
 # first (and therefore default) target.  The definition of what "all" is
-# differs for the framework, for the implementation report, and for the
-# eva codes, so "all:" should be defined in the top level makefile and
-# not here.  If a different default is desired, that can also be
-# defined in the top level makefile, before common.mk is included.
+# should be defined in the top level makefile and not here.  If a different
+# default is desired, that can also be defined in the top level makefile,
+# before common.mk is included.
 #-------------------------------------------------------------------------------
 
 default: lib
@@ -692,9 +691,7 @@ OBJS		= $(OBJSC) $(OBJSF)
 
 #-------------------------------------------------------------------------------
 # HOWTO:  Warning: Here there be dragons.
-# 
-# There are 3 separate top level makefiles: for the ESMF Framework, for the
-# ESMF Implementation Report, and for the ESMF EVA (Validation) codes.
+#
 # There is this file (build/common.mk), there are platform-dependent makefiles
 # (build_config/<platform+compiler>/build_rules.mk), and there are
 # makefiles in each subdir.  Needless to say, this makes things confusing
@@ -754,7 +751,7 @@ OBJS		= $(OBJSC) $(OBJSF)
 # and EVA builds, and to ESMF_IMPL_DIR for the Implementation Report.
 # ESMF_BUILD always defaults to the same location as ESMF_DIR.
 #
-# good luck.
+# Good luck.
 #
 #-------------------------------------------------------------------------------
 
@@ -1071,7 +1068,7 @@ clean_check:
 
 
 # all tests, respecting user setting of EXHAUSTIVE
-all_tests:
+all_tests: 
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
 	  $(MAKE) info $(ALLTEST_TARGETS_UNI) results_summary ;\
 	else \
