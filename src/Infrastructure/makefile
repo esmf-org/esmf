@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.86 2007/06/25 20:15:50 cdeluca Exp $ 
+# $Id: makefile,v 1.87 2007/06/28 22:50:00 oehmke Exp $ 
 
 ALL: build_here
 
@@ -9,10 +9,10 @@ include $(ESMF_DIR)/makefile
 
 DIRS     =	stubs Util Base IOSpec LogErr IO TimeMgr VM DELayout \
                 Config InternDG ArraySpec LocalArray \
-                InternArray PhysGrid Route InternGrid Grid FieldDataMap \
+                InternArray PhysGrid Route InternGrid FieldDataMap \
                 InternArrayComm Field BundleDataMap Bundle \
                 Regrid FieldComm BundleComm \
-                DistGrid Array GridUtil 
+                DistGrid Array GridUtil Grid
 
 CLEANDIRS   =
 CLEANFILES  =
