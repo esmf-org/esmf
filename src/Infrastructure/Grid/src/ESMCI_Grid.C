@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.1 2007/06/26 20:09:26 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.2 2007/06/28 22:47:11 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMCI_Grid.C,v 1.1 2007/06/26 20:09:26 oehmke Exp $";
+  static const char *const version = "$Id: ESMCI_Grid.C,v 1.2 2007/06/28 22:47:11 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -68,13 +68,38 @@ static int _NumStaggerLocsFromRank(int rank)
   return 0x1<<rank;
 }
 
+// Allocate a 2D array of ints in one chunk of memory
+static  int **_allocate2DIntArray(int sizeDim1, int sizeDim2)
+  {
+    int **array,*p;
+
+    // allocate enough space for pointers to rows and rows
+    array=(int **)malloc(sizeDim1*sizeof(int *)+(sizeDim1*sizeDim2*sizeof(int)));
+
+    // fill in row pointers
+    p=((int *)(array+sizeDim1));
+    for (int i=0; i<sizeDim1; i++) {
+      array[i]=p;
+      p=p+sizeDim2;  // advance to beginning of next row
+    }
+
+    return array;
+  }
+
+// Deallocate a 2D array of ints in one chunk of memory
+static  void _deallocate2DIntArray(int ***array)
+  {
+    if (*array==ESMC_NULL_POINTER) return;
+    free(*array);  
+    *array=ESMC_NULL_POINTER;
+  }
+
 
 //-----------------------------------------------------------------------------
 //
 // external Create and Destroy functions
 //
 //-----------------------------------------------------------------------------
-
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -262,12 +287,12 @@ Grid *GridCreate(
   } 
   
   // Process _coordDimMap
-  //TODO: DO THIS BETTER IN FUTURE, SO THE MEMORY IS IN ONE CHUNK (use TEMPLATES?)
-  coordDimMap = new int *[rank];
+  // Allocate a 2D array of integers
+  coordDimMap=_allocate2DIntArray(rank,rank);
+  // initialize array to 0
   for(int i=0; i<rank; i++) {
-    coordDimMap[i]=new int[rank];
     for (int j=0; j<rank; j++) {
-      coordDimMap[i][j]=0;  // initialize to 0
+      coordDimMap[i][j]=0;  
     }
   }
 
@@ -297,10 +322,16 @@ Grid *GridCreate(
 			      "- coordDimMap / rank mismatch", _rc);
 	  return ESMC_NULL_POINTER;
 	}
-        // TODO: check order of [i][j] may need to reverse because of F vs. C array ordering
-	coordDimMap[i][j] = _coordDimMap->array[k];  // copy coordDimMap array element
+        // Note: order of i,j is reversed because of F vs. C array ordering
+	coordDimMap[j][i] = _coordDimMap->array[k];  // copy coordDimMap array element
 
         k++; // increment to next position in input array
+      }
+    }
+    // test coordDimMap Order
+    for (int i=0; i<rank; i++){
+      for (int j=0; j<rank; j++) {
+        printf("[%d][%d]=%d\n",i,j,coordDimMap[i][j]);
       }
     }
   }  
@@ -342,9 +373,7 @@ Grid *GridCreate(
 
   delete [] coordRanks;
 
-  for(int i=0; i<rank; i++)
-    delete [] coordDimMap[i];
-  delete [] coordDimMap;
+  _deallocate2DIntArray(&coordDimMap);
 
   // return successfully
   *_rc = ESMF_SUCCESS;
@@ -404,6 +433,220 @@ int GridDestroy(
   // return successfully
   return ESMF_SUCCESS;
 }
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::gridSetCoordFromArray()"
+//BOP
+// !IROUTINE:  gridSetCoordFromArray
+//
+// !INTERFACE:
+int gridSetCoordFromArray(
+
+//
+// !RETURN VALUE:
+//   Return code
+//
+// !ARGUMENTS:
+//
+  Grid *_grid, 
+  int *_staggerloc,
+  int *_coord,
+  Array *_array,
+  ESMC_DataCopy *_docopy,
+  InterfaceInt *_coordAlign
+  ) {
+//
+// !DESCRIPTION:
+//    Add coordinates to a grid from an array
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int status;                 // local error status
+  int rc;
+  int staggerloc;
+  int coord;
+  ESMC_DataCopy docopy;
+  int *coordAlign;
+  int rank;
+
+  // TODO: Change to get rid of return codes in favor of try-catch
+
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
+  
+  // check the input and get the information together to add array
+  if (_grid == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to grid argument", &rc);
+    return rc;
+  }
+
+  // Process staggerloc
+  if (_staggerloc==NULL) {
+    staggerloc=0;  // default
+  } else {
+    staggerloc=*_staggerloc;
+  }
+
+  // Process coord
+  if (_coord==NULL) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Must pass in coord argument", &rc);
+    return rc;
+
+  } else {
+    coord=(*_coord)-1; // translate from 1 based to 0 based
+  }
+
+  if (_array == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to array argument", &rc);
+    return rc;
+  }
+
+  // TODO: make sure array has the same distgrid as the grid
+
+  // Process staggerloc
+  if (_docopy==NULL) {
+    docopy=ESMC_DATA_REF;  // default
+  } else {
+    docopy=*_docopy;
+  }
+
+  // get the grid rank
+  rank=_grid->getRank();
+
+  // Process coordAlign
+  coordAlign = new int[rank];
+  if (_coordAlign == NULL) {
+    for (int i=0; i<rank; i++)
+      coordAlign[i] = -1; // set coordAlign to default (-1,-1,-1...)
+  } else {
+    if (_coordAlign->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- coordAlign array must be of rank 1", &rc);
+      return rc;
+    }
+    if (_coordAlign->extent[0] != rank){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- coordAlign size and Grid rank mismatch ", &rc);
+      return rc;
+    }
+    for (int i=0; i<rank; i++){
+      coordAlign[i] = _coordAlign->array[i];  // copy coordAlign array element
+    }
+  }
+
+  // Set Coord Array
+  rc=_grid->setCoordArray(staggerloc, coord, _array, coordAlign, false);
+
+  // Dellocate temporay arrays
+  delete [] coordAlign;
+
+  // return what setCoordArray returned
+  return rc;
+  }
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridGet()"
+//BOP
+// !IROUTINE:  GridGet
+//
+// !INTERFACE:
+int gridGet(
+//
+// !RETURN VALUE:
+//    Return code
+//
+// !ARGUMENTS:
+//
+	    Grid *_grid, //(in)
+	    ESMC_TypeKind *_typekind,
+	    int *_rank,
+	    int *_tileCount,
+	    DistGrid *_distgrid,
+	    int *_staggerLocCount,
+	    InterfaceInt *_dimmap,   
+	    InterfaceInt *_lbounds,  
+	    InterfaceInt *_ubounds,  
+	    InterfaceInt *_coordRanks,
+	    InterfaceInt *_coordDimMap,
+	    ESMC_IndexFlag *_indexflag, 
+	    int *_gridType              
+  ){
+//
+// !DESCRIPTION:
+//    Create an {\tt ESMC\_Grid} object from a DistGrid.
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int status;                 // local error status
+  int rank;
+  int distRank;
+  int undistRank;
+  int *dimmap;
+  ESMC_TypeKind typekind;
+  int *ubounds;
+  int *lbounds;
+  int *coordRanks;
+  int **coordDimMap;
+  int rc;
+
+  // TODO: Change to get rid of return codes in favor of try-catch
+
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
+   
+  // Process _rank
+  if (_typekind!=NULL) {
+    *_typekind=_grid->getTypeKind();
+  }
+
+  // Process _rank
+  if (_rank!=NULL) {
+    *_rank=_grid->getRank();
+  }
+
+  // Process _tileCount
+  if (_tileCount!=NULL) {
+    *_tileCount=_grid->getTileCount();
+  }
+
+  // Process _distgrid
+  //  if (_distgrid!=NULL) {
+  //  _distgrid=_grid->getDistGrid();
+  //}
+
+  // Process _tileCount
+  if (_staggerLocCount!=NULL) {
+    *_staggerLocCount=_grid->getStaggerLocCount();
+  }
+
+  // Process _indexflag
+  if (_indexflag!=NULL) {
+    *_indexflag=_grid->getIndexFlag();
+  }
+
+  // Process _gridType
+  if (_gridType!=NULL) {
+    *_gridType=_grid->getGridType();
+  }
+
+  // return successfully
+  return ESMF_SUCCESS;
+  }
+//-----------------------------------------------------------------------------
+
+
+
+
 
 
 //-----------------------------------------------------------------------------
@@ -531,18 +774,29 @@ Grid::Grid(
     coordRanks = new int[rank];
     memcpy(coordRanks, _coordRanks, rank * sizeof(int));
     
-    //// DO THIS BETTER IN FUTURE, SO THE MEMORY IS IN ONE CHUNK (use TEMPLATES? or STL?)
-    coordDimMap = new int *[rank];
-    for(int i=0; i<rank; i++)
-      coordDimMap[i]=new int[rank];
+  // Allocate a 2D array of integers
+    coordDimMap=_allocate2DIntArray(rank,rank);
     for(int i=0; i<rank; i++)
       for(int j=0; j<rank; j++)
 	coordDimMap[i][j]=_coordDimMap[i][j];
     
     // Allocate coordinate array storage
     coordArrayList = new Array **[staggerLocCount];
-    for(int i=0; i<rank; i++)
+    for(int i=0; i<staggerLocCount; i++)
       coordArrayList[i]=new Array *[rank];
+
+    // Allocate coordinate Alignment storage
+    coordAlignList = new int **[staggerLocCount];
+    for(int i=0; i<staggerLocCount; i++) {
+      coordAlignList[i]=new int *[rank];
+      for(int j=0; j<rank; j++)
+	coordAlignList[i][j]=new int [rank];
+    }
+
+    // Allocate coordinate allocation storage
+    didIAllocList = new bool *[staggerLocCount];
+    for(int i=0; i<staggerLocCount; i++)
+      didIAllocList[i]=new bool [rank];
   }
 
 
@@ -629,17 +883,99 @@ Grid::Grid(
    if (rank) {
      delete [] coordRanks;
 
-     for(int i=0; i<rank; i++)
-       delete [] coordDimMap[i];
-     delete [] coordDimMap;
+     _deallocate2DIntArray(&coordDimMap);
 
-     for(int i=0; i<rank; i++)
+     for(int i=0; i<staggerLocCount; i++)
        delete [] coordArrayList[i];
      delete [] coordArrayList;
+
+     for(int i=0; i<staggerLocCount; i++) {
+       for(int j=0; j<rank; j++) {
+	 delete [] coordAlignList[i][j];
+       }
+       delete [] coordAlignList[i];
+     }
+     delete [] coordAlignList;
+
+     for(int i=0; i<staggerLocCount; i++)
+       delete [] didIAllocList[i];
+     delete [] didIAllocList;
    }
 
   // TODO: Do I need to do something to the base because of the name?    
 }
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::setCoordArray()"
+//BOPI
+// !IROUTINE:  Grid::setCoordArray
+//
+// !INTERFACE:
+int Grid::setCoordArray(
+//
+// !RETURN VALUE:
+//   return code
+//
+// !ARGUMENTS:
+//
+  int _staggerloc, // (in)
+  int _coord,      // (in)
+  Array *_array,   // (in)
+  int *_coordAlign, // (in)
+  bool didIAlloc // (in)
+  ){
+//
+// !DESCRIPTION:
+//   Set a coordinate array in the grid structure
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int rc;
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+  
+  // Check status
+  if (status != ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Grid not fully created", &rc);
+    return rc;
+  }
+
+  // Check staggerloc
+  if ((_staggerloc < 0) || (_staggerloc >= staggerLocCount)) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- stagger location out of range", &rc);
+    return rc;
+  }
+
+  // Check coord
+  if ((_coord < 0) || (_coord >= rank)) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- coord out of range", &rc);
+    return rc;
+  }
+
+  // Set array in list
+  coordArrayList[_staggerloc][_coord] = _array;
+
+  // Set coordAlign
+  for (int i=0; i<rank; i++) {
+    coordAlignList[_staggerloc][_coord][i]=_coordAlign[i];
+   }
+
+  // Set alloc
+  didIAllocList[_staggerloc][_coord]=didIAlloc;
+
+
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
 
 } // END ESMCI name space
 //-----------------------------------------------------------------------------

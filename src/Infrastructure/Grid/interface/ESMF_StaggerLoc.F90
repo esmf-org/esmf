@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.1 2007/06/25 18:28:10 cdeluca Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.2 2007/06/28 22:47:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -49,7 +49,6 @@
 
       type ESMF_StaggerLoc
       sequence
-!      private
         integer :: staggerloc
       end type
 
@@ -150,7 +149,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.1 2007/06/25 18:28:10 cdeluca Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.2 2007/06/28 22:47:10 oehmke Exp $'
 
 
 !==============================================================================

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.1 2007/06/26 20:08:38 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.2 2007/06/28 22:47:10 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -40,8 +40,13 @@
 
 // Eventually move this to ESMCI_Util.h
 enum ESMC_GridStatus {ESMC_GRIDSTATUS_NOT_READY=1,
-		      ESMC_GRIDSTATUS_SHAPE_READY,
+		      ESMC_GRIDSTATUS_SHAPE_READY
 };
+
+// Eventually move this to ESMCI_Util.h
+//enum ESMC_CopyFlag {ESMC_DATA_REF=1,
+//		    ESMC_DATA_COPY
+//};
 
 // Start name space
 namespace ESMCI {  
@@ -70,12 +75,24 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   
   int staggerLocCount;
   Array ***coordArrayList; // size of coordArrayList = staggerLocCountxrank [staggerLoc][coord]
+  int   ***coordAlignList;     // hold alignment info [staggerloc][coord][dim]
+  bool  **didIAllocList;        // if true, I allocated this Array [staggerloc][coord]
   
   int gridType;
   ESMC_IndexFlag indexflag;
   DistGrid *distgrid;
   
  public:
+
+  // accessor methods
+  const int getRank(void) const {return rank;}
+  const int getTileCount(void) const {return 1;}
+  const int getStaggerLocCount(void) const {return staggerLocCount;}
+  const int getGridType(void) const {return gridType;}
+  const ESMC_IndexFlag getIndexFlag(void) const {return indexflag;}
+  const ESMC_TypeKind getTypeKind(void) const {return typekind;}
+  const DistGrid *getDistGrid(void) const {return distgrid;}
+
 
   // Set Grid default values
   friend void  _GridSetDefaults(Grid *grid);
@@ -106,6 +123,15 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   // Grid Destruct
   ~Grid();
+
+int Grid::setCoordArray(
+  int _staggerloc, // (in)
+  int _coord,      // (in)
+  Array *_array,   // (in)
+  int *coordAlign,  // (in)
+  bool _self_alloc // (in)
+  );
+
   
 };  // end class ESMC_Grid
  
@@ -125,6 +151,33 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 		  int *rc                                     // (out) return code
 		  );
  
+
+int gridSetCoordFromArray(
+  Grid *_grid, 
+  int *_staggerloc,
+  int *_coord,
+  Array *_array,
+  ESMC_DataCopy *_docopy,
+  InterfaceInt *_coordAlign
+  );
+
+int gridGet(
+	    Grid *_grid, //(in)
+	    ESMC_TypeKind *_typekind,
+	    int *_rank,
+	    int *_tileCount,
+	    DistGrid *_distgrid,
+	    int *_staggerLocsCount,
+	    InterfaceInt *_dimmap,   
+	    InterfaceInt *_lbounds,  
+	    InterfaceInt *_ubounds,  
+	    InterfaceInt *_coordRanks,
+	    InterfaceInt *_coordDimMap,
+	    ESMC_IndexFlag *_indexflag, 
+	    int *_gridType              
+ );
+
+
  
  int GridDestroy(Grid **grid);
  

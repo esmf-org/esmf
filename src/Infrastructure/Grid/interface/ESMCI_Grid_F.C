@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.1 2007/06/26 20:08:07 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.2 2007/06/28 22:47:10 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -40,8 +40,7 @@
 // the interface subroutine names MUST be in lower case by ESMF convention
 extern "C" {
 
-  // - ESMF-public methods:
-        
+  // - ESMF-public methods:        
   void FTN(c_esmc_gridcreatefromdistgrid)(ESMCI::Grid **ptr, 
     int nameLen, char *name, ESMC_TypeKind *coordTypeKind, 
 					  ESMCI::DistGrid **distgrid,
@@ -69,6 +68,60 @@ extern "C" {
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
+
+  void FTN(c_esmc_gridget)(ESMCI::Grid **grid, 
+                           ESMC_TypeKind *coordTypeKind,
+                           int *rank, int *tileCount,
+			   ESMCI::DistGrid **distgrid,
+                           int *staggerLocsCount, 
+			   ESMCI::InterfaceInt **dimmapArg, 
+			   ESMCI::InterfaceInt **lboundsArg,
+			   ESMCI::InterfaceInt **uboundsArg,
+			   ESMCI::InterfaceInt **coordRanksArg,
+			   ESMCI::InterfaceInt **coordDimMapArg,		  
+			   ESMC_IndexFlag *indexflag,
+			   int *gridtype,
+			   int *rc){
+    int localrc;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridget()"
+
+    //Initialize return code
+    localrc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    localrc = ESMCI::gridGet(*grid, 
+      ESMC_NOT_PRESENT_FILTER(coordTypeKind), ESMC_NOT_PRESENT_FILTER(rank),
+      ESMC_NOT_PRESENT_FILTER(tileCount),  *distgrid,  ESMC_NOT_PRESENT_FILTER(staggerLocsCount),  
+      *dimmapArg,*lboundsArg, *uboundsArg, *coordRanksArg, *coordDimMapArg,
+      ESMC_NOT_PRESENT_FILTER(indexflag), ESMC_NOT_PRESENT_FILTER(gridtype));
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+}
+
+
+  void FTN(c_esmc_gridsetcoordfromarray)(ESMCI::Grid **grid, 
+                                         int *staggerloc, 
+                                         int *coord, 
+                                         ESMCI::Array **array,
+                                         ESMC_DataCopy *docopy, 
+                                         ESMCI::InterfaceInt **coordAlignArg, 
+                                         int *rc) {
+    int localrc;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridsetfromarray()"
+
+    //Initialize return code
+    localrc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    localrc= ESMCI::gridSetCoordFromArray(*grid, ESMC_NOT_PRESENT_FILTER(staggerloc),
+      ESMC_NOT_PRESENT_FILTER(coord), *array, ESMC_NOT_PRESENT_FILTER(docopy),
+      *coordAlignArg);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+}
+
   
   void FTN(c_esmc_griddestroy)(ESMCI::Grid **ptr, int *rc){
 #undef  ESMC_METHOD

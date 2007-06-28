@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.4 2007/06/26 20:31:42 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.5 2007/06/28 22:47:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -115,6 +115,8 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag
 ! - ESMF-public methods:
   public ESMF_GridCreateFromDistGrid
   public ESMF_GridDestroy
+  public ESMF_GridSetCoordFromArray
+  public ESMF_GridGet
 
 ! - ESMF-private methods:
   public ESMF_GridGetInit  
@@ -125,7 +127,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.4 2007/06/26 20:31:42 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.5 2007/06/28 22:47:10 oehmke Exp $'
 
 
 
@@ -134,7 +136,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag
       contains
 
 !==============================================================================
-#define NEWGRID_NOTYET ! put in for documentation 
+
 #ifdef NEWGRID_NOTYET  ! Take out so you don't have to worry about compiler warnings for now
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -332,7 +334,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridcreatefromdistgrid(grid%this, nameLen, name, &
       coordTypeKind, distgrid, dimmapArg, lboundsArg, uboundsArg, coordRanksArg, coordDimMapArg, &
-      indexflag, gridtype, rc)
+      indexflag, gridtype, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -854,6 +856,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag
 !EOP
 
       end subroutine ESMF_GridGenCoordUni
+#endif ! Take out so you don't have to worry about compiler warnings for now
 
 
 !------------------------------------------------------------------------------
@@ -864,25 +867,25 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag
 
 ! !INTERFACE:
       subroutine ESMF_GridGet(grid, name, coordTypeKind, rank,  &
-          tileCount, distGrid, delayout, staggerLocsCount,  &
-          staggerLocs, coordRanks, coordDimMap, dimmap, &
-          lbounds, ubounds, gridType, rc)
+          tileCount, distGrid, staggerLocsCount,  &
+          staggerLocs, dimmap, lbounds, ubounds, coordRanks, coordDimMap, &
+          indexFlag, gridType, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),       intent(in)            :: grid
       character (len=*),     intent(out), optional :: name
-      type(ESMF_TypeKind),  intent(in),   optional :: coordTypeKind
+      type(ESMF_TypeKind),   intent(out), optional :: coordTypeKind
       integer,               intent(out), optional :: rank
-      type(ESMF_DELayout),   intent(out), optional :: delayout
       integer,               intent(out), optional :: tileCount
+      type(ESMF_DistGrid),   intent(out), optional :: distGrid
       integer,               intent(out), optional :: lbounds(:)
       integer,               intent(out), optional :: ubounds(:)
       integer,               intent(out), optional :: dimmap(:)
       integer,               intent(out), optional :: coordRanks(:)
       integer,               intent(out), optional :: coordDimMap(:,:)
-      type(ESMF_DistGrid),   intent(out), optional :: distGrid
       integer,               intent(out), optional :: staggerLocsCount
-      integer,               intent(out), optional :: staggerLocs(:)
+      type(ESMF_StaggerLoc), intent(out), optional :: staggerLocs(:)
+      type(ESMF_IndexFlag),  intent(out), optional :: indexflag
       integer,               intent(out), optional :: gridType
       integer,               intent(out), optional :: rc
 !
@@ -904,8 +907,6 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag
 !   The number of logically rectangular tiles in the grid. 
 !\item[{[distGrid]}]
 !   The structure describing the distribution of the grid. 
-!\item[{[delayout]}]
-!   Upon return this holds the associated {\tt ESMF\_DELayout} object.
 !\item[{[staggerLocsCount]}]
 !   The number of stagger locations which have coordinate arrays allocated.
 !\item[{[staggerLocs]}]
@@ -937,10 +938,86 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag
 !\end{description}
 !
 !EOP
+    integer :: localrc ! local error status
+    integer :: nameLen 
+    type(ESMF_InterfaceInt) :: dimmapArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: lboundsArg ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: uboundsArg ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: coordRanksArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
+
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+!    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+    ! Translate F90 arguments to C++ friendly form
+    !! name
+    nameLen=0
+    if (present(name)) then
+       nameLen=len_trim(name)
+    endif
+
+    !! coordTypeKind
+    ! It doesn't look like it needs to be translated, but test to make sure
+
+    !! TODO: add staggerLocs
+
+    !! dimmap
+    dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !! tensor bounds
+    lboundsArg = ESMF_InterfaceIntCreate(lbounds, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    uboundsArg = ESMF_InterfaceIntCreate(ubounds, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !! Description of array factorization
+    coordRanksArg = ESMF_InterfaceIntCreate(coordRanks, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call C++ Subroutine to do the create
+    call c_ESMC_gridget(grid%this, &
+      coordTypeKind, rank, tileCount, distgrid,  staggerLocsCount, &
+      dimmapArg, lboundsArg, uboundsArg, coordRanksArg, coordDimMapArg, &
+      indexflag, gridtype, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate helper variables
+    call ESMF_InterfaceIntDestroy(dimmapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(lboundsArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(uboundsArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(coordRanksArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
 end subroutine ESMF_GridGet
 
-
+#ifdef NEWGRID_NOTYET  ! Take out so you don't have to worry about compiler warnings for now
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordIntoArray"
@@ -1371,7 +1448,7 @@ end subroutine ESMF_GridGet
 !EOP
 
       end subroutine ESMF_GridSetCoordNoValues
-
+#endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1424,9 +1501,48 @@ end subroutine ESMF_GridGet
 !\end{description}
 !
 !EOP
+    integer :: tmp_staggerloc
+    integer :: localrc ! local error status
+    type(ESMF_InterfaceInt) :: coordAlignArg  ! Language Interface Helper Var
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit, array, rc)
+!    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+    ! handle staggerloc
+    if (present(staggerLoc)) then
+       tmp_staggerloc=staggerLoc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
+    endif
+
+
+    !! coordAlign
+    coordAlignArg = ESMF_InterfaceIntCreate(coordAlign, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call C++ Subroutine to do the create
+    call c_ESMC_gridsetcoordfromarray(grid%this,tmp_staggerloc, coord, &
+      array, docopy, coordAlignArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate helper variables
+    call ESMF_InterfaceIntDestroy(coordAlignArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridSetCoordFromArray
 
+
+#ifdef NEWGRID_NOTYET  ! Take out so you don't have to worry about compiler warnings for now
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
