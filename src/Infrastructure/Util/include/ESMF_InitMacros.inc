@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_InitMacros.inc,v 1.29 2007/02/06 05:39:19 oehmke Exp $
+$Id: ESMF_InitMacros.inc,v 1.30 2007/06/28 16:25:06 oehmke Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,6 +28,20 @@ automatic initialization of types.
 
 
 #define ESMF_INIT_TYPE integer (ESMF_KIND_I8)
+
+#if 0
+ To detect uninitialized objects on compilers which don't support
+ automatic structure initialization ESMF uses the small probablility
+ of a given non-pathological (e.g. not all 0's, etc) bit string 
+ showing up in memory. The following are some random bit strings
+ (stored in 8 byte integers) used for this detection. 
+ (For more information about the detection process please see Section 5.10 of the 
+ developer's guide.)
+
+  ESMF_INIT_DEFINED  marks if a shallow object has been defined by ESMF. 
+  ESMF_INIT_CREATED  marks if a deep object has been allocated
+  ESMF_INIT_DELETED  marks if a deep object has been deallocated. 
+#endif
 #define ESMF_INIT_DEFINED 76838410
 #define ESMF_INIT_CREATED 82949521
 #define ESMF_INIT_DELETED 12594838
