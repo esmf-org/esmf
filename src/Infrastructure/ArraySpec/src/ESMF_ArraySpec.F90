@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.26 2007/06/27 23:38:19 oehmke Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.27 2007/06/29 22:21:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -62,13 +62,13 @@ module ESMF_ArraySpecMod
 
   ! Supported ESMF Array Spec Statuses:
   !    ESMF_ARRAYSPEC_STATUS_UNKNOWN   Not Known
-  !    ESMF_ARRAYSPEC_STATUS_UNINIT    Array Spec hasn't been set yet
-  !    ESMF_ARRAYSPEC_STATUS_READY     Array Spec has been set and can be used
+  !    ESMF_ARRAYSPEC_STATUS_NOTSET    Array Spec hasn't been set yet
+  !    ESMF_ARRAYSPEC_STATUS_SET       Array Spec has been set and can be used
 
-   type (ESMF_ArraySpecStatus), parameter, public ::             &
+   type (ESMF_ArraySpecStatus), parameter, private ::            &
       ESMF_ARRAYSPEC_STATUS_UNKNOWN  =  ESMF_ArraySpecStatus(0), &
-      ESMF_ARRAYSPEC_STATUS_UNINIT   =  ESMF_ArraySpecStatus(1), &
-      ESMF_ARRAYSPEC_STATUS_READY    =  ESMF_ArraySpecStatus(2)
+      ESMF_ARRAYSPEC_STATUS_NOTSET   =  ESMF_ArraySpecStatus(1), &
+      ESMF_ARRAYSPEC_STATUS_SET      =  ESMF_ArraySpecStatus(2)
 
 
 !------------------------------------------------------------------------------
@@ -78,21 +78,20 @@ module ESMF_ArraySpecMod
   type ESMF_ArraySpec
     sequence
     private
+    integer             :: rank       ! number of dimensions
+    type(ESMF_TypeKind) :: typekind   ! fortran type and kind enum/integer
 #ifdef ESMF_NO_INITIALIZERS
     type (ESMF_ArraySpecStatus) :: status
 #else
-    type (ESMF_ArraySpecStatus) :: status = ESMF_ARRAYSPEC_STATUS_UNINIT 
+    type (ESMF_ArraySpecStatus) :: status = ESMF_ARRAYSPEC_STATUS_NOTSET 
 #endif
-
-    integer             :: rank       ! number of dimensions
-    type(ESMF_TypeKind) :: typekind   ! fortran type and kind enum/integer
     ESMF_INIT_DECLARE
   end type
 
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-  public ESMF_ArraySpec, ESMF_ArraySpecStatus
+  public ESMF_ArraySpec
 
 !------------------------------------------------------------------------------
 
@@ -107,15 +106,12 @@ module ESMF_ArraySpecMod
   public ESMF_ArraySpecInit
   public ESMF_ArraySpecGetInit
 
-  public operator(==), operator(/=) ! for overloading 
-                                      ! comparison functions
-
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.26 2007/06/27 23:38:19 oehmke Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.27 2007/06/29 22:21:20 theurich Exp $'
 
 !==============================================================================
 
@@ -209,7 +205,7 @@ module ESMF_ArraySpecMod
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
 
     ! check status
-    if (arrayspec%status .ne. ESMF_ARRAYSPEC_STATUS_READY) then
+    if (arrayspec%status .ne. ESMF_ARRAYSPEC_STATUS_SET) then
        ! Use LogErr to handle return code (to record other info for logfile)
        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_UNINIT, "ArraySpec hasn't been set", &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
@@ -290,7 +286,7 @@ module ESMF_ArraySpecMod
     arrayspec%typekind = typekind
 
     ! set status to indicate that arrayspec has now been defined
-    arrayspec%status = ESMF_ARRAYSPEC_STATUS_READY
+    arrayspec%status = ESMF_ARRAYSPEC_STATUS_SET
 
     ! set return code
     if (rcpresent) rc = ESMF_SUCCESS
@@ -343,7 +339,7 @@ module ESMF_ArraySpecMod
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! check status
-    if (arrayspec%status .ne. ESMF_ARRAYSPEC_STATUS_READY) then
+    if (arrayspec%status .ne. ESMF_ARRAYSPEC_STATUS_SET) then
        ! Use LogErr to handle return code (to record other info for logfile)
        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_UNINIT, "ArraySpec hasn't been set", &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
@@ -381,7 +377,7 @@ module ESMF_ArraySpecMod
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    arrayspec%status = ESMF_ARRAYSPEC_STATUS_UNINIT 
+    arrayspec%status = ESMF_ARRAYSPEC_STATUS_NOTSET 
 
     ESMF_INIT_SET_DEFINED(arrayspec)
   end subroutine ESMF_ArraySpecInit
