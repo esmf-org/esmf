@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.45 2007/06/28 22:46:10 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.46 2007/06/29 22:52:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.45 2007/06/28 22:46:10 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.46 2007/06/29 22:52:04 svasquez Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -45,7 +45,7 @@ program ESMF_GridCreateUTest
 
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
-  character(ESMF_MAXSTR) :: name
+  character(ESMF_MAXSTR) :: name, grid_name
 
   integer :: i, j, petCount
   logical :: looptest
@@ -72,13 +72,22 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
+  grid_name="GRID"
   write(name, *) "Creating a Grid with only a distgrid"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  grid=ESMF_GridCreateFromDistGrid(distgrid=distgrid, rc=rc)
+  grid=ESMF_GridCreateFromDistGrid(name=grid_name, distgrid=distgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-
+  !-----------------------------------------------------------------------------
+  !NEX____UTest
+  ! This test crashes bug 1745580 has been opened
+  !grid_name="NOT_GRID"
+  !write(name, *) "Getting a name from a grid"
+  !write(failMsg, *) "Did not return ESMF_SUCCESS"
+  !call ESMF_GridGet(grid, name=grid_name, rc=rc)
+  !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Destroying a Grid"
