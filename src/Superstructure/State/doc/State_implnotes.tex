@@ -1,4 +1,4 @@
-% $Id: State_implnotes.tex,v 1.10 2007/06/23 04:01:09 cdeluca Exp $
+% $Id: State_implnotes.tex,v 1.11 2007/07/02 19:34:41 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -24,8 +24,8 @@ may need to be associated with the data as an Attribute.
 Data contained in States must be created in unison on each
 PET of the current VM.  This allows the creation process to avoid
 doing communications since each PET can compute any information
-it needs to know about any remote PET (for example, the igrid
-distribute method can compute the decomposition of the igrid on
+it needs to know about any remote PET (for example, the grid
+distribute method can compute the decomposition of the grid on
 not only the local PET but also the remote PETs since it knows
 each PET is making the identical call).  For all PETs to have a
 consistent view of the data this means objects must be given
@@ -49,17 +49,17 @@ to the local PET (for receiving data) and conversely, can determine
 which other PETs are going to receive data and how much (for
 sending data).
 
-For example, the FieldExcl system test creates 2 igridded components
+For example, the FieldExcl system test creates 2 Gridded Components
 on separate subsets of PETs.  They use the option of mapping
 particular, non-monotonic PETs to DEs.  The following figures 
-illustrate how the DEs are mapped in each of the igridded components
+illustrate how the DEs are mapped in each of the Gridded Components
 in that test:
 
 \begin{center}
 \begin{figure}
-\scalebox{0.9}{\includegraphics{Excl_src_igrid}}
+\scalebox{0.9}{\includegraphics{Excl_src_grid}}
 \caption{The mapping of PETs (processors) to DEs (data)
-in the source igrid created by {\tt user\_model1.F90}
+in the source grid created by {\tt user\_model1.F90}
 in the FieldExcl system test.}
 \label{fig:excl_source}
 \end{figure}
@@ -67,9 +67,9 @@ in the FieldExcl system test.}
 
 \begin{center}
 \begin{figure}
-\scalebox{0.9}{\includegraphics{Excl_dst_igrid}}
+\scalebox{0.9}{\includegraphics{Excl_dst_grid}}
 \caption{The mapping of PETs (processors) to DEs (data)
-in the destination igrid created by {\tt user\_model2.F90}
+in the destination grid created by {\tt user\_model2.F90}
 in the FieldExcl system test.}
 \label{fig:excl_destination}
 \end{figure}
@@ -80,15 +80,15 @@ accessing data in the State.  On PETs which already contain data,
 the objects are unchanged.  On PETs which were not involved during
 the creation of the Bundles or Fields, the reconcile call adds an
 object to the State which contains all the same metadata associated
-with the object, but creates a slightly different IGrid object,
-called a Proxy IGrid. These PETs contain no local data, so the
-Array object is empty, and the DELayout for the IGrid is like this:
+with the object, but creates a slightly different Grid object,
+called a Proxy Grid. These PETs contain no local data, so the
+Array object is empty, and the DELayout for the Grid is like this:
 
 \begin{center}
 \begin{figure}
-\scalebox{0.9}{\includegraphics{Excl_src_igrid_cpl}}
+\scalebox{0.9}{\includegraphics{Excl_src_grid_cpl}}
 \caption{The mapping of PETs (processors) to DEs (data)
-in the source igrid after the reconcile call in {\tt user\_coupler.F90}
+in the source grid after the reconcile call in {\tt user\_coupler.F90}
 in the FieldExcl system test.}
 \label{fig:excl_source}
 \end{figure}
@@ -96,9 +96,9 @@ in the FieldExcl system test.}
 
 \begin{center}
 \begin{figure}
-\scalebox{0.9}{\includegraphics{Excl_dst_igrid_cpl}}
+\scalebox{0.9}{\includegraphics{Excl_dst_grid_cpl}}
 \caption{The mapping of PETs (processors) to DEs (data)
-in the destination igrid after the reconcile call in {\tt user\_coupler.F90}
+in the destination grid after the reconcile call in {\tt user\_coupler.F90}
 in the FieldExcl system test.}
 \label{fig:excl_destination}
 \end{figure}

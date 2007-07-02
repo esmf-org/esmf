@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.25 2007/06/25 18:28:05 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.26 2007/07/02 19:34:41 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -241,6 +241,7 @@ the stage the Grid has attained (see Section \ref{sec:opt:gridstatus}).
 These stages are:
 
 \begin{enumerate}
+
 \item Create the Grid topology or shape.  At the completion of this
 stage, the Grid has a specific topology and distribution, but
 empty coordinate arrays.  The Grid can be used as the basis for
@@ -297,8 +298,9 @@ for building Grids.
 {\it Retrieve local bounds and native array from Grid and set values}
 {\tt call ESMF\_GridGetLocalTileInfo(grid, lbound, ubound, ...)
 {\tt call ESMF\_GridGetLocalTileCoord(array)}
+
 \begin{verbatim}
-     do i=lbound,ubound}
+     do i=lbound,ubound
        array=values
      enddo
 \end{verbatim}
