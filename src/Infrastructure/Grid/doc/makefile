@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2007/06/25 18:28:08 cdeluca Exp $ 
+# $Id: makefile,v 1.18 2007/07/02 19:11:28 cdeluca Exp $ 
 
 ALL: onedoc
 
@@ -12,7 +12,7 @@ OBJSF     =
 TEXFILES  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/Infrastructure/newGrid/doc
+LOCDIR	  = src/Infrastructure/Grid/doc
 
 DVIFILES  =	Grid_refdoc.dvi
 PDFFILES  =     $(ESMC_DOCDIR)/Grid_refdoc.pdf
