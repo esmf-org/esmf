@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.26 2007/07/02 19:34:41 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.27 2007/07/02 20:29:07 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -237,7 +237,7 @@ typical calling sequences.
 
 In ESMF there are two main stages to building Grids.  The
 {\tt ESMF\_GridStatus} value stored within the Grid object reflects
-the stage the Grid has attained (see Section \ref{sec:opt:gridstatus}).
+the stage the Grid has attained (see Section~\ref{sec:opt:gridstatus}).
 These stages are:
 
 \begin{enumerate}
@@ -273,7 +273,7 @@ or can provide information incrementally.  The call
 container that can be filled in with subsequent calls to 
 {\tt ESMF\_GridSet()} methods.  A Grid that is empty
 has the {\tt ESMF\_GridStatus} value
-{\tt ESMF\_GRIDSTATUS\_NOT\_READY}
+{\tt ESMF\_GRIDSTATUS\_NOT\_READY}.
 
 The following table summarizes possible call sequences
 for building Grids.
@@ -294,16 +294,9 @@ for building Grids.
 {\it Set coordinates by copy or reference} \\
 {\tt call ESMF\_GridSetCoord(grid, ...)} \\
 {\it Retrieve ESMF Array of coordinates from Grid and set values}
-{\tt call ESMF\_GridGetCoord(grid, ...)
+{\tt call ESMF\_GridGetCoord(grid, ...), set values}
 {\it Retrieve local bounds and native array from Grid and set values}
-{\tt call ESMF\_GridGetLocalTileInfo(grid, lbound, ubound, ...)
-{\tt call ESMF\_GridGetLocalTileCoord(array)}
-
-\begin{verbatim}
-     do i=lbound,ubound
-       array=values
-     enddo
-\end{verbatim}
-
+{\tt call ESMF\_GridGetLocalTileInfo(grid, lbound, ubound, ...)}
+{\tt call ESMF\_GridGetLocalTileCoord(array), set values}
 \hline
 \end{tabular}
