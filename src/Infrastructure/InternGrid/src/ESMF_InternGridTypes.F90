@@ -1,4 +1,4 @@
-! $Id: ESMF_InternGridTypes.F90,v 1.4 2007/06/26 23:22:36 cdeluca Exp $
+! $Id: ESMF_InternGridTypes.F90,v 1.5 2007/07/03 23:21:29 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -566,7 +566,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_InternGridTypes.F90,v 1.4 2007/06/26 23:22:36 cdeluca Exp $'
+      '$Id: ESMF_InternGridTypes.F90,v 1.5 2007/07/03 23:21:29 oehmke Exp $'
 
 !==============================================================================
 !
@@ -2101,7 +2101,7 @@
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LogRectIGridValidate()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LogRectIGridValidate - Validate DataHolder internals
 
 ! !INTERFACE:
@@ -2124,7 +2124,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 
     ! Assume failure until success
