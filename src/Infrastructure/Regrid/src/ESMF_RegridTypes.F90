@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.93 2007/06/23 04:00:40 cdeluca Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.94 2007/07/03 23:26:33 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -266,7 +266,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.93 2007/06/23 04:00:40 cdeluca Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.94 2007/07/03 23:26:33 oehmke Exp $'
 
 !==============================================================================
 !
@@ -397,7 +397,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RegridIndexTypeValidate"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridIndexTypeValidate - Check validity of a RegridIndexType
 !
 ! !INTERFACE:
@@ -1490,7 +1490,7 @@ end subroutine ESMF_RegridIndexTypeValidate
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RegridIndexValidate"
 
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_RegridIndexValidate - Check validity of a RegridIndex
 
 ! !INTERFACE:
@@ -1514,7 +1514,7 @@ end subroutine ESMF_RegridIndexTypeValidate
 !           is valid.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       ! Check Init Status  
       ESMF_INIT_CHECK_DEEP(ESMF_RegridIndexGetInit,s,rc)
