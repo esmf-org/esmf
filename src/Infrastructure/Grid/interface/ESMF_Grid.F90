@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.6 2007/07/03 21:28:20 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.7 2007/07/03 21:41:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -128,7 +128,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.6 2007/07/03 21:28:20 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.7 2007/07/03 21:41:03 oehmke Exp $'
 
 
 
@@ -965,7 +965,11 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag
     !! coordTypeKind
     ! It doesn't look like it needs to be translated, but test to make sure
 
-    !! TODO: add staggerLocs
+    ! TODO: add staggerlocs, right now just use center until we
+    ! figure out which staggerlocs to pass out.
+    if (present(staggerlocs)) then
+       staggerlocs=ESMF_STAGGERLOC_CENTER
+    endif
 
     !! dimmap
     dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=localrc)

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.3 2007/07/03 21:28:20 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.4 2007/07/03 21:41:03 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMCI_Grid.C,v 1.3 2007/07/03 21:28:20 oehmke Exp $";
+  static const char *const version = "$Id: ESMCI_Grid.C,v 1.4 2007/07/03 21:41:03 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -687,105 +687,6 @@ int gridGetCoordIntoArray(
   return rc;
   }
 //-----------------------------------------------------------------------------
-
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::GridGet()"
-//BOP
-// !IROUTINE:  GridGet
-//
-// !INTERFACE:
-int gridGet(
-//
-// !RETURN VALUE:
-//    Return code
-//
-// !ARGUMENTS:
-//
-	    Grid *_grid, //(in)
-	    ESMC_TypeKind *_typekind,
-	    int *_rank,
-	    int *_tileCount,
-	    DistGrid *_distgrid,
-	    int *_staggerLocCount,
-	    InterfaceInt *_dimmap,   
-	    InterfaceInt *_lbounds,  
-	    InterfaceInt *_ubounds,  
-	    InterfaceInt *_coordRanks,
-	    InterfaceInt *_coordDimMap,
-	    ESMC_IndexFlag *_indexflag, 
-	    int *_gridType              
-  ){
-//
-// !DESCRIPTION:
-//    Create an {\tt ESMC\_Grid} object from a DistGrid.
-//EOP
-//-----------------------------------------------------------------------------
-  // local vars
-  int status;                 // local error status
-  int rank;
-  int distRank;
-  int undistRank;
-  int *dimmap;
-  ESMC_TypeKind typekind;
-  int *ubounds;
-  int *lbounds;
-  int *coordRanks;
-  int **coordDimMap;
-  int rc;
-
-  // TODO: Change to get rid of return codes in favor of try-catch
-
-  // initialize return code; assume routine not implemented
-  status = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
-   
-  // Process _rank
-  if (_typekind!=NULL) {
-    *_typekind=_grid->getTypeKind();
-  }
-
-  // Process _rank
-  if (_rank!=NULL) {
-    *_rank=_grid->getRank();
-  }
-
-  // Process _tileCount
-  if (_tileCount!=NULL) {
-    *_tileCount=_grid->getTileCount();
-  }
-
-  // Process _distgrid
-  //  if (_distgrid!=NULL) {
-  //  _distgrid=_grid->getDistGrid();
-  //}
-
-  // Process _tileCount
-  if (_staggerLocCount!=NULL) {
-    *_staggerLocCount=_grid->getStaggerLocCount();
-  }
-
-  // Process _indexflag
-  if (_indexflag!=NULL) {
-    *_indexflag=_grid->getIndexFlag();
-  }
-
-  // Process _gridType
-  if (_gridType!=NULL) {
-    *_gridType=_grid->getGridType();
-  }
-
-  // return successfully
-  return ESMF_SUCCESS;
-  }
-//-----------------------------------------------------------------------------
-
-
-
-
-
 
 //-----------------------------------------------------------------------------
 //

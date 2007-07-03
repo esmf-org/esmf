@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.3 2007/07/03 21:28:19 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.4 2007/07/03 21:41:03 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -184,25 +184,6 @@ int gridSetCoordFromArray(
 			   Array **_array,
 			   ESMC_DataCopy *_docopy
 			   );
-
-
- int gridGet(
-	     Grid *_grid, //(in)
-	     ESMC_TypeKind *_typekind,
-	     int *_rank,
-	     int *_tileCount,
-	     DistGrid *_distgrid,
-	     int *_staggerLocsCount,
-	     InterfaceInt *_dimmap,   
-	     InterfaceInt *_lbounds,  
-	     InterfaceInt *_ubounds,  
-	     InterfaceInt *_coordRanks,
-	     InterfaceInt *_coordDimMap,
-	     ESMC_IndexFlag *_indexflag, 
-	     int *_gridType              
-	     );
-
-
  
  int GridDestroy(Grid **grid);
  
