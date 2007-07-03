@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.19 2007/06/26 23:22:38 cdeluca Exp $
+! $Id: ESMF_StateTypes.F90,v 1.20 2007/07/03 23:28:55 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -282,7 +282,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.19 2007/06/26 23:22:38 cdeluca Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.20 2007/07/03 23:28:55 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -502,7 +502,7 @@ end function
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateItemValidate()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateItemValidate - Validate StateItem internals
 
 ! !INTERFACE:
@@ -525,7 +525,7 @@ end function
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 
     ! Assume failure until success
@@ -609,7 +609,7 @@ end function
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateClassValidate()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateClassValidate - Validate StateClass internals
 
 ! !INTERFACE:
@@ -632,7 +632,7 @@ end function
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
