@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.25 2007/06/23 04:00:36 cdeluca Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.26 2007/07/03 23:24:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -240,7 +240,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.25 2007/06/23 04:00:36 cdeluca Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.26 2007/07/03 23:24:13 oehmke Exp $'
 
 !==============================================================================
 !
@@ -417,7 +417,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PhysCoordValidate"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysCoordValidate - Check validity of a PhysCoord
 !
 ! !INTERFACE:
@@ -441,7 +441,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt physcoord}
 !           is valid.
 !     \end{description}
-!EOP
+!EOPI
 
         ESMF_INIT_CHECK_DEEP(ESMF_PhysCoordGetInit,d,rc)
 
