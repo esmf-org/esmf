@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.2 2007/06/28 22:47:11 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.3 2007/07/03 21:28:20 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMCI_Grid.C,v 1.2 2007/06/28 22:47:11 oehmke Exp $";
+  static const char *const version = "$Id: ESMCI_Grid.C,v 1.3 2007/07/03 21:28:20 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -68,16 +68,21 @@ static int _NumStaggerLocsFromRank(int rank)
   return 0x1<<rank;
 }
 
-// Allocate a 2D array of ints in one chunk of memory
-static  int **_allocate2DIntArray(int sizeDim1, int sizeDim2)
+
+// At some point consider replacing the following templated subroutines
+// with a whole templated multidimensional class.
+
+// Allocate a 2D array in one chunk of memory
+template <class Type>
+static  Type **_allocate2D(int sizeDim1, int sizeDim2)
   {
-    int **array,*p;
+    Type **array,*p;
 
     // allocate enough space for pointers to rows and rows
-    array=(int **)malloc(sizeDim1*sizeof(int *)+(sizeDim1*sizeDim2*sizeof(int)));
+    array=(Type **)malloc(sizeDim1*sizeof(Type *)+(sizeDim1*sizeDim2*sizeof(Type)));
 
     // fill in row pointers
-    p=((int *)(array+sizeDim1));
+    p=((Type *)(array+sizeDim1));
     for (int i=0; i<sizeDim1; i++) {
       array[i]=p;
       p=p+sizeDim2;  // advance to beginning of next row
@@ -87,12 +92,53 @@ static  int **_allocate2DIntArray(int sizeDim1, int sizeDim2)
   }
 
 // Deallocate a 2D array of ints in one chunk of memory
-static  void _deallocate2DIntArray(int ***array)
+template <class Type>
+static  void _free2D(Type ***array)
   {
     if (*array==ESMC_NULL_POINTER) return;
     free(*array);  
     *array=ESMC_NULL_POINTER;
   }
+
+
+// Allocate a 3D array in one chunk of memory
+template <class Type>
+static  Type ***_allocate3D(int sizeDim1, int sizeDim2, int sizeDim3)
+  {
+    Type ***array,**p1, *p2;
+
+    // allocate enough space for pointers to pointers and pointers to data and data
+    array=(Type ***)malloc(sizeDim1*sizeof(Type **)+sizeDim1*sizeDim2*sizeof(Type *)+
+                           sizeDim1*sizeDim2*sizeDim3*sizeof(Type));
+
+    // fill in pointers to arrays of pointers to actual data
+    p1=((Type **)(array+sizeDim1));
+    for (int i=0; i<sizeDim1; i++) {
+      array[i]=p1;
+      p1=p1+sizeDim2;  // advance to next row in pointers to pointers
+    }
+
+    // starting with pointer to beginning of data storage fill in row pointers
+    p2=(Type *)p1;
+    for (int i=0; i<sizeDim1; i++) {
+      for (int j=0; j<sizeDim2; j++) {
+	array[i][j]=p2;
+	p2=p2+sizeDim3;  // advance to beginning of next row
+      }
+    }
+
+    return array;
+  }
+
+// Deallocate a 3D array of ints in one chunk of memory
+template <class Type>
+static  void _free3D(Type ****array)
+  {
+    if (*array==ESMC_NULL_POINTER) return;
+    free(*array);  
+    *array=ESMC_NULL_POINTER;
+  }
+
 
 
 //-----------------------------------------------------------------------------
@@ -288,7 +334,7 @@ Grid *GridCreate(
   
   // Process _coordDimMap
   // Allocate a 2D array of integers
-  coordDimMap=_allocate2DIntArray(rank,rank);
+  coordDimMap=_allocate2D<int>(rank,rank);
   // initialize array to 0
   for(int i=0; i<rank; i++) {
     for (int j=0; j<rank; j++) {
@@ -328,12 +374,15 @@ Grid *GridCreate(
         k++; // increment to next position in input array
       }
     }
+
+    /* DEBUG
     // test coordDimMap Order
     for (int i=0; i<rank; i++){
       for (int j=0; j<rank; j++) {
         printf("[%d][%d]=%d\n",i,j,coordDimMap[i][j]);
       }
     }
+    */
   }  
  
   // Process _indexflag
@@ -373,7 +422,7 @@ Grid *GridCreate(
 
   delete [] coordRanks;
 
-  _deallocate2DIntArray(&coordDimMap);
+  _free2D<int>(&coordDimMap);
 
   // return successfully
   *_rc = ESMF_SUCCESS;
@@ -550,6 +599,95 @@ int gridSetCoordFromArray(
   return rc;
   }
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::gridGetCoordIntoArray()"
+//BOP
+// !IROUTINE:  gridGetCoordFromArray
+//
+// !INTERFACE:
+int gridGetCoordIntoArray(
+
+//
+// !RETURN VALUE:
+//   Return code
+//
+// !ARGUMENTS:
+//
+  Grid *_grid, 
+  int *_staggerloc,
+  int *_coord,
+  Array **_array,
+  ESMC_DataCopy *_docopy
+  ) {
+//
+// !DESCRIPTION:
+//    Add coordinates to a grid from an array
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int status;                 // local error status
+  int rc;
+  int staggerloc;
+  int coord;
+  ESMC_DataCopy docopy;
+  int rank;
+
+  // TODO: Change to get rid of return codes in favor of try-catch
+
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
+  
+  // check the input and get the information together to add array
+  if (_grid == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to grid argument", &rc);
+    return rc;
+  }
+
+  // Process staggerloc
+  if (_staggerloc==NULL) {
+    staggerloc=0;  // default
+  } else {
+    staggerloc=*_staggerloc;
+  }
+
+  // Process coord
+  if (_coord==NULL) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Must pass in coord argument", &rc);
+    return rc;
+
+  } else {
+    coord=(*_coord)-1; // translate from 1 based to 0 based
+  }
+
+  if (_array == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to pass array out through", &rc);
+    return rc;
+  }
+
+  // TODO: make sure array has the same distgrid as the grid
+
+  // Process staggerloc
+  if (_docopy==NULL) {
+    docopy=ESMC_DATA_REF;  // default
+  } else {
+    docopy=*_docopy;
+  }
+
+  // Get Coord Array
+  // (note that _array is already a ** to Array)
+  rc=_grid->getCoordArray(staggerloc, coord, _array);
+
+   // return what setCoordArray returned
+  return rc;
+  }
+//-----------------------------------------------------------------------------
+
 
 
 //-----------------------------------------------------------------------------
@@ -775,28 +913,19 @@ Grid::Grid(
     memcpy(coordRanks, _coordRanks, rank * sizeof(int));
     
   // Allocate a 2D array of integers
-    coordDimMap=_allocate2DIntArray(rank,rank);
+    coordDimMap=_allocate2D<int>(rank,rank);
     for(int i=0; i<rank; i++)
       for(int j=0; j<rank; j++)
 	coordDimMap[i][j]=_coordDimMap[i][j];
     
     // Allocate coordinate array storage
-    coordArrayList = new Array **[staggerLocCount];
-    for(int i=0; i<staggerLocCount; i++)
-      coordArrayList[i]=new Array *[rank];
+    coordArrayList=_allocate2D<Array *>(staggerLocCount,rank);
 
     // Allocate coordinate Alignment storage
-    coordAlignList = new int **[staggerLocCount];
-    for(int i=0; i<staggerLocCount; i++) {
-      coordAlignList[i]=new int *[rank];
-      for(int j=0; j<rank; j++)
-	coordAlignList[i][j]=new int [rank];
-    }
+    coordAlignList=_allocate3D<int>(staggerLocCount,rank,rank);
 
-    // Allocate coordinate allocation storage
-    didIAllocList = new bool *[staggerLocCount];
-    for(int i=0; i<staggerLocCount; i++)
-      didIAllocList[i]=new bool [rank];
+    // Allocate coordinate array storage
+    didIAllocList=_allocate2D<bool>(staggerLocCount,rank);
   }
 
 
@@ -883,23 +1012,13 @@ Grid::Grid(
    if (rank) {
      delete [] coordRanks;
 
-     _deallocate2DIntArray(&coordDimMap);
+     _free2D<int>(&coordDimMap);
 
-     for(int i=0; i<staggerLocCount; i++)
-       delete [] coordArrayList[i];
-     delete [] coordArrayList;
+     _free2D<Array *>(&coordArrayList);
 
-     for(int i=0; i<staggerLocCount; i++) {
-       for(int j=0; j<rank; j++) {
-	 delete [] coordAlignList[i][j];
-       }
-       delete [] coordAlignList[i];
-     }
-     delete [] coordAlignList;
+     _free3D<int>(&coordAlignList);
 
-     for(int i=0; i<staggerLocCount; i++)
-       delete [] didIAllocList[i];
-     delete [] didIAllocList;
+     _free2D<bool>(&didIAllocList);
    }
 
   // TODO: Do I need to do something to the base because of the name?    
@@ -970,6 +1089,65 @@ int Grid::setCoordArray(
   // Set alloc
   didIAllocList[_staggerloc][_coord]=didIAlloc;
 
+
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getCoordArray()"
+//BOPI
+// !IROUTINE:  Grid::getCoordArray
+//
+// !INTERFACE:
+int Grid::getCoordArray(
+//
+// !RETURN VALUE:
+//   return code
+//
+// !ARGUMENTS:
+//
+  int _staggerloc, // (in)
+  int _coord,      // (in)
+  Array **_array   // (in)
+  ){
+//
+// !DESCRIPTION:
+//   Get a coordinate array from the grid structure
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int rc;
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+  
+  // Check status
+  if (status != ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Grid not fully created", &rc);
+    return rc;
+  }
+
+  // Check staggerloc
+  if ((_staggerloc < 0) || (_staggerloc >= staggerLocCount)) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- stagger location out of range", &rc);
+    return rc;
+  }
+
+  // Check coord
+  if ((_coord < 0) || (_coord >= rank)) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- coord out of range", &rc);
+    return rc;
+  }
+
+  // Set array in list
+  *_array=coordArrayList[_staggerloc][_coord];
 
   return ESMF_SUCCESS;
 }

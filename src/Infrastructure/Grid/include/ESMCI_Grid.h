@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.2 2007/06/28 22:47:10 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.3 2007/07/03 21:28:19 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -86,12 +86,19 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   // accessor methods
   const int getRank(void) const {return rank;}
+  const int getDistRank(void) const {return distRank;}
+  const int getUndistRank(void) const {return undistRank;}
   const int getTileCount(void) const {return 1;}
   const int getStaggerLocCount(void) const {return staggerLocCount;}
   const int getGridType(void) const {return gridType;}
   const ESMC_IndexFlag getIndexFlag(void) const {return indexflag;}
   const ESMC_TypeKind getTypeKind(void) const {return typekind;}
   const DistGrid *getDistGrid(void) const {return distgrid;}
+  const int *getDimMap(void) const {return dimmap;}
+  const int *getLbounds(void) const {return lbounds;}
+  const int *getUbounds(void) const {return ubounds;}
+  const int *getCoordRanks(void) const {return coordRanks;}
+  const int **getCoordDimMap(void) const {return coordDimMap;}
 
 
   // Set Grid default values
@@ -124,13 +131,21 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   // Grid Destruct
   ~Grid();
 
-int Grid::setCoordArray(
-  int _staggerloc, // (in)
-  int _coord,      // (in)
-  Array *_array,   // (in)
-  int *coordAlign,  // (in)
-  bool _self_alloc // (in)
-  );
+  int Grid::setCoordArray(
+			  int _staggerloc, // (in)
+			  int _coord,      // (in)
+			  Array *_array,   // (in)
+			  int *coordAlign,  // (in)
+			  bool _self_alloc // (in)
+			  );
+
+
+  int Grid::getCoordArray(
+			  int _staggerloc, // (in)
+			  int _coord,      // (in)
+			  Array **_array   // (in)
+			  );
+
 
   
 };  // end class ESMC_Grid
@@ -161,21 +176,31 @@ int gridSetCoordFromArray(
   InterfaceInt *_coordAlign
   );
 
-int gridGet(
-	    Grid *_grid, //(in)
-	    ESMC_TypeKind *_typekind,
-	    int *_rank,
-	    int *_tileCount,
-	    DistGrid *_distgrid,
-	    int *_staggerLocsCount,
-	    InterfaceInt *_dimmap,   
-	    InterfaceInt *_lbounds,  
-	    InterfaceInt *_ubounds,  
-	    InterfaceInt *_coordRanks,
-	    InterfaceInt *_coordDimMap,
-	    ESMC_IndexFlag *_indexflag, 
-	    int *_gridType              
- );
+
+ int gridGetCoordIntoArray(			  
+			   Grid *_grid, 
+			   int *_staggerloc,
+			   int *_coord,
+			   Array **_array,
+			   ESMC_DataCopy *_docopy
+			   );
+
+
+ int gridGet(
+	     Grid *_grid, //(in)
+	     ESMC_TypeKind *_typekind,
+	     int *_rank,
+	     int *_tileCount,
+	     DistGrid *_distgrid,
+	     int *_staggerLocsCount,
+	     InterfaceInt *_dimmap,   
+	     InterfaceInt *_lbounds,  
+	     InterfaceInt *_ubounds,  
+	     InterfaceInt *_coordRanks,
+	     InterfaceInt *_coordDimMap,
+	     ESMC_IndexFlag *_indexflag, 
+	     int *_gridType              
+	     );
 
 
  

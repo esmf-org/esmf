@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.5 2007/06/28 22:47:10 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.6 2007/07/03 21:28:20 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -116,6 +116,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag
   public ESMF_GridCreateFromDistGrid
   public ESMF_GridDestroy
   public ESMF_GridSetCoordFromArray
+  public ESMF_GridGetCoordIntoArray
   public ESMF_GridGet
 
 ! - ESMF-private methods:
@@ -127,7 +128,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.5 2007/06/28 22:47:10 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.6 2007/07/03 21:28:20 oehmke Exp $'
 
 
 
@@ -1012,12 +1013,20 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Set Deep Classes as created
+    if (present(distgrid)) then
+       call ESMF_DistGridSetInitCreated(distgrid, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+   	   ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
 end subroutine ESMF_GridGet
 
-#ifdef NEWGRID_NOTYET  ! Take out so you don't have to worry about compiler warnings for now
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordIntoArray"
@@ -1061,9 +1070,38 @@ end subroutine ESMF_GridGet
 !
 !EOP
 
-      end subroutine ESMF_GridGetCoordIntoArray
+    integer :: tmp_staggerloc
+    integer :: localrc ! local error status
 
-#endif
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+    ! handle staggerloc
+    if (present(staggerLoc)) then
+       tmp_staggerloc=staggerLoc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
+    endif
+
+    ! Call C++ Subroutine to do the create
+    call c_ESMC_gridgetcoordintoarray(grid%this,tmp_staggerloc, coord, &
+      array, docopy, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Set Array as created
+    call ESMF_ArraySetInitCreated(array,localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetCoordIntoArray
 
 ! -------------------------- ESMF-private method ------------------------------
 #undef ESMF_METHOD
