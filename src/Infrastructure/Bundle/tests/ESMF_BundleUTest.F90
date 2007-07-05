@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.49 2007/06/23 04:00:06 cdeluca Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.50 2007/07/05 15:25:05 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.49 2007/06/23 04:00:06 cdeluca Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.50 2007/07/05 15:25:05 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -247,12 +247,12 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX   _UTest
       ! Test Requirement FLD2.1.1 Creating a Bundle with ESMF_PACKED_DATA option
-      bundle1 = ESMF_BundleCreate(3, fields, ESMF_PACKED_DATA, &
-				name="atmosphere data", rc=rc)
-      write(name, *) "Creating Bundle with ESMF_PACKED_DATA Req. FLD2.1.1"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !bundle1 = ESMF_BundleCreate(3, fields, ESMF_PACKED_DATA, &
+      !			name="atmosphere data", rc=rc)
+      !write(name, *) "Creating Bundle with ESMF_PACKED_DATA Req. FLD2.1.1"
+      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
