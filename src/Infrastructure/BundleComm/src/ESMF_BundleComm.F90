@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.72 2007/06/23 04:00:09 cdeluca Exp $
+! $Id: ESMF_BundleComm.F90,v 1.73 2007/07/05 15:26:40 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.72 2007/06/23 04:00:09 cdeluca Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.73 2007/07/05 15:26:40 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -537,12 +537,17 @@
 !     \end{description}
 !
 !EOPI
+      integer :: localrc                        ! local return code
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
-      call ESMF_RouteHandleDestroy(routehandle, rc)
+      call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_BundleHaloRelease
 
 !------------------------------------------------------------------------------
@@ -1042,13 +1047,17 @@
 !     \end{description}
 !
 !EOP
-
+      integer :: localrc                        ! local return code
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
-      call ESMF_RouteHandleDestroy(routehandle, rc)
+      call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_BundleRedistRelease
 
 !------------------------------------------------------------------------------
@@ -1262,9 +1271,9 @@
       !call ESMF_IGridReduce(field%btypep%igrid, &
       !                     field%btypep%flist(1)%ftypep%localfield%localdata, &
       !                     rtype, result, status)
-      !if (ESMF_LogMsgFoundError(status, &
-      !                            ESMF_ERR_PASSTHRU, &
-      !                            ESMF_CONTEXT, rc)) return
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1661,12 +1670,17 @@
 !
 !EOPI
 ! !REQUIREMENTS: 
+      integer :: localrc                        ! local return code
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
-      call ESMF_RouteHandleDestroy(routehandle, rc)
+      call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_BundleRegridRelease
 
 !------------------------------------------------------------------------------
