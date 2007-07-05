@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.40 2007/04/30 21:14:44 rosalind Exp $
+! $Id: ESMF_Config.F90,v 1.41 2007/07/05 15:40:12 samsoncheung Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -872,7 +872,6 @@
       if( present( rc )) then
         rc = iret 
       endif
-
       return
 
     end subroutine ESMF_ConfigGetFloatR4
@@ -967,7 +966,6 @@
       if( present( rc )) then
         rc = iret 
       endif
-
       return
 
     end subroutine ESMF_ConfigGetFloatR8
@@ -2025,7 +2023,6 @@
       if (present( rc )) then
         rc = iret
       endif
-
       return
 
     end subroutine ESMF_ConfigLoadFile
@@ -2258,7 +2255,7 @@
 !               into attributes table to track user retrieval
 !
 !EOPI -------------------------------------------------------------------
-      integer :: i, j, k, a, b
+      integer :: i, j, k, a, b, localrc
       character(len=LSZ) :: this_line, label
       character(len=ESMF_MAXSTR) :: logmsg
       logical :: duplicate
@@ -2267,6 +2264,7 @@
       if ( present (rc) ) then
         rc = ESMF_RC_NOT_IMPL
       endif
+      localrc = ESMF_RC_NOT_IMPL
 
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -2303,6 +2301,7 @@
                                   "' found in attributes file"
                     call ESMF_LogMsgSetError(ESMF_RC_DUP_NAME, logmsg, &
                                              ESMF_CONTEXT, rc)
+                    localrc = ESMF_RC_DUP_NAME
                   endif
                 enddo
               endif
@@ -2324,6 +2323,13 @@
       ! remember number of labels found
       config%cptr%nattr = a-1
 
+      if (present(rc)) then
+        if (localrc == ESMF_RC_DUP_NAME) then
+          rc = localrc
+        else
+          rc = ESMF_SUCCESS
+        end if
+      end if
       return
 
     end subroutine ESMF_ConfigParseAttributes
