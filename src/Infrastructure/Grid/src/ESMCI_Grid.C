@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.4 2007/07/03 21:41:03 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.5 2007/07/05 19:07:50 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMCI_Grid.C,v 1.4 2007/07/03 21:41:03 oehmke Exp $";
+  static const char *const version = "$Id: ESMCI_Grid.C,v 1.5 2007/07/05 19:07:50 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -192,6 +192,7 @@ Grid *GridCreate(
   int **coordDimMap;
   ESMC_IndexFlag indexflag;
   int gridType;
+  int ind;
 
 
   // TODO: Change to get rid of return codes in favor of try-catch
@@ -360,18 +361,20 @@ Grid *GridCreate(
         "- coordDimMap and distgrid (and perhaps ubounds) mismatch", _rc);
       return ESMC_NULL_POINTER;
     }
-    int k=0;
     for (int i=0; i<rank; i++){
       for (int j=0; j<coordRanks[i]; j++) {
-	if (_coordDimMap->array[k] < 1 || _coordDimMap->array[k] > rank){
+        // Note: order of i,j is because of F vs. C array ordering
+        ind=j*rank+i;
+
+        // Check to make sure data is correct
+	if (_coordDimMap->array[ind] < 1 || _coordDimMap->array[ind] > rank){
 	  ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
 			      "- coordDimMap / rank mismatch", _rc);
 	  return ESMC_NULL_POINTER;
 	}
-        // Note: order of i,j is reversed because of F vs. C array ordering
-	coordDimMap[j][i] = _coordDimMap->array[k];  // copy coordDimMap array element
 
-        k++; // increment to next position in input array
+	// copy coordDimMap array element
+	coordDimMap[i][j] = _coordDimMap->array[ind];  
       }
     }
 
@@ -383,6 +386,7 @@ Grid *GridCreate(
       }
     }
     */
+
   }  
  
   // Process _indexflag

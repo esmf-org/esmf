@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2007/06/28 22:46:10 oehmke Exp $ 
+# $Id: makefile,v 1.20 2007/07/05 19:07:50 oehmke Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -17,13 +17,16 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/Array/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_GridCreateUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_GridCreateUTest \
+	        $(ESMF_TESTDIR)/ESMF_GridCoordUTest
 
 
 
-TESTS_RUN     = RUN_ESMF_GridCreateUTest 
+TESTS_RUN     = RUN_ESMF_GridCreateUTest \
+	        RUN_ESMF_GridCoordUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_GridCreateUTestUNI 
+TESTS_RUN_UNI = RUN_ESMF_GridCreateUTestUNI \
+	        RUN_ESMF_GridCoordUTestUNI 
 
 
 
@@ -38,9 +41,20 @@ CLOBBERDIRS =
 # unit test targets
 #
 
+# --- Grid Creation
+
 RUN_ESMF_GridCreateUTest:
 	$(MAKE) TNAME=GridCreate NP=4 ftest
 
 RUN_ESMF_GridCreateUTestUNI:
 	$(MAKE) TNAME=GridCreate NP=1 ftest
+
+
+# --- Coord Manipulation
+
+RUN_ESMF_GridCoordUTest:
+	$(MAKE) TNAME=GridCoord NP=4 ftest
+
+RUN_ESMF_GridCoordUTestUNI:
+	$(MAKE) TNAME=GridCoord NP=1 ftest
 
