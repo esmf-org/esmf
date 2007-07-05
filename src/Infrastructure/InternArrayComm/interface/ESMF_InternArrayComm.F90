@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.23 2007/06/27 22:30:38 cdeluca Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.24 2007/07/05 15:41:40 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.23 2007/06/27 22:30:38 cdeluca Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.24 2007/07/05 15:41:40 samsoncheung Exp $'
 !
 !==============================================================================
 !
@@ -722,6 +722,8 @@ module ESMF_InternArrayCommMod
                                     horzRelLoc=horzRelLoc, &
                                     vertRelLoc=vertRelLoc, &
                                     AICountPerDE=AICountPerDE, rc=status)
+      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! load globalindex with arrayindex and igridindex
       allocate(globalindex(nAIs, maxrank), stat=status)
@@ -788,9 +790,10 @@ module ESMF_InternArrayCommMod
         endif
       endif
 
-      status = ESMF_SUCCESS
-
  10   continue
+
+      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Clean up
       deallocate(dimOrder,    stat=status)
@@ -798,7 +801,7 @@ module ESMF_InternArrayCommMod
       deallocate(igridindex,   stat=status)
       deallocate(globalindex, stat=status)
 
-      if (present(rc)) rc = status 
+      if (present(rc)) rc = ESMF_SUCCESS 
 
   end subroutine ESMF_IArrayGetAllAxisIndices
 
@@ -911,6 +914,7 @@ module ESMF_InternArrayCommMod
     ! do not error check this; preserve rc from routerun
 
     ! last call to routerun set rc
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_IArrayHaloList
 
@@ -1008,7 +1012,7 @@ module ESMF_InternArrayCommMod
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-    ! last call to logerr already set rc
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_IArrayHaloOne
 
@@ -1038,15 +1042,20 @@ module ESMF_InternArrayCommMod
 !     \end{description}
 !
 !EOPI
+    integer :: localrc                        ! local return code
 
-     ! initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
-    call ESMF_RouteHandleDestroy(routehandle, rc=rc)
+    call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_IArrayHaloRelease
 
 !------------------------------------------------------------------------------
@@ -1102,6 +1111,7 @@ module ESMF_InternArrayCommMod
 !     \end{description}
 !
 !EOPI
+      integer :: localrc                        ! local return code
       ! note that the routehandle coming in here is intent(out) because
       ! it is going to be created from scratch in the subsequent call.
       ! however, the StoreIndex() call has to have the routehandle intent
@@ -1113,21 +1123,24 @@ module ESMF_InternArrayCommMod
       ! this level (inout) as well, even though that is confusing to users,
       ! or make a temporary here and do an assignment before returning.
 
-     ! initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      ! initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-
-    ! Check init status of arguments
-    if (localFlag) then
-      ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
-    endif
-    ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit, igrid, rc)
-    ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
+      ! Check init status of arguments
+      if (localFlag) then
+        ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit, array, rc)
+      endif
+      ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit, igrid, rc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit, datamap)
 
       ! passthru call, setting index to 1 and type 1-to-1
       call ESMF_IArrayHaloStoreIndex(array, localFlag, 1, ESMF_1TO1HANDLEMAP, &
-        1, igrid, datamap, routehandle, halodirection, routeOptions, rc)
+        1, igrid, datamap, routehandle, halodirection, routeOptions, rc=localrc)
 
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_IArrayHaloStoreOne
 
 !------------------------------------------------------------------------------
@@ -1504,9 +1517,11 @@ module ESMF_InternArrayCommMod
 
 
       deallocate(srctotal, dsttotal, stat=status)
-      ! do NOT error check this; preserve the rc returned from validate.
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-
+      if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_IArrayHaloValidateList
 
 !------------------------------------------------------------------------------
@@ -1594,8 +1609,7 @@ module ESMF_InternArrayCommMod
                                 ESMF_CONTEXT, rc)) return
      
 
-      ! last call to logerr already set rc
-
+      if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_IArrayHaloValidateOne
 
 !------------------------------------------------------------------------------
@@ -1746,9 +1760,8 @@ module ESMF_InternArrayCommMod
 
       deallocate(srcLocalArrayList, stat=status)
       deallocate(dstLocalArrayList, stat=status)
-      ! do not error check the status; preserve the rc from the actual run
 
-      ! rc has been set from previous call
+      if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_IArrayRedistList
 
@@ -1878,8 +1891,7 @@ module ESMF_InternArrayCommMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      ! rc has already been set by logerr call above
-
+      if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_IArrayRedistOne
 
 !------------------------------------------------------------------------------
@@ -1909,15 +1921,19 @@ module ESMF_InternArrayCommMod
 !     \end{description}
 !
 !EOPI
-
+     integer :: localrc                        ! local return code
      ! initialize return code; assume routine not implemented
      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+     localrc = ESMF_RC_NOT_IMPL
 
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+     ! Check init status of arguments
+     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
 
-    call ESMF_RouteHandleDestroy(routehandle, rc=rc)
+     call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
+     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+     ESMF_CONTEXT, rcToReturn=rc)) return
 
+     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_IArrayRedistRelease
 
 !------------------------------------------------------------------------------
@@ -1989,12 +2005,14 @@ module ESMF_InternArrayCommMod
 !   \end{description}
 !
 !EOPI
+    integer :: localrc                        ! local return code
 
     ! if problems compiling, see the comment in HaloStore() for
     ! suggestions regarding intent(out) vs intent(inout).
 
      ! initialize return code; assume routine not implemented
      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+     localrc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     if (srcLocalFlag) then
@@ -2011,8 +2029,11 @@ module ESMF_InternArrayCommMod
 
     call ESMF_IArrayRedistStoreIndex(srcArray, srcLocalFlag, srcIGrid, &
       srcDataMap, dstArray, dstLocalFlag, dstIGrid, dstDataMap, &
-      1, ESMF_1TO1HANDLEMAP, 1, parentVM, routehandle, routeOptions, rc)
+      1, ESMF_1TO1HANDLEMAP, 1, parentVM, routehandle, routeOptions, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_IArrayRedistStoreOne
 
 !------------------------------------------------------------------------------
@@ -2123,6 +2144,7 @@ module ESMF_InternArrayCommMod
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     if (srcLocalFlag) then
@@ -2345,8 +2367,7 @@ module ESMF_InternArrayCommMod
       if (associated(dstGlobalCompAIperDEperRank)) &
                           deallocate(dstGlobalCompAIperDEperRank, stat=status)
 
-      ! rc has been set by the calls above, just return here.
-
+      if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_IArrayRedistStoreIndex
 
 !------------------------------------------------------------------------------
@@ -2931,9 +2952,11 @@ module ESMF_InternArrayCommMod
  10   continue
 
       deallocate(srctotal, dsttotal, stat=status)
-      ! do not error check these; preserve the rc from the validate call
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      ! rc has already been set, just return
+      if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_IArrayRedistValidateList
 
@@ -3033,7 +3056,7 @@ module ESMF_InternArrayCommMod
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! preserve the rc and return it
+      if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_IArrayRedistValidateOne
 
