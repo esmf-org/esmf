@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.37 2007/06/23 04:00:12 cdeluca Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.38 2007/07/05 15:38:52 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.37 2007/06/23 04:00:12 cdeluca Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.38 2007/07/05 15:38:52 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -308,10 +308,11 @@
       !jw  write (msgbuf, *)  " Data: ", str
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write (*, *)  " Data: ", str
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
   
-        if (present(rc)) rc = localrc
-      
-        end subroutine ESMF_BundleDataMapPrint
+      if (present(rc)) rc = localrc
+      end subroutine ESMF_BundleDataMapPrint
 
 
 !------------------------------------------------------------------------------
