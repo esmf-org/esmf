@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.110 2007/06/23 04:00:05 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.111 2007/07/05 15:16:19 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -1033,11 +1033,18 @@ end function
 
       btype => bundle%btypep
     
-      call ESMF_BundleTypeAddFieldList(btype, 1, temp_list, rc)
+      call ESMF_BundleTypeAddFieldList(btype, 1, temp_list, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! this resets the congruent flag as a side effect
-      dummy = ESMF_BundleIsCongruent(bundle, rc)
+      dummy = ESMF_BundleIsCongruent(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_BundleAddOneField
 
 
@@ -1105,11 +1112,18 @@ end function
 
       btype => bundle%btypep
     
-      call ESMF_BundleTypeAddFieldList(btype, fieldCount, fieldList, rc)
+      call ESMF_BundleTypeAddFieldList(btype, fieldCount, fieldList, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       
       ! this resets the congruent flag as a side effect
-      dummy = ESMF_BundleIsCongruent(bundle, rc)
+      dummy = ESMF_BundleIsCongruent(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_BundleAddFieldList
 
 
@@ -1200,10 +1214,6 @@ end function
       ! Initialize pointers
       nullify(btypep)
       nullify(ESMF_BundleCreateNew%btypep)
-
-      ! Initialize return code
-      status = ESMF_RC_NOT_IMPL
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       allocate(btypep,  stat=status)
       if (ESMF_LogMsgFoundAllocError(status, "Bundle allocate", &
@@ -1391,8 +1401,6 @@ end function
       ESMF_INIT_SET_DELETED(bundle)
 
       if (present(rc)) rc = ESMF_SUCCESS
-
-
       end subroutine ESMF_BundleDestroy
 
 
@@ -1484,8 +1492,6 @@ end function
       endif
 
       if (present(rc)) rc = ESMF_SUCCESS
-
-
       end subroutine ESMF_BundleGet
 
 
@@ -1561,7 +1567,6 @@ end function
 
 
       if (present(rc)) rc = ESMF_SUCCESS
-
       end subroutine ESMF_BundleGetAllFields
 
 
@@ -3021,13 +3026,20 @@ end function
 !     \end{description}
 !
 !EOPI
+      integer :: localrc                        ! local return code
+
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
 !
 !  TODO: code goes here
 !
-        end subroutine ESMF_BundleGetIGridCellCount
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_BundleGetIGridCellCount
 
 
 !------------------------------------------------------------------------------
@@ -3059,15 +3071,21 @@ end function
 !
 !
 !EOPI
+      integer :: localrc                        ! local return code
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
 
 !
 !  TODO: code goes here
 !
-        end subroutine ESMF_BundleGetIGridDimCount
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_BundleGetIGridDimCount
 
 
 
@@ -3104,15 +3122,20 @@ end function
 !
 !
 !EOPI
-
+      integer :: localrc                        ! local return code
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
 
 !
 !  TODO: code goes here
 !
-        end subroutine ESMF_BundleGetIGridDimSize
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_BundleGetIGridDimSize
 
 
 !------------------------------------------------------------------------------
@@ -3143,15 +3166,20 @@ end function
 !     \end{description}
 !
 !EOPI
+      integer :: localrc                        ! local return code
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
+      localrc = ESMF_RC_NOT_IMPL
 
 !
 !  TODO: code goes here
 !
-        end subroutine ESMF_BundleGetIGridIndexOrder
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_BundleGetIGridIndexOrder
 
 
 !------------------------------------------------------------------------------
@@ -3186,15 +3214,21 @@ end function
 !     \end{description}
 !
 !EOPI
+      integer :: localrc                        ! local return code
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
 
 !
 !  TODO: code goes here
 !
-        end subroutine ESMF_BundleGetIGridPointCount
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_BundleGetIGridPointCount
 
 
 !------------------------------------------------------------------------------
@@ -3346,6 +3380,7 @@ end function
 
       ! TODO: add more code here for printing more info
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_BundlePrint
 
 !------------------------------------------------------------------------------
@@ -3478,17 +3513,19 @@ end function
 !
 !
 !EOPI
+      integer :: localrc                        ! local return code
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
+      localrc = ESMF_RC_NOT_IMPL
 
 !
 !  TODO: code goes here
 !
-      if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "ESMF_BundleRemoveField", &
-                                 ESMF_CONTEXT, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleRemoveField
 
@@ -3526,18 +3563,19 @@ end function
 !
 !
 !EOPI
+      integer :: localrc                        ! local return code
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
+      localrc = ESMF_RC_NOT_IMPL
 
 !
 !  TODO: code goes here
 !
-      if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "ESMF_BundleReorder", &
-                                 ESMF_CONTEXT, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_BundleReorder
 
 !------------------------------------------------------------------------------
@@ -4353,19 +4391,20 @@ end function
 !
 !
 !EOPI
+      integer :: localrc                        ! local return code
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
+      localrc = ESMF_RC_NOT_IMPL
 
 !
 !  TODO: code goes here
 !
 
-      if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "ESMF_BundleSetDataValues", &
-                                 ESMF_CONTEXT, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_BundleSetDataValues
 
 
@@ -4439,7 +4478,6 @@ end function
       btype%igridstatus = ESMF_STATUS_READY
 
       if (present(rc)) rc = ESMF_SUCCESS
-
 
       end subroutine ESMF_BundleSetIGrid
 
@@ -4539,18 +4577,19 @@ end function
 !     \end{description}
 !
 !EOPI
+      integer :: localrc                        ! local return code
 
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
 !
 !  TODO: code goes here
 !
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-      if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "ESMF_BundleWrite", &
-                                 ESMF_CONTEXT, rc)) return
-
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_BundleWrite
 
 
@@ -4585,18 +4624,19 @@ end function
 !     \end{description}
 !
 !EOPI
+      integer :: localrc                        ! local return code
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
+      localrc = ESMF_RC_NOT_IMPL
 
 !
 !  TODO: code goes here
 !
-      if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "ESMF_BundleWriteRestart", &
-                                 ESMF_CONTEXT, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_BundleWriteRestart
 
 !------------------------------------------------------------------------------
@@ -4772,7 +4812,9 @@ end function
       ! If packed data buffer requested, create or update it here.
       if (btype%pack_flag .eq. ESMF_PACKED_DATA) then
 
-         call ESMF_BundleTypeRepackData(btype, rc=rc)
+         call ESMF_BundleTypeRepackData(btype, rc=status)
+         if (ESMF_LogMsgFoundAllocError(status, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
       endif
 
@@ -4877,9 +4919,9 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       !pkarray = ESMF_ArrayCreate(arrayspec, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      !if (ESMF_LogMsgFoundError(status, &
+      !                            ESMF_ERR_PASSTHRU, &
+      !                            ESMF_CONTEXT, rc)) return
 
       btype%pack_flag = ESMF_PACKED_DATA
       !btype%localbundle%packed_data = pkarray
