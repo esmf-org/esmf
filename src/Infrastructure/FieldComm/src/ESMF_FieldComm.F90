@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.95 2007/06/26 23:22:35 cdeluca Exp $
+! $Id: ESMF_FieldComm.F90,v 1.96 2007/07/05 18:03:57 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.95 2007/06/26 23:22:35 cdeluca Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.96 2007/07/05 18:03:57 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1257,7 +1257,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRedistValidate"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldRedistValidate - Do extensive error checking on Redist
 
 ! !INTERFACE:
@@ -1293,7 +1293,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: localrc                          ! Error status
       integer :: htype
@@ -1915,7 +1915,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRegridValidate"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldRegridValidate - Do extensive error checking on Regrid
 
 ! !INTERFACE:
@@ -1960,7 +1960,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: localrc                          ! Error status
       logical :: hasSrcData        ! does this DE contain localdata from src?

@@ -1,4 +1,4 @@
-! $Id: ESMF_InternGrid.F90,v 1.5 2007/06/26 23:22:36 cdeluca Exp $
+! $Id: ESMF_InternGrid.F90,v 1.6 2007/07/05 18:03:57 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_InternGrid.F90,v 1.5 2007/06/26 23:22:36 cdeluca Exp $'
+      '$Id: ESMF_InternGrid.F90,v 1.6 2007/07/05 18:03:57 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -3084,7 +3084,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IGridGetCoordByDim1D"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IGridGetCoordByDim1D - Get the horizontal and/or vertical coordinates of a IGrid
 
 ! !INTERFACE:
@@ -3149,7 +3149,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -3257,7 +3257,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IGridGetCoordByDim2D"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IGridGetCoordByDim2D - Get the horizontal and/or vertical coordinates of a IGrid
 
 ! !INTERFACE:
@@ -3322,7 +3322,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
