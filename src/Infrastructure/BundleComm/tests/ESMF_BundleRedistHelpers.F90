@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.24 2007/06/23 04:00:11 cdeluca Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.25 2007/07/05 15:29:44 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -2097,6 +2097,7 @@ function CreateLayout(which, rc)
 
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  status = ESMF_RC_NOT_IMPL
 
   call ESMF_VMGetGlobal(vm, rc=status)
   if (ESMF_LogMsgFoundError(status, &
@@ -2166,8 +2167,8 @@ function CreateLayout(which, rc)
                             ESMF_CONTEXT, rc)) goto 10
 
 10 continue
-  ! rc will have been set by the call to logerr; 
-  ! just return at this point
+  ! rc will NOT be set by the call to logerr;
+  if (present(rc)) rc = ESMF_SUCCESS
 
 end function CreateLayout
 
@@ -2190,6 +2191,7 @@ function CreateIGrid(which, layout, rc)
 
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  status = ESMF_RC_NOT_IMPL
 
   if (present(layout)) then
       thislayout = layout
@@ -2290,8 +2292,8 @@ function CreateIGrid(which, layout, rc)
    
 
 10 continue
-  ! rc will have been set by the call to logerr; 
-  ! just return at this point
+  ! rc will NOT be set by the call to logerr; 
+  if (present(rc)) rc = ESMF_SUCCESS
 
 end function CreateIGrid
 
@@ -2467,14 +2469,16 @@ function CreateEmptyDataField(name, rc)
   integer :: status
 
   rc = ESMF_RC_NOT_IMPL
+  status = ESMF_RC_NOT_IMPL
+
   CreateEmptyDataField = ESMF_FieldCreateNoData(name=name, rc=status)
   if (ESMF_LogMsgFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
 
 10 continue
-  ! rc will have been set by the call to logerr; 
-  ! just return at this point
+  ! Eventually, rc will not be set by logerr
+  rc = ESMF_SUCCESS
 
 end function CreateEmptyDataField
 
