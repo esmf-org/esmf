@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.3 2007/07/03 21:28:19 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.4 2007/07/05 15:52:49 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -210,7 +210,7 @@ extern "C" {
       }
       // fill in coordDimMap
       int k=0;
-      const int **coordDimMap=grid->getCoordDimMap();
+      int **coordDimMap=grid->getCoordDimMap();
       for (int i=0; i<rank; i++) {
 	for (int j=0; j<rank; j++) {
            // Note: order of i,j is reversed because of F vs. C array ordering
