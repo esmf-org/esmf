@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.38 2007/06/23 04:00:42 cdeluca Exp $
+# $Id: makefile,v 1.39 2007/07/06 20:13:20 svasquez Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -60,10 +60,10 @@ RUN_ESMF_RegridUTestUNI:
 # RegridOptions Unit Test
 #
 RUN_ESMF_RegridOptionsUTest:
-	$(MAKE) TNAME=RegridOptions NP=8 ftest
+	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=RegridOptions NP=8 ftest
 
 RUN_ESMF_RegridOptionsUTestUNI:
-	$(MAKE) TNAME=RegridOptions NP=1 ftest
+	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=RegridOptions NP=1 ftest
 
 
 
@@ -104,7 +104,7 @@ RUN_ESMF_RegridToolUTest:
 	cp -f ESMF_IGridHorzStagger.rc $(ESMF_TESTDIR)
 	cp -f ESMF_RegridDELayout.rc $(ESMF_TESTDIR)
 	cp -f ESMF_RegridHalo.rc $(ESMF_TESTDIR)
-	$(MAKE) TNAME=RegridTool NP=8 ftest
+	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=RegridTool NP=8 ftest
 
 RUN_ESMF_RegridToolUTestUNI:
 	cp -f ESMF_RegridTestList.rc $(ESMF_TESTDIR)
@@ -113,6 +113,6 @@ RUN_ESMF_RegridToolUTestUNI:
 	cp -f ESMF_IGridHorzStagger.rc $(ESMF_TESTDIR)
 	cp -f ESMF_RegridDELayout.rc $(ESMF_TESTDIR)
 	cp -f ESMF_RegridHalo.rc $(ESMF_TESTDIR)
-	$(MAKE) TNAME=RegridTool NP=1 ftest
+	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=RegridTool NP=1 ftest
 
 
