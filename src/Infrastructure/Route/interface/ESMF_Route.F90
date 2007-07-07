@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.96 2007/06/26 23:22:36 cdeluca Exp $
+! $Id: ESMF_Route.F90,v 1.97 2007/07/07 04:21:13 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.96 2007/06/26 23:22:36 cdeluca Exp $'
+      '$Id: ESMF_Route.F90,v 1.97 2007/07/07 04:21:13 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -370,10 +370,9 @@ end subroutine rias
         ! nullify pointer
         route%this = ESMF_NULL_POINTER
 
-        ! logerr routine already set rc
-
 	ESMF_INIT_SET_DELETED(route)
 
+        if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_RouteDestroy
 
 
@@ -415,6 +414,7 @@ end subroutine rias
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        status = ESMF_RC_NOT_IMPL
 
         if (present(value1)) then
           ! code to be added here
@@ -429,13 +429,11 @@ end subroutine rias
         ! Call C++  code
 	! This function is not implemented yet -- P.Li 11/27/06
 !       call c_ESMC_RouteGet(route, value1, value2, status)
-        status = ESMF_RC_NOT_IMPL  ! not implemented yet
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        ! logerr already set rc
-
+        if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_RouteGet
 
 
@@ -612,9 +610,10 @@ end subroutine rias
                                          srcDELayout, dstDELayout, &
                                          srcDomainList, dstDomainList, &
                                          hasSrcDataX, hasDstDataX, localrc)
-      if (localrc .ne. ESMF_SUCCESS) then  
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) then
         print *, "Route PrecomputeDomainList error"
-        ! don't return before adding 1 back to AIs
+        print *, "return after adding 1 back to AIs"
       endif
 
       ! Translate AxisIndices back to F90 from C++
@@ -739,9 +738,10 @@ end subroutine rias
         call c_ESMC_RoutePrecomputeHalo(route, rank, my_DE, AI_exc, AI_tot, &
                                         AI_count, global_start, global_count, &
                                         delayout, periodic, status)
-        if (status .ne. ESMF_SUCCESS) then  
+        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc))  then
           print *, "Route Precompute Halo error"
-          ! don't return before adding 1 back to AIs
+          print *, "return after adding 1 back to AIs"
         endif
 
         ! Translate AxisIndices back to  F90 from C++
@@ -896,9 +896,10 @@ end subroutine rias
                                           myDstDE, dstDECount, &
                                           dstGlobalCompAIperDEperRank, &
                                           myDstGlobalTotalAIperRank, status)
-        if (status .ne. ESMF_SUCCESS) then  
+        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  then
           print *, "Route PrecomputeRedist error"
-          ! don't return before adding 1 back to AIs
+          print *, "return after adding 1 back to AIs"
         endif
 
         ! Translate AxisIndices back to  F90 from C++
@@ -1095,9 +1096,10 @@ end subroutine rias
                                            srcAICount, srcAICountPerDE, &
                                            srcGlobalStart, srcGSCount, &
                                            srcGlobalCount, srcDElayout, status)
-        if (status .ne. ESMF_SUCCESS) then  
+        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc))  then
           print *, "Route PrecomputeRedistV error"
-          ! don't return before adding 1 back to AIs
+          print *, "return after adding 1 back to AIs"
         endif
 
         ! Translate AxisIndices back to  F90 from C++
@@ -1253,9 +1255,10 @@ end subroutine rias
                                            srcAICount, srcAICountPerDE, &
                                            srcGlobalStart, srcGSCount, &
                                            srcGlobalCount, srcDElayout, status)
-        if (status .ne. ESMF_SUCCESS) then  
+        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc))  then
           print *, "Route PrecomputeRedistV error"
-          ! don't return before adding 1 back to AIs
+          print *, "return after adding 1 back to AIs"
         endif
 
         ! Translate AxisIndices back to  F90 from C++
@@ -1401,9 +1404,10 @@ end subroutine rias
            dst_global_start, dst_global_count, dstDElayout, &
            my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
            src_global_start, src_global_count, srcDElayout, status)
-        if (status .ne. ESMF_SUCCESS) then  
+        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc))  then
           print *, "Route PrecomputeRegrid error"
-          ! don't return before adding 1 back to AIs
+          print *, "return after adding 1 back to AIs"
         endif
 
         ! Translate AxisIndices back to  F90 from C++

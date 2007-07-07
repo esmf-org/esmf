@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.38 2007/06/26 23:22:36 cdeluca Exp $
+! $Id: ESMF_RHandle.F90,v 1.39 2007/07/07 04:21:37 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -155,7 +155,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.38 2007/06/26 23:22:36 cdeluca Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.39 2007/07/07 04:21:37 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -919,12 +919,22 @@ end function ESMF_RouteHandleGetInit
 !     \end{description}
 !
 !EOPI
+        ! local variables
+        integer :: status                  ! local error status
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        status = ESMF_RC_NOT_IMPL
+
 
         ! check input variable
         ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
-        call ESMF_RouteHandleDestroy(routehandle, rc)
+        call ESMF_RouteHandleDestroy(routehandle, rc=status)
+        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
 
+        if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_RouteHandleRelease
 
 

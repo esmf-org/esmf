@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.108 2007/05/11 02:43:19 rosalind Exp $
+! $Id: ESMF_State.F90,v 1.109 2007/07/07 04:18:54 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.108 2007/05/11 02:43:19 rosalind Exp $'
+      '$Id: ESMF_State.F90,v 1.109 2007/07/07 04:18:54 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -400,8 +400,11 @@ end interface
 
       temp_list(1) = array
 
-      call ESMF_StateClassAddIArrayList(state%statep, 1, temp_list, rc)      
+      call ESMF_StateClassAddIArrayList(state%statep, 1, temp_list, rc=localrc)      
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddOneInternArray
 
 !------------------------------------------------------------------------------
@@ -461,8 +464,12 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_StateClassAddIArrayList(state%statep, arrayCount, arrayList, rc)
+      call ESMF_StateClassAddIArrayList(state%statep, arrayCount, &
+                                  arrayList, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddInternArrayList
 
 !------------------------------------------------------------------------------
@@ -522,8 +529,11 @@ end interface
 
       temp_list(1) = array
 
-      call ESMF_StateClassAddArrayList(state%statep, 1, temp_list, rc)      
+      call ESMF_StateClassAddArrayList(state%statep, 1, temp_list, rc=localrc)      
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddOneArray
 
 !------------------------------------------------------------------------------
@@ -584,8 +594,11 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_StateClassAddArrayList(state%statep, arrayCount, arrayList, rc)
+      call ESMF_StateClassAddArrayList(state%statep, arrayCount, arrayList, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddArrayList
 
 !------------------------------------------------------------------------------
@@ -645,8 +658,11 @@ end interface
 
       temp_list(1) = bundle
 
-      call ESMF_StateClassAddBundleList(state%statep, 1, temp_list, rc)      
+      call ESMF_StateClassAddBundleList(state%statep, 1, temp_list, rc=localrc)      
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddOneBundle
 
 !------------------------------------------------------------------------------
@@ -707,8 +723,11 @@ end interface
                                   ESMF_CONTEXT, rc)) return
 
       call ESMF_StateClassAddBundleList(state%statep, bundleCount, &
-                                          bundleList, rc)
+                                          bundleList, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddBundleList
 
 !------------------------------------------------------------------------------
@@ -768,8 +787,11 @@ end interface
 
       temp_list(1) = field
 
-      call ESMF_StateClassAddFieldList(state%statep, 1, temp_list, rc)      
+      call ESMF_StateClassAddFieldList(state%statep, 1, temp_list, rc=localrc)      
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddOneField
 
 !------------------------------------------------------------------------------
@@ -829,8 +851,11 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_StateClassAddFieldList(state%statep, fieldCount, fieldList, rc)
+      call ESMF_StateClassAddFieldList(state%statep, fieldCount, fieldList, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddFieldList
 
 !------------------------------------------------------------------------------
@@ -887,8 +912,11 @@ end interface
 
       temp_list(1) = name
 
-      call ESMF_StateAddNameList(state, 1, temp_list, rc)      
+      call ESMF_StateAddNameList(state, 1, temp_list, rc=localrc)      
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddOneName
 
 !------------------------------------------------------------------------------
@@ -943,14 +971,18 @@ end interface
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
 
-      call ESMF_StateClassAddDataNameList(state%statep, namecount, namelist, rc)      
+      call ESMF_StateClassAddDataNameList(state%statep, namecount, &
+                  namelist, rc=localrc)      
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddNameList
 
 !------------------------------------------------------------------------------
@@ -1004,7 +1036,6 @@ end interface
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1013,8 +1044,11 @@ end interface
 
       temp_list(1) = nestedState
 
-      call ESMF_StateClassAddStateList(state%statep, 1, temp_list, rc)      
+      call ESMF_StateClassAddStateList(state%statep, 1, temp_list, rc=localrc)      
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddOneState
 
 !------------------------------------------------------------------------------
@@ -1077,8 +1111,11 @@ end interface
                                   ESMF_CONTEXT, rc)) return
 
       call ESMF_StateClassAddStateList(state%statep, nestedStateCount, &
-                                                         nestedStateList, rc)
+                                      nestedStateList, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddStateList
 
 !------------------------------------------------------------------------------
@@ -4217,6 +4254,7 @@ end interface
                                   ESMF_CONTEXT, rc)) return
   
 
+        if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_StateWrite
 
 
@@ -4251,7 +4289,12 @@ end interface
 !     \end{description}
 !
 !EOPI
+        integer :: localrc
 
+        localrc = ESMF_RC_NOT_IMPL
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 !
 ! TODO: code goes here
 !
@@ -4260,9 +4303,8 @@ end interface
 ! completed change back to BOP/EOP.
 !
 
-        ! check input variables
-        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
 
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
         end subroutine ESMF_StateWriteRestart
@@ -5257,6 +5299,7 @@ end interface
 
       ! Initialize return code.  Assume failure until success assured.
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
       fneedsdealloc = .FALSE.
       fname = ""
 
@@ -5559,8 +5602,8 @@ end interface
         endif
       endif
 
-      ! do not reset rc here - it should already have a valid value.
 
+      if (present(rc)) rc = localrc
       end subroutine ESMF_StateClassAddBundleList
 
 
