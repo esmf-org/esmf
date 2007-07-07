@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.39 2007/06/23 04:01:11 cdeluca Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.40 2007/07/07 04:16:42 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.39 2007/06/23 04:01:11 cdeluca Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.40 2007/07/07 04:16:42 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -419,9 +419,7 @@
 !!DEUBG "i, offset, bufsize = ", i, offset, bufsize
     enddo
        
-    !! TODO: Is this safe?
     if (present(rc)) rc = ESMF_SUCCESS
-
     end subroutine ESMF_StateInfoBuild
 
 !------------------------------------------------------------------------------
