@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.24 2007/07/05 15:41:40 samsoncheung Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.25 2007/07/09 15:18:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.24 2007/07/05 15:41:40 samsoncheung Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.25 2007/07/09 15:18:08 oehmke Exp $'
 !
 !==============================================================================
 !
@@ -1927,7 +1927,7 @@ module ESMF_InternArrayCommMod
      localrc = ESMF_RC_NOT_IMPL
 
      ! Check init status of arguments
-     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
 
      call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
