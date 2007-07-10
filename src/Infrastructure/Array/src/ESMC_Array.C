@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.89 2007/06/25 05:57:28 theurich Exp $
+// $Id: ESMC_Array.C,v 1.90 2007/07/10 01:47:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.89 2007/06/25 05:57:28 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.90 2007/07/10 01:47:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -237,23 +237,40 @@ Array::~Array(){
   // garbage collection
   for (int i=0; i<localDeCount; i++)
     ESMC_LocalArrayDestroy(larrayList[i]);
-  delete [] larrayList;
-  delete [] larrayBaseAddrList;
-  delete [] exclusiveLBound;
-  delete [] exclusiveUBound;
-  delete [] computationalLBound;
-  delete [] computationalUBound;
-  delete [] totalLBound;
-  delete [] totalUBound;
-  delete [] lbounds;
-  delete [] ubounds;
-  delete [] staggerLoc;
-  delete [] vectorDim;
-  delete [] dimmap;
-  delete [] inverseDimmap;
-  delete [] contiguousFlag;
-  delete [] deCellCount;
-  delete [] deList;
+  if (larrayList != NULL)
+    delete [] larrayList;
+  if (larrayBaseAddrList != NULL)
+    delete [] larrayBaseAddrList;
+  if (exclusiveLBound != NULL)
+    delete [] exclusiveLBound;
+  if (exclusiveUBound != NULL)
+    delete [] exclusiveUBound;
+  if (computationalLBound != NULL)
+    delete [] computationalLBound;
+  if (computationalUBound != NULL)
+    delete [] computationalUBound;
+  if (totalLBound != NULL)
+    delete [] totalLBound;
+  if (totalUBound != NULL)
+    delete [] totalUBound;
+  if (lbounds != NULL)
+    delete [] lbounds;
+  if (ubounds != NULL)
+    delete [] ubounds;
+  if (staggerLoc != NULL)
+    delete [] staggerLoc;
+  if (vectorDim != NULL)
+    delete [] vectorDim;
+  if (dimmap != NULL)
+    delete [] dimmap;
+  if (inverseDimmap != NULL)
+    delete [] inverseDimmap;
+  if (contiguousFlag != NULL)
+    delete [] contiguousFlag;
+  if (deCellCount != NULL)
+    delete [] deCellCount;
+  if (deList != NULL)
+    delete [] deList;
 }
 //-----------------------------------------------------------------------------
 
@@ -1561,7 +1578,7 @@ int Array::scatter(
     }
   }
 
-  // size in bytes of each piece of data  
+  // size in bytes of each piece of data
   int dataSize = ESMC_TypeKindSize(typekind);
 
   // prepare for comms
@@ -1953,6 +1970,7 @@ typedef struct{
 }SendTable;
 
 typedef struct{
+  XXE *xxe;                     // XXE
   FactorStorage *factorStorage; // initial factor storage used during Store()
   int termCount;                // number of terms in term storage
   TermStorage **termStorage;    // term storage for each active local dst. cell
@@ -1980,7 +1998,8 @@ int Array::sparseMatMulStore(
 //
   Array *srcArray,                      // in    -
   Array *dstArray,                      // inout -
-  ESMC_R8 *factorList,                  // in    -
+  ESMC_TypeKind typekindArg,            // in    -
+  void *factorList,                     // in    -
   int factorListCount,                  // in    -
   InterfaceInt *factorIndexList,        // in    -
   int rootPet,                          // in    -
@@ -2018,6 +2037,20 @@ int Array::sparseMatMulStore(
       "- Not a valid pointer to dstArray", &rc);
     return rc;
   }
+  if (typekindArg != srcArray->getTypekind()){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      "- TypeKind mismatch between srcArray argument and factorList", &rc);
+    return rc;
+  }
+  if (typekindArg != dstArray->getTypekind()){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      "- TypeKind mismatch between dstArray argument and factorList", &rc);
+    return rc;
+  }
+
+  // size in bytes of each piece of data
+  int dataSize = ESMC_TypeKindSize(typekindArg);
+  
   if (localPet == rootPet){
     // only rootPet must provide valid factorList and factorIndexList args
     if (factorIndexList == NULL){
@@ -2078,7 +2111,7 @@ int Array::sparseMatMulStore(
   localrc = (*routehandle)->ESMC_RouteHandleSetStorage(storage);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-      
+  
   // allocate and fill the factorStorage on all PETs
   storage->factorStorage = new FactorStorage;
   if (localPet == rootPet)
@@ -2342,6 +2375,2309 @@ int Array::sparseMatMulStore(
   delete [] storage->factorStorage->factorIndexList;
   delete [] storage->factorStorage->factorList;
   delete [] storage->factorStorage;
+
+  //----------------------------------
+  // attach XXE to storage
+  storage->xxe = new XXE(50000);
+  XXE *xxe = storage->xxe;
+  XXE::StreamElement *stream = xxe->stream;
+
+  // transfer information into xxe
+  int xxeCount = 0;
+  void *xxeElement;
+  XXE::SendnbInfo *xxeSendnbInfo;
+  XXE::RecvnbInfo *xxeRecvnbInfo;
+  XXE::WaitOnIndexInfo *xxeWaitOnIndexInfo;
+  XXE::WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
+  XXE::ProductSumInfo *xxeProductSumInfo;
+  int size;
+
+  // loop through recv table and issue non-blocking receives
+  int xxeCountRecvStart = xxeCount;
+  size = storage->recvTable->baseSize;
+  for (int i=0; i<storage->recvTable->count; i++){
+    char *element = (char *)storage->recvTable->addr[i];
+    stream[xxeCount].opId = XXE::recvnb;
+    xxeElement = &(stream[xxeCount]);
+    xxeRecvnbInfo = (XXE::RecvnbInfo *)xxeElement;
+    xxeRecvnbInfo->buffer = element;
+    xxeRecvnbInfo->size = size;
+    xxeRecvnbInfo->srcPet = storage->recvTable->srcPet[i];
+    xxeRecvnbInfo->commhandle = &(storage->recvTable->commh[i]);
+    ++xxeCount;
+    if (xxeCount >= xxe->max){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxeCount out of range", &rc);
+      return rc;
+    }
+  }
+
+  // loop through send table and issue non-blocking sends
+  int xxeCountSendStart = xxeCount;
+  size = storage->sendTable->baseSize;
+  for (int i=0; i<storage->sendTable->count; i++){
+    char *element = 
+      (char *)srcArray->larrayBaseAddrList[storage->sendTable->localSrcDe[i]];
+    element += storage->sendTable->linSrcIndex[i] * size;
+    stream[xxeCount].opId = XXE::sendnb;
+    xxeElement = &(stream[xxeCount]);
+    xxeSendnbInfo = (XXE::SendnbInfo *)xxeElement;
+    xxeSendnbInfo->buffer = element;
+    xxeSendnbInfo->size = size;
+    xxeSendnbInfo->dstPet = storage->sendTable->dstPet[i];
+    xxeSendnbInfo->commhandle = &(storage->sendTable->commh[i]);
+    ++xxeCount;
+    if (xxeCount >= xxe->max){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxeCount out of range", &rc);
+      return rc;
+    }
+  }
+  
+  // wait until all local receive calls have completed
+    // new:
+  stream[xxeCount].opId = XXE::waitOnAllRecvnb;
+  ++xxeCount;
+    // orig;
+#if 0
+  stream[xxeCount].opId = XXE::waitOnIndexRange;
+  xxeElement = &(stream[xxeCount]);
+  xxeWaitOnIndexRangeInfo = (XXE::WaitOnIndexRangeInfo *)xxeElement;
+  xxeWaitOnIndexRangeInfo->indexStart = xxeCountRecvStart;
+  xxeWaitOnIndexRangeInfo->indexEnd = xxeCountRecvStart +
+    storage->recvTable->count;
+  ++xxeCount;
+#endif
+  if (xxeCount >= xxe->max){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- xxeCount out of range", &rc);
+    return rc;
+  }
+  
+  // loop through termStorage and compute local results
+  for (int i=0; i<storage->termCount; i++){
+    stream[xxeCount].opId = XXE::productSum;
+    stream[xxeCount].opSubId = XXE::R8;
+    xxeElement = &(stream[xxeCount]);
+    xxeProductSumInfo = (XXE::ProductSumInfo *)xxeElement;
+    TermStorage *termStorage = storage->termStorage[i];
+    ESMC_R8 *element = 
+      (ESMC_R8 *)dstArray->larrayBaseAddrList[termStorage->localDe];
+    element += termStorage->linIndex; // shift to correct element
+    xxeProductSumInfo->element = (void *)element;
+    xxeProductSumInfo->factorList = (void *)termStorage->factorList;
+    xxeProductSumInfo->valueList = (void *)termStorage->valueList;
+    xxeProductSumInfo->factorCount = termStorage->factorCount;
+    ++xxeCount;
+    if (xxeCount >= xxe->max){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxeCount out of range", &rc);
+      return rc;
+    }
+  }
+  
+  // wait until all local send calls have completed
+    // new:
+  stream[xxeCount].opId = XXE::waitOnAllSendnb;
+  ++xxeCount;
+    // orig:
+#if 0
+  stream[xxeCount].opId = XXE::waitOnIndexRange;
+  xxeElement = &(stream[xxeCount]);
+  xxeWaitOnIndexRangeInfo = (XXE::WaitOnIndexRangeInfo *)xxeElement;
+  xxeWaitOnIndexRangeInfo->indexStart = xxeCountSendStart;
+  xxeWaitOnIndexRangeInfo->indexEnd = xxeCountSendStart +
+    storage->sendTable->count;
+  ++xxeCount;
+#endif
+  if (xxeCount >= xxe->max){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- xxeCount out of range", &rc);
+    return rc;
+  }
+  
+  // store xxeCount
+  xxe->count = xxeCount;
+  
+  // optimize the XXE contents
+  localrc = xxe->optimize();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // get XXE ready for execution
+  localrc = xxe->execReady();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::sparseMatMulStore()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::sparseMatMulStore
+//
+// !INTERFACE:
+int Array::sparseMatMulStoreNEW(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  Array *srcArray,                      // in    -
+  Array *dstArray,                      // inout -
+  ESMC_TypeKind typekindArg,            // in    -
+  void *factorList,                     // in    -
+  int factorListCount,                  // in    -
+  InterfaceInt *factorIndexList,        // in    -
+  int rootPet,                          // in    -
+  ESMC_RouteHandle **routehandle        // inout -
+  ){    
+//
+// !DESCRIPTION:
+//    Store information for an Array sparse matrix multiplication operation
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // local return code
+  int rc;                     // final return code
+
+  // initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
+
+  // get the current VM and VM releated information
+  VM *vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  int localPet = vm->getLocalPet();
+  int petCount = vm->getPetCount();
+  
+  // error checking for input
+  if (srcArray == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to srcArray", &rc);
+    return rc;
+  }
+  if (dstArray == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to dstArray", &rc);
+    return rc;
+  }
+  if (typekindArg != srcArray->getTypekind()){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      "- TypeKind mismatch between srcArray argument and factorList", &rc);
+    return rc;
+  }
+  if (typekindArg != dstArray->getTypekind()){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      "- TypeKind mismatch between dstArray argument and factorList", &rc);
+    return rc;
+  }
+
+// not sure I need those VMs
+#if 0   
+  // get the srcArray VM and VM releated information
+  VM *srcVm = srcArray->delayout->getVM();
+  int srcLocalPet = srcVm->getLocalPet();
+  int srcPetCount = srcVm->getPetCount();
+  
+  // get the dstArray VM and VM releated information
+  VM *dstVm = dstArray->delayout->getVM();
+  int dstLocalPet = dstVm->getLocalPet();
+  int dstPetCount = dstVm->getPetCount();
+#endif
+  
+  // size in bytes of each piece of data
+  int dataSize = ESMC_TypeKindSize(typekindArg);
+
+  // TODO: allow rootPet to be absent and factorList to come in distributed
+  // across PETs
+  
+  if (localPet == rootPet){
+    // only rootPet must provide valid factorList and factorIndexList args
+    if (factorIndexList == NULL){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+        "- Not a valid pointer to factorIndexList array", &rc);
+      return rc;
+    }
+    if (factorIndexList->dimCount != 2){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- factorIndexList array must be of rank 2", &rc);
+      return rc;
+    }
+    if (factorIndexList->extent[0] != 2){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- first dimension of factorIndexList array must be of size 2", &rc);
+      return rc;
+    }
+    if (factorIndexList->extent[1] != factorListCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- second dimension of factorIndexList does not match factorListCount",
+        &rc);
+      return rc;
+    }
+  }
+  
+  // create and initialize the RouteHandle
+  *routehandle = ESMC_RouteHandleCreate(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  // todo: I have no idea what some of these settings do, just copied it for now
+  // todo: from what I saw being set in ESMF_IArrayHaloStoreIndex()
+  localrc =
+    (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYSPARSEMATMULHANDLE);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  localrc = (*routehandle)->ESMC_RouteHandleSetRouteCount(1);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  localrc = (*routehandle)->ESMC_RouteHandleSetRMapType(ESMC_1TO1HANDLEMAP);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  localrc = (*routehandle)->ESMC_RouteHandleSetTVCount(0);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  localrc = (*routehandle)->ESMC_RouteHandleSetTVMapType(ESMC_NOHANDLEMAP);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
+  // determine local srcCellCount
+  int *srcDistGridDeCellCount = new int[srcArray->localDeCount];
+  int srcCellCount = 0;   // initialize
+  for (int i=0; i<srcArray->localDeCount; i++){
+    srcDistGridDeCellCount[i] = srcArray->distgrid->getDeCellCount(i, &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+    srcCellCount += srcDistGridDeCellCount[i];
+  }
+  // communicate srcCellCount across all Pets
+  // todo: use nb-allgather and wait right before needed below
+  int *srcCellCountList = new int[petCount];
+  vm->vmk_allgather(&srcCellCount, srcCellCountList, sizeof(int));
+  // determine local dstCellCount
+  int *dstDistGridDeCellCount = new int[dstArray->localDeCount];
+  int dstCellCount = 0;   // initialize
+  for (int i=0; i<dstArray->localDeCount; i++){
+    dstDistGridDeCellCount[i] = dstArray->distgrid->getDeCellCount(i, &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+    dstCellCount += dstDistGridDeCellCount[i];
+  }
+  // communicate dstCellCount across all Pets
+  // todo: use nb-allgather and wait right before needed below
+  int *dstCellCountList = new int[petCount];
+  vm->vmk_allgather(&dstCellCount, dstCellCountList, sizeof(int));
+  
+  
+  // local structs to simplify code
+
+  struct Interval{
+    int min;
+    int max;
+    int count;
+  };
+
+  struct FactorElement{
+    int partnerSeqIndex;
+    int partnerDe;
+    char factor[8]; // large enough for R8 and I8
+  };
+  
+  struct SeqIndexFactorLookup{
+    int de;
+    int factorCount;
+    FactorElement *factorList;
+  };
+  
+  struct SeqIndexFactorCount{
+    int seqIndex;
+    int factorCount;
+  };
+  
+  struct SeqIndexDeInfo{
+    int seqIndex;
+    int de;
+  };
+
+  struct associationElement{
+    int linIndex;
+    int seqIndex;
+    int factorCount;
+    FactorElement *factorList;
+  };
+  
+  // determine linIndex <-> seqIndex association for all cells in exclusive 
+  // region on all localDEs on srcArray
+  int srcRank = srcArray->rank;
+  int *ii = new int[srcRank];     // index tuple basis 0
+  int *iiEnd = new int[srcRank];
+  associationElement **srcLinSeqList = 
+    new associationElement*[srcArray->localDeCount];
+  int srcSeqIndexMinMax[2]; // [0]=min, [1]=max
+  for (int i=0; i<srcArray->localDeCount; i++){
+    int de = srcArray->localDeList[i];  // global DE index
+    // allocate memory in srcLinSeqList for this DE
+    srcLinSeqList[i] = new associationElement[srcDistGridDeCellCount[i]];
+    // reset counters
+    int joff = i*srcRank; // offset according to localDe index
+    for (int j=0; j<srcRank; j++){
+      ii[j] = 0;  // reset
+      iiEnd[j] = srcArray->exclusiveUBound[joff+j]
+        - srcArray->exclusiveLBound[joff+j] + 1;
+    }
+    // loop over all cells in exclusive region for this DE
+    int cellIndex = 0;  // reset
+    while(ii[srcRank-1] < iiEnd[srcRank-1]){
+//      printf("src: DE = %d  - (", de);
+//      int jjj;
+//      for (jjj=0; jjj<srcRank-1; jjj++)
+//        printf("%d, ", ii[jjj]);
+//      printf("%d)\n", ii[jjj]);
+
+      // determine the linearized index for cell ii[] in localArray for this DE
+      int linIndex = srcArray->getLinearIndexExclusive(i, ii);
+      // determine the sequentialized index for cell ii[] in this DE
+      // getSequenceIndex() expects basis 0 ii[] in excl. region
+      int seqIndex = srcArray->distgrid->getSequenceIndex(de, ii);
+      // store linIndex and seqIndex in srcLinSeqList for this DE
+      srcLinSeqList[i][cellIndex].linIndex = linIndex;
+      srcLinSeqList[i][cellIndex].seqIndex = seqIndex;
+      // reset factorCount
+      srcLinSeqList[i][cellIndex].factorCount = 0;
+      // record seqIndex min and max
+      if (i==0 && cellIndex==0)
+        srcSeqIndexMinMax[0] = srcSeqIndexMinMax[1] = seqIndex; // initialize
+      else{
+        if (seqIndex < srcSeqIndexMinMax[0]) srcSeqIndexMinMax[0] = seqIndex;
+        if (seqIndex > srcSeqIndexMinMax[1]) srcSeqIndexMinMax[1] = seqIndex;
+      }
+      // increment
+      ++cellIndex;
+      // multi-dim index increment
+      ++ii[0];
+      for (int j=0; j<srcRank-1; j++){
+        if (ii[j] == iiEnd[j]){
+          ii[j] = 0;  // reset
+          ++ii[j+1];
+        }
+      }
+    } // end while over all exclusive cells
+  } // end for over local DEs
+  delete [] ii;
+  delete [] iiEnd;
+  
+  // communicate srcSeqIndexMinMax across all Pets
+  // todo: use nb-allgather and wait right before needed below
+  int *srcSeqIndexMinMaxList = new int[2*petCount];
+  vm->vmk_allgather(srcSeqIndexMinMax, srcSeqIndexMinMaxList, 2*sizeof(int));
+
+#if 0  
+  for (int i=0; i<srcArray->localDeCount; i++)
+    for (int j=0; j<srcDistGridDeCellCount[i]; j++)
+      printf("gjt: localPet %d, srcLinSeqList[%d][%d] = %d, %d\n", 
+        localPet, i, j, srcLinSeqList[i][j].linIndex,
+        srcLinSeqList[i][j].seqIndex);
+#endif
+
+  // determine linIndex <-> seqIndex association for all cells in exclusive 
+  // region on all localDEs on dstArray
+  int dstRank = dstArray->rank;
+  ii = new int[dstRank];     // index tuple basis 0
+  iiEnd = new int[dstRank];
+  associationElement **dstLinSeqList = 
+    new associationElement*[dstArray->localDeCount];
+  int dstSeqIndexMinMax[2]; // [0]=min, [1]=max
+  for (int i=0; i<dstArray->localDeCount; i++){
+    int de = dstArray->localDeList[i];  // global DE index
+    // allocate memory in dstLinSeqList for this DE
+    dstLinSeqList[i] = new associationElement[dstDistGridDeCellCount[i]];
+    // reset counters
+    int joff = i*dstRank; // offset according to localDe index
+    for (int j=0; j<dstRank; j++){
+      ii[j] = 0;  // reset
+      iiEnd[j] = dstArray->exclusiveUBound[joff+j]
+        - dstArray->exclusiveLBound[joff+j] + 1;
+    }
+    // loop over all cells in exclusive region for this DE
+    int cellIndex = 0;  // reset
+    while(ii[dstRank-1] < iiEnd[dstRank-1]){
+//      printf("dst: DE = %d  - (", de);
+//      int jjj;
+//      for (jjj=0; jjj<dstRank-1; jjj++)
+//        printf("%d, ", ii[jjj]);
+//      printf("%d)\n", ii[jjj]);
+
+      // determine the linearized index for cell ii[] in localArray for this DE
+      int linIndex = dstArray->getLinearIndexExclusive(i, ii);
+      // determine the sequentialized index for cell ii[] in this DE
+      // getSequenceIndex() expects basis 0 ii[] in excl. region
+      int seqIndex = dstArray->distgrid->getSequenceIndex(de, ii);
+      // store linIndex and seqIndex in dstLinSeqList for this DE
+      dstLinSeqList[i][cellIndex].linIndex = linIndex;
+      dstLinSeqList[i][cellIndex].seqIndex = seqIndex;
+      // reset factorCount
+      dstLinSeqList[i][cellIndex].factorCount = 0;
+      // record seqIndex min and max
+      if (i==0 && cellIndex==0)
+        dstSeqIndexMinMax[0] = dstSeqIndexMinMax[1] = seqIndex; // initialize
+      else{
+        if (seqIndex < dstSeqIndexMinMax[0]) dstSeqIndexMinMax[0] = seqIndex;
+        if (seqIndex > dstSeqIndexMinMax[1]) dstSeqIndexMinMax[1] = seqIndex;
+      }
+      // increment
+      ++cellIndex;
+      // multi-dim index increment
+      ++ii[0];
+      for (int j=0; j<dstRank-1; j++){
+        if (ii[j] == iiEnd[j]){
+          ii[j] = 0;  // reset
+          ++ii[j+1];
+        }
+      }
+    } // end while over all exclusive cells
+  } // end for over local DEs
+  delete [] ii;
+  delete [] iiEnd;
+
+  // communicate dstSeqIndexMinMax across all Pets
+  // todo: use nb-allgather and wait right before needed below
+  int *dstSeqIndexMinMaxList = new int[2*petCount];
+  vm->vmk_allgather(dstSeqIndexMinMax, dstSeqIndexMinMaxList, 2*sizeof(int));
+
+#if 0  
+  for (int i=0; i<dstArray->localDeCount; i++)
+    for (int j=0; j<dstDistGridDeCellCount[i]; j++)
+      printf("gjt: localPet %d, dstLinSeqList[%d][%d] = %d, %d\n", 
+        localPet, i, j, dstLinSeqList[i][j].linIndex,
+        dstLinSeqList[i][j].seqIndex);
+#endif
+
+  // determine the srcSeqIndexMinGlobal and MaxGlobal
+  // todo: for nb-allgather(srcSeqIndexMinMaxList) here insert commwait()
+  int srcSeqIndexMinGlobal, srcSeqIndexMaxGlobal;
+  int pastInitFlag = 0; // reset
+  for (int i=0; i<petCount; i++){
+    if (srcCellCountList[i]){
+      // this Pet does hold cells in srcArray
+      if (pastInitFlag){
+        if (srcSeqIndexMinMaxList[2*i] < srcSeqIndexMinGlobal)
+          srcSeqIndexMinGlobal = srcSeqIndexMinMaxList[2*i];
+        if (srcSeqIndexMinMaxList[2*i+1] > srcSeqIndexMaxGlobal)
+          srcSeqIndexMaxGlobal = srcSeqIndexMinMaxList[2*i+1];
+      }else{
+        // initialization
+        srcSeqIndexMinGlobal = srcSeqIndexMinMaxList[2*i];
+        srcSeqIndexMaxGlobal = srcSeqIndexMinMaxList[2*i+1];
+        pastInitFlag = 1; // set
+      }
+    }
+  }
+    
+  // set up a distributed directory for srcArray seqIndex look-up
+  int indicesPerPet = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
+    / petCount;
+  int extraIndices = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
+    % petCount;
+  Interval *srcSeqIndexInterval = new Interval[petCount];
+  srcSeqIndexInterval[0].min = srcSeqIndexMinGlobal;  // start
+  for (int i=0; i<petCount-1; i++){
+    srcSeqIndexInterval[i].max = srcSeqIndexInterval[i].min + indicesPerPet - 1;
+    if (i<extraIndices)
+      ++srcSeqIndexInterval[i].max;   // distribute extra indices homogeneously
+    srcSeqIndexInterval[i].count = 
+      srcSeqIndexInterval[i].max - srcSeqIndexInterval[i].min + 1;
+    srcSeqIndexInterval[i+1].min = srcSeqIndexInterval[i].max + 1;
+  }
+  srcSeqIndexInterval[petCount-1].max = srcSeqIndexMaxGlobal;  // finish
+  srcSeqIndexInterval[petCount-1].count = 
+    srcSeqIndexInterval[petCount-1].max - srcSeqIndexInterval[petCount-1].min
+    + 1;
+  
+#if 0
+  printf("gjt: localPet %d, srcCellCountList[localPet] = %d, "
+    "srcSeqIndexMinMax = %d / %d, srcSeqIndexMinGlobal/MaxGlobal = %d, %d, "
+    "srcSeqIndexInterval[localPet].min/.max = %d, %d\n",
+    localPet, srcCellCountList[localPet], srcSeqIndexMinMax[0],
+    srcSeqIndexMinMax[1], srcSeqIndexMinGlobal, srcSeqIndexMaxGlobal,
+    srcSeqIndexInterval[localPet].min, srcSeqIndexInterval[localPet].max);
+#endif
+
+  // allocate local look-up table indexed by srcSeqIndex
+  SeqIndexFactorLookup *srcSeqIndexFactorLookup = 
+    new SeqIndexFactorLookup[srcSeqIndexInterval[localPet].count];
+  for (int i=0; i<srcSeqIndexInterval[localPet].count; i++){
+    srcSeqIndexFactorLookup[i].de = 0; // use during initialization as counter
+    srcSeqIndexFactorLookup[i].factorCount = 0; // reset
+  }
+  
+  //todo: the following assumes that rootPet is the only Pet with factorList
+  // info, in general any Pet may hold partial factorLists and this must change
+  
+  // rootPet to construct srcSeqIndex information out of factorList for each
+  // Pet and communicate
+  int srcSeqIndexFactorCount = 0; // reset
+  if (localPet == rootPet){
+    // rootPet
+    for (int i=0; i<petCount; i++){
+      if (i == rootPet){
+        // rootPet -> rootPet "communication"
+        for (int j=0; j<factorListCount; j++){
+          // loop over all factorList entries
+          int srcSeqIndex = factorIndexList->array[j*2];
+          if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
+            srcSeqIndex <= srcSeqIndexInterval[i].max){
+            // srcSeqIndex lies within srcSeqIndex for this Pet
+            int k = srcSeqIndex - srcSeqIndexInterval[i].min;
+            ++srcSeqIndexFactorLookup[k].factorCount;
+          }
+        }
+        // set srcSeqIndexFactorLookup[]
+        for (int j=0; j<srcSeqIndexInterval[i].count; j++)
+          if (int factorCount = srcSeqIndexFactorLookup[j].factorCount){
+            srcSeqIndexFactorCount += factorCount;
+            srcSeqIndexFactorLookup[j].factorList =
+              new FactorElement[factorCount];
+          }
+        // fill srcSeqIndexFactorLookup[]
+        if (typekindArg == ESMC_TYPEKIND_R4){
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int srcSeqIndex = factorIndexList->array[j*2];
+            if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
+              srcSeqIndex <= srcSeqIndexInterval[i].max){
+              // srcSeqIndex lies within srcSeqIndex for this Pet
+              int k = srcSeqIndex - srcSeqIndexInterval[i].min;
+              int kk = srcSeqIndexFactorLookup[k].de++;// counter during init
+              srcSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2+1]; // dstSeqIndex
+              *((ESMC_R4 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_R4 *)factorList)[j];
+            }
+          }
+        }else if (typekindArg == ESMC_TYPEKIND_R8){
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int srcSeqIndex = factorIndexList->array[j*2];
+            if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
+              srcSeqIndex <= srcSeqIndexInterval[i].max){
+              // srcSeqIndex lies within srcSeqIndex for this Pet
+              int k = srcSeqIndex - srcSeqIndexInterval[i].min;
+              int kk = srcSeqIndexFactorLookup[k].de++;// counter during init
+              srcSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2+1]; // dstSeqIndex
+              *((ESMC_R8 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_R8 *)factorList)[j];
+#if 0
+printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, srcSeqIndex, factorIndexList->array[j*2+1], ((ESMC_R8 *)factorList)[j]);   
+#endif              
+            }
+          }
+        }else if (typekindArg == ESMC_TYPEKIND_I4){
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int srcSeqIndex = factorIndexList->array[j*2];
+            if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
+              srcSeqIndex <= srcSeqIndexInterval[i].max){
+              // srcSeqIndex lies within srcSeqIndex for this Pet
+              int k = srcSeqIndex - srcSeqIndexInterval[i].min;
+              int kk = srcSeqIndexFactorLookup[k].de++;// counter during init
+              srcSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2+1]; // dstSeqIndex
+              *((ESMC_I4 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_I4 *)factorList)[j];
+            }
+          }
+        }else if (typekindArg == ESMC_TYPEKIND_I8){
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int srcSeqIndex = factorIndexList->array[j*2];
+            if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
+              srcSeqIndex <= srcSeqIndexInterval[i].max){
+              // srcSeqIndex lies within srcSeqIndex for this Pet
+              int k = srcSeqIndex - srcSeqIndexInterval[i].min;
+              int kk = srcSeqIndexFactorLookup[k].de++;// counter during init
+              srcSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2+1]; // dstSeqIndex
+              *((ESMC_I8 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_I8 *)factorList)[j];
+            }
+          }
+        }          
+      }else{
+        // rootPet -> not rootPet communication
+        SeqIndexFactorCount *seqIndexFactorCountList = 
+          new SeqIndexFactorCount[srcSeqIndexInterval[i].count]; // no more
+        int counts[2];
+        counts[0] = counts[1] = 0;  // reset
+        for (int j=0; j<factorListCount; j++){
+          // loop over all factorList entries
+          int srcSeqIndex = factorIndexList->array[j*2];
+          if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
+            srcSeqIndex <= srcSeqIndexInterval[i].max){
+            // srcSeqIndex lies within srcSeqIndex for this Pet
+            ++counts[1];
+            int k;
+            for (k=0; k<counts[0]; k++)
+              if (seqIndexFactorCountList[k].seqIndex == srcSeqIndex) break;
+            if (k==counts[0]){
+              // new entry
+              seqIndexFactorCountList[k].seqIndex = srcSeqIndex;
+              seqIndexFactorCountList[k].factorCount = 1; // initialize
+              ++counts[0];
+            }else{
+              // increment factorCount in existing entry
+              ++seqIndexFactorCountList[k].factorCount;
+            }
+          }
+        }
+        // send info to Pet "i"
+        vm->vmk_send(counts, 2*sizeof(int), i);
+        vm->vmk_send(seqIndexFactorCountList,
+          counts[0]*sizeof(SeqIndexFactorCount), i);
+        // prepare to send remaining information to Pet "i" in one big stream
+        int byteCount = counts[1] * (2 * sizeof(int) + dataSize);
+        char *stream = new char[byteCount];
+        int *intStream;
+        if (typekindArg == ESMC_TYPEKIND_R4){
+          ESMC_R4 *factorStream = (ESMC_R4 *)stream;
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int srcSeqIndex = factorIndexList->array[j*2];
+            if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
+              srcSeqIndex <= srcSeqIndexInterval[i].max){
+              // srcSeqIndex lies within srcSeqIndex for this Pet
+              intStream = (int *)factorStream;
+              *intStream++ = srcSeqIndex;
+              *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
+              factorStream = (ESMC_R4 *)intStream;
+              *factorStream++ = ((ESMC_R4 *)factorList)[j];
+            }
+          }
+        }else if (typekindArg == ESMC_TYPEKIND_R8){
+          ESMC_R8 *factorStream = (ESMC_R8 *)stream;
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int srcSeqIndex = factorIndexList->array[j*2];
+            if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
+              srcSeqIndex <= srcSeqIndexInterval[i].max){
+              // srcSeqIndex lies within srcSeqIndex for this Pet
+              intStream = (int *)factorStream;
+              *intStream++ = srcSeqIndex;
+              *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
+              factorStream = (ESMC_R8 *)intStream;
+              *factorStream++ = ((ESMC_R8 *)factorList)[j];
+#if 0
+printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, srcSeqIndex, factorIndexList->array[j*2+1], ((ESMC_R8 *)factorList)[j]);   
+#endif              
+            }
+          }
+        }else if (typekindArg == ESMC_TYPEKIND_I4){
+          ESMC_I4 *factorStream = (ESMC_I4 *)stream;
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int srcSeqIndex = factorIndexList->array[j*2];
+            if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
+              srcSeqIndex <= srcSeqIndexInterval[i].max){
+              // srcSeqIndex lies within srcSeqIndex for this Pet
+              intStream = (int *)factorStream;
+              *intStream++ = srcSeqIndex;
+              *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
+              factorStream = (ESMC_I4 *)intStream;
+              *factorStream++ = ((ESMC_I4 *)factorList)[j];
+            }
+          }
+        }else if (typekindArg == ESMC_TYPEKIND_I8){
+          ESMC_I8 *factorStream = (ESMC_I8 *)stream;
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int srcSeqIndex = factorIndexList->array[j*2];
+            if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
+              srcSeqIndex <= srcSeqIndexInterval[i].max){
+              // srcSeqIndex lies within srcSeqIndex for this Pet
+              intStream = (int *)factorStream;
+              *intStream++ = srcSeqIndex;
+              *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
+              factorStream = (ESMC_I8 *)intStream;
+              *factorStream++ = ((ESMC_I8 *)factorList)[j];
+            }
+          }
+        }
+        // ready to send information to Pet "i" in one big stream
+        vm->vmk_send(stream, byteCount, i);
+        // garbage collection
+        delete [] seqIndexFactorCountList;
+        delete [] stream;
+      }
+    }
+  }else{
+    // not rootPet
+    // receive info from rootPet
+    int counts[2];
+    vm->vmk_recv(counts, 2*sizeof(int), rootPet);
+    SeqIndexFactorCount *seqIndexFactorCountList = 
+      new SeqIndexFactorCount[counts[0]];
+    vm->vmk_recv(seqIndexFactorCountList,
+      counts[0]*sizeof(SeqIndexFactorCount), rootPet);
+    // process seqIndexFactorCountList and set srcSeqIndexFactorLookup[]
+    for (int i=0; i<counts[0]; i++){
+      int j = seqIndexFactorCountList[i].seqIndex
+        - srcSeqIndexInterval[localPet].min;
+      int factorCount = seqIndexFactorCountList[i].factorCount;
+      srcSeqIndexFactorCount += factorCount;
+      srcSeqIndexFactorLookup[j].factorCount = factorCount;
+      srcSeqIndexFactorLookup[j].factorList = new FactorElement[factorCount];
+    }
+    // receive remaining information to from rootPet in one big stream
+    int byteCount = counts[1] * (2 * sizeof(int) + dataSize);
+    char *stream = new char[byteCount];
+    vm->vmk_recv(stream, byteCount, rootPet);
+    // process stream and set srcSeqIndexFactorLookup[] content
+    int *intStream;
+    if (typekindArg == ESMC_TYPEKIND_R4){
+      ESMC_R4 *factorStream = (ESMC_R4 *)stream;
+      for (int i=0; i<counts[1]; i++){
+        intStream = (int *)factorStream;
+        int j = *intStream++ - srcSeqIndexInterval[localPet].min; // srcSeqIndex
+        int k = srcSeqIndexFactorLookup[j].de++;// counter during initialization
+        srcSeqIndexFactorLookup[j].factorList[k].partnerSeqIndex =
+          *intStream++; // dstSeqIndex
+        factorStream = (ESMC_R4 *)intStream;
+        *((ESMC_R4 *)srcSeqIndexFactorLookup[j].factorList[k].factor) =
+          *factorStream++;
+      }
+    }else if (typekindArg == ESMC_TYPEKIND_R8){
+      ESMC_R8 *factorStream = (ESMC_R8 *)stream;
+      for (int i=0; i<counts[1]; i++){
+        intStream = (int *)factorStream;
+        int j = *intStream++ - srcSeqIndexInterval[localPet].min; // srcSeqIndex
+        int k = srcSeqIndexFactorLookup[j].de++;// counter during initialization
+        srcSeqIndexFactorLookup[j].factorList[k].partnerSeqIndex =
+          *intStream++; // dstSeqIndex
+        factorStream = (ESMC_R8 *)intStream;
+        *((ESMC_R8 *)srcSeqIndexFactorLookup[j].factorList[k].factor) =
+          *factorStream++;
+      }
+    }else if (typekindArg == ESMC_TYPEKIND_I4){
+      ESMC_I4 *factorStream = (ESMC_I4 *)stream;
+      for (int i=0; i<counts[1]; i++){
+        intStream = (int *)factorStream;
+        int j = *intStream++ - srcSeqIndexInterval[localPet].min; // srcSeqIndex
+        int k = srcSeqIndexFactorLookup[j].de++;// counter during initialization
+        srcSeqIndexFactorLookup[j].factorList[k].partnerSeqIndex =
+          *intStream++; // dstSeqIndex
+        factorStream = (ESMC_I4 *)intStream;
+        *((ESMC_I4 *)srcSeqIndexFactorLookup[j].factorList[k].factor) =
+          *factorStream++;
+      }
+    }else if (typekindArg == ESMC_TYPEKIND_I8){
+      ESMC_I8 *factorStream = (ESMC_I8 *)stream;
+      for (int i=0; i<counts[1]; i++){
+        intStream = (int *)factorStream;
+        int j = *intStream++ - srcSeqIndexInterval[localPet].min; // srcSeqIndex
+        int k = srcSeqIndexFactorLookup[j].de++;// counter during initialization
+        srcSeqIndexFactorLookup[j].factorList[k].partnerSeqIndex =
+          *intStream++; // dstSeqIndex
+        factorStream = (ESMC_I8 *)intStream;
+        *((ESMC_I8 *)srcSeqIndexFactorLookup[j].factorList[k].factor) =
+          *factorStream++;
+      }
+    }
+    // garbage collection
+    delete [] seqIndexFactorCountList;
+    delete [] stream;
+  }
+  
+  // communicate between Pets to set up "de" member in srcSeqIndexFactorLookup[]
+  for (int i=0; i<petCount; i++){
+    // Pet "i" is the active srcSeqIndex interval
+    int seqIndexMin = srcSeqIndexInterval[i].min;
+    int seqIndexMax = srcSeqIndexInterval[i].max;
+    int seqIndexCount = srcSeqIndexInterval[i].count;
+    if (localPet!=i){
+      // localPet is a client for the active srcSeqIndex interval
+      SeqIndexDeInfo *seqIndexDeInfoList = new SeqIndexDeInfo[seqIndexCount];
+      int count = 0; // reset
+      for (int j=0; j<srcArray->localDeCount; j++){
+        int de = srcArray->localDeList[j];  // global DE number
+        for (int k=0; k<srcDistGridDeCellCount[j]; k++){
+          int srcSeqIndex = srcLinSeqList[j][k].seqIndex;
+          if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
+            seqIndexDeInfoList[count].seqIndex = srcSeqIndex;
+            seqIndexDeInfoList[count].de = de;
+            ++count; // increment counter
+          }
+        }
+      }
+      // send information to the serving Pet
+      vm->vmk_send(&count, sizeof(int), i);
+//printf("localPet %d sending count %d to Pet %i\n", localPet, count, i);
+      if (count)
+        vm->vmk_send(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), i);
+      // garbage collection
+      delete [] seqIndexDeInfoList;
+    }else{
+      // localPet serves the active srcSeqIndex interval
+      // todo: this can be rewritten with nb-recv to hide latencies
+      for (int ii=0; ii<petCount; ii++){
+        if (ii==i){
+          // server Pet itself
+          for (int j=0; j<srcArray->localDeCount; j++){
+            int de = srcArray->localDeList[j];  // global DE number
+            for (int k=0; k<srcDistGridDeCellCount[j]; k++){
+              int srcSeqIndex = srcLinSeqList[j][k].seqIndex;
+              if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
+                int kk = srcSeqIndex - seqIndexMin;
+                srcSeqIndexFactorLookup[kk].de = de;
+              }
+            }
+          }
+        }else{
+          // receive seqIndexWithinInterval from Pet "ii"
+          int count;
+          vm->vmk_recv(&count, sizeof(int), ii);
+          SeqIndexDeInfo *seqIndexDeInfoList = new SeqIndexDeInfo[count];
+//printf("localPet %d receiving count %d from Pet %i\n", localPet, count, ii);
+          if (count)
+            vm->vmk_recv(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), ii);
+          // process seqIndexDeInfoList and set srcSeqIndexFactorLookup[]
+          for (int j=0; j<count; j++){
+            int k = seqIndexDeInfoList[j].seqIndex - seqIndexMin;
+            srcSeqIndexFactorLookup[k].de = seqIndexDeInfoList[j].de;
+          }
+          // garbage collection
+          delete [] seqIndexDeInfoList;
+        }
+      } // for ii
+    }
+  }
+      
+  // determine the dstSeqIndexMinGlobal and MaxGlobal
+  // todo: for nb-allgather(dstSeqIndexMinMaxList) here insert commwait()
+  int dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal;
+  pastInitFlag = 0; // reset
+  for (int i=0; i<petCount; i++){
+    if (dstCellCountList[i]){
+      // this Pet does hold cells in dstArray
+      if (pastInitFlag){
+        if (dstSeqIndexMinMaxList[2*i] < dstSeqIndexMinGlobal)
+          dstSeqIndexMinGlobal = dstSeqIndexMinMaxList[2*i];
+        if (dstSeqIndexMinMaxList[2*i+1] > dstSeqIndexMaxGlobal)
+          dstSeqIndexMaxGlobal = dstSeqIndexMinMaxList[2*i+1];
+      }else{
+        // initialization
+        dstSeqIndexMinGlobal = dstSeqIndexMinMaxList[2*i];
+        dstSeqIndexMaxGlobal = dstSeqIndexMinMaxList[2*i+1];
+        pastInitFlag = 1; // set
+      }
+    }
+  }
+    
+  // set up a distributed directory for dstArray seqIndex look-up
+  indicesPerPet = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) / petCount;
+  extraIndices = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) % petCount;
+  Interval *dstSeqIndexInterval = new Interval[petCount];
+  dstSeqIndexInterval[0].min = dstSeqIndexMinGlobal;  // start
+  for (int i=0; i<petCount-1; i++){
+    dstSeqIndexInterval[i].max = dstSeqIndexInterval[i].min + indicesPerPet - 1;
+    if (i<extraIndices)
+      ++dstSeqIndexInterval[i].max;   // distribute extra indices homogeneously
+    dstSeqIndexInterval[i].count = 
+      dstSeqIndexInterval[i].max - dstSeqIndexInterval[i].min + 1;
+    dstSeqIndexInterval[i+1].min = dstSeqIndexInterval[i].max + 1;
+  }
+  dstSeqIndexInterval[petCount-1].max = dstSeqIndexMaxGlobal;  // finish
+  dstSeqIndexInterval[petCount-1].count = 
+    dstSeqIndexInterval[petCount-1].max - dstSeqIndexInterval[petCount-1].min
+    + 1;
+  
+#if 0
+    printf("gjt: localPet %d, dstCellCountList[localPet] = %d, "
+    "dstSeqIndexMinMax = %d / %d, dstSeqIndexMinGlobal/MaxGlobal = %d, %d, "
+    "dstSeqIndexInterval[localPet].min/.max = %d, %d\n",
+    localPet, dstCellCountList[localPet], dstSeqIndexMinMax[0],
+    dstSeqIndexMinMax[1], dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal,
+    dstSeqIndexInterval[localPet].min, dstSeqIndexInterval[localPet].max);
+#endif
+
+  // allocate local look-up table indexed by dstSeqIndex
+  SeqIndexFactorLookup *dstSeqIndexFactorLookup = 
+    new SeqIndexFactorLookup[dstSeqIndexInterval[localPet].count];
+  for (int i=0; i<dstSeqIndexInterval[localPet].count; i++){
+    dstSeqIndexFactorLookup[i].de = 0; // use during initialization as counter
+    dstSeqIndexFactorLookup[i].factorCount = 0; // reset
+  }
+  
+  //todo: the following assumes that rootPet is the only Pet with factorList
+  // info, in general any Pet may hold partial factorLists and this must change
+  
+  // rootPet to construct dstSeqIndex information out of factorList for each
+  // Pet and communicate
+  int dstSeqIndexFactorCount = 0; // reset
+  if (localPet == rootPet){
+    // rootPet
+    for (int i=0; i<petCount; i++){
+      if (i == rootPet){
+        // rootPet -> rootPet "communication"
+        for (int j=0; j<factorListCount; j++){
+          // loop over all factorList entries
+          int dstSeqIndex = factorIndexList->array[j*2+1];
+          if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
+            dstSeqIndex <= dstSeqIndexInterval[i].max){
+            // dstSeqIndex lies within dstSeqIndex for this Pet
+            int k = dstSeqIndex - dstSeqIndexInterval[i].min;
+            ++dstSeqIndexFactorLookup[k].factorCount;
+          }
+        }
+        // set dstSeqIndexFactorLookup[]
+        for (int j=0; j<dstSeqIndexInterval[i].count; j++)
+          if (int factorCount = dstSeqIndexFactorLookup[j].factorCount){
+            dstSeqIndexFactorCount += factorCount;
+            dstSeqIndexFactorLookup[j].factorList =
+              new FactorElement[factorCount];
+          }
+        // fill dstSeqIndexFactorLookup[]
+        if (typekindArg == ESMC_TYPEKIND_R4){
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int dstSeqIndex = factorIndexList->array[j*2+1];
+            if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
+              dstSeqIndex <= dstSeqIndexInterval[i].max){
+              // dstSeqIndex lies within dstSeqIndex for this Pet
+              int k = dstSeqIndex - dstSeqIndexInterval[i].min;
+              int kk = dstSeqIndexFactorLookup[k].de++;// counter during init
+              dstSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2]; // srcSeqIndex
+              *((ESMC_R4 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_R4 *)factorList)[j];
+            }
+          }
+        }else if (typekindArg == ESMC_TYPEKIND_R8){
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int dstSeqIndex = factorIndexList->array[j*2+1];
+            if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
+              dstSeqIndex <= dstSeqIndexInterval[i].max){
+              // dstSeqIndex lies within dstSeqIndex for this Pet
+              int k = dstSeqIndex - dstSeqIndexInterval[i].min;
+              int kk = dstSeqIndexFactorLookup[k].de++;// counter during init
+              dstSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2]; // srcSeqIndex
+              *((ESMC_R8 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_R8 *)factorList)[j];
+#if 0
+printf("dstArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, dstSeqIndex, factorIndexList->array[j*2], ((ESMC_R8 *)factorList)[j]);
+#endif        
+            }
+          }
+        }else if (typekindArg == ESMC_TYPEKIND_I4){
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int dstSeqIndex = factorIndexList->array[j*2+1];
+            if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
+              dstSeqIndex <= dstSeqIndexInterval[i].max){
+              // dstSeqIndex lies within dstSeqIndex for this Pet
+              int k = dstSeqIndex - dstSeqIndexInterval[i].min;
+              int kk = dstSeqIndexFactorLookup[k].de++;// counter during init
+              dstSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2]; // srcSeqIndex
+              *((ESMC_I4 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_I4 *)factorList)[j];
+            }
+          }
+        }else if (typekindArg == ESMC_TYPEKIND_I8){
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int dstSeqIndex = factorIndexList->array[j*2+1];
+            if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
+              dstSeqIndex <= dstSeqIndexInterval[i].max){
+              // dstSeqIndex lies within dstSeqIndex for this Pet
+              int k = dstSeqIndex - dstSeqIndexInterval[i].min;
+              int kk = dstSeqIndexFactorLookup[k].de++;// counter during init
+              dstSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2]; // srcSeqIndex
+              *((ESMC_I8 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_I8 *)factorList)[j];
+            }
+          }
+        }          
+      }else{
+        // rootPet -> not rootPet communication
+        SeqIndexFactorCount *seqIndexFactorCountList = 
+          new SeqIndexFactorCount[dstSeqIndexInterval[i].count]; // no more
+        int counts[2];
+        counts[0] = counts[1] = 0;  // reset
+        for (int j=0; j<factorListCount; j++){
+          // loop over all factorList entries
+          int dstSeqIndex = factorIndexList->array[j*2+1];
+          if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
+            dstSeqIndex <= dstSeqIndexInterval[i].max){
+            // dstSeqIndex lies within dstSeqIndex for this Pet
+            ++counts[1];
+            int k;
+            for (k=0; k<counts[0]; k++)
+              if (seqIndexFactorCountList[k].seqIndex == dstSeqIndex) break;
+            if (k==counts[0]){
+              // new entry
+              seqIndexFactorCountList[k].seqIndex = dstSeqIndex;
+              seqIndexFactorCountList[k].factorCount = 1; // initialize
+              ++counts[0];
+            }else{
+              // increment factorCount in existing entry
+              ++seqIndexFactorCountList[k].factorCount;
+            }
+          }
+        }
+        // send info to Pet "i"
+        vm->vmk_send(counts, 2*sizeof(int), i);
+        vm->vmk_send(seqIndexFactorCountList,
+          counts[0]*sizeof(SeqIndexFactorCount), i);
+        // prepare to send remaining information to Pet "i" in one big stream
+        int byteCount = counts[1] * (2 * sizeof(int) + dataSize);
+        char *stream = new char[byteCount];
+        int *intStream;
+        if (typekindArg == ESMC_TYPEKIND_R4){
+          ESMC_R4 *factorStream = (ESMC_R4 *)stream;
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int dstSeqIndex = factorIndexList->array[j*2+1];
+            if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
+              dstSeqIndex <= dstSeqIndexInterval[i].max){
+              // dstSeqIndex lies within dstSeqIndex for this Pet
+              intStream = (int *)factorStream;
+              *intStream++ = dstSeqIndex;
+              *intStream++ = factorIndexList->array[j*2]; // srcSeqIndex
+              factorStream = (ESMC_R4 *)intStream;
+              *factorStream++ = ((ESMC_R4 *)factorList)[j];
+            }
+          }
+        }else if (typekindArg == ESMC_TYPEKIND_R8){
+          ESMC_R8 *factorStream = (ESMC_R8 *)stream;
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int dstSeqIndex = factorIndexList->array[j*2+1];
+            if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
+              dstSeqIndex <= dstSeqIndexInterval[i].max){
+              // dstSeqIndex lies within dstSeqIndex for this Pet
+              intStream = (int *)factorStream;
+              *intStream++ = dstSeqIndex;
+              *intStream++ = factorIndexList->array[j*2]; // srcSeqIndex
+              factorStream = (ESMC_R8 *)intStream;
+              *factorStream++ = ((ESMC_R8 *)factorList)[j];
+#if 0
+printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, dstSeqIndex, factorIndexList->array[j*2], ((ESMC_R8 *)factorList)[j]);
+#endif
+            }
+          }
+        }else if (typekindArg == ESMC_TYPEKIND_I4){
+          ESMC_I4 *factorStream = (ESMC_I4 *)stream;
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int dstSeqIndex = factorIndexList->array[j*2+1];
+            if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
+              dstSeqIndex <= dstSeqIndexInterval[i].max){
+              // dstSeqIndex lies within dstSeqIndex for this Pet
+              intStream = (int *)factorStream;
+              *intStream++ = dstSeqIndex;
+              *intStream++ = factorIndexList->array[j*2]; // srcSeqIndex
+              factorStream = (ESMC_I4 *)intStream;
+              *factorStream++ = ((ESMC_I4 *)factorList)[j];
+            }
+          }
+        }else if (typekindArg == ESMC_TYPEKIND_I8){
+          ESMC_I8 *factorStream = (ESMC_I8 *)stream;
+          for (int j=0; j<factorListCount; j++){
+            // loop over all factorList entries
+            int dstSeqIndex = factorIndexList->array[j*2+1];
+            if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
+              dstSeqIndex <= dstSeqIndexInterval[i].max){
+              // dstSeqIndex lies within dstSeqIndex for this Pet
+              intStream = (int *)factorStream;
+              *intStream++ = dstSeqIndex;
+              *intStream++ = factorIndexList->array[j*2]; // srcSeqIndex
+              factorStream = (ESMC_I8 *)intStream;
+              *factorStream++ = ((ESMC_I8 *)factorList)[j];
+            }
+          }
+        }
+        // ready to send information to Pet "i" in one big stream
+        vm->vmk_send(stream, byteCount, i);
+        // garbage collection
+        delete [] seqIndexFactorCountList;
+        delete [] stream;
+      }
+    }
+  }else{
+    // not rootPet
+    // receive info from rootPet
+    int counts[2];
+    vm->vmk_recv(counts, 2*sizeof(int), rootPet);
+    SeqIndexFactorCount *seqIndexFactorCountList = 
+      new SeqIndexFactorCount[counts[0]];
+    vm->vmk_recv(seqIndexFactorCountList,
+      counts[0]*sizeof(SeqIndexFactorCount), rootPet);
+    // process seqIndexFactorCountList and set dstSeqIndexFactorLookup[]
+    for (int i=0; i<counts[0]; i++){
+      int j = seqIndexFactorCountList[i].seqIndex
+        - dstSeqIndexInterval[localPet].min;
+      int factorCount = seqIndexFactorCountList[i].factorCount;
+      dstSeqIndexFactorCount += factorCount;
+      dstSeqIndexFactorLookup[j].factorCount = factorCount;
+      dstSeqIndexFactorLookup[j].factorList = new FactorElement[factorCount];
+    }
+    // receive remaining information to from rootPet in one big stream
+    int byteCount = counts[1] * (2 * sizeof(int) + dataSize);
+    char *stream = new char[byteCount];
+    vm->vmk_recv(stream, byteCount, rootPet);
+    // process stream and set dstSeqIndexFactorLookup[] content
+    int *intStream;
+    if (typekindArg == ESMC_TYPEKIND_R4){
+      ESMC_R4 *factorStream = (ESMC_R4 *)stream;
+      for (int i=0; i<counts[1]; i++){
+        intStream = (int *)factorStream;
+        int j = *intStream++ - dstSeqIndexInterval[localPet].min; // dstSeqIndex
+        int k = dstSeqIndexFactorLookup[j].de++;// counter during initialization
+        dstSeqIndexFactorLookup[j].factorList[k].partnerSeqIndex =
+          *intStream++; // dstSeqIndex
+        factorStream = (ESMC_R4 *)intStream;
+        *((ESMC_R4 *)dstSeqIndexFactorLookup[j].factorList[k].factor) =
+          *factorStream++;
+      }
+    }else if (typekindArg == ESMC_TYPEKIND_R8){
+      ESMC_R8 *factorStream = (ESMC_R8 *)stream;
+      for (int i=0; i<counts[1]; i++){
+        intStream = (int *)factorStream;
+        int j = *intStream++ - dstSeqIndexInterval[localPet].min; // dstSeqIndex
+        int k = dstSeqIndexFactorLookup[j].de++;// counter during initialization
+        dstSeqIndexFactorLookup[j].factorList[k].partnerSeqIndex =
+          *intStream++; // dstSeqIndex
+        factorStream = (ESMC_R8 *)intStream;
+        *((ESMC_R8 *)dstSeqIndexFactorLookup[j].factorList[k].factor) =
+          *factorStream++;
+      }
+    }else if (typekindArg == ESMC_TYPEKIND_I4){
+      ESMC_I4 *factorStream = (ESMC_I4 *)stream;
+      for (int i=0; i<counts[1]; i++){
+        intStream = (int *)factorStream;
+        int j = *intStream++ - dstSeqIndexInterval[localPet].min; // dstSeqIndex
+        int k = dstSeqIndexFactorLookup[j].de++;// counter during initialization
+        dstSeqIndexFactorLookup[j].factorList[k].partnerSeqIndex =
+          *intStream++; // dstSeqIndex
+        factorStream = (ESMC_I4 *)intStream;
+        *((ESMC_I4 *)dstSeqIndexFactorLookup[j].factorList[k].factor) =
+          *factorStream++;
+      }
+    }else if (typekindArg == ESMC_TYPEKIND_I8){
+      ESMC_I8 *factorStream = (ESMC_I8 *)stream;
+      for (int i=0; i<counts[1]; i++){
+        intStream = (int *)factorStream;
+        int j = *intStream++ - dstSeqIndexInterval[localPet].min; // dstSeqIndex
+        int k = dstSeqIndexFactorLookup[j].de++;// counter during initialization
+        dstSeqIndexFactorLookup[j].factorList[k].partnerSeqIndex =
+          *intStream++; // dstSeqIndex
+        factorStream = (ESMC_I8 *)intStream;
+        *((ESMC_I8 *)dstSeqIndexFactorLookup[j].factorList[k].factor) =
+          *factorStream++;
+      }
+    }
+    // garbage collection
+    delete [] seqIndexFactorCountList;
+    delete [] stream;
+  }
+  
+  // communicate between Pets to set up "de" member in dstSeqIndexFactorLookup[]
+  for (int i=0; i<petCount; i++){
+    // Pet "i" is the active dstSeqIndex interval
+    int seqIndexMin = dstSeqIndexInterval[i].min;
+    int seqIndexMax = dstSeqIndexInterval[i].max;
+    int seqIndexCount = dstSeqIndexInterval[i].count;
+    if (localPet!=i){
+      // localPet is a client for the active dstSeqIndex interval
+      SeqIndexDeInfo *seqIndexDeInfoList = new SeqIndexDeInfo[seqIndexCount];
+      int count = 0; // reset
+      for (int j=0; j<dstArray->localDeCount; j++){
+        int de = dstArray->localDeList[j];  // global DE number
+        for (int k=0; k<dstDistGridDeCellCount[j]; k++){
+          int dstSeqIndex = dstLinSeqList[j][k].seqIndex;
+          if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
+            seqIndexDeInfoList[count].seqIndex = dstSeqIndex;
+            seqIndexDeInfoList[count].de = de;
+            ++count; // increment counter
+          }
+        }
+      }
+      // send information to the serving Pet
+      vm->vmk_send(&count, sizeof(int), i);
+//printf("localPet %d sending count %d to Pet %i\n", localPet, count, i);
+      if (count)
+        vm->vmk_send(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), i);
+      // garbage collection
+      delete [] seqIndexDeInfoList;
+    }else{
+      // localPet serves the active dstSeqIndex interval
+      // todo: this can be rewritten with nb-recv to hide latencies
+      for (int ii=0; ii<petCount; ii++){
+        if (ii==i){
+          // server Pet itself
+          for (int j=0; j<dstArray->localDeCount; j++){
+            int de = dstArray->localDeList[j];  // global DE number
+            for (int k=0; k<dstDistGridDeCellCount[j]; k++){
+              int dstSeqIndex = dstLinSeqList[j][k].seqIndex;
+              if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
+                int kk = dstSeqIndex - seqIndexMin;
+                dstSeqIndexFactorLookup[kk].de = de;
+              }
+            }
+          }
+        }else{
+          // receive seqIndexWithinInterval from Pet "ii"
+          int count;
+          vm->vmk_recv(&count, sizeof(int), ii);
+          SeqIndexDeInfo *seqIndexDeInfoList = new SeqIndexDeInfo[count];
+//printf("localPet %d receiving count %d from Pet %i\n", localPet, count, ii);
+          if (count)
+            vm->vmk_recv(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), ii);
+          // process seqIndexDeInfoList and set dstSeqIndexFactorLookup[]
+          for (int j=0; j<count; j++){
+            int k = seqIndexDeInfoList[j].seqIndex - seqIndexMin;
+            dstSeqIndexFactorLookup[k].de = seqIndexDeInfoList[j].de;
+          }
+          // garbage collection
+          delete [] seqIndexDeInfoList;
+        }
+      } // for ii
+    }
+  }
+    
+  // fill in the partnerDe member in srcSeqIndexFactorLookup using dst distdir
+  for (int i=0; i<petCount; i++){
+    // Pet "i" is the active dstSeqIndex interval
+    int seqIndexMin = dstSeqIndexInterval[i].min;
+    int seqIndexMax = dstSeqIndexInterval[i].max;
+    int seqIndexCount = dstSeqIndexInterval[i].count;
+    if (localPet!=i){
+      // localPet is a client for the active dstSeqIndex interval
+      // construct a request from the srcSeqIndexFactorLookup for this interval
+      int *requestDstSeqIndexList = new int[srcSeqIndexFactorCount];
+      int *srcSeqIndexFactorLookupIndex = new int[2*srcSeqIndexFactorCount];
+      int count = 0; // reset
+      for (int j=0; j<srcSeqIndexInterval[localPet].count; j++)
+        for (int k=0; k<srcSeqIndexFactorLookup[j].factorCount; k++){
+          int partnerSeqIndex =
+            srcSeqIndexFactorLookup[j].factorList[k].partnerSeqIndex;
+          if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax){
+            srcSeqIndexFactorLookupIndex[2*count] = j;
+            srcSeqIndexFactorLookupIndex[2*count+1] = k;
+            requestDstSeqIndexList[count] = partnerSeqIndex;
+            ++count;
+          }
+        }
+      // send request to the serving Pet "i"
+      vm->vmk_send(&count, sizeof(int), i);
+      if (count)
+        vm->vmk_send(requestDstSeqIndexList, count*sizeof(int), i);
+      // receive response from the serving Pet "i"
+      int *responseDstDeList = new int[count];
+      if (count)
+        vm->vmk_recv(responseDstDeList, count*sizeof(int), i);
+      // process responseDstDeList and set partnerDe member
+      for (int j=0; j<count; j++){
+        int jj =  srcSeqIndexFactorLookupIndex[2*j];
+        int k = srcSeqIndexFactorLookupIndex[2*j+1];
+        srcSeqIndexFactorLookup[jj].factorList[k].partnerDe =
+          responseDstDeList[j];
+      }
+      // garbage collection
+      delete [] requestDstSeqIndexList;
+      delete [] responseDstDeList;
+      delete [] srcSeqIndexFactorLookupIndex;
+    }else{
+      // localPet serves the active dstSeqIndex interval
+      // todo: this can be rewritten with nb-recv to hide latencies
+      for (int ii=0; ii<petCount; ii++){
+        if (ii==i){
+          // server Pet itself
+          for (int j=0; j<srcSeqIndexInterval[localPet].count; j++)
+            for (int k=0; k<srcSeqIndexFactorLookup[j].factorCount; k++){
+              int partnerSeqIndex = 
+                srcSeqIndexFactorLookup[j].factorList[k].partnerSeqIndex;
+              if (partnerSeqIndex >= seqIndexMin &&
+                partnerSeqIndex <= seqIndexMax){
+                int kk = partnerSeqIndex - seqIndexMin;
+                srcSeqIndexFactorLookup[j].factorList[k].partnerDe =
+                  dstSeqIndexFactorLookup[kk].de;
+              }
+            }
+        }else{
+          // receive requestDstSeqIndexList from Pet "ii"
+          int count;
+          vm->vmk_recv(&count, sizeof(int), ii);
+          int *requestDstSeqIndexList = new int[count];
+          if (count)
+            vm->vmk_recv(requestDstSeqIndexList, count*sizeof(int), ii);
+          // process requestDstSeqIndexList and set up response
+          int *responseDstDeList = new int[count];
+          for (int j=0; j<count; j++){
+            int k = requestDstSeqIndexList[j] - seqIndexMin;
+            responseDstDeList[j] = dstSeqIndexFactorLookup[k].de;
+          }
+          // send response back to Pet "ii"
+          if (count)
+            vm->vmk_send(responseDstDeList, count*sizeof(int), ii);
+          // garbage collection
+          delete [] requestDstSeqIndexList;
+          delete [] responseDstDeList;
+        }
+      } // for ii
+    }
+  }
+  
+  // fill in the partnerDe member in dstSeqIndexFactorLookup using src distdir
+  for (int i=0; i<petCount; i++){
+    // Pet "i" is the active srcSeqIndex interval
+    int seqIndexMin = srcSeqIndexInterval[i].min;
+    int seqIndexMax = srcSeqIndexInterval[i].max;
+    int seqIndexCount = srcSeqIndexInterval[i].count;
+    if (localPet!=i){
+      // localPet is a client for the active srcSeqIndex interval
+      // construct a request from the dstSeqIndexFactorLookup for this interval
+      int *requestSrcSeqIndexList = new int[dstSeqIndexFactorCount];
+      int *dstSeqIndexFactorLookupIndex = new int[2*dstSeqIndexFactorCount];
+      int count = 0; // reset
+      for (int j=0; j<dstSeqIndexInterval[localPet].count; j++)
+        for (int k=0; k<dstSeqIndexFactorLookup[j].factorCount; k++){
+          int partnerSeqIndex =
+            dstSeqIndexFactorLookup[j].factorList[k].partnerSeqIndex;
+          if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax){
+            dstSeqIndexFactorLookupIndex[2*count] = j;
+            dstSeqIndexFactorLookupIndex[2*count+1] = k;
+            requestSrcSeqIndexList[count] = partnerSeqIndex;
+            ++count;
+          }
+        }
+      // send request to the serving Pet "i"
+      vm->vmk_send(&count, sizeof(int), i);
+      if (count)
+        vm->vmk_send(requestSrcSeqIndexList, count*sizeof(int), i);
+      // receive response from the serving Pet "i"
+      int *responseSrcDeList = new int[count];
+      if (count)
+        vm->vmk_recv(responseSrcDeList, count*sizeof(int), i);
+      // process responseSrcDeList and set partnerDe member
+      for (int j=0; j<count; j++){
+        int jj =  dstSeqIndexFactorLookupIndex[2*j];
+        int k = dstSeqIndexFactorLookupIndex[2*j+1];
+        dstSeqIndexFactorLookup[jj].factorList[k].partnerDe =
+          responseSrcDeList[j];
+      }
+      // garbage collection
+      delete [] requestSrcSeqIndexList;
+      delete [] responseSrcDeList;
+      delete [] dstSeqIndexFactorLookupIndex;
+    }else{
+      // localPet serves the active srcSeqIndex interval
+      // todo: this can be rewritten with nb-recv to hide latencies
+      for (int ii=0; ii<petCount; ii++){
+        if (ii==i){
+          // server Pet itself
+          for (int j=0; j<dstSeqIndexInterval[localPet].count; j++)
+            for (int k=0; k<dstSeqIndexFactorLookup[j].factorCount; k++){
+              int partnerSeqIndex = 
+                dstSeqIndexFactorLookup[j].factorList[k].partnerSeqIndex;
+              if (partnerSeqIndex >= seqIndexMin &&
+                partnerSeqIndex <= seqIndexMax){
+                int kk = partnerSeqIndex - seqIndexMin;
+                dstSeqIndexFactorLookup[j].factorList[k].partnerDe =
+                  srcSeqIndexFactorLookup[kk].de;
+              }
+            }
+        }else{
+          // receive requestSrcSeqIndexList from Pet "ii"
+          int count;
+          vm->vmk_recv(&count, sizeof(int), ii);
+          int *requestSrcSeqIndexList = new int[count];
+          if (count)
+            vm->vmk_recv(requestSrcSeqIndexList, count*sizeof(int), ii);
+          // process requestSrcSeqIndexList and set up response
+          int *responseSrcDeList = new int[count];
+          for (int j=0; j<count; j++){
+            int k = requestSrcSeqIndexList[j] - seqIndexMin;
+            responseSrcDeList[j] = srcSeqIndexFactorLookup[k].de;
+          }
+          // send response back to Pet "ii"
+          if (count)
+            vm->vmk_send(responseSrcDeList, count*sizeof(int), ii);
+          // garbage collection
+          delete [] requestSrcSeqIndexList;
+          delete [] responseSrcDeList;
+        }
+      } // for ii
+    }
+  }
+  
+#if 0
+  // some serious printing for src info
+  for (int i=0; i<srcSeqIndexInterval[localPet].count; i++){
+    printf("gjt srcDistDir: localPet %d, srcSeqIndex = %d, "
+      "srcSeqIndexFactorLookup[%d].factorCount = %d, .de = %d\n",
+      localPet, i+srcSeqIndexInterval[localPet].min, i,
+      srcSeqIndexFactorLookup[i].factorCount, 
+      srcSeqIndexFactorLookup[i].de);
+    for (int j=0; j<srcSeqIndexFactorLookup[i].factorCount; j++)
+      printf("gjt srcDistDir: localPet %d, "
+        "srcSeqIndexFactorLookup[%d].factorList[%d].partnerSeqIndex = %d, "
+        ".partnerDe = %d, .factor = %g\n",
+        localPet, i, j,
+        srcSeqIndexFactorLookup[i].factorList[j].partnerSeqIndex,
+        srcSeqIndexFactorLookup[i].factorList[j].partnerDe,
+        *((double *)srcSeqIndexFactorLookup[i].factorList[j].factor));
+  }
+  // some serious printing for dst info
+  for (int i=0; i<dstSeqIndexInterval[localPet].count; i++){
+    printf("gjt dstDistDir: localPet %d, dstSeqIndex = %d, "
+      "dstSeqIndexFactorLookup[%d].factorCount = %d, .de = %d\n",
+      localPet, i+dstSeqIndexInterval[localPet].min, i,
+      dstSeqIndexFactorLookup[i].factorCount, 
+      dstSeqIndexFactorLookup[i].de);
+    for (int j=0; j<dstSeqIndexFactorLookup[i].factorCount; j++)
+      printf("gjt dstDistDir: localPet %d, "
+        "dstSeqIndexFactorLookup[%d].factorList[%d].partnerSeqIndex = %d, "
+        ".partnerDe = %d, .factor = %g\n",
+        localPet, i, j,
+        dstSeqIndexFactorLookup[i].factorList[j].partnerSeqIndex,
+        dstSeqIndexFactorLookup[i].factorList[j].partnerDe,
+        *((double *)dstSeqIndexFactorLookup[i].factorList[j].factor));
+  }
+#endif
+  
+  struct SeqIndexIndexInfo{
+    int seqIndex;
+    int listIndex1;
+    int listIndex2;
+  };
+  
+  // communicate between Pets to obtain complete srcArray info on localPet
+  for (int i=0; i<petCount; i++){
+    // Pet "i" is the active srcSeqIndex interval
+    int seqIndexMin = srcSeqIndexInterval[i].min;
+    int seqIndexMax = srcSeqIndexInterval[i].max;
+    int seqIndexCount = srcSeqIndexInterval[i].count;
+    if (localPet!=i){
+      // localPet is a client for the active srcSeqIndex interval
+      SeqIndexIndexInfo *seqIndexIndexInfoList =
+        new SeqIndexIndexInfo[seqIndexCount];
+      int count = 0; // reset
+      for (int j=0; j<srcArray->localDeCount; j++){
+        for (int k=0; k<srcDistGridDeCellCount[j]; k++){
+          int srcSeqIndex = srcLinSeqList[j][k].seqIndex;
+          if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
+            seqIndexIndexInfoList[count].seqIndex = srcSeqIndex;
+            seqIndexIndexInfoList[count].listIndex1 = j;
+            seqIndexIndexInfoList[count].listIndex2 = k;
+            ++count; // increment counter
+          }
+        }
+      }
+      // send information to the serving Pet
+      vm->vmk_send(&count, sizeof(int), i);
+      if (count)
+        vm->vmk_send(seqIndexIndexInfoList, count*sizeof(SeqIndexIndexInfo), i);
+      // receive response from the serving Pet "i"
+      int responseStreamSize;
+      vm->vmk_recv(&responseStreamSize, sizeof(int), i);
+      char *responseStream = new char[responseStreamSize];
+      if (responseStreamSize)
+        vm->vmk_recv(responseStream, responseStreamSize, i);
+      // process responseStream and complete srcLinSeqList[][] info
+      if (responseStreamSize){
+        int *responseStreamInt;
+        FactorElement *responseStreamFactorElement =
+          (FactorElement *)responseStream;
+        while ((char *)responseStreamFactorElement !=
+          responseStream+responseStreamSize){
+          responseStreamInt = (int *)responseStreamFactorElement;
+          int j = *responseStreamInt++;
+          int k = *responseStreamInt++;
+          int factorCount = *responseStreamInt++;
+          srcLinSeqList[j][k].factorCount = factorCount;
+          srcLinSeqList[j][k].factorList = new FactorElement[factorCount];
+          responseStreamFactorElement = (FactorElement *)responseStreamInt;
+          memcpy(srcLinSeqList[j][k].factorList, responseStreamFactorElement,
+            factorCount * sizeof(FactorElement));
+          responseStreamFactorElement += factorCount;
+        }
+      }
+      // garbage collection
+      delete [] seqIndexIndexInfoList;
+      delete [] responseStream;
+    }else{
+      // localPet serves the active srcSeqIndex interval
+      // todo: this can be rewritten with nb-recv to hide latencies
+      for (int ii=0; ii<petCount; ii++){
+        if (ii==i){
+          // server Pet itself
+          for (int j=0; j<srcArray->localDeCount; j++){
+            for (int k=0; k<srcDistGridDeCellCount[j]; k++){
+              int srcSeqIndex = srcLinSeqList[j][k].seqIndex;
+              if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
+                int kk = srcSeqIndex - seqIndexMin;
+                int factorCount = srcSeqIndexFactorLookup[kk].factorCount;
+                if (factorCount){
+                  srcLinSeqList[j][k].factorCount = factorCount;
+                  srcLinSeqList[j][k].factorList =
+                    new FactorElement[factorCount];
+                  memcpy(srcLinSeqList[j][k].factorList,
+                    srcSeqIndexFactorLookup[kk].factorList,
+                    factorCount * sizeof(FactorElement));
+                }
+              }
+            }
+          }
+        }else{
+          // receive seqIndexWithinInterval from Pet "ii"
+          int count;
+          vm->vmk_recv(&count, sizeof(int), ii);
+          SeqIndexIndexInfo *seqIndexIndexInfoList =
+            new SeqIndexIndexInfo[count];
+          if (count)
+            vm->vmk_recv(seqIndexIndexInfoList, count*sizeof(SeqIndexIndexInfo),
+              ii);
+          // process seqIndexIndexInfoList and set up response
+          int indexCounter = 0; // reset
+          int factorElementCounter = 0; // reset
+          for (int j=0; j<count; j++){
+            int k = seqIndexIndexInfoList[j].seqIndex - seqIndexMin;
+            int factorCount = srcSeqIndexFactorLookup[k].factorCount;
+            if (factorCount){
+              ++indexCounter;
+              factorElementCounter += factorCount;
+            }
+          }
+          int responseStreamSize = 3*indexCounter*sizeof(int)
+            + factorElementCounter*sizeof(FactorElement);
+          char *responseStream = new char[responseStreamSize];
+          int *responseStreamInt;
+          FactorElement *responseStreamFactorElement =
+            (FactorElement *)responseStream;
+          for (int j=0; j<count; j++){
+            int k = seqIndexIndexInfoList[j].seqIndex - seqIndexMin;
+            int factorCount = srcSeqIndexFactorLookup[k].factorCount;
+            if (factorCount){
+              responseStreamInt = (int *)responseStreamFactorElement;
+              *responseStreamInt++ = seqIndexIndexInfoList[j].listIndex1;
+              *responseStreamInt++ = seqIndexIndexInfoList[j].listIndex2;
+              *responseStreamInt++ = factorCount;
+              responseStreamFactorElement = (FactorElement *)responseStreamInt;
+              memcpy(responseStreamFactorElement,
+                srcSeqIndexFactorLookup[k].factorList,
+                factorCount * sizeof(FactorElement));
+              responseStreamFactorElement += factorCount;
+            }
+          }
+          // send response back to Pet "ii"
+          vm->vmk_send(&responseStreamSize, sizeof(int), ii);
+          if (responseStreamSize)
+            vm->vmk_send(responseStream, responseStreamSize, ii);
+          // garbage collection
+          delete [] seqIndexIndexInfoList;
+          delete [] responseStream;
+        }
+      } // for ii
+    }
+  }
+  // communicate between Pets to obtain complete dstArray info on localPet
+  for (int i=0; i<petCount; i++){
+    // Pet "i" is the active dstSeqIndex interval
+    int seqIndexMin = dstSeqIndexInterval[i].min;
+    int seqIndexMax = dstSeqIndexInterval[i].max;
+    int seqIndexCount = dstSeqIndexInterval[i].count;
+    if (localPet!=i){
+      // localPet is a client for the active dstSeqIndex interval
+      SeqIndexIndexInfo *seqIndexIndexInfoList =
+        new SeqIndexIndexInfo[seqIndexCount];
+      int count = 0; // reset
+      for (int j=0; j<dstArray->localDeCount; j++){
+        for (int k=0; k<dstDistGridDeCellCount[j]; k++){
+          int dstSeqIndex = dstLinSeqList[j][k].seqIndex;
+          if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
+            seqIndexIndexInfoList[count].seqIndex = dstSeqIndex;
+            seqIndexIndexInfoList[count].listIndex1 = j;
+            seqIndexIndexInfoList[count].listIndex2 = k;
+            ++count; // increment counter
+          }
+        }
+      }
+      // send information to the serving Pet
+      vm->vmk_send(&count, sizeof(int), i);
+      if (count)
+        vm->vmk_send(seqIndexIndexInfoList, count*sizeof(SeqIndexIndexInfo), i);
+      // receive response from the serving Pet "i"
+      int responseStreamSize;
+      vm->vmk_recv(&responseStreamSize, sizeof(int), i);
+      char *responseStream = new char[responseStreamSize];
+      if (responseStreamSize)
+        vm->vmk_recv(responseStream, responseStreamSize, i);
+      // process responseStream and complete dstLinSeqList[][] info
+      if (responseStreamSize){
+        int *responseStreamInt;
+        FactorElement *responseStreamFactorElement =
+          (FactorElement *)responseStream;
+        while ((char *)responseStreamFactorElement !=
+          responseStream+responseStreamSize){
+          responseStreamInt = (int *)responseStreamFactorElement;
+          int j = *responseStreamInt++;
+          int k = *responseStreamInt++;
+          int factorCount = *responseStreamInt++;
+          dstLinSeqList[j][k].factorCount = factorCount;
+          dstLinSeqList[j][k].factorList = new FactorElement[factorCount];
+          responseStreamFactorElement = (FactorElement *)responseStreamInt;
+          memcpy(dstLinSeqList[j][k].factorList, responseStreamFactorElement,
+            factorCount * sizeof(FactorElement));
+          responseStreamFactorElement += factorCount;
+        }
+      }
+      // garbage collection
+      delete [] seqIndexIndexInfoList;
+      delete [] responseStream;
+    }else{
+      // localPet serves the active dstSeqIndex interval
+      // todo: this can be rewritten with nb-recv to hide latencies
+      for (int ii=0; ii<petCount; ii++){
+        if (ii==i){
+          // server Pet itself
+          for (int j=0; j<dstArray->localDeCount; j++){
+            for (int k=0; k<dstDistGridDeCellCount[j]; k++){
+              int dstSeqIndex = dstLinSeqList[j][k].seqIndex;
+              if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
+                int kk = dstSeqIndex - seqIndexMin;
+                int factorCount = dstSeqIndexFactorLookup[kk].factorCount;
+                if (factorCount){
+                  dstLinSeqList[j][k].factorCount = factorCount;
+                  dstLinSeqList[j][k].factorList =
+                    new FactorElement[factorCount];
+                  memcpy(dstLinSeqList[j][k].factorList,
+                    dstSeqIndexFactorLookup[kk].factorList,
+                    factorCount * sizeof(FactorElement));
+                }
+              }
+            }
+          }
+        }else{
+          // receive seqIndexWithinInterval from Pet "ii"
+          int count;
+          vm->vmk_recv(&count, sizeof(int), ii);
+          SeqIndexIndexInfo *seqIndexIndexInfoList =
+            new SeqIndexIndexInfo[count];
+          if (count)
+            vm->vmk_recv(seqIndexIndexInfoList, count*sizeof(SeqIndexIndexInfo),
+              ii);
+          // process seqIndexIndexInfoList and set up response
+          int indexCounter = 0; // reset
+          int factorElementCounter = 0; // reset
+          for (int j=0; j<count; j++){
+            int k = seqIndexIndexInfoList[j].seqIndex - seqIndexMin;
+            int factorCount = dstSeqIndexFactorLookup[k].factorCount;
+            if (factorCount){
+              ++indexCounter;
+              factorElementCounter += factorCount;
+            }
+          }
+          int responseStreamSize = 3*indexCounter*sizeof(int)
+            + factorElementCounter*sizeof(FactorElement);
+          char *responseStream = new char[responseStreamSize];
+          int *responseStreamInt;
+          FactorElement *responseStreamFactorElement =
+            (FactorElement *)responseStream;
+          for (int j=0; j<count; j++){
+            int k = seqIndexIndexInfoList[j].seqIndex - seqIndexMin;
+            int factorCount = dstSeqIndexFactorLookup[k].factorCount;
+            if (factorCount){
+              responseStreamInt = (int *)responseStreamFactorElement;
+              *responseStreamInt++ = seqIndexIndexInfoList[j].listIndex1;
+              *responseStreamInt++ = seqIndexIndexInfoList[j].listIndex2;
+              *responseStreamInt++ = factorCount;
+              responseStreamFactorElement = (FactorElement *)responseStreamInt;
+              memcpy(responseStreamFactorElement,
+                dstSeqIndexFactorLookup[k].factorList,
+                factorCount * sizeof(FactorElement));
+              responseStreamFactorElement += factorCount;
+            }
+          }
+          // send response back to Pet "ii"
+          vm->vmk_send(&responseStreamSize, sizeof(int), ii);
+          if (responseStreamSize)
+            vm->vmk_send(responseStream, responseStreamSize, ii);
+          // garbage collection
+          delete [] seqIndexIndexInfoList;
+          delete [] responseStream;
+        }
+      } // for ii
+    }
+  }
+
+#if 0
+  // more serious printing
+  for (int j=0; j<srcArray->localDeCount; j++){
+    for (int k=0; k<srcDistGridDeCellCount[j]; k++){
+      printf("localPet: %d, srcLinSeqList[%d][%d].linIndex = %d, "
+        ".seqIndex = %d, .factorCount = %d\n",
+        localPet, j, k, srcLinSeqList[j][k].linIndex,
+        srcLinSeqList[j][k].seqIndex, srcLinSeqList[j][k].factorCount);
+      for (int kk=0; kk<srcLinSeqList[j][k].factorCount; kk++)
+        printf("factorList[%d].partnerSeqIndex = %d, .partnerDe = %d, "
+          ".factor = %g\n", kk,
+          srcLinSeqList[j][k].factorList[kk].partnerSeqIndex,
+          srcLinSeqList[j][k].factorList[kk].partnerDe, 
+          *((double *)srcLinSeqList[j][k].factorList[kk].factor));
+    }
+  }
+    
+  // more serious printing
+  for (int j=0; j<dstArray->localDeCount; j++){
+    for (int k=0; k<dstDistGridDeCellCount[j]; k++){
+      printf("localPet: %d, dstLinSeqList[%d][%d].linIndex = %d, "
+        ".seqIndex = %d, .factorCount = %d\n",
+        localPet, j, k, dstLinSeqList[j][k].linIndex,
+        dstLinSeqList[j][k].seqIndex, dstLinSeqList[j][k].factorCount);
+      for (int kk=0; kk<dstLinSeqList[j][k].factorCount; kk++)
+        printf("factorList[%d].partnerSeqIndex = %d, .partnerDe = %d, "
+          ".factor = %g\n", kk,
+          dstLinSeqList[j][k].factorList[kk].partnerSeqIndex,
+          dstLinSeqList[j][k].factorList[kk].partnerDe, 
+          *((double *)dstLinSeqList[j][k].factorList[kk].factor));
+    }
+  }
+#endif
+
+  // allocate XXE and attach to RouteHandle
+  XXE *xxe = new XXE(50000, 50000, 20000);
+  localrc = (*routehandle)->ESMC_RouteHandleSetStorage(xxe);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  XXE::StreamElement *xxestream = xxe->stream;
+  // prepare XXE related helper variables
+  int xxeCount = 0;   // reset count
+  void *xxeElement;
+  XXE::SendnbInfo *xxeSendnbInfo;
+  XXE::RecvnbInfo *xxeRecvnbInfo;
+  XXE::ProductSumInfo *xxeProductSumInfo;
+  XXE::MemCpyInfo *xxeMemCpyInfo;
+  
+  // determine send pattern for all localDEs in srcArray and fill in XXE
+  for (int j=0; j<srcArray->localDeCount; j++){
+    int *index2Ref = new int[srcDistGridDeCellCount[j]];  // large enough
+    int localDeFactorCount = 0; // reset
+    int iCount = 0; // reset
+    for (int k=0; k<srcDistGridDeCellCount[j]; k++){
+      int factorCount = srcLinSeqList[j][k].factorCount;
+      if (factorCount){
+        index2Ref[iCount] = k;   // store index2
+        localDeFactorCount += factorCount;
+        ++iCount; // increment counter
+      }
+    }
+    int *index2Ref2 = new int[localDeFactorCount];  // large enough
+    int *factorIndexRef = new int[localDeFactorCount];  // large enough
+    int *partnerDeRef = new int[localDeFactorCount];  // large enough
+    int *partnerDeList = new int[localDeFactorCount];  // large enough
+    int *partnerDeCount = new int[localDeFactorCount];  // large enough
+    int diffPartnerDeCount = 0; // reset
+    int count = 0; // reset
+    for (int i=0; i<iCount; i++){
+      int factorCount = srcLinSeqList[j][index2Ref[i]].factorCount;
+      for (int k=0; k<factorCount; k++){
+        int partnerDe = srcLinSeqList[j][index2Ref[i]].factorList[k].partnerDe;
+        int kk;
+        for (kk=0; kk<diffPartnerDeCount; kk++)
+          if (partnerDeList[kk]==partnerDe) break;
+        if (kk==diffPartnerDeCount){
+          // new entry
+          partnerDeList[kk] = partnerDe;
+          partnerDeCount[kk] = 1; // initialize
+          ++diffPartnerDeCount;
+        }else
+          ++partnerDeCount[kk];   // increment
+        index2Ref2[count] = index2Ref[i];
+        factorIndexRef[count] = k;
+        partnerDeRef[count] = kk;
+        ++count;
+      }
+    }
+    // invert the look-up direction
+    struct SrcInfo{
+      int linIndex;
+      int seqIndex;
+      int partnerSeqIndex;
+      static int cmp(const void *a, const void *b){
+        SrcInfo *aObj = (SrcInfo *)a;
+        SrcInfo *bObj = (SrcInfo *)b;
+        if (aObj->seqIndex < bObj->seqIndex) return -1;
+        if (aObj->seqIndex > bObj->seqIndex) return +1;
+        // seqIndex must be equal
+        if (aObj->partnerSeqIndex < bObj->partnerSeqIndex) return -1;
+        if (aObj->partnerSeqIndex > bObj->partnerSeqIndex) return +1;
+        // partnerSeqIndex must also be equal
+        return 0;
+      }
+    };
+    SrcInfo **srcInfoTable = new SrcInfo*[diffPartnerDeCount];
+    int *srcInfoTableInit = new int[diffPartnerDeCount];
+    for (int i=0; i<diffPartnerDeCount; i++){
+      srcInfoTable[i] = new SrcInfo[partnerDeCount[i]];
+      srcInfoTableInit[i] = 0;   // reset
+    }
+    for (int i=0; i<localDeFactorCount; i++){
+      int partnerDeListIndex = partnerDeRef[i];
+      int index2 = srcInfoTableInit[partnerDeListIndex]++;
+      srcInfoTable[partnerDeListIndex][index2].linIndex =
+        srcLinSeqList[j][index2Ref2[i]].linIndex;
+      srcInfoTable[partnerDeListIndex][index2].seqIndex =
+        srcLinSeqList[j][index2Ref2[i]].seqIndex;
+      srcInfoTable[partnerDeListIndex][index2].partnerSeqIndex =
+        srcLinSeqList[j][index2Ref2[i]].factorList[factorIndexRef[i]]
+        .partnerSeqIndex;
+    }
+    // sort each "diffPartnerDeCount group" wrt seqIndex and partnerSeqIndex
+    // in this order
+    for (int i=0; i<diffPartnerDeCount; i++)
+      qsort(srcInfoTable[i], partnerDeCount[i], sizeof(SrcInfo), SrcInfo::cmp);
+#if 0
+    // print:
+    for (int i=0; i<diffPartnerDeCount; i++)
+      for (int k=0; k<partnerDeCount[i]; k++)
+        printf("srcInfoTable[%d][%d].seqIndex = %d, .partnerSeqIndex[][] ="
+          " %d\n", i, k, srcInfoTable[i][k].seqIndex, 
+          srcInfoTable[i][k].partnerSeqIndex);
+#endif
+    // construct send pattern and fill in corresponding XXE StreamElements    
+    struct LinIndexContigBlock{
+      int linIndex;
+      int linIndexCount;
+    };
+    for (int i=0; i<diffPartnerDeCount; i++){
+      // determine contiguous runs in linIndex to minimize memcpy overhead
+      LinIndexContigBlock *linIndexContigBlockList =
+        new LinIndexContigBlock[partnerDeCount[i]]; // large enough
+      int count = 0;  // reset
+      // initialize linIndexContigBlockList[]
+      linIndexContigBlockList[count].linIndex = srcInfoTable[i][0].linIndex;
+      linIndexContigBlockList[count].linIndexCount = 1;
+      for (int k=1; k<partnerDeCount[i]; k++){
+        if (srcInfoTable[i][k-1].linIndex + 1 == srcInfoTable[i][k].linIndex){
+          // contiguous step in linIndex
+          ++linIndexContigBlockList[count].linIndexCount;
+        }else{
+          // discontiguous jump in linIndex
+          ++count;
+          linIndexContigBlockList[count].linIndex = srcInfoTable[i][k].linIndex;
+          linIndexContigBlockList[count].linIndexCount = 1;
+        }
+      }
+      ++count;
+      // fill in XXE StreamElements for srcArray side
+      char *buffer;
+      if (count == 1){
+#if 0
+        printf("gjt: single contigous linIndex run in srcArray\n");
+#endif
+        // single contigous linIndex run -> don't need intermediate buffer
+        buffer = (char *)(srcArray->larrayBaseAddrList[j])
+          + (linIndexContigBlockList[0].linIndex * dataSize);  //TODO: RRA
+      }else{
+#if 0
+        printf("gjt: non-contigous linIndex in srcArray -> need buffer \n");
+#endif
+        // need intermediate buffer and memCpys
+        buffer = new char[partnerDeCount[i] * dataSize]; // TODO: RRA
+        xxe->storage[xxe->storageCount] = buffer; // for xxe garbage collection
+        ++(xxe->storageCount);
+        if (xxe->storageCount >= xxe->storageMaxCount){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+            "- xxe->storageCount out of range", &rc);
+          return rc;
+        }
+        char *bufferPointer = buffer;
+        for (int k=0; k<count; k++){
+          int byteCount = linIndexContigBlockList[k].linIndexCount * dataSize;
+          // memCpy
+          xxestream[xxeCount].opId = XXE::memCpy;
+          xxeElement = &(xxestream[xxeCount]);
+          xxeMemCpyInfo = (XXE::MemCpyInfo *)xxeElement;
+          xxeMemCpyInfo->dstMem = bufferPointer;
+          xxeMemCpyInfo->srcMem = (char *)(srcArray->larrayBaseAddrList[j])
+            + (linIndexContigBlockList[k].linIndex * dataSize);  //TODO: RRA
+          xxeMemCpyInfo->size = byteCount;
+          ++xxeCount;
+          if (xxeCount >= xxe->max){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+              "- xxeCount out of range", &rc);
+            return rc;
+          }
+          bufferPointer += byteCount;
+        }
+      }
+      int dstDe = partnerDeList[i];
+      int dstPet;   //TODO: DE-based comms
+      dstArray->delayout->getDEMatchPET(dstDe, *vm, NULL, &dstPet, 1);
+#if 0
+      printf("gjt: XXE::sendnb from localPet %d to Pet %d\n", localPet, dstPet);
+#endif
+      xxestream[xxeCount].opId = XXE::sendnb;
+      xxeElement = &(xxestream[xxeCount]);
+      xxeSendnbInfo = (XXE::SendnbInfo *)xxeElement;
+      xxeSendnbInfo->buffer = buffer;
+      xxeSendnbInfo->size = partnerDeCount[i] * dataSize;
+      xxeSendnbInfo->dstPet = dstPet;
+      xxeSendnbInfo->commhandle = new vmk_commhandle*;
+      *(xxeSendnbInfo->commhandle) = new vmk_commhandle;
+      ++xxeCount;
+      if (xxeCount >= xxe->max){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxeCount out of range", &rc);
+        return rc;
+      }
+      // keep track of commhandles for xxe garbage collection
+      xxe->commhandle[xxe->commhandleCount] = xxeSendnbInfo->commhandle;
+      ++(xxe->commhandleCount);
+      if (xxe->commhandleCount >= xxe->commhandleMaxCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxe->commhandleCount out of range", &rc);
+        return rc;
+      }
+      delete [] linIndexContigBlockList;
+    }    
+    // garbage collection
+    delete [] index2Ref;
+    delete [] index2Ref2;
+    delete [] factorIndexRef;
+    delete [] partnerDeRef;
+    delete [] partnerDeList;
+    delete [] partnerDeCount;
+    for (int i=0; i<diffPartnerDeCount; i++){
+      delete [] srcInfoTable[i];
+    }
+    delete [] srcInfoTable;
+    delete [] srcInfoTableInit;
+  } // for i - srcArray->localDeCount
+
+  // determine recv pattern for all localDEs in dstArray and fill in XXE
+  for (int j=0; j<dstArray->localDeCount; j++){
+    int *index2Ref = new int[dstDistGridDeCellCount[j]];  // large enough
+    int localDeFactorCount = 0; // reset
+    int iCount = 0; // reset
+    for (int k=0; k<dstDistGridDeCellCount[j]; k++){
+      int factorCount = dstLinSeqList[j][k].factorCount;
+      if (factorCount){
+        index2Ref[iCount] = k;   // store index2
+        localDeFactorCount += factorCount;
+        ++iCount; // increment counter
+      }
+    }
+#if 0
+printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
+#endif
+    int *index2Ref2 = new int[localDeFactorCount];  // large enough
+    int *factorIndexRef = new int[localDeFactorCount];  // large enough
+    int *partnerDeRef = new int[localDeFactorCount];  // large enough
+    int *partnerDeList = new int[localDeFactorCount];  // large enough
+    int *partnerDeCount = new int[localDeFactorCount];  // large enough
+    int diffPartnerDeCount = 0; // reset
+    int count = 0; // reset
+    for (int i=0; i<iCount; i++){
+      int factorCount = dstLinSeqList[j][index2Ref[i]].factorCount;
+      for (int k=0; k<factorCount; k++){
+        int partnerDe = dstLinSeqList[j][index2Ref[i]].factorList[k].partnerDe;
+        int kk;
+        for (kk=0; kk<diffPartnerDeCount; kk++)
+          if (partnerDeList[kk]==partnerDe) break;
+        if (kk==diffPartnerDeCount){
+          // new entry
+          partnerDeList[kk] = partnerDe;
+          partnerDeCount[kk] = 1; // initialize
+          ++diffPartnerDeCount;
+        }else
+          ++partnerDeCount[kk];   // increment
+        index2Ref2[count] = index2Ref[i];
+        factorIndexRef[count] = k;
+        partnerDeRef[count] = kk;
+        ++count;
+      }
+    }
+    // invert the look-up direction
+    struct DstInfo{
+      int linIndex;
+      int seqIndex;
+      int partnerSeqIndex;
+      char factor[8];
+      static int cmp(const void *a, const void *b){
+        DstInfo *aObj = (DstInfo *)a;
+        DstInfo *bObj = (DstInfo *)b;
+        if (aObj->partnerSeqIndex < bObj->partnerSeqIndex) return -1;
+        if (aObj->partnerSeqIndex > bObj->partnerSeqIndex) return +1;
+        // partnerSeqIndex must be equal
+        if (aObj->seqIndex < bObj->seqIndex) return -1;
+        if (aObj->seqIndex > bObj->seqIndex) return +1;
+        // seqIndex must also be equal
+        return 0;
+      }
+    };
+    // prepare to sort each "diffPartnerDeCount group"
+    // at the same time determine linIndexTermCount and linIndexTermFactorCount
+    DstInfo **dstInfoTable = new DstInfo*[diffPartnerDeCount];
+    int *dstInfoTableInit = new int[diffPartnerDeCount];
+    int linIndexTermCount = 0;  // reset
+    int *linIndexTermList = new int[localDeFactorCount];
+    int *linIndexTermFactorCount = new int[localDeFactorCount];
+    for (int i=0; i<diffPartnerDeCount; i++){
+      dstInfoTable[i] = new DstInfo[partnerDeCount[i]];
+      dstInfoTableInit[i] = 0;   // reset
+    }
+    for (int i=0; i<localDeFactorCount; i++){
+      int partnerDeListIndex = partnerDeRef[i];
+      int index2 = dstInfoTableInit[partnerDeListIndex]++;
+      dstInfoTable[partnerDeListIndex][index2].linIndex =
+        dstLinSeqList[j][index2Ref2[i]].linIndex;
+      dstInfoTable[partnerDeListIndex][index2].seqIndex =
+        dstLinSeqList[j][index2Ref2[i]].seqIndex;
+      dstInfoTable[partnerDeListIndex][index2].partnerSeqIndex =
+        dstLinSeqList[j][index2Ref2[i]].factorList[factorIndexRef[i]]
+        .partnerSeqIndex;
+      memcpy(dstInfoTable[partnerDeListIndex][index2].factor,
+        dstLinSeqList[j][index2Ref2[i]].factorList[factorIndexRef[i]]
+        .factor, dataSize);
+      // determine linIndexTermCount, linIndexTermList, linIndexTermFactorCount
+      int k;
+      for (k=0; k<linIndexTermCount; k++)
+        if (linIndexTermList[k] == dstLinSeqList[j][index2Ref2[i]].linIndex)
+          break;
+      if (k==linIndexTermCount){
+        // new linIndex entry
+        linIndexTermList[k] = dstLinSeqList[j][index2Ref2[i]].linIndex;
+        linIndexTermFactorCount[k] = 1; // initialize
+        ++linIndexTermCount;
+      }else{
+        // existing entry
+        ++linIndexTermFactorCount[k]; // increment counter
+      }
+    }
+    // sort each "diffPartnerDeCount group" wrt partnerSeqIndex and seqIndex
+    // in this order (opposite of src)
+    for (int i=0; i<diffPartnerDeCount; i++)
+      qsort(dstInfoTable[i], partnerDeCount[i], sizeof(DstInfo), DstInfo::cmp);
+#if 0
+    // print:
+    printf("dstArray: %d, %d\n", j, diffPartnerDeCount); 
+    for (int i=0; i<diffPartnerDeCount; i++)
+      for (int k=0; k<partnerDeCount[i]; k++)
+        printf("dstInfoTable[%d][%d].seqIndex = %d, .partnerSeqIndex[][] ="
+          " %d\n", i, k, dstInfoTable[i][k].seqIndex, 
+          dstInfoTable[i][k].partnerSeqIndex);
+#endif
+    // construct recv pattern and fill in corresponding XXE StreamElements
+    char **buffer = new char*[diffPartnerDeCount];
+    for (int i=0; i<diffPartnerDeCount; i++){
+      // fill in XXE StreamElements for dstArray side
+      // large contiguous 1st level receive buffer
+      buffer[i] = new char[partnerDeCount[i] * dataSize];
+      xxe->storage[xxe->storageCount] = buffer[i]; // for xxe garbage collection
+      ++(xxe->storageCount);
+      if (xxe->storageCount >= xxe->storageMaxCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxe->storageCount out of range", &rc);
+        return rc;
+      }
+      int srcDe = partnerDeList[i];
+      int srcPet;   //TODO: DE-based comms
+      srcArray->delayout->getDEMatchPET(srcDe, *vm, NULL, &srcPet, 1);
+#if 0
+      printf("gjt: XXE::recvnb on localPet %d from Pet %d\n", localPet, srcPet);
+#endif
+      xxestream[xxeCount].opId = XXE::recvnb;
+      xxeElement = &(xxestream[xxeCount]);
+      xxeRecvnbInfo = (XXE::RecvnbInfo *)xxeElement;
+      xxeRecvnbInfo->buffer = buffer[i];
+      xxeRecvnbInfo->size = partnerDeCount[i] * dataSize;
+      xxeRecvnbInfo->srcPet = srcPet;
+      xxeRecvnbInfo->commhandle = new vmk_commhandle*;
+      *(xxeRecvnbInfo->commhandle) = new vmk_commhandle;
+      ++xxeCount;
+      if (xxeCount >= xxe->max){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxeCount out of range", &rc);
+        return rc;
+      }
+      // keep track of commhandles for xxe garbage collection
+      xxe->commhandle[xxe->commhandleCount] = xxeRecvnbInfo->commhandle;
+      ++(xxe->commhandleCount);
+      if (xxe->commhandleCount >= xxe->commhandleMaxCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxe->commhandleCount out of range", &rc);
+        return rc;
+      }
+    }
+    
+    // post XXE::waitOnAllRecvnb
+    xxestream[xxeCount].opId = XXE::waitOnAllRecvnb;
+    ++xxeCount;
+    if (xxeCount >= xxe->max){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxeCount out of range", &rc);
+      return rc;
+    }
+    // memCpy pieces into 2nd level buffers for each linIndexTerm and "+=*"
+    for (int i=0; i<linIndexTermCount; i++){
+      int linIndex = linIndexTermList[i];
+      int factorCount = linIndexTermFactorCount[i];
+      // prepare buffers
+      char *dataBuffer = new char[factorCount * dataSize];
+      char *factorBuffer = new char[factorCount * dataSize];
+      xxe->storage[xxe->storageCount] = dataBuffer; // for xxe garbage coll.
+      ++(xxe->storageCount);
+      if (xxe->storageCount >= xxe->storageMaxCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxe->storageCount out of range", &rc);
+        return rc;
+      }
+      xxe->storage[xxe->storageCount] = factorBuffer; // for xxe garbage coll.
+      ++(xxe->storageCount);
+      if (xxe->storageCount >= xxe->storageMaxCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxe->storageCount out of range", &rc);
+        return rc;
+      }
+      // pull data and factors together into buffers from sorted table
+      char *dataBufferPointer = dataBuffer;
+      char *factorBufferPointer = factorBuffer;
+      for (int k=0; k<diffPartnerDeCount; k++){
+        for (int kk=0; kk<partnerDeCount[k]; kk++){
+          DstInfo *dstInfo = &(dstInfoTable[k][kk]);
+          if (dstInfo->linIndex == linIndex){
+            // memcpy factor
+            memcpy(factorBufferPointer, dstInfo->factor, dataSize);
+            // enter memCpy for data into XXE stream
+            xxestream[xxeCount].opId = XXE::memCpy;
+            xxeElement = &(xxestream[xxeCount]);
+            xxeMemCpyInfo = (XXE::MemCpyInfo *)xxeElement;
+            xxeMemCpyInfo->dstMem = dataBufferPointer;
+            xxeMemCpyInfo->srcMem = buffer[k] + kk*dataSize;  //TODO: RRA
+            xxeMemCpyInfo->size = dataSize;
+            ++xxeCount;
+            if (xxeCount >= xxe->max){
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                "- xxeCount out of range", &rc);
+              return rc;
+            }
+            // increment buffer pointers
+            dataBufferPointer += dataSize;
+            factorBufferPointer += dataSize;
+          }
+        }
+      }
+      // enter "+=*" operation into XXE stream
+      xxestream[xxeCount].opId = XXE::productSum;
+      // todo: replace the following with using ESMC_TypeKind in XXE!
+      if (typekindArg == ESMC_TYPEKIND_R4)
+        xxestream[xxeCount].opSubId = XXE::R4;
+      else if (typekindArg == ESMC_TYPEKIND_R8)
+        xxestream[xxeCount].opSubId = XXE::R8;
+      else if (typekindArg == ESMC_TYPEKIND_I4)
+        xxestream[xxeCount].opSubId = XXE::I4;
+      else if (typekindArg == ESMC_TYPEKIND_I8)
+        xxestream[xxeCount].opSubId = XXE::I8;
+      xxeElement = &(xxestream[xxeCount]);
+      xxeProductSumInfo = (XXE::ProductSumInfo *)xxeElement;
+      char *element = (char *)(dstArray->larrayBaseAddrList[j])
+        + (linIndex * dataSize);   //TODO: RRA
+      xxeProductSumInfo->element = (void *)element;
+      xxeProductSumInfo->factorList = (void *)factorBuffer;
+      xxeProductSumInfo->valueList = (void *)dataBuffer;
+      xxeProductSumInfo->factorCount = factorCount;
+      ++xxeCount;
+      if (xxeCount >= xxe->max){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxeCount out of range", &rc);
+        return rc;
+      }
+    }
+    // garbage collection
+    delete [] buffer;
+    delete [] index2Ref;
+    delete [] index2Ref2;
+    delete [] factorIndexRef;
+    delete [] partnerDeRef;
+    delete [] partnerDeList;
+    delete [] partnerDeCount;
+    for (int i=0; i<diffPartnerDeCount; i++){
+      delete [] dstInfoTable[i];
+    }
+    delete [] dstInfoTable;
+    delete [] dstInfoTableInit;
+    delete [] linIndexTermList;
+    delete [] linIndexTermFactorCount;
+  } // for i - dstArray->localDeCount
+        
+  // post XXE::waitOnAllSendnb
+  xxestream[xxeCount].opId = XXE::waitOnAllSendnb;
+  ++xxeCount;
+  if (xxeCount >= xxe->max){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- xxeCount out of range", &rc);
+    return rc;
+  }
+
+  // store xxeCount
+  xxe->count = xxeCount;
+
+#if 0  
+  // optimize the XXE contents
+  localrc = xxe->optimize();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+#endif 
+  
+  // get XXE ready for execution
+  localrc = xxe->execReady();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // garbage collection
+  for (int i=0; i<srcArray->localDeCount; i++){
+    for (int j=0; j<srcDistGridDeCellCount[i]; j++)
+      if (srcLinSeqList[i][j].factorCount)
+        delete [] srcLinSeqList[i][j].factorList;
+    delete [] srcLinSeqList[i];
+  }
+  delete [] srcLinSeqList;
+  delete [] srcDistGridDeCellCount;
+  for (int i=0; i<dstArray->localDeCount; i++){
+    for (int j=0; j<dstDistGridDeCellCount[i]; j++)
+      if (dstLinSeqList[i][j].factorCount)
+        delete [] dstLinSeqList[i][j].factorList;
+    delete [] dstLinSeqList[i];
+  }
+  delete [] dstLinSeqList;
+  delete [] dstDistGridDeCellCount;
+  delete [] srcCellCountList;
+  delete [] dstCellCountList;
+  delete [] srcSeqIndexMinMaxList;
+  delete [] dstSeqIndexMinMaxList;
+  for (int i=0; i<srcSeqIndexInterval[localPet].count; i++)
+    if (srcSeqIndexFactorLookup[i].factorCount)
+      delete [] srcSeqIndexFactorLookup[i].factorList;
+  delete [] srcSeqIndexFactorLookup;
+  delete [] srcSeqIndexInterval;
+  for (int i=0; i<dstSeqIndexInterval[localPet].count; i++)
+    if (dstSeqIndexFactorLookup[i].factorCount)
+      delete [] dstSeqIndexFactorLookup[i].factorList;
+  delete [] dstSeqIndexFactorLookup;
+  delete [] dstSeqIndexInterval;
     
   // return successfully
   rc = ESMF_SUCCESS;
@@ -2370,7 +4706,7 @@ int Array::sparseMatMul(
   ){    
 //
 // !DESCRIPTION:
-//    Store information for an Array sparse matrix multiplication operation
+//    Execute an Array sparse matrix multiplication operation
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -2381,14 +4717,7 @@ int Array::sparseMatMul(
   // initialize return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
   rc = ESMC_RC_NOT_IMPL;
-
-  // get the current VM and VM releated information
-  VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
-
+  
   // error checking for input
   if (srcArray == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -2401,49 +4730,12 @@ int Array::sparseMatMul(
     return rc;
   }
 
-  // get a handle on the storage in routehandle
-  ArraySparseMatMulStorage *storage = 
-    (ArraySparseMatMulStorage *)(*routehandle)->ESMC_RouteHandleGetStorage();
-
-  // loop through send table and issue non-blocking sends
-  int size = storage->sendTable->baseSize;
-  for (int i=0; i<storage->sendTable->count; i++){
-    char *element = 
-      (char *)srcArray->larrayBaseAddrList[storage->sendTable->localSrcDe[i]];
-    element += storage->sendTable->linSrcIndex[i] * size;
-    vm->vmk_send(element, size, storage->sendTable->dstPet[i],
-      &(storage->sendTable->commh[i]));
-  }
-  
-  // loop through recv table and issue non-blocking receives
-  size = storage->recvTable->baseSize;
-  for (int i=0; i<storage->recvTable->count; i++){
-    char *element = (char *)storage->recvTable->addr[i];
-    vm->vmk_recv(element, size, storage->recvTable->srcPet[i],
-      &(storage->recvTable->commh[i]));
-  }
-
-  // wait until all local receive calls have completed
-  for (int i=0; i<storage->recvTable->count; i++)
-    vm->commwait(&(storage->recvTable->commh[i]));
-  
-  // loop through termStorage and compute local results
-  for (int i=0; i<storage->termCount; i++){
-    TermStorage *termStorage = storage->termStorage[i];
-    //todo: don't hardcode ESMC_R8 here
-    ESMC_R8 *element = 
-      (ESMC_R8 *)dstArray->larrayBaseAddrList[termStorage->localDe];
-    element += termStorage->linIndex; // shift to correct element
-    ESMC_R8 *factorList = termStorage->factorList;
-    ESMC_R8 *valueList = termStorage->valueList;
-    for (int j=0; j<termStorage->factorCount; j++){
-      *element += factorList[j] * valueList[j]; // compute sparse mat mul term
-    }
-  }
-  
-  // wait until all local send calls have completed
-  for (int i=0; i<storage->sendTable->count; i++)
-    vm->commwait(&(storage->sendTable->commh[i]));
+  // put a handle on the XXE in routehandle
+  XXE *xxe = (XXE *)(*routehandle)->ESMC_RouteHandleGetStorage();
+  // execute XXE list
+  localrc = xxe->exec();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -2482,39 +4774,12 @@ int Array::sparseMatMulRelease(
   localrc = ESMC_RC_NOT_IMPL;
   rc = ESMC_RC_NOT_IMPL;
 
-  // get a handle on the storage in routehandle
-  ArraySparseMatMulStorage *storage = 
-    (ArraySparseMatMulStorage *)routehandle->ESMC_RouteHandleGetStorage();
+  // get XXE from routehandle
+  XXE *xxe = (XXE *)routehandle->ESMC_RouteHandleGetStorage();
+  // delete xxe
+  delete xxe;
 
-  // delete termStorage
-  for (int i=0; i<storage->termCount; i++){
-    delete [] storage->termStorage[i]->factorList;
-    delete [] storage->termStorage[i]->valueList;
-    delete storage->termStorage[i];
-  }
-  delete [] storage->termStorage;
-  
-  // delete recvTable
-  for (int i=0; i<storage->recvTable->count; i++){
-    delete storage->recvTable->commh[i];
-  }
-  delete [] storage->recvTable->srcPet;
-  delete [] storage->recvTable->addr;
-  delete [] storage->recvTable->commh;
-  delete storage->recvTable;
-  
-  // delete sendTable
-  for (int i=0; i<storage->sendTable->count; i++){
-    delete storage->sendTable->commh[i];
-  }
-  delete [] storage->sendTable->dstPet;
-  delete [] storage->sendTable->localSrcDe;
-  delete [] storage->sendTable->linSrcIndex;
-  delete [] storage->sendTable->commh;
-  delete storage->sendTable;
-  
-  // delete storage handle
-  delete storage;
+  // mark storage pointer in RouteHandle as invalid  
   routehandle->ESMC_RouteHandleSetStorage(NULL);
   
   // return successfully

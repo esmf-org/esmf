@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.53 2007/06/27 18:47:14 cdeluca Exp $
+! $Id: ESMF_Array.F90,v 1.54 2007/07/10 01:47:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.53 2007/06/27 18:47:14 cdeluca Exp $'
+    '$Id: ESMF_Array.F90,v 1.54 2007/07/10 01:47:52 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -650,12 +650,16 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, opt_factorList, &
-      len_factorList, factorIndexListArg, rootPet, routehandle, status)
+    call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, ESMF_TYPEKIND_R8, &
+      opt_factorList, len_factorList, factorIndexListArg, rootPet, &
+      routehandle, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
+    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, status)

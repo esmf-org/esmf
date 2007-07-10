@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.55 2007/06/24 23:24:08 cdeluca Exp $
+// $Id: ESMC_Array_F.C,v 1.56 2007/07/10 01:47:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -518,17 +518,22 @@ extern "C" {
   
 
   void FTN(c_esmc_arraysparsematmulstore)(ESMCI::Array **srcArray,
-    ESMCI::Array **dstArray, ESMC_R8 *factorList, int *factorListCount,
-    ESMCI::InterfaceInt **factorIndexList, int *rootPet,
+    ESMCI::Array **dstArray, ESMC_TypeKind *typekind, void *factorList, 
+    int *factorListCount, ESMCI::InterfaceInt **factorIndexList, int *rootPet,
     ESMC_RouteHandle **routehandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysparsematmulstore()"
     //Initialize return code
     *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::sparseMatMulStore(
-      *srcArray, *dstArray, factorList, *factorListCount, *factorIndexList,
-      *rootPet, routehandle),
+//    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::sparseMatMulStore(
+//      *srcArray, *dstArray, *typekind, factorList, *factorListCount,
+//      *factorIndexList, *rootPet, routehandle),
+//      ESMF_ERR_PASSTHRU,
+//      ESMC_NOT_PRESENT_FILTER(rc));
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::sparseMatMulStoreNEW(
+      *srcArray, *dstArray, *typekind, factorList, *factorListCount,
+      *factorIndexList, *rootPet, routehandle),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
