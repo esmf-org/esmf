@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.161 2007/06/26 23:22:38 cdeluca Exp $
+! $Id: ESMF_Comp.F90,v 1.162 2007/07/10 01:48:58 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.161 2007/06/26 23:22:38 cdeluca Exp $'
+      '$Id: ESMF_Comp.F90,v 1.162 2007/07/10 01:48:58 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -333,9 +333,9 @@ end interface
     ! Call into the C++ interface, which will sort out optional arguments.
     !todo: call c_ESMC_CompClassValidate(cc, localrc)
     
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Use LogErr to handle return code (ESMF_SUCCESS for Validate)
+    ! if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    !   ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1763,9 +1763,9 @@ end function
 
        ! TODO: add code here
 
-       ! Use LogErr to handle return code
-       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+       ! Use LogErr to handle return code (ESMF_SUCCESS for *Validate)
+       ! if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+       !    ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! set return values
        if (rcpresent) rc = ESMF_SUCCESS
@@ -1832,6 +1832,8 @@ end function
        endif
 
        call ESMF_GetName(compp%base, cname, status)
+       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
      !jw  write (msgbuf,*) " Component name = ", trim(cname)
      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
        write (*,*) " Component name = ", trim(cname)

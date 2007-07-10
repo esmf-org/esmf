@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.96 2007/07/05 18:03:57 cdeluca Exp $
+! $Id: ESMF_FieldComm.F90,v 1.97 2007/07/10 01:47:33 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.96 2007/07/05 18:03:57 cdeluca Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.97 2007/07/10 01:47:33 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -515,12 +515,17 @@
 !     \end{description}
 !
 !EOPI
+      integer :: localrc
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
-      call ESMF_RouteHandleDestroy(routehandle, rc)
+      call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_FieldHaloRelease
 
 !------------------------------------------------------------------------------
@@ -1003,12 +1008,17 @@
 !     \end{description}
 !
 !EOP
+      integer :: localrc                        ! local return code
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
-      call ESMF_RouteHandleDestroy(routehandle, rc)
+      call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_FieldRedistRelease
 
 
@@ -1429,16 +1439,16 @@
         rc = ESMF_RC_NOT_IMPL
       endif     
 
-!     Call IGrid method to perform actual work
+!     Call IGrid method to perform actual work (not done nor tested)
       !call ESMF_IGridReduce(field%ftypep%igrid, &
       !                     field%ftypep%localfield%localdata, &
       !                     rtype, result, status)
-      !if (ESMF_LogMsgFoundError(status, &
-      !                            ESMF_ERR_PASSTHRU, &
-      !                            ESMF_CONTEXT, rc)) return
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
 !     Set return values.
-      !if(rcpresent) rc = ESMF_SUCCESS
+      if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldReduce
 
@@ -1781,12 +1791,17 @@
 !     \end{description}
 !
 !EOP
+      integer :: localrc                        ! local return code
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
-      call ESMF_RouteHandleDestroy(routehandle, rc)
+      call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_FieldRegridRelease
 
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.92 2007/06/26 17:55:40 samsoncheung Exp $
+! $Id: ESMF_GridComp.F90,v 1.93 2007/07/10 01:48:58 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.92 2007/06/26 17:55:40 samsoncheung Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.93 2007/07/10 01:48:58 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -498,16 +498,21 @@
 !   \end{description}
 !
 !EOP
+        integer :: localrc                        ! local return code
+
+        ! Assume failure until success
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
-        ! Initialize return code; assume routine not implemented
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
         call ESMF_CompGet(gridcomp%compp, name, vm=vm, contextflag=contextflag,&
                           gridcomptype=gridcomptype, igrid=igrid, clock=clock, &
-                          configFile=configFile, config=config, rc=rc)
+                          configFile=configFile, config=config, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
+        if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_GridCompGet
 
 !------------------------------------------------------------------------------
@@ -623,17 +628,22 @@
 !   \end{description}
 !
 !EOP
+       integer :: localrc                        ! local return code
 
-        ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+       ! Assume failure until success
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+       localrc = ESMF_RC_NOT_IMPL
 
-        ! Initialize return code; assume routine not implemented
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+       ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
 
      !jw  call ESMF_LogWrite("Gridded Component:", ESMF_LOG_INFO)
        print *, "Gridded Component:"
-       call ESMF_CompPrint(gridcomp%compp, options, rc)
+       call ESMF_CompPrint(gridcomp%compp, options, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
+       if (present(rc)) rc = ESMF_SUCCESS
        end subroutine ESMF_GridCompPrint
 
 !------------------------------------------------------------------------------
@@ -1161,16 +1171,22 @@
 !   \end{description}
 !
 !EOP
+        integer :: localrc                        ! local return code
+
+        ! Assume failure until success
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
+
         ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
         ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-        ! Initialize return code; assume routine not implemented
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
 	!Change BOPI to BOP when implemented.
         call ESMF_CompWriteRestart(gridcomp%compp, iospec, clock, phase, &
-                                   blockingflag, rc)
+                                   blockingflag, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
+        if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_GridCompWriteRestart
 
 

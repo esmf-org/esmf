@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.37 2007/06/23 04:00:28 cdeluca Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.38 2007/07/10 01:46:22 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.37 2007/06/23 04:00:28 cdeluca Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.38 2007/07/10 01:46:22 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -333,12 +333,13 @@
 !
 !EOP
 
-
-        character (len = ESMF_MAXSTR) :: str
-        !character (len = ESMF_MAXSTR) :: msgbuf
+      integer :: localrc                        ! local return code
+      character (len = ESMF_MAXSTR) :: str
+      !character (len = ESMF_MAXSTR) :: msgbuf
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       !jw  write (msgbuf, *)  "FieldDataMap print:"
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
@@ -349,21 +350,28 @@
           write (*, *)  "Uninitialized or Invalid object"
           if (present(rc)) rc = ESMF_SUCCESS ! or stuff will fail!
           return
+          !What it should be...
+          !localrc = ESMF_RC_NOT_VALID
+          !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          !   ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
         ! individual data item information
-        call ESMF_ArrayDataMapPrint(fielddatamap%adm, options, rc)
+        call ESMF_ArrayDataMapPrint(fielddatamap%adm, options, rc=localrc)
 
-        call ESMF_RelLocString(fielddatamap%horzRelloc, str, rc)
+        call ESMF_RelLocString(fielddatamap%horzRelloc, str, rc=localrc)
       !jw  write (msgbuf, *)  "Horizontal Relative location = ", trim(str)
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write (*, *)  "Horizontal Relative location = ", trim(str)
-        call ESMF_RelLocString(fielddatamap%vertRelloc, str, rc)
+        call ESMF_RelLocString(fielddatamap%vertRelloc, str, rc=localrc)
       !jw  write (msgbuf, *)  "Vertical Relative location = ", trim(str)
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write (*, *)  "Vertical Relative location = ", trim(str)
-        call ESMF_InterleaveTypeString(fielddatamap%interleave, str, rc)
+        call ESMF_InterleaveTypeString(fielddatamap%interleave, str, rc=localrc)
         write (*, *)  "Interleave type = ", trim(str)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
         ! TODO: need methods
       !nsc write (msgbuf, *)  "Interleave type = ", trim(str), &
         !         ".  Interleave Start,end,stride = ",  &
@@ -371,6 +379,7 @@
         !         fielddatamap%interleave%il_end, & 
         !         fielddatamap%interleave%il_strides
       
+        if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_FieldDataMapPrint
 
 !------------------------------------------------------------------------------
@@ -449,7 +458,9 @@
         ! set the internal array map
         call ESMF_ArrayDataMapSet(fielddatamap%adm, dataRank, dataIndexList, &
                                    counts, status)
-        if (status .ne. ESMF_SUCCESS) return
+        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
 
         ! TODO: add the vector information here
 
@@ -542,7 +553,8 @@
         ! initialize the contents of the internal array fielddatamap
         call ESMF_ArrayDataMapSetDefault(fielddatamap%adm, dataRank, dataIndexList, &
                                          counts, status)
-        if (status .ne. ESMF_SUCCESS) return
+        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! assume scalar data and use the relloc the caller gave
         fielddatamap%rankLength = 0
@@ -636,7 +648,8 @@
         ! initialize the contents of the internal array fielddatamap
         call ESMF_ArrayDataMapSetDefault(fielddatamap%adm, indexorder, &
                                          counts, status)
-        if (status .ne. ESMF_SUCCESS) return
+        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! assume scalar data and use the relloc the caller gave
         fielddatamap%rankLength = 0
@@ -689,11 +702,16 @@
 !
 !
 !EOP
+      integer :: localrc
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
-        call ESMF_ArrayDataMapSetInvalid(fielddatamap%adm, rc)
+        call ESMF_ArrayDataMapSetInvalid(fielddatamap%adm, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
 
         fielddatamap%status = ESMF_STATUS_INVALID
 
