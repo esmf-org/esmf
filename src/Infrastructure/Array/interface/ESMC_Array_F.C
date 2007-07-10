@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.56 2007/07/10 01:47:52 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.57 2007/07/10 01:57:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -526,12 +526,7 @@ extern "C" {
     //Initialize return code
     *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-//    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::sparseMatMulStore(
-//      *srcArray, *dstArray, *typekind, factorList, *factorListCount,
-//      *factorIndexList, *rootPet, routehandle),
-//      ESMF_ERR_PASSTHRU,
-//      ESMC_NOT_PRESENT_FILTER(rc));
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::sparseMatMulStoreNEW(
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::sparseMatMulStore(
       *srcArray, *dstArray, *typekind, factorList, *factorListCount,
       *factorIndexList, *rootPet, routehandle),
       ESMF_ERR_PASSTHRU,
