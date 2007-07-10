@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.27 2007/06/22 04:48:41 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.28 2007/07/10 01:46:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -48,6 +48,8 @@ enum DELayoutServiceReply {DELAYOUT_SERVICE_ACCEPT=1, DELAYOUT_SERVICE_DENY};
 // classes
 
 class DELayout;
+class XXE;
+
 
 // DE type used internally in the ESMC_DELayout class
 typedef struct{
@@ -114,6 +116,7 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
       InterfaceInt *petList=NULL, VM *vm=NULL, int *rc=NULL);
     static int destroy(ESMCI::DELayout **layout);
     // get() and set()
+    VM *getVM()                     const {return vm;}
     int getDeCount()                const {return deCount;}
     int getLocalDeCount()           const {return localDeCount;}
     int *getLocalDeList()           const {return localDeList;}
@@ -182,7 +185,7 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
       int len, ESMC_TypeKind dtk, int rootDE);
     int ESMC_DELayoutGatherV(void *srcdata, void *destdata, 
       int *blen, int *bdestdispl, int rootDE);
-    // InternArrayComm.C uses the following DELayoutComm, so I leave it for now
+    // InternArrayComm.C uses the following DELayoutComm, so leave it for now
   public:  
     int ESMC_DELayoutGatherV(void *srcdata, void *destdata, 
       int *blen, int *bdestdispl, ESMC_TypeKind dtk, int rootDE);
@@ -191,6 +194,127 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_DELayoutFillLocal(int mypet);        
     
 };  // class DELayout
+
+
+
+
+class XXE{
+  public:
+    enum OpId{
+      send, recv,
+      sendnb, recvnb,
+      waitOnIndex, waitOnIndexRange,
+      productSum, memCpy,
+      // --- ids below are not suitable for direct execution
+      waitOnAllSendnb, waitOnAllRecvnb,
+      // --- nop
+      nop    
+    };
+    enum OpSubId{
+      I4, I8, R4, R8
+    };
+    struct StreamElement{
+      OpId opId;              // id of operation
+      OpSubId opSubId;        // id of sub-operation
+      char opInfo[7*8];       // 7 x 8-byte to hold info associated with op
+    };
+  public:
+    StreamElement *stream;
+    int count;
+    int max;
+    char **storage;
+    int storageCount;
+    int storageMaxCount;
+    vmk_commhandle ***commhandle;
+    int commhandleCount;
+    int commhandleMaxCount;
+    
+  public:
+    XXE(int maxArg, int storageMaxCountArg=100, int commhandleMaxCountArg=100){
+      // constructor
+      stream = new StreamElement[maxArg]; count = 0; max = maxArg;
+      storage = new char*[storageMaxCountArg];
+      storageCount  = 0;
+      storageMaxCount = storageMaxCountArg;
+      commhandle = new vmk_commhandle**[commhandleMaxCountArg];
+      commhandleCount  = 0;
+      commhandleMaxCount = commhandleMaxCountArg;
+    }
+    ~XXE(){     // destructor
+      delete [] stream;
+      for (int i=0; i<storageCount; i++)
+        delete [] storage[i];
+      delete [] storage;
+      for (int i=0; i<commhandleCount; i++){
+        delete *commhandle[i];
+        delete commhandle[i];
+      }
+      delete [] commhandle;
+    }
+    int exec();
+    int execReady();
+    int optimize();
+    
+  // types to interprete the StreamElement data
+  public:
+      
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      vmk_commhandle **commhandle;
+      void *buffer;
+      int size;
+      int dstPet;
+    }SendnbInfo;
+
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      vmk_commhandle **commhandle;
+      void *buffer;
+      int size;
+      int srcPet;
+    }RecvnbInfo;
+
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      int index;
+    }WaitOnIndexInfo;
+
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      int indexStart;
+      int indexEnd;
+    }WaitOnIndexRangeInfo;
+
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      void *element;
+      void *factorList;
+      void *valueList;
+      int factorCount;
+    }ProductSumInfo;
+
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      void *dstMem;
+      void *srcMem;
+      int size;
+    }MemCpyInfo;
+
+    
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      vmk_commhandle **commhandle;
+    }CommhandleInfo;
+
+};  // class XXE
+
 
 } // namespace ESMCI
 

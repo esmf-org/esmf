@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.58 2007/06/22 04:48:41 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.59 2007/07/10 01:46:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.58 2007/06/22 04:48:41 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.59 2007/07/10 01:46:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -56,9 +56,9 @@ namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DELayout:create()"
+#define ESMC_METHOD "ESMCI::DELayout::create()"
 //BOPI
-// !IROUTINE:  ESMCI::DELayout:create
+// !IROUTINE:  ESMCI::DELayout::create
 //
 // !INTERFACE:
 DELayout *DELayout::create(
@@ -110,9 +110,9 @@ DELayout *DELayout::create(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DELayout:create()"
+#define ESMC_METHOD "ESMCI::DELayout::create()"
 //BOPI
-// !IROUTINE:  ESMCI::DELayout:create
+// !IROUTINE:  ESMCI::DELayout::create
 //
 // !INTERFACE:
 DELayout *DELayout::create(
@@ -276,9 +276,9 @@ DELayout *DELayout::create(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DELayout:create() - deprecated"
+#define ESMC_METHOD "ESMCI::DELayout::create() - deprecated"
 //BOPI
-// !IROUTINE:  ESMCI::DELayout:create - deprecated
+// !IROUTINE:  ESMCI::DELayout::create - deprecated
 //
 // !INTERFACE:
 DELayout *DELayout::create(
@@ -1496,9 +1496,9 @@ int DELayout::validate(){
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DELayout::Serialize()"
+#define ESMC_METHOD "ESMCI::DELayout::serialize()"
 //BOPI
-// !IROUTINE:  ESMCI::DELayout::Serialize - Turn delayout into a byte stream
+// !IROUTINE:  ESMCI::DELayout::serialize - Turn delayout into a byte stream
 //
 // !INTERFACE:
 int DELayout::serialize(
@@ -2513,5 +2513,800 @@ int DELayout::ESMC_DELayoutFillLocal(int mypet){
   return localrc;
 }
 //-----------------------------------------------------------------------------
+
+
+
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::exec()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::exec
+//
+// !INTERFACE:
+int XXE::exec(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  ){
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // local return code
+  int rc;                     // final return code
+
+  // initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
+  
+  // get the current VM
+  VM *vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+#if 0
+  printf("gjt in ESMCI::XXE::exec(), stream=%p, %d, %d\n", stream, count, 
+    sizeof(StreamElement));
+#endif
+  
+  void *xxeElement, *xxeIndexElement;
+  SendnbInfo *xxeSendnbInfo;
+  RecvnbInfo *xxeRecvnbInfo;
+  WaitOnIndexInfo *xxeWaitOnIndexInfo;
+  WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
+  CommhandleInfo *xxeCommhandleInfo;
+  ProductSumInfo *xxeProductSumInfo;
+  MemCpyInfo *xxeMemCpyInfo;
+  
+  for (int i=0; i<count; i++){
+    xxeElement = &(stream[i]);
+//    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
+    switch(stream[i].opId){
+    case send:
+      break;
+    case recv:
+      break;
+    case sendnb:
+      {
+        xxeSendnbInfo = (SendnbInfo *)xxeElement;
+//        printf("case: sendnb: %p, %d, %d, %p\n", xxeSendnbInfo->buffer,
+//          xxeSendnbInfo->size, xxeSendnbInfo->dstPet,
+//          xxeSendnbInfo->commhandle);
+        vm->vmk_send(xxeSendnbInfo->buffer, xxeSendnbInfo->size,
+          xxeSendnbInfo->dstPet, xxeSendnbInfo->commhandle);
+      }
+      break;
+    case recvnb:
+      {
+        xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
+//        printf("case: recvnb: %p, %d, %d, %p\n", xxeRecvnbInfo->buffer,
+//          xxeRecvnbInfo->size, xxeRecvnbInfo->srcPet,
+//          xxeRecvnbInfo->commhandle);
+        vm->vmk_recv(xxeRecvnbInfo->buffer, xxeRecvnbInfo->size,
+          xxeRecvnbInfo->srcPet, xxeRecvnbInfo->commhandle);
+      }
+      break;
+    case waitOnIndex:
+      {
+        xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
+        xxeIndexElement = &(stream[xxeWaitOnIndexInfo->index]);
+        xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
+//        printf("case: waitOnIndex: %d, %p\n", xxeWaitOnIndexInfo->index,
+//          xxeCommhandleInfo->commhandle);
+        vm->commwait(xxeCommhandleInfo->commhandle);
+      }
+      break;
+    case waitOnIndexRange:
+      {
+        xxeWaitOnIndexRangeInfo = (WaitOnIndexRangeInfo *)xxeElement;
+        for (int j=xxeWaitOnIndexRangeInfo->indexStart;
+          j<xxeWaitOnIndexRangeInfo->indexEnd; j++){
+          xxeIndexElement = &(stream[j]);
+          xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
+          vm->commwait(xxeCommhandleInfo->commhandle);
+        }
+      }
+      break;
+    case productSum:
+      {
+        xxeProductSumInfo = (ProductSumInfo *)xxeElement;
+        switch (xxeProductSumInfo->opSubId){
+        case I4:
+          {
+            ESMC_I4 *element = (ESMC_I4 *)xxeProductSumInfo->element;
+            ESMC_I4 *factorList = (ESMC_I4 *)xxeProductSumInfo->factorList;
+            ESMC_I4 *valueList = (ESMC_I4 *)xxeProductSumInfo->valueList;
+            for (int j=0; j<xxeProductSumInfo->factorCount; j++)
+              *element += factorList[j] * valueList[j];
+          }
+          break;
+        case I8:
+          {
+            ESMC_I8 *element = (ESMC_I8 *)xxeProductSumInfo->element;
+            ESMC_I8 *factorList = (ESMC_I8 *)xxeProductSumInfo->factorList;
+            ESMC_I8 *valueList = (ESMC_I8 *)xxeProductSumInfo->valueList;
+            for (int j=0; j<xxeProductSumInfo->factorCount; j++)
+              *element += factorList[j] * valueList[j];
+          }
+          break;
+        case R4:
+          {
+            ESMC_R4 *element = (ESMC_R4 *)xxeProductSumInfo->element;
+            ESMC_R4 *factorList = (ESMC_R4 *)xxeProductSumInfo->factorList;
+            ESMC_R4 *valueList = (ESMC_R4 *)xxeProductSumInfo->valueList;
+            for (int j=0; j<xxeProductSumInfo->factorCount; j++)
+              *element += factorList[j] * valueList[j];
+          }
+          break;
+        case R8:
+          {
+            ESMC_R8 *element = (ESMC_R8 *)xxeProductSumInfo->element;
+            ESMC_R8 *factorList = (ESMC_R8 *)xxeProductSumInfo->factorList;
+            ESMC_R8 *valueList = (ESMC_R8 *)xxeProductSumInfo->valueList;
+            for (int j=0; j<xxeProductSumInfo->factorCount; j++)
+              *element += factorList[j] * valueList[j];
+          }
+          break;
+        default:
+          break;
+        }
+      }
+      break;
+    case memCpy:
+      {
+        xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
+        memcpy(xxeMemCpyInfo->dstMem, xxeMemCpyInfo->srcMem,
+          xxeMemCpyInfo->size);
+      }
+      break;
+    default:
+      break;
+    }
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::execReady()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::execReady
+//
+// !INTERFACE:
+int XXE::execReady(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  ){
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // local return code
+  int rc;                     // final return code
+
+  // initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
+
+#if 0
+  printf("gjt in ESMCI::XXE::execReady(), stream=%p, %d, %d\n", stream, count, 
+    sizeof(StreamElement));
+#endif
+  
+  const int sendnbMax = 20000;
+  int *sendnbIndexList = new int[sendnbMax];
+  int sendnbCount = 0;
+  int sendnbLowerIndex = -1;  // prime lower index indicator blow 0
+  
+  const int recvnbMax = 20000;
+  int *recvnbIndexList = new int[recvnbMax];
+  int recvnbCount = 0;
+  int recvnbLowerIndex = -1;  // prime lower index indicator blow 0
+  
+  void *xxeElement, *xxeIndexElement;
+  SendnbInfo *xxeSendnbInfo;
+  RecvnbInfo *xxeRecvnbInfo;
+  WaitOnIndexInfo *xxeWaitOnIndexInfo;
+  WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
+  CommhandleInfo *xxeCommhandleInfo;
+  ProductSumInfo *xxeProductSumInfo;
+  
+  int i = 0;  // prime index counter
+  while(i!=count){
+    // repeat going through the entire stream until no more StreamElements need 
+    // to be replaced, i.e. the i-loop will finally make it all the way through.
+    sendnbCount = 0;
+    recvnbCount = 0;
+    
+    for (i=0; i<count; i++){
+      xxeElement = &(stream[i]);
+//    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
+      int breakFlag = 0;  // reset
+      switch(stream[i].opId){
+      case send:
+        break;
+      case recv:
+        break;
+      case sendnb:
+        if (i>sendnbLowerIndex){
+          xxeSendnbInfo = (SendnbInfo *)xxeElement;
+          sendnbIndexList[sendnbCount] = i;
+          ++sendnbCount;
+          if (sendnbCount >= sendnbMax){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+              "- sendnbCount out of range", &rc);
+            return rc;
+          }
+        }
+        break;
+      case recvnb:
+        if (i>recvnbLowerIndex){
+          xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
+          recvnbIndexList[recvnbCount] = i;
+          ++recvnbCount;
+          if (recvnbCount >= recvnbMax){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+              "- recvnbCount out of range", &rc);
+            return rc;
+          }
+        }
+        break;
+        // --- cases below this line must cannot be used in execution ---  
+      case waitOnAllSendnb:
+        sendnbLowerIndex = i; // all sendnb below this index are considered
+        {
+#if 0
+          printf("case: waitOnAllSendnb: %d outstanding sendnb\n",
+            sendnbCount);
+#endif
+          // start a new stream
+          StreamElement *newstream = new StreamElement[max];  // prepare stream
+          // fill in StreamElements from before this StreamElement
+          memcpy(newstream, stream, i*sizeof(StreamElement));
+          // insert explicit waitOnIndex StreamElements
+          int xxeCount = i;
+          for (int j=0; j<sendnbCount; j++){
+            newstream[xxeCount].opId = waitOnIndex;
+            xxeElement = &(newstream[xxeCount]);
+            xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
+            xxeWaitOnIndexInfo->index = sendnbIndexList[j];
+            ++xxeCount;
+            if (xxeCount >= max){
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                "- xxeCount out of range", &rc);
+              return rc;
+            }
+          }
+          // fill in StreamElements from after this StreamElement
+          if (sendnbCount+count-1 >= max){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+              "- count out of range", &rc);
+            return rc;
+          }
+          memcpy(newstream+xxeCount, stream+i+1, (count-i-1)
+            * sizeof(StreamElement));
+          // replace stream
+          delete [] stream; // delete original stream
+          stream = newstream; // replace by new stream
+          count = sendnbCount + count -1;        // account for modification
+        }
+        breakFlag = 1;  // set
+        break;
+      case waitOnAllRecvnb:
+        recvnbLowerIndex = i; // all recvnb below this index are considered
+        {
+#if 0
+          printf("case: waitOnAllRecvnb: %d outstanding recvnb\n",
+            recvnbCount);
+#endif
+          // start a new stream
+          StreamElement *newstream = new StreamElement[max];  // prepare stream
+          // fill in StreamElements from before this StreamElement
+          // (excluding this StreamElement)
+          memcpy(newstream, stream, i*sizeof(StreamElement));
+          // insert explicit waitOnIndex StreamElements
+          int xxeCount = i;
+          for (int j=0; j<recvnbCount; j++){
+            //printf("inserting waitOnIndex for: %d\n", recvnbIndexList[j]);
+            newstream[xxeCount].opId = waitOnIndex;
+            xxeElement = &(newstream[xxeCount]);
+            xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
+            xxeWaitOnIndexInfo->index = recvnbIndexList[j];
+            ++xxeCount;
+            if (xxeCount >= max){
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                "- xxeCount out of range", &rc);
+              return rc;
+            }
+          }
+          // fill in StreamElements from after this StreamElement
+          // (excluding this StreamElement)
+          if (recvnbCount+count-1 >= max){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+              "- count out of range", &rc);
+            return rc;
+          }
+          memcpy(newstream+xxeCount, stream+i+1, (count-i-1)
+            * sizeof(StreamElement));
+          // replace stream
+          delete [] stream; // delete original stream
+          stream = newstream; // replace by new stream
+          count = recvnbCount + count -1;        // account for modification
+        }
+        breakFlag = 1;  // set
+        break;
+      default:
+        break;
+      }
+      if (breakFlag) break;
+    } // for i
+  } // while
+  
+  // garbage collection
+  delete [] sendnbIndexList;
+  delete [] recvnbIndexList;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::optimize()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::optimize
+//
+// !INTERFACE:
+int XXE::optimize(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  ){
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // local return code
+  int rc;                     // final return code
+
+  // initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
+  
+#if 0
+  printf("gjt in ESMCI::XXE::optimize(), stream=%p, %d, %d\n", stream, count, 
+    sizeof(StreamElement));
+#endif
+
+  void *xxeElement, *xxeIndexElement;
+  SendnbInfo *xxeSendnbInfo;
+  RecvnbInfo *xxeRecvnbInfo;
+  WaitOnIndexInfo *xxeWaitOnIndexInfo;
+  WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
+  CommhandleInfo *xxeCommhandleInfo;
+  ProductSumInfo *xxeProductSumInfo;
+  MemCpyInfo *xxeMemCpyInfo;
+  
+  class AnalyzeElement{
+    public:
+      OpId opId;
+      OpSubId opSubId;
+      int partnerPet;
+      char *bufferStart;
+      char *bufferEnd;
+      int bufferSize;
+      int indexCount;
+      int indexList[10000];
+      AnalyzeElement *next;
+    public:
+      AnalyzeElement(int index, OpId opIdArg, OpSubId opSubIdArg, 
+        int petArg, void *buffer, int size){
+        opId=opIdArg;
+        opSubId=opSubIdArg;
+        partnerPet=petArg;
+        bufferStart=(char *)buffer;
+        bufferEnd=bufferStart+size;
+        bufferSize=size;
+        indexCount=1;
+        indexList[0]=index;
+        next = NULL;
+      }
+      ~AnalyzeElement(){
+        if (next)
+          delete next;
+      }
+      void print(){
+        if (this){
+          printf("opId: %d, opSubId: %d, partnerPet: %d, indexCount: %d, "
+            "buffer: %p - %p\n",
+            opId, opSubId, partnerPet, indexCount, bufferStart, bufferEnd);
+          next->print();  // recursive call
+        }else
+          printf("ae: END\n");
+      }
+      void add(int index, OpId opIdArg, OpSubId opSubIdArg, 
+        int petArg, void *buffer, int size){
+        if (opIdArg!=opId || opSubId!=opSubId || petArg!=partnerPet)
+          if (next)
+            next->add(index, opIdArg, opSubIdArg, petArg, buffer, size);
+          else
+            next = new 
+              AnalyzeElement(index, opIdArg, opSubIdArg, petArg, buffer, size);
+        else{
+          if ((char *)buffer == bufferEnd){
+            // in this simple analyzer elements must be in order
+            bufferEnd += size;
+            bufferSize += size;
+            indexList[indexCount]=index;
+            ++indexCount;
+          }else
+            if (next)
+              next->add(index, opIdArg, opSubIdArg, petArg, buffer, size);
+            else
+              next = new 
+                AnalyzeElement(index, opIdArg, opSubIdArg, petArg, buffer,
+                  size);
+        }
+      }
+      int elementCount(){
+        // count the number of AnalyzeElements
+        int elementCount = 0;
+        AnalyzeElement *ae = this;
+        while (ae!=NULL){
+          ++elementCount;
+          ae = ae->next;
+        }
+        return elementCount;
+      }
+      int elementMatchCount(OpId opIdArg){
+        // count the number of AnalyzeElements that match opIdArg
+        int elementCount = 0;
+        AnalyzeElement *ae = this;
+        while (ae!=NULL){
+          if (ae->opId == opIdArg)
+            ++elementCount;
+          ae = ae->next;
+        }
+        return elementCount;
+      }
+      int elementPetList(OpId opIdArg, int *petList, int *aeCountList){
+        // find petList of all the queued AnalyzeElements
+        int petListCount = 0;
+        AnalyzeElement *ae = this;
+        // walk through the queue and find all matching elements
+        while (ae!=NULL){
+          if (ae->opId == opIdArg){
+            // check if this Pet has been entered the petList
+            int i;
+            for (i=0; i<petListCount; i++)
+              if (petList[i] == ae->partnerPet) break;
+            if (i==petListCount){
+              // did not find Pet in petList yet -> new entry
+              petList[petListCount] = ae->partnerPet;
+              aeCountList[petListCount] = 1;
+              ++petListCount;
+            }else{
+              ++aeCountList[i]; // increment the aeCount for this Pet
+            }
+          }
+          ae = ae->next;
+        }
+        return petListCount;
+      }
+      int aeList(OpId opIdArg, int partnerPetArg, AnalyzeElement **aeList){
+        // enter all matching AnalyzeElements into aeList
+        int aeListCount = 0;
+        AnalyzeElement *ae = this;
+        // walk through the queue and find all matching elements
+        while (ae!=NULL){
+          if (ae->opId == opIdArg && ae->partnerPet == partnerPetArg){
+            // enter ae into aeList
+            aeList[aeListCount] = ae;
+            ++aeListCount;
+          }
+          ae = ae->next;
+        }
+        return aeListCount;
+      }
+  };
+    
+  // prime the analyzeQueue
+  AnalyzeElement *aq = NULL;
+
+  int i = 0;  // prime index counter
+  while(i!=count){
+    // repeat going through the entire stream until no more StreamElements need 
+    // to be replaced, i.e. the i-loop will finally make it all the way through.
+
+    if (aq != NULL) delete aq;  // delete from previous analysis loop
+    aq = NULL;  // indicate empty queue
+    
+    int breakFlag = 0;  // reset
+    for (i=0; i<count; i++){
+      xxeElement = &(stream[i]);
+//    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
+      switch(stream[i].opId){
+      case send:
+        break;
+      case recv:
+        break;
+      case sendnb:
+        {
+          xxeSendnbInfo = (SendnbInfo *)xxeElement;
+          if (aq) aq->add(i, xxeSendnbInfo->opId, xxeSendnbInfo->opSubId,
+            xxeSendnbInfo->dstPet, xxeSendnbInfo->buffer, xxeSendnbInfo->size);
+          else
+            aq = new AnalyzeElement(i, xxeSendnbInfo->opId,
+              xxeSendnbInfo->opSubId, xxeSendnbInfo->dstPet,
+              xxeSendnbInfo->buffer, xxeSendnbInfo->size);
+        }
+        break;
+      case recvnb:
+        {
+          xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
+          if (aq) aq->add(i, xxeRecvnbInfo->opId, xxeRecvnbInfo->opSubId,
+            xxeRecvnbInfo->srcPet, xxeRecvnbInfo->buffer, xxeRecvnbInfo->size);
+          else
+            aq = new AnalyzeElement(i, xxeRecvnbInfo->opId,
+              xxeRecvnbInfo->opSubId, xxeRecvnbInfo->srcPet,
+              xxeRecvnbInfo->buffer, xxeRecvnbInfo->size);
+        }
+        break;
+      case waitOnAllSendnb:
+        {
+          // use single buffer for all previous sendnb with identical partnerPet
+#if 0
+          printf("case: waitOnAllSendnb: elementMatchCount() = %d\n",
+            aq->elementMatchCount(sendnb));
+#endif
+          // can't have more different Pets than there are sendnb entries
+          int *petList = new int[aq->elementMatchCount(sendnb)];
+          int *aeCountList = new int[aq->elementMatchCount(sendnb)];
+          int petListCount = aq->elementPetList(sendnb, petList, aeCountList);
+          for (int j=0; j<petListCount; j++){
+#if 0
+            printf("%d, petList[j]=%d, aeCountList[j]=%d\n", j, petList[j],
+              aeCountList[j]);
+#endif
+            AnalyzeElement **aeList = new AnalyzeElement*[aeCountList[j]];
+            aq->aeList(sendnb, petList[j], aeList);
+            if (aeCountList[j]==1){
+              // the sendnb StreamElements form a _single_ contiguous block
+              // -> don't need extra buffer
+              char *buffer = aeList[0]->bufferStart;
+              int bufferSize = aeList[0]->bufferSize;
+              // replace the very first sendnb StreamElement using the buffer
+              xxeElement = &(stream[aeList[0]->indexList[0]]);
+              xxeSendnbInfo = (SendnbInfo *)xxeElement;
+              xxeSendnbInfo->buffer = buffer;
+              xxeSendnbInfo->size = bufferSize;
+              // invalidate all other sendnb StreamElements to nop
+              for (int k=1; k<aeList[0]->indexCount; k++)
+                stream[aeList[0]->indexList[k]].opId = nop;
+            }else{
+              // need to introduce a contiguous intermediate buffer
+              int bufferSize = 0; // reset
+              for (int kk=0; kk<aeCountList[j]; kk++)
+                bufferSize += aeList[kk]->bufferSize;
+      //printf("allocate itermediate buffer of size: %d bytes, filling in"
+      //  " for stream index: %d\n", bufferSize, aeList[0]->indexList[0]);
+              char *buffer = new char[bufferSize]; //TODO: leave leak
+              // prepare extra stream element with memCpy StreamElements
+              StreamElement *extrastream = new StreamElement[aeCountList[j]];
+              int xxeCount = 0;
+              int bufferOffset = 0;
+              for (int kk=0; kk<aeCountList[j]; kk++){
+                // data of StreamElements ref. by aeList[kk] are congtig. memory
+                // -> only need a single memCpy for all of them
+                extrastream[xxeCount].opId = memCpy;
+                xxeElement = &(extrastream[xxeCount]);
+                xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
+                xxeMemCpyInfo->dstMem = buffer + bufferOffset;
+                xxeMemCpyInfo->srcMem = aeList[kk]->bufferStart;
+                xxeMemCpyInfo->size = aeList[kk]->bufferSize;
+                ++xxeCount;
+                bufferOffset += aeList[kk]->bufferSize;
+                // invalidate all StreamElements in stream assoc. w. aeList[kk]
+                for (int k=0; k<aeList[kk]->indexCount; k++)
+                  stream[aeList[kk]->indexList[k]].opId = nop;  // invalidate
+              }
+              // determine first Sendnb index
+              int firstIndex = aeList[0]->indexList[0];
+              // replace the first sendnb StreamElement using the interm. buffer
+              stream[firstIndex].opId = sendnb;
+              xxeElement = &(stream[firstIndex]);
+              xxeSendnbInfo = (SendnbInfo *)xxeElement;
+              xxeSendnbInfo->buffer = buffer;
+              xxeSendnbInfo->size = bufferSize;
+              // slip in the associated memcpy()s _before_ the first Sendnb
+              if (xxeCount+count > max){
+                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                  "- count out of range", &rc);
+                return rc;
+              }
+              // start a new stream
+              StreamElement *newstream = new StreamElement[max]; // prep. stream
+              // fill in StreamElements from before firstIndex 
+              // (excluding firstIndex)
+              memcpy(newstream, stream, firstIndex*sizeof(StreamElement));
+              // insert extrastream
+              memcpy(newstream+firstIndex, extrastream, xxeCount 
+                * sizeof(StreamElement));
+              delete [] extrastream;  // done using
+              // fill in StreamElements from after firstIndex
+              // (including firstIndex)
+              memcpy(newstream+firstIndex+xxeCount, stream+firstIndex,
+                (count-firstIndex)*sizeof(StreamElement));
+              // replace stream
+              delete [] stream; // delete original stream
+              stream = newstream; // replace by new stream
+              count = count + xxeCount;        // account for modification
+              // need to indicate that stream was modified _before_ current
+              // StreamElement
+              breakFlag = 1;  // set
+            }
+            delete [] aeList;
+            if (breakFlag) break;
+          }
+          delete [] aeCountList;
+          delete [] petList;
+        }
+        break;
+      case waitOnAllRecvnb:
+        {
+          // use single buffer for all previous recvnb with identical partnerPet
+#if 0
+          printf("case: waitOnAllRecvnb: elementMatchCount() = %d\n",
+            aq->elementMatchCount(recvnb));
+#endif
+          // can't have more different Pets than there are recvnb entries
+          int *petList = new int[aq->elementMatchCount(recvnb)];
+          int *aeCountList = new int[aq->elementMatchCount(recvnb)];
+          int petListCount = aq->elementPetList(recvnb, petList, aeCountList);
+          for (int j=0; j<petListCount; j++){
+#if 0
+            printf("%d, petList[j]=%d, aeCountList[j]=%d\n", j, petList[j],
+              aeCountList[j]);
+#endif
+            AnalyzeElement **aeList = new AnalyzeElement*[aeCountList[j]];
+            aq->aeList(recvnb, petList[j], aeList);
+            if (aeCountList[j]==1){
+              // the recvnb StreamElements form a _single_ contiguous block
+              // -> don't need extra buffer
+              char *buffer = aeList[0]->bufferStart;
+              int bufferSize = aeList[0]->bufferSize;
+              // replace the very first recvnb StreamElement using the buffer
+              xxeElement = &(stream[aeList[0]->indexList[0]]);
+              xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
+              xxeRecvnbInfo->buffer = buffer;
+              xxeRecvnbInfo->size = bufferSize;
+              // invalidate all other recvnb StreamElements to nop
+              for (int k=1; k<aeList[0]->indexCount; k++)
+                stream[aeList[0]->indexList[k]].opId = nop;
+            }else{
+              // need to introduce a contiguous intermediate buffer
+              int bufferSize = 0; // reset
+              for (int kk=0; kk<aeCountList[j]; kk++)
+                bufferSize += aeList[kk]->bufferSize;
+           //printf("allocate itermediate buffer of size: %d bytes, filling in"
+           //  " for stream index: %d\n", bufferSize, aeList[0]->indexList[0]);
+              char *buffer = new char[bufferSize]; //TODO: leave leak
+              // prepare extra stream segment with memCpy StreamElements
+              StreamElement *extrastream = new StreamElement[aeCountList[j]];
+              int xxeCount = 0;
+              int bufferOffset = 0;
+              for (int kk=0; kk<aeCountList[j]; kk++){
+                // data of StreamElements referenced by aeList[kk] are congtig.
+                // -> only need a single memCpy for all of them
+                extrastream[xxeCount].opId = memCpy;
+                xxeElement = &(extrastream[xxeCount]);
+                xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
+                xxeMemCpyInfo->dstMem = aeList[kk]->bufferStart;
+                xxeMemCpyInfo->srcMem = buffer + bufferOffset;
+                xxeMemCpyInfo->size = aeList[kk]->bufferSize;
+                ++xxeCount;
+                bufferOffset += aeList[kk]->bufferSize;
+                // invalidate all StreamElements in stream asso. with aeList[kk]
+                for (int k=0; k<aeList[kk]->indexCount; k++)
+                  stream[aeList[kk]->indexList[k]].opId = nop;  // invalidate
+              }
+              // replace the very first recvnb StreamElement using the
+              // intermediate buffer
+              stream[aeList[0]->indexList[0]].opId = recvnb;
+              xxeElement = &(stream[aeList[0]->indexList[0]]);
+              xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
+              xxeRecvnbInfo->buffer = buffer;
+              xxeRecvnbInfo->size = bufferSize;
+              // slip in the associated memcpy()s _after_ the waitOnAllRecvnb
+              if (xxeCount+count > max){
+                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                  "- count out of range", &rc);
+                return rc;
+              }
+              // start a new stream
+              StreamElement *newstream = new StreamElement[max];  // prep stream
+              // fill in StreamElements from before this StreamElement
+              // (including this StreamElement)
+              memcpy(newstream, stream, (i+1)*sizeof(StreamElement));
+              // insert extrastream
+              memcpy(newstream+i+1, extrastream, xxeCount
+                * sizeof(StreamElement));
+              delete [] extrastream;  // done using
+              // fill in StreamElements from after this StreamElement
+              // (excluding this StreamElement)
+              memcpy(newstream+i+1+xxeCount, stream+i+1, (count-i-1)
+                * sizeof(StreamElement));
+              // replace stream
+              delete [] stream; // delete original stream
+              stream = newstream; // replace by new stream
+              count = count + xxeCount;        // account for modification
+            }
+            delete [] aeList;
+          }
+          delete [] aeCountList;
+          delete [] petList;
+        }
+        break;
+      default:
+        break;
+      }
+      if (breakFlag) break;
+    } // for i
+  } // while
+
+  // remove all the nop StreamElements from stream
+  // start a new stream
+  StreamElement *newstream = new StreamElement[max];  // prepare a new stream
+  int xxeCount = 0;
+  for (int i=0; i<count; i++){
+    xxeElement = &(stream[i]);
+    if (stream[i].opId != nop){
+      memcpy(newstream+xxeCount, stream+i, sizeof(StreamElement));
+      ++xxeCount;
+    }
+  }
+  // replace stream
+  delete [] stream; // delete original stream
+  stream = newstream; // replace by new stream
+  count = xxeCount;
+  // done replacing the nop StreamElements from stream
+  
+  // garbage collection
+  if (aq != NULL) delete aq;  // delete from previous analysis loop
+  
+  // return successfully
+  //rc = ESMF_SUCCESS       todo: activate once done implementing
+  return rc;
+}
 
 } // namespace ESMCI
