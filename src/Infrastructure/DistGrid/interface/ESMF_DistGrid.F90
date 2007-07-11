@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.19 2007/07/11 05:09:55 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.20 2007/07/11 19:09:23 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2020,7 +2020,7 @@ contains
 !     \item[distgrid] 
 !        Queried {\tt ESMF\_DistGrid} object.
 !     \item[de] 
-!        Queried DE.
+!        DE for which information is requested. {\tt \[1,..,deCount\]}
 !     \item[{[dimExtent]}]
 !        Upon return this number identifies the patch on which the DE is defined.
 !     \item[{[regDecompDeCoord]}]
@@ -2083,12 +2083,12 @@ contains
 !     \item[distgrid] 
 !        Queried {\tt ESMF\_DistGrid} object.
 !     \item[localDe] 
-!        Queried local DE.
+!        Local DE for which information is requested. {\tt \[1,..,localDeCount\]}
 !     \item[dim] 
-!        Queried dimension.
+!        Dimension for which information is requested. {\tt \[1,..,dimCount\]}
 !     \item[{[localIndexList]}]
-!        Upon return this array holds the indices that lie in {\tt localDe}'s
-!        DE-local LR domain along dimension {\tt dim}. The supplied variable 
+!        Upon return this holds the list of DistGrid patch-local indices
+!        for {\tt localDe} along dimension {\tt dim}. The supplied variable 
 !        must be at least of size {\tt dimExtent(dim, de(localDe))}.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
