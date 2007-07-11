@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.61 2007/07/10 01:57:29 theurich Exp $
+// $Id: ESMC_Array.h,v 1.62 2007/07/11 05:11:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -90,8 +90,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int deCount;
     int localDeCount;
     int *localDeList;
-    // derived from DELayout
-    int *deList;  // localDE index for DE or -1 if not local
+    int *deList;
     
   public:
     // constructor and destructor
@@ -112,7 +111,6 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       inverseDimmap = NULL;
       contiguousFlag = NULL;
       deCellCount = NULL;
-      deList = NULL;
     }
     Array(ESMC_TypeKind typekind, int rank, ESMC_LocalArray **larrayList,
       DistGrid *distgrid, int *exclusiveLBound, int *exclusiveUBound, 

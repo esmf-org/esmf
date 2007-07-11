@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.17 2007/06/26 23:22:35 cdeluca Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.18 2007/07/11 05:11:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.17 2007/06/26 23:22:35 cdeluca Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.18 2007/07/11 05:11:10 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -445,14 +445,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_Get()
-  subroutine ESMF_ArrayGetPDimPDe(array, dim, localDe, dimExtent, indexList, rc)
+  subroutine ESMF_ArrayGetPDimPDe(array, dim, localDe, dimExtent, localIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
     integer,                       intent(in)            :: dim
     integer,                       intent(in)            :: localDe
     integer,                       intent(out), optional :: dimExtent
-    integer,                       intent(out), optional :: indexList(:)
+    integer,                       intent(out), optional :: localIndexList(:)
     integer,                       intent(out), optional :: rc  
 !         
 !
@@ -471,7 +471,7 @@ contains
 !        Local DE for which information is requested.
 !     \item[{[dimExtent]}]
 !        Upon return this holds the DistGrid dimExtent for {\tt (dim, localDe)}.
-!     \item[{[indexList]}]
+!     \item[{[localIndexList]}]
 !        Upon return this holds the list of DistGrid patch-local indices
 !        associated with {\tt (dim, localDe)}.
 !     \item[{[rc]}] 
@@ -522,15 +522,15 @@ contains
       dimExtent = extent
     endif
 
-    if (present(indexList)) then
-      if (size(indexList) < extent) then
+    if (present(localIndexList)) then
+      if (size(localIndexList) < extent) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
           "indexList argument dimensioned too small", &
           ESMF_CONTEXT, rc)
         return
       endif
-      call ESMF_DistGridGet(distgrid, de=de, dim=dim, indexList=indexList, &
-        rc=status)
+      call ESMF_DistGridGet(distgrid, localDe=localDe, dim=dim, &
+        localIndexList=localIndexList, rc=status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
