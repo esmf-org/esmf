@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.19 2007/07/11 05:09:55 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.20 2007/07/11 19:08:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -239,14 +239,22 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_distgridgetpdepdim)(ESMCI::DistGrid **ptr, int *localDe,
-    int *dim, ESMCI::InterfaceInt **localIndexList, int *rc){
+  void FTN(c_esmc_distgridgetpdepdim)(ESMCI::DistGrid **ptr, int *localDeArg,
+    int *dimArg, ESMCI::InterfaceInt **localIndexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetpdepdim()"
+    int localrc = ESMC_RC_NOT_IMPL;
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // shift input indices to base zero
+    int localDe = *localDeArg - 1;
+    int dim = *dimArg - 1;
     // fill indexList
     if (*localIndexList != NULL){
-      // indexList was provided -> do some error checking
+      // indexList provided -> get localIndexListPtr & do some error checking
+      const int *localIndexListPtr =
+        (*ptr)->getLocalIndexList(localDe, dim+1, &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
       if ((*localIndexList)->dimCount != 1){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
           "- localIndexList array must be of rank 1", rc);
@@ -254,16 +262,15 @@ extern "C" {
       }
       if ((*localIndexList)->extent[0] <
         ((*ptr)->getDimExtent())[(*ptr)->getDELayout()->
-        getLocalDeList()[*localDe] * (*ptr)->getDimCount()+(*dim-1)]){
+        getLocalDeList()[localDe] * (*ptr)->getDimCount()+dim]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of localIndexList array size insufficiently", rc);
         return;
       }
       // fill in the values
-      memcpy((*localIndexList)->array,
-        (*ptr)->getLocalIndexList(*localDe, *dim),
-        sizeof(int) * ((*ptr)->getDimExtent())[(*ptr)->getDELayout()->
-        getLocalDeList()[*localDe] * (*ptr)->getDimCount()+(*dim-1)]);
+      memcpy((*localIndexList)->array, localIndexListPtr,
+        sizeof(int) * (*ptr)->getDimExtent()[((*ptr)->getDELayout()->
+        getLocalDeList()[localDe] * (*ptr)->getDimCount()+dim)]);
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
