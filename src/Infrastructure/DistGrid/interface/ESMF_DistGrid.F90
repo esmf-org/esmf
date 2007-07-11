@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.18 2007/06/26 23:22:35 cdeluca Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.19 2007/07/11 05:09:55 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2065,13 +2065,13 @@ contains
 ! !IROUTINE: ESMF_DistGridGet - Get DE local information for dimension about DistGrid
 
 ! !INTERFACE:
-  subroutine ESMF_DistGridGetPDePDim(distgrid, de, dim, indexList, rc)
+  subroutine ESMF_DistGridGetPDePDim(distgrid, localDe, dim, localIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),    intent(in)            :: distgrid
-    integer,                intent(in)            :: de
+    integer,                intent(in)            :: localDe
     integer,                intent(in)            :: dim
-    integer,                intent(out), optional :: indexList(:)
+    integer,                intent(out), optional :: localIndexList(:)
     integer,                intent(out), optional :: rc
 !         
 !
@@ -2082,14 +2082,14 @@ contains
 !     \begin{description}
 !     \item[distgrid] 
 !        Queried {\tt ESMF\_DistGrid} object.
-!     \item[de] 
-!        Queried DE.
+!     \item[localDe] 
+!        Queried local DE.
 !     \item[dim] 
 !        Queried dimension.
-!     \item[{[indexList]}]
-!        Upon return this array holds the indices that lie in {\tt de}'s
+!     \item[{[localIndexList]}]
+!        Upon return this array holds the indices that lie in {\tt localDe}'s
 !        DE-local LR domain along dimension {\tt dim}. The supplied variable 
-!        must be at least of size {\tt dimExtent(dim, de)}.
+!        must be at least of size {\tt dimExtent(dim, de(localDe))}.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2097,8 +2097,8 @@ contains
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                     :: status         ! local error status
-    type(ESMF_InterfaceInt):: indexListArg   ! helper variable
+    integer                 :: status               ! local error status
+    type(ESMF_InterfaceInt) :: localIndexListArg    ! helper variable
 
     ! initialize return code; assume routine not implemented
     status = ESMF_RC_NOT_IMPL
@@ -2108,17 +2108,18 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Deal with (optional) array arguments
-    indexListArg = ESMF_InterfaceIntCreate(indexList, rc=status)
+    localIndexListArg = ESMF_InterfaceIntCreate(localIndexList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridGetPDePDim(distgrid, de, dim, indexListArg, status)
+    call c_ESMC_DistGridGetPDePDim(distgrid, localDe, dim, localIndexListArg, &
+      status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(indexListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(localIndexListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

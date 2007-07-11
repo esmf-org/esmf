@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.21 2007/06/26 23:01:32 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.22 2007/07/11 05:09:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.21 2007/06/26 23:01:32 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.22 2007/07/11 05:09:55 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1212,11 +1212,6 @@ int DistGrid::construct(
   memcpy(dimContigFlag, dimContigFlagArg, sizeof(int)*dimCount*deCount);
   dimExtent = new int[dimCount*deCount];
   memcpy(dimExtent, dimExtentArg, sizeof(int)*dimCount*deCount);
-  indexList = new int*[dimCount*deCount];
-  for (int i=0; i<dimCount*deCount; i++){
-    indexList[i] = new int[dimExtent[i]];
-    memcpy(indexList[i], indexListArg[i], sizeof(int)*dimExtent[i]);
-  }
   // TODO: eventually get localIndexList from DistGrid::create() routines
   // directly
   localIndexList = new int*[dimCount*localDeCount];
@@ -1292,9 +1287,6 @@ int DistGrid::destruct(void){
   delete [] dePatchList;
   delete [] deCellCount;
   delete [] dimContigFlag;
-  for (int i=0; i<dimCount*deCount; i++)
-    delete [] indexList[i];
-  delete [] indexList;
   for (int i=0; i<dimCount*localDeCount; i++)
     delete [] localIndexList[i];
   delete [] localIndexList;
@@ -1367,14 +1359,14 @@ int DistGrid::print()const{
   for (int i=0; i<deCount; i++)
     printf("%d ", deCellCount[i]);
   printf("\n");
-  printf("indexList:\n");
-  for (int i=0; i<deCount; i++){
+  printf("localIndexList:\n");
+  for (int i=0; i<localDeCount; i++){
     printf("DE %d - ", i);
     for (int j=0; j<dimCount; j++){
       printf(" (");
       for (int k=0; k<dimExtent[i*dimCount+j]; k++){
         if (k!=0) printf(", ");
-        printf("%d", indexList[i*dimCount+j][k]);
+        printf("%d", localIndexList[i*dimCount+j][k]);
       }
       printf(") /");
     }
@@ -1536,9 +1528,10 @@ int DistGrid::getSequenceIndex(
 //
 // !ARGUMENTS:
 //
-  int de,                           // in - DE
-  int *index                        // in - DE-local index tupple in exclusive
+  int localDe,                      // in  - local DE = {0, ..., localDeCount-1}
+  int *index,                       // in - DE-local index tupple in exclusive
                                     //      region basis 0
+  int *rc                           // out - return code
   )const{
 //
 // !DESCRIPTION:
@@ -1546,113 +1539,32 @@ int DistGrid::getSequenceIndex(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
+  // check input
+  if (localDe < 0 || localDe > localDeCount-1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
+      "- Specified local DE out of bounds", rc);
+    return -1;
+  }
 
   // determine the sequentialized index
-  int patch = dePatchList[de];  // patches are basis 1 !!!!
-  int seqindex = indexList[de*dimCount+(dimCount-1)][index[dimCount-1]]
+  int patch = dePatchList[localDeList[localDe]];  // patches are basis 1 !!!!
+  int seqindex =
+    localIndexList[localDe*dimCount+(dimCount-1)][index[dimCount-1]]
     - minIndex[(patch-1)*dimCount+(dimCount-1)]; // initialize
   for (int i=dimCount-2; i>=0; i--){
     // add cells in the patch in which DE is located
     seqindex *= maxIndex[(patch-1)*dimCount+i] 
       - minIndex[(patch-1)*dimCount+i] + 1;
-    seqindex += indexList[de*dimCount+i][index[i]] 
+    seqindex += localIndexList[localDe*dimCount+i][index[i]] 
       - minIndex[(patch-1)*dimCount+i];
   }
-  for (int i=0; i<dePatchList[de]-2; i++)
+  for (int i=0; i<dePatchList[localDeList[localDe]]-2; i++)
     seqindex += patchCellCount[i];  // add all the cells of previous patches
   
   return seqindex+1;  // shift sequentialized index to basis 1 !!!!
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::getSequenceDe()"
-//BOPI
-// !IROUTINE:  ESMCI::DistGrid::getSequenceDe
-//
-// !INTERFACE:
-int DistGrid::getSequenceDe(
-//
-// !RETURN VALUE:
-//    int DE that covers sequential index
-//
-// !ARGUMENTS:
-//
-  int seqindex                      // in - sequential index basis 1
-  )const{
-//
-// !DESCRIPTION:
-//    Get DE that covers sequential index
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
-  // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
-
-  // determine the DE that covers sequentialized index
-  
-  // find that patch that contains seqindex
-  int cellSum=0; // reset
-  int p;          // this will be patch index basis 0
-  for (p=0; p<patchCount; p++)
-    if (seqindex <= cellSum + patchCellCount[p]) break;
-  if (p >= patchCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
-      "- Could not find seqindex in DistGrid", &rc);
-    return -1;  // indicate problem
-  }
-  seqindex -= cellSum;  // shift into patch-local sequential index
-  seqindex -= 1;        // shift into basis 0
-  // find the patch-local index tuple for seqindex
-  int *ii = new int[dimCount];
-  for (int i=dimCount-1; i>=0; i--){
-    int delta = 1; // reset
-    for (int j=0; j<i; j++)
-      delta *= maxIndex[p*dimCount+j] - minIndex[p*dimCount+j] + 1;
-    ii[i] = seqindex / delta;
-    seqindex = seqindex % delta;
-  }
-  // shift origin of ii[] onto patch origin
-  for (int i=0; i<dimCount; i++)
-    ii[i] += minIndex[p*dimCount+i];
-  // find the DE that covers this patch-local index tuple
-  int de;
-  for (de=0; de<deCount; de++){
-    if (dePatchList[de] != p+1) continue; // DE not in correct patch
-    int dim;
-    for (dim=0; dim<dimCount; dim++){
-      int i;
-      for (i=0; i<dimExtent[de*dimCount+dim]; i++){
-        if (indexList[de*dimCount+dim][i] == ii[dim]) break;  // dim match
-      }
-      if (i==dimExtent[de*dimCount+dim])break; // did not find dim match
-    }
-    if (dim==dimCount) break; // found matching DE
-  }
-  // garbage collection
-  delete [] ii;
-  // error checking
-  if (de == deCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
-      "- Could not find DE in DistGrid that covers seqindex", &rc);
-    return -1;  // indicate problem
-  }
-    
-  return de;
 }
 //-----------------------------------------------------------------------------
 
@@ -1751,7 +1663,7 @@ const int *DistGrid::getLocalIndexList(
 //
 // !ARGUMENTS:
 //
-  int de,                           // in  - local DE = {0, ..., localDeCount-1}
+  int localDe,                      // in  - local DE = {0, ..., localDeCount-1}
   int dim,                          // in  - dim  = {1, ..., dimCount}
   int *rc                           // out - return code
   )const{
@@ -1765,9 +1677,9 @@ const int *DistGrid::getLocalIndexList(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
   // check input
-  if (de < 0 || de > localDeCount-1){
+  if (localDe < 0 || localDe > localDeCount-1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
-      "- Specified DE out of bounds", rc);
+      "- Specified local DE out of bounds", rc);
     return NULL;
   }
   if (dim < 1 || dim > dimCount){
@@ -1778,7 +1690,7 @@ const int *DistGrid::getLocalIndexList(
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return localIndexList[de*dimCount+(dim-1)];
+  return localIndexList[localDe*dimCount+(dim-1)];
 }
 //-----------------------------------------------------------------------------
 
@@ -1881,10 +1793,7 @@ int DistGrid::serialize(
     *ip++ = maxIndex[i];
   for (int i=0; i<dimCount*deCount; i++)
     *ip++ = dimExtent[i];
-  for (int i=0; i<dimCount*deCount; i++)
-    for (int k=0; k<dimExtent[i]; k++)
-      *ip++ = indexList[i][k];
-
+  
   cp = (char *)ip;
   *offset = (cp - buffer);
   
@@ -1967,13 +1876,7 @@ DistGrid *DistGrid::deserialize(
     a->dimExtent = new int[a->dimCount*a->deCount];
     for (int i=0; i<a->dimCount*a->deCount; i++)
       a->dimExtent[i] = *ip++;
-    a->indexList = new int*[a->dimCount*a->deCount];
-    for (int i=0; i<a->dimCount*a->deCount; i++){
-      a->indexList[i] = new int[a->dimExtent[i]];
-      for (int k=0; k<a->dimExtent[i]; k++)
-        a->indexList[i][k] = *ip++;
-    }
-
+    
     cp = (char *)ip;
     *offset = (cp - buffer);
    

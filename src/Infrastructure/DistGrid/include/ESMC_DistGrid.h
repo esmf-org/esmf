@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.21 2007/06/26 23:01:31 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.22 2007/07/11 05:09:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -61,7 +61,6 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int *deCellCount;             // number of cells for each DE
     int *dimContigFlag;           // flag contiguous indices by DE per dim
     int *dimExtent;               // extent of indexList held by DE per dim
-    int **indexList;              // indices held by all DEs per dim
     int **localIndexList;         // indices held by local DEs per dim
     ESMC_Logical regDecompFlag;   // flag indicating regular decomposition
     int **connectionList;         // list of connection elements
@@ -130,13 +129,10 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     const int *getDimContigFlag()   const {return dimContigFlag;}
     int getDimContigFlag(int de, int dim, int *rc) const;
     const int *getDimExtent()       const {return dimExtent;}
-    const int *getLocalIndexList(int de, int dim, int *rc) const;
-    DELayout *getDelayout()         const {return delayout;}
+    const int *getLocalIndexList(int localDe, int dim, int *rc=NULL) const;
+    DELayout *getDELayout()         const {return delayout;}
     ESMC_Logical getRegDecompFlag() const {return regDecompFlag;}
-    int getSequenceIndex(int de, int *index) const;
-    int getSequenceDe(int seqindex) const;
-    //TODO: remove the getIndexList() call when DistGrid is free of global index
-    int *const*getIndexList()       const {return indexList;}
+    int getSequenceIndex(int localDe, int *index, int *rc=NULL) const;
     int setArbIdx(InterfaceInt *argIndices);
     // misc.
     int print() const;

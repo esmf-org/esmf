@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.18 2007/06/26 23:01:31 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.19 2007/07/11 05:09:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -184,7 +184,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // fill simple return values
     if (ESMC_NOT_PRESENT_FILTER(delayout) != ESMC_NULL_POINTER)
-      *delayout = (*ptr)->getDelayout();
+      *delayout = (*ptr)->getDELayout();
     if (ESMC_NOT_PRESENT_FILTER(patchCount) != ESMC_NULL_POINTER)
       *patchCount = (*ptr)->getPatchCount();
     if (ESMC_NOT_PRESENT_FILTER(dimCount) != ESMC_NULL_POINTER)
@@ -204,7 +204,7 @@ extern "C" {
           "- 1st dim of dimExtent array must be of size 'dimCount'", rc);
         return;
       }
-      if ((*dimExtent)->extent[1] < (*ptr)->getDelayout()->getDeCount()){
+      if ((*dimExtent)->extent[1] < (*ptr)->getDELayout()->getDeCount()){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dim of dimExtent array must be of size 'deCount'", rc);
         return;
@@ -213,7 +213,7 @@ extern "C" {
       // which are larger than dimCount x deCount. Consequently it is necessary
       // to memcpy strips of contiguous data since it cannot be assumed that
       // all data ends up contiguous in the dimExtent array.
-      for (int i=0; i<(*ptr)->getDelayout()->getDeCount(); i++)
+      for (int i=0; i<(*ptr)->getDELayout()->getDeCount(); i++)
         memcpy(&((*dimExtent)->array[i*((*dimExtent)->extent[0])]),
           &(((*ptr)->getDimExtent())[i*(*ptr)->getDimCount()]),
           sizeof(int)*(*ptr)->getDimCount());
@@ -226,43 +226,44 @@ extern "C" {
           "- patchList array must be of rank 1", rc);
         return;
       }
-      if ((*patchList)->extent[0] < (*ptr)->getDelayout()->getDeCount()){
+      if ((*patchList)->extent[0] < (*ptr)->getDELayout()->getDeCount()){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of patchList array must be of size 'deCount'", rc);
         return;
       }
       // fill in values
       memcpy((*patchList)->array, (*ptr)->getDePatchList(),
-        sizeof(int)*(*ptr)->getDelayout()->getDeCount());
+        sizeof(int)*(*ptr)->getDELayout()->getDeCount());
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_distgridgetpdepdim)(ESMCI::DistGrid **ptr, int *de, int *dim,
-    ESMCI::InterfaceInt **indexList, int *rc){
+  void FTN(c_esmc_distgridgetpdepdim)(ESMCI::DistGrid **ptr, int *localDe,
+    int *dim, ESMCI::InterfaceInt **localIndexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetpdepdim()"
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // fill indexList
-    if (*indexList != NULL){
+    if (*localIndexList != NULL){
       // indexList was provided -> do some error checking
-      if ((*indexList)->dimCount != 1){
+      if ((*localIndexList)->dimCount != 1){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-          "- indexList array must be of rank 1", rc);
+          "- localIndexList array must be of rank 1", rc);
         return;
       }
-      if ((*indexList)->extent[0] <
-        ((*ptr)->getDimExtent())[(*de)*(*ptr)->getDimCount()+(*dim-1)]){
+      if ((*localIndexList)->extent[0] <
+        ((*ptr)->getDimExtent())[(*ptr)->getDELayout()->
+        getLocalDeList()[*localDe] * (*ptr)->getDimCount()+(*dim-1)]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of indexListArg array size insufficiently", rc);
+          "- 1st dimension of localIndexList array size insufficiently", rc);
         return;
       }
       // fill in the values
-      memcpy((*indexList)->array,
-        ((*ptr)->getIndexList())[(*de)*(*ptr)->getDimCount()+(*dim-1)],
-        sizeof(int) *
-        ((*ptr)->getDimExtent())[(*de)*(*ptr)->getDimCount()+(*dim-1)]);
+      memcpy((*localIndexList)->array,
+        (*ptr)->getLocalIndexList(*localDe, *dim),
+        sizeof(int) * ((*ptr)->getDimExtent())[(*ptr)->getDELayout()->
+        getLocalDeList()[*localDe] * (*ptr)->getDimCount()+(*dim-1)]);
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
