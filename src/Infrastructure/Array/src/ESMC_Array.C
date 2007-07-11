@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.92 2007/07/11 05:11:10 theurich Exp $
+// $Id: ESMC_Array.C,v 1.93 2007/07/11 21:16:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.92 2007/07/11 05:11:10 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.93 2007/07/11 21:16:55 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3570,7 +3570,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
 #endif
 
   // allocate XXE and attach to RouteHandle
-  XXE *xxe = new XXE(50000, 50000, 20000);
+  XXE *xxe = new XXE(1000000, 1000000, 20000);
   localrc = (*routehandle)->ESMC_RouteHandleSetStorage(xxe);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
