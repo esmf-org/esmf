@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.25 2007/05/30 17:46:19 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.26 2007/07/11 19:08:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.25 2007/05/30 17:46:19 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.26 2007/07/11 19:08:01 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -654,7 +654,7 @@ print *, min_R4, min_R8
   !EX_UTest_Multi_Proc_Only
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "ArrayGet() Test"
-  call ESMF_ArrayGet(array, dim=1, localDe=1, indexList=indexList1, rc=rc)
+  call ESMF_ArrayGet(array, dim=1, localDe=1, localIndexList=indexList1, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -670,7 +670,7 @@ print *, min_R4, min_R8
   !EX_UTest_Multi_Proc_Only
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "ArrayGet() Test"
-  call ESMF_ArrayGet(array, dim=2, localDe=1, indexList=indexList2, rc=rc)
+  call ESMF_ArrayGet(array, dim=2, localDe=1, localIndexList=indexList2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
