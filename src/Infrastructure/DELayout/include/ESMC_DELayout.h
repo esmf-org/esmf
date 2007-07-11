@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.28 2007/07/10 01:46:15 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.29 2007/07/11 05:08:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -72,10 +72,11 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     VM *vm;    // ptr to this PET's VM instance this layout is running on
     ESMC_Logical oneToOneFlag;  // indicate whether this is a 1-to-1 layout
     int deCount;    // number of DEs
-    de_type *deList;// list that holds all of this layout's DE info
+    de_type *deInfoList;// list that holds all of this layout's DE info
     // --- local section ---
-    int localDeCount;// number of DEs associated with instantiating PET
-    int *localDeList;// list that holds all of the de indices for this PET
+    int localDeCount; // number of DEs associated with instantiating PET
+    int *localDeList; // list that holds all of the de indices for this PET
+    int *deList;      // localDE index for DE or -1 if not local
     
     int oldstyle;   // if this flag is set then this is an oldstyle delayout
                     // new style delayouts follow proposal sent out on 02/15/06
@@ -118,6 +119,7 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     // get() and set()
     VM *getVM()                     const {return vm;}
     int getDeCount()                const {return deCount;}
+    int *getDeList()                const {return deList;}
     int getLocalDeCount()           const {return localDeCount;}
     int *getLocalDeList()           const {return localDeList;}
     

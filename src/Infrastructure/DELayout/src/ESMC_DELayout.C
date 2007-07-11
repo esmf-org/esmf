@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.59 2007/07/10 01:46:15 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.60 2007/07/11 05:08:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.59 2007/07/10 01:46:15 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.60 2007/07/11 05:08:20 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -494,12 +494,12 @@ int DELayout::construct(
   oldstyle = 0;           // while the old style delayout is still supported
   vm = vmArg;             // pointer to the VM this delayout is constructed for
   deCount = petMapCount;  // number of DEs in the delayout
-  deList = new de_type[deCount];// allocate as many elements as there are DEs
+  deInfoList = new de_type[deCount];// alloc as many elements as there are DEs
   // set the de specific information
   for (int i=0; i<deCount; i++){
-    deList[i].de = i;                // by default start at 0
-    deList[i].pet = petMap[i];
-    deList[i].vas = vmArg->getVas(petMap[i]);
+    deInfoList[i].de = i;                // by default start at 0
+    deInfoList[i].pet = petMap[i];
+    deInfoList[i].vas = vmArg->getVas(petMap[i]);
   }
   
   // clean up petMap if necessary
@@ -510,12 +510,12 @@ int DELayout::construct(
   for (int i=0; i<petCount; i++)
     petFlag[i] = 0; // reset
   for (int i=0; i<deCount; i++){
-    int pet = deList[i].pet;
+    int pet = deInfoList[i].pet;
     // the following works because PETs in VM must be contiguous & start at zero
     if (pet < 0 || pet >= petCount){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
         "- DE to PET mapping is invalid", rc);
-      delete [] deList;
+      delete [] deInfoList;
       delete [] petFlag;
       return localrc;
     }
@@ -527,24 +527,31 @@ int DELayout::construct(
   delete [] petFlag;
   
   // fill PET-local part of layout object
+  deList = new int[deCount];
   localDeCount = 0;               // reset local de count
-  for (int i=0; i<deCount; i++)
-    if (deList[i].pet == localPet) ++localDeCount;
+  for (int i=0; i<deCount; i++){
+    if (deInfoList[i].pet == localPet){
+      deList[i] = localDeCount; // set to local DE
+      ++localDeCount;
+    }else
+      deList[i] = -1;           // indicate not a local DE
+  }
   localDeList = new int[localDeCount];  // allocate space to hold local de ids
   int j=0;
   for (int i=0; i<deCount; i++)
-    if (deList[i].pet == localPet){
+    if (deInfoList[i].pet == localPet){
       localDeList[j]=i;
       ++j;
     }
+    
   // fill VAS-local part of layout object
   vasLocalDeCount = 0;               // reset vas-local de count
   for (int i=0; i<deCount; i++)
-    if (deList[i].vas == localVas) ++vasLocalDeCount;
+    if (deInfoList[i].vas == localVas) ++vasLocalDeCount;
   vasLocalDeList = new int[vasLocalDeCount];  // vas-local de id list
   j=0;
   for (int i=0; i<deCount; i++)
-    if (deList[i].vas == localVas){
+    if (deInfoList[i].vas == localVas){
       vasLocalDeList[j]=i;
       ++j;
     }
@@ -613,62 +620,62 @@ int DELayout::construct1D(VM &vmArg, int deCountArg,
     // number of DEs has been supplied
     deCount = deCountArg;
   }
-  deList = new de_type[deCount];   // allocate as many DEs as there are PETs
+  deInfoList = new de_type[deCount];   // allocate as many DEs as there are PETs
   // uniquely label the DEs in the layout 
   for (int i=0; i<deCount; i++){
-    deList[i].de = i;                // default is to use basis zero
+    deInfoList[i].de = i;                // default is to use basis zero
   }
   // now define connectivity between the DEs
   if (deCount>1){
     for (int i=0; i<deCount; i++){
       if (i==0){
         if (cyclic==ESMF_TRUE){
-          deList[i].nconnect = 2;
-          deList[i].connect_de = new int[2];
-          deList[i].connect_w  = new int[2];
-          deList[i].connect_de[0] = deCount-1;
-          deList[i].connect_w[0] = DELAYOUT_CWGHT_NORMAL;
-          deList[i].connect_de[1] = 1;
-          deList[i].connect_w[1] = DELAYOUT_CWGHT_NORMAL;
+          deInfoList[i].nconnect = 2;
+          deInfoList[i].connect_de = new int[2];
+          deInfoList[i].connect_w  = new int[2];
+          deInfoList[i].connect_de[0] = deCount-1;
+          deInfoList[i].connect_w[0] = DELAYOUT_CWGHT_NORMAL;
+          deInfoList[i].connect_de[1] = 1;
+          deInfoList[i].connect_w[1] = DELAYOUT_CWGHT_NORMAL;
         }else{
-          deList[i].nconnect = 1;
-          deList[i].connect_de = new int[1];
-          deList[i].connect_w  = new int[1];
-          deList[i].connect_de[0] = 1;
-          deList[i].connect_w[0] = DELAYOUT_CWGHT_NORMAL;
+          deInfoList[i].nconnect = 1;
+          deInfoList[i].connect_de = new int[1];
+          deInfoList[i].connect_w  = new int[1];
+          deInfoList[i].connect_de[0] = 1;
+          deInfoList[i].connect_w[0] = DELAYOUT_CWGHT_NORMAL;
         }
       }else if (i==deCount-1){
         if (cyclic==ESMF_TRUE){
-          deList[i].nconnect = 2;
-          deList[i].connect_de = new int[2];
-          deList[i].connect_w  = new int[2];
-          deList[i].connect_de[0] = i-1;
-          deList[i].connect_w[0] = DELAYOUT_CWGHT_NORMAL;
-          deList[i].connect_de[1] = 0;
-          deList[i].connect_w[1] = DELAYOUT_CWGHT_NORMAL;
+          deInfoList[i].nconnect = 2;
+          deInfoList[i].connect_de = new int[2];
+          deInfoList[i].connect_w  = new int[2];
+          deInfoList[i].connect_de[0] = i-1;
+          deInfoList[i].connect_w[0] = DELAYOUT_CWGHT_NORMAL;
+          deInfoList[i].connect_de[1] = 0;
+          deInfoList[i].connect_w[1] = DELAYOUT_CWGHT_NORMAL;
         }else{
-          deList[i].nconnect = 1;
-          deList[i].connect_de = new int[1];
-          deList[i].connect_w  = new int[1];
-          deList[i].connect_de[0] = 0;
-          deList[i].connect_w[0] = DELAYOUT_CWGHT_NORMAL;
+          deInfoList[i].nconnect = 1;
+          deInfoList[i].connect_de = new int[1];
+          deInfoList[i].connect_w  = new int[1];
+          deInfoList[i].connect_de[0] = 0;
+          deInfoList[i].connect_w[0] = DELAYOUT_CWGHT_NORMAL;
         }
       }else{
-        deList[i].nconnect = 2;
-        deList[i].connect_de = new int[2];
-        deList[i].connect_w  = new int[2];
-        deList[i].connect_de[0] = i-1;
-        deList[i].connect_w[0] = DELAYOUT_CWGHT_NORMAL;
-        deList[i].connect_de[1] = i+1;
-        deList[i].connect_w[1] = DELAYOUT_CWGHT_NORMAL;
+        deInfoList[i].nconnect = 2;
+        deInfoList[i].connect_de = new int[2];
+        deInfoList[i].connect_w  = new int[2];
+        deInfoList[i].connect_de[0] = i-1;
+        deInfoList[i].connect_w[0] = DELAYOUT_CWGHT_NORMAL;
+        deInfoList[i].connect_de[1] = i+1;
+        deInfoList[i].connect_w[1] = DELAYOUT_CWGHT_NORMAL;
       }        
     }
   } else  {
-     deList[0].nconnect = 1;
-     deList[0].connect_de = new int[1];
-     deList[0].connect_w  = new int[1];
-     deList[0].connect_de[0] = 0;
-     deList[0].connect_w[0] = DELAYOUT_CWGHT_NORMAL;
+     deInfoList[0].nconnect = 1;
+     deInfoList[0].connect_de = new int[1];
+     deInfoList[0].connect_w  = new int[1];
+     deInfoList[0].connect_de[0] = 0;
+     deInfoList[0].connect_w[0] = DELAYOUT_CWGHT_NORMAL;
   }
 	
   // Setup the dimensionality and coordinates of this layout. This information
@@ -678,14 +685,14 @@ int DELayout::construct1D(VM &vmArg, int deCountArg,
   dims = new int[ndim];
   dims[0] = deCount;
   for (int i=0; i<deCount; i++){
-    deList[i].coord = new int[ndim];
-    deList[i].coord[0] = i;
+    deInfoList[i].coord = new int[ndim];
+    deInfoList[i].coord[0] = i;
   }
   // DE-to-PET mapping
   if (len==deCount){
     // DEtoPET mapping has been provided externally
     for (int i=0; i<deCount; i++)
-      deList[i].pet = DEtoPET[i];   // copy the mapping
+      deInfoList[i].pet = DEtoPET[i];   // copy the mapping
   }else{
     // Use the mapper algorithm to find good DE-to-PET mapping
     ESMC_DELayoutFindDEtoPET(npets);
@@ -712,7 +719,7 @@ int DELayout::construct1D(VM &vmArg, int deCountArg,
   // Now that the layout is pretty much set up it is time to go through once
   // more to set the correct VAS.
   for (int i=0; i<deCount; i++)
-    deList[i].vas = vm->getVas(deList[i].pet);
+    deInfoList[i].vas = vm->getVas(deInfoList[i].pet);
   localrc = ESMF_SUCCESS;
   return localrc;
 }
@@ -755,24 +762,24 @@ int DELayout::constructND(VM &vmArg, int *deCountArg, int nndim,
   deCount = 1;
   for (int i=0; i<nndim; i++)
     deCount *= deCountArg[i];
-  deList = new de_type[deCount];    // allocate as many DEs as there are PETs
+  deInfoList = new de_type[deCount]; // allocate as many DEs as there are PETs
   // uniquely label the DEs in the layout 
   for (int i=0; i<deCount; i++){
-    deList[i].de = i;                // default is to use basis zero
+    deInfoList[i].de = i;                // default is to use basis zero
   }
   // Setup the dimensionality and coordinates of this layout. This information
   // is only kept for external use!
   for (int i=0; i<deCount; i++){
-    deList[i].coord = new int[ndim];
+    deInfoList[i].coord = new int[ndim];
   }
   for (int j=0; j<ndim; j++)
-    deList[0].coord[j] = 0;
+    deInfoList[0].coord[j] = 0;
   for (int i=1; i<deCount; i++){
     int carryover = 1;
     for (int j=0; j<ndim; j++){
-      deList[i].coord[j] = deList[i-1].coord[j] + carryover;
-      if (deList[i].coord[j]==deCountArg[j]){
-        deList[i].coord[j] = 0;
+      deInfoList[i].coord[j] = deInfoList[i-1].coord[j] + carryover;
+      if (deInfoList[i].coord[j]==deCountArg[j]){
+        deInfoList[i].coord[j] = 0;
         carryover = 1;
       }else{
         carryover=0;
@@ -784,15 +791,15 @@ int DELayout::constructND(VM &vmArg, int *deCountArg, int nndim,
   // however even without real connections the connect_de and connect_w arrays
   // must be valid in order for the delete method to function correctly!
   for (int i=0; i<deCount; i++){
-    deList[i].nconnect = 0;
-    deList[i].connect_de = new int[1];
-    deList[i].connect_w  = new int[1];
+    deInfoList[i].nconnect = 0;
+    deInfoList[i].connect_de = new int[1];
+    deInfoList[i].connect_w  = new int[1];
   }
   // DE-to-PET mapping
   if (len==deCount){
     // DEtoPET mapping has been provided externally
     for (int i=0; i<deCount; i++)
-      deList[i].pet = DEtoPET[i];   // copy the mapping
+      deInfoList[i].pet = DEtoPET[i];   // copy the mapping
     // nsc - if deCount is = npets, go ahead and set the 1:1 flag
     // even if the user supplied the mapping.   6dec04
     // TODO: gjt - this needs a bit more consideration than this, just 
@@ -827,7 +834,7 @@ int DELayout::constructND(VM &vmArg, int *deCountArg, int nndim,
   // Now that the layout is pretty much set up it is time to go through once
   // more to set the correct VAS.
   for (int i=0; i<deCount; i++)
-    deList[i].vas = vm->getVas(deList[i].pet);
+    deInfoList[i].vas = vm->getVas(deInfoList[i].pet);
   localrc = ESMF_SUCCESS;
   return localrc;
 }
@@ -861,21 +868,22 @@ int DELayout::destruct(void){
   status = ESMC_RC_NOT_IMPL;
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
-
+  
   if (oldstyle){
     // oldstyle DELayout has several more allocations that need to be deleted
     for (int i=0; i<deCount; i++){
-      delete [] deList[i].connect_de;
-      delete [] deList[i].connect_w;
-      delete [] deList[i].coord;
+      delete [] deInfoList[i].connect_de;
+      delete [] deInfoList[i].connect_w;
+      delete [] deInfoList[i].coord;
     }
     if (logRectFlag == ESMF_TRUE)
       delete [] dims;
   }
     
   // oldstyle and newstyle DELayout alike must delete the following members
-  delete [] deList;
+  delete [] deInfoList;
   delete [] localDeList;
+  delete [] deList;
 
   if (!oldstyle){
     // this is only for newstyle DELayouts
@@ -950,7 +958,7 @@ int DELayout::get(
 
   if (petMapCount == deCount){
     for (int i=0; i<deCount; i++)
-      petMap[i] = deList[i].pet;
+      petMap[i] = deInfoList[i].pet;
   }else if (petMapCount != 0){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
       "- Size of petMap does not match deCount", rc);
@@ -959,7 +967,7 @@ int DELayout::get(
 
   if (vasMapCount == deCount){
     for (int i=0; i<deCount; i++)
-      vasMap[i] = deList[i].vas;
+      vasMap[i] = deInfoList[i].vas;
   }else if (vasMapCount != 0){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
       "- Size of vasMap does not match deCount", rc);
@@ -1207,26 +1215,26 @@ int DELayout::getDELocalInfo(
   }
   if (len_coord >= ndim) {
     for (i=0; i<ndim; i++)
-      DEcoord[i] = deList[de].coord[i];
+      DEcoord[i] = deInfoList[de].coord[i];
     for (i=ndim; i<len_coord; i++)
       DEcoord[i] = 0;
   }
-  if (len_cde >= deList[de].nconnect) {
-    for (i=0; i<deList[de].nconnect; i++)
-      DEcde[i] = deList[de].connect_de[i];
-    for (i=deList[de].nconnect; i<len_cde; i++)
+  if (len_cde >= deInfoList[de].nconnect) {
+    for (i=0; i<deInfoList[de].nconnect; i++)
+      DEcde[i] = deInfoList[de].connect_de[i];
+    for (i=deInfoList[de].nconnect; i<len_cde; i++)
       DEcde[i] = 0;
   }
-  if (len_cw >= deList[de].nconnect) {
-    for (i=0; i<deList[de].nconnect; i++)
-      DEcw[i] = deList[de].connect_w[i];
-    for (i=deList[de].nconnect; i<len_cw; i++)
+  if (len_cw >= deInfoList[de].nconnect) {
+    for (i=0; i<deInfoList[de].nconnect; i++)
+      DEcw[i] = deInfoList[de].connect_w[i];
+    for (i=deInfoList[de].nconnect; i<len_cw; i++)
       DEcw[i] = 0;
   }
   if (nDEc != ESMC_NULL_POINTER)
-    *nDEc = deList[de].nconnect;
+    *nDEc = deInfoList[de].nconnect;
   if (vas != ESMC_NULL_POINTER)
-    *vas = deList[de].vas;
+    *vas = deInfoList[de].vas;
   localrc = ESMF_SUCCESS;
   return localrc;
 }
@@ -1264,10 +1272,10 @@ int DELayout::getDEMatchDE(
   localrc = ESMC_RC_NOT_IMPL;
   int *tempMatchList = new int[layoutMatch.deCount]; // maximum number of DEs
   int tempMatchCount = 0;
-  int vasCompare = deList[de].vas;
+  int vasCompare = deInfoList[de].vas;
   int j=0;
   for (int i=0; i<layoutMatch.deCount; i++)
-    if (layoutMatch.deList[i].vas == vasCompare){
+    if (layoutMatch.deInfoList[i].vas == vasCompare){
       tempMatchList[j] = i;
       ++j;
     }
@@ -1322,7 +1330,7 @@ int DELayout::getDEMatchPET(
   int npets = vmMatch.getNpets();  // maximum number of PETs in vmMatch
   int *tempMatchList = new int[npets];
   int tempMatchCount = 0;
-  int vasCompare = deList[de].vas; // this is the virtual address space id
+  int vasCompare = deInfoList[de].vas; // this is the virtual address space id
   int j=0;
   for (int i=0; i<npets; i++)
     if (vmMatch.getVas(i) == vasCompare){
@@ -1378,11 +1386,12 @@ int DELayout::print(){
       printf("ESMF_FALSE\n");
     printf("deCount = %d\n", deCount);
     for (int i=0; i<deCount; i++){
-      printf("  deList[%d]: de=%d, pet=%d, vas=%d, nconnect=%d\n", i, 
-        deList[i].de, deList[i].pet, deList[i].vas, deList[i].nconnect);
-      for (int j=0; j<deList[i].nconnect; j++)
+      printf("  deInfoList[%d]: de=%d, pet=%d, vas=%d, nconnect=%d\n", i, 
+        deInfoList[i].de, deInfoList[i].pet, deInfoList[i].vas,
+        deInfoList[i].nconnect);
+      for (int j=0; j<deInfoList[i].nconnect; j++)
         printf("      connect_de[%d]=%d, weight=%d\n", j,
-          deList[i].connect_de[j], deList[i].connect_w[j]);
+          deInfoList[i].connect_de[j], deInfoList[i].connect_w[j]);
     }
     printf("--- local DELayout section ---\n");
     printf("localDeCount=%d\n", localDeCount);
@@ -1393,8 +1402,8 @@ int DELayout::print(){
       printf("[%d]: ", i);
       int j;
       for (j=0; j<ndim-1; j++)
-        printf("%d, ", deList[i].coord[j]);
-      printf("%d\n", deList[i].coord[j]);
+        printf("%d, ", deInfoList[i].coord[j]);
+      printf("%d\n", deInfoList[i].coord[j]);
     }
   }else{
     printf("This is a NEWSTYLE DELayout!\n");
@@ -1414,8 +1423,8 @@ int DELayout::print(){
       printf(" ...unknown... \n");
     printf("deCount = %d\n", deCount);
     for (int i=0; i<deCount; i++){
-      printf("  deList[%d]: de=%d, pet=%d, vas=%d\n", i, 
-        deList[i].de, deList[i].pet, deList[i].vas);
+      printf("  deInfoList[%d]: de=%d, pet=%d, vas=%d\n", i, 
+        deInfoList[i].de, deInfoList[i].pet, deInfoList[i].vas);
     }
     printf("--- PET-local DELayout section ---\n");
     printf("localDeCount=%d\n", localDeCount);
@@ -1565,7 +1574,7 @@ int DELayout::serialize(
     ip = (int *)dp;
   }
 
-  for (i=0, dep=deList; i<deCount; i++, dep++) {
+  for (i=0, dep=deInfoList; i<deCount; i++, dep++) {
     *ip++ = dep->de;
     *ip++ = dep->pet;
     *ip++ = dep->vas;
@@ -1662,8 +1671,8 @@ DELayout *DELayout::deserialize(
     ip = (int *)dp;
   }
   
-  a->deList = new de_type[a->deCount];
-  for (i=0, dep=a->deList; i<a->deCount; i++, dep++) {
+  a->deInfoList = new de_type[a->deCount];
+  for (i=0, dep=a->deInfoList; i<a->deCount; i++, dep++) {
     dep->de = *ip++;
     dep->pet = *ip++;
     dep->vas = *ip++;
@@ -1928,8 +1937,8 @@ int DELayout::ESMC_DELayoutCopy(
     return localrc; // bail out
   }
   int mypet = vm->getMypet();
-  int srcpet = deList[srcDE].pet;      // PETid where srcDE lives
-  int destpet = deList[destDE].pet;    // PETid where destDE lives
+  int srcpet = deInfoList[srcDE].pet;      // PETid where srcDE lives
+  int destpet = deInfoList[destDE].pet;    // PETid where destDE lives
   if (srcpet==mypet && destpet==mypet){
     // srcDE and destDE are on my PET
     memcpy(destdata, srcdata, blen);
@@ -2180,7 +2189,7 @@ int DELayout::ESMC_DELayoutScatter(
   localrc = ESMC_RC_NOT_IMPL;
 
   int mypet = vm->getMypet();
-  if (deList[rootDE].pet==mypet){
+  if (deInfoList[rootDE].pet==mypet){
     // my PET holds the rootDE
     char *tempdata = (char *)srcdata;
     for (int i=0; i<deCount; i++){
@@ -2264,7 +2273,7 @@ int DELayout::ESMC_DELayoutGather(
   localrc = ESMC_RC_NOT_IMPL;
 
   int mypet = vm->getMypet();
-  if (deList[rootDE].pet==mypet){
+  if (deInfoList[rootDE].pet==mypet){
     // my PET holds the rootDE -> receive chunks from all other DEs
     char *tempdata = (char *)destdata;
     for (int i=0; i<deCount; i++){
@@ -2352,7 +2361,7 @@ int DELayout::ESMC_DELayoutGatherV(
   // Initialize return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  if (deList[rootDE].pet==mypet){
+  if (deInfoList[rootDE].pet==mypet){
     // my PET holds the rootDE -> receive chunks from all other DEs
     char *tempdata;
     for (int i=0; i<deCount; i++){
@@ -2445,7 +2454,7 @@ int DELayout::ESMC_DELayoutFindDEtoPET(int npets){
     // 1:1 layout
     oneToOneFlag = ESMF_TRUE;
     for (int i=0; i<deCount; i++)
-      deList[i].pet = i;   // default 1:1 DE-to-PET mapping
+      deInfoList[i].pet = i;   // default 1:1 DE-to-PET mapping
   }else{
     // not a 1:1 layout
     oneToOneFlag = ESMF_FALSE;
@@ -2463,7 +2472,7 @@ int DELayout::ESMC_DELayoutFindDEtoPET(int npets){
     i=0;
     int k=0;
     for (int j=0; j<deCount; j++){
-      deList[j].pet = i;
+      deInfoList[j].pet = i;
       ++k;
       if (k>=ndepet[i]){
         k=0;
@@ -2501,11 +2510,11 @@ int DELayout::ESMC_DELayoutFillLocal(int mypet){
   localrc = ESMC_RC_NOT_IMPL;
   localDeCount = 0;               // reset local de count
   for (int i=0; i<deCount; i++)
-    if (deList[i].pet == mypet) ++localDeCount;
+    if (deInfoList[i].pet == mypet) ++localDeCount;
   localDeList = new int[localDeCount];  // allocate space to hold local de ids
   int j=0;
   for (int i=0; i<deCount; i++)
-    if (deList[i].pet == mypet){
+    if (deInfoList[i].pet == mypet){
       localDeList[j]=i;
       ++j;
     }
