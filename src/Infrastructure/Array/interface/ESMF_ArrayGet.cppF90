@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.18 2007/07/11 05:11:10 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.19 2007/07/11 19:06:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.18 2007/07/11 05:11:10 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.19 2007/07/11 19:06:17 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -87,7 +87,7 @@ module ESMF_ArrayGetMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     module procedure ESMF_ArrayGetDefault
-    module procedure ESMF_ArrayGetPDimPDe
+    module procedure ESMF_ArrayGetPDePDim
     TypeKindRankInterfaceMacro(ArrayGetFPtr)
     module procedure ESMF_ArrayGetLarray
     module procedure ESMF_ArrayGetTotalCellMask1D
@@ -439,18 +439,18 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayGetPDimPDe()"
+^define ESMF_METHOD "ESMF_ArrayGetPDePDim()"
 !BOP
 ! !IROUTINE: ESMF_ArrayGet - Get Array internals per dim per local DE
 
 ! !INTERFACE:
   ! Private name; call using ESMF_Get()
-  subroutine ESMF_ArrayGetPDimPDe(array, dim, localDe, dimExtent, localIndexList, rc)
+  subroutine ESMF_ArrayGetPDePDim(array, localDe, dim, dimExtent, localIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
-    integer,                       intent(in)            :: dim
     integer,                       intent(in)            :: localDe
+    integer,                       intent(in)            :: dim
     integer,                       intent(out), optional :: dimExtent
     integer,                       intent(out), optional :: localIndexList(:)
     integer,                       intent(out), optional :: rc  
@@ -465,15 +465,16 @@ contains
 !     \begin{description}
 !     \item[array] 
 !        Queried {\tt ESMF\_Array} object.
-!     \item[dim]
-!        Dimension for which information is requested.
 !     \item[localDe]
-!        Local DE for which information is requested.
+!        Local DE for which information is requested. {\tt \[1,..,localDeCount\]}
+!     \item[dim]
+!        Dimension for which information is requested. {\tt \[1,..,dimCount\]}
 !     \item[{[dimExtent]}]
-!        Upon return this holds the DistGrid dimExtent for {\tt (dim, localDe)}.
+!        Upon return this holds the DistGrid dimExtent associated with
+!        {\tt localDe, dim}.
 !     \item[{[localIndexList]}]
 !        Upon return this holds the list of DistGrid patch-local indices
-!        associated with {\tt (dim, localDe)}.
+!        for {\tt localDe} along dimension {\tt dim}.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -517,11 +518,12 @@ contains
     extent = dimExtentInternal(dim, de+1)
     deallocate(dimExtentInternal)
       
-    ! Obtain requested information
+    ! Set dimExtent output
     if (present(dimExtent)) then
       dimExtent = extent
     endif
 
+    ! Obtain localIndexList
     if (present(localIndexList)) then
       if (size(localIndexList) < extent) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
@@ -538,7 +540,7 @@ contains
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayGetPDimPDe
+  end subroutine ESMF_ArrayGetPDePDim
 !------------------------------------------------------------------------------
 
 
