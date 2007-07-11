@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.5 2007/07/05 15:52:49 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.6 2007/07/11 20:50:40 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   const int *getUbounds(void) const {return ubounds;}
   const int *getCoordRanks(void) const {return coordRanks;}
   int **getCoordDimMap(void) const {return coordDimMap;}
-
+  const char *getName(void)  const {return ESMC_BaseGetName();}
 
   // Set Grid default values
   friend void  _GridSetDefaults(Grid *grid);
@@ -109,10 +109,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   
   // Grid Construct (grid usable after construction)
   Grid(
-       int nameLen, 
-       char *name, 
+       char *name,                            // (in)
        ESMC_TypeKind typekindArg,              // (in)
-       DistGrid *distgridArg,             // (in)
+       DistGrid *distgridArg,                  // (in)
        int distRankArg,                        // (in)
        int *dimmapArg,                         // (in)
        int undistRankArg,                      // (in)
@@ -151,7 +150,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 };  // end class ESMC_Grid
  
  
- Grid *GridCreate(
+Grid *GridCreate(
 		  int nameLen,                                // (in)
 		  char *name,                                 // (in)
 		  ESMC_TypeKind *typekind,                    // (in)
@@ -166,6 +165,8 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 		  int *rc                                     // (out) return code
 		  );
  
+Grid *GridCreateEmpty(int *_rc);
+
 
 int gridSetCoordFromArray(
   Grid *_grid, 

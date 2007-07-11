@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.5 2007/07/05 19:07:50 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.6 2007/07/11 20:50:41 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMCI_Grid.C,v 1.5 2007/07/05 19:07:50 oehmke Exp $";
+  static const char *const version = "$Id: ESMCI_Grid.C,v 1.6 2007/07/11 20:50:41 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -193,7 +193,7 @@ Grid *GridCreate(
   ESMC_IndexFlag indexflag;
   int gridType;
   int ind;
-
+  char *name;  
 
   // TODO: Change to get rid of return codes in favor of try-catch
 
@@ -207,6 +207,14 @@ Grid *GridCreate(
   if (_distgrid == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to distgrid argument", _rc);
+    return ESMC_NULL_POINTER;
+  }
+
+  // process name
+  name = ESMC_F90toCstring(_name, _nameLen);
+  if (!name && _nameLen){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+					  "- Not a valid string", _rc);
     return ESMC_NULL_POINTER;
   }
 
@@ -407,7 +415,7 @@ Grid *GridCreate(
   // allocate the new Grid object
   Grid *grid=ESMC_NULL_POINTER;
   try{
-    grid = new Grid(_nameLen, _name, typekind, _distgrid, 
+    grid = new Grid(name, typekind, _distgrid, 
              distRank, dimmap, 
              undistRank, lbounds, ubounds,
              rank, coordRanks, coordDimMap, 
@@ -421,7 +429,9 @@ Grid *GridCreate(
 
   // Dellocate temporay arrays
   if (_ubounds != NULL)  delete [] lbounds;
- 
+
+  if (name) delete [] name;
+
   delete [] dimmap;
 
   delete [] coordRanks;
@@ -433,6 +443,56 @@ Grid *GridCreate(
   return grid;
   }
 //-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridCreateEmpty()"
+//BOP
+// !IROUTINE:  GridCreateEmpty
+//
+// !INTERFACE:
+Grid *GridCreateEmpty(
+//
+// !RETURN VALUE:
+//    Grid * to newly allocated ESMC_Grid
+//
+// !ARGUMENTS:
+//
+  int *_rc                                     // (out) return code
+  ){
+//
+// !DESCRIPTION:
+//    Create an {\tt ESMC\_Grid} object from a DistGrid.
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int status;                 // local error status
+
+  // TODO: Change to get rid of return codes in favor of try-catch
+
+  // initialize return code; assume routine not implemented
+  status = ESMC_RC_NOT_IMPL;
+  if (_rc!=NULL)
+    *_rc = ESMC_RC_NOT_IMPL;
+  
+  // allocate the new Grid object
+  Grid *grid=ESMC_NULL_POINTER;
+  try{
+    grid = new Grid();
+  }catch(...){
+     // allocation error
+     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_Grid.", _rc);  
+     return ESMC_NULL_POINTER;
+  }
+
+  // return successfully
+  *_rc = ESMF_SUCCESS;
+
+  return grid;
+  }
+//-----------------------------------------------------------------------------
+
 
 
 //-----------------------------------------------------------------------------
@@ -560,7 +620,10 @@ int gridSetCoordFromArray(
     return rc;
   }
 
-  // TODO: make sure array has the same distgrid as the grid
+  // TODO: make sure array is consistant with the Grid (i.e. has the same distgrid, 
+  //       typekind, rank, etc.)
+
+
 
   // Process staggerloc
   if (_docopy==NULL) {
@@ -727,8 +790,8 @@ void _GridSetDefaults(Grid *_grid)
   _grid->gridType=0;
   _grid->indexflag=ESMF_INDEX_DELOCAL;
   _grid->distgrid= ESMC_NULL_POINTER; 
-  
-    // TODO: Set default name (if you can easily change it)
+
+  // Don't default basename because it appears to generate a name for you if you do
 }
 
 
@@ -746,8 +809,7 @@ Grid::Grid(
 //
 // !ARGUMENTS:
 //
-  int _nameLen, 
-  char *_name, 
+  char *_name,                          // (in)
   ESMC_TypeKind _typekind,              // (in)
   DistGrid *_distgrid,                  // (in)
   int _distRank,                        // (in)
@@ -825,6 +887,9 @@ Grid::Grid(
     
     // Allocate coordinate array storage
     coordArrayList=_allocate2D<Array *>(staggerLocCount,rank);
+    for(int i=0; i<staggerLocCount; i++)
+      for(int j=0; j<rank; j++)
+	coordArrayList[i][j]=ESMC_NULL_POINTER;
 
     // Allocate coordinate Alignment storage
     coordAlignList=_allocate3D<int>(staggerLocCount,rank,rank);
@@ -833,10 +898,8 @@ Grid::Grid(
     didIAllocList=_allocate2D<bool>(staggerLocCount,rank);
   }
 
-
-  // TODO: work on name later
-  // invalidate the name for this Grid object in the Base class
-  ESMC_BaseSetName(NULL, "Grid");
+  // Set the name for this Grid object in the Base class
+  ESMC_BaseSetName(_name, "Grid");
 
   // Grid is now ready to be used in grid methods, so set status appropriately
   status=ESMC_GRIDSTATUS_SHAPE_READY;
@@ -1026,6 +1089,7 @@ int Grid::getCoordArray(
 //EOPI
 //-----------------------------------------------------------------------------
   int rc;
+  Array *array;
 
   // initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
@@ -1051,8 +1115,18 @@ int Grid::getCoordArray(
     return rc;
   }
 
-  // Set array in list
-  *_array=coordArrayList[_staggerloc][_coord];
+  // get Array pointer from List
+  array=coordArrayList[_staggerloc][_coord];
+
+  // Check if array has been set
+  if (array==ESMC_NULL_POINTER) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- accessing unset coord array", &rc);
+    return rc;
+  }
+
+  // output array
+  *_array=array;
 
   return ESMF_SUCCESS;
 }
