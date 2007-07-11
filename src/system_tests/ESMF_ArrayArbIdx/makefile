@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2007/06/12 21:28:58 dneckels Exp $ 
+# $Id: makefile,v 1.2 2007/07/11 17:05:40 dneckels Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -44,5 +44,5 @@ CLOBBERDIRS =
 RUN_ArrayArbIdx:
 	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=ArrayArbIdx NP=6 stest
 
-RUN_ArrayArbIdx:
+RUN_ArrayArbIdxUNI:
 	$(MAKE) TNAME=ArrayArbIdx NP=1 stest
