@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.20 2007/03/31 05:51:29 cdeluca Exp $
+! $Id: ESMF_VMUTest.F90,v 1.21 2007/07/12 17:20:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -30,20 +30,21 @@
 
 !     !Module global variables
       type(ESMF_VM),save :: vm
-      integer:: localPet, npets
+      integer:: localPet, npets, rootPet
       integer, allocatable:: array1(:), array3(:),array3_soln(:)
+      integer, allocatable:: array4(:), array5(:)
       integer, dimension (:, :), allocatable:: array2
       integer::  func_results, myresults
       integer:: nsize, i, j
       integer:: isum
       real:: fsum
 
-      real(ESMF_KIND_R8), allocatable:: farray1(:)
+      real(ESMF_KIND_R8), allocatable:: farray1(:), farray4(:), farray5(:)
       real(ESMF_KIND_R8), allocatable:: farray3(:) , farray3_soln(:)
       real(ESMF_KIND_R8), dimension(:,:), allocatable:: farray2
       real(ESMF_KIND_R8):: float_results, my_float_results
 
-      real(ESMF_KIND_R4), allocatable:: f4array1(:)
+      real(ESMF_KIND_R4), allocatable:: f4array1(:), f4array4(:), f4array5(:)
       real(ESMF_KIND_R4), allocatable:: f4array3(:), f4array3_soln(:)
       real(ESMF_KIND_R4), dimension(:,:), allocatable:: f4array2
       real(ESMF_KIND_R4):: float4_results, my_float4_results
@@ -52,6 +53,370 @@
       contains
 !==============================================================================
 
+
+      subroutine test_Reduce_sum
+! This subroutine tests all the overloaded versions of the ESMF global sum.
+
+      ! Test with integer arguments
+      !=============================
+      !EX_UTest
+      array4 = (/50,50/)
+      ! Set expected results
+      if (npets == 1) then
+	array5 = (/1,2/)
+      else
+      	array5 = (/604,608/)
+      end if
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM Reduce ESMF_SUM Test"
+      call ESMF_VMReduce(vm, sendData=array1, recvData=array4, &
+                                count=nsize, reduceflag=ESMF_SUM, root=rootPet, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! print the result
+      print *, 'Global sum:' 
+      print *, localPet,' array4(1): ', array4(1), &
+                        ' array4(2):', array4(2) 
+
+      print *, localPet,' array1(1): ', array1(1), &
+                        ' array1(2):', array1(2) 
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify Reduce ESMF_SUM Results Test"
+      if (localPet == rootPet) then
+      	call ESMF_Test((array4(1)==(array5(1)).and.(array4(2)==(array5(2)))), &
+			name, failMsg, result, ESMF_SRCLINE)
+      else
+      	call ESMF_Test(((array4(1)==50).and.(array4(2)==50)), &
+			name, failMsg, result, ESMF_SRCLINE)
+      end if
+      !------------------------------------------------------------------------
+
+      !Test with ESMF_KIND_R8 arguments
+      !=================================
+      !EX_UTest
+      farray4 = (/50,50/)
+      ! Set expected results
+      if (npets == 1) then
+	farray5 = (/1,2/)
+      else
+      	farray5 = (/604,608/)
+      end if
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM Reduce ESMF_SUM Test: ESMF_KIND_R8"
+      call ESMF_VMReduce(vm, sendData=farray1, recvData=farray4, &
+                                count=nsize, reduceflag=ESMF_SUM, root=rootPet, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! print the result
+      print *, 'Global sum:'
+      print *, localPet,' farray4(1): ', farray4(1), &
+                        ' farray4(2):', farray4(2)
+
+       print *, localPet,' farray1(1): ', farray1(1), &
+                        ' farray1(2):', farray1(2)
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify Reduce ESMF_SUM Results Test: ESMF_KIND_R8"
+      if (localPet == rootPet) then
+        call ESMF_Test((farray4(1)==(farray5(1)).and.(farray4(2)==(farray5(2)))), &
+                        name, failMsg, result, ESMF_SRCLINE)
+      else
+        call ESMF_Test(((farray4(1)==50).and.(farray4(2)==50)), &
+                        name, failMsg, result, ESMF_SRCLINE)
+      end if
+
+      !------------------------------------------------------------------------
+
+      !Test with ESMF_KIND_R4 arguments
+      !=================================
+      !EX_UTest
+      f4array4 = (/50,50/)
+      ! Set expected results
+      if (npets == 1) then
+        f4array5 = (/1,2/)
+      else
+        f4array5 = (/604,608/)
+      end if
+
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM Reduce ESMF_SUM Test: ESMF_KIND_R4"
+      call ESMF_VMReduce(vm, sendData=f4array1, recvData=f4array4, &
+                                count=nsize, reduceflag=ESMF_SUM, root=rootPet, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! print the result
+      print *, 'Global sum:'
+      print *, localPet,' f4array4(1): ', f4array4(1), &
+                        ' f4array4(2):', f4array4(2)
+
+       print *, localPet,' f4array1(1): ', f4array1(1), &
+                        ' f4array1(2):', f4array1(2)
+
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify Reduce ESMF_SUM Results Test: ESMF_KIND_R4"
+      if (localPet == rootPet) then
+        call ESMF_Test((farray4(1)==(farray5(1)).and.(farray4(2)==(farray5(2)))), &
+                        name, failMsg, result, ESMF_SRCLINE)
+      else
+        call ESMF_Test(((farray4(1)==50).and.(farray4(2)==50)), &
+                        name, failMsg, result, ESMF_SRCLINE)
+      end if
+
+      !------------------------------------------------------------------------
+
+
+      end subroutine test_Reduce_sum
+
+
+
+!------------------------------------------------------------------------------
+
+      subroutine test_Reduce_min
+! This subroutine tests all the overloaded versions of the ESMF global sum.
+
+      ! Test with integer arguments
+      !=============================
+      !EX_UTest
+      array4 = (/50,50/)
+      ! Set expected results
+      array5 = (/1,2/)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM Reduce ESMF_MIN Test"
+      call ESMF_VMReduce(vm, sendData=array1, recvData=array4, &
+                                count=nsize, reduceflag=ESMF_MIN, root=rootPet, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! print the result
+      print *, 'Global min:' 
+      print *, localPet,' array4(1): ', array4(1), &
+                        ' array4(2):', array4(2) 
+
+      print *, localPet,' array1(1): ', array1(1), &
+                        ' array1(2):', array1(2) 
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify Reduce ESMF_MIN Results Test"
+      if (localPet == rootPet) then
+      	call ESMF_Test((array4(1)==(array5(1)).and.(array4(2)==(array5(2)))), &
+			name, failMsg, result, ESMF_SRCLINE)
+      else
+      	call ESMF_Test(((array4(1)==50).and.(array4(2)==50)), &
+			name, failMsg, result, ESMF_SRCLINE)
+      end if
+      !------------------------------------------------------------------------
+
+      !Test with ESMF_KIND_R8 arguments
+      !=================================
+      !EX_UTest
+      farray4 = (/50,50/)
+      ! Set expected results
+      farray5 = (/1,2/)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM Reduce ESMF_MIN Test: ESMF_KIND_R8"
+      call ESMF_VMReduce(vm, sendData=farray1, recvData=farray4, &
+                                count=nsize, reduceflag=ESMF_MIN, root=rootPet, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! print the result
+      print *, 'Global min:'
+      print *, localPet,' farray4(1): ', farray4(1), &
+                        ' farray4(2):', farray4(2)
+
+       print *, localPet,' farray1(1): ', farray1(1), &
+                        ' farray1(2):', farray1(2)
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify Reduce ESMF_MIN Results Test: ESMF_KIND_R8"
+      if (localPet == rootPet) then
+        call ESMF_Test((farray4(1)==(farray5(1)).and.(farray4(2)==(farray5(2)))), &
+                        name, failMsg, result, ESMF_SRCLINE)
+      else
+        call ESMF_Test(((farray4(1)==50).and.(farray4(2)==50)), &
+                        name, failMsg, result, ESMF_SRCLINE)
+      end if
+
+      !------------------------------------------------------------------------
+
+      !Test with ESMF_KIND_R4 arguments
+      !=================================
+      !EX_UTest
+      f4array4 = (/50,50/)
+      ! Set expected results
+      f4array5 = (/1,2/)
+
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM Reduce ESMF_MIN Test: ESMF_KIND_R4"
+      call ESMF_VMReduce(vm, sendData=f4array1, recvData=f4array4, &
+                                count=nsize, reduceflag=ESMF_MIN, root=rootPet, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! print the result
+      print *, 'Global min:'
+      print *, localPet,' f4array4(1): ', f4array4(1), &
+                        ' f4array4(2):', f4array4(2)
+
+       print *, localPet,' f4array1(1): ', f4array1(1), &
+                        ' f4array1(2):', f4array1(2)
+
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify Reduce ESMF_MIN Results Test: ESMF_KIND_R4"
+      if (localPet == rootPet) then
+        call ESMF_Test((farray4(1)==(farray5(1)).and.(farray4(2)==(farray5(2)))), &
+                        name, failMsg, result, ESMF_SRCLINE)
+      else
+        call ESMF_Test(((farray4(1)==50).and.(farray4(2)==50)), &
+                        name, failMsg, result, ESMF_SRCLINE)
+      end if
+
+      !------------------------------------------------------------------------
+
+
+      end subroutine test_Reduce_min
+
+
+!------------------------------------------------------------------------------
+
+      subroutine test_Reduce_max
+! This subroutine tests all the overloaded versions of the ESMF global sum.
+
+      ! Test with integer arguments
+      !=============================
+      !EX_UTest
+      array4 = (/50,50/)
+      ! Set expected results
+      if (npets == 1) then
+	array5 = (/1,2/)
+      else
+      	array5 = (/301,302/)
+      end if
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM Reduce ESMF_MAX Test"
+      call ESMF_VMReduce(vm, sendData=array1, recvData=array4, &
+                                count=nsize, reduceflag=ESMF_MAX, root=rootPet, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! print the result
+      print *, 'Global max:' 
+      print *, localPet,' array4(1): ', array4(1), &
+                        ' array4(2):', array4(2) 
+
+      print *, localPet,' array1(1): ', array1(1), &
+                        ' array1(2):', array1(2) 
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify Reduce ESMF_MAX Results Test"
+      if (localPet == rootPet) then
+      	call ESMF_Test((array4(1)==(array5(1)).and.(array4(2)==(array5(2)))), &
+			name, failMsg, result, ESMF_SRCLINE)
+      else
+      	call ESMF_Test(((array4(1)==50).and.(array4(2)==50)), &
+			name, failMsg, result, ESMF_SRCLINE)
+      end if
+      !------------------------------------------------------------------------
+
+      !Test with ESMF_KIND_R8 arguments
+      !=================================
+      !EX_UTest
+      farray4 = (/50,50/)
+      ! Set expected results
+      if (npets == 1) then
+	farray5 = (/1,2/)
+      else
+      	farray5 = (/301,302/)
+      end if
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM Reduce ESMF_MAX Test: ESMF_KIND_R8"
+      call ESMF_VMReduce(vm, sendData=farray1, recvData=farray4, &
+                                count=nsize, reduceflag=ESMF_MAX, root=rootPet, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! print the result
+      print *, 'Global max:'
+      print *, localPet,' farray4(1): ', farray4(1), &
+                        ' farray4(2):', farray4(2)
+
+       print *, localPet,' farray1(1): ', farray1(1), &
+                        ' farray1(2):', farray1(2)
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify Reduce ESMF_MAX Results Test: ESMF_KIND_R8"
+      if (localPet == rootPet) then
+        call ESMF_Test((farray4(1)==(farray5(1)).and.(farray4(2)==(farray5(2)))), &
+                        name, failMsg, result, ESMF_SRCLINE)
+      else
+        call ESMF_Test(((farray4(1)==50).and.(farray4(2)==50)), &
+                        name, failMsg, result, ESMF_SRCLINE)
+      end if
+
+      !------------------------------------------------------------------------
+
+      !Test with ESMF_KIND_R4 arguments
+      !=================================
+      !EX_UTest
+      f4array4 = (/50,50/)
+      ! Set expected results
+      if (npets == 1) then
+        f4array5 = (/1,2/)
+      else
+        f4array5 = (/301,302/)
+      end if
+
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM Reduce ESMF_MAX Test: ESMF_KIND_R4"
+      call ESMF_VMReduce(vm, sendData=f4array1, recvData=f4array4, &
+                                count=nsize, reduceflag=ESMF_MAX, root=rootPet, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! print the result
+      print *, 'Global max:'
+      print *, localPet,' f4array4(1): ', f4array4(1), &
+                        ' f4array4(2):', f4array4(2)
+
+       print *, localPet,' f4array1(1): ', f4array1(1), &
+                        ' f4array1(2):', f4array1(2)
+
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify Reduce ESMF_MAX Results Test: ESMF_KIND_R4"
+      if (localPet == rootPet) then
+        call ESMF_Test((farray4(1)==(farray5(1)).and.(farray4(2)==(farray5(2)))), &
+                        name, failMsg, result, ESMF_SRCLINE)
+      else
+        call ESMF_Test(((farray4(1)==50).and.(farray4(2)==50)), &
+                        name, failMsg, result, ESMF_SRCLINE)
+      end if
+
+      !------------------------------------------------------------------------
+
+
+      end subroutine test_Reduce_max
+
+
+!-------------------------------------------------------------------------------
       subroutine test_AllFullReduce_sum
 ! This subroutine tests all the overloaded versions of the full ESMF global sum.
 
@@ -522,7 +887,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.20 2007/03/31 05:51:29 cdeluca Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.21 2007/07/12 17:20:17 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -571,8 +936,14 @@
       ! allocate data arrays
       nsize = 2
       allocate(array1(nsize))
+      allocate(array4(nsize))
+      allocate(farray4(nsize))
+      allocate(f4array4(nsize))
       allocate(farray1(nsize))
       allocate(f4array1(nsize))
+      allocate(array5(nsize))
+      allocate(farray5(nsize))
+      allocate(f4array5(nsize))
 
       allocate(array3(nsize))
       allocate(farray3(nsize))
@@ -601,13 +972,17 @@
       	enddo
       enddo
 
+      rootPet = 0
 
+      call test_Reduce_sum
       call test_AllFullReduce_sum
-      call test_allReduce_sum
+      call test_AllReduce_sum
 
+      call test_Reduce_min
       call test_AllFullReduce_min
       call test_AllReduce_min
 
+      call test_Reduce_max
       call test_AllFullReduce_max
       call test_AllReduce_max
 
