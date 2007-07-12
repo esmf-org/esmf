@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.22 2007/07/12 21:18:54 svasquez Exp $
+! $Id: ESMF_VMUTest.F90,v 1.23 2007/07/12 21:24:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -75,7 +75,7 @@
       call date_and_time(values=time_values)
       end_sec = time_values(7)
       write(failMsg, *) "Wrong delay time"
-      write(name, *) "Verify delay was 5 seconds + 1 Sec Test"
+      write(name, *) "Verify delay was 5 or 6 Seconds Test"
       delay_time = end_sec - init_sec
       print *, "init_sec =", init_sec
       print *, "end_sec =", end_sec
@@ -922,7 +922,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.22 2007/07/12 21:18:54 svasquez Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.23 2007/07/12 21:24:11 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
