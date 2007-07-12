@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.93 2007/07/11 21:16:55 theurich Exp $
+// $Id: ESMC_Array.C,v 1.94 2007/07/12 23:41:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.93 2007/07/11 21:16:55 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.94 2007/07/12 23:41:28 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1970,7 +1970,7 @@ int Array::sparseMatMulStore(
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
   
-  // error checking for input
+  // every Pet must provide srcArray and dstArray
   if (srcArray == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to srcArray", &rc);
@@ -1981,38 +1981,10 @@ int Array::sparseMatMulStore(
       "- Not a valid pointer to dstArray", &rc);
     return rc;
   }
-  if (typekindArg != srcArray->getTypekind()){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-      "- TypeKind mismatch between srcArray argument and factorList", &rc);
-    return rc;
-  }
-  if (typekindArg != dstArray->getTypekind()){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-      "- TypeKind mismatch between dstArray argument and factorList", &rc);
-    return rc;
-  }
-
-// not sure I need those VMs
-#if 0   
-  // get the srcArray VM and VM releated information
-  VM *srcVm = srcArray->delayout->getVM();
-  int srcLocalPet = srcVm->getLocalPet();
-  int srcPetCount = srcVm->getPetCount();
   
-  // get the dstArray VM and VM releated information
-  VM *dstVm = dstArray->delayout->getVM();
-  int dstLocalPet = dstVm->getLocalPet();
-  int dstPetCount = dstVm->getPetCount();
-#endif
-  
-  // size in bytes of each piece of data
-  int dataSize = ESMC_TypeKindSize(typekindArg);
-
-  // TODO: allow rootPet to be absent and factorList to come in distributed
-  // across PETs
-  
-  if (localPet == rootPet){
-    // only rootPet must provide valid factorList and factorIndexList args
+  // every Pet that specifies factorListCount > 0 must be checked wrt input
+  if (factorListCount > 0){
+    // must provide valid factorList and factorIndexList args
     if (factorIndexList == NULL){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
         "- Not a valid pointer to factorIndexList array", &rc);
@@ -2035,6 +2007,42 @@ int Array::sparseMatMulStore(
       return rc;
     }
   }
+  
+  // TODO: allow rootPet to be absent and factorList to come in distributed
+  // across PETs
+  // this only works because of rootPet
+  // actually I really need to check if all Pets that bring in factor
+  // lists have the same typekindArg and communicate it to the rest
+  vm->vmk_broadcast(&typekindArg, sizeof(ESMC_TypeKind), rootPet);
+  
+  // check that the typekindArg matches srcArray and dstArray typekind
+  if (typekindArg != srcArray->getTypekind()){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      "- TypeKind mismatch between srcArray argument and factorList", &rc);
+    return rc;
+  }
+  if (typekindArg != dstArray->getTypekind()){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      "- TypeKind mismatch between dstArray argument and factorList", &rc);
+    return rc;
+  }
+
+  // size in bytes of each piece of data
+  int dataSize = ESMC_TypeKindSize(typekindArg);
+
+
+  // not sure I need those VMs
+#if 0   
+  // get the srcArray VM and VM releated information
+  VM *srcVm = srcArray->delayout->getVM();
+  int srcLocalPet = srcVm->getLocalPet();
+  int srcPetCount = srcVm->getPetCount();
+  
+  // get the dstArray VM and VM releated information
+  VM *dstVm = dstArray->delayout->getVM();
+  int dstLocalPet = dstVm->getLocalPet();
+  int dstPetCount = dstVm->getPetCount();
+#endif  
   
   // create and initialize the RouteHandle
   *routehandle = ESMC_RouteHandleCreate(&localrc);
