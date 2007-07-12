@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.62 2007/07/11 05:11:10 theurich Exp $
+// $Id: ESMC_Array.h,v 1.63 2007/07/12 15:46:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -135,25 +135,31 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       InterfaceInt *lboundsArg, InterfaceInt *uboundsArg, int *rc);
     static int destroy(Array **array);
     // get() and set()
-    ESMC_TypeKind getTypekind(void)         const {return typekind;}
-    int getRank(void)                       const {return rank;}
-    ESMC_LocalArray **getLocalarrayList(void) const {return larrayList;}
-    DistGrid *getDistgrid(void)             const {return distgrid;}
-    DELayout *getDelayout(void)             const {return delayout;}
-    ESMC_IndexFlag getIndexflag(void)       const {return indexflag;}
-    const int *getDimmap(void)              const {return dimmap;}
-    const int *getInverseDimmap(void)       const {return inverseDimmap;}
-    const int *getExclusiveLBound(void)     const {return exclusiveLBound;}
-    const int *getExclusiveUBound(void)     const {return exclusiveUBound;}
-    const int *getComputationalLBound(void) const {return computationalLBound;}
-    const int *getComputationalUBound(void) const {return computationalUBound;}
-    const int *getTotalLBound(void)         const {return totalLBound;}
-    const int *getTotalUBound(void)         const {return totalUBound;}
+    ESMC_TypeKind getTypekind()             const {return typekind;}
+    int getRank()                           const {return rank;}
+    ESMC_IndexFlag getIndexflag()           const {return indexflag;}
+    ESMC_LocalArray **getLocalarrayList()   const {return larrayList;}
+    const int *getExclusiveLBound()         const {return exclusiveLBound;}
+    const int *getExclusiveUBound()         const {return exclusiveUBound;}
+    const int *getComputationalLBound()     const {return computationalLBound;}
+    const int *getComputationalUBound()     const {return computationalUBound;}
+    const int *getTotalLBound()             const {return totalLBound;}
+    const int *getTotalUBound()             const {return totalUBound;}
+    int getTensorCount()                    const {return tensorCount;}
+    const int *getLBounds()                 const {return lbounds;}
+    const int *getUBounds()                 const {return ubounds;}
+    const int *getStaggerLoc()              const {return staggerLoc;}
+    const int *getVectorDim()               const {return vectorDim;}
+    const int *getDeCellCount()             const {return deCellCount;}
+    const int *getDimmap()                  const {return dimmap;}
+    const int *getInverseDimmap()           const {return inverseDimmap;}
+    DistGrid *getDistgrid()                 const {return distgrid;}
+    DELayout *getDelayout()                 const {return delayout;}
     int getLinearIndexExclusive(int localDe, int *index, int *rc=NULL) const;
-    const char *getName(void)               const {return ESMC_BaseGetName();}
+    const char *getName()               const {return ESMC_BaseGetName();}
     int setName(char *name){return ESMC_BaseSetName(name, "Array");}
     // misc.
-    int print(void) const;
+    int print() const;
     // serialize() and deserialize()
     int serialize(char *buffer, int *length, int *offset) const;
     int deserialize(char *buffer, int *offset);
