@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.23 2007/06/12 17:52:18 cdeluca Exp $
+% $Id: ESMF_options.tex,v 1.24 2007/07/12 16:30:13 cdeluca Exp $
 
 \section{Global Options and Parameters}
 
@@ -209,6 +209,31 @@ Valid values are:
          Data is not required for restart.
 \end{description}
 
+\subsubsection{ESMF\_Status}
+\label{opt:status}
+{\sf DESCRIPTION:\\}
+This is a general object status flag used throughout the
+framework.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_STATUS\_UNINIT] 
+         Object is uninitialized.
+   \item [ESMF\_STATUS\_READY]
+         Object is ready for use.
+   \item [ESMF_\_STATUS\_UNALLOCATED]
+         Object has not yet been allocated.
+   \item [ESMF_\_STATUS\_ALLOCATED]
+         Object has been allocated.
+   \item [ESMF_\_STATUS\_BUSY]
+         Object is not able to respond.
+   \item [ESMF_\_STATUS\_INVALID]
+         Object is invalid.
+\end{description}
+
+
+\end{description}
+
 \subsubsection{ESMF\_ValidFlag}
 \label{opt:validflag}
 {\sf DESCRIPTION:\\}
@@ -253,12 +278,12 @@ Valid values are:
       8 byte real.
 \end{description}
 
-\subsubsection{Fortran 90 Kinds}
+\subsubsection{Fortran Kinds}
 
 {\sf DESCRIPTION:\\}
 These are integer parameters of the proper type to be
 used when declaring variables with a specific precision 
-in Fortran 90 syntax.  For example:
+in Fortran syntax.  For example:
 \begin{verbatim}
  integer(ESMF_KIND_I4) :: myintegervariable
  real(ESMF_KIND_R4) :: myrealvariable
