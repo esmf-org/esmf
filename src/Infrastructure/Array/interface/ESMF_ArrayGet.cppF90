@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.20 2007/07/12 19:14:28 cdeluca Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.21 2007/07/12 20:29:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.20 2007/07/12 19:14:28 cdeluca Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.21 2007/07/12 20:29:20 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -466,9 +466,9 @@ contains
 !     \item[array] 
 !        Queried {\tt ESMF\_Array} object.
 !     \item[localDe]
-!        Local DE for which information is requested. {\tt [/1,..,localDeCount/]}
+!        Local DE for which information is requested. {\tt [1,..,localDeCount]}
 !     \item[dim]
-!        Dimension for which information is requested. {\tt [/1,..,dimCount/]}
+!        Dimension for which information is requested. {\tt [1,..,dimCount]}
 !     \item[{[dimExtent]}]
 !        Upon return this holds the DistGrid dimExtent associated with
 !        {\tt localDe, dim}.

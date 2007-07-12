@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.21 2007/07/12 19:40:28 cdeluca Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.22 2007/07/12 20:29:20 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2083,9 +2083,9 @@ contains
 !     \item[distgrid] 
 !        Queried {\tt ESMF\_DistGrid} object.
 !     \item[localDe] 
-!        Local DE for which information is requested. {\tt [/1,..,localDeCount/]}
+!        Local DE for which information is requested. {\tt [1,..,localDeCount]}
 !     \item[dim] 
-!        Dimension for which information is requested. {\tt [/1,..,dimCount/]}
+!        Dimension for which information is requested. {\tt [1,..,dimCount]}
 !     \item[{[localIndexList]}]
 !        Upon return this holds the list of DistGrid patch-local indices
 !        for {\tt localDe} along dimension {\tt dim}. The supplied variable 
