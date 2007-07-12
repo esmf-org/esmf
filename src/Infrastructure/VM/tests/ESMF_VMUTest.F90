@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.21 2007/07/12 17:20:17 svasquez Exp $
+! $Id: ESMF_VMUTest.F90,v 1.22 2007/07/12 21:18:54 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -10,7 +10,9 @@
 !
 !==============================================================================
 #include <ESMF_Macros.inc>
+#include <ESMF.h>
 !
+
 
       module ESMF_VMSubrs
       use ESMF_Mod
@@ -30,7 +32,8 @@
 
 !     !Module global variables
       type(ESMF_VM),save :: vm
-      integer:: localPet, npets, rootPet
+      integer:: localPet, npets, rootPet, time_values(8)
+      integer:: init_sec, end_sec, delay_time
       integer, allocatable:: array1(:), array3(:),array3_soln(:)
       integer, allocatable:: array4(:), array5(:)
       integer, dimension (:, :), allocatable:: array2
@@ -42,7 +45,7 @@
       real(ESMF_KIND_R8), allocatable:: farray1(:), farray4(:), farray5(:)
       real(ESMF_KIND_R8), allocatable:: farray3(:) , farray3_soln(:)
       real(ESMF_KIND_R8), dimension(:,:), allocatable:: farray2
-      real(ESMF_KIND_R8):: float_results, my_float_results
+      real(ESMF_KIND_R8):: float_results, my_float_results, delay_interval
 
       real(ESMF_KIND_R4), allocatable:: f4array1(:), f4array4(:), f4array5(:)
       real(ESMF_KIND_R4), allocatable:: f4array3(:), f4array3_soln(:)
@@ -54,6 +57,38 @@
 !==============================================================================
 
 
+      subroutine test_vm_time
+! This subroutine tests VM time methods
+
+      call date_and_time(values=time_values)
+      init_sec = time_values(7)
+      !=============================
+      !EX_UTest
+      delay_interval=5
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM Time 5 Second Delay Test"
+      call ESMF_VMWtimeDelay(delay=delay_interval, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      call date_and_time(values=time_values)
+      end_sec = time_values(7)
+      write(failMsg, *) "Wrong delay time"
+      write(name, *) "Verify delay was 5 seconds + 1 Sec Test"
+      delay_time = end_sec - init_sec
+      print *, "init_sec =", init_sec
+      print *, "end_sec =", end_sec
+      print *, "delay_time =", delay_time
+      ! if init_sec > end_sec add 60 to the difference.
+      if (delay_time.lt.0) delay_time=delay_time + 60
+      print *, "delay_time =", delay_time
+      call ESMF_Test((delay_time.eq.5.or.delay_time.eq.6), name, failMsg, result, ESMF_SRCLINE)
+
+	
+      end subroutine test_vm_time
+
+!-----------------------------------------------------------------------------
       subroutine test_Reduce_sum
 ! This subroutine tests all the overloaded versions of the ESMF global sum.
 
@@ -887,7 +922,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.21 2007/07/12 17:20:17 svasquez Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.22 2007/07/12 21:18:54 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -974,6 +1009,8 @@
 
       rootPet = 0
 
+      call test_vm_time
+      
       call test_Reduce_sum
       call test_AllFullReduce_sum
       call test_AllReduce_sum
