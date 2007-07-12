@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.23 2007/07/12 21:24:11 svasquez Exp $
+! $Id: ESMF_VMUTest.F90,v 1.24 2007/07/12 22:45:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -39,9 +39,9 @@
       integer, dimension (:, :), allocatable:: array2
       integer::  func_results, myresults
       integer:: nsize, i, j
-      integer:: isum
+      integer:: isum, clock_count
       real:: fsum
-
+      real(ESMF_KIND_R8)::  vm_prec
       real(ESMF_KIND_R8), allocatable:: farray1(:), farray4(:), farray5(:)
       real(ESMF_KIND_R8), allocatable:: farray3(:) , farray3_soln(:)
       real(ESMF_KIND_R8), dimension(:,:), allocatable:: farray2
@@ -85,7 +85,21 @@
       print *, "delay_time =", delay_time
       call ESMF_Test((delay_time.eq.5.or.delay_time.eq.6), name, failMsg, result, ESMF_SRCLINE)
 
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM Time Prec. Test"
+      call ESMF_VMWtimePrec(prec=vm_prec, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, "vm_prec = ", vm_prec
 	
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Value not between 0 and 1."
+      write(name, *) "VM Time Prec. Value Test"
+      call ESMF_Test(((vm_prec.gt.0).and.(vm_prec.lt.1)), name, failMsg, result, ESMF_SRCLINE)
+
       end subroutine test_vm_time
 
 !-----------------------------------------------------------------------------
@@ -922,7 +936,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.23 2007/07/12 21:24:11 svasquez Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.24 2007/07/12 22:45:15 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
