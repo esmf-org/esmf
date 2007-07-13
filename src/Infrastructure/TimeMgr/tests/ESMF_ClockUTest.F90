@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.102 2007/03/31 05:51:26 cdeluca Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.103 2007/07/13 18:00:59 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.102 2007/03/31 05:51:26 cdeluca Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.103 2007/07/13 18:00:59 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1440,22 +1440,18 @@
 
 
       !EX_UTest
-      write(failMsg, *) "Test failed."
-      call ESMF_TimeSet(startTime, yy=100, mm=1, dd=1, m=-9, s=-5, &
+
+      write(failMsg, *) "Did not return ESMC_RC_VAL_WRONG."
+      call ESMF_TimeSet(startTime, yy=100, mm=1, dd=1, h=0,  m=-9, s=-5, &
                                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=99, mm=12, dd=31, h=23, m=50, s=55, &
                                         calendar=gregorianCalendar, rc=rc)
+
       write(name, *) "Time setting equivalency Test"
       clock_gregorian = ESMF_ClockCreate("Gregorian Clock", timeStep, &
                                          startTime, stopTime, rc=rc)
-      call ESMF_ClockGet(clock_gregorian, startTime=startTime2, rc=rc)
-      call ESMF_ClockGet(clock_gregorian, stopTime=stopTime2, rc=rc)
-      call ESMF_Test((startTime2.eq.stopTime2), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_TimePrint(startTime2, rc=rc)
-      call ESMF_TimePrint(stopTime2, rc=rc)
-      call ESMF_ClockDestroy(clock_gregorian, rc)
-
+      call ESMF_Test((rc.eq.ESMC_RC_VAL_WRONG), &
+                       name, failMsg, result, ESMF_SRCLINE)
 
 
      ! ----------------------------------------------------------------------------
