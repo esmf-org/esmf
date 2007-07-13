@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.24 2007/07/12 22:45:15 svasquez Exp $
+! $Id: ESMF_VMUTest.F90,v 1.25 2007/07/13 16:54:46 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -31,8 +31,9 @@
       character(ESMF_MAXSTR) :: name
 
 !     !Module global variables
-      type(ESMF_VM),save :: vm
+      type(ESMF_VM),save :: vm, test_vm
       integer:: localPet, npets, rootPet, time_values(8)
+      integer:: test_localPet, test_npets
       integer:: init_sec, end_sec, delay_time
       integer, allocatable:: array1(:), array3(:),array3_soln(:)
       integer, allocatable:: array4(:), array5(:)
@@ -56,6 +57,33 @@
       contains
 !==============================================================================
 
+      subroutine test_vm_current
+! This subroutine tests VM get current
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM Get Current  Test"
+      call ESMF_VMGetCurrent(test_vm, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Test_VM Get Test"
+      call ESMF_VMGet(test_vm, test_localPet, petCount=test_npets, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did have correct PET infoS"
+      write(name, *) "Verify the VM is correct Test"
+      call ESMF_Test(((localPet.eq.test_localPet).and.(npets.eq.test_npets)), &
+			name, failMsg, result, ESMF_SRCLINE)
+
+      end subroutine test_vm_current
+
+!----------------------------------------------------------------------------
 
       subroutine test_vm_time
 ! This subroutine tests VM time methods
@@ -936,7 +964,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.24 2007/07/12 22:45:15 svasquez Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.25 2007/07/13 16:54:46 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -1023,6 +1051,7 @@
 
       rootPet = 0
 
+      call test_vm_current
       call test_vm_time
       
       call test_Reduce_sum
