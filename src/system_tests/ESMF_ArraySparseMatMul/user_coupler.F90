@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.2 2006/05/19 21:35:53 theurich Exp $
+! $Id: user_coupler.F90,v 1.3 2007/07/13 18:20:03 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -71,11 +71,11 @@ module user_coupler
     integer :: rc
 
     ! Local variables
-    integer :: itemcount
+    integer :: itemcount, localPet
     type(ESMF_Array) :: srcArray, dstArray
     type(ESMF_VM) :: vm
-    real(ESMF_KIND_R8):: factorList(15000)
-    integer:: i, factorIndexList(2,15000)
+    real(ESMF_KIND_R8):: factorList(10000)
+    integer:: i, factorIndexList(2,10000)
 
     print *, "User Coupler Init starting"
 
@@ -84,30 +84,70 @@ module user_coupler
 
     ! Need to reconcile import and export states
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) goto 20
     call ESMF_StateReconcile(importState, vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) goto 20
     call ESMF_StateReconcile(exportState, vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) goto 20
 
     ! Get source Array out of import state
     call ESMF_StateGetArray(importState, "array data", srcArray, rc=rc)
     ! call ESMF_ArrayPrint(srcArray, rc=rc)
+    if (rc/=ESMF_SUCCESS) goto 20
 
     ! Get destination Array out of export state
     call ESMF_StateGetArray(exportState, "array data", dstArray, rc=rc)
     ! call ESMF_ArrayPrint(dstArray, rc=rc)
+    if (rc/=ESMF_SUCCESS) goto 20
 
-    ! Setup identity sparse matrix
-    factorList = 1.d0
-    factorIndexList(1,:) = (/(i,i=1,15000)/)
-    factorIndexList(2,:) = factorIndexList(1,:)
+    ! get localPet
+    call ESMF_VMGet(vm, localPet=localPet, rc=rc)
+    if (rc/=ESMF_SUCCESS) goto 20
+
+    ! Setup identity sparse matrix as a combination of PET 0 and PET 4
+    ! there are 15000 elements on the diagonal, defined as two overlapping
+    ! lists of each 10000 elements (overlapping 5000).
+    if (localPet==0) then
+      factorIndexList(1,:) = (/(i,i=1,10000)/)
+      factorIndexList(2,:) = factorIndexList(1,:)
+      do i=1, 5000
+        factorList(i) = 1.d0
+      enddo
+      do i=5001, 10000
+        factorList(i) = .253d0
+      enddo
+    endif
+    if (localPet==4) then
+      factorIndexList(1,:) = (/(i,i=5001,15000)/)
+      factorIndexList(2,:) = factorIndexList(1,:)
+      do i=1, 5000
+        factorList(i) = .747d0
+      enddo
+      do i=5001, 10000
+        factorList(i) = 1.d0
+      enddo
+    endif
 
     ! Precompute and store an ArraySparseMatMul operation
-    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
-      factorList=factorList, factorIndexList=factorIndexList, &
-      rootPet=0, routehandle=routehandle, rc=rc)
-
+    if (localPet==0 .or. localPet==4) then
+      ! only PET 0 and PET 4 provide factors
+      call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+        routehandle=routehandle, factorList=factorList, &
+        factorIndexList=factorIndexList, rc=rc)
+      if (rc/=ESMF_SUCCESS) goto 20
+    else
+      call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+        routehandle=routehandle, rc=rc)
+      if (rc/=ESMF_SUCCESS) goto 20
+    endif
+    
     print *, "User Coupler Init returning"
    
     rc = ESMF_SUCCESS
+    return
+    
+    ! get here only on error exit
+20  continue
 
   end subroutine user_init
 
