@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.71 2007/03/31 05:51:25 cdeluca Exp $
+! $Id: ESMF_Alarm.F90,v 1.72 2007/07/13 18:03:41 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.71 2007/03/31 05:51:25 cdeluca Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.72 2007/07/13 18:03:41 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -319,7 +319,12 @@
 !     TMG4.1, TMG4.7
 
       ! initialize name length to zero for non-existent name
-      integer :: nameLen
+      integer :: nameLen, localrc
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
       nameLen = 0
 
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
@@ -338,10 +343,14 @@
       call c_ESMC_AlarmCreateNew(ESMF_AlarmCreateNew, nameLen, name, clock, &
                                  ringTime, ringInterval, stopTime, &
                                  ringDuration, ringTimeStepCount, refTime, &
-                                 enabled, sticky, rc)
+                                 enabled, sticky, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_AlarmSetInitCreated(ESMF_AlarmCreateNew)
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_AlarmCreateNew
 
 !------------------------------------------------------------------------------
@@ -377,14 +386,23 @@
 !
 !EOP
 ! !REQUIREMENTS:
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point to copy alarm
-      call c_ESMC_AlarmCreateCopy(ESMF_AlarmCreateCopy, alarm, rc)
+      call c_ESMC_AlarmCreateCopy(ESMF_AlarmCreateCopy, alarm, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_AlarmSetInitCreated(ESMF_AlarmCreateCopy)
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_AlarmCreateCopy
 
 !------------------------------------------------------------------------------
@@ -413,14 +431,22 @@
 !
 !EOP
 ! !REQUIREMENTS:
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmDestroy(alarm, rc)
+      call c_ESMC_AlarmDestroy(alarm, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_AlarmSetInitDeleted(alarm)
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_AlarmDestroy
 
 !------------------------------------------------------------------------------
@@ -449,13 +475,21 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG4.5.3
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
     
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmDisable(alarm, rc)
+      call c_ESMC_AlarmDisable(alarm, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_AlarmDisable
 
 !------------------------------------------------------------------------------
@@ -484,13 +518,21 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG4.5.3
+      integer :: localrc                      ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmEnable(alarm, rc)
+      call c_ESMC_AlarmEnable(alarm, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_AlarmEnable
 
 !------------------------------------------------------------------------------
@@ -589,8 +631,13 @@
       ! initialize name lengths to zero for non-existent name
       integer :: nameLen
       integer :: tempNameLen
+      integer :: localrc             ! local return code
       nameLen = 0
       tempNameLen = 0
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
@@ -611,10 +658,12 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmGet(alarm, nameLen, tempNameLen, tempName, clock, &
-                           ringTime, prevRingTime, ringInterval, stopTime, &
-                           ringDuration, ringTimeStepCount, &
-                           timeStepRingingCount, ringBegin, ringEnd, refTime, &
-                           ringing, ringingOnPrevTimeStep, enabled, sticky, rc)
+                    ringTime, prevRingTime, ringInterval, stopTime, &
+                    ringDuration, ringTimeStepCount, &
+                    timeStepRingingCount, ringBegin, ringEnd, refTime, &
+                    ringing, ringingOnPrevTimeStep, enabled, sticky, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! make work with Init. Stand.
       if (present(clock)) call ESMF_ClockSetInitCreated(clock)
@@ -625,6 +674,8 @@
         name = tempName(1:tempNameLen)
       endif
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_AlarmGet
 
 !------------------------------------------------------------------------------
@@ -656,13 +707,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-    
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmIsEnabled(alarm, ESMF_AlarmIsEnabled, rc)
+      call c_ESMC_AlarmIsEnabled(alarm, ESMF_AlarmIsEnabled, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_AlarmIsEnabled
 
 !------------------------------------------------------------------------------
@@ -698,13 +758,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG4.4
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
     
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmIsRinging(alarm, ESMF_AlarmIsRinging, rc)
+      call c_ESMC_AlarmIsRinging(alarm, ESMF_AlarmIsRinging, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_AlarmIsRinging
 
 !------------------------------------------------------------------------------
@@ -736,13 +805,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
     
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmIsSticky(alarm, ESMF_AlarmIsSticky, rc)
+      call c_ESMC_AlarmIsSticky(alarm, ESMF_AlarmIsSticky, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_AlarmIsSticky
 
 !------------------------------------------------------------------------------
@@ -782,14 +860,23 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmNotSticky(alarm, ringDuration, &
-                                 ringTimeStepCount, rc)
+                                 ringTimeStepCount, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_AlarmNotSticky
 
 !------------------------------------------------------------------------------
@@ -846,13 +933,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
       
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmPrint(alarm, options, rc)   
+      call c_ESMC_AlarmPrint(alarm, options, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_AlarmPrint
 
 !------------------------------------------------------------------------------
@@ -890,13 +986,22 @@
 ! !REQUIREMENTS:
 
       ! get length of given name for C++ validation
-      integer :: nameLen
+      integer :: nameLen, localrc
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
       nameLen = len_trim(name)
 
 !     invoke C to C++ entry point to allocate and restore alarm
       call c_ESMC_AlarmReadRestart(ESMF_AlarmReadRestart, nameLen, name, &
-                                   iospec, rc)
+                                   iospec, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_AlarmReadRestart
 
 !------------------------------------------------------------------------------
@@ -928,13 +1033,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG4.6
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmRingerOff(alarm, rc)
+      call c_ESMC_AlarmRingerOff(alarm, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_AlarmRingerOff
 
 !------------------------------------------------------------------------------
@@ -965,13 +1079,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG4.6
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmRingerOn(alarm, rc)
+      call c_ESMC_AlarmRingerOn(alarm, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_AlarmRingerOn
 
 !------------------------------------------------------------------------------
@@ -1061,7 +1184,12 @@
 !     TMG4.1, TMG4.7
 
       ! initialize name length to zero for non-existent name
-      integer :: nameLen
+      integer :: nameLen, localrc
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
       nameLen = 0
 
       ! check variables
@@ -1076,8 +1204,12 @@
       call c_ESMC_AlarmSet(alarm, nameLen, name, clock, ringTime, &
                            ringInterval, stopTime, ringDuration, &
                            ringTimeStepCount, refTime, ringing, &
-                           enabled, sticky, rc)
+                           enabled, sticky, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_AlarmSet
 
 !------------------------------------------------------------------------------
@@ -1115,13 +1247,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmSticky(alarm, rc)
+      call c_ESMC_AlarmSticky(alarm, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_AlarmSticky
 
 !------------------------------------------------------------------------------
@@ -1156,13 +1297,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
       
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmValidate(alarm, options, rc)
+      call c_ESMC_AlarmValidate(alarm, options, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_AlarmValidate
 
 !------------------------------------------------------------------------------
@@ -1199,13 +1349,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG4.4
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
     
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmWasPrevRinging(alarm, ESMF_AlarmWasPrevRinging, rc)
+      call c_ESMC_AlarmWasPrevRinging(alarm, ESMF_AlarmWasPrevRinging, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_AlarmWasPrevRinging
 
 !------------------------------------------------------------------------------
@@ -1246,13 +1405,23 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG4.4
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
     
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmWillRingNext(alarm, timeStep, ESMF_AlarmWillRingNext, rc)
+      call c_ESMC_AlarmWillRingNext(alarm, timeStep,  &
+                   ESMF_AlarmWillRingNext, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_AlarmWillRingNext
 
 !------------------------------------------------------------------------------
@@ -1285,13 +1454,22 @@
 !
 !EOPI
 ! !REQUIREMENTS:
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmWriteRestart(alarm, iospec, rc)
+      call c_ESMC_AlarmWriteRestart(alarm, iospec, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_AlarmWriteRestart
 
 !------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Clock.F90,v 1.76 2007/03/31 05:51:26 cdeluca Exp $
+! $Id: ESMF_Clock.F90,v 1.77 2007/07/13 18:03:41 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.76 2007/03/31 05:51:26 cdeluca Exp $'
+      '$Id: ESMF_Clock.F90,v 1.77 2007/07/13 18:03:41 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -268,7 +268,11 @@
       ! initialize list size to zero for not-present list
       integer :: sizeofRingingAlarmList,i
       type(ESMF_Pointer), allocatable :: ringingAlarmPtrList(:)      
+      integer :: localrc                        ! local return code
 
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
@@ -289,17 +293,32 @@
       if (present(ringingAlarmList) .and. sizeofRingingAlarmList > 1) then
         ! pass address of 2nd element for C++ to calculate array step size
         call c_ESMC_ClockAdvance2(clock, timeStep, &
-                                  ringingAlarmPtrList(1), ringingAlarmPtrList(2), &
-                                  sizeofRingingAlarmList, ringingAlarmCount, rc)
+                     ringingAlarmPtrList(1), ringingAlarmPtrList(2), &
+                     sizeofRingingAlarmList, ringingAlarmCount, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) then
+          ! Not bail out until deallocation
+          write(*,*)"c_ESMC_ClockAdvance2 fails"
+        endif
       else if (sizeofRingingAlarmList == 1) then
         ! array has only one element
-        call c_ESMC_ClockAdvance1(clock, timeStep, &
-                                  ringingAlarmPtrList(1), &
-                                  sizeofRingingAlarmList, ringingAlarmCount, rc)
+        call c_ESMC_ClockAdvance1(clock, timeStep, ringingAlarmPtrList(1), &
+                        sizeofRingingAlarmList, ringingAlarmCount, localrc)
+        ! Not bail out until deallocation
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) then
+          ! Not bail out until deallocation
+          write(*,*)"c_ESMC_ClockAdvance1 fails"
+        endif 
       else
         ! array is not present
         call c_ESMC_ClockAdvance0(clock, timeStep, &
-                                  sizeofRingingAlarmList, ringingAlarmCount, rc)
+                    sizeofRingingAlarmList, ringingAlarmCount, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) then
+          ! Not bail out until deallocation
+          write(*,*)"c_ESMC_ClockAdvance0 fails"
+        endif
       endif
 
       ! postprocess ringing alarm list
@@ -315,9 +334,10 @@
         deallocate(ringingAlarmPtrList)
      end if
 
-
+     ! Return success
+     if (present(rc)) rc = localrc
     
-      end subroutine ESMF_ClockAdvance
+     end subroutine ESMF_ClockAdvance
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -393,7 +413,12 @@
 !     TMG3.1, TMG3.4.4
 
       ! initialize name length to zero for non-existent name
-      integer :: nameLen
+      integer :: nameLen, localrc
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
       nameLen = 0
 
       ! get length of given name for C++ validation
@@ -404,10 +429,14 @@
 !     invoke C to C++ entry point to allocate and initialize new clock
       call c_ESMC_ClockCreateNew(ESMF_ClockCreateNew, nameLen, name, &
                                  timeStep, startTime, stopTime, runDuration, &
-                                 runTimeStepCount, refTime, rc)
+                                 runTimeStepCount, refTime, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_ClockSetInitCreated(ESMF_ClockCreateNew)
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_ClockCreateNew
 
 !------------------------------------------------------------------------------
@@ -443,12 +472,21 @@
 !     
 !EOP
 ! !REQUIREMENTS:
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
 !     invoke C to C++ entry point to copy clock
-      call c_ESMC_ClockCreateCopy(ESMF_ClockCreateCopy, clock, rc)
+      call c_ESMC_ClockCreateCopy(ESMF_ClockCreateCopy, clock, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_ClockSetInitCreated(ESMF_ClockCreateCopy)
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_ClockCreateCopy
 
 !------------------------------------------------------------------------------
@@ -477,15 +515,27 @@
 !
 !EOP
 ! !REQUIREMENTS:
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check inputs
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockDestroy(clock, rc)
+      call c_ESMC_ClockDestroy(clock, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) then 
+        ! Don't bail out until Delete
+        write(*,*)" c_ESMC_ClockDestroy fails"
+      endif
 
       call ESMF_ClockSetInitDeleted(clock)
 
+      ! Return success
+      if (present(rc)) rc = localrc
       end subroutine ESMF_ClockDestroy
 
 !------------------------------------------------------------------------------
@@ -586,11 +636,15 @@
       character (len=ESMF_MAXSTR) :: tempName
 
       ! initialize name lengths to zero for non-existent name
-      integer :: nameLen
-      integer :: tempNameLen
+      integer :: nameLen, tempNameLen
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
       nameLen = 0
       tempNameLen = 0
-
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
@@ -617,7 +671,9 @@
                            runDuration, runTimeStepCount, refTime, &
                            currTime, prevTime, currSimTime, prevSimTime, &
                            calendar, calendarType, timeZone, advanceCount, &
-                           alarmCount, direction, rc)
+                           alarmCount, direction, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
 
@@ -627,6 +683,8 @@
         name = tempName(1:tempNameLen)
       endif
     
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_ClockGet
 
 !------------------------------------------------------------------------------
@@ -665,14 +723,23 @@
 !     TMGx.x
 
       ! get length of given name for C++ validation
-      integer :: nameLen
+      integer :: nameLen, localrc
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
       nameLen = len_trim(name)
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockGetAlarm(clock, nameLen, name, alarm, rc)
+      call c_ESMC_ClockGetAlarm(clock, nameLen, name, alarm, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
    
       call ESMF_AlarmSetInitCreated(alarm)
  
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_ClockGetAlarm
 
 !------------------------------------------------------------------------------
@@ -742,6 +809,11 @@
       ! get size of given alarm list for C++ validation
       integer :: sizeofAlarmList,i
       type(ESMF_Pointer), allocatable :: alarmPtrList(:)      
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
@@ -755,13 +827,23 @@
       if (sizeofAlarmList > 1) then
         ! pass address of 2nd element for C++ to calculate array step size
         call c_ESMC_ClockGetAlarmList2(clock, alarmListType, &
-                                      alarmPtrList(1), alarmPtrList(2), &
-                                      sizeofAlarmList, alarmCount, timeStep, rc)
+                           alarmPtrList(1), alarmPtrList(2), &
+                           sizeofAlarmList, alarmCount, timeStep, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) then
+          ! Not bail out until deallocation
+          write(*,*)"c_ESMC_ClockGetAlarmList2 fails"
+        endif
       else
         ! array has only one element
         call c_ESMC_ClockGetAlarmList1(clock, alarmListType, &
-                                      alarmPtrList(1), &
-                                      sizeofAlarmList, alarmCount, timeStep, rc)
+                           alarmPtrList(1), &
+                           sizeofAlarmList, alarmCount, timeStep, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) then
+          ! Not bail out until deallocation
+          write(*,*)"c_ESMC_ClockGetAlarmList1 fails"
+        endif
       endif
 
     
@@ -774,8 +856,8 @@
       ! Get rid of list
       deallocate(alarmPtrList)
 
-
-
+      ! Return success
+      if (present(rc)) rc = localrc
       end subroutine ESMF_ClockGetAlarmList
 
 !------------------------------------------------------------------------------
@@ -813,6 +895,11 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGx.x, CCSM
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
@@ -820,8 +907,12 @@
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeStep)
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockGetNextTime(clock, nextTime, timeStep, rc)
+      call c_ESMC_ClockGetNextTime(clock, nextTime, timeStep, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_ClockGetNextTime
 
 !------------------------------------------------------------------------------
@@ -855,13 +946,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG3.5.7
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockIsDone(clock, ESMF_ClockIsDone, rc)
-    
+      call c_ESMC_ClockIsDone(clock, ESMF_ClockIsDone, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_ClockIsDone
 
 !------------------------------------------------------------------------------
@@ -895,13 +995,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG3.4.6
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockIsReverse(clock, ESMF_ClockIsReverse, rc)
-    
+      call c_ESMC_ClockIsReverse(clock, ESMF_ClockIsReverse, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_ClockIsReverse
 
 !------------------------------------------------------------------------------
@@ -934,13 +1043,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG3.5.6
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockIsStopTime(clock, ESMF_ClockIsStopTime, rc)
-    
+      call c_ESMC_ClockIsStopTime(clock, ESMF_ClockIsStopTime, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_ClockIsStopTime
 
 !------------------------------------------------------------------------------
@@ -973,13 +1091,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGx.x, WRF
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockIsStopTimeEnabled(clock, ESMF_ClockIsStopTimeEnabled, rc)
-    
+      call c_ESMC_ClockIsStopTimeEnabled(clock, ESMF_ClockIsStopTimeEnabled, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_ClockIsStopTimeEnabled
 
 !------------------------------------------------------------------------------
@@ -1027,13 +1154,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
       
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockPrint(clock, options, rc)   
+      call c_ESMC_ClockPrint(clock, options, localrc)   
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_ClockPrint
 
 !------------------------------------------------------------------------------
@@ -1071,15 +1207,24 @@
 ! !REQUIREMENTS:
 
       ! get length of given name for C++ validation
-      integer :: nameLen
+      integer :: nameLen, localrc
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
       nameLen = len_trim(name)
 
 !     invoke C to C++ entry point to allocate and restore clock
       call c_ESMC_ClockReadRestart(ESMF_ClockReadRestart, nameLen, name, &
-                                   iospec, rc)
+                                   iospec, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_ClockSetInitCreated(ESMF_ClockReadRestart)
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_ClockReadRestart
 
 !------------------------------------------------------------------------------
@@ -1183,7 +1328,12 @@
 !     TMG3.1, TMG3.4.4
 
       ! initialize name length to zero for non-existent name
-      integer :: nameLen
+      integer :: nameLen, localrc
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
       nameLen = 0
 
       ! check variables
@@ -1203,8 +1353,12 @@
 !     invoke C to C++ entry point
       call c_ESMC_ClockSet(clock, nameLen, name, timeStep, startTime, &
                            stopTime, runDuration, runTimeStepCount, &
-                           refTime, currTime, advanceCount, direction, rc)
-    
+                           refTime, currTime, advanceCount, direction, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_ClockSet
 
 !------------------------------------------------------------------------------
@@ -1234,13 +1388,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGx.x, WRF
-    
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL 
+
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockStopTimeDisable(clock, rc)
+      call c_ESMC_ClockStopTimeDisable(clock, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_ClockStopTimeDisable
 
 !------------------------------------------------------------------------------
@@ -1273,13 +1436,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGx.x, WRF
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockStopTimeEnable(clock, stopTime, rc)
+      call c_ESMC_ClockStopTimeEnable(clock, stopTime, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_ClockStopTimeEnable
 
 !------------------------------------------------------------------------------
@@ -1310,13 +1482,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG3.4.5
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockSyncToRealTime(clock, rc)
-    
+      call c_ESMC_ClockSyncToRealTime(clock, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS 
       end subroutine ESMF_ClockSyncToRealTime
 
 !------------------------------------------------------------------------------
@@ -1352,13 +1533,22 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-    
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+ 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockValidate(clock, options, rc)
-    
+      call c_ESMC_ClockValidate(clock, options, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS 
       end subroutine ESMF_ClockValidate
 
 !------------------------------------------------------------------------------
@@ -1391,13 +1581,22 @@
 !
 !EOPI
 ! !REQUIREMENTS:
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockWriteRestart(clock, iospec, rc)
+      call c_ESMC_ClockWriteRestart(clock, iospec, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_ClockWriteRestart
 
 !------------------------------------------------------------------------------

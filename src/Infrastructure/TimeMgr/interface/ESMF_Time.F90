@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.94 2007/03/31 05:51:26 cdeluca Exp $
+! $Id: ESMF_Time.F90,v 1.95 2007/07/13 18:03:41 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.94 2007/03/31 05:51:26 cdeluca Exp $'
+      '$Id: ESMF_Time.F90,v 1.95 2007/07/13 18:03:41 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -672,6 +672,12 @@
       ! initialize time string lengths to zero for non-existent time string
       integer :: timeStringLen, timeStringLenISOFrac
       integer :: tempTimeStringLen, tempTimeStringLenISOFrac
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
       timeStringLen = 0     
       timeStringLenISOFrac = 0     
       tempTimeStringLen = 0
@@ -699,7 +705,9 @@
                           timeStringLenISOFrac, tempTimeStringLenISOFrac, &
                           tempTimeStringISOFrac, &
                           dayOfWeek, MidMonth, dayOfYear, dayOfYear_r8, &
-                          dayOfYear_intvl, rc)
+                          dayOfYear_intvl, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
                                   
       if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
@@ -713,6 +721,8 @@
         timeStringISOFrac = tempTimeStringISOFrac(1:tempTimeStringLenISOFrac)
       endif
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeGet
 
 !------------------------------------------------------------------------------
@@ -746,11 +756,20 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
 
-      call c_ESMC_TimeIsLeapYear(time, ESMF_TimeIsLeapYear, rc)
-    
+      call c_ESMC_TimeIsLeapYear(time, ESMF_TimeIsLeapYear, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end function ESMF_TimeIsLeapYear
 
 !------------------------------------------------------------------------------
@@ -787,12 +806,21 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time1)
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time2)
 
-      call c_ESMC_TimeIsSameCalendar(time1, time2, ESMF_TimeIsSameCalendar, rc)
-    
+      call c_ESMC_TimeIsSameCalendar(time1, time2, ESMF_TimeIsSameCalendar, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS    
       end function ESMF_TimeIsSameCalendar
 
 !------------------------------------------------------------------------------
@@ -844,11 +872,20 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
    
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
 
-      call c_ESMC_TimePrint(time, options, rc)
+      call c_ESMC_TimePrint(time, options, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimePrint
 
 !------------------------------------------------------------------------------
@@ -887,15 +924,23 @@
 !     TMGn.n.n
 
       ! get length of given name for C++ validation
-      integer :: nameLen       
+      integer :: nameLen, localrc
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
 
       nameLen = len_trim(name)
    
 !     invoke C to C++ entry point to restore time
-      call c_ESMC_TimeReadRestart(time, nameLen, name, iospec, rc)
+      call c_ESMC_TimeReadRestart(time, nameLen, name, iospec, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeReadRestart
 
 !------------------------------------------------------------------------------
@@ -1062,7 +1107,11 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
 
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
@@ -1073,8 +1122,12 @@
       call c_ESMC_TimeSet(time, yy, yy_i8, mm, dd, d, d_i8, &
                           h, m, s, s_i8, ms, us, ns, &
                           d_r8, h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, &
-                          sN, sD, calendar, calendarType, timeZone, rc)
+                          sN, sD, calendar, calendarType, timeZone, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeSet
 
 !------------------------------------------------------------------------------
@@ -1105,11 +1158,20 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMG2.5.7
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
 
-      call c_ESMC_TimeSyncToRealTime(time, rc)
+      call c_ESMC_TimeSyncToRealTime(time, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeSyncToRealTime
 
 !------------------------------------------------------------------------------
@@ -1147,11 +1209,20 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
    
-      call c_ESMC_TimeValidate(time, options, rc)
+      call c_ESMC_TimeValidate(time, options, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeValidate
 
 !------------------------------------------------------------------------------
@@ -1185,12 +1256,21 @@
 !EOPI
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
    
 !     invoke C to C++ entry point
-      call c_ESMC_TimeWriteRestart(time, iospec, rc)
+      call c_ESMC_TimeWriteRestart(time, iospec, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeWriteRestart
 
 !------------------------------------------------------------------------------

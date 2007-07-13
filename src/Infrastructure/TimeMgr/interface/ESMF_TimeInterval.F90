@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.82 2007/03/31 05:51:26 cdeluca Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.83 2007/07/13 18:03:41 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.82 2007/03/31 05:51:26 cdeluca Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.83 2007/07/13 18:03:41 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -1127,6 +1127,12 @@
       ! initialize time string lengths to zero for non-existent time string
       integer :: timeStringLen, timeStringLenISOFrac
       integer :: tempTimeStringLen, tempTimeStringLenISOFrac
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
@@ -1155,7 +1161,9 @@
                                      tempTimeString, &
                                      timeStringLenISOFrac, &
                                      tempTimeStringLenISOFrac, &
-                                     tempTimeStringISOFrac, rc)
+                                     tempTimeStringISOFrac, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
 
@@ -1169,6 +1177,8 @@
         timeStringISOFrac = tempTimeStringISOFrac(1:tempTimeStringLenISOFrac)
       endif
     
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeIntervalGetDur
 
 !------------------------------------------------------------------------------
@@ -1337,6 +1347,11 @@
       ! initialize time string lengths to zero for non-existent time string
       integer :: timeStringLen, timeStringLenISOFrac
       integer :: tempTimeStringLen, tempTimeStringLenISOFrac
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
@@ -1368,7 +1383,9 @@
                                        tempTimeString, &
                                        timeStringLenISOFrac, &
                                        tempTimeStringLenISOFrac, &
-                                       tempTimeStringISOFrac, rc)
+                                       tempTimeStringISOFrac, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
 
@@ -1381,6 +1398,8 @@
         timeStringISOFrac = tempTimeStringISOFrac(1:tempTimeStringLenISOFrac)
       endif
     
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeIntervalGetDurStart
 
 !------------------------------------------------------------------------------
@@ -1551,6 +1570,11 @@
       ! initialize time string lengths to zero for non-existent time string
       integer :: timeStringLen, timeStringLenISOFrac
       integer :: tempTimeStringLen, tempTimeStringLenISOFrac
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
 !      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendarIn,rc)
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
@@ -1580,7 +1604,9 @@
                                   tempTimeString, &
                                   timeStringLenISOFrac, &
                                   tempTimeStringLenISOFrac, &
-                                  tempTimeStringISOFrac, rc)
+                                  tempTimeStringISOFrac, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
 
@@ -1593,6 +1619,8 @@
         timeStringISOFrac = tempTimeStringISOFrac(1:tempTimeStringLenISOFrac)
       endif
     
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeIntervalGetDurCal
 
 !------------------------------------------------------------------------------
@@ -1762,6 +1790,11 @@
       ! initialize time string lengths to zero for non-existent time string
       integer :: timeStringLen, timeStringLenISOFrac
       integer :: tempTimeStringLen, tempTimeStringLenISOFrac
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
@@ -1790,7 +1823,9 @@
                                   tempTimeString, &
                                   timeStringLenISOFrac, &
                                   tempTimeStringLenISOFrac, &
-                                  tempTimeStringISOFrac, rc)
+                                  tempTimeStringISOFrac, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
 
@@ -1803,6 +1838,8 @@
         timeStringISOFrac = tempTimeStringISOFrac(1:tempTimeStringLenISOFrac)
       endif
     
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeIntervalGetDurCalTyp
 
 !------------------------------------------------------------------------------
@@ -1889,11 +1926,20 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
     
-      call c_ESMC_TimeIntervalPrint(timeinterval, options, rc)
+      call c_ESMC_TimeIntervalPrint(timeinterval, options, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeIntervalPrint
 
 !------------------------------------------------------------------------------
@@ -1932,17 +1978,24 @@
 !     TMGn.n.n
 
       ! get length of given name for C++ validation
-      integer :: nameLen
+      integer :: nameLen, localrc
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
-
 
       nameLen = len_trim(name)
 
 !     invoke C to C++ entry point to restore timeinterval
       call c_ESMC_TimeIntervalReadRestart(timeinterval, nameLen, name, &
-                                          iospec, rc)
+                                          iospec, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeIntervalReadRestart
 
 !------------------------------------------------------------------------------
@@ -2059,6 +2112,11 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
 
@@ -2067,8 +2125,12 @@
                                      mm, mm_i8, &
                                      d, d_i8, h, m, s, s_i8, ms, &
                                      us, ns, d_r8, h_r8, m_r8, s_r8, &
-                                     ms_r8, us_r8, ns_r8, sN, sD, rc)
+                                     ms_r8, us_r8, ns_r8, sN, sD, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeIntervalSetDur
 
 !------------------------------------------------------------------------------
@@ -2191,6 +2253,11 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
 
@@ -2200,8 +2267,12 @@
                                           d, d_i8, h, m, s, s_i8, ms, &
                                           us, ns, d_r8, h_r8, m_r8, s_r8, &
                                           ms_r8, us_r8, ns_r8, sN, sD, &
-                                          startTime, rc)
+                                          startTime, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeIntervalSetDurStart
 
 !------------------------------------------------------------------------------
@@ -2329,6 +2400,11 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
@@ -2339,8 +2415,12 @@
                                         d, d_i8, h, m, s, s_i8, ms, &
                                         us, ns, d_r8, h_r8, m_r8, s_r8, &
                                         ms_r8, us_r8, ns_r8, sN, sD, &
-                                        calendar, rc)
+                                        calendar, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeIntervalSetDurCal
 
 !------------------------------------------------------------------------------
@@ -2461,7 +2541,11 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
 
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
 
@@ -2471,8 +2555,12 @@
                                            d, d_i8, h, m, s, s_i8, ms, &
                                            us, ns, d_r8, h_r8, m_r8, s_r8, &
                                            ms_r8, us_r8, ns_r8, sN, sD, &
-                                           calendarType, rc)
+                                           calendarType, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeIntervalSetDurCalTyp
 
 !------------------------------------------------------------------------------
@@ -2507,11 +2595,20 @@
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
     
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
 
-      call c_ESMC_TimeIntervalValidate(timeinterval, options, rc)
+      call c_ESMC_TimeIntervalValidate(timeinterval, options, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeIntervalValidate
 
 !------------------------------------------------------------------------------
@@ -2545,12 +2642,21 @@
 !EOPI
 ! !REQUIREMENTS:
 !     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
 
 !     invoke C to C++ entry point 
-      call c_ESMC_TimeIntervalWriteRestart(timeinterval, iospec, rc)
+      call c_ESMC_TimeIntervalWriteRestart(timeinterval, iospec, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeIntervalWriteRestart
 
 !------------------------------------------------------------------------------
