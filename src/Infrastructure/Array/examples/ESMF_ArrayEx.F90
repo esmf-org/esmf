@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.19 2007/06/27 19:38:30 cdeluca Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.20 2007/07/13 18:51:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1178,13 +1178,19 @@ program ESMF_ArrayEx
   factorIndexList(2,:) = (/4, 4, 20, 20/)   ! destination cell indices
 !EOC
 !BOE
-! With this information available on {\tt rootPET} the Array SparseMatMul
-! can be precomputed and stored.
+! The following call will pass this information into the Array SparseMatMul
+! on PET 0 while all other PETs call in without factorList and factorIndexList
+! arguments.
 !EOE
 !BOC
-  call ESMF_ArraySparseMatMulStore(srcArray=array1, dstArray=array2, &
-    factorList=factorList, factorIndexList=factorIndexList, rootPET=0, &
-    routehandle=sparseMatMulHandle, rc=rc)
+  if (localPet == 0) then
+    call ESMF_ArraySparseMatMulStore(srcArray=array1, dstArray=array2, &
+      routehandle=sparseMatMulHandle, factorList=factorList, &
+      factorIndexList=factorIndexList, rc=rc)
+  else
+    call ESMF_ArraySparseMatMulStore(srcArray=array1, dstArray=array2, &
+      routehandle=sparseMatMulHandle, rc=rc)
+  endif      
 !EOC
 !call ESMF_ArrayPrint(array1, rc=rc)
 !call ESMF_ArrayPrint(array2, rc=rc)
