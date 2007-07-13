@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSTest.F90,v 1.1 2007/06/12 21:28:58 dneckels Exp $
+! $Id: ESMF_ArrayArbIdxSTest.F90,v 1.2 2007/07/13 20:40:21 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !SYSTEM_TEST        String used by test script to count system tests.
@@ -21,6 +21,14 @@ program ArrayArbIdx
   use ESMF_Mod
   use ESMF_TestMod
 
+  implicit none
+
+  ! Local variables
+  type(ESMF_VM) :: vm
+  type(ESMF_DISTGRID) :: distgrid
+  integer :: rc, nPets, i, localPet
+  integer :: indices(20)
+
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: testresult = 0
 
@@ -31,20 +39,16 @@ program ArrayArbIdx
   character(ESMF_MAXSTR) :: failMsg, finalMsg
 
 
-  type(ESMF_VM) :: vm
-  type(ESMF_DISTGRID) :: distgrid
-  integer :: rc, myPet, nPets
-  integer :: indices(20)
 
   call ESMF_Initialize(vm=vm, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_VMGet(vm, localPet=myPet, petCount=nPets, rc=rc)
+  call ESMF_VMGet(vm, localPet=localPet, petCount=nPets, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 
   do i=1,20
-    indices(i) = myPet*20 + i
+    indices(i) = localPet*20 + i
   enddo 
 
   distgrid = ESMF_DistGridCreate(indices, vm, rc)
