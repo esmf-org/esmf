@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.63 2007/07/12 15:46:44 theurich Exp $
+// $Id: ESMC_Array.h,v 1.64 2007/07/13 18:18:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -167,9 +167,9 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int scatter(void *array, ESMC_TypeKind typekind, int rank,
       int *counts, int *patch, int rootPet, VM *vm);
     static int sparseMatMulStore(Array *srcArray, Array *dstArray,
-      ESMC_TypeKind typekind, void *factorList, int factorListCount,
-      InterfaceInt *factorIndexList, int rootPet, 
-      ESMC_RouteHandle **routehandle);
+      ESMC_RouteHandle **routehandle,
+      ESMC_TypeKind typekind = ESMF_NOKIND, void *factorList = NULL,
+      int factorListCount = 0, InterfaceInt *factorIndexList = NULL);
     static int sparseMatMul(Array *srcArray, Array *dstArray,
       ESMC_RouteHandle **routehandle);
     static int sparseMatMulRelease(ESMC_RouteHandle *routehandle);

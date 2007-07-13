@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.58 2007/07/12 23:41:27 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.59 2007/07/13 18:18:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -518,32 +518,31 @@ extern "C" {
   
 
   void FTN(c_esmc_arraysparsematmulstore)(ESMCI::Array **srcArray,
-    ESMCI::Array **dstArray, ESMC_TypeKind *typekind, void *factorList, 
-    int *factorListCount, ESMCI::InterfaceInt **factorIndexList, int *rootPet,
-    ESMC_RouteHandle **routehandle, int *rc){
+    ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle, 
+    ESMC_TypeKind *typekind, void *factorList, int *factorListCount,
+    ESMCI::InterfaceInt **factorIndexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysparsematmulstore()"
     //Initialize return code
     *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::sparseMatMulStore(
-      *srcArray, *dstArray, *typekind, factorList, *factorListCount,
-      *factorIndexList, *rootPet, routehandle),
+      *srcArray, *dstArray, routehandle, *typekind, factorList,
+      *factorListCount, *factorIndexList),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
 
   void FTN(c_esmc_arraysparsematmulstorenf)(ESMCI::Array **srcArray,
-    ESMCI::Array **dstArray, int *rootPet, ESMC_RouteHandle **routehandle, 
-    int *rc){
+    ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysparsematmulstorenf()"
     //Initialize return code
     *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::sparseMatMulStore(
-      *srcArray, *dstArray, ESMF_NOKIND, NULL, 0, NULL, *rootPet, routehandle),
+      *srcArray, *dstArray, routehandle),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

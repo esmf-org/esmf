@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.55 2007/07/12 23:41:28 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.56 2007/07/13 18:18:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.55 2007/07/12 23:41:28 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.56 2007/07/13 18:18:52 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -585,16 +585,15 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySparseMatMulStore()
-    subroutine ESMF_ArraySparseMatMulStoreI4(srcArray, dstArray, &
-      factorList, factorIndexList, rootPET, routehandle, rc)
+    subroutine ESMF_ArraySparseMatMulStoreI4(srcArray, dstArray, routehandle, &
+      factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     integer(ESMF_KIND_I4), target, intent(in)           :: factorList(:)
     integer,                    intent(in)              :: factorIndexList(:,:)
-    integer,                    intent(in)              :: rootPet
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     integer,                    intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -623,6 +622,8 @@ contains
 !         {\tt ESMF\_Array} containing source data.
 !   \item [dstArray]
 !         {\tt ESMF\_Array} holding destination data.
+!   \item [routehandle]
+!         Handle to the Route that stores the precomputed operation.
 !   \item [factorList]
 !         List of non-zero coefficients.
 !   \item [factorIndexList]
@@ -632,10 +633,6 @@ contains
 !         factorIndexList(1,:)} indicates the index in the source Array and
 !         {\tt factorIndexList(2,:)} indicates the index in the destination
 !         Array.
-!   \item[rootPet]
-!         PET on which weights are provided.
-!   \item [routehandle]
-!         Handle to the Route that stores the precomputed operation.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -664,9 +661,9 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, ESMF_TYPEKIND_I4, &
-      opt_factorList, len_factorList, factorIndexListArg, rootPet, &
-      routehandle, status)
+    call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, routehandle, &
+      ESMF_TYPEKIND_I4, opt_factorList, len_factorList, factorIndexListArg, &
+      status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -695,16 +692,15 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySparseMatMulStore()
-    subroutine ESMF_ArraySparseMatMulStoreI8(srcArray, dstArray, &
-      factorList, factorIndexList, rootPET, routehandle, rc)
+    subroutine ESMF_ArraySparseMatMulStoreI8(srcArray, dstArray, routehandle, &
+      factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     integer(ESMF_KIND_I8), target, intent(in)           :: factorList(:)
     integer,                    intent(in)              :: factorIndexList(:,:)
-    integer,                    intent(in)              :: rootPet
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     integer,                    intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -733,6 +729,8 @@ contains
 !         {\tt ESMF\_Array} containing source data.
 !   \item [dstArray]
 !         {\tt ESMF\_Array} holding destination data.
+!   \item [routehandle]
+!         Handle to the Route that stores the precomputed operation.
 !   \item [factorList]
 !         List of non-zero coefficients.
 !   \item [factorIndexList]
@@ -742,10 +740,6 @@ contains
 !         factorIndexList(1,:)} indicates the index in the source Array and
 !         {\tt factorIndexList(2,:)} indicates the index in the destination
 !         Array.
-!   \item[rootPet]
-!         PET on which weights are provided.
-!   \item [routehandle]
-!         Handle to the Route that stores the precomputed operation.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -774,9 +768,9 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, ESMF_TYPEKIND_I8, &
-      opt_factorList, len_factorList, factorIndexListArg, rootPet, &
-      routehandle, status)
+    call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, routehandle, &
+      ESMF_TYPEKIND_I8, opt_factorList, len_factorList, factorIndexListArg, &
+      status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -805,16 +799,15 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySparseMatMulStore()
-    subroutine ESMF_ArraySparseMatMulStoreR4(srcArray, dstArray, &
-      factorList, factorIndexList, rootPET, routehandle, rc)
+    subroutine ESMF_ArraySparseMatMulStoreR4(srcArray, dstArray, routehandle, &
+      factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R4), target, intent(in)              :: factorList(:)
     integer,                    intent(in)              :: factorIndexList(:,:)
-    integer,                    intent(in)              :: rootPet
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     integer,                    intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -852,8 +845,6 @@ contains
 !         factorIndexList(1,:)} indicates the index in the source Array and
 !         {\tt factorIndexList(2,:)} indicates the index in the destination
 !         Array.
-!   \item[rootPet]
-!         PET on which weights are provided.
 !   \item [routehandle]
 !         Handle to the Route that stores the precomputed operation.
 !   \item [{[rc]}]
@@ -884,9 +875,9 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, ESMF_TYPEKIND_R4, &
-      opt_factorList, len_factorList, factorIndexListArg, rootPet, &
-      routehandle, status)
+    call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, routehandle, &
+      ESMF_TYPEKIND_R4, opt_factorList, len_factorList, factorIndexListArg, &
+      status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -915,16 +906,15 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySparseMatMulStore()
-    subroutine ESMF_ArraySparseMatMulStoreR8(srcArray, dstArray, &
-      factorList, factorIndexList, rootPET, routehandle, rc)
+    subroutine ESMF_ArraySparseMatMulStoreR8(srcArray, dstArray, routehandle, &
+      factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R8), target, intent(in)              :: factorList(:)
     integer,                    intent(in)              :: factorIndexList(:,:)
-    integer,                    intent(in)              :: rootPet
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     integer,                    intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -953,6 +943,8 @@ contains
 !         {\tt ESMF\_Array} containing source data.
 !   \item [dstArray]
 !         {\tt ESMF\_Array} holding destination data.
+!   \item [routehandle]
+!         Handle to the Route that stores the precomputed operation.
 !   \item [factorList]
 !         List of non-zero coefficients.
 !   \item [factorIndexList]
@@ -962,10 +954,6 @@ contains
 !         factorIndexList(1,:)} indicates the index in the source Array and
 !         {\tt factorIndexList(2,:)} indicates the index in the destination
 !         Array.
-!   \item[rootPet]
-!         PET on which weights are provided.
-!   \item [routehandle]
-!         Handle to the Route that stores the precomputed operation.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -994,9 +982,9 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, ESMF_TYPEKIND_R8, &
-      opt_factorList, len_factorList, factorIndexListArg, rootPet, &
-      routehandle, status)
+    call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, routehandle, &
+      ESMF_TYPEKIND_R8, opt_factorList, len_factorList, factorIndexListArg, &
+      status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1025,13 +1013,12 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySparseMatMulStore()
-    subroutine ESMF_ArraySparseMatMulStoreNF(srcArray, dstArray, &
-      rootPET, routehandle, rc)
+    subroutine ESMF_ArraySparseMatMulStoreNF(srcArray, dstArray, routehandle, &
+      rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
-    integer,                    intent(in)              :: rootPet
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     integer,                    intent(out),  optional  :: rc
 !
@@ -1061,8 +1048,6 @@ contains
 !         {\tt ESMF\_Array} containing source data.
 !   \item [dstArray]
 !         {\tt ESMF\_Array} holding destination data.
-!   \item[rootPet]
-!         PET on which weights are provided.
 !   \item [routehandle]
 !         Handle to the Route that stores the precomputed operation.
 !   \item [{[rc]}]
@@ -1082,8 +1067,8 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySparseMatMulStoreNF(srcArray, dstArray, rootPet, &
-      routehandle, status)
+    call c_ESMC_ArraySparseMatMulStoreNF(srcArray, dstArray, routehandle, &
+      status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
