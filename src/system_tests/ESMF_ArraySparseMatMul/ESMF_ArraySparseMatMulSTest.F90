@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.9 2007/06/25 06:02:05 theurich Exp $
+! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.10 2007/07/14 04:53:19 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !SYSTEM_TEST        String used by test script to count system tests.
@@ -221,27 +221,13 @@ program ArraySparseMatMul
   call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), testname, failMsg, testresult, &
     ESMF_SRCLINE)
 
-  if ((localPet .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
-    ! Separate message to console, for quick confirmation of success/failure
-    if (rc .eq. ESMF_SUCCESS) then
-      write(finalMsg, *) "SUCCESS: ArraySparseMatMul test finished correctly."
-    else
-      write(finalMsg, *) "System Test did not succeed.  Error code ", rc
-    endif
-    write(0, *) ""
-    write(0, *) trim(testname)
-    write(0, *) trim(finalMsg)
-    write(0, *) ""
-
-  endif
-  
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
   print *, "Test finished, localPet = ", localPet
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
 
-  call ESMF_Finalize(rc=rc) 
+  call ESMF_Finalize()
 
 end program ArraySparseMatMul
     
