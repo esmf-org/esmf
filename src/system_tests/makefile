@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2007/06/04 14:43:09 dneckels Exp $ 
+# $Id: makefile,v 1.27 2007/07/14 04:48:56 theurich Exp $ 
 
 ALL: build_system_tests
 
@@ -10,6 +10,7 @@ include $(ESMF_DIR)/makefile
 DIRS     = \
            ESMF_CompCreate \
            ESMF_ArraySparseMatMul \
+           ESMF_ArrayArbIdx \
            ESMF_FieldRedist \
            ESMF_FieldHalo \
            ESMF_FieldHaloPer \
