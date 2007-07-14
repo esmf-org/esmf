@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.22 2007/07/11 05:09:55 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.23 2007/07/14 04:44:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -65,8 +65,8 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     ESMC_Logical regDecompFlag;   // flag indicating regular decomposition
     int **connectionList;         // list of connection elements
     int connectionCount;          // number of elements in connection list
-    int arbIdxCount;              // number of local arbitrary indices
-    int *localArbIndices;         // local arbitrary indices for 1d unstr. case
+    int *localArbSeqIndexCount;   // number of arb sequence indices per localDe
+    int **localArbSeqIndexList;   // local arb sequence indices per localDe
     // lower level objects
     DELayout *delayout;
     VM *vm;    
@@ -133,7 +133,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     DELayout *getDELayout()         const {return delayout;}
     ESMC_Logical getRegDecompFlag() const {return regDecompFlag;}
     int getSequenceIndex(int localDe, int *index, int *rc=NULL) const;
-    int setArbIdx(InterfaceInt *argIndices);
+    int setArbSeqIndex(InterfaceInt *arbSeqIndex);
     // misc.
     int print() const;
     int validate() const;

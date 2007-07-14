@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.20 2007/07/11 19:08:57 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.21 2007/07/14 04:44:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -304,7 +304,7 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_connection()"
   if (rc!=NULL)
     *rc = ESMC_RC_NOT_IMPL;
-    // call into C++
+    // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError(
       ESMCI::DistGrid::connection(*connection, *patchIndexA,
       *patchIndexB, *positionVector, *orientationVector), 
@@ -312,23 +312,19 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_distgrid_storeabidx)(
-    ESMCI::DistGrid **dptr,
-    ESMCI::InterfaceInt **abidx, int *rc){
+  void FTN(c_esmc_distgridsetarbseqindex)(
+    ESMCI::DistGrid **ptr, ESMCI::InterfaceInt **arbSeqIndex, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_distgrid_storeabidx()"
-    
+#define ESMC_METHOD "c_esmc_distgridsetarbseqindex()"
     if (rc!=NULL)
       *rc = ESMC_RC_NOT_IMPL;
-      
+    // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError(
-      (*dptr)->setArbIdx(*abidx),
+      (*ptr)->setArbSeqIndex(*arbSeqIndex),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
 #undef  ESMC_METHOD
-
-
 }
 

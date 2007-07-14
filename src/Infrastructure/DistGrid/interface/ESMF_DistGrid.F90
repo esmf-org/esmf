@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.22 2007/07/12 20:29:20 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.23 2007/07/14 04:44:50 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1716,11 +1716,10 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDBAI(indices, vm, rc)
+  function ESMF_DistGridCreateDBAI(arbSeqIndexList, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: indices(:)
-    type(ESMF_VM),                intent(in)            :: vm
+    integer,                      intent(in)            :: arbSeqIndexList(:)
     integer,                      intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
@@ -1732,11 +1731,8 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[indices]}]
-!          List of (global) indices that reside on the current pet.  These
-!          may be a partition of the global index space, or may overlap.
-!     \item[{[vm]}]
-!          Required {\tt ESMF\_VM} object of the current context. 
+!     \item[{[arbSeqIndexList]}]
+!          List of arbitrary sequence indices that reside on the local DE.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1746,6 +1742,7 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: status          ! local error status
     type(ESMF_DistGrid)     :: distgrid        ! opaque pointer to new C++ DistGrid
+    type(ESMF_VM)           :: vm              ! opaque pointer to new C++ DistGrid
     type(ESMF_InterfaceInt) :: indicesArg      ! index helper
     integer                 :: localSize(2)    ! number of local indices
     integer, allocatable    :: globalSizes(:)  ! array of all sizes
@@ -1759,20 +1756,21 @@ contains
     status = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
-
+    call ESMF_VMGetCurrent(vm, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
     call ESMF_VMGet(vm, petCount=petCount, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! min/max of local indices
-    localSize(1) = size(indices)
+    localSize(1) = size(arbSeqIndexList)
     imax = -huge(imax)
     imin = huge(imin)
     do i=1,localSize(1)
-      if (indices(i) .le. imin) imin = indices(i)
-      if (indices(i) .ge. imax) imax = indices(i)
+      if (arbSeqIndexList(i) .le. imin) imin = arbSeqIndexList(i)
+      if (arbSeqIndexList(i) .ge. imax) imax = arbSeqIndexList(i)
     enddo
 
     allocate(globalSizes(2*petCount))
@@ -1818,15 +1816,18 @@ contains
     ! Set return value
     ESMF_DistGridCreateDBAI = distgrid 
 
-    indicesArg = ESMF_InterfaceIntCreate(farray1D=indices, rc=status)
+    indicesArg = ESMF_InterfaceIntCreate(farray1D=arbSeqIndexList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call c_ESMC_DistGrid_StoreAbIdx(distgrid, indicesArg, status)
+    call c_ESMC_DistGridSetArbSeqIndex(distgrid, indicesArg, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(indicesArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBAI)

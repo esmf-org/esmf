@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.23 2007/07/12 18:43:40 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.24 2007/07/14 04:44:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.23 2007/07/12 18:43:40 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.24 2007/07/14 04:44:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1288,11 +1288,13 @@ int DistGrid::construct(
     // mark in dePatchList DEs that have no cells as not being part of any patch
     if (deCellCount[i]==0) dePatchList[i]=0;
   }
-
-  // By default there are no arbitrary indices
-  arbIdxCount = 0;
-  localArbIndices = NULL;
-  
+  // no arbitrary sequence indices by default
+  localArbSeqIndexCount = new int[localDeCount];
+  localArbSeqIndexList = new int*[localDeCount];
+  for (int i=0; i<localDeCount; i++){
+    localArbSeqIndexCount[i] = 0;
+    localArbSeqIndexList[i] = NULL;
+  }
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1341,6 +1343,11 @@ int DistGrid::destruct(void){
     delete [] connectionList[i];
   if (connectionList)
     delete [] connectionList;
+  delete [] localArbSeqIndexCount;
+  for (int i=0; i<localDeCount; i++)
+    if (localArbSeqIndexList[i])
+      delete [] localArbSeqIndexList[i];
+  delete [] localArbSeqIndexList;
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -1406,12 +1413,12 @@ int DistGrid::print()const{
   for (int i=0; i<deCount; i++)
     printf("%d ", deCellCount[i]);
   printf("\n");
-  printf("localIndexList:\n");
+  printf("localIndexList (dims separated by / ):\n");
   for (int i=0; i<localDeCount; i++){
-    printf("DE %d - ", i);
+    printf(" for localDE %d - DE %d: ", i, localDeList[i]);
     for (int j=0; j<dimCount; j++){
       printf(" (");
-      for (int k=0; k<dimExtent[i*dimCount+j]; k++){
+      for (int k=0; k<dimExtent[localDeList[i]*dimCount+j]; k++){
         if (k!=0) printf(", ");
         printf("%d", localIndexList[i*dimCount+j][k]);
       }
@@ -1419,6 +1426,20 @@ int DistGrid::print()const{
     }
     printf("\n");
   }
+  printf("localArbSeqIndexList:\n");
+  for (int i=0; i<localDeCount; i++){
+    printf(" for localDE %d - DE %d: ", i, localDeList[i]);
+    if (localArbSeqIndexCount[i]){
+      printf("(");
+      for (int j=0; j<localArbSeqIndexCount[i]; j++){
+        if (j!=0) printf(", ");
+        printf("%d", localArbSeqIndexList[i][j]);
+      }
+      printf(")\n");
+    }else
+      printf(" default\n");
+  }
+      
   printf("connectionCount = %d\n", connectionCount);
   printf("~ cached values ~\n");
   printf("deCount = %d\n", deCount);
@@ -1576,8 +1597,8 @@ int DistGrid::getSequenceIndex(
 // !ARGUMENTS:
 //
   int localDe,                      // in  - local DE = {0, ..., localDeCount-1}
-  int *index,                       // in - DE-local index tupple in exclusive
-                                    //      region basis 0
+  int *index,                       // in  - DE-local index tupple in exclusive
+                                    //       region basis 0
   int *rc                           // out - return code
   )const{
 //
@@ -1595,23 +1616,35 @@ int DistGrid::getSequenceIndex(
       "- Specified local DE out of bounds", rc);
     return -1;
   }
-
-  // determine the sequentialized index
-  int patch = dePatchList[localDeList[localDe]];  // patches are basis 1 !!!!
-  int seqindex =
-    localIndexList[localDe*dimCount+(dimCount-1)][index[dimCount-1]]
-    - minIndex[(patch-1)*dimCount+(dimCount-1)]; // initialize
-  for (int i=dimCount-2; i>=0; i--){
-    // add cells in the patch in which DE is located
-    seqindex *= maxIndex[(patch-1)*dimCount+i] 
-      - minIndex[(patch-1)*dimCount+i] + 1;
-    seqindex += localIndexList[localDe*dimCount+i][index[i]] 
-      - minIndex[(patch-1)*dimCount+i];
-  }
-  for (int i=0; i<dePatchList[localDeList[localDe]]-2; i++)
-    seqindex += patchCellCount[i];  // add all the cells of previous patches
   
-  return seqindex+1;  // shift sequentialized index to basis 1 !!!!
+  int seqindex;
+  if (localArbSeqIndexCount[localDe]){
+    // determine the sequentialized index by localArbSeqIndexList loop-up
+    int linExclusiveIndex = index[dimCount-1];  // initialize
+    for (int i=dimCount-2; i>=0; i--){
+      linExclusiveIndex *= dimExtent[localDe*dimCount + i];
+      linExclusiveIndex += index[i];
+    }
+    seqindex = localArbSeqIndexList[localDe][linExclusiveIndex];
+  }else{
+    // determine the sequentialized index by construction of default patch rule
+    int patch = dePatchList[localDeList[localDe]];  // patches are basis 1 !!!!
+    // add up cells from patch in which DE is located
+    seqindex =
+      localIndexList[localDe*dimCount+(dimCount-1)][index[dimCount-1]]
+      - minIndex[(patch-1)*dimCount+(dimCount-1)]; // initialize
+    for (int i=dimCount-2; i>=0; i--){
+      seqindex *= maxIndex[(patch-1)*dimCount+i] 
+        - minIndex[(patch-1)*dimCount+i] + 1;
+      seqindex += localIndexList[localDe*dimCount+i][index[i]] 
+        - minIndex[(patch-1)*dimCount+i];
+    }
+    // add all the cells of previous patches
+    for (int i=0; i<dePatchList[localDeList[localDe]]-2; i++)
+      seqindex += patchCellCount[i];
+    ++seqindex;  // shift sequentialized index to basis 1 !!!!
+  }
+  return seqindex;
 }
 //-----------------------------------------------------------------------------
 
@@ -2047,19 +2080,19 @@ int DistGrid::connection(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::setArbIdx()"
+#define ESMC_METHOD "ESMCI::DistGrid::setArbSeqIndex()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::setArbIdx
+// !IROUTINE:  ESMCI::DistGrid::setArbSeqIndex
 //
 // !INTERFACE:
 //
-int DistGrid::setArbIdx(
+int DistGrid::setArbSeqIndex(
 // !RETURN VALUE:
 //    int return code
 //
 // !ARGUMENTS:
 //
-  InterfaceInt *arbIndices // in
+  InterfaceInt *arbSeqIndex // in
   ){
 //
 // !DESCRIPTION:
@@ -2074,15 +2107,43 @@ int DistGrid::setArbIdx(
   // initialize return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
   rc = ESMC_RC_NOT_IMPL;
-
-  if (arbIndices->dimCount != 1){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-      "- arbIndices array must be of rank 1", &rc);
+  
+  //TODO: This routine is kind of strange and needs to be refactored:
+  //      1) InterfaceInt types should not make it into Set() or Get() methods.
+  //      2) The routine assumes special case 1 DE per PET.
+  
+  // check that the conditions are met for this routine to make sense
+  if (localDeCount != 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+      "- This routine is only implemented for 1 DE per PET case", &rc);
     return rc;
   }
 
-  arbIdxCount = arbIndices->extent[0];
-  localArbIndices = arbIndices->array;
+  // check input
+  if (arbSeqIndex == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to arbSeqIndex array", &rc);
+    return rc;
+  }
+  if (arbSeqIndex->dimCount != 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- arbSeqIndex array must be of rank 1", &rc);
+    return rc;
+  }
+  if (arbSeqIndex->extent[0] != deCellCount[localDeList[0]]){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- arbSeqIndex array must supply one value for each cell in local DE",
+      &rc);
+    return rc;
+  }
+
+  // set localArbSeqIndexCount[] and localArbSeqIndexList[][]
+  localArbSeqIndexCount[0] = arbSeqIndex->extent[0];
+  if (localArbSeqIndexList[0])
+    delete [] localArbSeqIndexList[0];  // delete previous index list
+  localArbSeqIndexList[0] = new int[arbSeqIndex->extent[0]];
+  memcpy(localArbSeqIndexList[0], arbSeqIndex->array, 
+    sizeof(int)*arbSeqIndex->extent[0]);
   
   // return successfully
   rc = ESMF_SUCCESS;
