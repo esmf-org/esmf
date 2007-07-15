@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.48 2007/07/11 20:50:42 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.49 2007/07/15 05:56:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.48 2007/07/11 20:50:42 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.49 2007/07/15 05:56:03 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -561,7 +561,7 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Creating an Empty Grid"
+  write(name, *) "Creating/Destroying an Empty Grid"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! create empty grid
@@ -575,6 +575,83 @@ program ESMF_GridCreateUTest
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Creating a Grid using CreateEmpty/Set/Commit with only a distgrid and the rest defaults"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  rc=ESMF_SUCCESS
+
+  ! create a grid with all defaults
+  rc=ESMF_SUCCESS
+  grid=ESMF_GridCreateEmpty(rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridSetFromDistGrid(grid=grid, distgrid=distgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridCommit(grid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! get info from Grid
+  call ESMF_GridGet(grid, rank=rank, coordTypeKind=typekind, &
+         dimmap=dimmap, coordRanks=coordRanks, coordDimMap=coordDimMap, &
+         indexflag=indexflag, gridtype=gridtype, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that defaults are as expected
+  correct=.true.
+  if (typekind .ne. ESMF_TYPEKIND_R8) correct=.false.
+  if (rank .ne. 2) correct=.false.
+  if ((dimmap(1) .ne. 1) .or. (dimmap(2) .ne. 2)) correct=.false.
+  !TODO: what to do about lbounds and ubounds
+  if ((coordRanks(1) .ne. 2) .or. (coordRanks(2) .ne. 2)) correct=.false.
+  if ((coordDimMap(1,1) .ne. 1) .or. (coordDimMap(1,2) .ne. 2) .or. & 
+      (coordDimMap(2,1) .ne. 1) .or. (coordDimMap(2,2) .ne. 2)) correct=.false.
+!  if (indexflag .ne. ESMF_INDEX_DELOCAL) correct=.false.
+  if (gridtype .ne. 0) correct=.false.
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Creating a Grid with non-default parameter (ubounds) using CreateEmpty/Set/Commit"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! create grid with nondefault parameter
+  rc=ESMF_SUCCESS
+  grid=ESMF_GridCreateEmpty(rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridSetFromDistGrid(grid, distgrid=distgrid, ubounds=(/100,200/),rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridSetFromDistGrid(grid, ubounds=(/10,20/),rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridCommit(grid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, ubounds=ubounds, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  correct=.true.
+  if ((ubounds(1) .ne. 10) .or. (ubounds(2) .ne. 20)) correct=.false.
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
 
 
   !-----------------------------------------------------------------------------

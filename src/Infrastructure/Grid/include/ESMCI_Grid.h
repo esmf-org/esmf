@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.6 2007/07/11 20:50:40 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.7 2007/07/15 05:56:03 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -52,10 +52,15 @@ enum ESMC_GridStatus {ESMC_GRIDSTATUS_NOT_READY=1,
 namespace ESMCI {  
 
 class Grid;
+class ProtoGrid;
 
 // class definition
 class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   private:
+
+  // holder for set/commit data
+  ProtoGrid *proto;
+
   // Grid Status
   ESMC_GridStatus status;
 
@@ -63,11 +68,12 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   ESMC_TypeKind typekind;
   
   int distRank;
-  int *dimmap;    // size of dimmap = distRank
+  int *dimmap;    // size of dimmap = distRank, entries are 0-based
   
   int undistRank;
   int *lbounds; // size of lbounds = undistRank
   int *ubounds; // size of ubounds = undistRank
+  int *undistDimmap; // size of ubounds = undistRank, entries are 0-based
   
   int rank;
   int *coordRanks; // size of coordRanks = rank
@@ -85,6 +91,8 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
  public:
 
   // accessor methods
+  const ESMC_GridStatus getStatus(void) const {return status;}
+  ProtoGrid *getProtoGrid(void) {return proto;}
   const int getRank(void) const {return rank;}
   const int getDistRank(void) const {return distRank;}
   const int getUndistRank(void) const {return undistRank;}
@@ -95,6 +103,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   const ESMC_TypeKind getTypeKind(void) const {return typekind;}
   const DistGrid *getDistGrid(void) const {return distgrid;}
   const int *getDimMap(void) const {return dimmap;}
+  const int *getUndistDimMap(void) const {return undistDimmap;}
   const int *getLbounds(void) const {return lbounds;}
   const int *getUbounds(void) const {return ubounds;}
   const int *getCoordRanks(void) const {return coordRanks;}
@@ -107,8 +116,11 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   
   // external methods:  
   
-  // Grid Construct (grid usable after construction)
-  Grid(
+  // Grid Construct (grid NOT usable after construction)
+  Grid();
+
+  // make grid usable
+  int activate(
        char *name,                            // (in)
        ESMC_TypeKind typekindArg,              // (in)
        DistGrid *distgridArg,                  // (in)
@@ -124,11 +136,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
        int gridTypeArg                          // (in)
        );
   
-  // Grid Construct (grid NOT usable after construction)
-  Grid();
-
   // Grid Destruct
   ~Grid();
+
 
   int setCoordArray(
 		    int _staggerloc, // (in)
@@ -146,11 +156,25 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 		    );
   
 
+int getCoordExclusiveUBnd(
+  int _staggerloc, // (in)
+  int _coord,      // (in)
+  int _localDE,    // (in)
+  int *_bnd        // (out)
+  );
+
+ int addProtoGrid();
+
   
 };  // end class ESMC_Grid
+
+
+ int GridCommit(
+		Grid *_grid
+		);
  
  
-Grid *GridCreate(
+ Grid *GridCreate(
 		  int nameLen,                                // (in)
 		  char *name,                                 // (in)
 		  ESMC_TypeKind *typekind,                    // (in)
@@ -164,6 +188,22 @@ Grid *GridCreate(
 		  int *gridType,                              // (in)
 		  int *rc                                     // (out) return code
 		  );
+
+
+int GridSetFromDistGrid(
+  Grid *_grid,
+  int _nameLen,                                // (in)
+  char *_name,                                 // (in)
+  ESMC_TypeKind *_typekind,                    // (in)
+  DistGrid *_distgrid,                    // (in)
+  InterfaceInt *_dimmap,                  // (in)
+  InterfaceInt *_lbounds,                 // (in)
+  InterfaceInt *_ubounds,                 // (in)
+  InterfaceInt *_coordRanks,              // (in)
+  InterfaceInt *_coordDimMap,             // (in)
+  ESMC_IndexFlag *_indexflag,                  // (in)
+  int *_gridType                             // (in)
+  );
  
 Grid *GridCreateEmpty(int *_rc);
 
@@ -187,6 +227,30 @@ int gridSetCoordFromArray(
 			   );
  
  int GridDestroy(Grid **grid);
+
+ // Class for holding data set after grid empty creation, but before grid is finally created.
+class ProtoGrid { 
+ public:
+  int nameLen; 
+  char *name;  
+  ESMC_TypeKind *typekind;
+  DistGrid *distgrid;     
+  InterfaceInt *dimmap;   
+  InterfaceInt *lbounds;  
+  InterfaceInt *ubounds;  
+  InterfaceInt *coordRanks;  
+  InterfaceInt *coordDimMap; 
+  ESMC_IndexFlag *indexflag; 
+  int *gridType;    
+
+  // Proto Grid Construct
+  ProtoGrid();
+
+  // Proto Grid Destruct
+  ~ProtoGrid();
+         
+}; // end class ProtoGrid
+
  
 } // END ESMCI namespace
 

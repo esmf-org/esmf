@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.8 2007/07/11 20:50:41 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.9 2007/07/15 05:56:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -113,6 +113,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !
 
 ! - ESMF-public methods:
+  public ESMF_GridCommit
   public ESMF_GridCreateFromDistGrid
   public ESMF_GridCreateEmpty
   public ESMF_GridDestroy
@@ -120,9 +121,12 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
   public ESMF_GridGetCoordIntoArray
   public ESMF_GridGet
   public ESMF_GridCreateShapeIrreg
+  public ESMF_GridGetLocalTileInfo
+  public ESMF_GridSetFromDistGrid
 
 ! - ESMF-private methods:
   public ESMF_GridGetInit  
+
 
 !EOPI
 ! !PRIVATE MEMBER FUNCTIONS:
@@ -130,7 +134,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.8 2007/07/11 20:50:41 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.9 2007/07/15 05:56:03 oehmke Exp $'
 
 
 
@@ -140,7 +144,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 
 !==============================================================================
 
-#ifdef NEWGRID_NOTYET  ! Take out so you don't have to worry about compiler warnings for now
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCommit"
@@ -152,7 +156,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout)     :: grid
-      type(ESMF_GridStatus)              :: status
+      type(ESMF_GridStatus),optional     :: status
       type(ESMF_DefaultFlag), optional   :: defaultflag
       integer, intent(out), optional     :: rc
 !
@@ -203,9 +207,24 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !   \end{description}
 !
 !EOP
+    integer :: localrc ! local error status
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+    ! Call C++ Subroutine to do the create
+    call c_ESMC_gridcommit(grid%this, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridCommit
-#endif ! Take out so you don't have to worry about compiler warnings for now
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1714,6 +1733,8 @@ end subroutine ESMF_GridGet
 
       end subroutine ESMF_GridGetLocalTileCoord
 
+#endif
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1722,15 +1743,13 @@ end subroutine ESMF_GridGet
 ! !IROUTINE: ESMF_GridGetLocalTileInfo - Get information about a local tile
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetLocalTileInfo(grid, tile, coord, localDE, staggerLoc, &
+      subroutine ESMF_GridGetLocalTileInfo(grid, coord, localDE, staggerLoc, &
           exclusiveLBound, exclusiveUBound, computationalLBound, computationalUBound, &
-          totalLBound, totalUBound, computationalLWidth, computationalUWidth, &
-          totalLWidth, totalUWidth,rc)
+          totalLBound, totalUBound, rc)
 
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      integer,                intent(in),  optional :: tile
       integer,                intent(in),  optional :: localDE
       integer,                intent(in)            :: coord
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerLoc
@@ -1740,10 +1759,6 @@ end subroutine ESMF_GridGet
       integer,                intent(out), optional :: computationalUBound(:)
       integer,                intent(out), optional :: totalLBound(:)
       integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: computationalLWidth(:)
-      integer,                intent(out), optional :: computationalUWidth(:)
-      integer,                intent(out), optional :: totalLWidth(:)
-      integer,                intent(out), optional :: totalUWidth(:)
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1753,9 +1768,6 @@ end subroutine ESMF_GridGet
 !\begin{description}
 !\item[{grid}]
 !    Grid to get the information from.
-!\item[{[tile]}]
-!    The grid tile to get the information for. If not set, defaults to 
-!    the first tile. 
 !\item[{[localDE]}]
 !     The local DE from which to get the information.  If not set, defaults to 
 !     the first DE on this processor. 
@@ -1781,18 +1793,6 @@ end subroutine ESMF_GridGet
 !\item[{[totalUBound]}]
 !     Upon return this holds the upper bounds of the total region.
 !     {\tt totalUBound} must be allocated to be of size dimCount.
-!\item[{[computationalLWidth]}]
-!     Upon return this holds the lower width of the computational region.
-!     {\tt computationalLWidth} must be allocated to be of size dimCount.
-!\item[{[computationalUWidth]}]
-!     Upon return this holds the upper width of the computational region.
-!     {\tt computationalUWidth} must be allocated to be of size dimCount.
-!\item[{[totalLWidth]}]
-!     Upon return this holds the lower width of the total memory region.
-!     {\tt computationalUWidth} must be allocated to be of size dimCount.
-!\item[{[totalUWidth]}]
-!     Upon return this holds the upper width of the total memory region.
-!     {\tt totalUWidth} must be allocated to be of size dimCount.
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -1806,10 +1806,6 @@ end subroutine ESMF_GridGet
     type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUWidthArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -1845,26 +1841,12 @@ end subroutine ESMF_GridGet
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLWidthArg=ESMF_InterfaceIntCreate(computationalLWidth, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUWidthArg=ESMF_InterfaceIntCreate(computationalUWidth, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLWidthArg = ESMF_InterfaceIntCreate(totalLWidth, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUWidthArg = ESMF_InterfaceIntCreate(totalUWidth, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_GridGetLocalTileInfo(grid, tile, coord, localDE, tmp_staggerLoc, &
+    call c_ESMC_GridGetLocalTileInfo(grid, coord, localDE, tmp_staggerLoc, &
       exclusiveLBoundArg, exclusiveUBoundArg, &
       computationalLBoundArg, computationalUBoundArg, &
-      totalLBoundArg, totalUBoundArg, &
-      computationalLWidthArg, computationalUWidthArg, &
-      totalLWidthArg, totalUWidthArg, status)
+      totalLBoundArg, totalUBoundArg, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1887,24 +1869,14 @@ end subroutine ESMF_GridGet
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLWidthArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUWidthArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetLocalTileInfo
 
+
+#ifdef NEWGRID_NOTYET  ! Take out so you don't have to worry about compiler warnings for now
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1963,6 +1935,7 @@ end subroutine ESMF_GridGet
 !EOP
 
       end subroutine ESMF_GridGetStaggerLocInfo
+#endif
 
 
 !------------------------------------------------------------------------------
@@ -1973,20 +1946,23 @@ end subroutine ESMF_GridGet
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSet()
-    subroutine ESMF_GridSetFromDistGrid(grid,name,coordTypeKind,distgrid, dimmap, &
-                        lbounds, ubounds, indexflag, gridType, rc)
+    subroutine ESMF_GridSetFromDistGrid(grid,name,coordTypeKind,distgrid, &
+                 dimmap, lbounds, ubounds, coordRanks, coordDimMap, &
+                 indexflag, gridType, rc)
 !
 ! !RETURN VALUE:
 
 !
 ! !ARGUMENTS:
-       type(ESMF_Grid),       intent(in)              :: grid
+       type(ESMF_Grid),       intent(inout)           :: grid
        character (len=*),     intent(in),   optional  :: name
        type(ESMF_TypeKind),   intent(in),   optional  :: coordTypeKind
-       type(ESMF_DistGrid),   intent(in)              :: distgrid
+       type(ESMF_DistGrid),   intent(in),   optional  :: distgrid
        integer,               intent(in),   optional  :: dimmap(:)
        integer,               intent(in),   optional  :: lbounds(:)
        integer,               intent(in),   optional  :: ubounds(:)
+       integer,               intent(in),   optional  :: coordRanks(:)
+       integer,               intent(in),   optional  :: coordDimMap(:,:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: gridType
        integer,               intent(out),  optional  :: rc
@@ -2030,7 +2006,84 @@ end subroutine ESMF_GridGet
 ! \end{description}
 !
 !EOP
+    integer :: localrc ! local error status
+    integer :: nameLen 
+    type(ESMF_InterfaceInt) :: dimmapArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: lboundsArg ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: uboundsArg ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: coordRanksArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
+
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+    ! Translate F90 arguments to C++ friendly form
+    !! name
+    nameLen=0
+    if (present(name)) then
+       nameLen=len_trim(name)
+    endif
+
+    !! coordTypeKind
+    ! It doesn't look like it needs to be translated, but test to make sure
+
+    !! dimmap
+    dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !! tensor bounds
+    lboundsArg = ESMF_InterfaceIntCreate(lbounds, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    uboundsArg = ESMF_InterfaceIntCreate(ubounds, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !! Description of array factorization
+    coordRanksArg = ESMF_InterfaceIntCreate(coordRanks, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call C++ Subroutine to do the create
+    call c_ESMC_gridsetfromdistgrid(grid%this, nameLen, name, &
+      coordTypeKind, distgrid, dimmapArg, lboundsArg, uboundsArg, coordRanksArg, coordDimMapArg, &
+      indexflag, gridtype, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate helper variables
+    call ESMF_InterfaceIntDestroy(dimmapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(lboundsArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(uboundsArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(coordRanksArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
       end subroutine ESMF_GridSetFromDistGrid
+
+#ifdef NEWGRID_NOTYET  ! Take out so you don't have to worry about compiler warnings for now
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
