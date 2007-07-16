@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSTest.F90,v 1.4 2007/07/16 19:36:45 theurich Exp $
+! $Id: ESMF_ArrayArbIdxSTest.F90,v 1.5 2007/07/16 19:41:15 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !SYSTEM_TEST        String used by test script to count system tests.
@@ -75,6 +75,8 @@ program ArrayArbIdx
   srcDistgrid = ESMF_DistGridCreate(arbSeqIndexList=srcIndices, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
+  deallocate(srcIndices)
+
 !  call ESMF_DistGridPrint(srcDistgrid, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -258,7 +260,15 @@ program ArrayArbIdx
     if (farrayPtr(2) /= -1)   rc = ESMF_FAILURE
   endif
 
-  deallocate(srcIndices)
+  call ESMF_ArrayDestroy(srcArray, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(srcDistGrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_ArrayDestroy(dstArray, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(dstDistgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
