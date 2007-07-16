@@ -33,11 +33,19 @@ same or close enough to be able to determine they are one and the same
 \item The Support Lead if the Advocate is unavailable
 \end{itemize}
 
-\item The Handler, which may be the Advocate or another developer assigned by the Advocate, works on the issue keeping the requester informed. Once the work has been completed to the Handlers satisfaction, the ticket can be coded on SourceForge as pending by the Handler.  The mail folder on 
-on the IMAP server is moved to pending by the Handler.
+\item The Handler, which may be the Advocate or another developer assigned by the 
+Advocate, works on the issue keeping the requester informed. Once the work has been 
+completed to the Handlers satisfaction, the ticket can be coded on SourceForge as 
+pending by the Handler.  The mail folder on the IMAP server is moved to pending by 
+the Handler.
 
-\item The Handler contacts the customer to gauge their satisfaction in the solution. If the customer is satisfied, the ticket may be closed by the Advocate, and the mail folder on the IMAP server moved from open to 
-closed by the Advocate.  If the customer does not respond, an attempt at contact will be made every two weeks for one month.  After one month with no contact, a pending ticket may be closed.  The Advocate can choose to hand off this part of the process to the Support Lead if desired.  The customer is always notified when any ticket is closed. 
+\item The Handler contacts the customer to gauge their satisfaction in the solution. 
+If the customer is satisfied, the ticket may be closed by the Advocate, and the mail 
+folder on the IMAP server moved from open to closed by the Advocate.  If the customer
+does not respond, an attempt at contact will be made every two weeks for one month. 
+After one month with no contact, a pending ticket may be closed.  The Advocate can 
+choose to hand off this part of the process to the Support Lead if desired.  The 
+customer is always notified when any ticket is closed. 
 \end{enumerate}
 
 \subsubsection{General Guidelines for Handling Tickets}
@@ -72,48 +80,30 @@ corresponding to status of the request on the SourceForge system.
 Advocates need to share the information they have received from their codes with the rest of the Core team. This will be done by sending an email to esmf\_support with a subject line labeled INFO:Code e.g. INFO:CCSM, INFO:GEOS-5, followed by a subject line e.g. status of support requests or new code contact.  These messages will be filed on the IMAP server (see above section) under the code referenced. All information about a code that is general and not related to a specific support request will be archived in this manner. 
 
 \subsubsection{freeCRM}
-A client relationship management tool (freeCRM http://www.freecrm.com) is being used to archive codes, their affiliated contacts and applicable funding information. The following is a list of roles and responsibilities associated with this software:
+A client relationship management tool (freeCRM http://www.freecrm.com) is being used 
+to archive codes, their affiliated contacts and applicable funding information. The 
+following is a list of roles and responsibilities associated with this software:
 \begin{itemize}
-\item Advocates are responsible for the accuracy and completeness of all information associated with codes to which they are assigned.  This information includes a pull down menu that specifies the state of the code's ESMF'ization. This piece of information is critical and needs to be updated whenever an Advocate updates his or her codes. Other information includes type of code, parent agency etc. This information will be reviewed monthly. See section ~\ref{battle} for details.
-\item The Integrator is responsible for creating a back up of all freeCRM data on a monthly basis.
-\item The Core Team Manager is responsible for the accuracy and completness of all funding related information.
-\item Codes are classified as normal or critical. This label is controlled by a pull down menu. The Core Team Manager is responsible for determining this classification and for assigning codes to Advocates.
-\item The Support Lead is responsible for creating code 'companies' and informing the Integrator of any additions so that the back up scripts can be modified. He or she is additionally responsible for conducting monthly quality control checks of all information in the system. See section ~\ref{battle} for details.
-\item All team members are responsible for updating and adding to the list of contacts. 
+\item Advocates are responsible for the accuracy and completeness of all information 
+associated with codes to which they are assigned.  This information includes a pull 
+down menu that specifies the state of the code's ESMF'ization. This piece of 
+information is critical and needs to be updated whenever an Advocate updates his or 
+her codes. Other information includes type of code, parent agency etc. This 
+information will be reviewed on a semi-annual basis. 
+\item The Integrator is responsible for creating a back up of all freeCRM data on a 
+monthly basis.
+\item The Core Team Manager is responsible for the accuracy and completness of all 
+funding related information.
+\item Codes are classified as normal or critical. This label is controlled by a pull 
+down menu. The Core Team Manager is responsible for determining this classification 
+and for assigning codes to Advocates.
+\item The Support Lead is responsible for creating code 'companies' and informing 
+the Integrator of any additions so that the back up scripts can be modified. He or 
+she is additionally responsible for conducting semi-annual quality control checks of 
+all information in the system. 
+\item All team members are responsible for updating and adding to the list of 
+contacts. 
 \end{itemize} 
 
-\subsection{Battle Rhythm}
-\label{battle}
-There are numerous tasks that need to occur on a cyclical basis. The following lists these tasks, their periodicity, who should complete the task, and the expected results.
 
-\subsubsection{Support}
-\begin{enumerate}
-
-\item Yearly
- \begin{itemize}
- \item Non-critical codes are contacted and Advocates update the core team on the status of non-critical codes. See section ~\ref{infomail} for details on format.
- \end{itemize}
-
-\item Quarterly
- \begin{itemize}
- \item Advocates update core team on the status of critical codes. See section ~\ref{infomail} for details on format.
- \end{itemize}
-
-\item Monthly
-  \begin{itemize}
-  \item The Support Lead will conduct a ticket review meeting in which new tickets will be reviewed, placed on the appropriate tracker, given appropriate key words e.g. LONG:KEY. During this meeting, ticket Handlers will be expected to discuss tickets they have closed or changed to pending. The Core Team Mangager will review and accept or reject the justification for the closures.
-   \item The Integrator will create a back up file of all freeCRM data.
-   \item The Support Lead will print out a table of code information from freeCRM. This information will be reviewed and verified at either a Core Meeting or during the monthly ticket review meeting. 
-   \item Advocates will send an email to esmf\_support with update of their codes. See section ~\ref{infomail} for the format of this email.
-   \item The Support Lead will send out an report on the status of all codes. This report will be a consolidation of individual Advocate reports along with any pertinent ticket status. This report will be issued the morning prior to the monthly ticket review meeting. 
-  \end{itemize}
-
-\item Weekly
-  \begin{itemize}
-  \item The Support Lead will purge the Maia Mailguard spam filter.
-  \item The Support Lead will update the esmf\_community, esmf\_info, esmf\_support, and esmf\_jst mailing lists with the email addresses of those individuals who have downloaded the software.
-  \item The Support Lead will review the IMAP folders moving items that have been responded to into the appropriate category and spot check for errors such as mis-filings.
-  \end{itemize}
-
-\end{enumerate}  
  
