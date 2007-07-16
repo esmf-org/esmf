@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSTest.F90,v 1.3 2007/07/14 04:48:28 theurich Exp $
+! $Id: ESMF_ArrayArbIdxSTest.F90,v 1.4 2007/07/16 19:36:45 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !SYSTEM_TEST        String used by test script to count system tests.
@@ -57,6 +57,12 @@ program ArrayArbIdx
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
+  if (petCount /= 6) then
+    print *, "This system test needs to run on exactly 6 PETs, petCount = ", &
+      petCount
+    goto 10
+  endif
+
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 
