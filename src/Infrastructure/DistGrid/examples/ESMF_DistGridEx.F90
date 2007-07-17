@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.16 2007/07/14 04:44:49 theurich Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.17 2007/07/17 21:39:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -61,8 +61,8 @@ program ESMF_DistGridEx
   distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/1000/), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_DistGridPrint(distgrid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  call ESMF_DistGridPrint(distgrid, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -193,22 +193,22 @@ program ESMF_DistGridEx
 ! from the DistGrid object by use of {\tt ESMF\_DistGridGet()} methods:
 !
 !BOC
-  allocate(dimExtent(2, 6)) ! (dimCount, deCount)
+  allocate(dimExtent(2, 0:5)) ! (dimCount, deCount)
   call ESMF_DistGridGet(distgrid, delayout=delayout, dimExtent=dimExtent, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  allocate(localDeList(localDeCount))
+  allocate(localDeList(0:localDeCount-1))
   call ESMF_DELayoutGet(delayout, localDeList=localDeList, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  do localDe=1, localDeCount
-    de = localDeList(localDe) + 1
+  do localDe=0, localDeCount-1
+    de = localDeList(localDe)
     do dim=1, 2
       allocate(localIndexList(dimExtent(dim, de))) ! allocate list to hold indices
       call ESMF_DistGridGet(distgrid, localDe=localDe, dim=dim, &
         localIndexList=localIndexList, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-      print *, "DE ",de," localIndexList along dim=",dim," :: ", localIndexList
+      print *, "local DE ", localDe," - DE ",de," localIndexList along dim=",dim," :: ", localIndexList
       deallocate(localIndexList)
     enddo
   enddo

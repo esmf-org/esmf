@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.21 2007/07/14 04:44:50 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.22 2007/07/17 21:39:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -245,9 +245,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_distgridgetpdepdim()"
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // shift input indices to base zero
-    int localDe = *localDeArg - 1;
-    int dim = *dimArg - 1;
+    // shift input indices
+    int localDe = *localDeArg;  // already base 0
+    int dim = *dimArg - 1;      // shift to base 0
     // fill indexList
     if (*localIndexList != NULL){
       // indexList provided -> get localIndexListPtr & do some error checking

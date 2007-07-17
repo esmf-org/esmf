@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.21 2007/07/12 20:29:20 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.22 2007/07/17 21:39:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.21 2007/07/12 20:29:20 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.22 2007/07/17 21:39:16 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -466,7 +466,7 @@ contains
 !     \item[array] 
 !        Queried {\tt ESMF\_Array} object.
 !     \item[localDe]
-!        Local DE for which information is requested. {\tt [1,..,localDeCount]}
+!        Local DE for which information is requested. {\tt [0,..,localDeCount-1]}
 !     \item[dim]
 !        Dimension for which information is requested. {\tt [1,..,dimCount]}
 !     \item[{[dimExtent]}]
@@ -505,17 +505,17 @@ contains
       delayout=delayout, deCount=deCount, localDeCount=localDeCount, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    allocate(dimExtentInternal(dimCount,deCount))
+    allocate(dimExtentInternal(dimCount,0:deCount-1))
     call ESMF_DistGridGet(distgrid, dimExtent=dimExtentInternal, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    allocate(localDeList(localDeCount))
+    allocate(localDeList(0:localDeCount-1))
     call ESMF_DELayoutGet(delayout, localDeList=localDeList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     de=localDeList(localDe)
     deallocate(localDeList)
-    extent = dimExtentInternal(dim, de+1)
+    extent = dimExtentInternal(dim, de)
     deallocate(dimExtentInternal)
       
     ! Set dimExtent output

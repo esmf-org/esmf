@@ -1,4 +1,4 @@
-!stG$
+! $Id: ESMF_DistGrid.F90,v 1.24 2007/07/17 21:39:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.23 2007/07/14 04:44:50 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.24 2007/07/17 21:39:17 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2021,7 +2021,7 @@ contains
 !     \item[distgrid] 
 !        Queried {\tt ESMF\_DistGrid} object.
 !     \item[de] 
-!        DE for which information is requested. {\tt \[1,..,deCount\]}
+!        DE for which information is requested. {\tt \[0,..,deCount-1\]}
 !     \item[{[dimExtent]}]
 !        Upon return this number identifies the patch on which the DE is defined.
 !     \item[{[regDecompDeCoord]}]
@@ -2084,7 +2084,7 @@ contains
 !     \item[distgrid] 
 !        Queried {\tt ESMF\_DistGrid} object.
 !     \item[localDe] 
-!        Local DE for which information is requested. {\tt [1,..,localDeCount]}
+!        Local DE for which information is requested. {\tt [0,..,localDeCount-1]}
 !     \item[dim] 
 !        Dimension for which information is requested. {\tt [1,..,dimCount]}
 !     \item[{[localIndexList]}]
