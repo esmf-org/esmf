@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.36 2007/06/26 22:00:19 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.37 2007/07/17 21:57:44 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrReturnCodes.inc"
 
-#define ESMF_SUCCESS_DEFAULT_ON
+#define ESMF_SUCCESS_DEFAULT_OFF
 
 !BOPI
 !============================================================================
