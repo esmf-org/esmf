@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.28 2007/07/12 19:40:28 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.29 2007/07/17 05:37:35 donstark Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -126,9 +126,9 @@ are to be distributed through a coordinate dependency (coordDep)
 argument.
 
 The main distribution options are block, regular and arbitrary.
-A {\bf block} distribution is one in which the same number of
+A {\bf regular} distribution is one in which the same number of
 contiguous grid points are assigned to each DE in the
-distributed dimension.  A {\bf regular} distribution is one in which
+distributed dimension.  A {\bf irregular} distribution is one in which
 unequal numbers of contiguous gridpoints are assigned to each
 DE in the distributed dimension.  An {\bf arbitrary} distribution is
 one in which any gridpoint can be assigned to any DE.  Any ofthese
@@ -144,8 +144,8 @@ a grid {\bf b} that is 6x3.}
 \label{fig:GridDecomps}
 \end{figure}
 
-A distribution can also be specified using the DistGrid.  This
-DistGrid is then passed into a Grid create call.
+A distribution can also be specified using the DistGrid, by passing
+object into a Grid create call.
 
 \subsubsection{Grid Coordinates}
 \label{sec:coordspec}
@@ -217,9 +217,9 @@ staggers.
 
 As a default the ESMF Grid class provides symmetric staggering, so
 that cell centers are enclosed by cell perimeter (e.g. corner) 
-stagger locations. This means the coordinate arrays for
-some stagger locations may be padded to one element larger in some
-dimensions than the cell center arrays to allow the enclosure. 
+stagger locations. This means the coordinate arrays for stagger
+locations other than the center will have an additional element of 
+padding in order to enclose the cell center locations.
 However, to achieve other types of staggering, the user may alter 
 or eliminate this padding by using the appropriate options when adding
 coordinates to a Grid. 
