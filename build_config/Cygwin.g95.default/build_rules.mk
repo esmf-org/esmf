@@ -1,6 +1,6 @@
-# $Id: build_rules.mk,v 1.2 2007/07/17 18:03:33 theurich Exp $
+# $Id: build_rules.mk,v 1.3 2007/07/17 18:07:13 theurich Exp $
 #
-# Linux.g95.default
+# Cygwin.g95.default
 #
 
 ############################################################
