@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2007/06/25 20:15:52 cdeluca Exp $
+# $Id: makefile,v 1.19 2007/07/17 05:34:57 donstark Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -17,7 +17,7 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/Grid/examples
 
 
-EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_GridCreateEx
+EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_GridUsageEx
 
 EXAMPLES_RUN      = run_ESMF_GridCreateEx
 
