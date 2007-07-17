@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxUTest.F90,v 1.1 2007/07/17 22:15:44 svasquez Exp $
+! $Id: ESMF_ArrayArbIdxUTest.F90,v 1.2 2007/07/17 22:46:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxUTest.F90,v 1.1 2007/07/17 22:15:44 svasquez Exp $'
+    '$Id: ESMF_ArrayArbIdxUTest.F90,v 1.2 2007/07/17 22:46:58 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -138,7 +138,7 @@ program ESMF_ArrayArbIdxUTest
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) " Get Source Array Test"
+  write(name, *) "Get Source Array Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayGet(srcArray, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -160,21 +160,21 @@ program ESMF_ArrayArbIdxUTest
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) " Create Dest. DistGrid Test"
+  write(name, *) "Create Dest. DistGrid Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   dstDistgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/12/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) " Create Dest. Array Test"
+  write(name, *) "Create Dest. Array Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   dstArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) " Get Dest. Array Test"
+  write(name, *) "Get Dest. Array Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayGet(dstArray, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
