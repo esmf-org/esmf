@@ -1,0 +1,350 @@
+! $Id: ESMF_ArrayArbIdxUTest.F90,v 1.1 2007/07/17 22:15:44 svasquez Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2007, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+!
+program ESMF_ArrayArbIdxUTest
+
+!------------------------------------------------------------------------------
+
+#include <ESMF_Macros.inc>
+#include "ESMF.h"
+
+!==============================================================================
+!BOP
+! !PROGRAM: ESMF_ArrayArbIdxUTest -  Tests a combination of DistGrid and Array.
+!
+! !DESCRIPTION:
+!
+! Test the use of 1D arrays with 'user supplied' arbitrary indexing for  the 
+! array entries.
+!
+!-----------------------------------------------------------------------------
+! !USES:
+  use ESMF_TestMod     ! test methods
+  use ESMF_Mod
+
+  implicit none
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+  character(*), parameter :: version = &
+    '$Id: ESMF_ArrayArbIdxUTest.F90,v 1.1 2007/07/17 22:15:44 svasquez Exp $'
+!------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------
+!=========================================================================
+
+
+
+  ! individual test failure message
+  character(ESMF_MAXSTR) :: failMsg
+  character(ESMF_MAXSTR) :: name
+
+  ! Local variables
+  type(ESMF_VM)         :: vm
+  type(ESMF_DistGrid)   :: srcDistgrid, dstDistgrid
+  type(ESMF_Array)      :: srcArray, dstArray
+  type(ESMF_ArraySpec)  :: arrayspec
+  type(ESMF_RouteHandle):: routehandle
+  integer(ESMF_KIND_I4), pointer :: farrayPtr(:)  ! matching F90 array pointer
+  integer               :: rc, i, petCount, localPet
+  integer, allocatable  :: srcIndices(:)
+  integer(ESMF_KIND_I4) :: factorList(3)
+  integer               :: factorIndexList(2,3)
+
+  ! cumulative result: count failures; no failures equals "all pass"
+  integer :: result = 0
+
+
+!-------------------------------------------------------------------------------
+! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+! always run. When the environment variable, EXHAUSTIVE, is set to ON then
+! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+! to OFF, then only the sanity unit tests.
+! Special strings (Non-exhaustive and exhaustive) have been
+! added to allow a script to count the number and types of unit tests.
+!-------------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
+  !------------------------------------------------------------------------
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+  if (petCount /= 6) then
+    print *, "This system test needs to run on exactly 6 PETs, petCount = ", &
+      petCount
+    goto 10
+  endif
+
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+  allocate(srcIndices((localPet+1)*2))   ! sizes: 2, 4, 6, 8, 10, 12
+  
+  do i=1,(localPet+1)*2
+    srcIndices(i) = localPet*20 + (21 - i) ! set arbitrary but unique seq. indices
+  enddo 
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "DistGrid Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  srcDistgrid = ESMF_DistGridCreate(arbSeqIndexList=srcIndices, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  deallocate(srcIndices)
+
+!  call ESMF_DistGridPrint(srcDistgrid, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  ! The srcDistgrid has 1 DE per PET, i.e. 6 DEs. Each DE has a different
+  ! number of local cells in the DistGrid. The arbitrary sequence indices are
+  ! constructed to look like this:
+  !
+  ! PET   localDE   DE    indices
+  ! 0     0         0     20, 19
+  ! 1     0         1     40, 39, 38, 37
+  ! 2     0         2     60, 59, 58, 57, 56, 55
+  ! 3     0         3     80, 79, 78, 77, 76, 75, 74, 73
+  ! 4     0         4     100, 99, 98, 97, 96, 95, 94, 93, 92, 91
+  ! 5     0         5     120, 119, 118, 117, 116, 115, 114, 113, 112, 111, 110, 109
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Spec Set Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create Source Array Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  srcArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=srcDistgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) " Get Source Array Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(srcArray, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+    farrayPtr(i) = localPet * 10 + i    ! initialize
+  enddo
+  
+  ! The lbound(farrayPtr, 1) = 1 because ArrayCreate() by default sets local
+  ! bounds starting at 1. Thus the srcArray contents are locally set to:
+  !
+  ! PET   localDE   DE    srcArray contents
+  ! 0     0         0     1, 2
+  ! 1     0         1     11, 12, 13, 14
+  ! 2     0         2     21, 22, 23, 24, 25, 26
+  ! 3     0         3     31, 32, 33, 34, 35, 36, 37, 38
+  ! 4     0         4     41, 42, 43, 44, 45, 46, 47, 48, 49, 50
+  ! 5     0         5     51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) " Create Dest. DistGrid Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  dstDistgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/12/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) " Create Dest. Array Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  dstArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) " Get Dest. Array Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(dstArray, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  farrayPtr = 0     ! initialize
+  
+  ! The dstDistgrid evenly divides 12 cells across the 6 DEs (becaues default
+  ! is 1 DE per PET and there are 6 PETs running this example).
+  ! The default sequenceIndex of dstDistGrid is determined by the default rule
+  ! of simply enumerating the cells within the tile, starting at 1:
+  !
+  ! PET   localDE   DE    indices
+  ! 0     0         0     1, 2
+  ! 1     0         1     3, 4
+  ! 2     0         2     5, 6
+  ! 3     0         3     7, 8
+  ! 4     0         4     9, 10
+  ! 5     0         5     11, 12
+  !
+  ! The dstArray created on the dstDistgrid has the following shape and
+  ! initialization:
+  !
+  ! PET   localDE   DE    srcArray contents
+  ! 0     0         0     0, 0
+  ! 1     0         1     0, 0
+  ! 2     0         2     0, 0
+  ! 3     0         3     0, 0
+  ! 4     0         4     0, 0
+  ! 5     0         5     0, 0
+
+
+  if (localPet == 0) then
+    factorList(1) = 2
+    factorIndexList(1,1) = 76   ! src seq index
+    factorIndexList(2,1) = 1    ! dst seq index
+    factorList(2) = -3
+    factorIndexList(1,2) = 40   ! src seq index
+    factorIndexList(2,2) = 1    ! dst seq index
+    factorList(3) = 1
+    factorIndexList(1,3) = 19   ! src seq index
+    factorIndexList(2,3) = 4    ! dst seq index
+  else if (localPet == 1) then
+    factorList(1) = -4
+    factorIndexList(1,1) = 112  ! src seq index
+    factorIndexList(2,1) = 4    ! dst seq index
+    factorList(2) = 2
+    factorIndexList(1,2) = 92   ! src seq index
+    factorIndexList(2,2) = 4    ! dst seq index
+    factorList(3) = 7
+    factorIndexList(1,3) = 77   ! src seq index
+    factorIndexList(2,3) = 5    ! dst seq index
+  else if (localPet == 2) then
+    factorList(1) = -2
+    factorIndexList(1,1) = 98   ! src seq index
+    factorIndexList(2,1) = 6    ! dst seq index
+    factorList(2) = 1
+    factorIndexList(1,2) = 39   ! src seq index
+    factorIndexList(2,2) = 7    ! dst seq index
+    factorList(3) = 1
+    factorIndexList(1,3) = 58   ! src seq index
+    factorIndexList(2,3) = 7    ! dst seq index
+  else if (localPet == 3) then
+    factorList(1) = 1 
+    factorIndexList(1,1) = 95   ! src seq index
+    factorIndexList(2,1) = 7    ! dst seq index
+    factorList(2) = -4
+    factorIndexList(1,2) = 113  ! src seq index
+    factorIndexList(2,2) = 7    ! dst seq index
+    factorList(3) = -1
+    factorIndexList(1,3) = 20   ! src seq index
+    factorIndexList(2,3) = 12   ! dst seq index
+  else if (localPet == 4) then
+    factorList(1) = 100
+    factorIndexList(1,1) = 99   ! src seq index
+    factorIndexList(2,1) = 9    ! dst seq index
+    factorList(2) = -2
+    factorIndexList(1,2) = 109  ! src seq index
+    factorIndexList(2,2) = 9    ! dst seq index
+    factorList(3) = -5
+    factorIndexList(1,3) = 80   ! src seq index
+    factorIndexList(2,3) = 9    ! dst seq index
+  else if (localPet == 5) then
+    factorList(1) = 22
+    factorIndexList(1,1) = 55   ! src seq index
+    factorIndexList(2,1) = 9    ! dst seq index
+    factorList(2) = 5
+    factorIndexList(1,2) = 120  ! src seq index
+    factorIndexList(2,2) = 11   ! dst seq index
+    factorList(3) = -11
+    factorIndexList(1,3) = 74 ! src seq index
+    factorIndexList(2,3) = 10   ! dst seq index
+  endif
+  
+  ! Each of the 6 PETs defines 3 different factors of the sparse matrix
+  ! multiplication for a total of 6 x 3 = 18 non-zero entries in the 
+  ! 12 x 42 = 504 matrix.
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySparseMatMulStore Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=routehandle, factorList=factorList, &
+    factorIndexList=factorIndexList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySparseMatMulMul Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySparseMatMul(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  ! The expected result of the sparse matrix multiplication in dstArray is:
+  !
+  !
+  ! PET   localDE   DE    srcArray contents
+  ! 0     0         0     2x35 - 3x11 = 37, 0
+  ! 1     0         1     0, 1x2 - 4x59 + 2x49 = -136
+  ! 2     0         2     7x34 = 238, -2x43 = -86
+  ! 3     0         3     1x12 + 1x23 + 1x46 - 4x58 = -151, 0
+  ! 4     0         4     100x42 - 2x62 - 5x31 + 22x26 = 4493, -11x37 = -407
+  ! 5     0         5     5x51 = 255, -1
+  
+  print *, "localPet: ",localPet," dstArray: ",farrayPtr
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify results Test"
+  write(failMsg, *) "Wrong results" 
+  if (localPet == 0) then
+    call ESMF_Test(((farrayPtr(1).eq.37).and.((farrayPtr(2).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 1) then
+    call ESMF_Test(((farrayPtr(1).eq.0).and.((farrayPtr(2).eq.-136))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 2) then
+    call ESMF_Test(((farrayPtr(1).eq.238).and.((farrayPtr(2).eq.-86))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 3) then
+    call ESMF_Test(((farrayPtr(1).eq.-151).and.((farrayPtr(2).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 4) then
+    call ESMF_Test(((farrayPtr(1).eq.4493).and.((farrayPtr(2).eq.-407))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 5) then
+    call ESMF_Test(((farrayPtr(1).eq.255).and.((farrayPtr(2).eq.-1))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  endif
+
+  call ESMF_ArrayDestroy(srcArray, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(srcDistGrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_ArrayDestroy(dstArray, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(dstDistgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+10 continue
+  !------------------------------------------------------------------------
+  call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
+  !------------------------------------------------------------------------
+
+
+end program ESMF_ArrayArbIdxUTest
+    
+    
