@@ -1,4 +1,4 @@
-% $Id: user_arch.tex,v 1.20 2007/03/14 17:46:31 theurich Exp $
+% $Id: user_arch.tex,v 1.21 2007/07/17 19:49:43 svasquez Exp $
 
 % List of architectures supported.  This file is 
 % meant to be included in a user doc.
@@ -19,24 +19,24 @@ included in the build system.
 \begin{tabular}{lcccc}
   &{\bfseries ESMF\_OS} &{\bfseries ESMF\_COMPILER} & {\bfseries ESMF\_COMM} & {\bfseries ESMF\_ABI} \\
 
+Cray X1     &  Unicos  &  default      &  mpi         &  64 \\
+Cray X3/4   &  Unicos  &  pgi          &  mpi         &  64 \\
+HP IA64     &  Linux   &  intel        &  lam         &  64  \\
+IBM Opteron &  Linux   &  pathscale    &  mpich       &  64  \\
+IBM Opteron &  Linux   &  pgi          &  mpich       &  64  \\
 IBM SP      &  AIX     &  default      &  mpi         &  32,64  \\
 Mac         &  Darwin  &  absoft       &  lam,mpiuni  &  32  \\
 Mac         &  Darwin  &  nag          &  lam,mpiuni  &  32  \\
 Mac         &  Darwin  &  xlf          &  lam,mpiuni  &  32  \\
 Mac         &  Darwin  &  xlfgcc       &  lam,mpiuni  &  32  \\
-SGI Mips    &  IRIX64  &  default      &  mpi         &  32,64  \\
 PC          &  Linux   &  absoftintel  &  mpich       &  32  \\
 PC          &  Linux   &  g95          &  mpich       &  32  \\
-HP IA64     &  Linux   &  intel        &  lam         &  64  \\
-SGI Altix   &  Linux   &  intel        &  mpi         &  64  \\
 PC          &  Linux   &  intel        &  mpich       &  32  \\
 PC 	    &  Linux   &  lahey        &  mpiuni      &  32  \\
 PC 	    &  Linux   &  nagintel     &  mpich       &  32  \\
-IBM Opteron &  Linux   &  pathscale    &  mpich       &  64  \\
-IBM Opteron &  Linux   &  pgi          &  mpich       &  64  \\
 PC 	    &  Linux   &  pgi          &  mpich,mpiuni&  32  \\
-HP/Compaq   &  OSF1    &  default      &  mpi         &  64  \\
-Cray X1     &  Unicos  &  default      &  mpi         &  64
+SGI Altix   &  Linux   &  intel        &  mpi         &  64  \\
+SGI Mips    &  IRIX64  &  default      &  mpi         &  32,64 
 \end{tabular}
 
 \vspace{1ex}
