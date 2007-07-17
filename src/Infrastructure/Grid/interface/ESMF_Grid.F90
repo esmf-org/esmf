@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.9 2007/07/15 05:56:03 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.10 2007/07/17 21:54:55 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -134,7 +134,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.9 2007/07/15 05:56:03 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.10 2007/07/17 21:54:55 samsoncheung Exp $'
 
 
 
@@ -1291,7 +1291,9 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
        deallocate(ubounds)
     endif
 
-      end function ESMF_GridCreateShapeIrreg
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    end function ESMF_GridCreateShapeIrreg
 
 
 
