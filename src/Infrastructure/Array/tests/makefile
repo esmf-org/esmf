@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2007/04/10 03:08:40 theurich Exp $ 
+# $Id: makefile,v 1.15 2007/07/17 22:16:27 svasquez Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -19,12 +19,14 @@ LOCDIR	  = src/Infrastructure/Array/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayCreateGetUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayDataUTest \
-                $(ESMF_TESTDIR)/ESMF_ArrayScatterUTest
+                $(ESMF_TESTDIR)/ESMF_ArrayScatterUTest \
+                $(ESMF_TESTDIR)/ESMF_ArrayArbIdxUTest
 
 
 TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayDataUTest \
-                RUN_ESMF_ArrayScatterUTest
+                RUN_ESMF_ArrayScatterUTest \
+                RUN_ESMF_ArrayArbIdxUTest
 
 TESTS_RUN_UNI = RUN_ESMF_ArrayCreateGetUTestUNI \
                 RUN_ESMF_ArrayDataUTestUNI \
@@ -62,3 +64,8 @@ RUN_ESMF_ArrayScatterUTest:
 
 RUN_ESMF_ArrayScatterUTestUNI:
 	$(MAKE) TNAME=ArrayScatter NP=1 ftest
+# ---
+
+RUN_ESMF_ArrayArbIdxUTest:
+	$(MAKE) TNAME=ArrayArbIdx NP=6 ftest
+
