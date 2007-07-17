@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5 2006/09/27 18:22:08 theurich Exp $
+# $Id: build_rules.mk,v 1.6 2007/07/17 18:03:34 theurich Exp $
 #
 # Darwin.gfortran.default
 #
@@ -73,10 +73,27 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v --version
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
 ############################################################
-# Fortran symbol convention must match other libraries used
+# Fortran symbol convention
 #
+ifeq ($(ESMF_FORTRANSYMBOLS),default)
 ESMF_F90COMPILEOPTS       += -fno-second-underscore
 ESMF_F90LINKOPTS          += -fno-second-underscore
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+else
+ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_singleunderscore)
+ESMF_F90COMPILEOPTS       += -fno-second-underscore
+ESMF_F90LINKOPTS          += -fno-second-underscore
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+else
+ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_doubleunderscore)
+ESMF_F90COMPILEOPTS       +=
+ESMF_F90LINKOPTS          +=
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
+else
+$(error "ESMF_FORTRANSYMBOLS = $(ESMF_FORTRANSYMBOLS)" not supported by ESMF and/or this platform)
+endif
+endif
+endif
 
 ############################################################
 # On 64-bit set long and pointer types to 64-bit
