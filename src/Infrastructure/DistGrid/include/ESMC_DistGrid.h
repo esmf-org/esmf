@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.24 2007/07/18 18:18:32 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.25 2007/07/18 22:05:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -54,20 +54,21 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
   private:
     int dimCount;                 // rank of DistGrid
     int patchCount;               // number of patches in DistGrid
-    int *patchCellCount;          // number of cells [patchCount]
-    int *dePatchList;             // patch index [deCount]
-    int *minIndex;                // minIndex for [dimCount*patchCount]
-    int *maxIndex;                // maxIndex for [dimCount*patchCount]
-    int *deCellCount;             // number of cells [deCount]
-    int *dimContigFlag;           // flag contiguous indices [dimCount*deCount]
-    int *dimExtent;               // extent of indexList [dimCount*deCount]
-    int **localIndexList;         // local DEs' indices [dimCount*localDeCount]
-                                  // [dimExtent(localDe,dim)]
+    int *cellCountPPatch;         // number of cells [patchCount]
+    int *patchListPDe;            // patch indices [deCount]
+    int *minIndexPDimPPatch;      // lower corner indices [dimCount*patchCount]
+    int *maxIndexPDimPPatch;      // upper corner indices [dimCount*patchCount]
+    int *cellCountPDe;            // number of cells [deCount]
+    int *contigFlagPDimPDe;       // flag contiguous indices [dimCount*deCount]
+    int *indexCountPDimPDe;       // number of indices [dimCount*deCount]
+    int **indexListPDimPLocalDe;  // local DEs' indices [dimCount*localDeCount]
+                                  // [indexCountPDimPDe(localDe,dim)]
     ESMC_Logical regDecompFlag;   // flag indicating regular decomposition
     int **connectionList;         // list of connection elements
     int connectionCount;          // number of elements in connection list
-    int *localArbSeqIndexCount;   // number of arb seq. indices [localDeCount]
-    int **localArbSeqIndexList;   // local arb sequence indices per localDe
+    int *arbSeqIndexCountPLocalDe;// number of arb seq. indices [localDeCount]
+    int **arbSeqIndexListPLocalDe;// local arb sequence indices [localDeCount]
+                                  // [arbSeqIndexCountPLocalDe(localDe)]
     // lower level object references
     DELayout *delayout;
     VM *vm;    
@@ -75,8 +76,8 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
   private:
     // construct() and destruct()
     int construct(int dimCount, int patchCount, int *dePatchList,
-      int *minIndex, int *maxIndex, int *dimContigFlag, 
-      int *dimExtent, int **indexList, ESMC_Logical regDecompFlagArg,
+      int *minIndex, int *maxIndex, int *contigFlagPDimPDe, 
+      int *indexCountPDimPDe, int **indexList, ESMC_Logical regDecompFlagArg,
       InterfaceInt *connectionList, DELayout *delayout, VM *vm);
     int destruct();
   public:
@@ -112,17 +113,17 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     // get() and set()
     int getDimCount()               const {return dimCount;}
     int getPatchCount()             const {return patchCount;}
-    const int *getPatchCellCount()  const {return patchCellCount;}
-    const int *getDePatchList()     const {return dePatchList;}
-    const int *getMinIndex()        const {return minIndex;}
+    const int *getPatchCellCount()  const {return cellCountPPatch;}
+    const int *getDePatchList()     const {return patchListPDe;}
+    const int *getMinIndex()        const {return minIndexPDimPPatch;}
     const int *getMinIndex(int patch, int *rc) const;
-    const int *getMaxIndex()        const {return maxIndex;}
+    const int *getMaxIndex()        const {return maxIndexPDimPPatch;}
     const int *getMaxIndex(int patch, int *rc) const;
-    const int *getDeCellCount()     const {return deCellCount;}
+    const int *getDeCellCount()     const {return cellCountPDe;}
     int getDeCellCount(int de, int *rc) const;
-    const int *getDimContigFlag()   const {return dimContigFlag;}
+    const int *getDimContigFlag()   const {return contigFlagPDimPDe;}
     int getDimContigFlag(int de, int dim, int *rc) const;
-    const int *getDimExtent()       const {return dimExtent;}
+    const int *getDimExtent()       const {return indexCountPDimPDe;}
     const int *getLocalIndexList(int localDe, int dim, int *rc=NULL) const;
     DELayout *getDELayout()         const {return delayout;}
     ESMC_Logical getRegDecompFlag() const {return regDecompFlag;}

@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.26 2007/07/18 20:43:40 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.27 2007/07/18 22:05:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.26 2007/07/18 20:43:40 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.27 2007/07/18 22:05:06 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -255,13 +255,13 @@ DistGrid *DistGrid::create(
     }
   }
   
-  // setup temporary dimExtent and localIndexList arrays for construct()
-  // also setup temporary dimCongtigFlag array for construct()
+  // setup temporary indexCountPDimPDe, indexListPDimPLocalDe and dimCongtigFlag
+  // arrays for construct()
   int localDeCount = delayout->getLocalDeCount();
   const int *deList = delayout->getDeList();
-  int *dimExtent = new int[dimCount*deCount];
-  int **localIndexList = new int*[dimCount*localDeCount];
-  int *dimContigFlag = new int[dimCount*deCount];
+  int *indexCountPDimPDe = new int[dimCount*deCount];
+  int **indexListPDimPLocalDe = new int*[dimCount*localDeCount];
+  int *contigFlagPDimPDe = new int[dimCount*deCount];
   int deDivider = 1;  // reset
   for (int i=0; i<dimCount; i++){
     int dimLength = maxIndex->array[i] - minIndex->array[i] + 1;
@@ -274,20 +274,22 @@ DistGrid *DistGrid::create(
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
           extentIndex = de*dimCount+i;  // index into temp. arrays
-          dimExtent[extentIndex] = chunkLength;
+          indexCountPDimPDe[extentIndex] = chunkLength;
           decompChunk = (j/deDivider)%regDecomp->array[i];
-          if (decompChunk < chunkRest) ++dimExtent[extentIndex]; // dist. rest
-          dimContigFlag[extentIndex] = 1; // flag contiguous dimension
+          if (decompChunk < chunkRest)
+            ++indexCountPDimPDe[extentIndex]; // dist. rest
+          contigFlagPDimPDe[extentIndex] = 1; // flag contiguous dimension
           if (deList[de] > -1){
             int localExtentIndex = deList[de]*dimCount+i;
-            localIndexList[localExtentIndex] = new int[dimExtent[extentIndex]];
-            // fill the localIndexList for this dimension and local DE
+            indexListPDimPLocalDe[localExtentIndex] =
+              new int[indexCountPDimPDe[extentIndex]];
+            // fill the indexListPDimPLocalDe for this dimension and local DE
             int indexStart = minIndex->array[i] + decompChunk * chunkLength;
             if (decompChunk < chunkRest) indexStart += decompChunk;
             else indexStart += chunkRest;
-            for (int k=0; k<dimExtent[extentIndex]; k++){
+            for (int k=0; k<indexCountPDimPDe[extentIndex]; k++){
               // block structure
-              localIndexList[localExtentIndex][k] = indexStart + k;
+              indexListPDimPLocalDe[localExtentIndex][k] = indexStart + k;
             }
           }
         }
@@ -296,19 +298,20 @@ DistGrid *DistGrid::create(
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
           extentIndex = de*dimCount+i;  // index into temp. arrays
-          dimExtent[extentIndex] = chunkLength;
+          indexCountPDimPDe[extentIndex] = chunkLength;
           decompChunk = (j/deDivider)%regDecomp->array[i];
           if (decompChunk == regDecomp->array[i]-1) 
-            dimExtent[extentIndex] += chunkRest; // add rest to last chunk
-          dimContigFlag[extentIndex] = 1; // flag contiguous dimension
+            indexCountPDimPDe[extentIndex] += chunkRest; // add rest
+          contigFlagPDimPDe[extentIndex] = 1; // flag contiguous dimension
           if (deList[de] > -1){
             int localExtentIndex = deList[de]*dimCount+i;
-            localIndexList[localExtentIndex] = new int[dimExtent[extentIndex]];
-            // fill the localIndexList for this dimension and local DE
+            indexListPDimPLocalDe[localExtentIndex] =
+              new int[indexCountPDimPDe[extentIndex]];
+            // fill the indexListPDimPLocalDe for this dimension and local DE
             int indexStart = minIndex->array[i] + decompChunk * chunkLength;
-            for (int k=0; k<dimExtent[extentIndex]; k++){
+            for (int k=0; k<indexCountPDimPDe[extentIndex]; k++){
               // block structure
-              localIndexList[localExtentIndex][k] = indexStart + k;
+              indexListPDimPLocalDe[localExtentIndex][k] = indexStart + k;
             }
           }
         }
@@ -317,20 +320,21 @@ DistGrid *DistGrid::create(
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
           extentIndex = de*dimCount+i;  // index into temp. arrays
-          dimExtent[extentIndex] = chunkLength;
+          indexCountPDimPDe[extentIndex] = chunkLength;
           decompChunk = (j/deDivider)%regDecomp->array[i];
           if (decompChunk == 0) 
-            dimExtent[extentIndex] += chunkRest; // add rest to first chunk
-          dimContigFlag[extentIndex] = 1; // flag contiguous dimension
+            indexCountPDimPDe[extentIndex] += chunkRest; // add rest
+          contigFlagPDimPDe[extentIndex] = 1; // flag contiguous dimension
           if (deList[de] > -1){
             int localExtentIndex = deList[de]*dimCount+i;
-            localIndexList[localExtentIndex] = new int[dimExtent[extentIndex]];
-            // fill the localIndexList for this dimension and local DE
+            indexListPDimPLocalDe[localExtentIndex] =
+              new int[indexCountPDimPDe[extentIndex]];
+            // fill the indexListPDimPLocalDe for this dimension and local DE
             int indexStart = minIndex->array[i] + decompChunk * chunkLength;
             if (decompChunk > 0) indexStart += chunkRest;
-            for (int k=0; k<dimExtent[extentIndex]; k++){
+            for (int k=0; k<indexCountPDimPDe[extentIndex]; k++){
               // block structure
-              localIndexList[localExtentIndex][k] = indexStart + k;
+              indexListPDimPLocalDe[localExtentIndex][k] = indexStart + k;
             }
           }
         }
@@ -339,18 +343,20 @@ DistGrid *DistGrid::create(
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
           extentIndex = de*dimCount+i;  // index into temp. arrays
-          dimExtent[extentIndex] = chunkLength;
+          indexCountPDimPDe[extentIndex] = chunkLength;
           decompChunk = (j/deDivider)%regDecomp->array[i];
-          if (decompChunk < chunkRest) ++dimExtent[extentIndex]; // distr. rest
-          dimContigFlag[extentIndex] = 0; // flag non-contiguous dimension
+          if (decompChunk < chunkRest)
+            ++indexCountPDimPDe[extentIndex]; // distr. rest
+          contigFlagPDimPDe[extentIndex] = 0; // flag non-contiguous dimension
           if (deList[de] > -1){
             int localExtentIndex = deList[de]*dimCount+i;
-            localIndexList[localExtentIndex] = new int[dimExtent[extentIndex]];
-            // fill the localIndexList for this dimension and local DE
+            indexListPDimPLocalDe[localExtentIndex] =
+              new int[indexCountPDimPDe[extentIndex]];
+            // fill the indexListPDimPLocalDe for this dimension and local DE
             int indexStart = minIndex->array[i] + decompChunk;
-            for (int k=0; k<dimExtent[extentIndex]; k++){
+            for (int k=0; k<indexCountPDimPDe[extentIndex]; k++){
               // cyclic
-              localIndexList[localExtentIndex][k] = 
+              indexListPDimPLocalDe[localExtentIndex][k] = 
                 indexStart + k * regDecomp->array[i];
             }
           }
@@ -366,15 +372,15 @@ DistGrid *DistGrid::create(
     }
     deDivider *= regDecomp->array[i];
   }
-  // set up dePatchList
-  int *dePatchList = new int[deCount];
+  // set up patchListPDe
+  int *patchListPDe = new int[deCount];
   for (int i=0; i<deCount; i++)
-    dePatchList[i] = 1;
+    patchListPDe[i] = 1;
   
   // call into construct()
-  localrc = distgrid->construct(dimCount, 1, dePatchList,
-    minIndex->array, maxIndex->array, dimContigFlag, dimExtent, localIndexList,
-    ESMF_TRUE, connectionList, delayout, vm);
+  localrc = distgrid->construct(dimCount, 1, patchListPDe,
+    minIndex->array, maxIndex->array, contigFlagPDimPDe, indexCountPDimPDe,
+    indexListPDimPLocalDe, ESMF_TRUE, connectionList, delayout, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
@@ -382,11 +388,11 @@ DistGrid *DistGrid::create(
   }
   
   // garbage collection
-  delete [] dimContigFlag;
-  delete [] dimExtent;
+  delete [] contigFlagPDimPDe;
+  delete [] indexCountPDimPDe;
   for (int i=0; i<dimCount*localDeCount; i++)
-    delete [] localIndexList[i];
-  delete [] localIndexList;
+    delete [] indexListPDimPLocalDe[i];
+  delete [] indexListPDimPLocalDe;
   if (regDecompDeleteFlag){
     delete [] regDecomp->array;
     delete regDecomp;
@@ -398,7 +404,7 @@ DistGrid *DistGrid::create(
     delete [] deLabelList->array;
     delete deLabelList;
   }
-  delete [] dePatchList;
+  delete [] patchListPDe;
     
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -578,13 +584,13 @@ DistGrid *DistGrid::create(
     }
   }
   
-  // setup temporary dimExtent and localIndexList arrays for construct()
-  // also setup temporary dimCongtigFlag array for construct()
+  // setup temporary indexCountPDimPDe, indexListPDimPLocalDe and dimCongtigFlag
+  // arrays for construct()
   int localDeCount = delayout->getLocalDeCount();
   const int *deList = delayout->getDeList();
-  int *dimExtent = new int[dimCount*deCount];
-  int **localIndexList = new int*[dimCount*localDeCount];
-  int *dimContigFlag = new int[dimCount*deCount];
+  int *indexCountPDimPDe = new int[dimCount*deCount];
+  int **indexListPDimPLocalDe = new int*[dimCount*localDeCount];
+  int *contigFlagPDimPDe = new int[dimCount*deCount];
   for (int i=0; i<dimCount; i++){
     int dimLength = maxIndex->array[i] - minIndex->array[i] + 1;
     int de, extentIndex, deBlockIndexMin, deBlockIndexMax;
@@ -593,28 +599,29 @@ DistGrid *DistGrid::create(
       extentIndex = de*dimCount+i;  // index into temp. arrays
       deBlockIndexMin = j*deBlockList->extent[0]*deBlockList->extent[1] + i;
       deBlockIndexMax = deBlockIndexMin + deBlockList->extent[0];
-      dimExtent[extentIndex] = deBlockList->array[deBlockIndexMax]
+      indexCountPDimPDe[extentIndex] = deBlockList->array[deBlockIndexMax]
         - deBlockList->array[deBlockIndexMin] + 1;
-      dimContigFlag[extentIndex] = 1; // flag contiguous dimension
+      contigFlagPDimPDe[extentIndex] = 1; // flag contiguous dimension
       if (deList[j] > -1){
         int localExtentIndex = deList[j]*dimCount+i;
-        localIndexList[localExtentIndex] = new int[dimExtent[extentIndex]];
-        for (int k=0; k<dimExtent[extentIndex]; k++)
-          localIndexList[localExtentIndex][k] =
+        indexListPDimPLocalDe[localExtentIndex] =
+          new int[indexCountPDimPDe[extentIndex]];
+        for (int k=0; k<indexCountPDimPDe[extentIndex]; k++)
+          indexListPDimPLocalDe[localExtentIndex][k] =
             deBlockList->array[deBlockIndexMin] + k;
       }
     }
   }
-  // set up dePatchList
-  int *dePatchList = new int[deCount];
+  // set up patchListPDe
+  int *patchListPDe = new int[deCount];
   for (int i=0; i<deCount; i++)
-    dePatchList[i] = 1;
+    patchListPDe[i] = 1;
 
   // todo: check for overlapping deBlocks!!
   // call into construct()
-  localrc = distgrid->construct(dimCount, 1, dePatchList, 
-    minIndex->array, maxIndex->array, dimContigFlag, dimExtent, localIndexList,
-    ESMF_FALSE, connectionList, delayout, vm);
+  localrc = distgrid->construct(dimCount, 1, patchListPDe, 
+    minIndex->array, maxIndex->array, contigFlagPDimPDe, indexCountPDimPDe,
+    indexListPDimPLocalDe, ESMF_FALSE, connectionList, delayout, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
@@ -622,16 +629,16 @@ DistGrid *DistGrid::create(
   }
     
   // garbage collection
-  delete [] dimContigFlag;
-  delete [] dimExtent;
+  delete [] contigFlagPDimPDe;
+  delete [] indexCountPDimPDe;
   for (int i=0; i<dimCount*localDeCount; i++)
-    delete [] localIndexList[i];
-  delete [] localIndexList;
+    delete [] indexListPDimPLocalDe[i];
+  delete [] indexListPDimPLocalDe;
   if (deLabelListDeleteFlag){
     delete [] deLabelList->array;
     delete deLabelList;
   }
-  delete [] dePatchList;
+  delete [] patchListPDe;
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -936,17 +943,17 @@ DistGrid *DistGrid::create(
     }
   }
     
-  // setup temporary dimExtent and localIndexList arrays for construct()
-  // also setup temporary dimCongtigFlag array for construct()
+  // setup temporary indexCountPDimPDe, indexListPDimPLocalDe and dimCongtigFlag
+  // arrays for construct()
   int localDeCount = delayout->getLocalDeCount();
   const int *deList = delayout->getDeList();
-  int *dimExtent = new int[dimCount*deCount];
-  int **localIndexList = new int*[dimCount*localDeCount];
-  int *dimContigFlag = new int[dimCount*deCount];
+  int *indexCountPDimPDe = new int[dimCount*deCount];
+  int **indexListPDimPLocalDe = new int*[dimCount*localDeCount];
+  int *contigFlagPDimPDe = new int[dimCount*deCount];
   
   // the following differs from the single patch case in that there is an
-  // extra outer loop over patches. The dimExtent and localIndexList arrays are
-  // on DE basis, independent of patches.
+  // extra outer loop over patches. The indexCountPDimPDe and
+  // indexListPDimPLocalDe arrays are on DE basis, independent of patches.
 
   int dePatchStart = 0;  // reset  
   for (int patch=0; patch<patchCount; patch++){
@@ -964,21 +971,22 @@ DistGrid *DistGrid::create(
             int j = dePatchStart + jj;
             de = deLabelList->array[j];
             extentIndex = de*dimCount+ii;  // index into temp. arrays
-            dimExtent[extentIndex] = chunkLength;
+            indexCountPDimPDe[extentIndex] = chunkLength;
             decompChunk = (jj/deDivider)%regDecomp->array[i];
-            if (decompChunk < chunkRest) ++dimExtent[extentIndex]; //distr. rest
-            dimContigFlag[extentIndex] = 1; // flag contiguous dimension
+            if (decompChunk < chunkRest)
+              ++indexCountPDimPDe[extentIndex]; //distr. rest
+            contigFlagPDimPDe[extentIndex] = 1; // flag contiguous dimension
             if (deList[de] > -1){
               int localExtentIndex = deList[de]*dimCount+ii;
-              localIndexList[localExtentIndex] =
-                new int[dimExtent[extentIndex]];
-              // fill the localIndexList for this dimension and local DE
+              indexListPDimPLocalDe[localExtentIndex] =
+                new int[indexCountPDimPDe[extentIndex]];
+              // fill the indexListPDimPLocalDe for this dimension and local DE
               int indexStart = minIndex->array[i] + decompChunk * chunkLength;
               if (decompChunk < chunkRest) indexStart += decompChunk;
               else indexStart += chunkRest;
-              for (int k=0; k<dimExtent[extentIndex]; k++){
+              for (int k=0; k<indexCountPDimPDe[extentIndex]; k++){
                 // block structure
-                localIndexList[localExtentIndex][k] = indexStart + k;
+                indexListPDimPLocalDe[localExtentIndex][k] = indexStart + k;
               }
             }
           }
@@ -988,22 +996,22 @@ DistGrid *DistGrid::create(
             int j = dePatchStart + jj;
             de = deLabelList->array[j];
             extentIndex = de*dimCount+ii;  // index into temp. arrays
-            dimExtent[extentIndex] = chunkLength;
+            indexCountPDimPDe[extentIndex] = chunkLength;
             decompChunk = (jj/deDivider)%regDecomp->array[i];
             if (decompChunk == regDecomp->array[i]-1) 
-              dimExtent[extentIndex] += chunkRest; // add rest to last chunk
-            dimContigFlag[extentIndex] = 1; // flag contiguous dimension
+              indexCountPDimPDe[extentIndex] += chunkRest; // add rest
+            contigFlagPDimPDe[extentIndex] = 1; // flag contiguous dimension
             if (deList[de] > -1){
               int localExtentIndex = deList[de]*dimCount+ii;
-              localIndexList[localExtentIndex] =
-                new int[dimExtent[extentIndex]];
-              // fill the localIndexList for this dimension and local DE
+              indexListPDimPLocalDe[localExtentIndex] =
+                new int[indexCountPDimPDe[extentIndex]];
+              // fill the indexListPDimPLocalDe for this dimension and local DE
               int indexStart = minIndex->array[i] + decompChunk * chunkLength;
               if (decompChunk < chunkRest) indexStart += decompChunk;
               else indexStart += chunkRest;
-              for (int k=0; k<dimExtent[extentIndex]; k++){
+              for (int k=0; k<indexCountPDimPDe[extentIndex]; k++){
                 // block structure
-                localIndexList[localExtentIndex][k] = indexStart + k;
+                indexListPDimPLocalDe[localExtentIndex][k] = indexStart + k;
               }
             }
           }
@@ -1013,22 +1021,22 @@ DistGrid *DistGrid::create(
             int j = dePatchStart + jj;
             de = deLabelList->array[j];
             extentIndex = de*dimCount+ii;  // index into temp. arrays
-            dimExtent[extentIndex] = chunkLength;
+            indexCountPDimPDe[extentIndex] = chunkLength;
             decompChunk = (jj/deDivider)%regDecomp->array[i];
             if (decompChunk == 0) 
-              dimExtent[extentIndex] += chunkRest; // add rest to first chunk
-            dimContigFlag[extentIndex] = 1; // flag contiguous dimension
+              indexCountPDimPDe[extentIndex] += chunkRest; // add rest
+            contigFlagPDimPDe[extentIndex] = 1; // flag contiguous dimension
             if (deList[de] > -1){
               int localExtentIndex = deList[de]*dimCount+ii;
-              localIndexList[localExtentIndex] =
-                new int[dimExtent[extentIndex]];
-              // fill the localIndexList for this dimension and local DE
+              indexListPDimPLocalDe[localExtentIndex] =
+                new int[indexCountPDimPDe[extentIndex]];
+              // fill the indexListPDimPLocalDe for this dimension and local DE
               int indexStart = minIndex->array[i] + decompChunk * chunkLength;
               if (decompChunk < chunkRest) indexStart += decompChunk;
               else indexStart += chunkRest;
-              for (int k=0; k<dimExtent[extentIndex]; k++){
+              for (int k=0; k<indexCountPDimPDe[extentIndex]; k++){
                 // block structure
-                localIndexList[localExtentIndex][k] = indexStart + k;
+                indexListPDimPLocalDe[localExtentIndex][k] = indexStart + k;
               }
             }
           }
@@ -1038,21 +1046,22 @@ DistGrid *DistGrid::create(
             int j = dePatchStart + jj;
             de = deLabelList->array[j];
             extentIndex = de*dimCount+ii;  // index into temp. arrays
-            dimExtent[extentIndex] = chunkLength;
+            indexCountPDimPDe[extentIndex] = chunkLength;
             decompChunk = (jj/deDivider)%regDecomp->array[i];
-            if (decompChunk < chunkRest) ++dimExtent[extentIndex]; //distr. rest
-            dimContigFlag[extentIndex] = 0; // flag non-contiguous dimension
+            if (decompChunk < chunkRest)
+              ++indexCountPDimPDe[extentIndex]; //distr. rest
+            contigFlagPDimPDe[extentIndex] = 0; // flag non-contiguous dimension
             if (deList[de] > -1){
               int localExtentIndex = deList[de]*dimCount+ii;
-              localIndexList[localExtentIndex] =
-                new int[dimExtent[extentIndex]];
-              // fill the localIndexList for this dimension and local DE
+              indexListPDimPLocalDe[localExtentIndex] =
+                new int[indexCountPDimPDe[extentIndex]];
+              // fill the indexListPDimPLocalDe for this dimension and local DE
               int indexStart = minIndex->array[i] + decompChunk * chunkLength;
               if (decompChunk < chunkRest) indexStart += decompChunk;
               else indexStart += chunkRest;
-              for (int k=0; k<dimExtent[extentIndex]; k++){
+              for (int k=0; k<indexCountPDimPDe[extentIndex]; k++){
                 // block structure
-                localIndexList[localExtentIndex][k] = indexStart + k;
+                indexListPDimPLocalDe[localExtentIndex][k] = indexStart + k;
               }
             }
           }
@@ -1069,22 +1078,22 @@ DistGrid *DistGrid::create(
     } // i-loop
     dePatchStart += deCountPPatch[patch];
   } // patch-loop
-  // set up dePatchList
+  // set up patchListPDe
   dePatchStart = 0;  // reset  
-  int *dePatchList = new int[deCount];
+  int *patchListPDe = new int[deCount];
   for (int patch=0; patch<patchCount; patch++){
     for (int jj=0; jj<deCountPPatch[patch]; jj++){
       int j = dePatchStart + jj;
       int de = deLabelList->array[j];
-      dePatchList[de] = patch + 1;  // patch ids are basis 1
+      patchListPDe[de] = patch + 1;  // patch ids are basis 1
     }
     dePatchStart += deCountPPatch[patch];
   }
 
   // call into construct()
-  localrc = distgrid->construct(dimCount, patchCount, dePatchList,
-    minIndex->array, maxIndex->array, dimContigFlag, dimExtent, localIndexList,
-    ESMF_TRUE, connectionList, delayout, vm);
+  localrc = distgrid->construct(dimCount, patchCount, patchListPDe,
+    minIndex->array, maxIndex->array, contigFlagPDimPDe, indexCountPDimPDe,
+    indexListPDimPLocalDe, ESMF_TRUE, connectionList, delayout, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
@@ -1092,12 +1101,12 @@ DistGrid *DistGrid::create(
   }
   
   // garbage collection
-  delete [] dimContigFlag;
+  delete [] contigFlagPDimPDe;
   delete [] deCountPPatch;
-  delete [] dimExtent;
+  delete [] indexCountPDimPDe;
   for (int i=0; i<dimCount*localDeCount; i++)
-    delete [] localIndexList[i];
-  delete [] localIndexList;
+    delete [] indexListPDimPLocalDe[i];
+  delete [] indexListPDimPLocalDe;
   if (regDecompDeleteFlag){
     delete [] regDecomp->array;
     delete regDecomp;
@@ -1109,7 +1118,7 @@ DistGrid *DistGrid::create(
     delete [] deLabelList->array;
     delete deLabelList;
   }
-  delete [] dePatchList;
+  delete [] patchListPDe;
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1189,12 +1198,12 @@ int DistGrid::construct(
 //
   int dimCountArg,                      // (in)
   int patchCountArg,                    // (in)
-  int *dePatchListArg,                  // (in)
+  int *patchListPDeArg,                 // (in)
   int *minIndexArg,                     // (in)
   int *maxIndexArg,                     // (in)
-  int *dimContigFlagArg,                // (in)
-  int *dimExtentArg,                    // (in)
-  int **localIndexListArg,              // (in)
+  int *contigFlagPDimPDeArg,            // (in)
+  int *indexCountPDimPDeArg,            // (in)
+  int **indexListPDimPLocalDeArg,       // (in)
   ESMC_Logical regDecompFlagArg,        // (in)
   InterfaceInt *connectionListArg,      // (in)
   DELayout *delayoutArg,                // (in) DELayout
@@ -1248,50 +1257,52 @@ int DistGrid::construct(
   delayout = delayoutArg;
   vm = vmArg;
   // fill in the rest
-  minIndex = new int[dimCount*patchCount];
-  memcpy(minIndex, minIndexArg, sizeof(int)*dimCount*patchCount);
-  maxIndex = new int[dimCount*patchCount];
-  memcpy(maxIndex, maxIndexArg, sizeof(int)*dimCount*patchCount);
+  minIndexPDimPPatch = new int[dimCount*patchCount];
+  memcpy(minIndexPDimPPatch, minIndexArg, sizeof(int)*dimCount*patchCount);
+  maxIndexPDimPPatch = new int[dimCount*patchCount];
+  memcpy(maxIndexPDimPPatch, maxIndexArg, sizeof(int)*dimCount*patchCount);
   int deCount = delayout->getDeCount();
-  dimContigFlag = new int[dimCount*deCount];
-  memcpy(dimContigFlag, dimContigFlagArg, sizeof(int)*dimCount*deCount);
-  dimExtent = new int[dimCount*deCount];
-  memcpy(dimExtent, dimExtentArg, sizeof(int)*dimCount*deCount);
+  contigFlagPDimPDe = new int[dimCount*deCount];
+  memcpy(contigFlagPDimPDe, contigFlagPDimPDeArg, sizeof(int)*dimCount*deCount);
+  indexCountPDimPDe = new int[dimCount*deCount];
+  memcpy(indexCountPDimPDe, indexCountPDimPDeArg, sizeof(int)*dimCount*deCount);
   int localDeCount = delayout->getLocalDeCount();
   const int *localDeList = delayout->getLocalDeList();
-  localIndexList = new int*[dimCount*localDeCount];
+  indexListPDimPLocalDe = new int*[dimCount*localDeCount];
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
     for (int k=0; k<dimCount; k++){
-      localIndexList[i*dimCount+k] = new int[dimExtent[de*dimCount+k]];
-      memcpy(localIndexList[i*dimCount+k], localIndexListArg[i*dimCount+k],
-        sizeof(int)*dimExtent[de*dimCount+k]);
+      indexListPDimPLocalDe[i*dimCount+k] =
+        new int[indexCountPDimPDe[de*dimCount+k]];
+      memcpy(indexListPDimPLocalDe[i*dimCount+k],
+        indexListPDimPLocalDeArg[i*dimCount+k],
+        sizeof(int)*indexCountPDimPDe[de*dimCount+k]);
     }
   }
-  // determine the patchCellCount
-  patchCellCount = new int[patchCount];
+  // determine the cellCountPPatch
+  cellCountPPatch = new int[patchCount];
   for (int i=0; i<patchCount; i++){
-    patchCellCount[i] = 1;  // reset
+    cellCountPPatch[i] = 1;  // reset
     for (int j=0; j<dimCount; j++)
-      patchCellCount[i] *=
-        (maxIndex[i*dimCount+j] - minIndex[i*dimCount+j] + 1);
+      cellCountPPatch[i] *=
+        maxIndexPDimPPatch[i*dimCount+j] - minIndexPDimPPatch[i*dimCount+j] + 1;
   }
-  dePatchList = new int[deCount];
-  memcpy(dePatchList, dePatchListArg, sizeof(int)*deCount);
-  deCellCount = new int[deCount];
+  patchListPDe = new int[deCount];
+  memcpy(patchListPDe, patchListPDeArg, sizeof(int)*deCount);
+  cellCountPDe = new int[deCount];
   for (int i=0; i<deCount; i++){
-    deCellCount[i] = 1;  // reset
+    cellCountPDe[i] = 1;  // reset
     for (int j=0; j<dimCount; j++)
-      deCellCount[i] *= dimExtent[i*dimCount+j];
-    // mark in dePatchList DEs that have no cells as not being part of any patch
-    if (deCellCount[i]==0) dePatchList[i]=0;
+      cellCountPDe[i] *= indexCountPDimPDe[i*dimCount+j];
+    // mark in patchListPDe DEs that have no cells as not being on any patch
+    if (cellCountPDe[i]==0) patchListPDe[i]=0;
   }
   // no arbitrary sequence indices by default
-  localArbSeqIndexCount = new int[localDeCount];
-  localArbSeqIndexList = new int*[localDeCount];
+  arbSeqIndexCountPLocalDe = new int[localDeCount];
+  arbSeqIndexListPLocalDe = new int*[localDeCount];
   for (int i=0; i<localDeCount; i++){
-    localArbSeqIndexCount[i] = 0;
-    localArbSeqIndexList[i] = NULL;
+    arbSeqIndexCountPLocalDe[i] = 0;
+    arbSeqIndexListPLocalDe[i] = NULL;
   }
   // return successfully
   rc = ESMF_SUCCESS;
@@ -1327,26 +1338,26 @@ int DistGrid::destruct(void){
   rc = ESMC_RC_NOT_IMPL;
 
   // garbage collection
-  delete [] dimExtent;
-  delete [] minIndex;
-  delete [] maxIndex;
-  delete [] patchCellCount;
-  delete [] dePatchList;
-  delete [] deCellCount;
-  delete [] dimContigFlag;
+  delete [] indexCountPDimPDe;
+  delete [] minIndexPDimPPatch;
+  delete [] maxIndexPDimPPatch;
+  delete [] cellCountPPatch;
+  delete [] patchListPDe;
+  delete [] cellCountPDe;
+  delete [] contigFlagPDimPDe;
   int localDeCount = delayout->getLocalDeCount();
   for (int i=0; i<dimCount*localDeCount; i++)
-    delete [] localIndexList[i];
-  delete [] localIndexList;
+    delete [] indexListPDimPLocalDe[i];
+  delete [] indexListPDimPLocalDe;
   for (int i=0; i<connectionCount; i++)
     delete [] connectionList[i];
   if (connectionList)
     delete [] connectionList;
-  delete [] localArbSeqIndexCount;
+  delete [] arbSeqIndexCountPLocalDe;
   for (int i=0; i<localDeCount; i++)
-    if (localArbSeqIndexList[i])
-      delete [] localArbSeqIndexList[i];
-  delete [] localArbSeqIndexList;
+    if (arbSeqIndexListPLocalDe[i])
+      delete [] arbSeqIndexListPLocalDe[i];
+  delete [] arbSeqIndexListPLocalDe;
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -1399,43 +1410,43 @@ int DistGrid::print()const{
   printf("--- ESMCI::DistGrid::print start ---\n");
   printf("dimCount = %d\n", dimCount);
   printf("patchCount = %d\n", patchCount);
-  printf("patchCellCount: ");
+  printf("cellCountPPatch: ");
   for (int i=0; i<patchCount; i++)
-    printf("%d ", patchCellCount[i]);
+    printf("%d ", cellCountPPatch[i]);
   printf("\n");
   printf("regDecompFlag = %s\n", ESMC_LogicalString(regDecompFlag));
-  printf("dePatchList: ");
+  printf("patchListPDe: ");
   int deCount = delayout->getDeCount();
   for (int i=0; i<deCount; i++)
-    printf("%d ", dePatchList[i]);
+    printf("%d ", patchListPDe[i]);
   printf("\n");
-  printf("deCellCount: ");
+  printf("cellCountPDe: ");
   for (int i=0; i<deCount; i++)
-    printf("%d ", deCellCount[i]);
+    printf("%d ", cellCountPDe[i]);
   printf("\n");
-  printf("localIndexList (dims separated by / ):\n");
+  printf("indexListPDimPLocalDe (dims separated by / ):\n");
   int localDeCount = delayout->getLocalDeCount();
   const int *localDeList = delayout->getLocalDeList();
   for (int i=0; i<localDeCount; i++){
     printf(" for localDE %d - DE %d: ", i, localDeList[i]);
     for (int j=0; j<dimCount; j++){
       printf(" (");
-      for (int k=0; k<dimExtent[localDeList[i]*dimCount+j]; k++){
+      for (int k=0; k<indexCountPDimPDe[localDeList[i]*dimCount+j]; k++){
         if (k!=0) printf(", ");
-        printf("%d", localIndexList[i*dimCount+j][k]);
+        printf("%d", indexListPDimPLocalDe[i*dimCount+j][k]);
       }
       printf(") /");
     }
     printf("\n");
   }
-  printf("localArbSeqIndexList:\n");
+  printf("arbSeqIndexListPLocalDe:\n");
   for (int i=0; i<localDeCount; i++){
     printf(" for localDE %d - DE %d: ", i, localDeList[i]);
-    if (localArbSeqIndexCount[i]){
+    if (arbSeqIndexCountPLocalDe[i]){
       printf("(");
-      for (int j=0; j<localArbSeqIndexCount[i]; j++){
+      for (int j=0; j<arbSeqIndexCountPLocalDe[i]; j++){
         if (j!=0) printf(", ");
-        printf("%d", localArbSeqIndexList[i][j]);
+        printf("%d", arbSeqIndexListPLocalDe[i][j]);
       }
       printf(")\n");
     }else
@@ -1540,7 +1551,7 @@ int DistGrid::getDimContigFlag(
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return dimContigFlag[de*dimCount+(dim-1)];
+  return contigFlagPDimPDe[de*dimCount+(dim-1)];
 }
 //-----------------------------------------------------------------------------
 
@@ -1581,7 +1592,7 @@ int DistGrid::getDeCellCount(
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return deCellCount[de];
+  return cellCountPDe[de];
 }
 //-----------------------------------------------------------------------------
 
@@ -1623,31 +1634,31 @@ int DistGrid::getSequenceIndex(
   }
   
   int seqindex;
-  if (localArbSeqIndexCount[localDe]){
-    // determine the sequentialized index by localArbSeqIndexList loop-up
+  if (arbSeqIndexCountPLocalDe[localDe]){
+    // determine the sequentialized index by arbSeqIndexListPLocalDe loop-up
     int linExclusiveIndex = index[dimCount-1];  // initialize
     for (int i=dimCount-2; i>=0; i--){
-      linExclusiveIndex *= dimExtent[localDe*dimCount + i];
+      linExclusiveIndex *= indexCountPDimPDe[localDe*dimCount + i];
       linExclusiveIndex += index[i];
     }
-    seqindex = localArbSeqIndexList[localDe][linExclusiveIndex];
+    seqindex = arbSeqIndexListPLocalDe[localDe][linExclusiveIndex];
   }else{
     // determine the sequentialized index by construction of default patch rule
     const int *localDeList = delayout->getLocalDeList();
-    int patch = dePatchList[localDeList[localDe]];  // patches are basis 1 !!!!
+    int patch = patchListPDe[localDeList[localDe]];  // patches are basis 1 !!!!
     // add up cells from patch in which DE is located
     seqindex =
-      localIndexList[localDe*dimCount+(dimCount-1)][index[dimCount-1]]
-      - minIndex[(patch-1)*dimCount+(dimCount-1)]; // initialize
+      indexListPDimPLocalDe[localDe*dimCount+(dimCount-1)][index[dimCount-1]]
+      - minIndexPDimPPatch[(patch-1)*dimCount+(dimCount-1)]; // initialize
     for (int i=dimCount-2; i>=0; i--){
-      seqindex *= maxIndex[(patch-1)*dimCount+i] 
-        - minIndex[(patch-1)*dimCount+i] + 1;
-      seqindex += localIndexList[localDe*dimCount+i][index[i]] 
-        - minIndex[(patch-1)*dimCount+i];
+      seqindex *= maxIndexPDimPPatch[(patch-1)*dimCount+i] 
+        - minIndexPDimPPatch[(patch-1)*dimCount+i] + 1;
+      seqindex += indexListPDimPLocalDe[localDe*dimCount+i][index[i]] 
+        - minIndexPDimPPatch[(patch-1)*dimCount+i];
     }
     // add all the cells of previous patches
-    for (int i=0; i<dePatchList[localDeList[localDe]]-2; i++)
-      seqindex += patchCellCount[i];
+    for (int i=0; i<patchListPDe[localDeList[localDe]]-2; i++)
+      seqindex += cellCountPPatch[i];
     ++seqindex;  // shift sequentialized index to basis 1 !!!!
   }
   return seqindex;
@@ -1690,7 +1701,7 @@ const int *DistGrid::getMinIndex(
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return &minIndex[(patch-1)*dimCount];
+  return &minIndexPDimPPatch[(patch-1)*dimCount];
 }
 //-----------------------------------------------------------------------------
 
@@ -1730,7 +1741,7 @@ const int *DistGrid::getMaxIndex(
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return &maxIndex[(patch-1)*dimCount];
+  return &maxIndexPDimPPatch[(patch-1)*dimCount];
 }
 //-----------------------------------------------------------------------------
 
@@ -1777,7 +1788,7 @@ const int *DistGrid::getLocalIndexList(
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return localIndexList[localDe*dimCount+(dim-1)];
+  return indexListPDimPLocalDe[localDe*dimCount+(dim-1)];
 }
 //-----------------------------------------------------------------------------
 
@@ -1871,15 +1882,15 @@ int DistGrid::serialize(
   // serialize array members
   ip = (int *)lp;
   for (int i=0; i<patchCount; i++)
-    *ip++ = patchCellCount[i];
+    *ip++ = cellCountPPatch[i];
   for (int i=0; i<deCount; i++)
-    *ip++ = dePatchList[i];
+    *ip++ = patchListPDe[i];
   for (int i=0; i<dimCount*patchCount; i++)
-    *ip++ = minIndex[i];
+    *ip++ = minIndexPDimPPatch[i];
   for (int i=0; i<dimCount*patchCount; i++)
-    *ip++ = maxIndex[i];
+    *ip++ = maxIndexPDimPPatch[i];
   for (int i=0; i<dimCount*deCount; i++)
-    *ip++ = dimExtent[i];
+    *ip++ = indexCountPDimPDe[i];
   
   cp = (char *)ip;
   *offset = (cp - buffer);
@@ -1944,21 +1955,21 @@ DistGrid *DistGrid::deserialize(
     int deCount = a->delayout->getDeCount();
     // deserialize array members
     ip = (int *)lp;
-    a->patchCellCount = new int[a->patchCount];
+    a->cellCountPPatch = new int[a->patchCount];
     for (int i=0; i<a->patchCount; i++)
-      a->patchCellCount[i] = *ip++;
-    a->dePatchList = new int[deCount];
+      a->cellCountPPatch[i] = *ip++;
+    a->patchListPDe = new int[deCount];
     for (int i=0; i<deCount; i++)
-      a->dePatchList[i] = *ip++;
-    a->minIndex = new int[a->dimCount*a->patchCount];
+      a->patchListPDe[i] = *ip++;
+    a->minIndexPDimPPatch = new int[a->dimCount*a->patchCount];
     for (int i=0; i<a->dimCount*a->patchCount; i++)
-      a->minIndex[i] = *ip++;
-    a->maxIndex = new int[a->dimCount*a->patchCount];
+      a->minIndexPDimPPatch[i] = *ip++;
+    a->maxIndexPDimPPatch = new int[a->dimCount*a->patchCount];
     for (int i=0; i<a->dimCount*a->patchCount; i++)
-      a->maxIndex[i] = *ip++;
-    a->dimExtent = new int[a->dimCount*deCount];
+      a->maxIndexPDimPPatch[i] = *ip++;
+    a->indexCountPDimPDe = new int[a->dimCount*deCount];
     for (int i=0; i<a->dimCount*deCount; i++)
-      a->dimExtent[i] = *ip++;
+      a->indexCountPDimPDe[i] = *ip++;
     
     cp = (char *)ip;
     *offset = (cp - buffer);
@@ -2135,19 +2146,19 @@ int DistGrid::setArbSeqIndex(
     return rc;
   }
   const int *localDeList = delayout->getLocalDeList();
-  if (arbSeqIndex->extent[0] != deCellCount[localDeList[0]]){
+  if (arbSeqIndex->extent[0] != cellCountPDe[localDeList[0]]){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
       "- arbSeqIndex array must supply one value for each cell in local DE",
       &rc);
     return rc;
   }
 
-  // set localArbSeqIndexCount[] and localArbSeqIndexList[][]
-  localArbSeqIndexCount[0] = arbSeqIndex->extent[0];
-  if (localArbSeqIndexList[0])
-    delete [] localArbSeqIndexList[0];  // delete previous index list
-  localArbSeqIndexList[0] = new int[arbSeqIndex->extent[0]];
-  memcpy(localArbSeqIndexList[0], arbSeqIndex->array, 
+  // set arbSeqIndexCountPLocalDe[] and arbSeqIndexListPLocalDe[][]
+  arbSeqIndexCountPLocalDe[0] = arbSeqIndex->extent[0];
+  if (arbSeqIndexListPLocalDe[0])
+    delete [] arbSeqIndexListPLocalDe[0];  // delete previous index list
+  arbSeqIndexListPLocalDe[0] = new int[arbSeqIndex->extent[0]];
+  memcpy(arbSeqIndexListPLocalDe[0], arbSeqIndex->array, 
     sizeof(int)*arbSeqIndex->extent[0]);
   
   // return successfully
