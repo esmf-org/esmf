@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.29 2007/07/11 05:08:20 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.30 2007/07/18 20:43:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -119,9 +119,9 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     // get() and set()
     VM *getVM()                     const {return vm;}
     int getDeCount()                const {return deCount;}
-    int *getDeList()                const {return deList;}
+    const int *getDeList()          const {return deList;}
     int getLocalDeCount()           const {return localDeCount;}
-    int *getLocalDeList()           const {return localDeList;}
+    const int *getLocalDeList()     const {return localDeList;}
     
     int get(VM **vmArg, int *deCountArg, int *petMap, 
       int petMapCount, int *vasMap, int vasMapCount, 

@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.25 2007/07/18 18:18:32 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.26 2007/07/18 20:43:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.25 2007/07/18 18:18:32 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.26 2007/07/18 20:43:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -258,7 +258,7 @@ DistGrid *DistGrid::create(
   // setup temporary dimExtent and localIndexList arrays for construct()
   // also setup temporary dimCongtigFlag array for construct()
   int localDeCount = delayout->getLocalDeCount();
-  int *deList = delayout->getDeList();
+  const int *deList = delayout->getDeList();
   int *dimExtent = new int[dimCount*deCount];
   int **localIndexList = new int*[dimCount*localDeCount];
   int *dimContigFlag = new int[dimCount*deCount];
@@ -581,7 +581,7 @@ DistGrid *DistGrid::create(
   // setup temporary dimExtent and localIndexList arrays for construct()
   // also setup temporary dimCongtigFlag array for construct()
   int localDeCount = delayout->getLocalDeCount();
-  int *deList = delayout->getDeList();
+  const int *deList = delayout->getDeList();
   int *dimExtent = new int[dimCount*deCount];
   int **localIndexList = new int*[dimCount*localDeCount];
   int *dimContigFlag = new int[dimCount*deCount];
@@ -939,7 +939,7 @@ DistGrid *DistGrid::create(
   // setup temporary dimExtent and localIndexList arrays for construct()
   // also setup temporary dimCongtigFlag array for construct()
   int localDeCount = delayout->getLocalDeCount();
-  int *deList = delayout->getDeList();
+  const int *deList = delayout->getDeList();
   int *dimExtent = new int[dimCount*deCount];
   int **localIndexList = new int*[dimCount*localDeCount];
   int *dimContigFlag = new int[dimCount*deCount];

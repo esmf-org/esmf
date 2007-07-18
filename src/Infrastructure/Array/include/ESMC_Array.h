@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.64 2007/07/13 18:18:52 theurich Exp $
+// $Id: ESMC_Array.h,v 1.65 2007/07/18 20:43:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -80,17 +80,9 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int *inverseDimmap;
     int *contiguousFlag;
     int *deCellCount;
-    // lower level objects
+    // lower level object references
     DistGrid *distgrid;
     DELayout *delayout;
-    // cached values from LocalArray
-    // cached values from DistGrid
-    int dimCount;
-    // cached values from DELayout
-    int deCount;
-    int localDeCount;
-    int *localDeList;
-    int *deList;
     
   public:
     // constructor and destructor
