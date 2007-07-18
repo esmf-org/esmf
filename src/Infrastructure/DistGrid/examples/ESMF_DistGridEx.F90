@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.17 2007/07/17 21:39:17 theurich Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.18 2007/07/18 18:18:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -208,7 +208,8 @@ program ESMF_DistGridEx
       call ESMF_DistGridGet(distgrid, localDe=localDe, dim=dim, &
         localIndexList=localIndexList, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-      print *, "local DE ", localDe," - DE ",de," localIndexList along dim=",dim," :: ", localIndexList
+      print *, "local DE ", localDe," - DE ",de," localIndexList along dim=", &
+        dim," :: ", localIndexList
       deallocate(localIndexList)
     enddo
   enddo
@@ -320,20 +321,37 @@ program ESMF_DistGridEx
 ! example are running on 3 nodes of a dual-SMP node cluster and there is a 
 ! higher communication load along the first dimension of the model than along 
 ! the second dimension it would be sensible to place DEs according to this 
-! knowledge. There are two ways to accomplish this in ESMF. First the 
+! knowledge.
+!EOE
+
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!!!! UNTIL FURTHER IMPLEMENTATION SKIP >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#ifdef NOSKIP
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+!BOEI
+! There are two ways to accomplish this in ESMF. First the 
 ! {\tt fastAxis} argument can be used when creating the DistGrid object to
 ! indicate which axis should have faster communication characteristics:
-!EOE
-!BOC
+!EOEI
+!BOCI
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), fastAxis=1, rc=rc)
-!EOC  
+!EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
+!BOEI
 ! A second way to achieve the same distribution is to explicitly create a
-! suitable DELayout object. The following example first creates a DELayout 
+! suitable DELayout object.
+!EOEI
+
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#endif
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+!BOE
+! The following example first creates a DELayout 
 ! with 6 DEs where groups of 2 DEs are to be in fast connection. This DELayout 
 ! is then used to create a DistGrid.
 !EOE
@@ -351,8 +369,8 @@ program ESMF_DistGridEx
   call ESMF_DELayoutDestroy(delayout, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
-! Either case ({\tt fastAxis} or {\tt DELayout}) will ensure a distribution of 
-! DEs across the cluster resource in the following way:
+! This will ensure a distribution of DEs across the cluster resource 
+! in the following way:
 ! \begin{verbatim}
 !   0   2   4
 !   1   3   5
@@ -362,12 +380,12 @@ program ESMF_DistGridEx
 ! The interplay between DistGrid and DELayout may at first seem complicated.
 ! The simple but important rule to understand is that DistGrid describes a 
 ! domain decomposition and each domain is labeled with a DE number. The DELayout
-! describes how these DEs are laid out over the compute resources of the VM.
-! The DEs are purely logical elements of decomposition and may be relabeled to
-! fit the algorithm or legacy code better. The following example demonstrates 
-! this by describing the exact
-! same distribution of the domain data across the fictitious cluster of 
-! SMP-nodes with a different choice of DE labeling:
+! describes how these DEs are laid out over the compute resources of the VM, 
+! i.e. PETs. The DEs are purely logical elements of decomposition and may be 
+! relabeled to fit the algorithm or legacy code better. The following 
+! example demonstrates this by describing the exact same distribution of the 
+! domain data across the fictitious cluster of SMP-nodes with a different 
+! choice of DE labeling:
 !EOE
 !BOC
   delayout = ESMF_DELayoutCreate(deCount=6, deGrouping=(/(mod(i,3),i=0,5)/), &
@@ -524,7 +542,7 @@ program ESMF_DistGridEx
 
 
 !BOE
-! \subsubsection{Single LR domain with decomposition by DE blocks}
+! \subsubsection{Single patch DistGrid with decomposition by DE blocks}
 ! 
 ! The examples of the previous sections showed how DistGrid objects with
 ! regular decompositions are created. However, in some cases a regular 
@@ -566,9 +584,9 @@ program ESMF_DistGridEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
-! \subsubsection{Periodic boundaries of a single LR domain}
+! \subsubsection{Single patch DistGrid with periodic boundaries}
 ! 
-! By default the edges of all LR patches have solid wall boundary conditions. 
+! By default the edges of all patches have solid wall boundary conditions. 
 ! Periodic boundary conditions can be imposed by specifying connections between
 ! patches. For the single LR domain of the last section periodic boundaries 
 ! along the first dimension are imposed by adding a
@@ -629,13 +647,12 @@ program ESMF_DistGridEx
 !EOC
   deallocate(deBlockList)
 !BOE
-! This closes the LR patch along the first dimension on itself, thus imposing
+! This closes the patch along the first dimension on itself, thus imposing
 ! periodic boundaries along this direction.
 !EOE
 
 !BOE
-! \subsubsection{2D DistGrid with patchwork LR domain and regular
-!    decomposition}
+! \subsubsection{2D patchwork DistGrid with regular decomposition}
 ! 
 ! Creating a DistGrid from a list of LR domains is a straight forward
 ! extension of the case with a single LR domain. The first four 
