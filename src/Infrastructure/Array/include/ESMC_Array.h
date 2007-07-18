@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.65 2007/07/18 20:43:38 theurich Exp $
+// $Id: ESMC_Array.h,v 1.66 2007/07/18 21:02:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -63,23 +63,23 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     //todo: in order to allow one-sided access to their data...
     // for now only keep PET-local LocalArray pointers here
     // PET-local information
-    ESMC_LocalArray **larrayList;
-    void **larrayBaseAddrList;
-    int *exclusiveLBound;
-    int *exclusiveUBound;
-    int *computationalLBound;
-    int *computationalUBound;
-    int *totalLBound;
-    int *totalUBound;
+    ESMC_LocalArray **larrayList;     // [localDeCount]
+    void **larrayBaseAddrList;        // [localDeCount]
+    int *exclusiveLBound;             // [dimCount*localDeCount]
+    int *exclusiveUBound;             // [dimCount*localDeCount]
+    int *computationalLBound;         // [dimCount*localDeCount]
+    int *computationalUBound;         // [dimCount*localDeCount]
+    int *totalLBound;                 // [dimCount*localDeCount]
+    int *totalUBound;                 // [dimCount*localDeCount]
     int tensorCount;
-    int *lbounds;
-    int *ubounds;
-    int *staggerLoc;
-    int *vectorDim;
-    int *dimmap;
-    int *inverseDimmap;
-    int *contiguousFlag;
-    int *deCellCount;
+    int *lbounds;                     // [tensorCount]
+    int *ubounds;                     // [tensorCount]
+    int *staggerLoc;                  // [tensorCount]
+    int *vectorDim;                   // [tensorCount]
+    int *dimmap;                      // [dimCount]
+    int *inverseDimmap;               // [rank]
+    int *contiguousFlag;              // [localDeCount]
+    int *deCellCount;                 // [deCount] number of cells in total reg.
     // lower level object references
     DistGrid *distgrid;
     DELayout *delayout;
