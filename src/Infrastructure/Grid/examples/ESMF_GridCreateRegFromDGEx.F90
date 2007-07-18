@@ -1,5 +1,5 @@
 
-! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.1 2007/06/25 18:28:09 cdeluca Exp $
+! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.2 2007/07/18 21:45:31 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ program ESMF_GridCreateEx
       type(ESMF_DistGrid) :: distgrid2D
       real(ESMF_KIND_R8), pointer :: coordsX(:,:),coordsY(:,:)
       integer :: gridSize(2)
-
+      type(ESMF_Grid) :: grid2D
 !EOC         
 
       ! initialize ESMF
@@ -58,8 +58,8 @@ program ESMF_GridCreateEx
 !EOE
 !BOC
 
-      distgrid2D = ESMF_DistGridCreate( minCorner=(/1,1/),      &
-                          maxCorner=(/gridSize(1),gridSize(2)/),     &
+      distgrid2D = ESMF_DistGridCreate(minIndex=(/1,1/),      &
+                          maxIndex=(/gridSize(1),gridSize(2)/),     &
                           rc=rc)  
 !EOC
 
@@ -69,15 +69,15 @@ program ESMF_GridCreateEx
 
 !BOC 
      Grid2D=ESMF_GridCreate(name="Simple 2D Regular", &
-               distgrid=distgrid2D, staggerLocs, rc=rc)
+               distgrid=distgrid2D, rc=rc)
 !EOC  
 
 !BOE
 ! Set the one stagger location as center. 
 !EOE
 !BOC
-   call ESMF_GridSetCoord(Grid2D, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-          rc=rc)
+   call ESMF_GridAllocCoord(Grid2D, coord=1, &
+          staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
 !EOC
 
 
