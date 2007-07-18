@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.23 2007/07/14 04:44:49 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.24 2007/07/18 18:18:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -54,29 +54,23 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
   private:
     int dimCount;                 // rank of DistGrid
     int patchCount;               // number of patches in DistGrid
-    int *patchCellCount;          // number of cells for each patch
-    int *dePatchList;             // patch index per DE
-    int *minIndex;                // minIndex for all patches
-    int *maxIndex;                // maxIndex for all patches
-    int *deCellCount;             // number of cells for each DE
-    int *dimContigFlag;           // flag contiguous indices by DE per dim
-    int *dimExtent;               // extent of indexList held by DE per dim
-    int **localIndexList;         // indices held by local DEs per dim
+    int *patchCellCount;          // number of cells [patchCount]
+    int *dePatchList;             // patch index [deCount]
+    int *minIndex;                // minIndex for [dimCount*patchCount]
+    int *maxIndex;                // maxIndex for [dimCount*patchCount]
+    int *deCellCount;             // number of cells [deCount]
+    int *dimContigFlag;           // flag contiguous indices [dimCount*deCount]
+    int *dimExtent;               // extent of indexList [dimCount*deCount]
+    int **localIndexList;         // local DEs' indices [dimCount*localDeCount]
+                                  // [dimExtent(localDe,dim)]
     ESMC_Logical regDecompFlag;   // flag indicating regular decomposition
     int **connectionList;         // list of connection elements
     int connectionCount;          // number of elements in connection list
-    int *localArbSeqIndexCount;   // number of arb sequence indices per localDe
+    int *localArbSeqIndexCount;   // number of arb seq. indices [localDeCount]
     int **localArbSeqIndexList;   // local arb sequence indices per localDe
-    // lower level objects
+    // lower level object references
     DELayout *delayout;
     VM *vm;    
-    // cached values from DELayout
-    int deCount;
-    int localDeCount;
-    int *localDeList;
-    // cached values from VM
-    int localPet;
-    int petCount;
         
   private:
     // construct() and destruct()

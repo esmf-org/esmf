@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.24 2007/07/14 04:44:51 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.25 2007/07/18 18:18:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.24 2007/07/14 04:44:51 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.25 2007/07/18 18:18:32 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -104,7 +104,7 @@ DistGrid *DistGrid::create(
      return ESMC_NULL_POINTER;
   }
 
-  // check the input and get the information together to call DistGridConstruct
+  // check the input and get the information together to call construct()
   if (minIndex == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to minIndex array", rc);
@@ -255,8 +255,8 @@ DistGrid *DistGrid::create(
     }
   }
   
-  // setup temporary dimExtent and localIndexList arrays for DistGridConstruct()
-  // also setup temporary dimCongtigFlag array for DistGridConstruct()
+  // setup temporary dimExtent and localIndexList arrays for construct()
+  // also setup temporary dimCongtigFlag array for construct()
   int localDeCount = delayout->getLocalDeCount();
   int *deList = delayout->getDeList();
   int *dimExtent = new int[dimCount*deCount];
@@ -454,7 +454,7 @@ DistGrid *DistGrid::create(
      return ESMC_NULL_POINTER;
   }
 
-  // check the input and get the information together to call DistGridConstruct
+  // check the input and get the information together to call construct()
   if (minIndex == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to minIndex array", rc);
@@ -578,8 +578,8 @@ DistGrid *DistGrid::create(
     }
   }
   
-  // setup temporary dimExtent and localIndexList arrays for DistGridConstruct()
-  // also setup temporary dimCongtigFlag array for DistGridConstruct()
+  // setup temporary dimExtent and localIndexList arrays for construct()
+  // also setup temporary dimCongtigFlag array for construct()
   int localDeCount = delayout->getLocalDeCount();
   int *deList = delayout->getDeList();
   int *dimExtent = new int[dimCount*deCount];
@@ -694,7 +694,8 @@ DistGrid *DistGrid::create(
     return distgrid;
   
   // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  //if (rc!=NULL) *rc = ESMF_SUCCESS; TODO: override ESMC_RC_NOT_IMPL
+  
   return distgrid;
 }
 //-----------------------------------------------------------------------------
@@ -750,7 +751,7 @@ DistGrid *DistGrid::create(
      return ESMC_NULL_POINTER;
   }
 
-  // check the input and get the information together to call DistGridConstruct
+  // check the input and get the information together to call construct()
   if (minIndex == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to minIndex array", rc);
@@ -935,8 +936,8 @@ DistGrid *DistGrid::create(
     }
   }
     
-  // setup temporary dimExtent and localIndexList arrays for DistGridConstruct()
-  // also setup temporary dimCongtigFlag array for DistGridConstruct()
+  // setup temporary dimExtent and localIndexList arrays for construct()
+  // also setup temporary dimCongtigFlag array for construct()
   int localDeCount = delayout->getLocalDeCount();
   int *deList = delayout->getDeList();
   int *dimExtent = new int[dimCount*deCount];
@@ -1246,21 +1247,18 @@ int DistGrid::construct(
   }
   delayout = delayoutArg;
   vm = vmArg;
-  // fill in cached values
-  deCount = delayout->getDeCount();
-  localDeCount = delayout->getLocalDeCount();
-  localDeList = delayout->getLocalDeList();
-  localPet = vm->getMypet();
-  petCount = vm->getNpets();
   // fill in the rest
   minIndex = new int[dimCount*patchCount];
   memcpy(minIndex, minIndexArg, sizeof(int)*dimCount*patchCount);
   maxIndex = new int[dimCount*patchCount];
   memcpy(maxIndex, maxIndexArg, sizeof(int)*dimCount*patchCount);
+  int deCount = delayout->getDeCount();
   dimContigFlag = new int[dimCount*deCount];
   memcpy(dimContigFlag, dimContigFlagArg, sizeof(int)*dimCount*deCount);
   dimExtent = new int[dimCount*deCount];
   memcpy(dimExtent, dimExtentArg, sizeof(int)*dimCount*deCount);
+  int localDeCount = delayout->getLocalDeCount();
+  const int *localDeList = delayout->getLocalDeList();
   localIndexList = new int*[dimCount*localDeCount];
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
@@ -1336,6 +1334,7 @@ int DistGrid::destruct(void){
   delete [] dePatchList;
   delete [] deCellCount;
   delete [] dimContigFlag;
+  int localDeCount = delayout->getLocalDeCount();
   for (int i=0; i<dimCount*localDeCount; i++)
     delete [] localIndexList[i];
   delete [] localIndexList;
@@ -1406,6 +1405,7 @@ int DistGrid::print()const{
   printf("\n");
   printf("regDecompFlag = %s\n", ESMC_LogicalString(regDecompFlag));
   printf("dePatchList: ");
+  int deCount = delayout->getDeCount();
   for (int i=0; i<deCount; i++)
     printf("%d ", dePatchList[i]);
   printf("\n");
@@ -1414,6 +1414,8 @@ int DistGrid::print()const{
     printf("%d ", deCellCount[i]);
   printf("\n");
   printf("localIndexList (dims separated by / ):\n");
+  int localDeCount = delayout->getLocalDeCount();
+  const int *localDeList = delayout->getLocalDeList();
   for (int i=0; i<localDeCount; i++){
     printf(" for localDE %d - DE %d: ", i, localDeList[i]);
     for (int j=0; j<dimCount; j++){
@@ -1443,8 +1445,8 @@ int DistGrid::print()const{
   printf("connectionCount = %d\n", connectionCount);
   printf("~ cached values ~\n");
   printf("deCount = %d\n", deCount);
-  printf("localPet = %d\n", localPet);
-  printf("petCount = %d\n", petCount);
+  printf("localPet = %d\n", vm->getLocalPet());
+  printf("petCount = %d\n", vm->getPetCount());
   printf("--- ESMCI::DistGrid::print end ---\n");
 
   // return successfully
@@ -1524,6 +1526,7 @@ int DistGrid::getDimContigFlag(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
   
   // check input
+  int deCount = delayout->getDeCount();
   if (de < 0 || de > deCount-1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
       "- Specified DE out of bounds", rc);
@@ -1569,6 +1572,7 @@ int DistGrid::getDeCellCount(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
   
   // check input
+  int deCount = delayout->getDeCount();
   if (de < 0 || de > deCount-1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
       "- Specified DE out of bounds", rc);
@@ -1611,6 +1615,7 @@ int DistGrid::getSequenceIndex(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
   // check input
+  int localDeCount = delayout->getLocalDeCount();
   if (localDe < 0 || localDe > localDeCount-1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
       "- Specified local DE out of bounds", rc);
@@ -1628,6 +1633,7 @@ int DistGrid::getSequenceIndex(
     seqindex = localArbSeqIndexList[localDe][linExclusiveIndex];
   }else{
     // determine the sequentialized index by construction of default patch rule
+    const int *localDeList = delayout->getLocalDeList();
     int patch = dePatchList[localDeList[localDe]];  // patches are basis 1 !!!!
     // add up cells from patch in which DE is located
     seqindex =
@@ -1757,6 +1763,7 @@ const int *DistGrid::getLocalIndexList(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
   // check input
+  int localDeCount = delayout->getLocalDeCount();
   if (localDe < 0 || localDe > localDeCount-1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
       "- Specified local DE out of bounds", rc);
@@ -1857,10 +1864,10 @@ int DistGrid::serialize(
   *ip++ = dimCount;
   *ip++ = patchCount;
   *ip++ = connectionCount;
-  *ip++ = deCount;
   lp = (ESMC_Logical *)ip;
   *lp++ = regDecompFlag;
   
+  int deCount = delayout->getDeCount();
   // serialize array members
   ip = (int *)lp;
   for (int i=0; i<patchCount; i++)
@@ -1931,21 +1938,17 @@ DistGrid *DistGrid::deserialize(
     a->dimCount = *ip++;
     a->patchCount = *ip++;
     a->connectionCount = *ip++;
-    a->deCount = *ip++;
     lp = (ESMC_Logical *)ip;
     a->regDecompFlag = *lp++;
-    
-    // set scalars that must be reset here
-    a->localPet = -1;   // reset
-    a->petCount = -1;   // reset
-    
+        
+    int deCount = a->delayout->getDeCount();
     // deserialize array members
     ip = (int *)lp;
     a->patchCellCount = new int[a->patchCount];
     for (int i=0; i<a->patchCount; i++)
       a->patchCellCount[i] = *ip++;
-    a->dePatchList = new int[a->deCount];
-    for (int i=0; i<a->deCount; i++)
+    a->dePatchList = new int[deCount];
+    for (int i=0; i<deCount; i++)
       a->dePatchList[i] = *ip++;
     a->minIndex = new int[a->dimCount*a->patchCount];
     for (int i=0; i<a->dimCount*a->patchCount; i++)
@@ -1953,8 +1956,8 @@ DistGrid *DistGrid::deserialize(
     a->maxIndex = new int[a->dimCount*a->patchCount];
     for (int i=0; i<a->dimCount*a->patchCount; i++)
       a->maxIndex[i] = *ip++;
-    a->dimExtent = new int[a->dimCount*a->deCount];
-    for (int i=0; i<a->dimCount*a->deCount; i++)
+    a->dimExtent = new int[a->dimCount*deCount];
+    for (int i=0; i<a->dimCount*deCount; i++)
       a->dimExtent[i] = *ip++;
     
     cp = (char *)ip;
@@ -2113,6 +2116,7 @@ int DistGrid::setArbSeqIndex(
   //      2) The routine assumes special case 1 DE per PET.
   
   // check that the conditions are met for this routine to make sense
+  int localDeCount = delayout->getLocalDeCount();
   if (localDeCount != 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
       "- This routine is only implemented for 1 DE per PET case", &rc);
@@ -2130,6 +2134,7 @@ int DistGrid::setArbSeqIndex(
       "- arbSeqIndex array must be of rank 1", &rc);
     return rc;
   }
+  const int *localDeList = delayout->getLocalDeList();
   if (arbSeqIndex->extent[0] != deCellCount[localDeList[0]]){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
       "- arbSeqIndex array must supply one value for each cell in local DE",
