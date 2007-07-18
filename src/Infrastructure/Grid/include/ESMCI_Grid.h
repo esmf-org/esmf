@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.7 2007/07/15 05:56:03 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.8 2007/07/18 05:58:02 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,21 +69,37 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   
   int distRank;
   int *dimmap;    // size of dimmap = distRank, entries are 0-based
-  
+
   int undistRank;
   int *lbounds; // size of lbounds = undistRank
   int *ubounds; // size of ubounds = undistRank
   int *undistDimmap; // size of ubounds = undistRank, entries are 0-based
   
   int rank;
+  // User info about coord ranks and dimmap
   int *coordRanks; // size of coordRanks = rank
-  int **coordDimMap; // size of coordDimMap = rankxrank  [coord][dim of coord array]
+  int **coordDimMap; // size of coordDimMap = rankxrank  [coord][dim of coord array], 1-based
+
+  // grid internal information about coord map to distgrid 
+  int *coordDistRank; // size = rank, entries are 0-based
+  int **coordDistDimMap; // size = rankxdistRank, entries are 0-based
+
+  // grid internal information about coord map to tensor bounds 
+  int *coordUndistRank; // size = rank, entries are 0-based
+  int **coordUndistDimMap; // size = rankxundistRank, entries are 0-based
   
   int staggerLocCount;
   Array ***coordArrayList; // size of coordArrayList = staggerLocCountxrank [staggerLoc][coord]
   int   ***coordAlignList;     // hold alignment info [staggerloc][coord][dim]
   bool  **didIAllocList;        // if true, I allocated this Array [staggerloc][coord]
   
+  bool **isDist; // size of isDist = rankxrank  [coord][dim of coord array], 1-based
+  int **mapDim;  // size of mapDim = rankxrank  [coord][dim of coord array], 1-based
+
+  // size of localDE each bit says if that dimension is on a boundary
+  char *isDELBnd;
+  char *isDEUBnd;
+
   int gridType;
   ESMC_IndexFlag indexflag;
   DistGrid *distgrid;
@@ -96,7 +112,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   const int getRank(void) const {return rank;}
   const int getDistRank(void) const {return distRank;}
   const int getUndistRank(void) const {return undistRank;}
-  const int getTileCount(void) const {return 1;}
+  const int getTileCount(void) const {return distgrid->getPatchCount();}
   const int getStaggerLocCount(void) const {return staggerLocCount;}
   const int getGridType(void) const {return gridType;}
   const ESMC_IndexFlag getIndexFlag(void) const {return indexflag;}
@@ -104,11 +120,18 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   const DistGrid *getDistGrid(void) const {return distgrid;}
   const int *getDimMap(void) const {return dimmap;}
   const int *getUndistDimMap(void) const {return undistDimmap;}
+  const int *getCoordDistRank(void) const {return coordDistRank;} 
+        int **getCoordDistDimMap(void) const {return coordDistDimMap;} 
+  const int *getCoordUndistRank(void) const {return coordUndistRank;} 
+        int **getCoordUndistDimMap(void) const {return coordUndistDimMap;} 
   const int *getLbounds(void) const {return lbounds;}
   const int *getUbounds(void) const {return ubounds;}
   const int *getCoordRanks(void) const {return coordRanks;}
-  int **getCoordDimMap(void) const {return coordDimMap;}
+        int **getCoordDimMap(void) const {return coordDimMap;}
   const char *getName(void)  const {return ESMC_BaseGetName();}
+        bool **getIsDist(void) const {return isDist;} 
+        int  **getMapDim(void) const {return mapDim;} 
+
 
   // Set Grid default values
   friend void  _GridSetDefaults(Grid *grid);
@@ -207,6 +230,15 @@ int GridSetFromDistGrid(
  
 Grid *GridCreateEmpty(int *_rc);
 
+
+int gridAllocCoord(
+		   Grid *_grid, 
+		   int *_staggerloc,
+		   int *_coord,
+		   InterfaceInt *_coordLWidthArg,
+		   InterfaceInt *_coordUWidthArg,
+		   InterfaceInt *_coordAlign
+		   );
 
 int gridSetCoordFromArray(
   Grid *_grid, 

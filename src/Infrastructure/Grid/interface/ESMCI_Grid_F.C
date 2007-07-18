@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.7 2007/07/15 17:57:21 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.8 2007/07/18 05:58:02 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -122,6 +122,7 @@ extern "C" {
 			   ESMCI::InterfaceInt **_coordDimMap,		  
 			   ESMC_IndexFlag *_indexflag,
 			   int *_gridtype,
+                           int *_localDECount, int *_distRank, int *_undistRank, 
 			   int *_rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridget()"
@@ -155,6 +156,18 @@ extern "C" {
     // rank
     if (ESMC_NOT_PRESENT_FILTER(_rank) != ESMC_NULL_POINTER)
       *_rank = rank;
+
+    // distrank
+    if (ESMC_NOT_PRESENT_FILTER(_distRank) != ESMC_NULL_POINTER)
+      *_distRank = distRank;
+
+    // undistrank
+    if (ESMC_NOT_PRESENT_FILTER(_undistRank) != ESMC_NULL_POINTER)
+      *_undistRank = undistRank;
+
+    // undistrank
+    if (ESMC_NOT_PRESENT_FILTER(_localDECount) != ESMC_NULL_POINTER)
+      *_localDECount = grid->getDistGrid()->getDELayout()->getLocalDeCount();
 
     // tileCount
     if (ESMC_NOT_PRESENT_FILTER(_tileCount) != ESMC_NULL_POINTER)
@@ -301,6 +314,33 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
+  void FTN(c_esmc_gridalloccoord)(ESMCI::Grid **grid, 
+                                         int *staggerloc, 
+                                         int *coord, 
+                                         ESMCI::InterfaceInt **coordLWidthArg, 
+                                         ESMCI::InterfaceInt **coordUWidthArg, 
+                                         ESMCI::InterfaceInt **coordAlignArg, 
+                                         int *rc) {
+    int localrc;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridalloccoord()"
+
+    //Initialize return code
+    localrc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    localrc= ESMCI::gridAllocCoord(*grid, ESMC_NOT_PRESENT_FILTER(staggerloc),
+      ESMC_NOT_PRESENT_FILTER(coord), *coordLWidthArg, *coordUWidthArg, *coordAlignArg);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+}
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
+
   ///////////////////////////////////////////////////////////////////////////////////
 
   void FTN(c_esmc_gridsetcoordfromarray)(ESMCI::Grid **grid, 
@@ -371,6 +411,8 @@ extern "C" {
 					int *_localDE, int *_staggerloc,  
                                         ESMCI::InterfaceInt **_exclusiveLBound,
                                         ESMCI::InterfaceInt **_exclusiveUBound,
+                                        ESMCI::InterfaceInt **_staggerLBound,
+                                        ESMCI::InterfaceInt **_staggerUBound,
                                         ESMCI::InterfaceInt **_computationalLBound,
                                         ESMCI::InterfaceInt **_computationalUBound,
                                         ESMCI::InterfaceInt **_totalLBound, 
@@ -381,7 +423,10 @@ extern "C" {
     int localrc;
     int distRank,undistRank,rank;
     int tile, coord,localDE,staggerloc;
-    const int *dimmap,*undistDimmap,*arrayLbounds,*arrayUbounds;
+    int *distDimMap,*undistDimMap;
+    const int *arrayLbounds,*arrayUbounds;
+    const int *coordDistRank, *coordUndistRank;
+          int **coordDistDimMap, **coordUndistDimMap;
     const int *arrayBnd;
     ESMCI::Grid *grid;
     ESMCI::Array *array;
@@ -394,11 +439,12 @@ extern "C" {
     if (_rc!=NULL) *_rc = ESMC_RC_NOT_IMPL;
 
     // get some useful info
-    distRank=grid->getDistRank();
-    undistRank=grid->getUndistRank();
     rank = grid->getRank();
-    dimmap=grid->getDimMap();
-    undistDimmap=grid->getUndistDimMap();
+    coordDistRank=grid->getCoordDistRank();
+    coordDistDimMap=grid->getCoordDistDimMap();
+    coordUndistRank=grid->getCoordUndistRank();
+    coordUndistDimMap=grid->getCoordUndistDimMap();
+
 
     // coord
     if (ESMC_NOT_PRESENT_FILTER(_coord) == ESMC_NULL_POINTER) {
@@ -413,7 +459,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(_localDE) == ESMC_NULL_POINTER) {
       localDE=0;
     } else {
-      localDE=*_localDE; // convert to 0 based ???
+      localDE=*_localDE; // already 0 based 
     }
 
 
@@ -426,7 +472,7 @@ extern "C" {
 
 
     // Input Error Checking
-    if ((localDE < 0) || (localDE >= grid->getDistGrid()->getDELayout()->getLocalDeCount())) {
+    if ((localDE < 0) || (localDE >=grid->getDistGrid()->getDELayout()->getLocalDeCount())) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
           "- localDE outside range on this processor", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
@@ -449,6 +495,16 @@ extern "C" {
           "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     }
+
+    // Get relavent information from ranks and dimmap
+   distRank=coordDistRank[coord];
+   distDimMap=coordDistDimMap[coord];
+   undistRank=coordUndistRank[coord];
+   if (undistRank>0) {
+       undistDimMap=coordUndistDimMap[coord];
+   } else {
+     undistDimMap=ESMC_NULL_POINTER;
+   }
 
 
     // Get Array From Grid
@@ -482,11 +538,11 @@ extern "C" {
 
       // Fill in the output array
       for (int i=0; i<distRank; i++){
-	(*_exclusiveLBound)->array[dimmap[i]]=arrayBnd[i];
+	(*_exclusiveLBound)->array[distDimMap[i]]=arrayBnd[i];
       }
 
       for (int i=0; i<undistRank; i++){
-	(*_exclusiveLBound)->array[undistDimmap[i]]=arrayLbounds[i];
+	(*_exclusiveLBound)->array[undistDimMap[i]]=arrayLbounds[i];
       }
     }
 
@@ -512,11 +568,73 @@ extern "C" {
 
       // Fill in the output array
       for (int i=0; i<distRank; i++){
-	(*_exclusiveUBound)->array[dimmap[i]]=arrayBnd[i];
+	(*_exclusiveUBound)->array[distDimMap[i]]=arrayBnd[i];
       }
 
       for (int i=0; i<undistRank; i++){
-	(*_exclusiveUBound)->array[undistDimmap[i]]=arrayUbounds[i];
+	(*_exclusiveUBound)->array[undistDimMap[i]]=arrayUbounds[i];
+      }
+    }
+
+
+    // fill staggerLBound
+    if (*_staggerLBound != NULL){
+      // staggerLBound was provided -> do some error checking
+      if ((*_staggerLBound)->dimCount != 1){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+          "- staggerLBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+      if ((*_staggerLBound)->extent[0] < rank){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- staggerLBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+
+      // now that we have the array get the stagger bounds of the localDE
+      arrayBnd=array->getExclusiveLBound()+localDE*distRank;
+      arrayLbounds=array->getLBounds();
+
+      // When we get the staggerbound stuff working then re-add it here
+
+      // Fill in the output array
+      for (int i=0; i<distRank; i++){
+	(*_staggerLBound)->array[distDimMap[i]]=arrayBnd[i];
+      }
+
+      for (int i=0; i<undistRank; i++){
+	(*_staggerLBound)->array[undistDimMap[i]]=arrayLbounds[i];
+      }
+    }
+
+
+    // fill staggerUBound
+    if (*_staggerUBound != NULL){
+      // staggerUBound was provided -> do some error checking
+      if ((*_staggerUBound)->dimCount != 1){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+          "- staggerUBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+      if ((*_staggerUBound)->extent[0] < rank){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- staggerUBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+
+      // now that we have the array get the stagger bounds of the localDE
+      arrayBnd=array->getExclusiveUBound()+localDE*distRank;
+      arrayUbounds=array->getUBounds();
+
+      // When we get the staggerbound stuff working then re-add it here
+
+      // Fill in the output array
+      for (int i=0; i<distRank; i++){
+	(*_staggerUBound)->array[distDimMap[i]]=arrayBnd[i];
+      }
+
+      for (int i=0; i<undistRank; i++){
+	(*_staggerUBound)->array[undistDimMap[i]]=arrayUbounds[i];
       }
     }
 
@@ -542,11 +660,11 @@ extern "C" {
 
       // Fill in the output array
       for (int i=0; i<distRank; i++){
-	(*_computationalLBound)->array[dimmap[i]]=arrayBnd[i];
+	(*_computationalLBound)->array[distDimMap[i]]=arrayBnd[i];
       }
 
       for (int i=0; i<undistRank; i++){
-	(*_computationalLBound)->array[undistDimmap[i]]=arrayLbounds[i];
+	(*_computationalLBound)->array[undistDimMap[i]]=arrayLbounds[i];
       }
     }
 
@@ -572,11 +690,11 @@ extern "C" {
 
       // Fill in the output array
       for (int i=0; i<distRank; i++){
-	(*_computationalUBound)->array[dimmap[i]]=arrayBnd[i];
+	(*_computationalUBound)->array[distDimMap[i]]=arrayBnd[i];
       }
 
       for (int i=0; i<undistRank; i++){
-	(*_computationalUBound)->array[undistDimmap[i]]=arrayUbounds[i];
+	(*_computationalUBound)->array[undistDimMap[i]]=arrayUbounds[i];
       }
     }
 
@@ -601,11 +719,11 @@ extern "C" {
 
       // Fill in the output array
       for (int i=0; i<distRank; i++){
-	(*_totalLBound)->array[dimmap[i]]=arrayBnd[i];
+	(*_totalLBound)->array[distDimMap[i]]=arrayBnd[i];
       }
 
       for (int i=0; i<undistRank; i++){
-	(*_totalLBound)->array[undistDimmap[i]]=arrayLbounds[i];
+	(*_totalLBound)->array[undistDimMap[i]]=arrayLbounds[i];
       }
     }
 
@@ -629,11 +747,11 @@ extern "C" {
 
       // Fill in the output array
       for (int i=0; i<distRank; i++){
-	(*_totalUBound)->array[dimmap[i]]=arrayBnd[i];
+	(*_totalUBound)->array[distDimMap[i]]=arrayBnd[i];
       }
 
       for (int i=0; i<undistRank; i++){
-	(*_totalUBound)->array[undistDimmap[i]]=arrayUbounds[i];
+	(*_totalUBound)->array[undistDimMap[i]]=arrayUbounds[i];
       }
     }
 
