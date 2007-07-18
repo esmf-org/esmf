@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.3 2007/07/18 00:28:57 donstark Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.4 2007/07/18 17:09:34 donstark Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -483,7 +483,7 @@ program ESMF_GridCreateEx
 ! that dimension.
 !
 ! The next example demostrates how to specify the PET to DE association 
-! for the previous ESMF_GridCreateShape example.
+! for the previous ESMF\_GridCreateShape example.
 !EOE
 
 !BOC
@@ -761,7 +761,9 @@ Index Space Dimensions}
 ! one of the predefined stagger locations.
 !EOE
 
+!BOCI
    grid2D=ESMF_GridCreateEmpty( rc=rc )
+!EOCI
 
 !BOC 
    call ESMF_GridAllocCoord(grid2D, staggerLoc=ESMF_STAGGER_CORNER, rc=rc)
@@ -799,9 +801,9 @@ Index Space Dimensions}
 ! data from an Array. For example, the following sets the 
 ! first component (e.g. x) coordinates for the center stagger location to 
 ! those in the array coordX.
-! EOE
+!EOE
 
-   grid2D=ESMF_GridCreateEmpty( rc=rc )
+   grid2D=ESMF_GridCreateEmpty( rc=rc )  
 
 !BOC
    call ESMF_GridSetCoord(grid2D, &
