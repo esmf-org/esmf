@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.77 2007/05/09 02:48:28 rosalind Exp $
+// $Id: ESMC_LogErr.C,v 1.78 2007/07/18 05:11:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,6 +36,8 @@
 // include array of error messages
 #include "ESMC_ErrMsgs.C"
 
+#define ESMC_SUCCESSDEFAULT_ON
+
 //Global Variables
 ESMC_Log ESMC_LogDefault;
 FILE* logErrCFilePtr[10];
@@ -48,7 +50,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.77 2007/05/09 02:48:28 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.78 2007/07/18 05:11:48 theurich Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -368,7 +370,9 @@ bool ESMC_Log::ESMC_LogFoundError(
 //EOP
 {
     bool result=false;
+#ifdef ESMC_SUCCESSDEFAULT_ON
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
+#endif
     if (rcToCheck!=ESMF_SUCCESS){
       int i;
       for (i=0; i<errorMaskCount; i++)
@@ -408,7 +412,9 @@ bool ESMC_Log::ESMC_LogFoundError(
 //EOP
 {
     bool result=false;
+#ifdef ESMC_SUCCESSDEFAULT_ON
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
+#endif
     if (rcToCheck!=ESMF_SUCCESS){
       int i;
       for (i=0; i<errorMaskCount; i++)
@@ -446,7 +452,9 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
 //EOP
 {
     bool result=false;
+#ifdef ESMC_SUCCESSDEFAULT_ON
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
+#endif
     if (rcToCheck!=ESMF_SUCCESS){
       int i;
       for (i=0; i<errorMaskCount; i++)
@@ -488,7 +496,9 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
 //EOP
 {
     bool result=false;
+#ifdef ESMC_SUCCESSDEFAULT_ON
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
+#endif
     if (rcToCheck!=ESMF_SUCCESS){
       int i;
       for (i=0; i<errorMaskCount; i++)
