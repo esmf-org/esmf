@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.50 2007/07/18 05:58:03 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.51 2007/07/18 16:50:14 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.50 2007/07/18 05:58:03 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.51 2007/07/18 16:50:14 samsoncheung Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -254,7 +254,7 @@ program ESMF_GridCreateUTest
 #if 0
   ! BETTER VERSION OF ABOVE WHEN ARRAY FACTORIZATION WORKS
   !-----------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX__ UTest
   write(name, *) "Creating a Grid with non-default coordRanks"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
@@ -312,7 +312,7 @@ program ESMF_GridCreateUTest
 #if 0
   ! Better version of above when array factorization works
   !-----------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX__ UTest
   write(name, *) "Creating a Grid with non-default coordDimMap"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
@@ -587,7 +587,7 @@ program ESMF_GridCreateUTest
 #if 0
   ! Better version of above when Array factorization works
   !-----------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX__ UTest
   write(name, *) "Creating a Grid with non-default coordDeps"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
