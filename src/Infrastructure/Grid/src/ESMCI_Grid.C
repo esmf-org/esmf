@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.8 2007/07/18 05:58:02 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.9 2007/07/18 23:05:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMCI_Grid.C,v 1.8 2007/07/18 05:58:02 oehmke Exp $";
+  static const char *const version = "$Id: ESMCI_Grid.C,v 1.9 2007/07/18 23:05:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -197,14 +197,14 @@ static  void _free3D(Type ****array)
     const int *localDEList=delayout->getLocalDeList();
    
     // Get map between DEs and patches
-    const int *DEPatchList = distgrid->getDePatchList();
+    const int *DEPatchList = distgrid->getPatchListPDe();
 
     // Get list of patch min and maxs
-    const int *patchMinIndexList = distgrid->getMinIndex();
-    const int *patchMaxIndexList = distgrid->getMaxIndex();
+    const int *patchMinIndexList = distgrid->getMinIndexPDimPPatch();
+    const int *patchMaxIndexList = distgrid->getMaxIndexPDimPPatch();
 
     // Get Extents of index lists
-    const int *deIndexListExtentList=distgrid->getDimExtent();
+    const int *deIndexListExtentList=distgrid->getIndexCountPDimPDe();
 
     // allocate Bnds
     isDELBnd=new char[localDECount];
@@ -223,10 +223,10 @@ static  void _free3D(Type ****array)
       const int *deExtent=deIndexListExtentList+gDE*dimCount;
 
       //// get patch min/max
-      const int *patchMin=distgrid->getMinIndex(patch, &localrc);
+      const int *patchMin=distgrid->getMaxIndexPDimPPatch(patch, &localrc);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
 			      ESMF_ERR_PASSTHRU, &rc)) return rc;
-      const int *patchMax=distgrid->getMaxIndex(patch, &localrc);
+      const int *patchMax=distgrid->getMaxIndexPDimPPatch(patch, &localrc);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
 			      ESMF_ERR_PASSTHRU, &rc)) return rc;
 
@@ -238,7 +238,7 @@ static  void _free3D(Type ****array)
       for (int d=0; d<dimCount; d++) {
 
 	////// make sure is contiguous         
-	const int contig=distgrid->getDimContigFlag(gDE, d+1, &localrc);
+	const int contig=distgrid->getContigFlagPDimPDe(gDE, d+1, &localrc);
 	if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
 			      ESMF_ERR_PASSTHRU, &rc)) return rc;
 	if (!contig) {
@@ -248,7 +248,8 @@ static  void _free3D(Type ****array)
 	}
 
         // get indices of DE
-	const int *indexList=distgrid->getLocalIndexList(lDE, d+1, &localrc);
+	const int *indexList=distgrid->getIndexListPDimPLocalDe(lDE, d+1,
+          &localrc);
 	if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
 			      ESMF_ERR_PASSTHRU, &rc)) return rc;
 

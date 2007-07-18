@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.96 2007/07/18 20:43:39 theurich Exp $
+// $Id: ESMC_Array.C,v 1.97 2007/07/18 23:05:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.96 2007/07/18 20:43:39 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.97 2007/07/18 23:05:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -166,10 +166,10 @@ Array::Array(
   int deCount = delayout->getDeCount();
   deCellCount = new int[deCount];
   
-  const int *dimExtent = distgrid->getDimExtent();
+  const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
   
   for (int i=0; i<deCount; i++){
-    int distGridDeCellCount = distgrid->getDeCellCount(i, &localrc);
+    int distGridDeCellCount = distgrid->getCellCountPDe(i, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
     deCellCount[i] = distGridDeCellCount;  // prime deCellCount element
@@ -194,11 +194,12 @@ Array::Array(
           break;
         }
         // obtain indexList for this DE and dim
-        const int *indexList = distgrid->getLocalIndexList(i, j+1, &localrc);
+        const int *indexList =
+          distgrid->getIndexListPDimPLocalDe(i, j+1, &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           rc)) return;
         // check if this dim has a contiguous index list
-        for (int k=1; k<dimExtent[de*dimCount+j]; k++){
+        for (int k=1; k<indexCountPDimPDe[de*dimCount+j]; k++){
           if (indexList[k] != indexList[k-1]+1){
             contiguousFlag[i] = 0; // reset
             break;
@@ -440,8 +441,8 @@ Array *Array::create(
     return ESMC_NULL_POINTER;
   }
   const int *localDeList = delayout->getLocalDeList();
-  // distgrid -> dimExtent[]
-  const int *dimExtent = distgrid->getDimExtent();
+  // distgrid -> indexCountPDimPDe[]
+  const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
   // check on indexflag
   ESMC_IndexFlag indexflag = ESMF_INDEX_DELOCAL;  // default
   if (indexflagArg != NULL)
@@ -451,10 +452,11 @@ Array *Array::create(
   int *exclusiveUBound = new int[dimCount*localDeCount];
   for (int i=0; i<dimCount*localDeCount; i++)
     exclusiveLBound[i] = 1; // excl. region starts at (1,1,1...) <- Fortran
-  // exlc. region for each DE ends at dimExtent of the associated DistGrid
+  // exlc. region for each DE ends at indexCountPDimPDe of the associated
+  // DistGrid
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
-    memcpy(&(exclusiveUBound[i*dimCount]), &(dimExtent[de*dimCount]),
+    memcpy(&(exclusiveUBound[i*dimCount]), &(indexCountPDimPDe[de*dimCount]),
       dimCount*sizeof(int));
   }
   // optionally shift origin of exclusive region to pseudo global index space
@@ -463,11 +465,12 @@ Array *Array::create(
       int de = localDeList[i];
       for (int j=0; j<dimCount; j++){
         // obtain indexList for this DE and dim
-        const int *indexList = distgrid->getLocalIndexList(i, j+1, &localrc);
+        const int *indexList =
+          distgrid->getIndexListPDimPLocalDe(i, j+1, &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
           return ESMC_NULL_POINTER;
         // check that this dim has a contiguous index list
-        for (int k=1; k<dimExtent[de*dimCount+j]; k++){
+        for (int k=1; k<indexCountPDimPDe[de*dimCount+j]; k++){
           if (indexList[k] != indexList[k-1]+1){
             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
               "- Cannot use non-contiguous decomposition for pseudo global"
@@ -867,8 +870,8 @@ Array *Array::create(
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
   const int *localDeList = delayout->getLocalDeList();
-  // distgrid -> dimExtent[]
-  const int *dimExtent = distgrid->getDimExtent();
+  // distgrid -> indexCountPDimPDe[]
+  const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
   // check on indexflag
   ESMC_IndexFlag indexflag = ESMF_INDEX_DELOCAL;  // default
   if (indexflagArg != NULL)
@@ -878,10 +881,11 @@ Array *Array::create(
   int *exclusiveUBound = new int[dimCount*localDeCount];
   for (int i=0; i<dimCount*localDeCount; i++)
     exclusiveLBound[i] = 1; // excl. region starts at (1,1,1...) <- Fortran
-  // exlc. region for each DE ends at dimExtent of the associated DistGrid
+  // exlc. region for each DE ends at indexCountPDimPDe of the associated
+  // DistGrid
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
-    memcpy(&(exclusiveUBound[i*dimCount]), &(dimExtent[de*dimCount]),
+    memcpy(&(exclusiveUBound[i*dimCount]), &(indexCountPDimPDe[de*dimCount]),
       dimCount*sizeof(int));
   }
   // optionally shift origin of exclusive region to pseudo global index space
@@ -890,11 +894,12 @@ Array *Array::create(
       int de = localDeList[i];
       for (int j=0; j<dimCount; j++){
         // obtain indexList for this DE and dim
-        const int *indexList = distgrid->getLocalIndexList(i, j+1, &localrc);
+        const int *indexList =
+          distgrid->getIndexListPDimPLocalDe(i, j+1, &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
           return ESMC_NULL_POINTER;
         // check that this dim has a contiguous index list
-        for (int k=1; k<dimExtent[de*dimCount+j]; k++){
+        for (int k=1; k<indexCountPDimPDe[de*dimCount+j]; k++){
           if (indexList[k] != indexList[k-1]+1){
             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
               "- Cannot use non-contiguous decomposition for pseudo global"
@@ -1521,13 +1526,15 @@ int Array::scatter(
       "- Specified patch out of bounds", &rc);
     return rc;
   }
-  const int *dePatchList = distgrid->getDePatchList();
+  const int *patchListPDe = distgrid->getPatchListPDe();
 
-  // get minIndex and maxIndex for patch
-  const int *minIndex = distgrid->getMinIndex(patch, &localrc);
+  // get minIndexPDimPPatch and maxIndex for patch
+  const int *minIndexPDimPPatch =
+    distgrid->getMinIndexPDimPPatch(patch, &localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  const int *maxIndex = distgrid->getMaxIndex(patch, &localrc);
+  const int *maxIndexPDimPPatch =
+    distgrid->getMaxIndexPDimPPatch(patch, &localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -1550,7 +1557,7 @@ int Array::scatter(
       if (j){
         // decomposed dimension
         --j;  // shift to basis 0
-        if (counts[i] != maxIndex[j] - minIndex[j] + 1){
+        if (counts[i] != maxIndexPDimPPatch[j] - minIndexPDimPPatch[j] + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
           return rc;
@@ -1576,7 +1583,7 @@ int Array::scatter(
     new vmk_commhandle*[rank]; // used for indexList comm
   
   // distgrid and delayout values
-  const int *dimExtent = distgrid->getDimExtent();
+  const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
   int dimCount = distgrid->getDimCount();
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
@@ -1594,12 +1601,12 @@ int Array::scatter(
     int *iiEnd = new int[rank];
     for (int i=0; i<deCount; i++){
       int de = i;
-      if (dePatchList[de] == patch){
+      if (patchListPDe[de] == patch){
         // this DE is located on receiving patch
         int **indexList = new int*[rank];
         int tensorIndex=0;  // reset
         // get contigFlag for first dimension for this de (dim is basis 1)
-        int contigFlag = distgrid->getDimContigFlag(de, 1, &localrc);
+        int contigFlag = distgrid->getContigFlagPDimPDe(de, 1, &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         int commhListCount = 0;  // reset
@@ -1609,7 +1616,7 @@ int Array::scatter(
             // decomposed dimension 
             --j;  // shift to basis 0
             // obtain indexList for this DE and dim
-            indexList[jj] = new int[dimExtent[de*dimCount+j]];
+            indexList[jj] = new int[indexCountPDimPDe[de*dimCount+j]];
             // check if this DE is local or not            
             if (deList[de] == -1){
               // this DE is _not_ local -> receive indexList from respective Pet
@@ -1617,7 +1624,7 @@ int Array::scatter(
               delayout->getDEMatchPET(de, *vm, NULL, &srcPet, 1);
               commhList[commhListCount] = new vmk_commhandle;
               localrc = vm->vmk_recv(indexList[jj],
-                sizeof(int)*dimExtent[de*dimCount+j], srcPet, 
+                sizeof(int)*indexCountPDimPDe[de*dimCount+j], srcPet, 
                 &(commhList[commhListCount]));
               if (localrc){
                 char *message = new char[160];
@@ -1631,14 +1638,14 @@ int Array::scatter(
             }else{
               // this DE is _is_ local -> look up indexList locally
               const int *localIndexList =
-                distgrid->getLocalIndexList(deList[de], j+1, &localrc);
+                distgrid->getIndexListPDimPLocalDe(deList[de], j+1, &localrc);
               if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
                 ESMF_ERR_PASSTHRU, &rc)) return rc;
               memcpy(indexList[jj], localIndexList, sizeof(int)*
-                dimExtent[de*dimCount+j]);
+                indexCountPDimPDe[de*dimCount+j]);
               // shift basis 1 -> basis 0
-              for (int k=0; k<dimExtent[de*dimCount+j]; k++)
-                indexList[jj][k] -= minIndex[j];
+              for (int k=0; k<indexCountPDimPDe[de*dimCount+j]; k++)
+                indexList[jj][k] -= minIndexPDimPPatch[j];
             }
           }else{
             // tensor dimension
@@ -1661,7 +1668,7 @@ int Array::scatter(
           if (j){
             // decomposed dimension 
             --j;  // shift to basis 0
-            iiEnd[jj] = dimExtent[de*dimCount+j];
+            iiEnd[jj] = indexCountPDimPDe[de*dimCount+j];
           }else{
             // tensor dimension
             iiEnd[jj] = ubounds[tensorIndex] - lbounds[tensorIndex] + 1;
@@ -1737,7 +1744,7 @@ int Array::scatter(
     // localPet is _not_ rootPet -> provide localIndexList to rootPet if nec.
     for (int i=0; i<localDeCount; i++){
       int de = localDeList[i];
-      if (dePatchList[de] == patch){
+      if (patchListPDe[de] == patch){
         // this DE is located on receiving patch -> must send info to rootPet
         int **indexList = new int*[rank];
         for (int jj=0; jj<rank; jj++){
@@ -1746,20 +1753,20 @@ int Array::scatter(
             // decomposed dimension 
             --j;  // shift to basis 0
             // obtain local indexList for this DE and dim
-            indexList[jj] = new int[dimExtent[de*dimCount+j]];
+            indexList[jj] = new int[indexCountPDimPDe[de*dimCount+j]];
             const int *localIndexList =
-              distgrid->getLocalIndexList(i, j+1, &localrc);
+              distgrid->getIndexListPDimPLocalDe(i, j+1, &localrc);
             if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
               ESMF_ERR_PASSTHRU, &rc)) return rc;
             memcpy(indexList[jj], localIndexList, sizeof(int)*
-              dimExtent[de*dimCount+j]);
+              indexCountPDimPDe[de*dimCount+j]);
             // shift basis 1 -> basis 0
-            for (int k=0; k<dimExtent[de*dimCount+j]; k++)
-              indexList[jj][k] -= minIndex[j];
+            for (int k=0; k<indexCountPDimPDe[de*dimCount+j]; k++)
+              indexList[jj][k] -= minIndexPDimPPatch[j];
             // send indexList of local DE to rootPet
             *commh = NULL;  // invalidate
             localrc = vm->vmk_send(indexList[jj],
-              sizeof(int)*dimExtent[de*dimCount+j], rootPet, commh);
+              sizeof(int)*indexCountPDimPDe[de*dimCount+j], rootPet, commh);
             if (localrc){
               char *message = new char[160];
               sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -1789,7 +1796,7 @@ int Array::scatter(
   char **recvBuffer = new char*[localDeCount];
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
-    if (dePatchList[de] != patch) continue; // skip to next local DE
+    if (patchListPDe[de] != patch) continue; // skip to next local DE
     recvBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
     if (!contiguousFlag[i])
       recvBuffer[i] = new char[deCellCount[de]*dataSize];
@@ -1820,7 +1827,7 @@ int Array::scatter(
   // distribute received data into non-contiguous exclusive regions
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
-    if (dePatchList[de] != patch) continue; // skip to next local DE
+    if (patchListPDe[de] != patch) continue; // skip to next local DE
     if (!contiguousFlag[i]){
       // only if this DE has a non-contiguous decomposition the contiguous
       // receive buffer must be copied into DE-local array segment piece by p.
@@ -1910,7 +1917,7 @@ int Array::scatter(
   delete [] recvBuffer;
   if (localPet == rootPet){
     for (int i=0; i<deCount; i++)
-      if (dePatchList[i] == patch)
+      if (patchListPDe[i] == patch)
         delete [] sendBuffer[i];
     delete [] sendBuffer;
   }
@@ -2109,7 +2116,7 @@ int Array::sparseMatMulStore(
   for (int i=0; i<srcLocalDeCount; i++){
     int de = srcLocalDeList[i];  // global DE index
     srcDistGridDeCellCount[i] =
-      srcArray->distgrid->getDeCellCount(de, &localrc);
+      srcArray->distgrid->getCellCountPDe(de, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
     srcCellCount += srcDistGridDeCellCount[i];
@@ -2126,7 +2133,7 @@ int Array::sparseMatMulStore(
   for (int i=0; i<dstLocalDeCount; i++){
     int de = dstLocalDeList[i];  // global DE index
     dstDistGridDeCellCount[i] = 
-      dstArray->distgrid->getDeCellCount(de, &localrc);
+      dstArray->distgrid->getCellCountPDe(de, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
     dstCellCount += dstDistGridDeCellCount[i];
