@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.11 2007/07/18 05:58:02 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.12 2007/07/18 19:58:27 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -136,7 +136,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.11 2007/07/18 05:58:02 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.12 2007/07/18 19:58:27 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -163,7 +163,7 @@ interface ESMF_GridAllocCoord
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_GridAllocCoord} functions.   
 !EOPI 
-end interface ESMF_GridAllocCoord
+end interface
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -182,7 +182,7 @@ interface ESMF_GridCreate
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_GridCreate} functions.   
 !EOPI 
-end interface ESMF_GridCreate
+end interface
 
 
 
@@ -202,7 +202,7 @@ interface ESMF_GridCreateShape
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_GridCreateShape} functions.   
 !EOPI 
-end interface ESMF_GridCreateShape
+end interface
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -221,7 +221,7 @@ interface ESMF_GridGetCoord
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_GridGetCoord} functions.   
 !EOPI 
-end interface ESMF_GridGetCoord
+end interface
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -244,7 +244,7 @@ interface ESMF_GridGetLocalTileCoord
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_GridGetLocalTileCoord} functions.   
 !EOPI 
-end interface ESMF_GridGetLocalTileCoord
+end interface
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -262,7 +262,7 @@ interface ESMF_GridSet
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_GridSet} functions.   
 !EOPI 
-end interface ESMF_GridSet
+end interface
       
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -280,7 +280,7 @@ interface ESMF_GridSetCoord
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_GridSetCoord} functions.   
 !EOPI 
-end interface ESMF_GridSetCoord
+end interface
 
 
 !==============================================================================
