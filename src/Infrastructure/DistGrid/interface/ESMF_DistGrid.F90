@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.24 2007/07/17 21:39:17 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.25 2007/07/18 18:16:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.24 2007/07/17 21:39:17 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.25 2007/07/18 18:16:42 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -207,17 +207,17 @@ contains
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
-!     domain with regular decomposition. A regular decomposition is of the same 
-!     rank as the domain and decomposes each dimension into a fixed number of 
-!     DEs. A regular decomposition of a single LR domain is expressed by a 
+!     patch with regular decomposition. A regular decomposition is of the same 
+!     rank as the patch and decomposes each dimension into a fixed number of 
+!     DEs. A regular decomposition of a single patch is expressed by a 
 !     single {\tt regDecomp} list of DE counts in each dimension.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the global domain.
+!          Global coordinate tuple of the lower corner of the patch.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the global domain.
+!          Global coordinate tuple of the upper corner of the patch.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The default decomposition will
 !          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
@@ -226,7 +226,7 @@ contains
 !          PETs and the distribution will be 1 DE per PET.
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of the
-!          global domain is to be divided between the DEs. The default setting
+!          patch is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. See section ?? for a 
 !          list of valid decomposition flag options.
 !     \item[{[deLabelList]}]
@@ -298,22 +298,21 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status     ! local error status
-    type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt):: minIndexArg ! helper variable
-    type(ESMF_InterfaceInt):: maxIndexArg ! helper variable
-    type(ESMF_InterfaceInt):: regDecompArg ! helper variable
-    type(ESMF_DecompFlag), target:: dummyDf(0)  ! used to satisfy the C interf.
-    type(ESMF_DecompFlag), pointer::  opt_decompflag(:) ! optional arg helper
+    integer                 :: localrc      ! local return code
+    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterfaceInt) :: minIndexArg  ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexArg  ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompArg ! helper variable
+    type(ESMF_DecompFlag), target   :: dummyDf(0)  ! satisfy C interface
+    type(ESMF_DecompFlag), pointer  ::  opt_decompflag(:) ! optional arg helper
     integer                 :: len_decompflag ! helper variable
-    type(ESMF_InterfaceInt):: deLabelListArg ! helper variable
-    type(ESMF_InterfaceInt):: connectionListArg ! helper variable
-    type(ESMF_InterfaceInt):: connectionTransformListArg ! helper variable
+    type(ESMF_InterfaceInt) :: deLabelListArg ! helper variable
+    type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
+    type(ESMF_InterfaceInt) :: connectionTransformListArg ! helper variable
 
     ! initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -321,14 +320,14 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with (optional) array arguments
-    minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompArg = ESMF_InterfaceIntCreate(regDecomp, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    regDecompArg = ESMF_InterfaceIntCreate(regDecomp, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (present(decompflag)) then
       len_decompflag = size(decompflag)
@@ -337,16 +336,16 @@ contains
       len_decompflag = 0
       opt_decompflag => dummyDf
     endif
-    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionListArg = &
-      ESMF_InterfaceIntCreate(farray2D=connectionList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=connectionList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionTransformListArg = &
-      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark this DistGrid as invalid
@@ -355,28 +354,28 @@ contains
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridCreateRD(distgrid, minIndexArg, maxIndexArg, &
       regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
-      connectionListArg, connectionTransformListArg, delayout, vm, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      connectionListArg, connectionTransformListArg, delayout, vm, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(regDecompArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
@@ -422,14 +421,14 @@ contains
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
-!     domain with decomposition specified by {\tt deBlockList}.
+!     patch with decomposition specified by {\tt deBlockList}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the global domain.
+!          Global coordinate tuple of the lower corner of the patch.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the global domain.
+!          Global coordinate tuple of the upper corner of the patch.
 !     \item[deBlockList]
 !          List of DE-local LR blocks. The third index of {\tt deBlockList}
 !          steps through the deBlock elements, which are defined by the first
@@ -517,19 +516,18 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status     ! local error status
-    type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt):: minIndexArg ! helper variable
-    type(ESMF_InterfaceInt):: maxIndexArg ! helper variable
-    type(ESMF_InterfaceInt):: deBlockListArg ! helper variable
-    type(ESMF_InterfaceInt):: deLabelListArg ! helper variable
-    type(ESMF_InterfaceInt):: connectionListArg ! helper variable
-    type(ESMF_InterfaceInt):: connectionTransformListArg ! helper variable
+    integer                 :: localrc      ! local return code
+    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterfaceInt) :: minIndexArg  ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexArg  ! helper variable
+    type(ESMF_InterfaceInt) :: deBlockListArg ! helper variable
+    type(ESMF_InterfaceInt) :: deLabelListArg ! helper variable
+    type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
+    type(ESMF_InterfaceInt) :: connectionTransformListArg ! helper variable
 
     ! initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -537,25 +535,25 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with (optional) array arguments
-    minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    deBlockListArg = ESMF_InterfaceIntCreate(farray3D=deBlockList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    deBlockListArg = ESMF_InterfaceIntCreate(farray3D=deBlockList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionListArg = &
-      ESMF_InterfaceIntCreate(farray2D=connectionList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=connectionList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionTransformListArg = &
-      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark this DistGrid as invalid
@@ -564,28 +562,28 @@ contains
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridCreateDB(distgrid, minIndexArg, maxIndexArg, &
       deBlockListArg, deLabelListArg, indexflag, &
-      connectionListArg, connectionTransformListArg, delayout, vm, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      connectionListArg, connectionTransformListArg, delayout, vm, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(deBlockListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(deBlockListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
@@ -631,18 +629,18 @@ contains
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
-!     domain with regular decomposition. A regular
-!     decomposition is of the same rank as the global domain and decomposes
+!     patch with regular decomposition. A regular
+!     decomposition is of the same rank as the patch and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
-!     single LR domain is expressed by a single {\tt regDecomp} list of DE counts
+!     single patch is expressed by a single {\tt regDecomp} list of DE counts
 !     in each dimension.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the global domain.
+!          Global coordinate tuple of the lower corner of the patch.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the global domain.
+!          Global coordinate tuple of the upper corner of the patch.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The default decomposition will
 !          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
@@ -651,7 +649,7 @@ contains
 !          PETs and the distribution will be 1 DE per PET.
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of the
-!          global domain is to be divided between the DEs. The default setting
+!          patch is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. See section ?? for a 
 !          list of valid decomposition flag options.
 !     \item[{[deLabelList]}]
@@ -721,36 +719,35 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status     ! local error status
-    type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt):: minIndexArg ! helper variable
-    type(ESMF_InterfaceInt):: maxIndexArg ! helper variable
-    type(ESMF_InterfaceInt):: regDecompArg ! helper variable
-    type(ESMF_DecompFlag), target:: dummyDf(0)  ! used to satisfy the C interf.
-    type(ESMF_DecompFlag), pointer::  opt_decompflag(:) ! optional arg helper
+    integer                 :: localrc      ! local return code
+    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterfaceInt) :: minIndexArg  ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexArg  ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompArg ! helper variable
+    type(ESMF_DecompFlag), target   :: dummyDf(0)  ! satisfy C interface
+    type(ESMF_DecompFlag), pointer  ::  opt_decompflag(:) ! optional arg helper
     integer                 :: len_decompflag ! helper variable
-    type(ESMF_InterfaceInt):: deLabelListArg ! helper variable
-    type(ESMF_InterfaceInt):: connectionListArg ! helper variable
-    type(ESMF_InterfaceInt):: connectionTransformListArg ! helper variable
+    type(ESMF_InterfaceInt) :: deLabelListArg ! helper variable
+    type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
+    type(ESMF_InterfaceInt) :: connectionTransformListArg ! helper variable
 
     ! initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with (optional) array arguments
-    minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompArg = ESMF_InterfaceIntCreate(regDecomp, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    regDecompArg = ESMF_InterfaceIntCreate(regDecomp, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (present(decompflag)) then
       len_decompflag = size(decompflag)
@@ -759,16 +756,16 @@ contains
       len_decompflag = 0
       opt_decompflag => dummyDf
     endif
-    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionListArg = &
-      ESMF_InterfaceIntCreate(farray2D=connectionList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=connectionList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionTransformListArg = &
-      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark this DistGrid as invalid
@@ -777,28 +774,28 @@ contains
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
       regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
-      connectionListArg, connectionTransformListArg, fastAxis, vm, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      connectionListArg, connectionTransformListArg, fastAxis, vm, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(regDecompArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
@@ -843,14 +840,14 @@ contains
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
-!     domain with decomposition specified by {\tt deBlockList}.
+!     patch with decomposition specified by {\tt deBlockList}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the global domain.
+!          Global coordinate tuple of the lower corner of the patch.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the global domain.
+!          Global coordinate tuple of the upper corner of the patch.
 !     \item[deBlockList]
 !          List of DE-local LR blocks. The third index of {\tt deBlockList}
 !          steps through the deBlock elements, which are defined by the first
@@ -936,16 +933,12 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
+    integer                 :: localrc      ! local return code
+    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
     
-    ! Print current subroutine name
-    print *, ">>ESMF_DistGridCreateDBFA<<"
-
     ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -955,13 +948,12 @@ contains
     distgrid%this = ESMF_NULL_POINTER
 
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
-!      virtualdepinflag, vm, localrc)
+!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
+!      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
+!      connectionListArg, connectionTransformListArg, fastAxis, vm, localrc)
+!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
     ! Set return value
     ESMF_DistGridCreateDBFA = distgrid 
  
@@ -969,7 +961,7 @@ contains
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBFA)
  
     ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
+    !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
  
   end function ESMF_DistGridCreateDBFA
 !------------------------------------------------------------------------------
@@ -979,7 +971,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateRDP()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patch work with regular decomposition
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patchwork with regular decomposition
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1004,25 +996,23 @@ contains
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRDP
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
-!     rectangular (LR) domains with regular decomposition. A regular
-!     decomposition is of the same rank as the global domain and decomposes
+!     Create an {\tt ESMF\_DistGrid} from a patchwork of logically 
+!     rectangular (LR) patches with regular decomposition. A regular
+!     decomposition is of the same rank as the patch and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
-!     patch work of LR domains is expressed by a list of DE count vectors, one
-!     vector for each patch domain. Each vector contained in the 
+!     patchwork of patches is expressed by a list of DE count vectors, one
+!     vector for each patch. Each vector contained in the 
 !     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
-!     erroneous to provide more domain patches than there are DEs.
+!     erroneous to provide more patches than there are DEs.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
 !          The first index provides the global coordinate tuple of the lower 
-!          corner of a global domain patch. The second index indicates the 
-!          patch number.
+!          corner of a patch. The second index indicates the patch number.
 !     \item[maxIndex]
 !          The first index provides the global coordinate tuple of the upper
-!          corner of a global domain patch. The second index indicates the 
-!          patch number.
+!          corner of a patch. The second index indicates the patch number.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The second 
 !          index indicates the patch number. The default decomposition will
@@ -1032,7 +1022,7 @@ contains
 !          PETs and the distribution will be 1 DE per PET.
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of each
-!          patch domain is to be divided between the DEs. The default setting
+!          patch is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all patches. 
 !          See section ?? for a list of valid decomposition flag options. The 
 !          second index indicates the patch number.
@@ -1105,23 +1095,22 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status     ! local error status
-    type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt):: minIndexArg ! helper variable
-    type(ESMF_InterfaceInt):: maxIndexArg ! helper variable
-    type(ESMF_InterfaceInt):: regDecompArg ! helper variable
-    type(ESMF_DecompFlag), target:: dummyDf(0,0)  ! used to satisfy the C interf.
+    integer                 :: localrc      ! local return code
+    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterfaceInt) :: minIndexArg  ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexArg  ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompArg ! helper variable
+    type(ESMF_DecompFlag), target :: dummyDf(0,0)  ! satisfy C interface
     type(ESMF_DecompFlag), pointer::  opt_decompflag(:,:) ! optional arg helper
     integer                 :: len1_decompflag ! helper variable
     integer                 :: len2_decompflag ! helper variable
-    type(ESMF_InterfaceInt):: deLabelListArg ! helper variable
-    type(ESMF_InterfaceInt):: connectionListArg ! helper variable
-    type(ESMF_InterfaceInt):: connectionTransformListArg ! helper variable
+    type(ESMF_InterfaceInt) :: deLabelListArg ! helper variable
+    type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
+    type(ESMF_InterfaceInt) :: connectionTransformListArg ! helper variable
 
     ! initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -1129,14 +1118,14 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with (optional) array arguments
-    minIndexArg = ESMF_InterfaceIntCreate(farray2D=minIndex, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    minIndexArg = ESMF_InterfaceIntCreate(farray2D=minIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg = ESMF_InterfaceIntCreate(farray2D=maxIndex, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    maxIndexArg = ESMF_InterfaceIntCreate(farray2D=maxIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompArg = ESMF_InterfaceIntCreate(farray2D=regDecomp, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    regDecompArg = ESMF_InterfaceIntCreate(farray2D=regDecomp, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (present(decompflag)) then
       len1_decompflag = size(decompflag, 1)
@@ -1147,16 +1136,16 @@ contains
       len2_decompflag = 0
       opt_decompflag => dummyDf
     endif
-    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionListArg = &
-      ESMF_InterfaceIntCreate(farray2D=connectionList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=connectionList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionTransformListArg = &
-      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark this DistGrid as invalid
@@ -1166,28 +1155,28 @@ contains
     call c_ESMC_DistGridCreateRDP(distgrid, minIndexArg, &
       maxIndexArg, regDecompArg, opt_decompflag, len1_decompflag, &
       len2_decompflag, deLabelListArg, indexflag, &
-      connectionListArg, connectionTransformListArg, delayout, vm, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      connectionListArg, connectionTransformListArg, delayout, vm, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(regDecompArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
@@ -1207,7 +1196,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBP()"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patch work with regular decomposition
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patchwork with regular decomposition
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1231,25 +1220,23 @@ contains
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDBP
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
-!     rectangular (LR) domains with regular decomposition. A regular
-!     decomposition is of the same rank as the global domain and decomposes
+!     Create an {\tt ESMF\_DistGrid} from a patchwork of logically 
+!     rectangular (LR) patches with regular decomposition. A regular
+!     decomposition is of the same rank as the patch and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
-!     patch work of LR domains is expressed by a list of DE count vectors, one
-!     vector for each patch domain. Each vector contained in the 
+!     patchwork of patches is expressed by a list of DE count vectors, one
+!     vector for each patch. Each vector contained in the 
 !     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
-!     erroneous to provide more domain patches than there are DEs.
+!     erroneous to provide more patches than there are DEs.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
 !          The first index provides the global coordinate tuple of the lower 
-!          corner of a global domain patch. The second index indicates the 
-!          patch number.
+!          corner of a patch. The second index indicates the patch number.
 !     \item[maxIndex]
 !          The first index provides the global coordinate tuple of the upper
-!          corner of a global domain patch. The second index indicates the 
-!          patch number.
+!          corner of a patch. The second index indicates the patch number.
 !     \item[deBlockList]
 !          List of DE-local LR blocks. The third index of {\tt deBlockList}
 !          steps through the deBlock elements, which are defined by the first
@@ -1337,16 +1324,12 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
-
-    ! Print current subroutine name
-    print *, ">>ESMF_DistGridCreateDBP<<"
+    integer                 :: localrc      ! local return code
+    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
 
     ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -1357,13 +1340,12 @@ contains
     distgrid%this = ESMF_NULL_POINTER
 
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
-!      virtualdepinflag, vm, localrc)
+!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
+!      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
+!      connectionListArg, connectionTransformListArg, fastAxis, vm, localrc)
+!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
     ! Set return value
     ESMF_DistGridCreateDBP = distgrid 
  
@@ -1371,7 +1353,7 @@ contains
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBP)
  
     ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
+    !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
  
   end function ESMF_DistGridCreateDBP
 !------------------------------------------------------------------------------
@@ -1381,7 +1363,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateRDPFA()"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patch work with regular decomposition and fast axis
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patchwork with regular decomposition and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1406,25 +1388,23 @@ contains
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRDPFA
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
-!     rectangular (LR) domains with regular decomposition. A regular
-!     decomposition is of the same rank as the global domain and decomposes
+!     Create an {\tt ESMF\_DistGrid} from a patchwork of logically 
+!     rectangular (LR) patches with regular decomposition. A regular
+!     decomposition is of the same rank as the patch and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
-!     patch work of LR domains is expressed by a list of DE count vectors, one
-!     vector for each patch domain. Each vector contained in the 
+!     patchwork of patches is expressed by a list of DE count vectors, one
+!     vector for each patch. Each vector contained in the 
 !     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
-!     erroneous to provide more domain patches than there are DEs.
+!     erroneous to provide more patches than there are DEs.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
 !          The first index provides the global coordinate tuple of the lower 
-!          corner of a global domain patch. The second index indicates the 
-!          patch number.
+!          corner of a patch. The second index indicates the patch number.
 !     \item[maxIndex]
 !          The first index provides the global coordinate tuple of the upper
-!          corner of a global domain patch. The second index indicates the 
-!          patch number.
+!          corner of a patch. The second index indicates the patch number.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The second 
 !          index indicates the patch number. The default decomposition will
@@ -1434,7 +1414,7 @@ contains
 !          PETs and the distribution will be 1 DE per PET.
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of each
-!          patch domain is to be divided between the DEs. The default setting
+!          patch is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all patches. 
 !          See section ?? for a list of valid decomposition flag options. The 
 !          second index indicates the patch number.
@@ -1505,16 +1485,12 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
-
-    ! Print current subroutine name
-    print *, ">>ESMF_DistGridCreateRDPFA<<"
+    integer                 :: localrc      ! local return code
+    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
 
     ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -1524,12 +1500,11 @@ contains
     distgrid%this = ESMF_NULL_POINTER
 
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
-!      virtualdepinflag, vm, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
+!      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
+!      connectionListArg, connectionTransformListArg, fastAxis, vm, localrc)
+!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
     ESMF_DistGridCreateRDPFA = distgrid
@@ -1538,7 +1513,7 @@ contains
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRDPFA)
  
     ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
+    !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
  
   end function ESMF_DistGridCreateRDPFA
 !------------------------------------------------------------------------------
@@ -1548,7 +1523,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBPFA()"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patch work with DE blocks and fast axis
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patchwork with DE blocks and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1572,19 +1547,17 @@ contains
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDBPFA
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
-!     rectangular (LR) domains with decomposition specified by {\tt deBlockList}.
+!     Create an {\tt ESMF\_DistGrid} from a patchwork of logically 
+!     rectangular (LR) patches with decomposition specified by {\tt deBlockList}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
 !          The first index provides the global coordinate tuple of the lower 
-!          corner of a global domain patch. The second index indicates the 
-!          patch number.
+!          corner of a patch. The second index indicates the patch number.
 !     \item[maxIndex]
 !          The first index provides the global coordinate tuple of the upper
-!          corner of a global domain patch. The second index indicates the 
-!          patch number.
+!          corner of a patch. The second index indicates the patch number.
 !     \item[deBlockList]
 !          List of DE-local LR blocks. The third index of {\tt deBlockList}
 !          steps through the deBlock elements, which are defined by the first
@@ -1670,16 +1643,12 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
-
-    ! Print current subroutine name
-    print *, ">>ESMF_DistGridCreateDBPFA<<"
+    integer                 :: localrc      ! local return code
+    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
 
     ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -1689,12 +1658,11 @@ contains
     distgrid%this = ESMF_NULL_POINTER
 
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
-!      virtualdepinflag, vm, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
+!      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
+!      connectionListArg, connectionTransformListArg, fastAxis, vm, localrc)
+!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
     ESMF_DistGridCreateDBPFA = distgrid
@@ -1703,7 +1671,7 @@ contains
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBPFA)
  
     ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
+    !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
  
   end function ESMF_DistGridCreateDBPFA
 !------------------------------------------------------------------------------
@@ -1711,8 +1679,8 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBAI()"
-!BOPI
-! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from users arbitray index
+!BOP
+! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from user's arbitray index list
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1726,25 +1694,29 @@ contains
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI
 !
 ! !DESCRIPTION:
-!     Create a 1D {\tt ESMF\_DistGrid} from a list of (global) indices that
-!     live on the current pet.
+!     Create an {\tt ESMF\_DistGrid} of {\tt dimCount} 1 from a PET-local list
+!     of sequence indices. The PET-local size of the {\tt arbSeqIndexList}
+!     argument determines the number of local cells in the created DistGrid.
+!     The sequence indices must be unique across all PETs and are meant to be
+!     used in combination with {\tt ESMF\_ArraySparseMatMulStore()}. A default
+!     1-D DELayout with 1 DE per PET across all PETs of the current VM is 
+!     automatically created.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{[arbSeqIndexList]}]
-!          List of arbitrary sequence indices that reside on the local DE.
+!          List of arbitrary sequence indices that reside on the local PET.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status          ! local error status
-    type(ESMF_DistGrid)     :: distgrid        ! opaque pointer to new C++ DistGrid
-    type(ESMF_VM)           :: vm              ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt) :: indicesArg      ! index helper
-    integer                 :: localSize(2)    ! number of local indices
+    integer                 :: localrc      ! local return code
+    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    type(ESMF_VM)           :: vm           ! opaque pointer to VM object
+    type(ESMF_InterfaceInt) :: indicesArg   ! index helper
+    integer                 :: localSize(2) ! number of local indices
     integer, allocatable    :: globalSizes(:)  ! array of all sizes
     integer                 :: petCount        ! num pets
     integer, allocatable    :: deblock(:,:,:)  ! Array of sizes
@@ -1753,15 +1725,15 @@ contains
     integer                 :: minC(1), maxC(1)! min/max corner
 
     ! initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
-    call ESMF_VMGetCurrent(vm, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_VMGetCurrent(vm, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
-    call ESMF_VMGet(vm, petCount=petCount, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_VMGet(vm, petCount=petCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! min/max of local indices
@@ -1775,15 +1747,13 @@ contains
 
     allocate(globalSizes(2*petCount))
 
-
     ! Gather the sizes locally
-    call ESMF_VMAllGather(vm, localSize, globalSizes, 1, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_VMAllGather(vm, localSize, globalSizes, 1, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Now set up the deblocks
     allocate(deblock(1,2,petCount))
-
 
     csum = 0
     do i=1,petCount
@@ -1792,22 +1762,19 @@ contains
       deblock(1,2,i) = csum
     enddo
 
-
     ! And now a global reduction to find min/max corners over all pets
     localSize(1) = imin
-    call ESMF_VMAllReduce(vm, localSize, globalSizes, 1, &
-     ESMF_MIN, rc=status)
+    call ESMF_VMAllReduce(vm, localSize, globalSizes, 1, ESMF_MIN, rc=localrc)
     imin = globalSizes(1)
     localSize(1) = imax
-    call ESMF_VMAllReduce(vm, localSize, globalSizes, 1, &
-     ESMF_MAX, rc=status)
+    call ESMF_VMAllReduce(vm, localSize, globalSizes, 1, ESMF_MAX, rc=localrc)
     imax = globalSizes(1)
 
     minC(1) = imin
     maxC(1) = imax
-    distgrid = ESMF_DistGridCreateDB(minC, maxC, &
-               deBlockList=deblock, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    distgrid = ESMF_DistGridCreateDB(minC, maxC, deBlockList=deblock, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     deallocate(deblock)
@@ -1816,17 +1783,17 @@ contains
     ! Set return value
     ESMF_DistGridCreateDBAI = distgrid 
 
-    indicesArg = ESMF_InterfaceIntCreate(farray1D=arbSeqIndexList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    indicesArg = ESMF_InterfaceIntCreate(farray1D=arbSeqIndexList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call c_ESMC_DistGridSetArbSeqIndex(distgrid, indicesArg, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call c_ESMC_DistGridSetArbSeqIndex(distgrid, indicesArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(indicesArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(indicesArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Set init code
@@ -1854,31 +1821,30 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!     Destroy an {\tt ESMF\_DistGrid} object.
+!   Destroy an {\tt ESMF\_DistGrid} object.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[distgrid] 
-!          {\tt ESMF\_DistGrid} object to be destroyed.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[distgrid] 
+!     {\tt ESMF\_DistGrid} object to be destroyed.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status       ! local error status
+    integer                 :: localrc      ! local return code
 
     ! initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DistGridDestroy(distgrid, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call c_ESMC_DistGridDestroy(distgrid, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Mark this DistGrid as invalid
@@ -1916,75 +1882,71 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!     Get internal DistGrid information.
+!   Get internal DistGrid information.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[distgrid] 
-!        Queried {\tt ESMF\_DistGrid} object.
-!     \item[{[delayout]}]
-!        Upon return this holds the {\tt ESMF\_DELayout} object associated with
-!        this DistGrid object.
-!     \item[{[patchCount]}]
-!        Upon return this holds the number of patches the DistGrid object is
-!        composed of.
-!     \item[{[patchList]}]
-!        Upon return this holds a list of patch id numbers, one for each DE.
-!     \item[{[dimCount]}]
-!        Upon return this holds the number dimensions (or rank) of the
-!        DistGrid object.
-!     \item[{[dimExtent]}]
-!        Upon return this array holds the extents for all dimensions of the
-!        DE-local LR boxes for all DEs. The supplied variable must be at least
-!        of size {\tt (/dimCount, deCount/)}.
-!     \item[{[regDecompFlag]}]
-!        Upon return this flag indicates regular decompositions by {\tt
-!        ESMF\_TRUE} and other decompositions by {\tt ESMF\_FALSE}.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[distgrid] 
+!     Queried {\tt ESMF\_DistGrid} object.
+!   \item[{[delayout]}]
+!     {\tt ESMF\_DELayout} object associated with {\tt distgrid}.
+!   \item[{[patchCount]}]
+!     Number of patches in {\tt distgrid}.
+!   \item[{[patchList]}]
+!     List of patch id numbers, one for each DE, with
+!     {\tt size(patchList) == (/deCount/)}
+!   \item[{[dimCount]}]
+!     Number of dimensions (or rank) of {\tt distgrid}.
+!   \item[{[dimExtent]}]
+!     Array of extents per {\tt dim}, per {\tt de}, with
+!     {\tt size(dimExtent) == (/dimCount, deCount/)}.
+!   \item[{[regDecompFlag]}]
+!     Flag equal to {\tt ESMF\_TRUE} for regular decompositions
+!     and equal to {\tt ESMF\_FALSE} otherwise.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                     :: status         ! local error status
-    type(ESMF_InterfaceInt):: patchListArg   ! helper variable
-    type(ESMF_InterfaceInt):: dimExtentArg   ! helper variable
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt) :: patchListArg ! helper variable
+    type(ESMF_InterfaceInt) :: dimExtentArg ! helper variable
 
     ! initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Deal with (optional) array arguments
-    patchListArg = ESMF_InterfaceIntCreate(patchList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    patchListArg = ESMF_InterfaceIntCreate(patchList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    dimExtentArg = ESMF_InterfaceIntCreate(farray2D=dimExtent, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    dimExtentArg = ESMF_InterfaceIntCreate(farray2D=dimExtent, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridGet(distgrid, delayout, patchCount, patchListArg, &
-      dimCount, dimExtentArg, regDecompFlag, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      dimCount, dimExtentArg, regDecompFlag, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set init code for deep C++ objects
     if (present(delayout)) then
-      call ESMF_DELayoutSetInitCreated(delayout, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      call ESMF_DELayoutSetInitCreated(delayout, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(patchListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(patchListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(dimExtentArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(dimExtentArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -2034,10 +1996,8 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-!    type(ESMF_DELayout):: dummy
+    integer                 :: localrc      ! local return code
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2046,15 +2006,15 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DELayoutGetVM(delayout, vm, localrc)
+    ! call into the C++ interface, which will sort out optional arguments
+!    call c_ESMC_DistGridGet(distgrid, delayout, patchCount, patchListArg, &
+!      dimCount, dimExtentArg, regDecompFlag, localrc)
+!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Return successfully
+    !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
 
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_DistGridGetPDe
 !------------------------------------------------------------------------------
 
@@ -2096,32 +2056,31 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status               ! local error status
+    integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: localIndexListArg    ! helper variable
 
     ! initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Deal with (optional) array arguments
-    localIndexListArg = ESMF_InterfaceIntCreate(localIndexList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    localIndexListArg = ESMF_InterfaceIntCreate(localIndexList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridGetPDePDim(distgrid, localDe, dim, localIndexListArg, &
-      status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(localIndexListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(localIndexListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -2179,10 +2138,8 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-!    type(ESMF_DELayout):: dummy
+    integer                 :: localrc      ! local return code
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2191,15 +2148,15 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DELayoutGetVM(delayout, vm, localrc)
+    ! call into the C++ interface, which will sort out optional arguments
+!    call c_ESMC_DistGridGet(distgrid, delayout, patchCount, patchListArg, &
+!      dimCount, dimExtentArg, regDecompFlag, localrc)
+!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Return successfully
+    !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
 
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_DistGridGetLinksPDe
 !------------------------------------------------------------------------------
 
@@ -2234,20 +2191,19 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status       ! local error status
+    integer                 :: localrc      ! local return code
 
     ! initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DistGridPrint(distgrid, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call c_ESMC_DistGridPrint(distgrid, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -2284,9 +2240,8 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: localrc      ! local return code
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2297,12 +2252,10 @@ contains
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DistGridValidate(distgrid, localrc)
-    
-    ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
-    ! Return success
+
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_DistGridValidate
@@ -2334,7 +2287,7 @@ contains
 !     \end{description}
 !
 !EOPI
-
+!------------------------------------------------------------------------------
     if (present(distgrid)) then
       ESMF_DistGridGetInit = ESMF_INIT_GET(distgrid)
     else
@@ -2371,7 +2324,6 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
 
     ! initialize return code; assume routine not implemented
@@ -2431,44 +2383,43 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status     ! local error status
-    type(ESMF_InterfaceInt):: connectionArg ! helper variable
-    type(ESMF_InterfaceInt):: positionVectorArg ! helper variable
-    type(ESMF_InterfaceInt):: orientationVectorArg ! helper variable
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt) :: connectionArg ! helper variable
+    type(ESMF_InterfaceInt) :: positionVectorArg ! helper variable
+    type(ESMF_InterfaceInt) :: orientationVectorArg ! helper variable
 
     ! initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Deal with (optional) array arguments
-    connectionArg = ESMF_InterfaceIntCreate(connection, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    connectionArg = ESMF_InterfaceIntCreate(connection, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    positionVectorArg = ESMF_InterfaceIntCreate(positionVector, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    positionVectorArg = ESMF_InterfaceIntCreate(positionVector, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     orientationVectorArg = ESMF_InterfaceIntCreate(orientationVector, &
-      rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_Connection(connectionArg, &
-      patchIndexA, patchIndexB, positionVectorArg, orientationVectorArg, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      patchIndexA, patchIndexB, positionVectorArg, orientationVectorArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(connectionArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(connectionArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(positionVectorArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(positionVectorArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(orientationVectorArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(orientationVectorArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -2543,15 +2494,15 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DELayoutGetVM(delayout, vm, localrc)
+    ! call into the C++ interface, which will sort out optional arguments
+!    call c_ESMC_Connection(connectionArg, &
+!      patchIndexA, patchIndexB, positionVectorArg, orientationVectorArg, localrc)
+!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
+    ! Return successfully
+    !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
+    
   end subroutine ESMF_ConnectionTransform
 !------------------------------------------------------------------------------
 
