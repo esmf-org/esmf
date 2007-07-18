@@ -1,7 +1,6 @@
-! $Id: ESMF_ArrayArbIdxSTest.F90,v 1.5 2007/07/16 19:41:15 theurich Exp $
+! $Id: ESMF_ArrayArbIdxSTest.F90,v 1.6 2007/07/18 18:33:42 svasquez Exp $
 !
 !-------------------------------------------------------------------------
-!SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP
