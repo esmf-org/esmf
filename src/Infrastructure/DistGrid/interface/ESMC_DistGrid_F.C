@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.22 2007/07/17 21:39:17 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.23 2007/07/18 23:05:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -215,7 +215,7 @@ extern "C" {
       // all data ends up contiguous in the dimExtent array.
       for (int i=0; i<(*ptr)->getDELayout()->getDeCount(); i++)
         memcpy(&((*dimExtent)->array[i*((*dimExtent)->extent[0])]),
-          &(((*ptr)->getDimExtent())[i*(*ptr)->getDimCount()]),
+          &(((*ptr)->getIndexCountPDimPDe())[i*(*ptr)->getDimCount()]),
           sizeof(int)*(*ptr)->getDimCount());
     }
     // fill patchList
@@ -232,7 +232,7 @@ extern "C" {
         return;
       }
       // fill in values
-      memcpy((*patchList)->array, (*ptr)->getDePatchList(),
+      memcpy((*patchList)->array, (*ptr)->getPatchListPDe(),
         sizeof(int)*(*ptr)->getDELayout()->getDeCount());
     }
     // return successfully
@@ -252,7 +252,7 @@ extern "C" {
     if (*localIndexList != NULL){
       // indexList provided -> get localIndexListPtr & do some error checking
       const int *localIndexListPtr =
-        (*ptr)->getLocalIndexList(localDe, dim+1, &localrc);
+        (*ptr)->getIndexListPDimPLocalDe(localDe, dim+1, &localrc);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc))) return;
       if ((*localIndexList)->dimCount != 1){
@@ -261,7 +261,7 @@ extern "C" {
         return;
       }
       if ((*localIndexList)->extent[0] <
-        ((*ptr)->getDimExtent())[(*ptr)->getDELayout()->
+        ((*ptr)->getIndexCountPDimPDe())[(*ptr)->getDELayout()->
         getLocalDeList()[localDe] * (*ptr)->getDimCount()+dim]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of localIndexList array size insufficiently", rc);
@@ -269,7 +269,7 @@ extern "C" {
       }
       // fill in the values
       memcpy((*localIndexList)->array, localIndexListPtr,
-        sizeof(int) * (*ptr)->getDimExtent()[((*ptr)->getDELayout()->
+        sizeof(int) * (*ptr)->getIndexCountPDimPDe()[((*ptr)->getDELayout()->
         getLocalDeList()[localDe] * (*ptr)->getDimCount()+dim)]);
     }
     // return successfully

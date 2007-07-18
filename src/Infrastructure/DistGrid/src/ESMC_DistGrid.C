@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.27 2007/07/18 22:05:06 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.28 2007/07/18 23:05:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.27 2007/07/18 22:05:06 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.28 2007/07/18 23:05:09 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1511,12 +1511,12 @@ int DistGrid::validate()const{
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::getDimContigFlag()"
+#define ESMC_METHOD "ESMCI::DistGrid::getContigFlagPDimPDe()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::getDimContigFlag
+// !IROUTINE:  ESMCI::DistGrid::getContigFlagPDimPDe
 //
 // !INTERFACE:
-int DistGrid::getDimContigFlag(
+int DistGrid::getContigFlagPDimPDe(
 //
 // !RETURN VALUE:
 //    int dimContigFlag for de and dim
@@ -1558,12 +1558,12 @@ int DistGrid::getDimContigFlag(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::getDeCellCount()"
+#define ESMC_METHOD "ESMCI::DistGrid::getCellCountPDe()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::getDeCellCount
+// !IROUTINE:  ESMCI::DistGrid::getCellCountPDe
 //
 // !INTERFACE:
-int DistGrid::getDeCellCount(
+int DistGrid::getCellCountPDe(
 //
 // !RETURN VALUE:
 //    int deCellCount for DE
@@ -1668,12 +1668,12 @@ int DistGrid::getSequenceIndex(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::getMinIndex()"
+#define ESMC_METHOD "ESMCI::DistGrid::getMinIndexPDimPPatch()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::getMinIndex
+// !IROUTINE:  ESMCI::DistGrid::getMinIndexPDimPPatch
 //
 // !INTERFACE:
-const int *DistGrid::getMinIndex(
+const int *DistGrid::getMinIndexPDimPPatch(
 //
 // !RETURN VALUE:
 //    int *minIndex for patch
@@ -1708,12 +1708,12 @@ const int *DistGrid::getMinIndex(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::getMaxIndex()"
+#define ESMC_METHOD "ESMCI::DistGrid::getMaxIndexPDimPPatch()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::getMaxIndex
+// !IROUTINE:  ESMCI::DistGrid::getMaxIndexPDimPPatch
 //
 // !INTERFACE:
-const int *DistGrid::getMaxIndex(
+const int *DistGrid::getMaxIndexPDimPPatch(
 //
 // !RETURN VALUE:
 //    int *maxIndex for patch
@@ -1748,15 +1748,15 @@ const int *DistGrid::getMaxIndex(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::getLocalIndexList()"
+#define ESMC_METHOD "ESMCI::DistGrid::getIndexListPDimPLocalDe()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::getLocalIndexList
+// !IROUTINE:  ESMCI::DistGrid::getIndexListPDimPLocalDe
 //
 // !INTERFACE:
-const int *DistGrid::getLocalIndexList(
+const int *DistGrid::getIndexListPDimPLocalDe(
 //
 // !RETURN VALUE:
-//    int *localIndexList for de, dim
+//    int *indexListPDimPLocalDe for localDe, dim
 //
 // !ARGUMENTS:
 //
@@ -1789,6 +1789,47 @@ const int *DistGrid::getLocalIndexList(
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return indexListPDimPLocalDe[localDe*dimCount+(dim-1)];
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::getArbSeqIndexListPLocalDe()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::getArbSeqIndexListPLocalDe
+//
+// !INTERFACE:
+const int *DistGrid::getArbSeqIndexListPLocalDe(
+//
+// !RETURN VALUE:
+//    int *arbSeqIndexListPLocalDe for localDe
+//
+// !ARGUMENTS:
+//
+  int localDe,                      // in  - local DE = {0, ..., localDeCount-1}
+  int *rc                           // out - return code
+  )const{
+//
+// !DESCRIPTION:
+//    Get information about a DistGrid object
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
+  // check input
+  int localDeCount = delayout->getLocalDeCount();
+  if (localDe < 0 || localDe > localDeCount-1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
+      "- Specified local DE out of bounds", rc);
+    return NULL;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return arbSeqIndexListPLocalDe[localDe];
 }
 //-----------------------------------------------------------------------------
 
