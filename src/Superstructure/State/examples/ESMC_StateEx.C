@@ -1,4 +1,4 @@
-// $Id: ESMC_StateEx.C,v 1.10 2007/06/23 04:01:10 cdeluca Exp $
+// $Id: ESMC_StateEx.C,v 1.11 2007/07/19 21:41:08 cdeluca Exp $
 //
 // Example/test code which creates a new State.
 
@@ -88,7 +88,7 @@ main(int argc, char **argv) {
 //   // Example 3:
 //   //
 //   //  Create, Add Placeholder, Query, then Destroy a State.
-//   //  This example applies to a IGridded Component which potentially
+//   //  This example applies to a Gridded Component which potentially
 //   //  could create a large number of export items but it is unlikely
 //   //  that any other component would require all of them.  This allows
 //   //  the consuming component to mark those needed, and the producer

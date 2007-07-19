@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.35 2007/06/23 07:00:49 cdeluca Exp $
+% $Id: Component_refdoc.ctex,v 1.36 2007/07/19 21:41:03 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 \newpage
 #endif
 
-%%%%%%%%%%%%% IGridded Component Class %%%%%%%%%
+%%%%%%%%%%%%% Gridded Component Class %%%%%%%%%
 \section{GridComp Class}
 
 \subsection{Description}
@@ -88,7 +88,7 @@
 #endif
 
 \subsection{Class API: SetServices and Related Methods}
-\label{sec:IGridSetServ}
+\label{sec:GridSetServ}
 #ifdef STANDALONE
 \input{ESMF_GridCompSetServ_fapi}
 #elif defined(CONSTITUENT)

@@ -2,11 +2,11 @@
 ! MODULE AppDriver.F90 - generic main program for an ESMF Application
 !
 ! !DESCRIPTION:
-! ESMF Application Driver for any IGridded Component.  Creates the top 
-!  IGridded Component and calls the Initialize, Run, and Finalize routines
+!  ESMF Application Driver for any Gridded Component.  Creates the top 
+!  Gridded Component and calls the Initialize, Run, and Finalize routines
 !  for it.  
-!  This IGridded Component will most likely create and manage subcomponents
-!  internally, so that this generic file becomes the "Cap" or root 
+!  This Gridded Component will most likely create and manage subcomponents
+!  internally, so that this generic file becomes the "cap" or root 
 !  of a tree of components.
 !
 !  In the text below, {\tt USER\_APP} should be replaced by the specific
@@ -29,7 +29,7 @@
     ! ESMF module, defines all ESMF data types and procedures
     use ESMF_Mod
     
-    ! IGridded Component registration routines.  Defined in "ChangeMe.F90"
+    ! Gridded Component registration routines.  Defined in "ChangeMe.F90"
     use USER_APP_Mod, only : SetServices => USER_APP_SetServices
 
     implicit none
@@ -108,8 +108,8 @@
     ! Get the default VM which contains all PEs this job was started on.
     call ESMF_VMGetGlobal(defaultvm, rc)
 
-    ! Create the top IGridded component, passing in the default layout.
-    compGridded = ESMF_GridCompCreate(name="ESMF IGridded Component", rc=rc)
+    ! Create the top Gridded component, passing in the default layout.
+    compGridded = ESMF_GridCompCreate(name="ESMF Gridded Component", rc=rc)
 
     call ESMF_LogWrite("Component Create finished", ESMF_LOG_INFO)
 
@@ -168,7 +168,7 @@
 !!------------------------------------------------------------------------------
 !!------------------------------------------------------------------------------
 
-      defaultstate = ESMF_StateCreate("Default IGridded State", rc=rc)
+      defaultstate = ESMF_StateCreate("Default State", rc=rc)
      
 !!------------------------------------------------------------------------------
 !!------------------------------------------------------------------------------

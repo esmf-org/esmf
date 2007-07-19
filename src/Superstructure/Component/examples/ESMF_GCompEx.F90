@@ -1,16 +1,16 @@
-! $Id: ESMF_GCompEx.F90,v 1.29 2007/06/23 07:00:49 cdeluca Exp $
+! $Id: ESMF_GCompEx.F90,v 1.30 2007/07/19 21:41:04 cdeluca Exp $
 !
-! Example/test code which shows IGridded Component calls.
+! Example/test code which shows Gridded Component calls.
 
 !-------------------------------------------------------------------------
 !EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
-! !PROGRAM: ESMF_GCompEx.F90 - IGridded Component example
+! !PROGRAM: ESMF_GCompEx.F90 - Gridded Component example
 !
 ! !DESCRIPTION:
 !
-!   The skeleton of one of many possible IGridded component models.
+!   The skeleton of one of many possible Gridded component models.
 !
 !-----------------------------------------------------------------------------
 
@@ -42,8 +42,8 @@
 !EOP
 
 !BOC
-    ! Example IGridded Component
-    module ESMF_IGriddedCompEx
+    ! Example Gridded Component
+    module ESMF_GriddedCompEx
     
     ! ESMF Framework module
     use ESMF_Mod
@@ -94,14 +94,14 @@
         type(ESMF_Clock) :: clock
         integer :: rc
 
-        print *, "IGridded Comp Init starting"
+        print *, "Gridded Comp Init starting"
 
         ! This is where the model specific setup code goes.  
  
         ! If the initial Export state needs to be filled, do it here.
         !call ESMF_StateAddField(exportState, field, rc)
         !call ESMF_StateAddBundle(exportState, bundle, rc)
-        print *, "IGridded Comp Init returning"
+        print *, "Gridded Comp Init returning"
    
         rc = ESMF_SUCCESS
 
@@ -136,7 +136,7 @@
         type(ESMF_Clock) :: clock
         integer :: rc
 
-        print *, "IGridded Comp Run starting"
+        print *, "Gridded Comp Run starting"
         ! call ESMF_StateGetField(), etc to get fields, bundles, arrays
         !  from import state.
 
@@ -144,7 +144,7 @@
 
         ! Fill export state here using ESMF_StateAddField(), etc
 
-        print *, "IGridded Comp Run returning"
+        print *, "Gridded Comp Run returning"
 
         rc = ESMF_SUCCESS
 
@@ -170,22 +170,22 @@
         type(ESMF_Clock) :: clock
         integer :: rc
 
-        print *, "IGridded Comp Final starting"
+        print *, "Gridded Comp Final starting"
     
         ! Add whatever code here needed
 
-        print *, "IGridded Comp Final returning"
+        print *, "Gridded Comp Final returning"
    
         rc = ESMF_SUCCESS
 
     end subroutine GComp_Final
 
-    end module ESMF_IGriddedCompEx
+    end module ESMF_GriddedCompEx
 !EOC
 
 !-------------------------------------------------------------------------
 ! Note - the program below is here only to make this an executable
-! program.  It should not appear in the documentation for a IGridded Component.
+! program.  It should not appear in the documentation for a Gridded Component.
 !-------------------------------------------------------------------------
 
     program ESMF_AppMainEx
@@ -194,7 +194,7 @@
     use ESMF_Mod
     
     ! User supplied modules
-    use ESMF_IGriddedCompEx, only: GComp_SetServices
+    use ESMF_GriddedCompEx, only: GComp_SetServices
     implicit none
     
 !   ! Local variables
@@ -224,7 +224,7 @@
 !   !  Create, Init, Run, Finalize, Destroy Components.
     print *, "Application Example 1:"
     ! Create the top level application component
-    cname = "Atmosphere Model IGridded Component"
+    cname = "Atmosphere Model Gridded Component"
     gcomp = ESMF_GridCompCreate(name=cname, configFile="setup.rc", rc=rc)  
 
     if (rc.NE.ESMF_SUCCESS) then

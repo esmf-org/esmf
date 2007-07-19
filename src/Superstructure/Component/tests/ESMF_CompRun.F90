@@ -1,4 +1,4 @@
-! $Id: ESMF_CompRun.F90,v 1.13 2007/06/23 07:00:51 cdeluca Exp $
+! $Id: ESMF_CompRun.F90,v 1.14 2007/07/19 21:41:05 cdeluca Exp $
 !
 ! Test code which creates a new Component.
 
@@ -41,31 +41,30 @@
     comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
                                                configFile="igrid.rc", rc=rc)  
 
-    print *, "IGrid Comp Create returned, name = ", trim(cname)
+    print *, "GridComp Create returned, name = ", trim(cname)
 
     call ESMF_GridCompPrint(comp1, rc=rc)
-    print *, "IGrid Comp Print returned"
+    print *, "GridComp Print returned"
 
     ! register other entry points
     call ESMF_GridCompSetServices(comp1, User_SetServices, rc)
 
     call ESMF_GridCompInitialize(comp1, rc=rc)
-    print *, "IGrid Comp Initialize returned"
+    print *, "GridComp Initialize returned"
 
     call ESMF_GridCompRun(comp1, clock=clock, rc=rc)
-    print *, "IGrid Comp Run returned"
+    print *, "GridComp Run returned"
 
     call ESMF_GridCompRun(comp1, clock=clock, rc=rc)
-    print *, "IGrid Comp Run returned"
+    print *, "GridComp Run returned"
 
     call ESMF_GridCompFinalize(comp1, rc=rc)
-    print *, "IGrid Comp Finalize returned"
+    print *, "GridComp Finalize returned"
 
     call ESMF_GridCompDestroy(comp1, rc=rc)
-    print *, "IGrid Comp Destroy returned"
+    print *, "GridComp Destroy returned"
 
     print *, "Component Test 1 finished"
-
 
     call ESMF_Finalize(rc=rc)
 

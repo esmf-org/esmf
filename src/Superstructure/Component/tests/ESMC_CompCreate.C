@@ -1,4 +1,4 @@
-// $Id: ESMC_CompCreate.C,v 1.13 2007/06/23 07:00:51 cdeluca Exp $
+// $Id: ESMC_CompCreate.C,v 1.14 2007/07/19 21:41:05 cdeluca Exp $
 //
 // Test code which creates a new Component.
 
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
     comp1 = ESMC_GridCompCreate(cname, ESMF_ATM, NULL, "igrid.rc", 
                                 clock, &rc);
 
-    printf("IGrid Comp Create returned, name = '%s'\n", cname);
+    printf("GridComp Create returned, name = '%s'\n", cname);
 
     rc = comp1->ESMC_GridCompPrint("");
     printf("Comp Print returned\n");

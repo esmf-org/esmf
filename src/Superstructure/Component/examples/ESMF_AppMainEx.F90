@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.29 2007/06/23 07:00:49 cdeluca Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.30 2007/07/19 21:41:04 cdeluca Exp $
 !
 ! Example code for a main Application program. 
 
@@ -10,14 +10,14 @@
 !
 ! !DESCRIPTION:
 ! Example of what a main program which uses ESMF might look like, along
-!  with 2 IGridded Components and a Coupler Component.  
+!  with 2 Gridded Components and a Coupler Component.  
 !  (In a real application each Component would probably be in separate files.)
 !
 !EOP
 
 !BOC
 !-------------------------------------------------------------------------
-!   ! Example IGridded Component that the main program will call.
+!   ! Example Gridded Component that the main program will call.
 
     module PHYS_mod
 
@@ -80,11 +80,11 @@
     end subroutine my_final
 
     end module
-!   ! End of IGridded Component module
+!   ! End of Gridded Component module
 !-------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
-!   ! Start of a Second IGridded Component module
+!   ! Start of a Second Gridded Component module
     module DYNM_mod
 
     use ESMF_Mod
@@ -146,7 +146,7 @@
     end subroutine my_final
 
     end module
-!   ! End of Second IGridded Component module
+!   ! End of Second Gridded Component module
 !-------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -213,7 +213,7 @@
     end subroutine my_final
 
     end module
-!   ! End of IGridded Component module
+!   ! End of Gridded Component module
 !-------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 
 This directory contains the starting files needed to build an ESMF
-Application with: sequential execution, a pairwise Coupling Component,
-a main program in Fortran, and the same executable is started on each
+Application with: sequential execution, a pairwise Coupler Component,
+a main program in Fortran, and the same executable on each
 computational node (SPMD).
 
 
@@ -12,10 +12,10 @@ each stage of execution.
 
 
 To use these files as a basis for a real application begin by copying
-them to another directory.  Then edit the child Coupler and IGrid
+them to another directory.  Then edit the child Coupler and Gridded
 Component Template files to reflect the actual data passed between
 components and the computations necessary.  If needed, edit the Parent
-IGrid Component file.  The AppDriver file should be useable for
+Gridded Component file.  The AppDriver file should be useable for
 most applications without changes.
 
 

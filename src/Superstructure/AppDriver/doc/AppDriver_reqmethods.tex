@@ -1,4 +1,4 @@
-% $Id: AppDriver_reqmethods.tex,v 1.8 2007/06/23 04:00:50 cdeluca Exp $
+% $Id: AppDriver_reqmethods.tex,v 1.9 2007/07/19 21:41:03 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@ documentation.
 The required function of the set services subroutine is to
 register the rest of the required functions in the component,
 currently initialize, run, and finalize methods.  The ESMF method \\
-{\tt ESMF\_<IGrid/Cpl>CompSetEntryPoint()} should be called for
+{\tt ESMF\_<Grid/Cpl>CompSetEntryPoint()} should be called for
 each of the required subroutines.  
 
 The names of the initialize, run, and finalize user-code 
@@ -43,11 +43,11 @@ between different components.
 
 Within the set services routine, the user can also register a 
 private data block by calling the 
-{\tt ESMF\_<IGrid|Cpl>CompSetInternalState} method.
+{\tt ESMF\_<Grid|Cpl>CompSetInternalState} method.
 
 Note that a component does not call its own set services routine;
 the AppDriver or parent component code which is creating a component 
-will first call {\tt ESMF\_<IGrid/Cpl>CompCreate()} to create an "empty" 
+will first call {\tt ESMF\_<Grid/Cpl>CompCreate()} to create an "empty" 
 component, and then must call the component-specific set services routine 
 to associate ESMF-standard methods to user-code methods, and to create
 the VM in which this component will run. After set 
@@ -58,7 +58,7 @@ routines as required.
 \subsubsection{User-Code Initialize, Run, and Finalize Methods}
 
 User-code initialize, run, and finalize routines must be provided for
-each component.  See Sections \ref{sec:IGridSetServ} and \ref{sec:CplSetServ}
+each component.  See Sections \ref{sec:GridSetServ} and \ref{sec:CplSetServ}
 for the prescribed interfaces and examples of how to set these up.
 
 

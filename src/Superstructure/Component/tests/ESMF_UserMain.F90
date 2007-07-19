@@ -1,4 +1,4 @@
-! $Id: ESMF_UserMain.F90,v 1.16 2007/06/23 07:00:54 cdeluca Exp $
+! $Id: ESMF_UserMain.F90,v 1.17 2007/07/19 21:41:06 cdeluca Exp $
 !
 ! Test code which creates a new Application Component. 
 !   Expects to be compiled with ESMF_UserCComp.F90 and ESMF_UserGComp.F90
@@ -50,13 +50,13 @@
 !-------------------------------------------------------------------------
 !   ! Test 1:
 !   !
-!   !  Create an top component which in turn creates 2 IGridded components and
-!   !    a Coupler component.
+!   !  Create an top component which in turn creates 2 Gridded Components and
+!   !    a Coupler Component.
  
     print *, "Application Test 1:"
 
     !-------------------------------------------------------------------------
-    !  Create the top level IGridded Component
+    !  Create the top level Gridded Component
 
     tname = "Test Application"
     configFile="/home/nancy/models/startup.conf"
@@ -90,7 +90,7 @@
 
 
     !-------------------------------------------------------------------------
-    !  Create the 2 igridded components
+    !  Create the 2 Gridded Components
 
     igrid1 = ESMF_IGridCreate("ocean igrid", rc=rc)
     gname1 = "Ocean"
@@ -98,7 +98,7 @@
                                     mtype=ESMF_OCEAN, igrid=igrid1, &
                                     config=tconfig, rc=rc)  
 
-    print *, "IGrid Comp Create completed, name = ", trim(gname1)
+    print *, "GridComp Create completed, name = ", trim(gname1)
 
     igrid2 = ESMF_IGridCreate("atm igrid", rc=rc)
     gname2 = "Atmosphere"
@@ -106,7 +106,7 @@
                                     mtype=ESMF_ATM, igrid=igrid2, &
                                     config=tconfig, rc=rc)  
 
-    print *, "IGrid Comp Create completed, name = ", trim(gname2)
+    print *, "GridComp Create completed, name = ", trim(gname2)
 
     !-------------------------------------------------------------------------
     !  Create the coupler

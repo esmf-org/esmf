@@ -1,4 +1,4 @@
-% $Id: CplComp_desc.tex,v 1.8 2007/06/23 07:00:49 cdeluca Exp $
+% $Id: CplComp_desc.tex,v 1.9 2007/07/19 21:41:04 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -14,13 +14,13 @@
 In a large, multi-component application such as a weather 
 forecasting or climate prediction system running within ESMF, 
 physical domains and major system functions are represented 
-as IGridded Components 
+as Gridded Components 
 (see Section \ref{sec:GridComp}).  A Coupler Component, or 
 {\tt ESMF\_CplComp}, arranges and executes the data 
-transformations between the IGridded Components.  Ideally, 
+transformations between the Gridded Components.  Ideally, 
 Coupler Components should contain all the information 
 about inter-component communication for an application.
-This enables the IGridded Components in the application to be 
+This enables the Gridded Components in the application to be 
 used in multiple contexts; that is, used in different coupled 
 configurations without changes to their source code. 
 For example, the same atmosphere might in one case be coupled 
@@ -28,16 +28,16 @@ to an ocean in a hurricane prediction model, and in another
 coupled to a data assimilation system for numerical weather 
 prediction.
 
-Like IGridded Components, Coupler Components have two parts, one
+Like Gridded Components, Coupler Components have two parts, one
 that is provided by the user and another that is part of the 
 framework.  The user-written portion of the software is the coupling
-code necessary for a particular exchange between IGridded Components.  
+code necessary for a particular exchange between Gridded Components.  
 The term ``user-written'' is somewhat misleading here, since within 
 a Coupler Component the user can leverage ESMF infrastructure 
 software for regridding, redistribution, lower-level communications, 
 calendar management, and other functions.  However, ESMF is unlikely 
 to offer all the software necessary to customize a data transfer
-between IGridded Components.  ESMF does not currently offer tools 
+between Gridded Components.  ESMF does not currently offer tools 
 for unit tranformations or time averaging operations, so users 
 must manage those operations themseves.
 
@@ -63,6 +63,6 @@ might be associated with the standard initialize routine in a
 Coupler Component.
 
 Coupler Components can be written to transform data between a 
-pair of IGridded Components, or a single Coupler Component can couple 
-more than two IGridded Components.
+pair of Gridded Components, or a single Coupler Component can couple 
+more than two Gridded Components.
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.162 2007/07/10 01:48:58 samsoncheung Exp $
+! $Id: ESMF_Comp.F90,v 1.163 2007/07/19 21:41:05 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -206,7 +206,7 @@
 !------------------------------------------------------------------------------
 !     ! ESMF_GridComp
 !
-!     ! IGridcomp wrapper
+!     ! GridComp wrapper
 
       type ESMF_GridComp
 #ifndef ESMF_SEQUENCE_BUG
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.162 2007/07/10 01:48:58 samsoncheung Exp $'
+      '$Id: ESMF_Comp.F90,v 1.163 2007/07/19 21:41:05 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -516,7 +516,7 @@ end function
 !   \item[{[config]}]
 !    Already created {\tt config} object.
 !   \item[{[igrid]}]
-!    Default {\tt igrid} for a IGridded {\tt Component}.
+!    Default {\tt igrid} for a Gridded {\tt Component}.
 !   \item[{[clock]}]
 !    Private {\tt clock} for this {\tt Component}.
 !   \item[{[parent]}]
@@ -627,7 +627,7 @@ end function
           endif
         endif
 
-        ! for igridded components, the model type it represents
+        ! for Gridded Components, the model type it represents
         if (present(gridcomptype)) then
           compp%gridcomptype = gridcomptype
         else
@@ -683,7 +683,7 @@ end function
           ! compp%config = ?
         endif
 
-        ! default igrid for a igridded component
+        ! default igrid for a Gridded Component
         if (present(igrid)) then
           compp%igrid = igrid
         else
