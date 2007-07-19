@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.97 2007/07/18 23:05:35 theurich Exp $
+// $Id: ESMC_Array.C,v 1.98 2007/07/19 20:14:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.97 2007/07/18 23:05:35 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.98 2007/07/19 20:14:26 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2071,6 +2071,19 @@ int Array::sparseMatMulStore(
 
   // size in bytes of each piece of data
   int dataSize = ESMC_TypeKindSize(typekindArg);
+  
+  // todo: the current implementation requires (dimCount == rank)
+  // todo: remove the following test if that limitation has been removed
+  if (srcArray->rank != srcArray->distgrid->getDimCount()){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+      "- Currently only (rank == dimCount) supported", &rc);
+    return rc;
+  }
+  if (dstArray->rank != dstArray->distgrid->getDimCount()){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+      "- Currently only (rank == dimCount) supported", &rc);
+    return rc;
+  }
 
   //TODO: maybe I will need these VMs to support exec() in model components?
 #if 0   
@@ -2142,7 +2155,6 @@ int Array::sparseMatMulStore(
   // todo: use nb-allgather and wait right before needed below
   int *dstCellCountList = new int[petCount];
   vm->vmk_allgather(&dstCellCount, dstCellCountList, sizeof(int));
-  
   
   // local structs to simplify code
 
