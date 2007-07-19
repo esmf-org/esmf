@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2 2006/10/20 18:53:07 theurich Exp $
+# $Id: build_rules.mk,v 1.3 2007/07/19 20:36:53 svasquez Exp $
 #
 # Unicos.pgi.default
 #
@@ -93,7 +93,7 @@ ESMF_F90LINKRPATHS += $(ESMF_RPATHPREFIX)$(shell $(ESMF_DIR)/scripts/libpath.pgC
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lrt -lC $(shell $(ESMF_DIR)/scripts/libs.pgCC $(ESMF_CXXCOMPILER))
+ESMF_F90LINKLIBS += -lstd -lrt -lC $(shell $(ESMF_DIR)/scripts/libs.pgCC $(ESMF_CXXCOMPILER))
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
