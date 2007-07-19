@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxUTest.F90,v 1.2 2007/07/17 22:46:58 svasquez Exp $
+! $Id: ESMF_ArrayArbIdxUTest.F90,v 1.3 2007/07/19 22:31:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxUTest.F90,v 1.2 2007/07/17 22:46:58 svasquez Exp $'
+    '$Id: ESMF_ArrayArbIdxUTest.F90,v 1.3 2007/07/19 22:31:20 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -178,8 +178,6 @@ program ESMF_ArrayArbIdxUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayGet(dstArray, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
-  farrayPtr = 0     ! initialize
   
   ! The dstDistgrid evenly divides 12 cells across the 6 DEs (becaues default
   ! is 1 DE per PET and there are 6 PETs running this example).

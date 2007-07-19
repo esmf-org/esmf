@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.14 2007/06/27 20:36:11 cdeluca Exp $
+! $Id: user_model2.F90,v 1.15 2007/07/19 22:31:20 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -101,7 +101,6 @@ module user_model2
    
     ! Reset the destination Array
     call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=status)
-    farrayPtr = 0.d0
 
     rc = ESMF_SUCCESS
 
