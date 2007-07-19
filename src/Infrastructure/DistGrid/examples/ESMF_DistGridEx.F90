@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.18 2007/07/18 18:18:02 theurich Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.19 2007/07/19 20:59:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -194,7 +194,8 @@ program ESMF_DistGridEx
 !
 !BOC
   allocate(dimExtent(2, 0:5)) ! (dimCount, deCount)
-  call ESMF_DistGridGet(distgrid, delayout=delayout, dimExtent=dimExtent, rc=rc)
+  call ESMF_DistGridGet(distgrid, delayout=delayout, &
+    indexCountPDimPDe=dimExtent, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -206,7 +207,7 @@ program ESMF_DistGridEx
     do dim=1, 2
       allocate(localIndexList(dimExtent(dim, de))) ! allocate list to hold indices
       call ESMF_DistGridGet(distgrid, localDe=localDe, dim=dim, &
-        localIndexList=localIndexList, rc=rc)
+        indexList=localIndexList, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
       print *, "local DE ", localDe," - DE ",de," localIndexList along dim=", &
         dim," :: ", localIndexList
@@ -557,19 +558,19 @@ program ESMF_DistGridEx
 !EOE
 ! 
 !BOC
-  allocate(deBlockList(2, 2, 6))  ! (dimCount, 3, deCount)
-  deBlockList(:,1,1) = (/1,1/)  ! minIndex
-  deBlockList(:,2,1) = (/3,2/)  ! maxIndex
-  deBlockList(:,1,2) = (/4,1/)  ! minIndex
-  deBlockList(:,2,2) = (/5,2/)  ! maxIndex
+  allocate(deBlockList(2, 2, 6))  ! (dimCount, 2, deCount)
+  deBlockList(:,1,1) = (/1,1/)  ! minIndex  1st deBlock
+  deBlockList(:,2,1) = (/3,2/)  ! maxIndex  1st deBlock
+  deBlockList(:,1,2) = (/4,1/)  ! minIndex  2nd deBlock
+  deBlockList(:,2,2) = (/5,2/)  ! maxIndex  2nd deBlock
   deBlockList(:,1,3) = (/1,3/)
   deBlockList(:,2,3) = (/2,4/)
   deBlockList(:,1,4) = (/3,3/)
   deBlockList(:,2,4) = (/5,4/)
   deBlockList(:,1,5) = (/1,5/)
   deBlockList(:,2,5) = (/3,5/)
-  deBlockList(:,1,6) = (/4,5/)
-  deBlockList(:,2,6) = (/5,5/)
+  deBlockList(:,1,6) = (/4,5/)  ! minIndex  6th deBlock
+  deBlockList(:,2,6) = (/5,5/)  ! maxInbex  6th deBlock
 !EOC
 !BOC
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.22 2007/07/17 21:39:16 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.23 2007/07/19 20:59:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.22 2007/07/17 21:39:16 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.23 2007/07/19 20:59:04 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -419,8 +419,8 @@ contains
     endif
     
     ! Obtain DistGrid information
-    call ESMF_DistGridGet(opt_distgrid, dimCount=dimCount, dimExtent=dimExtent,&
-      rc=status)
+    call ESMF_DistGridGet(opt_distgrid, dimCount=dimCount, &
+      indexCountPDimPDe=dimExtent, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -506,7 +506,8 @@ contains
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(dimExtentInternal(dimCount,0:deCount-1))
-    call ESMF_DistGridGet(distgrid, dimExtent=dimExtentInternal, rc=status)
+    call ESMF_DistGridGet(distgrid, indexCountPDimPDe=dimExtentInternal, &
+      rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(localDeList(0:localDeCount-1))
@@ -532,7 +533,7 @@ contains
         return
       endif
       call ESMF_DistGridGet(distgrid, localDe=localDe, dim=dim, &
-        localIndexList=localIndexList, rc=status)
+        indexList=localIndexList, rc=status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
