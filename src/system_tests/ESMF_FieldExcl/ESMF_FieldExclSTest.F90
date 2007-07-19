@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.30 2007/06/23 07:00:58 cdeluca Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.31 2007/07/19 22:15:34 cdeluca Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -25,7 +25,7 @@
 !                 accuracy of the Regrid.  Those values are output for
 !                 each DE.
 !
-!                 The IGridded Components are running on separate sets of
+!                 The Gridded Components are running on separate sets of
 !                 PETs, concurrently.  The coupler is running on the
 !                 union of PETs (which is one less PET than the total number
 !                 of PETs).

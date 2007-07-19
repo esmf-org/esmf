@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.31 2007/06/23 07:01:03 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.32 2007/07/19 22:15:35 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -47,7 +47,7 @@
 !     private to the module.
 !     \begin{description}
 !     \item [comp]
-!           Pointer to a {\tt IGridded Component} object.
+!           Pointer to a {\tt Gridded Component} object.
 !     \item [rc]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -98,11 +98,11 @@
 !
 ! !DESCRIPTION:
 !     This subroutine is the registered init routine.  It reads input,
-!     creates the {\tt IGrid}, attaches it to the {\tt IGridded Component},
+!     creates the {\tt IGrid}, attaches it to the {\tt Gridded Component},
 !     initializes data, and sets the import and export {\tt States}.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt IGridded Component} object.
+!           Pointer to a {\tt Gridded Component} object.
 !     \item [import_state]
 !           Pointer to a {\tt State} object containing the import list.
 !     \item [export_state]
@@ -257,7 +257,7 @@
 !     FlowSolver.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt IGridded Component} object.
+!           Pointer to a {\tt Gridded Component} object.
 !     \item [clock]
 !           Pointer to a {\tt Clock} object.
 !     \item [{[rc]}]
@@ -562,7 +562,7 @@
 !     algorithm and checks the output interval.
 !     \begin{description}
 !     \item [ccomp]
-!           Pointer to a {\tt IGridded Component} object.
+!           Pointer to a {\tt Gridded Component} object.
 !     \item [rc]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -1348,7 +1348,7 @@
 !     run.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt IGridded Component} object.
+!           Pointer to a {\tt Gridded Component} object.
 !     \item [clock]
 !           Pointer to a {\tt Clock} object.
 !     \item [file_no]
@@ -1453,7 +1453,7 @@
 !     process.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt IGridded Component} object.
+!           Pointer to a {\tt Gridded Component} object.
 !     \item [import_state]
 !           Pointer to a {\tt State} object containing the import list.
 !     \item [export_state]

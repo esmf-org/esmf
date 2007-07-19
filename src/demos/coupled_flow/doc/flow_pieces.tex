@@ -2,12 +2,12 @@
 \section{Program Organization}
 
 The demonstration program consists of a top level Application
-Driver, a top level IGridded Component, and nested within this IGridded
-Component are 3 subcomponents: a Coupler Component and 2 IGridded Components.
+Driver, a top level Gridded Component, and nested within this Gridded
+Component are 3 subcomponents: a Coupler Component and 2 Gridded Components.
 
 The following diagram shows this organization.  Note that there
 is no direct communication between the subcomponents; all
-interactions are mediated by the top level IGridded Component.
+interactions are mediated by the top level Gridded Component.
 
 Each component communicates via Initialize, run, and finalize
 subroutine calls.  These go through the ESMF where

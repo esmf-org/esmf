@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.4 2007/06/23 07:00:56 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.5 2007/07/19 22:15:33 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -99,7 +99,7 @@
 !     private to the module.
 !     \begin{description}
 !     \item [comp]
-!           A IGridded Component.
+!           A Gridded Component.
 !     \item [rc]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -142,11 +142,11 @@
 !
 ! !DESCRIPTION:
 !     This subroutine is the registered init routine.  It reads input,
-!     creates the IGrid, attaches it to the IGridded Component,
+!     creates the IGrid, attaches it to the Gridded Component,
 !     initializes data, and sets the import and export States.
 !     \begin{description}
 !     \item [gcomp]
-!           A IGridded Component.
+!           A Gridded Component.
 !     \item [import\_state]
 !           State containing the import list.
 !     \item [export\_state]
@@ -335,7 +335,7 @@
 !     It sets the export fields in the export state for what's required.
 !     \begin{description}
 !     \item [gcomp]
-!           A IGridded Component.
+!           A Gridded Component.
 !     \item [import\_state]
 !           State containing the import list.
 !     \item [export\_state]
@@ -404,7 +404,7 @@
 !     FlowSolver.
 !     \begin{description}
 !     \item [gcomp]
-!           A IGridded Component.
+!           A Gridded Component.
 !     \item [clock]
 !           Clock describing the external time.
 !     \item [{[rc]}]
@@ -712,7 +712,7 @@
 !     algorithm and checks the output interval.
 !     \begin{description}
 !     \item [gcomp]
-!           A IGridded Component.
+!           A Gridded Component.
 !     \item [import\_state]
 !           State containing data obtained from other components.
 !     \item [export\_state]
@@ -1582,7 +1582,7 @@
 !     run.
 !     \begin{description}
 !     \item [gcomp]
-!           A IGridded Component.
+!           A Gridded Component.
 !     \item [clock]
 !           Clock describing the external time.
 !     \item [file\_no]
@@ -1697,7 +1697,7 @@
 !     process.
 !     \begin{description}
 !     \item [gcomp]
-!           A IGridded Component.
+!           A Gridded Component.
 !     \item [import\_state]
 !           State containing the import list.
 !     \item [export\_state]

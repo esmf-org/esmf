@@ -1,12 +1,12 @@
-! $Id: CoupledFlowDemo.F90,v 1.4 2007/06/23 07:00:56 cdeluca Exp $
+! $Id: CoupledFlowDemo.F90,v 1.5 2007/07/19 22:15:33 cdeluca Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
 !
-! !MODULE: CoupledFlowDemo.F90 - Top level IGridded Component source
+! !MODULE: CoupledFlowDemo.F90 - Top level Gridded Component source
 !
 ! !DESCRIPTION:
-! ESMF Coupled Flow Demo - A IGridded Component which can be called either 
+! ESMF Coupled Flow Demo - A Gridded Component which can be called either 
 !   directly from an Application Driver or nested in a larger application.
 !   It contains 2 nested subcomponents and 1 Coupler Component which does 
 !   two-way coupling between the subcomponents.
@@ -177,7 +177,7 @@
 ! !DESCRIPTION:
 ! \subsubsection{Example of Component Creation:}
 !
-!   The following code creates 2 IGridded Components on the same set of PETs 
+!   The following code creates 2 Gridded Components on the same set of PETs 
 !   (persistent execution threads) as the top level Component, but each 
 !   of the IGrids useds by these Components will have a different connectivity.
 !   It also creates a Coupler Component on the same PET set.

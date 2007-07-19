@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.5 2007/06/24 23:24:11 cdeluca Exp $
+! $Id: CoupledFlowApp.F90,v 1.6 2007/07/19 22:15:33 cdeluca Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -7,7 +7,7 @@
 !
 ! !DESCRIPTION:
 ! ESMF Application Wrapper for Coupled Flow Demo.  This file contains the
-!  main program, and creates a top level ESMF IGridded Component to contain
+!  main program, and creates a top level ESMF Gridded Component to contain
 !  all other Components.
 !
 !
@@ -154,7 +154,7 @@
 
 !BOP
 !\begin{verbatim}
-    ! Create the top level IGridded Component.
+    ! Create the top level Gridded Component.
     compGridded = ESMF_GridCompCreate(name="Coupled Flow Demo", rc=rc)
 !\end{verbatim}
 !EOP 
@@ -238,7 +238,7 @@
       call ESMF_IGridDistribute(igrid, delayout=DELayoutTop, rc=rc)
 
 !\end{verbatim}
-!     The IGrid can then be attached to the IGridded Component with a set call:
+!     The IGrid can then be attached to the Gridded Component with a set call:
 !\begin{verbatim}
      call ESMF_GridCompSet(compGridded, igrid=igrid, rc=rc)
 !\end{verbatim}

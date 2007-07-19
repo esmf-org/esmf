@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.4 2007/06/23 07:00:56 cdeluca Exp $
+! $Id: InjectorMod.F90,v 1.5 2007/07/19 22:15:33 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -76,7 +76,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp]
-!          A IGridded Component.
+!          A Gridded Component.
 !     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors,
 !          {\tt ESMF\_FAILURE} othewise.
@@ -138,7 +138,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[gcomp]
-!           A IGridded Component.
+!           A Gridded Component.
 !     \item[importState]
 !           State containing the import list.
 !     \item[exportState]
@@ -304,7 +304,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp] 
-!           A IGridded Component.
+!           A Gridded Component.
 !     \item[importState]
 !           State containing the import list.
 !     \item[exportState]
@@ -373,7 +373,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp] 
-!           A IGridded Component.
+!           A Gridded Component.
 !     \item[importState]
 !           State containing the import list.
 !     \item[exportState]
@@ -498,7 +498,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp] 
-!           A IGridded Component.
+!           A Gridded Component.
 !     \item[importState]
 !           State containing the import list.
 !     \item[exportState]
