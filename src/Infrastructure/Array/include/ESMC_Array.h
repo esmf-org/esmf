@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.66 2007/07/18 21:02:25 theurich Exp $
+// $Id: ESMC_Array.h,v 1.67 2007/07/19 20:15:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -145,8 +145,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     const int *getDeCellCount()             const {return deCellCount;}
     const int *getDimmap()                  const {return dimmap;}
     const int *getInverseDimmap()           const {return inverseDimmap;}
-    DistGrid *getDistgrid()                 const {return distgrid;}
-    DELayout *getDelayout()                 const {return delayout;}
+    DistGrid *getDistGrid()                 const {return distgrid;}
+    DELayout *getDELayout()                 const {return delayout;}
     int getLinearIndexExclusive(int localDe, int *index, int *rc=NULL) const;
     const char *getName()               const {return ESMC_BaseGetName();}
     int setName(char *name){return ESMC_BaseSetName(name, "Array");}
