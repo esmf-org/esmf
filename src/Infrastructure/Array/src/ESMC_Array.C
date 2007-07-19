@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.98 2007/07/19 20:14:26 theurich Exp $
+// $Id: ESMC_Array.C,v 1.99 2007/07/19 22:30:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.98 2007/07/19 20:14:26 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.99 2007/07/19 22:30:45 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4237,7 +4237,8 @@ int Array::sparseMatMul(
 //
   Array *srcArray,                      // in    -
   Array *dstArray,                      // inout -
-  ESMC_RouteHandle **routehandle        // inout -
+  ESMC_RouteHandle **routehandle,       // inout -
+  ESMC_Logical zeroflag                 // in    -
   ){    
 //
 // !DESCRIPTION:
@@ -4263,6 +4264,17 @@ int Array::sparseMatMul(
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to dstArray", &rc);
     return rc;
+  }
+  
+  if (zeroflag==ESMF_TRUE){
+    // zero out total regions of the dstArray for all localDEs
+    for (int i=0; i<dstArray->delayout->getLocalDeCount(); i++){
+      char *start = (char *)(dstArray->larrayBaseAddrList[i]);
+      int dataSize = ESMC_TypeKindSize(dstArray->typekind);
+      int cellCount =
+        dstArray->deCellCount[dstArray->delayout->getLocalDeList()[i]];
+      memset(start, 0, dataSize * cellCount);
+    }
   }
 
   // put a handle on the XXE in routehandle
