@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.9 2007/07/18 23:05:35 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.10 2007/07/19 04:14:27 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMCI_Grid.C,v 1.9 2007/07/18 23:05:35 theurich Exp $";
+  static const char *const version = "$Id: ESMCI_Grid.C,v 1.10 2007/07/19 04:14:27 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -1801,7 +1801,7 @@ int Grid::activate(
  
  
   // allocate and fill isDELBnd isDEUBnd
-   _createIsDEBnd(&isDELBnd,&isDEUBnd, distgrid, dimmap);
+  //   _createIsDEBnd(&isDELBnd,&isDEUBnd, distgrid, dimmap);
 
   // Set the name for this Grid object in the Base class
   ESMC_BaseSetName(_name, "Grid");

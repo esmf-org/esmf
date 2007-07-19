@@ -1,5 +1,5 @@
 
-! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.2 2007/07/18 21:45:31 oehmke Exp $
+! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.3 2007/07/19 04:14:26 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
 program ESMF_GridCreateEx
 
 !==============================================================================
-!EX_NOTWORKING_AMPLE        String used by test script to count examples.
+!EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 !BOE
@@ -86,9 +86,9 @@ program ESMF_GridCreateEx
   
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
-    print *, "PASS: ESMF_GridEx.F90"
+    print *, "PASS: ESMF_GridCreateRegFromDGEx.F90"
   else
-    print *, "FAIL: ESMF_GridEx.F90"
+    print *, "FAIL: ESMF_GridCreateRegFromDGEx.F90"
   endif
   
 end program
