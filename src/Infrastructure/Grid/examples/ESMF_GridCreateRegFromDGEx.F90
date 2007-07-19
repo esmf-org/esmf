@@ -1,5 +1,5 @@
 
-! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.3 2007/07/19 04:14:26 oehmke Exp $
+! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.4 2007/07/19 05:15:42 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -43,8 +43,6 @@ program ESMF_GridCreateEx
       integer:: rc, finalrc
       type(ESMF_VM):: vm
       type(ESMF_DistGrid) :: distgrid2D
-      real(ESMF_KIND_R8), pointer :: coordsX(:,:),coordsY(:,:)
-      integer :: gridSize(2)
       type(ESMF_Grid) :: grid2D
 !EOC         
 
@@ -59,8 +57,7 @@ program ESMF_GridCreateEx
 !BOC
 
       distgrid2D = ESMF_DistGridCreate(minIndex=(/1,1/),      &
-                          maxIndex=(/gridSize(1),gridSize(2)/),     &
-                          rc=rc)  
+                          maxIndex=(/20,30/), rc=rc)  
 !EOC
 
 !BOE
