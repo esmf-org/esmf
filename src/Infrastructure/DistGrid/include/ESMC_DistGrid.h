@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.26 2007/07/18 23:05:08 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.27 2007/07/19 20:58:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -54,21 +54,23 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
   private:
     int dimCount;                 // rank of DistGrid
     int patchCount;               // number of patches in DistGrid
-    int *cellCountPPatch;         // number of cells [patchCount]
-    int *patchListPDe;            // patch indices [deCount]
     int *minIndexPDimPPatch;      // lower corner indices [dimCount*patchCount]
     int *maxIndexPDimPPatch;      // upper corner indices [dimCount*patchCount]
+    int *cellCountPPatch;         // number of cells [patchCount]
     int *cellCountPDe;            // number of cells [deCount]
+    int *patchListPDe;            // patch indices [deCount]
     int *contigFlagPDimPDe;       // flag contiguous indices [dimCount*deCount]
     int *indexCountPDimPDe;       // number of indices [dimCount*deCount]
     int **indexListPDimPLocalDe;  // local DEs' indices [dimCount*localDeCount]
                                   // [indexCountPDimPDe(localDe,dim)]
-    ESMC_Logical regDecompFlag;   // flag indicating regular decomposition
-    int **connectionList;         // list of connection elements
     int connectionCount;          // number of elements in connection list
+    int **connectionList;         // list of connection elements
     int *arbSeqIndexCountPLocalDe;// number of arb seq. indices [localDeCount]
+                                  // ==0: no arb seq indices for localDe
+                                  // ==cellCountPDe(localDe): arb seq indices
     int **arbSeqIndexListPLocalDe;// local arb sequence indices [localDeCount]
                                   // [arbSeqIndexCountPLocalDe(localDe)]
+    ESMC_Logical regDecompFlag;   // flag indicating regular decomposition
     // lower level object references
     DELayout *delayout;
     VM *vm;    
@@ -113,14 +115,14 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     // get() and set()
     int getDimCount()                   const {return dimCount;}
     int getPatchCount()                 const {return patchCount;}
-    const int *getCellCountPPatch()     const {return cellCountPPatch;}
-    const int *getPatchListPDe()        const {return patchListPDe;}
     const int *getMinIndexPDimPPatch()  const {return minIndexPDimPPatch;}
     const int *getMinIndexPDimPPatch(int patch, int *rc) const;
     const int *getMaxIndexPDimPPatch()  const {return maxIndexPDimPPatch;}
     const int *getMaxIndexPDimPPatch(int patch, int *rc) const;
+    const int *getCellCountPPatch()     const {return cellCountPPatch;}
     const int *getCellCountPDe()        const {return cellCountPDe;}
     int getCellCountPDe(int de, int *rc) const;
+    const int *getPatchListPDe()        const {return patchListPDe;}
     const int *getContigFlagPDimPDe()   const {return contigFlagPDimPDe;}
     int getContigFlagPDimPDe(int de, int dim, int *rc) const;
     const int *getIndexCountPDimPDe()   const {return indexCountPDimPDe;}

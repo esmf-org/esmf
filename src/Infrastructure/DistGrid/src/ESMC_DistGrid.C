@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.28 2007/07/18 23:05:09 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.29 2007/07/19 20:58:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.28 2007/07/18 23:05:09 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.29 2007/07/19 20:58:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1539,12 +1539,12 @@ int DistGrid::getContigFlagPDimPDe(
   // check input
   int deCount = delayout->getDeCount();
   if (de < 0 || de > deCount-1){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- Specified DE out of bounds", rc);
     return NULL;
   }
   if (dim < 1 || dim > dimCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- Specified dim out of bounds", rc);
     return NULL;
   }
@@ -1585,7 +1585,7 @@ int DistGrid::getCellCountPDe(
   // check input
   int deCount = delayout->getDeCount();
   if (de < 0 || de > deCount-1){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- Specified DE out of bounds", rc);
     return NULL;
   }
@@ -1628,7 +1628,7 @@ int DistGrid::getSequenceIndex(
   // check input
   int localDeCount = delayout->getLocalDeCount();
   if (localDe < 0 || localDe > localDeCount-1){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- Specified local DE out of bounds", rc);
     return -1;
   }
@@ -1694,7 +1694,7 @@ const int *DistGrid::getMinIndexPDimPPatch(
   
   // check input
   if (patch < 1 || patch > patchCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- Specified patch out of bounds", rc);
     return NULL;
   }
@@ -1734,7 +1734,7 @@ const int *DistGrid::getMaxIndexPDimPPatch(
   
   // check input
   if (patch < 1 || patch > patchCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- Specified patch out of bounds", rc);
     return NULL;
   }
@@ -1776,12 +1776,12 @@ const int *DistGrid::getIndexListPDimPLocalDe(
   // check input
   int localDeCount = delayout->getLocalDeCount();
   if (localDe < 0 || localDe > localDeCount-1){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- Specified local DE out of bounds", rc);
     return NULL;
   }
   if (dim < 1 || dim > dimCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- Specified dim out of bounds", rc);
     return NULL;
   }
@@ -1822,7 +1822,7 @@ const int *DistGrid::getArbSeqIndexListPLocalDe(
   // check input
   int localDeCount = delayout->getLocalDeCount();
   if (localDe < 0 || localDe > localDeCount-1){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- Specified local DE out of bounds", rc);
     return NULL;
   }
