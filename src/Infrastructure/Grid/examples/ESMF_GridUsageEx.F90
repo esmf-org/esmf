@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.8 2007/07/20 05:12:14 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.9 2007/07/20 21:32:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,14 +34,15 @@ program ESMF_GridCreateEx
       type(ESMF_VM):: vm
       type(ESMF_ArraySpec) ::  arrayspec2D
 
-      real(ESMF_KIND_R8), pointer :: coordX(:,:), coordY(:,:), coordZ(:)
-      real(ESMF_KIND_R8), pointer :: cornerX(:,:), cornerY(:,:)
+      real(ESMF_KIND_R8), pointer :: centerX(:,:,:), centerY(:,:,:), centerZ(:,:,:)
+      real(ESMF_KIND_R8), pointer :: cornerX(:,:,:), cornerY(:,:,:)
+      real(ESMF_KIND_R8), pointer :: coordX(:,:), coordY(:,:)
 
       integer :: i,j,k
-      integer :: lbnd(2), ubnd(2), lbnd_corner(2), ubnd_corner(2)
+      integer :: lbnd(3), ubnd(3), lbnd_corner(3), ubnd_corner(3)
       integer, allocatable :: petMap(:,:,:), localIndices(:,:)
 
-      type(ESMF_Grid) :: grid, grid2D, grid3D, grid4D
+      type(ESMF_Grid) :: grid2D, grid3D, grid4D
       type(ESMF_Array) :: arrayCoordX, arrayCoordY
 
       type(ESMF_distGrid) :: distgrid2D,distgrid4D
@@ -150,9 +151,8 @@ program ESMF_GridCreateEx
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 
-#ifdef LOCAL_NOT_IMPL
-!BOEI
-!\subsubsection{Creating a Regularly Distributed Grid with
+!BOE
+!\subsubsection{Creating an Irregularly Distributed Grid with
 !               Horizontal Curvilinear Coordinates
 !               and multiple stagger locations, 
 !               with an Undistributed Vertical Dimension}
@@ -168,29 +168,24 @@ program ESMF_GridCreateEx
 ! dimension because the size of the depth dimension is typically
 ! much less than that of the horizontal grid dimension.
 !
-!EOEI
+!EOE
 
-!BOCI
+!BOC
    !-------------------------------------------------------------------
    ! Create the Grid:  Allocate space for the Grid object.  The
    ! grid is defined to be 180 elements in Dim1 (longitude), 90 in
    ! Dim2 (longitude), and 40 in Dim3 (depth).  The first dimension is
-   ! decomposed over 10 DEs, the second over 5 DEs, and the third is 
+   ! decomposed over 4 DEs, the second over 3 DEs, and the third is 
    ! undistributed.  The connectivity of the distribution specifies that
    ! the longitude dimension is periodic, that the poles are defined at 
    ! each end of the latitude dimension, and the depth defaults to 
    ! aperiodic bounds. (See section~\ref{example:TileEdgeConn})
    !-------------------------------------------------------------------
-   grid3D=ESMF_GridCreateShape( 
-              maxIndex=(/180,90,40/),  &   ! upper extent of grid memory
-              regDecomp=(/10, 5, 1/),  &   ! block decomposition       
-              ! Specify connectivity
-              connDim1=(/ESMF_GRIDCONN_PERIODIC,ESMF_GRIDCONN_PERIODIC/),  &
-              connDim2=(/ESMF_GRIDCONN_POLE,ESMF_GRIDCONN_POLE/),          &
-              coordDep1=(/1,2/),       &  ! Coordinate dependencies (curvilinear horizontal)
-              coordDep2=(/1,2/),       &
-              coordDep3=(/3/),         &  ! Coordinate dependencies (rectilinear vertical)
-              indexflag=ESMF_GLOBAL,   &  ! Create grid with global indices
+   grid3D=ESMF_GridCreateShape(                    &
+              countsPerDEDim1=(/45,45,45,45/),     &
+              countsPerDEDim2=(/30,30,30/),        &
+              countsPerDEDim3=(/40/),              &
+              indexflag=ESMF_INDEX_GLOBAL,   &  ! Create grid with global indices
               rc=rc)
 
    !-------------------------------------------------------------------
@@ -198,34 +193,38 @@ program ESMF_GridCreateEx
    ! location.  Since no coordinate values are specified in this
    ! call no coordinate values are set yet.
    !-------------------------------------------------------------------
-   call ESMF_GridSetCoord(grid3D, ESMF_STAGGERLOC_CENTER, rc)
-   call ESMF_GridSetCoord(grid3D, ESMF_STAGGERLOC_CORNER, rc)
+   call ESMF_GridAllocCoord(grid3D, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+   call ESMF_GridAllocCoord(grid3D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
 
 !----------------------------------------------------------------------
 ! Fill in  the coordinates for the non-center stagger location first.
 !----------------------------------------------------------------------
    !-------------------------------------------------------------------
    ! Get the local bounds of the global indexing for the first
-   ! coordinate array on the local DE.
+   ! coordinate array on the local DE. If the number of processors
+   ! is less than the total number of DEs then the rest of this
+   ! example would be in a loop over the local DEs. 
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileInfo(grid3D, ESMF_Coord1,          &
+   call ESMF_GridGetLocalTileInfo(grid3D, coord=1,          &
           staggerLoc=ESMF_STAGGERLOC_CORNER,                    &
-          computationalLBound=lbnd_corner,                      &
-          computationalUBound=ubnd_corner,                      &
+          staggerLBound=lbnd_corner,                      &
+          staggerUBound=ubnd_corner,                      &
           rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the pointer to the first coordinate array from inside
    ! the Grid object.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid3D, ESMF_Coord1, cornerX, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid3D, coord=1, fptr=cornerX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension.
    !-------------------------------------------------------------------
+   do k=lbnd_corner(3),ubnd_corner(3)
    do j=lbnd_corner(2),ubnd_corner(2)
    do i=lbnd_corner(1),ubnd_corner(1)
-        cornerX(i,j) = (i-1)*(360.0/180.0)
+        cornerX(i,j,k) = (i-1)*(360.0/180.0)
+   enddo
    enddo
    enddo
 
@@ -233,7 +232,7 @@ program ESMF_GridCreateEx
    ! Get the local bounds of the global indexing for the second
    ! coordinate array on the local DE.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileInfo(grid3D, ESMF_Coord2, &
+   call ESMF_GridGetLocalTileInfo(grid3D, coord=1, &
           staggerLoc=ESMF_STAGGERLOC_CORNER,                    &
           computationalLBound=lbnd_corner,                      &
           computationalUBound=ubnd_corner,                      &
@@ -243,14 +242,16 @@ program ESMF_GridCreateEx
    ! Get the pointer to the second coordinate array from inside
    ! the Grid object.
    !-------------------------------------------------------------------
-   call ESMF_GridLocalTileGetCoord(grid3D, ESMF_Coord2, cornerY, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid3D, coord=2, fptr=cornerY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calcuate and set coordinates in the second dimension.
    !-------------------------------------------------------------------
+   do k=lbnd_corner(3),ubnd_corner(3)
    do j=lbnd_corner(2),ubnd_corner(2)
    do i=lbnd_corner(1),ubnd_corner(1)
-        cornerY(i,j) = (i-1)*(180.0/90.0)
+        cornerY(i,j,k) = (i-1)*(180.0/90.0)
+   enddo
    enddo
    enddo
 
@@ -262,22 +263,24 @@ program ESMF_GridCreateEx
    ! Get the local bounds of the global indexing for the first 
    ! coordinate array on the local DE.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileInfo(grid3D, ESMF_Coord1, &
-          computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
+   call ESMF_GridGetLocalTileInfo(grid3D, coord=1, &
+          staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the pointer to the first coordinate array from inside
    ! the Grid object.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid3D, ESMF_Coord1, coordX, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid3D, coord=1, fptr=centerX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension.
    !-------------------------------------------------------------------
+   do k=lbnd(3),ubnd(3)
    do j=lbnd(2),ubnd(2)
    do i=lbnd(1),ubnd(1)
-        coordX(i,j) = 0.25*(  cornerX(i,j) + cornerX(i+1,j) +     &
-                              cornerX(i+1,j+1) + cornerX(i,j+1)  )
+        centerX(i,j,k) = 0.25*(  cornerX(i,j,k) + cornerX(i+1,j,k) +     &
+                              cornerX(i+1,j+1,k) + cornerX(i,j+1,k)  )
+   enddo
    enddo
    enddo
 
@@ -285,49 +288,60 @@ program ESMF_GridCreateEx
    ! Get the local bounds of the global indexing for the second
    ! coordinate array on the local DE.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileInfo(grid3D, ESMF_Coord2, &
-          computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
+   call ESMF_GridGetLocalTileInfo(grid3D, coord=2, &
+          staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the pointer to the second coordinate array from inside
    ! the Grid object.
    !-------------------------------------------------------------------
-   call ESMF_GridLocalTileGetCoord(grid3D, ESMF_Coord2, coordY, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid3D, coord=2, fptr=centerY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calcuate and set coordinates in the second dimension.
    !-------------------------------------------------------------------
+   do k=lbnd(3),ubnd(3)
    do j=lbnd(2),ubnd(2)
    do i=lbnd(1),ubnd(1)
-        coordY(i,j) = 0.25*(  cornerY(i,j) + cornerY(i+1,j) +     &
-                              cornerY(i+1,j+1) + cornerY(i,j+1)  )
+        centerY(i,j,k) = 0.25*(  cornerY(i,j,k) + cornerY(i+1,j,k) +     &
+                              cornerY(i+1,j+1,k) + cornerY(i,j+1,k)  )
    enddo
    enddo
+   enddo
+
+   !-------------------------------------------------------------------
+   ! Get the local bounds of the global indexing for the third
+   ! coordinate array on the local DE.
+   !-------------------------------------------------------------------
+   call ESMF_GridGetLocalTileInfo(grid3D, coord=3, &
+          staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the pointer to the third coordinate array from inside
    ! the Grid object.
    !-------------------------------------------------------------------
-   call ESMF_GridLocalTileGetCoord(grid3D, ESMF_Coord3, coordZ, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid3D, coord=3, fptr=centerZ, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calcuate and set the vertical coordinates
    !-------------------------------------------------------------------
-   do k=1, 40
-        coordZ(k) = 4000.0*( (1./39.)*(i-1)  )**2
+   do k=lbnd(3),ubnd(3)
+   do j=lbnd(2),ubnd(2)
+   do i=lbnd(1),ubnd(1)
+        centerZ(i,j,k) = 4000.0*( (1./39.)*(k-1)  )**2
+   enddo
+   enddo
    enddo
 
-
-!EOCI
+!EOC
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid3D, rc=rc)
-#endif
 
 
-#ifdef LOCAL_NOT_IMP
-!BOEI
+
+!BOE
 !\subsubsection{Creating an Empty Grid in a Parent Component 
 ! for Completion in a Child Component}\label{sec:usage:setcommit}
 !
@@ -343,9 +357,9 @@ program ESMF_GridCreateEx
 ! {\tt ESMF\_GridSet()} calls. The following example uses the incremental
 ! technique to create a rectangular 10x20 grid with coordinates at the
 ! center and corner stagger locations. 
-!EOEI
+!EOE
 
-!BOCI
+!BOC
 !---------------------------------------------------------------------------
 ! IN THE PARENT COMPONENT:
 ! Create an empty grid in the parent component for use in a child component.
@@ -353,9 +367,7 @@ program ESMF_GridCreateEx
 ! The child's [vm or pet list] is passed into the create call so that
 ! the Grid is defined on the appropriate subset of the parent's PETs. 
 !---------------------------------------------------------------------------
-   grid2D=ESMF_GridCreateEmpty(                       &
-                               petList=/1,2,3,4/,     & ! Argument NOT IMPLEMENTED
-                               rc=rc)
+   grid2D=ESMF_GridCreateEmpty(rc=rc)
 
 !---------------------------------------------------------------------------
 ! IN THE CHILD COMPONENT:
@@ -368,21 +380,28 @@ program ESMF_GridCreateEx
                           countsPerDEDim2=(/7,7,6/), rc=rc)
 
 !---------------------------------------------------------------------------
+! IN THE CHILD COMPONENT:
+! Commit 
+!
+!---------------------------------------------------------------------------
+   call ESMF_GridCommit(grid2D, rc=rc)
+
+!---------------------------------------------------------------------------
 ! Set Grid coordinates at the cell center location.
 !---------------------------------------------------------------------------
-   call ESMF_GridSetCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+   call ESMF_GridAllocCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
 !---------------------------------------------------------------------------
 ! Set Grid coordinates at the corner stagger location.
 !---------------------------------------------------------------------------
-   call ESMF_GridSetCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
-!EOCI
+   call ESMF_GridAllocCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
+
+!EOC
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid2D, rc=rc)
 
-#endif
 
 !BOE
 !
