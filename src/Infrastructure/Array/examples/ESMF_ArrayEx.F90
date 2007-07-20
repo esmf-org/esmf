@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.20 2007/07/13 18:51:58 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.21 2007/07/20 05:47:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -991,6 +991,7 @@ program ESMF_ArrayEx
 !BOE
 !
 ! \subsubsection{SparseMatMul communication}
+! \label{Array:SparseMatMul}
 ! 
 ! Sparse matrix multiplication is a fundamental Array communication method. One
 ! frequently used application of this method is the interpolation between pairs

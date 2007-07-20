@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.23 2007/07/19 20:59:04 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.24 2007/07/20 05:47:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.23 2007/07/19 20:59:04 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.24 2007/07/20 05:47:09 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -87,7 +87,7 @@ module ESMF_ArrayGetMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     module procedure ESMF_ArrayGetDefault
-    module procedure ESMF_ArrayGetPDePDim
+    module procedure ESMF_ArrayGetPLocalDePDim
     TypeKindRankInterfaceMacro(ArrayGetFPtr)
     module procedure ESMF_ArrayGetLarray
     module procedure ESMF_ArrayGetTotalCellMask1D
@@ -128,8 +128,9 @@ contains
     indexflag, dimmap, inverseDimmap, exclusiveLBound, exclusiveUBound,&
     computationalLBound, computationalUBound, totalLBound, totalUBound, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
-    name, distgrid, dimCount, dimExtent, delayout, deCount, localDeCount, &
-    localDeList, rc)
+    name, distgrid, dimCount, patchCount, minIndexPDimPPatch, &
+    maxIndexPDimPPatch, patchListPDe, indexCountPDimPDe, delayout, deCount, &
+    localDeCount, localDeList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
@@ -152,7 +153,11 @@ contains
     character(len=*),              intent(out), optional :: name
     type(ESMF_DistGrid),           intent(out), optional :: distgrid
     integer,                       intent(out), optional :: dimCount
-    integer,                       intent(out), optional :: dimExtent(:,:)
+    integer,                       intent(out), optional :: patchCount
+    integer,                       intent(out), optional :: minIndexPDimPPatch(:,:)
+    integer,                       intent(out), optional :: maxIndexPDimPPatch(:,:)
+    integer,                       intent(out), optional :: patchListPDe(:)
+    integer,                       intent(out), optional :: indexCountPDimPDe(:,:)
     type(ESMF_DELayout),           intent(out), optional :: delayout
     integer,                       intent(out), optional :: deCount
     integer,                       intent(out), optional :: localDeCount
@@ -165,97 +170,105 @@ contains
 !
 ! This interface works for any number of DEs per PET.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!        Queried {\tt ESMF\_Array} object.
-!     \item[{[typekind]}]
-!        TypeKind of the Array object.
-!     \item[{[rank]}]
-!        Rank of the Array object.
-!     \item[{[larrayList]}]
-!        Upon return this holds a list of the associated {\tt ESMC\_LocalArray}
-!        objects. {\tt larrayList} must be allocated to be at least of size
-!        {\tt localDeCount}, i.e. the number of DEs associated with the calling
-!        PET.
-!     \item[{[indexflag]}]
-!       Upon return this flag indicates how the DE-local indices are defined.
-!       See section \ref{opt:indexflag} for a list of possible return values.
-!     \item[{[dimmap]}]
-!       Upon return this list holds the Array dimensions against which the
-!       DistGrid dimensions are mapped. {\tt dimmap} must be allocated to be
-!       at least of size {\tt dimCount}.
-!     \item[{[inverseDimmap]}]
-!       Upon return this list holds the DistGrid dimensions against which the
-!       Array dimensions are mapped. {\tt inverseDimmap} must be allocated to
-!       be at least of size {\tt rank}.
-!     \item[{[exclusiveLBound]}]
-!        Upon return this holds the lower bounds of the exclusive regions for
-!        all PET-local DEs. {\tt exclusiveLBound} must be allocated to be
-!        of size {\tt (dimCount, localDeCount)}.
-!     \item[{[exclusiveUBound]}]
-!        Upon return this holds the upper bounds of the exclusive regions for
-!        all PET-local DEs. {\tt exclusiveUBound} must be allocated to be
-!        of size {\tt (dimCount, localDeCount)}.
-!     \item[{[computationalLBound]}]
-!        Upon return this holds the lower bounds of the computational regions for
-!        all PET-local DEs. {\tt computationalLBound} must be allocated to be
-!        of size {\tt (dimCount, localDeCount)}.
-!     \item[{[computationalUBound]}]
-!        Upon return this holds the upper bounds of the computational regions for
-!        all PET-local DEs. {\tt computationalUBound} must be allocated to be
-!        of size {\tt (dimCount, localDeCount)}.
-!     \item[{[totalLBound]}]
-!        Upon return this holds the lower bounds of the total regions for
-!        all PET-local DEs. {\tt totalLBound} must be allocated to be
-!        of size {\tt (dimCount, localDeCount)}.
-!     \item[{[totalUBound]}]
-!        Upon return this holds the upper bounds of the total regions for
-!        all PET-local DEs. {\tt totalUBound} must be allocated to be
-!        of size {\tt (dimCount, localDeCount)}.
-!     \item[{[computationalLWidth]}]
-!        Upon return this holds the lower width of the computational regions for
-!        all PET-local DEs. {\tt computationalLWidth} must be allocated to be
-!        of size {\tt (dimCount, localDeCount)}.
-!     \item[{[computationalUWidth]}]
-!        Upon return this holds the upper width of the computational regions for
-!        all PET-local DEs. {\tt computationalUWidth} must be allocated to be
-!        of size {\tt (dimCount, localDeCount)}.
-!     \item[{[totalLWidth]}]
-!        Upon return this holds the lower width of the total memory regions for
-!        all PET-local DEs. {\tt computationalUWidth} must be allocated to be
-!        of size {\tt (dimCount, localDeCount)}.
-!     \item[{[totalUWidth]}]
-!        Upon return this holds the upper width of the total memory regions for
-!        all PET-local DEs. {\tt totalUWidth} must be allocated to be
-!        of size {\tt (dimCount, localDeCount)}.
-!     \item [{[name]}]
-!        Name of the Array object.
-!     \item[{[distgrid]}]
-!        Upon return this holds the associated {\tt ESMF\_DistGrid} object.
-!     \item[{[dimCount]}]
-!        Upon return this holds the number dimensions (or rank) of the
-!        DistGrid associated with the Array object.
-!     \item[{[dimExtent]}]
-!        Upon return this array holds the extents for all dimensions of the
-!        DE-local LR boxes for all DEs in the DistGrid associated with the Array
-!        object. The supplied variable must be at least of size 
-!        {\tt (dimCount, deCount)}.
-!     \item[{[delayout]}]
-!        Upon return this holds the associated {\tt ESMF\_DELayout} object.
-!     \item[{[deCount]}]
-!        Upon return this holds the total number of DEs defined in the DELayout
-!        associated with the Array object.
-!     \item[{[localDeCount]}]
-!        Upon return this holds the number of PET-local DEs defined in the
-!        DELayout associated with the Array object.
-!     \item[{[localDeList]}]
-!        Upon return this holds the list of DE ids for the PET-local
-!        DEs defined in the DELayout associated with the Array object.
-!        The provided argument must at least be of size {\tt localDeCount}.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[array] 
+!     Queried {\tt ESMF\_Array} object.
+!   \item[{[typekind]}]
+!     TypeKind of the Array object.
+!   \item[{[rank]}]
+!     Rank of the Array object.
+!   \item[{[larrayList]}]
+!     Upon return this holds a list of the associated {\tt ESMC\_LocalArray}
+!     objects. {\tt larrayList} must be allocated to be at least of size
+!     {\tt localDeCount}, i.e. the number of DEs associated with the calling
+!     PET.
+!   \item[{[indexflag]}]
+!     Upon return this flag indicates how the DE-local indices are defined.
+!     See section \ref{opt:indexflag} for a list of possible return values.
+!   \item[{[dimmap]}]
+!     Upon return this list holds the Array dimensions against which the
+!     DistGrid dimensions are mapped. {\tt dimmap} must be allocated to be
+!     at least of size {\tt dimCount}.
+!   \item[{[inverseDimmap]}]
+!     Upon return this list holds the DistGrid dimensions against which the
+!     Array dimensions are mapped. {\tt inverseDimmap} must be allocated to
+!     be at least of size {\tt rank}.
+!   \item[{[exclusiveLBound]}]
+!     Upon return this holds the lower bounds of the exclusive regions for
+!     all PET-local DEs. {\tt exclusiveLBound} must be allocated to be
+!     of size {\tt (dimCount, localDeCount)}.
+!   \item[{[exclusiveUBound]}]
+!     Upon return this holds the upper bounds of the exclusive regions for
+!     all PET-local DEs. {\tt exclusiveUBound} must be allocated to be
+!     of size {\tt (dimCount, localDeCount)}.
+!   \item[{[computationalLBound]}]
+!     Upon return this holds the lower bounds of the computational regions for
+!     all PET-local DEs. {\tt computationalLBound} must be allocated to be
+!     of size {\tt (dimCount, localDeCount)}.
+!   \item[{[computationalUBound]}]
+!     Upon return this holds the upper bounds of the computational regions for
+!     all PET-local DEs. {\tt computationalUBound} must be allocated to be
+!     of size {\tt (dimCount, localDeCount)}.
+!   \item[{[totalLBound]}]
+!     Upon return this holds the lower bounds of the total regions for
+!     all PET-local DEs. {\tt totalLBound} must be allocated to be
+!     of size {\tt (dimCount, localDeCount)}.
+!   \item[{[totalUBound]}]
+!     Upon return this holds the upper bounds of the total regions for
+!     all PET-local DEs. {\tt totalUBound} must be allocated to be
+!     of size {\tt (dimCount, localDeCount)}.
+!   \item[{[computationalLWidth]}]
+!     Upon return this holds the lower width of the computational regions for
+!     all PET-local DEs. {\tt computationalLWidth} must be allocated to be
+!     of size {\tt (dimCount, localDeCount)}.
+!   \item[{[computationalUWidth]}]
+!     Upon return this holds the upper width of the computational regions for
+!     all PET-local DEs. {\tt computationalUWidth} must be allocated to be
+!     of size {\tt (dimCount, localDeCount)}.
+!   \item[{[totalLWidth]}]
+!     Upon return this holds the lower width of the total memory regions for
+!     all PET-local DEs. {\tt computationalUWidth} must be allocated to be
+!     of size {\tt (dimCount, localDeCount)}.
+!   \item[{[totalUWidth]}]
+!     Upon return this holds the upper width of the total memory regions for
+!     all PET-local DEs. {\tt totalUWidth} must be allocated to be
+!     of size {\tt (dimCount, localDeCount)}.
+!   \item [{[name]}]
+!     Name of the Array object.
+!   \item[{[distgrid]}]
+!     Upon return this holds the associated {\tt ESMF\_DistGrid} object.
+!   \item[{[dimCount]}]
+!     Number of dimensions (rank) of {\tt distgrid}.
+!   \item[{[patchCount]}]
+!     Number of patches in {\tt distgrid}.
+!   \item[{[minIndexPDimPPatch]}]
+!     Lower index space corner per {\tt dim}, per {\tt patch}, with
+!     {\tt size(minIndexPDimPPatch) == (/dimCount, patchCount/)}.
+!   \item[{[maxIndexPDimPPatch]}]
+!     Upper index space corner per {\tt dim}, per {\tt patch}, with
+!     {\tt size(minIndexPDimPPatch) == (/dimCount, patchCount/)}.
+!   \item[{[patchListPDe]}]
+!     List of patch id numbers, one for each DE, with
+!     {\tt size(patchListPDe) == (/deCount/)}
+!   \item[{[indexCountPDimPDe]}]
+!     Array of extents per {\tt dim}, per {\tt de}, with
+!     {\tt size(indexCountPDimPDe) == (/dimCount, deCount/)}.
+!   \item[{[delayout]}]
+!     Upon return this holds the associated {\tt ESMF\_DELayout} object.
+!   \item[{[deCount]}]
+!     Upon return this holds the total number of DEs defined in the DELayout
+!     associated with the Array object.
+!   \item[{[localDeCount]}]
+!     Upon return this holds the number of PET-local DEs defined in the
+!     DELayout associated with the Array object.
+!   \item[{[localDeList]}]
+!     Upon return this holds the list of DE ids for the PET-local
+!     DEs defined in the DELayout associated with the Array object.
+!     The provided argument must at least be of size {\tt localDeCount}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -420,7 +433,9 @@ contains
     
     ! Obtain DistGrid information
     call ESMF_DistGridGet(opt_distgrid, dimCount=dimCount, &
-      indexCountPDimPDe=dimExtent, rc=status)
+      patchCount=patchCount, minIndexPDimPPatch=minIndexPDimPPatch, &
+      maxIndexPDimPPatch=maxIndexPDimPPatch, patchListPDe=patchListPDe, &
+      indexCountPDimPDe=indexCountPDimPDe, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -439,45 +454,44 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayGetPDePDim()"
+^define ESMF_METHOD "ESMF_ArrayGetPLocalDePDim()"
 !BOP
 ! !IROUTINE: ESMF_ArrayGet - Get Array internals per dim per local DE
 
 ! !INTERFACE:
   ! Private name; call using ESMF_Get()
-  subroutine ESMF_ArrayGetPDePDim(array, localDe, dim, dimExtent, localIndexList, rc)
+  subroutine ESMF_ArrayGetPLocalDePDim(array, localDe, dim, indexCount, indexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
     integer,                       intent(in)            :: localDe
     integer,                       intent(in)            :: dim
-    integer,                       intent(out), optional :: dimExtent
-    integer,                       intent(out), optional :: localIndexList(:)
+    integer,                       intent(out), optional :: indexCount
+    integer,                       intent(out), optional :: indexList(:)
     integer,                       intent(out), optional :: rc  
 !         
 !
 ! !DESCRIPTION:
-!     Get internal information per dim per local DE.
+!   Get internal information per local DE, per dim.
 !
 ! This interface works for any number of DEs per PET.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!        Queried {\tt ESMF\_Array} object.
-!     \item[localDe]
-!        Local DE for which information is requested. {\tt [0,..,localDeCount-1]}
-!     \item[dim]
-!        Dimension for which information is requested. {\tt [1,..,dimCount]}
-!     \item[{[dimExtent]}]
-!        Upon return this holds the DistGrid dimExtent associated with
-!        {\tt localDe, dim}.
-!     \item[{[localIndexList]}]
-!        Upon return this holds the list of DistGrid patch-local indices
-!        for {\tt localDe} along dimension {\tt dim}.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[array] 
+!     Queried {\tt ESMF\_Array} object.
+!   \item[localDe]
+!     Local DE for which information is requested. {\tt [0,..,localDeCount-1]}
+!   \item[dim]
+!     Dimension for which information is requested. {\tt [1,..,dimCount]}
+!   \item[{[indexCount]}]
+!     DistGrid indexCount associated with {\tt localDe, dim}.
+!   \item[{[indexList]}]
+!     List of DistGrid patch-local indices for {\tt localDe} along dimension 
+!     {\tt dim}.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -485,8 +499,8 @@ contains
     integer             :: status         ! local error status
     type(ESMF_DistGrid) :: distgrid       ! helper variable
     integer             :: dimCount       ! helper variable
-    integer, allocatable:: dimExtentInternal(:,:)  ! helper variable
-    integer             :: extent         ! helper variable
+    integer, allocatable:: indexCountInternal(:,:)  ! helper variable
+    integer             :: count          ! helper variable
     type(ESMF_DELayout) :: delayout       ! helper variable
     integer             :: deCount        ! helper variable
     integer             :: localDeCount   ! helper variable
@@ -505,8 +519,8 @@ contains
       delayout=delayout, deCount=deCount, localDeCount=localDeCount, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    allocate(dimExtentInternal(dimCount,0:deCount-1))
-    call ESMF_DistGridGet(distgrid, indexCountPDimPDe=dimExtentInternal, &
+    allocate(indexCountInternal(dimCount,0:deCount-1))
+    call ESMF_DistGridGet(distgrid, indexCountPDimPDe=indexCountInternal, &
       rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -516,24 +530,24 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     de=localDeList(localDe)
     deallocate(localDeList)
-    extent = dimExtentInternal(dim, de)
-    deallocate(dimExtentInternal)
+    count = indexCountInternal(dim, de)
+    deallocate(indexCountInternal)
       
-    ! Set dimExtent output
-    if (present(dimExtent)) then
-      dimExtent = extent
+    ! Set indexCount output
+    if (present(indexCount)) then
+      indexCount = count
     endif
 
-    ! Obtain localIndexList
-    if (present(localIndexList)) then
-      if (size(localIndexList) < extent) then
+    ! Obtain indexList
+    if (present(indexList)) then
+      if (size(indexList) < count) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
           "indexList argument dimensioned too small", &
           ESMF_CONTEXT, rc)
         return
       endif
       call ESMF_DistGridGet(distgrid, localDe=localDe, dim=dim, &
-        indexList=localIndexList, rc=status)
+        indexList=indexList, rc=status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -541,7 +555,7 @@ contains
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayGetPDePDim
+  end subroutine ESMF_ArrayGetPLocalDePDim
 !------------------------------------------------------------------------------
 
 
@@ -553,7 +567,7 @@ contains
 @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_Get() @\
-! subroutine ESMF_ArrayGetFarray<rank><type><kind>(array, farrayPtr, rc) @\
+! subroutine ESMF_ArrayGetFPtr<rank><type><kind>(array, farrayPtr, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Array),           intent(in)            :: array @\

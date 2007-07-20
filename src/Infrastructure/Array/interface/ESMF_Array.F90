@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.57 2007/07/19 22:30:45 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.58 2007/07/20 05:47:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.57 2007/07/19 22:30:45 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.58 2007/07/20 05:47:08 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -374,18 +374,17 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!   Prints internal information about the specified {\tt ESMF\_DELayout} 
-!   object to {\tt stdout}.
+!   Print internal information of the specified {\tt ESMF\_Array} object.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!          Specified {\tt ESMF\_Array} object.
-!     \item[{[options]}] 
-!          Print options are not yet supported.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[array] 
+!     {\tt ESMF\_Array} object.
+!   \item[{[options]}] 
+!     Print options are not yet supported.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -577,16 +576,79 @@ contains
 !------------------------------------------------------------------------------
 
 
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication
+!
+! !INTERFACE:
+! ! Private name; call using ESMF_ArraySparseMatMulStore()
+! subroutine ESMF_ArraySparseMatMulStore<type><kind>(srcArray, dstArray, &
+!   routehandle, factorList, factorIndexList, rc)
+!
+! !ARGUMENTS:
+!   type(ESMF_Array),           intent(in)              :: srcArray
+!   type(ESMF_Array),           intent(inout)           :: dstArray
+!   type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+!   <type>(ESMF_KIND_<kind>), target, intent(in)        :: factorList(:)
+!   integer,                    intent(in)              :: factorIndexList(:,:)
+!   integer,                    intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Store an Array sparse matrix multiplication operation from {\tt srcArray}
+!   to {\tt dstArray}. PETs that specify non-zero matrix coefficients must use
+!   the type/kind specific interface and provide the {\tt factorList} and
+!   {\tt factorIndexList} arguments. PETs that don't provide matrix elements
+!   call into the interface without {\tt factorList} and {\tt factorIndexList}.
+!
+!   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
+!   vectors. The sequence is defined by the order of DistGrid dimensions and 
+!   the order of patches within the DistGrid. Source and destination Arrays 
+!   must be of identical type/kind, but may differ in shape and number of cells.
+!   See section \ref{Array:SparseMatMul} for details on the definition of Array
+!   {\em sequence indices}.
+!
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_ArraySparseMatMul()} on any pair of Arrays that are 
+!   DistGrid-conform with the Array pair for which the Route was precomputed. 
+!
+!   This call is {\em collective} across the current VM.
+!
+!   \begin{description}
+!   \item [srcArray]
+!     {\tt ESMF\_Array} containing source data.
+!   \item [dstArray]
+!     {\tt ESMF\_Array} holding destination data.
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [factorList]
+!     List of non-zero coefficients.
+!   \item [factorIndexList]
+!     Pairs of sequence indices for the factors stored in {\tt factorList}. The
+!     second dimension of {\tt factorIndexList} steps through the list of 
+!     pairs, i.e. {\tt size(factorIndexList,2) == size(factorList)}. The first
+!     dimension of {\tt factorIndexList} is of size 2 where {\tt factorIndexList(1,:)}
+!     specifies the sequence index of the source cell in the {\tt srcArray} while
+!     {\tt factorIndexList(2,:)} specifies the sequence index of the destination
+!     cell in {\tt dstArray}. See section \ref{Array:SparseMatMul} for details
+!     on the definition of Array {\em sequence indices}.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySparseMatMulStoreI4()"
-!BOP
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication operation
+!BOPI
+! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication 
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySparseMatMulStore()
-    subroutine ESMF_ArraySparseMatMulStoreI4(srcArray, dstArray, routehandle, &
-      factorList, factorIndexList, rc)
+  subroutine ESMF_ArraySparseMatMulStoreI4(srcArray, dstArray, routehandle, &
+    factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -596,48 +658,7 @@ contains
     integer,                    intent(in)              :: factorIndexList(:,:)
     integer,                    intent(out),  optional  :: rc
 !
-! !DESCRIPTION:
-!   Store an Array sparse matrix multiplication operation from {\tt srcArray} 
-!   to {\tt dstArray}. PETs that specify non-zero matrix coefficients must use
-!   the type/kind specific interface and provide the {\tt factorList} and
-!   {\tt factorIndexList} arguments. PETs that don't provide matrix elements
-!   call into the interface without {\tt factorList} and {\tt factorIndexList}.
-!
-!   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
-!   vectors. The sequence is defined by the order of DistGrid dimensions and 
-!   the order of patches within the DistGrid. Source and destination Arrys 
-!   must be of identical type/kind, but may differ in shape and number of cells.
-!
-!   A {\tt routehandle} is returned and can be used on any pairs of 
-!   Arrays that are DistGrid-conform with the Array pair for which the Route
-!   was precomputed. 
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its local DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!   \begin{description}
-!   \item [srcArray]
-!         {\tt ESMF\_Array} containing source data.
-!   \item [dstArray]
-!         {\tt ESMF\_Array} holding destination data.
-!   \item [routehandle]
-!         Handle to the Route that stores the precomputed operation.
-!   \item [factorList]
-!         List of non-zero coefficients.
-!   \item [factorIndexList]
-!         List of indices for the factors stored in {\tt factorList}. The 
-!         second dimensiom steps through the list elements which are defined by
-!         the first dimension. Each list element contains two integers: {\tt 
-!         factorIndexList(1,:)} indicates the index in the source Array and
-!         {\tt factorIndexList(2,:)} indicates the index in the destination
-!         Array.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                         :: status             ! local error status
     integer(ESMF_KIND_I4), pointer  :: opt_factorList(:)  ! helper variable
@@ -684,16 +705,16 @@ contains
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySparseMatMulStoreI8()"
-!BOP
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication operation
+!BOPI
+! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySparseMatMulStore()
-    subroutine ESMF_ArraySparseMatMulStoreI8(srcArray, dstArray, routehandle, &
-      factorList, factorIndexList, rc)
+  subroutine ESMF_ArraySparseMatMulStoreI8(srcArray, dstArray, routehandle, &
+    factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -703,48 +724,7 @@ contains
     integer,                    intent(in)              :: factorIndexList(:,:)
     integer,                    intent(out),  optional  :: rc
 !
-! !DESCRIPTION:
-!   Store an Array sparse matrix multiplication operation from {\tt srcArray} 
-!   to {\tt dstArray}. PETs that specify non-zero matrix coefficients must use
-!   the type/kind specific interface and provide the {\tt factorList} and
-!   {\tt factorIndexList} arguments. PETs that don't provide matrix elements
-!   call into the interface without {\tt factorList} and {\tt factorIndexList}.
-!
-!   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
-!   vectors. The sequence is defined by the order of DistGrid dimensions and 
-!   the order of patches within the DistGrid. Source and destination Arrys 
-!   must be of identical type/kind, but may differ in shape and number of cells.
-!
-!   A {\tt routehandle} is returned and can be used on any pairs of 
-!   Arrays that are DistGrid-conform with the Array pair for which the Route
-!   was precomputed. 
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its local DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!   \begin{description}
-!   \item [srcArray]
-!         {\tt ESMF\_Array} containing source data.
-!   \item [dstArray]
-!         {\tt ESMF\_Array} holding destination data.
-!   \item [routehandle]
-!         Handle to the Route that stores the precomputed operation.
-!   \item [factorList]
-!         List of non-zero coefficients.
-!   \item [factorIndexList]
-!         List of indices for the factors stored in {\tt factorList}. The 
-!         second dimensiom steps through the list elements which are defined by
-!         the first dimension. Each list element contains two integers: {\tt 
-!         factorIndexList(1,:)} indicates the index in the source Array and
-!         {\tt factorIndexList(2,:)} indicates the index in the destination
-!         Array.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                         :: status             ! local error status
     integer(ESMF_KIND_I8), pointer  :: opt_factorList(:)  ! helper variable
@@ -791,16 +771,16 @@ contains
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySparseMatMulStoreR4()"
-!BOP
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication operation
+!BOPI
+! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySparseMatMulStore()
-    subroutine ESMF_ArraySparseMatMulStoreR4(srcArray, dstArray, routehandle, &
-      factorList, factorIndexList, rc)
+  subroutine ESMF_ArraySparseMatMulStoreR4(srcArray, dstArray, routehandle, &
+    factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -810,48 +790,7 @@ contains
     integer,                    intent(in)              :: factorIndexList(:,:)
     integer,                    intent(out),  optional  :: rc
 !
-! !DESCRIPTION:
-!   Store an Array sparse matrix multiplication operation from {\tt srcArray} 
-!   to {\tt dstArray}. PETs that specify non-zero matrix coefficients must use
-!   the type/kind specific interface and provide the {\tt factorList} and
-!   {\tt factorIndexList} arguments. PETs that don't provide matrix elements
-!   call into the interface without {\tt factorList} and {\tt factorIndexList}.
-!
-!   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
-!   vectors. The sequence is defined by the order of DistGrid dimensions and 
-!   the order of patches within the DistGrid. Source and destination Arrys 
-!   must be of identical type/kind, but may differ in shape and number of cells.
-!
-!   A {\tt routehandle} is returned and can be used on any pairs of 
-!   Arrays that are DistGrid-conform with the Array pair for which the Route
-!   was precomputed. 
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its local DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!   \begin{description}
-!   \item [srcArray]
-!         {\tt ESMF\_Array} containing source data.
-!   \item [dstArray]
-!         {\tt ESMF\_Array} holding destination data.
-!   \item [factorList]
-!         List of non-zero coefficients.
-!   \item [factorIndexList]
-!         List of indices for the factors stored in {\tt factorList}. The 
-!         second dimensiom steps through the list elements which are defined by
-!         the first dimension. Each list element contains two integers: {\tt 
-!         factorIndexList(1,:)} indicates the index in the source Array and
-!         {\tt factorIndexList(2,:)} indicates the index in the destination
-!         Array.
-!   \item [routehandle]
-!         Handle to the Route that stores the precomputed operation.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                         :: status             ! local error status
     real(ESMF_KIND_R4), pointer     :: opt_factorList(:)  ! helper variable
@@ -898,16 +837,16 @@ contains
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySparseMatMulStoreR8()"
-!BOP
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication operation
+!BOPI
+! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySparseMatMulStore()
-    subroutine ESMF_ArraySparseMatMulStoreR8(srcArray, dstArray, routehandle, &
-      factorList, factorIndexList, rc)
+  subroutine ESMF_ArraySparseMatMulStoreR8(srcArray, dstArray, routehandle, &
+    factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -917,48 +856,7 @@ contains
     integer,                    intent(in)              :: factorIndexList(:,:)
     integer,                    intent(out),  optional  :: rc
 !
-! !DESCRIPTION:
-!   Store an Array sparse matrix multiplication operation from {\tt srcArray} 
-!   to {\tt dstArray}. PETs that specify non-zero matrix coefficients must use
-!   the type/kind specific interface and provide the {\tt factorList} and
-!   {\tt factorIndexList} arguments. PETs that don't provide matrix elements
-!   call into the interface without {\tt factorList} and {\tt factorIndexList}.
-!
-!   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
-!   vectors. The sequence is defined by the order of DistGrid dimensions and 
-!   the order of patches within the DistGrid. Source and destination Arrys 
-!   must be of identical type/kind, but may differ in shape and number of cells.
-!
-!   A {\tt routehandle} is returned and can be used on any pairs of 
-!   Arrays that are DistGrid-conform with the Array pair for which the Route
-!   was precomputed. 
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its local DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!   \begin{description}
-!   \item [srcArray]
-!         {\tt ESMF\_Array} containing source data.
-!   \item [dstArray]
-!         {\tt ESMF\_Array} holding destination data.
-!   \item [routehandle]
-!         Handle to the Route that stores the precomputed operation.
-!   \item [factorList]
-!         List of non-zero coefficients.
-!   \item [factorIndexList]
-!         List of indices for the factors stored in {\tt factorList}. The 
-!         second dimensiom steps through the list elements which are defined by
-!         the first dimension. Each list element contains two integers: {\tt 
-!         factorIndexList(1,:)} indicates the index in the source Array and
-!         {\tt factorIndexList(2,:)} indicates the index in the destination
-!         Array.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                         :: status             ! local error status
     real(ESMF_KIND_R8), pointer     :: opt_factorList(:)  ! helper variable
@@ -1009,12 +907,12 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySparseMatMulStoreNF()"
 !BOP
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication operation
+! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySparseMatMulStore()
-    subroutine ESMF_ArraySparseMatMulStoreNF(srcArray, dstArray, routehandle, &
-      rc)
+  subroutine ESMF_ArraySparseMatMulStoreNF(srcArray, dstArray, routehandle, &
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -1023,7 +921,7 @@ contains
     integer,                    intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Store an Array sparse matrix multiplication operation from {\tt srcArray} 
+!   Store an Array sparse matrix multiplication operation from {\tt srcArray}
 !   to {\tt dstArray}. PETs that specify non-zero matrix coefficients must use
 !   the type/kind specific interface and provide the {\tt factorList} and
 !   {\tt factorIndexList} arguments. PETs that don't provide matrix elements
@@ -1031,27 +929,26 @@ contains
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
 !   vectors. The sequence is defined by the order of DistGrid dimensions and 
-!   the order of patches within the DistGrid. Source and destination Arrys 
+!   the order of patches within the DistGrid. Source and destination Arrays 
 !   must be of identical type/kind, but may differ in shape and number of cells.
+!   See section \ref{Array:SparseMatMul} for details on the definition of Array
+!   {\em sequence indices}.
 !
-!   A {\tt routehandle} is returned and can be used on any pairs of 
-!   Arrays that are DistGrid-conform with the Array pair for which the Route
-!   was precomputed. 
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_ArraySparseMatMul()} on any pair of Arrays that are 
+!   DistGrid-conform with the Array pair for which the Route was precomputed. 
 !
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its local DEs. The
-!     call will block until all PET-local data objects are accessible.
+!   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
 !   \item [srcArray]
-!         {\tt ESMF\_Array} containing source data.
+!     {\tt ESMF\_Array} containing source data.
 !   \item [dstArray]
-!         {\tt ESMF\_Array} holding destination data.
+!     {\tt ESMF\_Array} holding destination data.
 !   \item [routehandle]
-!         Handle to the Route that stores the precomputed operation.
+!     Handle to the precomputed Route.
 !   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
@@ -1084,15 +981,15 @@ contains
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySparseMatMul()"
 !BOP
-! !IROUTINE: ESMF_ArraySparseMatMul - Execute an Array sparse matrix multiplication operation
+! !IROUTINE: ESMF_ArraySparseMatMul - Execute an Array sparse matrix multiplication
 !
 ! !INTERFACE:
-    subroutine ESMF_ArraySparseMatMul(srcArray, dstArray, routehandle, &
-      zeroflag, rc)
+  subroutine ESMF_ArraySparseMatMul(srcArray, dstArray, routehandle, &
+    zeroflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)              :: srcArray
@@ -1103,29 +1000,28 @@ contains
 !
 ! !DESCRIPTION:
 !   Execute an Array sparse matrix operation from {\tt srcArray} to
-!   {\tt dstArray}. See {\tt ArrayInterpolateStore()} for details.
+!   {\tt dstArray}. See {\tt ESMF\_ArraySparseMatMulStore()} on how to
+!   precompute {\tt routehandle}. See section \ref{Array:SparseMatMul} for
+!   details on the operation this call performs.
 !
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
+!   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
 !   \item [srcArray]
-!         {\tt ESMF\_Array} containing source data.
+!     {\tt ESMF\_Array} containing source data.
 !   \item [dstArray]
-!         {\tt ESMF\_Array} holding destination data.
+!     {\tt ESMF\_Array} holding destination data.
 !   \item [routehandle]
-!         Handle to the Route that stores the operation.
+!     Handle to the precomputed Route.
 !   \item [{[zeroflag]}]
-!         If set to {\tt ESMF\_TRUE} {\em (default)} the total regions of all 
-!         DEs in {\tt dstArray} will be set to zero before updating the cells
-!         with the results of the sparse matrix multiplication. If set to
-!         {\tt ESMF\_FALSE} the cells in {\tt dstArray} will not be modified
-!         prior to the sparse matrix multiplication and results will be added
-!         to the incoming cell values.
+!     If set to {\tt ESMF\_TRUE} {\em (default)} the total regions of all 
+!     DEs in {\tt dstArray} will be initialized to zero before updating the 
+!     cells with the results of the sparse matrix multiplication. If set to
+!     {\tt ESMF\_FALSE} the cells in {\tt dstArray} will not be modified
+!     prior to the sparse matrix multiplication and results will be added
+!     to the incoming cell values.
 !   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
@@ -1539,11 +1435,8 @@ contains
     
     ! Call into the C++ interface, which will sort out optional arguments.
     !todo: call c_ESMC_ArrayValidate(array, localrc)
-    localrc = ESMF_SUCCESS  ! remove when todo is done.
-    
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    !  ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS
