@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.2 2007/07/18 05:58:03 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.3 2007/07/20 00:27:29 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.2 2007/07/18 05:58:03 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.3 2007/07/20 00:27:29 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -168,7 +168,7 @@ program ESMF_GridCoordUTest
   rc=ESMF_SUCCESS
 
   ! Set Coord From Array
-  call ESMF_GridAllocCoord(grid2D,coord=2, &
+  call ESMF_GridAllocCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -231,7 +231,7 @@ program ESMF_GridCoordUTest
   rc=ESMF_SUCCESS
 
   ! Set Coord From Array
-  call ESMF_GridAllocCoord(grid2Dp1,coord=2, &
+  call ESMF_GridAllocCoord(grid2Dp1, &
                staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -260,7 +260,7 @@ program ESMF_GridCoordUTest
   rc=ESMF_SUCCESS
 
   ! Set Coord From Array
-  call ESMF_GridAllocCoord(grid3D,coord=2, &
+  call ESMF_GridAllocCoord(grid3D, &
                staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 

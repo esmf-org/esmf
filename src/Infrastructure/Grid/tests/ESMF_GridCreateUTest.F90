@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.51 2007/07/18 16:50:14 samsoncheung Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.52 2007/07/20 00:27:29 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.51 2007/07/18 16:50:14 samsoncheung Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.52 2007/07/20 00:27:29 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -54,8 +54,8 @@ program ESMF_GridCreateUTest
   type(ESMF_DistGrid) :: distgrid,distgrid2
   integer :: coordDimMap(2,2), rank, lbounds(2), ubounds(2)
   type(ESMF_IndexFlag) :: indexflag
-  integer :: gridType, dimmap(2), coordRanks(2), dimcount
-  integer :: coordRanks2(3),coordDimMap2(3,3)
+  integer :: gridType, dimmap(2), coordRank(2), dimcount
+  integer :: coordRank2(3),coordDimMap2(3,3)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -84,7 +84,7 @@ program ESMF_GridCreateUTest
 
   ! get info from Grid
   call ESMF_GridGet(grid, rank=rank, coordTypeKind=typekind, &
-         dimmap=dimmap, coordRanks=coordRanks, coordDimMap=coordDimMap, &
+         dimmap=dimmap, coordRank=coordRank, coordDimMap=coordDimMap, &
          indexflag=indexflag, gridtype=gridtype, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -94,7 +94,7 @@ program ESMF_GridCreateUTest
   if (rank .ne. 2) correct=.false.
   if ((dimmap(1) .ne. 1) .or. (dimmap(2) .ne. 2)) correct=.false.
   !TODO: what to do about lbounds and ubounds
-  if ((coordRanks(1) .ne. 2) .or. (coordRanks(2) .ne. 2)) correct=.false.
+  if ((coordRank(1) .ne. 2) .or. (coordRank(2) .ne. 2)) correct=.false.
   if ((coordDimMap(1,1) .ne. 1) .or. (coordDimMap(1,2) .ne. 2) .or. & 
       (coordDimMap(2,1) .ne. 1) .or. (coordDimMap(2,2) .ne. 2)) correct=.false.
 !  if (indexflag .ne. ESMF_INDEX_DELOCAL) correct=.false.
@@ -227,21 +227,21 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Creating a Grid with non-default coordRanks"
+  write(name, *) "Creating a Grid with non-default coordRank"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreate(distgrid=distgrid, coordRanks=(/2,2/),rc=localrc)
+  grid=ESMF_GridCreate(distgrid=distgrid, coordRank=(/2,2/),rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, coordRanks=coordRanks, rc=localrc)
+  call ESMF_GridGet(grid, coordRank=coordRank, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that output is as expected
   correct=.true.
-  if ((coordRanks(1) .ne. 2) .or. (coordRanks(2) .ne. 2)) correct=.false.
+  if ((coordRank(1) .ne. 2) .or. (coordRank(2) .ne. 2)) correct=.false.
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -255,21 +255,21 @@ program ESMF_GridCreateUTest
   ! BETTER VERSION OF ABOVE WHEN ARRAY FACTORIZATION WORKS
   !-----------------------------------------------------------------------------
   !NEX__ UTest
-  write(name, *) "Creating a Grid with non-default coordRanks"
+  write(name, *) "Creating a Grid with non-default coordRank"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreate(distgrid=distgrid, coordRanks=(/1,2/),rc=localrc)
+  grid=ESMF_GridCreate(distgrid=distgrid, coordRank=(/1,2/),rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, coordRanks=coordRanks, rc=localrc)
+  call ESMF_GridGet(grid, coordRank=coordRank, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that output is as expected
   correct=.true.
-  if ((coordRanks(1) .ne. 1) .or. (coordRanks(2) .ne. 2)) correct=.false.
+  if ((coordRank(1) .ne. 1) .or. (coordRank(2) .ne. 2)) correct=.false.
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -288,17 +288,17 @@ program ESMF_GridCreateUTest
   rc=ESMF_SUCCESS
   coordDimMap(1,:)=(/1,2/)
   coordDimMap(2,:)=(/2,1/)
-  grid=ESMF_GridCreate(distgrid=distgrid, coordRanks=(/2,2/), &
+  grid=ESMF_GridCreate(distgrid=distgrid, coordRank=(/2,2/), &
                                    coordDimMap=coordDimMap,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, coordRanks=coordRanks, coordDimMap=coordDimMap, rc=localrc)
+  call ESMF_GridGet(grid, coordRank=coordRank, coordDimMap=coordDimMap, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that output is as expected
   correct=.true.
-  if ((coordRanks(1) .ne. 2) .or. (coordRanks(2) .ne. 2)) correct=.false.
+  if ((coordRank(1) .ne. 2) .or. (coordRank(2) .ne. 2)) correct=.false.
   if ((coordDimMap(1,1) .ne. 1) .or. (coordDimMap(1,2) .ne. 2)) correct=.false.
   if ((coordDimMap(2,1) .ne. 2) .or. (coordDimMap(2,2) .ne. 1)) correct=.false.
 
@@ -320,17 +320,17 @@ program ESMF_GridCreateUTest
   rc=ESMF_SUCCESS
   coordDimMap(1,:)=(/1,0/)
   coordDimMap(2,:)=(/2,1/)
-  grid=ESMF_GridCreate(distgrid=distgrid, coordRanks=(/1,2/), &
+  grid=ESMF_GridCreate(distgrid=distgrid, coordRank=(/1,2/), &
                                    coordDimMap=coordDimMap,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, coordRanks=coordRanks, coordDimMap=coordDimMap, rc=localrc)
+  call ESMF_GridGet(grid, coordRank=coordRank, coordDimMap=coordDimMap, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that output is as expected
   correct=.true.
-  if ((coordRanks(1) .ne. 1) .or. (coordRanks(2) .ne. 2)) correct=.false.
+  if ((coordRank(1) .ne. 1) .or. (coordRank(2) .ne. 2)) correct=.false.
   if (coordDimMap(1,1) .ne. 1) correct=.false.
   if ((coordDimMap(2,1) .ne. 2) .or. (coordDimMap(2,2) .ne. 1)) correct=.false.
 
@@ -562,14 +562,14 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, coordRanks=coordRanks2, coordDimMap=coordDimMap2, rc=localrc)
+  call ESMF_GridGet(grid, coordRank=coordRank2, coordDimMap=coordDimMap2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that output is as expected
   correct=.true.
 
-  if ((coordRanks2(1) .ne. 3) .or. (coordRanks2(2) .ne. 3) .or.  &
-      (coordRanks2(3) .ne. 3)) correct=.false.
+  if ((coordRank2(1) .ne. 3) .or. (coordRank2(2) .ne. 3) .or.  &
+      (coordRank2(3) .ne. 3)) correct=.false.
   if ((coordDimMap2(1,1) .ne. 1) .or. (coordDimMap2(1,2) .ne. 2) .or. &
       (coordDimMap2(1,3) .ne. 3)) correct=.false.
   if ((coordDimMap2(2,1) .ne. 3) .or. (coordDimMap2(2,2) .ne. 1) .or. &
@@ -603,14 +603,14 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, coordRanks=coordRanks2, coordDimMap=coordDimMap2, rc=localrc)
+  call ESMF_GridGet(grid, coordRank=coordRank2, coordDimMap=coordDimMap2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that output is as expected
   correct=.true.
 
-  if ((coordRanks2(1) .ne. 1) .or. (coordRanks2(2) .ne. 3) .or.  &
-      (coordRanks2(3) .ne. 2)) correct=.false.
+  if ((coordRank2(1) .ne. 1) .or. (coordRank2(2) .ne. 3) .or.  &
+      (coordRank2(3) .ne. 2)) correct=.false.
 
   if (coordDimMap2(1,1) .ne. 1) correct=.false.
   if ((coordDimMap2(2,1) .ne. 3) .or. (coordDimMap2(2,2) .ne. 1) .or. &
@@ -641,14 +641,14 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, coordRanks=coordRanks2, coordDimMap=coordDimMap2, rc=localrc)
+  call ESMF_GridGet(grid, coordRank=coordRank2, coordDimMap=coordDimMap2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that output is as expected
   correct=.true.
 
-  if ((coordRanks2(1) .ne. 3) .or. (coordRanks2(2) .ne. 3) .or.  &
-      (coordRanks2(3) .ne. 3)) correct=.false.
+  if ((coordRank2(1) .ne. 3) .or. (coordRank2(2) .ne. 3) .or.  &
+      (coordRank2(3) .ne. 3)) correct=.false.
   if ((coordDimMap2(1,1) .ne. 1) .or. (coordDimMap2(1,2) .ne. 2) .or. &
       (coordDimMap2(1,3) .ne. 3)) correct=.false.
   if ((coordDimMap2(2,1) .ne. 1) .or. (coordDimMap2(2,2) .ne. 2) .or. &
@@ -701,7 +701,7 @@ program ESMF_GridCreateUTest
 
   ! get info from Grid
   call ESMF_GridGet(grid, rank=rank, coordTypeKind=typekind, &
-         dimmap=dimmap, coordRanks=coordRanks, coordDimMap=coordDimMap, &
+         dimmap=dimmap, coordRank=coordRank, coordDimMap=coordDimMap, &
          indexflag=indexflag, gridtype=gridtype, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -711,7 +711,7 @@ program ESMF_GridCreateUTest
   if (rank .ne. 2) correct=.false.
   if ((dimmap(1) .ne. 1) .or. (dimmap(2) .ne. 2)) correct=.false.
   !TODO: what to do about lbounds and ubounds
-  if ((coordRanks(1) .ne. 2) .or. (coordRanks(2) .ne. 2)) correct=.false.
+  if ((coordRank(1) .ne. 2) .or. (coordRank(2) .ne. 2)) correct=.false.
   if ((coordDimMap(1,1) .ne. 1) .or. (coordDimMap(1,2) .ne. 2) .or. & 
       (coordDimMap(2,1) .ne. 1) .or. (coordDimMap(2,2) .ne. 2)) correct=.false.
 !  if (indexflag .ne. ESMF_INDEX_DELOCAL) correct=.false.

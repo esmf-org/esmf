@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.6 2007/07/19 04:14:26 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.7 2007/07/20 00:27:28 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -92,9 +92,7 @@ program ESMF_GridCreateEx
    ! stagger location.  Since no coordinate values are specified in
    ! this call no coordinate values are set yet.
    !-------------------------------------------------------------------
-   call ESMF_GridAllocCoord(grid2D, coord=1, &
-          staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-   call ESMF_GridAllocCoord(grid2D, coord=2, & 
+   call ESMF_GridAllocCoord(grid2D,  & 
           staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
    !-------------------------------------------------------------------
@@ -102,13 +100,15 @@ program ESMF_GridCreateEx
    ! coordinate array on the local DE.
    !-------------------------------------------------------------------
    call ESMF_GridGetLocalTileInfo(grid2D, coord=1, &
+          staggerloc=ESMF_STAGGERLOC_CENTER,       &
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the pointer to the first coordinate array from inside
    ! the Grid object.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid2D, coord=1, fptr=coordX, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid2D, coord=1, &
+          staggerloc=ESMF_STAGGERLOC_CENTER, fptr=coordX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
@@ -124,13 +124,15 @@ program ESMF_GridCreateEx
    ! coordinate array on the local DE.
    !-------------------------------------------------------------------
    call ESMF_GridGetLocalTileInfo(grid2D, coord=2, &
+          staggerloc=ESMF_STAGGERLOC_CENTER,       &
           computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the pointer to the second coordinate array from inside
    ! the Grid object.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid2D, coord=2, fptr=coordY, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid2D, coord=2, &
+          staggerloc=ESMF_STAGGERLOC_CENTER, fptr=coordY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calcuate and set coordinates in the second dimension [10-200]
@@ -814,7 +816,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 
 !BOC 
-   call ESMF_GridAllocCoord(grid2D, coord=1, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
+   call ESMF_GridAllocCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -897,7 +899,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! can then employ any of the standard {\tt ESMF\_Array} tools to operate
 ! on the data. The following copies the coordinates from the second 
 ! component of the corner and puts it into Array arrayCoordY. 
-! EOE
+!EOE
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Setup For Example
@@ -906,7 +908,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-   call ESMF_GridAllocCoord(grid2D,coord=2,&
+   call ESMF_GridAllocCoord(grid2D,&
           staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -952,7 +954,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOE
 ! alternatively, the call {\tt ESMF\_GridLocalTileGetCoord} gets a fortran pointer to 
 ! the coordinate data. The user can then operate on this array in the usual
-! manner. The following call gets a reference to the piece of the
+! manner. The following call gets a reference to the
 ! fortran array which holds the data for the second coordinate (e.g. y). 
 !EOE
 
@@ -963,7 +965,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-   call ESMF_GridAllocCoord(grid2D,coord=2,&
+   call ESMF_GridAllocCoord(grid2D,&
           staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1490,20 +1492,20 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! by the fact that the component arrays don't need to be the same dimension as
 ! each other or as the Grid. For example, for the 3D case, all 3 ESMF
 ! Arrays could be 1D, or x and y could be 2D while z is 1D.
-! The parameters {\tt coordRanks} and {\tt coordDimMap}
+! The parameters {\tt coordRank} and {\tt coordDimMap}
 ! can be used to specify the factorization of the coordinate arrays. 
 !
 ! The default Grid has coordinate arrays the same rank as the Grid.
-! To alter this, the {\tt coordRanks} parameter can be used
+! To alter this, the {\tt coordRank} parameter can be used
 ! to set the rank of the coordinate arrays.  The size of the parameter  
-! is the rank of the Grid. Each entry of {\tt coordRanks}  is the rank of 
+! is the rank of the Grid. Each entry of {\tt coordRank}  is the rank of 
 ! the associated coordinate array. The following creates a 10x20
 ! 2D Grid where both the x and y coordinates are stored in 1D arrays. 
 !EOEI
 
 !BOCI 
    Grid2D=ESMF_GridCreate(maxIndex=(/10,20/), &
-            coordRanks=(/1,1/) , rc=rc)
+            coordRank=(/1,1/) , rc=rc)
 !EOCI  
 
 !BOEI
@@ -1534,7 +1536,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOCI 
    coordDimMap(1,1)=2      ! Map X (i.e. 1) to second Grid dimension 
    coordDimMap(2,1)=1      ! Map Y (i.e. 2) to first Grid dimension 
-   Grid2D=ESMF_GridCreate(maxIndex=(/10,20/), coordRanks=(/1,1/) , &
+   Grid2D=ESMF_GridCreate(maxIndex=(/10,20/), coordRank=(/1,1/) , &
                coordDimMap=coordDimMap, rc=rc)
 !EOCI  
 #endif
@@ -1590,11 +1592,11 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
    ! Set Center
    call ESMF_StaggerLocSet(staggerLoc,loc=(/0,0,0,0/),rc=rc)
-   call ESMF_GridAllocCoord(grid4D, coord=1, staggerLoc=staggerLoc, rc=rc)
+   call ESMF_GridAllocCoord(grid4D, staggerLoc=staggerLoc, rc=rc)
 
    ! Set Corner
    call ESMF_StaggerLocSet(staggerLoc,loc=(/1,1,1,1/),rc=rc)
-   call ESMF_GridAllocCoord(grid4D, coord=1, staggerLoc=staggerLoc, rc=rc)
+   call ESMF_GridAllocCoord(grid4D, staggerLoc=staggerLoc, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1680,11 +1682,11 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 
 !BOC 
-   call ESMF_GridAllocCoord(grid2D, coord=1, &
+   call ESMF_GridAllocCoord(grid2D, &
           staggerLoc=ESMF_STAGGERLOC_CORNER, &
           coordLWidth=(/0,0/), coordUWidth=(/0,0/), rc=rc)
 
-   call ESMF_GridAllocCoord(grid2D, coord=1, &
+   call ESMF_GridAllocCoord(grid2D, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
           coordLWidth=(/1,1/), coordUWidth=(/0,0/), rc=rc)
 
@@ -1729,7 +1731,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
 
 !BOC 
-   call ESMF_GridAllocCoord(grid2D, coord=1, &
+   call ESMF_GridAllocCoord(grid2D, &
           staggerLoc=ESMF_STAGGERLOC_CORNER, coordAlign=(/1,1/), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)

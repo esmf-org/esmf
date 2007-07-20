@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.8 2007/07/18 05:58:02 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.9 2007/07/20 00:27:28 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@ extern "C" {
 					  ESMCI::InterfaceInt **dimmapArg, 
 					  ESMCI::InterfaceInt **lboundsArg,
 					  ESMCI::InterfaceInt **uboundsArg,
-					  ESMCI::InterfaceInt **coordRanksArg,
+					  ESMCI::InterfaceInt **coordRankArg,
 					  ESMCI::InterfaceInt **coordDimMapArg,		  
 					  ESMC_IndexFlag *indexflag,
 					  int *gridtype,
@@ -101,7 +101,7 @@ extern "C" {
     // call into C++
     *ptr = ESMCI::GridCreate(*nameLen, ESMC_NOT_PRESENT_FILTER(name),
       ESMC_NOT_PRESENT_FILTER(coordTypeKind), *distgrid, *dimmapArg,
-      *lboundsArg, *uboundsArg, *coordRanksArg, *coordDimMapArg,
+      *lboundsArg, *uboundsArg, *coordRankArg, *coordDimMapArg,
       ESMC_NOT_PRESENT_FILTER(indexflag), ESMC_NOT_PRESENT_FILTER(gridtype),
       &localrc);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
@@ -118,7 +118,7 @@ extern "C" {
 			   ESMCI::InterfaceInt **_dimmap, 
 			   ESMCI::InterfaceInt **_lbounds,
 			   ESMCI::InterfaceInt **_ubounds,
-			   ESMCI::InterfaceInt **_coordRanks,
+			   ESMCI::InterfaceInt **_coordRank,
 			   ESMCI::InterfaceInt **_coordDimMap,		  
 			   ESMC_IndexFlag *_indexflag,
 			   int *_gridtype,
@@ -236,21 +236,21 @@ extern "C" {
       memcpy((*_ubounds)->array, grid->getUbounds(), sizeof(int) * undistRank);
     }
 
-    // get coordRanks
-    if (*_coordRanks != NULL){
+    // get coordRank
+    if (*_coordRank != NULL){
       // Error check
-      if ((*_coordRanks)->dimCount != 1){
+      if ((*_coordRank)->dimCount != 1){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-          "- coordRanks array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
+          "- coordRank array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
-      if ((*_coordRanks)->extent[0] < rank){
+      if ((*_coordRank)->extent[0] < rank){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-          "- coordRanks array must be of size = the rank of the Grid", ESMC_NOT_PRESENT_FILTER(_rc));
+          "- coordRank array must be of size = the rank of the Grid", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
-      // fill in coordRanks
-      memcpy((*_coordRanks)->array, grid->getCoordRanks(), sizeof(int) * rank);
+      // fill in coordRank
+      memcpy((*_coordRank)->array, grid->getCoordRank(), sizeof(int) * rank);
     }
 
     // get coordDimMap
@@ -272,7 +272,7 @@ extern "C" {
       for (int i=0; i<rank; i++) {
 	for (int j=0; j<rank; j++) {
            // Note: order of i,j is reversed because of F vs. C array ordering
-	  (*_coordDimMap)->array[k]=coordDimMap[j][i];
+	  (*_coordDimMap)->array[k]=coordDimMap[j][i]+1; // Convert back to 1-based
 	  k++;
 	}
       } 
@@ -319,7 +319,6 @@ extern "C" {
 
   void FTN(c_esmc_gridalloccoord)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
-                                         int *coord, 
                                          ESMCI::InterfaceInt **coordLWidthArg, 
                                          ESMCI::InterfaceInt **coordUWidthArg, 
                                          ESMCI::InterfaceInt **coordAlignArg, 
@@ -333,7 +332,7 @@ extern "C" {
 
     // call into C++
     localrc= ESMCI::gridAllocCoord(*grid, ESMC_NOT_PRESENT_FILTER(staggerloc),
-      ESMC_NOT_PRESENT_FILTER(coord), *coordLWidthArg, *coordUWidthArg, *coordAlignArg);
+      *coordLWidthArg, *coordUWidthArg, *coordAlignArg);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
@@ -348,7 +347,6 @@ extern "C" {
                                          int *coord, 
                                          ESMCI::Array **array,
                                          ESMC_DataCopy *docopy, 
-                                         ESMCI::InterfaceInt **coordAlignArg, 
                                          int *rc) {
     int localrc;
 #undef  ESMC_METHOD
@@ -359,8 +357,7 @@ extern "C" {
 
     // call into C++
     localrc= ESMCI::gridSetCoordFromArray(*grid, ESMC_NOT_PRESENT_FILTER(staggerloc),
-      ESMC_NOT_PRESENT_FILTER(coord), *array, ESMC_NOT_PRESENT_FILTER(docopy),
-      *coordAlignArg);
+      ESMC_NOT_PRESENT_FILTER(coord), *array, ESMC_NOT_PRESENT_FILTER(docopy));
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
@@ -375,7 +372,7 @@ extern "C" {
 					  ESMCI::InterfaceInt **dimmapArg, 
 					  ESMCI::InterfaceInt **lboundsArg,
 					  ESMCI::InterfaceInt **uboundsArg,
-					  ESMCI::InterfaceInt **coordRanksArg,
+					  ESMCI::InterfaceInt **coordRankArg,
 					  ESMCI::InterfaceInt **coordDimMapArg,		  
 					  ESMC_IndexFlag *indexflag,
 					  int *gridtype,
@@ -399,7 +396,7 @@ extern "C" {
     // call into C++
     localrc = ESMCI::GridSetFromDistGrid(*grid, *nameLen, ESMC_NOT_PRESENT_FILTER(name),
       ESMC_NOT_PRESENT_FILTER(coordTypeKind), tmp_distgrid, *dimmapArg,
-      *lboundsArg, *uboundsArg, *coordRanksArg, *coordDimMapArg,
+      *lboundsArg, *uboundsArg, *coordRankArg, *coordDimMapArg,
       ESMC_NOT_PRESENT_FILTER(indexflag), ESMC_NOT_PRESENT_FILTER(gridtype));
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -423,13 +420,16 @@ extern "C" {
     int localrc;
     int distRank,undistRank,rank;
     int tile, coord,localDE,staggerloc;
-    int *distDimMap,*undistDimMap;
     const int *arrayLbounds,*arrayUbounds;
-    const int *coordDistRank, *coordUndistRank;
-          int **coordDistDimMap, **coordUndistDimMap;
+    const int *gridLBounds,*gridUBounds;
     const int *arrayBnd;
+    const int *coordRank;
+    int **coordDimMap;
+    int *gridMapDim, **coordMapDim;
+    bool *gridIsDist, **coordIsDist;
     ESMCI::Grid *grid;
     ESMCI::Array *array;
+    int offset[ESMF_MAXDIM];
 
     // Get Grid pointer
     grid=*_grid;
@@ -440,11 +440,15 @@ extern "C" {
 
     // get some useful info
     rank = grid->getRank();
-    coordDistRank=grid->getCoordDistRank();
-    coordDistDimMap=grid->getCoordDistDimMap();
-    coordUndistRank=grid->getCoordUndistRank();
-    coordUndistDimMap=grid->getCoordUndistDimMap();
-
+    distRank = grid->getDistRank();
+    coordRank=grid->getCoordRank();
+    coordDimMap=grid->getCoordDimMap();
+    coordIsDist=grid->getCoordIsDist();
+    coordMapDim=grid->getCoordMapDim();
+    gridIsDist=grid->getGridIsDist();
+    gridMapDim=grid->getGridMapDim();
+    gridLBounds=grid->getLbounds();
+    gridUBounds=grid->getUbounds();
 
     // coord
     if (ESMC_NOT_PRESENT_FILTER(_coord) == ESMC_NULL_POINTER) {
@@ -496,15 +500,6 @@ extern "C" {
         return;
     }
 
-    // Get relavent information from ranks and dimmap
-   distRank=coordDistRank[coord];
-   distDimMap=coordDistDimMap[coord];
-   undistRank=coordUndistRank[coord];
-   if (undistRank>0) {
-       undistDimMap=coordUndistDimMap[coord];
-   } else {
-     undistDimMap=ESMC_NULL_POINTER;
-   }
 
 
     // Get Array From Grid
@@ -517,6 +512,10 @@ extern "C" {
         return;
     }
 
+    // Array info
+    arrayLbounds=array->getLBounds();
+    arrayUbounds=array->getUBounds();
+
 
     // fill exclusiveLBound
     if (*_exclusiveLBound != NULL){
@@ -526,7 +525,7 @@ extern "C" {
           "- exclusiveLBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
-      if ((*_exclusiveLBound)->extent[0] < rank){
+      if ((*_exclusiveLBound)->extent[0] < coordRank[coord]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
           "- exclusiveLBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
@@ -534,15 +533,14 @@ extern "C" {
 
       // now that we have the array get the exclusive bounds of the localDE
       arrayBnd=array->getExclusiveLBound()+localDE*distRank;
-      arrayLbounds=array->getLBounds();
 
       // Fill in the output array
-      for (int i=0; i<distRank; i++){
-	(*_exclusiveLBound)->array[distDimMap[i]]=arrayBnd[i];
-      }
-
-      for (int i=0; i<undistRank; i++){
-	(*_exclusiveLBound)->array[undistDimMap[i]]=arrayLbounds[i];
+      for (int i=0; i<coordRank[coord]; i++) {
+	if (coordIsDist[coord][i]) {
+	  (*_exclusiveLBound)->array[i]=arrayBnd[coordMapDim[coord][i]];
+	} else {
+	  (*_exclusiveLBound)->array[i]=gridLBounds[gridMapDim[coordDimMap[coord][i]]];;
+	}
       }
     }
 
@@ -556,7 +554,7 @@ extern "C" {
           "- exclusiveUBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
-      if ((*_exclusiveUBound)->extent[0] < rank){
+      if ((*_exclusiveUBound)->extent[0] < coordRank[coord]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
           "- exclusiveUBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
@@ -564,15 +562,14 @@ extern "C" {
 
       // now that we have the array get the exclusive bounds of the localDE
       arrayBnd=array->getExclusiveUBound()+localDE*distRank;
-      arrayUbounds=array->getUBounds();
 
       // Fill in the output array
-      for (int i=0; i<distRank; i++){
-	(*_exclusiveUBound)->array[distDimMap[i]]=arrayBnd[i];
-      }
-
-      for (int i=0; i<undistRank; i++){
-	(*_exclusiveUBound)->array[undistDimMap[i]]=arrayUbounds[i];
+      for (int i=0; i<coordRank[coord]; i++) {
+	if (coordIsDist[coord][i]) {
+	  (*_exclusiveUBound)->array[i]=arrayBnd[coordMapDim[coord][i]];
+	} else {
+	  (*_exclusiveUBound)->array[i]=gridUBounds[gridMapDim[coordDimMap[coord][i]]];
+	}
       }
     }
 
@@ -585,7 +582,7 @@ extern "C" {
           "- staggerLBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
-      if ((*_staggerLBound)->extent[0] < rank){
+      if ((*_staggerLBound)->extent[0] < coordRank[coord]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
           "- staggerLBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
@@ -593,17 +590,20 @@ extern "C" {
 
       // now that we have the array get the stagger bounds of the localDE
       arrayBnd=array->getExclusiveLBound()+localDE*distRank;
-      arrayLbounds=array->getLBounds();
 
-      // When we get the staggerbound stuff working then re-add it here
+      // Get stagger offset
+     localrc=grid->getStaggerLWidth(staggerloc, localDE, offset);
+     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+					       ESMC_NOT_PRESENT_FILTER(_rc))) return; 
 
       // Fill in the output array
-      for (int i=0; i<distRank; i++){
-	(*_staggerLBound)->array[distDimMap[i]]=arrayBnd[i];
-      }
-
-      for (int i=0; i<undistRank; i++){
-	(*_staggerLBound)->array[undistDimMap[i]]=arrayLbounds[i];
+      for (int i=0; i<coordRank[coord]; i++) {
+        int gi=coordDimMap[coord][i];
+	if (coordIsDist[coord][i]) {
+	  (*_staggerLBound)->array[i]=arrayBnd[coordMapDim[coord][i]]-offset[gi];
+	} else {
+	  (*_staggerLBound)->array[i]=gridLBounds[gridMapDim[gi]]-offset[gi];
+	}
       }
     }
 
@@ -616,7 +616,7 @@ extern "C" {
           "- staggerUBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
-      if ((*_staggerUBound)->extent[0] < rank){
+      if ((*_staggerUBound)->extent[0] < coordRank[coord]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
           "- staggerUBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
@@ -624,17 +624,20 @@ extern "C" {
 
       // now that we have the array get the stagger bounds of the localDE
       arrayBnd=array->getExclusiveUBound()+localDE*distRank;
-      arrayUbounds=array->getUBounds();
 
-      // When we get the staggerbound stuff working then re-add it here
+      // Get stagger offset
+      localrc=grid->getStaggerUWidth(staggerloc, localDE, offset);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+						ESMC_NOT_PRESENT_FILTER(_rc))) return; 
 
-      // Fill in the output array
-      for (int i=0; i<distRank; i++){
-	(*_staggerUBound)->array[distDimMap[i]]=arrayBnd[i];
-      }
 
-      for (int i=0; i<undistRank; i++){
-	(*_staggerUBound)->array[undistDimMap[i]]=arrayUbounds[i];
+      for (int i=0; i<coordRank[coord]; i++) {
+        int gi=coordDimMap[coord][i];
+	if (coordIsDist[coord][i]) {
+	  (*_staggerUBound)->array[i]=arrayBnd[coordMapDim[coord][i]]+offset[gi];
+	} else {
+	  (*_staggerUBound)->array[i]=gridUBounds[gridMapDim[gi]]+offset[gi];
+	}
       }
     }
 
@@ -648,7 +651,7 @@ extern "C" {
           "- computationalLBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
-      if ((*_computationalLBound)->extent[0] < rank){
+      if ((*_computationalLBound)->extent[0] < coordRank[coord]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
           "- computationalLBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
@@ -656,15 +659,13 @@ extern "C" {
 
       // now that we have the array get the computational bounds of the localDE
       arrayBnd=array->getComputationalLBound()+localDE*distRank;
-      arrayLbounds=array->getLBounds();
 
-      // Fill in the output array
-      for (int i=0; i<distRank; i++){
-	(*_computationalLBound)->array[distDimMap[i]]=arrayBnd[i];
-      }
-
-      for (int i=0; i<undistRank; i++){
-	(*_computationalLBound)->array[undistDimMap[i]]=arrayLbounds[i];
+      for (int i=0; i<coordRank[coord]; i++) {
+	if (coordIsDist[coord][i]) {
+	  (*_computationalLBound)->array[i]=arrayBnd[coordMapDim[coord][i]];
+	} else {
+	  (*_computationalLBound)->array[i]=arrayLbounds[coordMapDim[coord][i]];
+	}
       }
     }
 
@@ -678,7 +679,7 @@ extern "C" {
           "- computationalUBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
-      if ((*_computationalUBound)->extent[0] < rank){
+      if ((*_computationalUBound)->extent[0] < coordRank[coord]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
           "- computationalUBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
@@ -686,15 +687,13 @@ extern "C" {
 
       // now that we have the array get the computational bounds of the localDE
       arrayBnd=array->getComputationalUBound()+localDE*distRank;
-      arrayUbounds=array->getUBounds();
 
-      // Fill in the output array
-      for (int i=0; i<distRank; i++){
-	(*_computationalUBound)->array[distDimMap[i]]=arrayBnd[i];
-      }
-
-      for (int i=0; i<undistRank; i++){
-	(*_computationalUBound)->array[undistDimMap[i]]=arrayUbounds[i];
+      for (int i=0; i<coordRank[coord]; i++) {
+	if (coordIsDist[coord][i]) {
+	  (*_computationalUBound)->array[i]=arrayBnd[coordMapDim[coord][i]];
+	} else {
+	  (*_computationalUBound)->array[i]=arrayUbounds[coordMapDim[coord][i]];
+	}
       }
     }
 
@@ -707,7 +706,7 @@ extern "C" {
           "- totalLBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
-      if ((*_totalLBound)->extent[0] < rank){
+      if ((*_totalLBound)->extent[0] < coordRank[coord]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
           "- totalLBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
@@ -715,15 +714,13 @@ extern "C" {
 
       // now that we have the array get the total bounds of the localDE
       arrayBnd=array->getTotalLBound()+localDE*distRank;
-      arrayLbounds=array->getLBounds();
 
-      // Fill in the output array
-      for (int i=0; i<distRank; i++){
-	(*_totalLBound)->array[distDimMap[i]]=arrayBnd[i];
-      }
-
-      for (int i=0; i<undistRank; i++){
-	(*_totalLBound)->array[undistDimMap[i]]=arrayLbounds[i];
+      for (int i=0; i<coordRank[coord]; i++) {
+	if (coordIsDist[coord][i]) {
+	  (*_totalLBound)->array[i]=arrayBnd[coordMapDim[coord][i]];
+	} else {
+	  (*_totalLBound)->array[i]=arrayLbounds[coordMapDim[coord][i]];
+	}
       }
     }
 
@@ -735,7 +732,7 @@ extern "C" {
           "- totalUBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
-      if ((*_totalUBound)->extent[0] < rank){
+      if ((*_totalUBound)->extent[0] < coordRank[coord]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
           "- totalUBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
@@ -743,15 +740,13 @@ extern "C" {
 
       // now that we have the array get the total bounds of the localDE
       arrayBnd=array->getTotalUBound()+localDE*distRank;
-      arrayUbounds=array->getUBounds();
 
-      // Fill in the output array
-      for (int i=0; i<distRank; i++){
-	(*_totalUBound)->array[distDimMap[i]]=arrayBnd[i];
-      }
-
-      for (int i=0; i<undistRank; i++){
-	(*_totalUBound)->array[undistDimMap[i]]=arrayUbounds[i];
+      for (int i=0; i<coordRank[coord]; i++) {
+	if (coordIsDist[coord][i]) {
+	  (*_totalUBound)->array[i]=arrayBnd[coordMapDim[coord][i]];
+	} else {
+	  (*_totalUBound)->array[i]=arrayUbounds[coordMapDim[coord][i]];
+	}
       }
     }
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.12 2007/07/18 19:58:27 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.13 2007/07/20 00:27:28 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -117,6 +117,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
   public ESMF_GridCommit
   public ESMF_GridCreate
   public ESMF_GridCreateShape
+  public ESMF_GridSetShape
   public ESMF_GridCreateEmpty
   public ESMF_GridDestroy
   public ESMF_GridGet
@@ -136,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.12 2007/07/18 19:58:27 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.13 2007/07/20 00:27:28 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -282,6 +283,25 @@ interface ESMF_GridSetCoord
 !EOPI 
 end interface
 
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridSetShape -- Generic interface
+
+! !INTERFACE:
+interface ESMF_GridSetShape
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_GridSetShapeIrreg
+
+      
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_GridSetShape} functions.   
+!EOPI 
+end interface
+
+
 
 !==============================================================================
 
@@ -299,7 +319,7 @@ end interface
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAllocCoord()
-     subroutine ESMF_GridAllocCoordNoValues(grid, staggerLoc, coord,  &
+     subroutine ESMF_GridAllocCoordNoValues(grid, staggerLoc,  &
                 coordLWidth, coordUWidth, coordAlign, &
                 computationalLWidth, computationalUWidth, &
                 totalLWidth, totalUWidth,rc)
@@ -308,7 +328,6 @@ end interface
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)              :: grid 
       type (ESMF_StaggerLoc), intent(in),optional     :: staggerLoc
-      integer,                intent(in)              :: coord
       integer,                intent(in),optional     :: coordLWidth(:)
       integer,                intent(in),optional     :: coordUWidth(:)
       integer,                intent(in),optional     :: coordAlign(:)
@@ -319,29 +338,34 @@ end interface
       integer,                intent(out),optional    :: rc
 !
 ! !DESCRIPTION:
-!  This call allocates space for a coordinate array at a stagger location, but doesn't set the values.
+! 
+!  When a Grid is created all of its potential stagger locations can hold coordinate
+!  data, but none of them have storage allocated. This call allocates coordinate
+!  storage (creates internal ESMF\_Arrays and associated memory) for  a particular
+!  stagger location. Note, that this
+!  call doesn't assign any values to the storage, it only allocates it. The
+!  remaining options {\tt coordLWidth}, etc. allow the user to adjust the 
+!  padding on the coordinate arrays.
 !
 ! The arguments are:
 ! \begin{description}
 !     \item[{grid}]
-!      Partially created Grid to set information into.
+!       Grid to allocate coordinate storage in.  
 ! \item[{[staggerLoc]}]
-!      The stagger location to add. If not present, defaults to center. 
-! \item[{coord}]
-!      The coordinate component to get the data from (e.g. 1=x).
+!      The stagger location to add. If not present, defaults to ESMF\_STAGGERLOC\_CENTER. 
 ! \item[{[coordLWidth]}] 
-!      This array should be the same rank as the grid. It specifies the lower corner of the computational
+!      This array should be the same rank as the grid. It specifies the lower corner of the stagger
 !      region with respect to the lower corner of the exclusive region.
 ! \item[{[coordUWidth]}] 
-!      This array should be the same rank as the grid. It specifies the upper corner of the computational
-!      region with respect to the lower corner of the exclusive region.
+!      This array should be the same rank as the grid. It specifies the upper corner of the stagger
+!      region with respect to the upper corner of the exclusive region.
 ! \item[{[coordAlign]}] 
 !      This array is of size  grid rank.
 !      For this stagger location, it specifies which element
 !      has the same index value as the center. For example, 
 !      for a 2D cell with corner stagger it specifies which 
 !      of the 4 corners has the same index as the center. 
-!      If this is set and coordUWidth is not,
+!      If this is set and either coordUWidth or coordLWidth is not,
 !      this determines the default array padding for a stagger. 
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
@@ -350,18 +374,20 @@ end interface
 !     The lower boundary of the computatational region in reference to the exclusive region. 
 !     If {\tt coordLWidth} is present then the actual computational width
 !     is the max on a dimension by dimension basis between {\tt coordLWidth} and
-!      {\tt computationalLWidth}.
+!      {\tt computationalLWidth}. [CURRENTLY NOT IMPLEMENTED]
 !\item[{[computationalUWidth]}]
 !     The lower boundary of the computatational region in reference to the exclusive region. 
 !     If {\tt coordUWidth} is present then the actual computational width
 !     is the max on a dimension by dimension basis between {\tt coordUWidth} and
-!      {\tt computationalUWidth}.
+!      {\tt computationalUWidth}. [CURRENTLY NOT IMPLEMENTED]
 !\item[{[totalLWidth]}]
 !     The lower boundary of the computatational region in reference to the computational region. 
 !     Note, the computational region includes the extra padding specified by {\tt ccordLWidth}.
+!     [CURRENTLY NOT IMPLEMENTED]
 !\item[{[totalUWidth]}]
 !     The lower boundary of the computatational region in reference to the computational region. 
 !     Note, the computational region includes the extra padding specified by {\tt coordLWidth}.
+!     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -380,6 +406,36 @@ end interface
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+
+    ! Check for Not Implemented inputs
+    if (present(computationalLWidth)) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- computationalLWidth specification not yet implemented", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (present(computationalUWidth)) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- computationalUWidth specification not yet implemented", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (present(totalLWidth)) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- totalLWidth specification not yet implemented", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (present(totalUWidth)) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- totalUWidth specification not yet implemented", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
 
     ! handle staggerloc
     if (present(staggerLoc)) then
@@ -410,7 +466,7 @@ end interface
 
 
     ! Call C++ Subroutine to do the create
-    call c_ESMC_gridalloccoord(grid%this,tmp_staggerloc, coord, &
+    call c_ESMC_gridalloccoord(grid%this,tmp_staggerloc, &
       coordLWidthArg, coordUWidthArg, coordAlignArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -485,11 +541,11 @@ end interface
 !          Grid object to commit.
 !     \item[{status}]
 !          Grid status to commit to.  For valid values see section
-!          \ref{sec:opt:gridstatus}.  
+!          \ref{sec:opt:gridstatus}.   
 !     \item[{[defaultFlag]}]
 !          Indicates whether to use default values to achieve the desired
 !          grid status.  For valid values see section \ref{opt:defaultflag}.
-!          The default value is {\tt ESMF\_NO\_DEFAULTS}.
+!          The default value is {\tt ESMF\_NO\_DEFAULTS}.  [CURRENTLY NOT IMPLEMENTED]
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -503,6 +559,23 @@ end interface
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+    ! Check for Not Implemented options
+    if (present(status)) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- status not yet implemented", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (present(defaultflag)) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- defaultflag not yet implemented", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridcommit(grid%this, localrc)
@@ -518,12 +591,12 @@ end interface
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreate"
 !BOP
-! !IROUTINE: ESMF_GridCreate - Create a Grid using a DistGrid
+! !IROUTINE: ESMF_GridCreate - Create a Grid from a distgrid
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateFromDistGrid(name,coordTypeKind,distgrid, dimmap, &
-                        lbounds, ubounds, coordRanks, coordDimMap, indexflag, gridType, rc)
+                        lbounds, ubounds, coordRank, coordDimMap, indexflag, gridType, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFromDistGrid
@@ -535,7 +608,7 @@ end interface
        integer,               intent(in),   optional  :: dimmap(:)
        integer,               intent(in),   optional  :: lbounds(:)
        integer,               intent(in),   optional  :: ubounds(:)
-       integer,               intent(in),   optional  :: coordRanks(:)
+       integer,               intent(in),   optional  :: coordRank(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: gridType
@@ -543,9 +616,16 @@ end interface
 !
 ! !DESCRIPTION:
 ! This is the most general form of creation for an {\tt ESMF\_Grid}
-! object. This subroutine constructs a 
-! grid as specified by a {\tt distgrid}. Optional {\tt lbound} and {\tt ubound}
-! arguments can be used to specify extra tensor dimensions. 
+! object. It allows the user to fully specify the topology and index space
+! (of the distributed dimensions) using the DistGrid methods and then build a grid out
+! of the resulting {\tt distgrid}.  Optional {\tt lbound} and {\tt ubound}
+! arguments can be used to specify extra tensor dimensions. The {\tt dimmap} argument
+! specifies how the distributed (from {\tt distgrid}) and tensor (from {\tt bounds})
+! dimensions are intermixed. The {\tt coordRank} and {\tt coordDimMap} arguments
+! allow the user to specify how the coordinate arrays should map to the grid
+! dimensions. (Note, though, that creating a grid does not allocate coordinate
+! storage, other methods (such as ESMF\_GridAllocCoord) must be used
+! before adding coordinate data.
 !
 ! The arguments are:
 ! \begin{description}
@@ -566,22 +646,25 @@ end interface
 !       is to map all of distgrid's dimensions against the lower dimensions of the
 !       grid in sequence. 
 ! \item[{[lbounds]}] 
-!      Lower bounds for tensor array dimensions.
+!      Lower bounds for tensor array dimensions. Must be the same size as {\tt ubounds}.
 ! \item[{[ubounds]}] 
-!      Upper bounds for tensor array dimensions.
-! \item[{[coordRanks]}]
+!      Upper bounds for tensor array dimensions. Must be the same size as {\tt lbounds}.
+! \item[{[coordRank]}]
 !      List that has as many elements as the grid rank .
 !      Gives the dimension of each component (e.g. x) array. This is 
 !      to allow factorization of the coordinate arrays. If not specified
-!      all arrays are the same size as the grid. 
+!      all arrays are the same size as the grid. [NOTE FACTORIZATION HAS
+!      NOT CURRENTLY BEEN IMPLEMENTED].
 ! \item[{[coordDimMap]}]
 !      2D list of size grid rank x grid rank. This array describes the
 !      map of each component array's dimensions onto the grids
 !      dimensions. Each entry {\tt coordDimMap(i,j)} tells which
 !      grid dimension component i's, jth dimension maps to. 
-!      Note that if j is bigger than {\tt coordRanks(i)} than its ignored.        
+!      Note that if j is bigger than {\tt coordRank(i)} than its ignored.        
 ! \item[{[indexflag]}]
-!      Flag that indicates how the DE-local indices are to be defined.
+!      Indicates whether the indices in the grid are to be interpreted to form
+!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), or are to 
+!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
 ! \item[{[gridType]}]
 !      Flag that indicates the type of the grid. If not given, defaults
 !       to ESMF\_GRIDTYPE\_UNKNOWN.
@@ -596,7 +679,7 @@ end interface
     type(ESMF_InterfaceInt) :: dimmapArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: lboundsArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: uboundsArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordRanksArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: coordRankArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
 
 
@@ -631,7 +714,7 @@ end interface
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Description of array factorization
-    coordRanksArg = ESMF_InterfaceIntCreate(coordRanks, rc=localrc)
+    coordRankArg = ESMF_InterfaceIntCreate(coordRank, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
@@ -643,7 +726,7 @@ end interface
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridcreatefromdistgrid(grid%this, nameLen, name, &
-      coordTypeKind, distgrid, dimmapArg, lboundsArg, uboundsArg, coordRanksArg, coordDimMapArg, &
+      coordTypeKind, distgrid, dimmapArg, lboundsArg, uboundsArg, coordRankArg, coordDimMapArg, &
       indexflag, gridtype, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -658,7 +741,7 @@ end interface
     call ESMF_InterfaceIntDestroy(uboundsArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordRanksArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(coordRankArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
@@ -823,58 +906,58 @@ end interface
 ! \item[{[connDim1]}] 
 !     Two element array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
-!      The second element represents the minimum end of dimension 1.
+!      The second element represents the maximum end of dimension 1.
 !      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
 !       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
 !       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
 ! \item[{[connDim2]}] 
 !     Two element array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
-!      The second element represents the minimum end of dimension 2.
+!      The second element represents the maximum end of dimension 2.
 !      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
 !       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
 !       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
 ! \item[{[connDim3]}] 
 !     Two element array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
-!      The second element represents the minimum end of dimension 3.
+!      The second element represents the maximum end of dimension 3.
 !      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
 !       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
 !       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be.
 ! \item[{[poleStaggerLoc1]}] 
 !     Two element array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
-!      The second element represents the minimum end of dimension 1.
+!      The second element represents the maximum end of dimension 1.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      If not present, the default is the edge.
+!      If not present, the default is the center.
 ! \item[{[poleStaggerLoc2]}] 
 !     Two element array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
-!      The second element represents the minimum end of dimension 2.
+!      The second element represents the maximum end of dimension 2.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      If not present, the default is the edge.
+!      If not present, the default is the center.
 ! \item[{[poleStaggerLoc3]}] 
 !     Two element array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
-!      The second element represents the minimum end of dimension 3.
+!      The second element represents the maximum end of dimension 3.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      If not present, the default is the edge.
+!      If not present, the default is the center.
 ! \item[{[bipolePos1]}] 
 !     Two element array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
-!      The second element represents the minimum end of dimension 1.
+!      The second element represents the maximum end of dimension 1.
 !      If a bipole, this gives the index position of one of the poles.
 !      The other is half way around. If not present, the default is 1.
 ! \item[{[bipolePos2]}] 
 !     Two element array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
-!      The second element represents the minimum end of dimension 2.
+!      The second element represents the maximum end of dimension 2.
 !      If a bipole, this gives the index position of one of the poles.
 !      The other is half way around. If not present, the default is 1.
 ! \item[{[bipolePos3]}] 
 !     Two element array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
-!      The second element represents the minimum end of dimension 3.
+!      The second element represents the maximum end of dimension 3.
 !      If a bipole, this gives the index position of one of the poles.
 !      The other is half way around. If not present, the default is 1. 
 ! \item[{[coordDep1]}] 
@@ -914,9 +997,11 @@ end interface
 !
 !EOP
     type(ESMF_DistGrid)  :: distgrid
+    type(ESMF_DELayout)  :: delayout
+    integer, pointer     :: petList(:)
     integer, pointer     :: lbounds(:)
     integer, pointer     :: ubounds(:)
-    integer, pointer     :: coordRanks(:)
+    integer, pointer     :: coordRank(:)
     integer, pointer     :: coordDimMap(:,:)
     integer              :: localrc
     integer              :: rank,i,distRank,undistRank,maxSizeDEDim
@@ -1048,6 +1133,29 @@ end interface
                "- minIndex size must equal grid rank", & 
                ESMF_CONTEXT, rc) 
           return 
+       endif
+    endif
+
+
+    if (present(petMap)) then
+       if (rank .gt. 2) then
+          if ((size(petMap,1) .ne. size(countsPerDEDim1)) .or. &
+              (size(petMap,2) .ne. size(countsPerDEDim2)) .or. &
+              (size(petMap,3) .ne. size(countsPerDEDim3))) then
+              call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                     "- petMap wrong size in one or more dimensions", & 
+                     ESMF_CONTEXT, rc) 
+              return 
+          endif
+       else
+          if ((size(petMap,1) .ne. size(countsPerDEDim1)) .or. &
+              (size(petMap,2) .ne. size(countsPerDEDim2)) .or. &
+              (size(petMap,3) .ne. 1)) then
+              call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                     "- petMap wrong size in one or more dimensions", & 
+                     ESMF_CONTEXT, rc) 
+              return 
+          endif
        endif
     endif
 
@@ -1291,10 +1399,52 @@ end interface
    ! CONNECTIONS DON'T WORK YET SO NOT IMPLEMENTED
 
 
+   ! Process PetMap --------------------------------------------------------------
+   if (present(petMap)) then
+      !! Allocate a petList
+      allocate(petList(deCount))
+
+      !! copy petMap to petList
+      if (rank .gt. 2) then
+	 k=1
+     	 do i3=1,size(countsPerDEDim3)
+         do i2=1,size(countsPerDEDim2)
+         do i1=1,size(countsPerDEDim1)
+            petList(k)=petMap(i1,i2,i3)
+            k=k+1
+         enddo
+         enddo
+         enddo
+      else 
+     	 do i3=1,1
+         do i2=1,size(countsPerDEDim2)
+         do i1=1,size(countsPerDEDim1)
+            petList(k)=petMap(i1,i2,i3)
+            k=k+1
+         enddo
+         enddo
+         enddo
+      endif
+      
+      !! create delayout from the petList
+      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      !! Get rid of list
+      deallocate(petList)
+   else
+      !! create a default delayout
+      delayout=ESMF_DELayoutCreate(rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+   endif
+
+
    ! Create DistGrid --------------------------------------------------------------
 
     distgrid=ESMF_DistGridCreate(minIndex=minIndexDG, maxIndex=maxIndexDG, &
-               deBlockList=deBlockList, indexflag=indexflag, rc=localrc)   
+               deBlockList=deBlockList, delayout=delayout, indexflag=indexflag, rc=localrc)   
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1332,35 +1482,35 @@ end interface
    endif
 
 
-   ! Convert coordDeps to coordRanks and coordDimMap -------------------------------
-   allocate(coordRanks(rank), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordRanks", &
+   ! Convert coordDeps to coordRank and coordDimMap -------------------------------
+   allocate(coordRank(rank), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordRank", &
               ESMF_CONTEXT, rc)) return
    allocate(coordDimMap(rank,rank), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimMap", &
               ESMF_CONTEXT, rc)) return
 
    if (present(coordDep1)) then
-      coordRanks(1)=size(coordDep1)
+      coordRank(1)=size(coordDep1)
       coordDimMap(1,:)=0
       do i=1,size(coordDep1)
          coordDimMap(1,i)=coordDep1(i)
       enddo
    else 
-      coordRanks(1)=rank
+      coordRank(1)=rank
       do i=1,rank
          coordDimMap(1,i)=i      
       enddo
    endif
 
    if (present(coordDep2)) then
-      coordRanks(2)=size(coordDep2)
+      coordRank(2)=size(coordDep2)
       coordDimMap(2,:)=0
       do i=1,size(coordDep2)
          coordDimMap(2,i)=coordDep2(i)
       enddo
    else 
-      coordRanks(2)=rank
+      coordRank(2)=rank
       do i=1,rank
          coordDimMap(2,i)=i      
       enddo
@@ -1368,13 +1518,13 @@ end interface
 
    if (rank .gt. 2) then
       if (present(coordDep3)) then 
-         coordRanks(3)=size(coordDep3)
+         coordRank(3)=size(coordDep3)
           coordDimMap(3,:)=0
           do i=1,size(coordDep3)
              coordDimMap(3,i)=coordDep3(i)
           enddo
       else 
-        coordRanks(3)=rank
+        coordRank(3)=rank
         do i=1,rank
 	   coordDimMap(3,i)=i      
         enddo
@@ -1386,12 +1536,12 @@ end interface
    if (undistRank .gt. 0) then
        ESMF_GridCreateShapeIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid, dimmap, lbounds, ubounds, &
-                                    coordRanks, coordDimMap, indexflag, &
+                                    coordRank, coordDimMap, indexflag, &
                                     gridType, localrc)
     else
        ESMF_GridCreateShapeIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid=distgrid, dimmap=dimmap, &
-                                    coordRanks=coordRanks, coordDimMap=coordDimMap, &
+                                    coordRank=coordRank, coordDimMap=coordDimMap, &
                                     indexflag=indexflag, &
                                     gridtype=gridType, rc=localrc)
     endif
@@ -1401,7 +1551,7 @@ end interface
 
 
     ! Clean up memory
-    deallocate(coordRanks)
+    deallocate(coordRank)
     deallocate(coordDimMap)
     deallocate(minIndexDG)
     deallocate(maxIndexDG)
@@ -1435,7 +1585,8 @@ end interface
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Destroys an {\tt ESMF\_Grid} object and all related internal structures.
+!     Destroys an {\tt ESMF\_Grid} object and all related internal structures. This call
+!    does not destroy the internal coordinate Arrays, or internally generated DistGrid. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -1482,7 +1633,7 @@ end interface
 ! !INTERFACE:
       subroutine ESMF_GridGet(grid, name, coordTypeKind, rank,  &
           tileCount, distGrid, staggerLocsCount,  &
-          dimmap, lbounds, ubounds, coordRanks, coordDimMap, &
+          dimmap, lbounds, ubounds, coordRank, coordDimMap, &
           indexFlag, gridType, localDECount,distRank,undistRank, rc)
 !
 ! !ARGUMENTS:
@@ -1495,7 +1646,7 @@ end interface
       integer,               intent(out), optional :: lbounds(:)
       integer,               intent(out), optional :: ubounds(:)
       integer,               intent(out), optional :: dimmap(:)
-      integer,               intent(out), optional :: coordRanks(:)
+      integer,               intent(out), optional :: coordRank(:)
       integer,               intent(out), optional :: coordDimMap(:,:)
       integer,               intent(out), optional :: staggerLocsCount
       integer,               intent(out), optional :: localDECount
@@ -1506,7 +1657,7 @@ end interface
       integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Gets various types of tile information about a grid. 
+!    Gets various types of information about a grid. 
 !
 !The arguments are:
 !\begin{description}
@@ -1528,7 +1679,7 @@ end interface
 !\item[{[staggerLocs]}]
 !   An array of size {\tt staggerLocsCount}. It contains a list of 
 !   the stagger locations which have coordinate data allocated. 
-! \item[{[coordRanks]}]
+! \item[{[coordRank]}]
 !   List that has as many elements as the grid rank (from arrayspec).
 !   Gives the dimension of each component (e.g. x) array. This is 
 !   to allow factorization of the coordinate arrays. If not specified
@@ -1564,7 +1715,7 @@ end interface
     type(ESMF_InterfaceInt) :: dimmapArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: lboundsArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: uboundsArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordRanksArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: coordRankArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
 
 
@@ -1599,7 +1750,7 @@ end interface
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Description of array factorization
-    coordRanksArg = ESMF_InterfaceIntCreate(coordRanks, rc=localrc)
+    coordRankArg = ESMF_InterfaceIntCreate(coordRank, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
@@ -1609,7 +1760,7 @@ end interface
     ! Call C++ Subroutine to do the get
     call c_ESMC_gridget(grid%this, &
       coordTypeKind, rank, tileCount, distgrid,  staggerLocsCount, &
-      dimmapArg, lboundsArg, uboundsArg, coordRanksArg, coordDimMapArg, &
+      dimmapArg, lboundsArg, uboundsArg, coordRankArg, coordDimMapArg, &
       indexflag, gridtype, localDECount, distRank, undistRank, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1624,7 +1775,7 @@ end interface
     call ESMF_InterfaceIntDestroy(uboundsArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordRanksArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(coordRankArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
@@ -1665,9 +1816,11 @@ end subroutine ESMF_GridGet
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Sets the coordinates for a stagger location into an array. If
-!    the doCopy flag is set to {\tt ESMF\_DATA\_REF}, the array contains a
-!    reference to the grid array.
+!    This method allows the user to get access to the ESMF Array holding
+!    coordinate data at a particular stagger location. This is useful, for example, 
+!    to set the coordinate values. To have an Array to access the coordinate Arrays
+!    must have already been set, for example by {\tt ESMF\_GridAllocCoord} or
+!    {\tt ESMF\_GridSetCoord}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1681,7 +1834,8 @@ end subroutine ESMF_GridGet
 !     \item[{[doCopy]}]
 !          Default to {\tt ESMF\_DATA\_COPY},  copys the coordinates
 !          into the arrays. If set to {\tt ESMF\_DATA\_REF},
-!          causes the array to reference the grid array containing the coordinates. 
+!          causes the array to reference the grid array containing the coordinates.
+!          [THE COPY OPTION IS CURRENTLY NOT IMPLEMENTED] 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1778,10 +1932,12 @@ end subroutine ESMF_GridGet
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Gets a fortran pointer to the coordinate data for the piece of tile on a local DE. 
-!    This routine will need to be overloaded to cover the full range of ranks, types, 
-!    and kinds. 
-
+!    This method gets a fortran pointer to the piece of memory which holds the 
+!    coordinate data for the given coordinate and stagger locations on the given local DE. 
+!    This is useful, for example, for setting the coordinate values in a Grid, or
+!    for reading the coordinate values. Eventually this method will be overloaded
+!    for the full range of ESMF supported types and dimensions. 
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[{grid}]
@@ -1814,7 +1970,7 @@ end subroutine ESMF_GridGet
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: lDE
- integer :: coordRanks(ESMF_MAXDIM)
+ integer :: coordRank(ESMF_MAXDIM)
 
  ! Initialize return code 
  status = ESMF_RC_NOT_IMPL 
@@ -1824,7 +1980,7 @@ end subroutine ESMF_GridGet
  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
  ! Check consistency 
- call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRanks=coordRanks, &
+ call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
                    localDECount=localDECount, rc=status) 
  if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1846,7 +2002,7 @@ if ((coord .lt. 1) .or. (coord .gt. rank)) then
  endif 
 
  ! Require farrayPtr rank to match coordinate rank 
- if (coordRanks(coord) .ne. 1) then 
+ if (coordRank(coord) .ne. 1) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr rank does not match requested coordinate rank", & 
  ESMF_CONTEXT, rc) 
@@ -1941,10 +2097,12 @@ endif
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Gets a fortran pointer to the coordinate data for the piece of tile on a local DE. 
-!    This routine will need to be overloaded to cover the full range of ranks, types, 
-!    and kinds. 
-
+!    This method gets a fortran pointer to the piece of memory which holds the 
+!    coordinate data for the given coordinate and stagger locations on the given local DE. 
+!    This is useful, for example, for setting the coordinate values in a Grid, or
+!    for reading the coordinate values. Eventually this method will be overloaded
+!    for the full range of ESMF supported types and dimensions. 
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[{grid}]
@@ -1977,7 +2135,7 @@ endif
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: lDE
- integer :: coordRanks(ESMF_MAXDIM)
+ integer :: coordRank(ESMF_MAXDIM)
 
  ! Initialize return code 
  status = ESMF_RC_NOT_IMPL 
@@ -1987,7 +2145,7 @@ endif
  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
  ! Check consistency 
- call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRanks=coordRanks, &
+ call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
                    localDECount=localDECount, rc=status) 
  if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2009,7 +2167,7 @@ if ((coord .lt. 1) .or. (coord .gt. rank)) then
  endif 
 
  ! Require farrayPtr rank to match coordinate rank 
- if (coordRanks(coord) .ne. 2) then 
+ if (coordRank(coord) .ne. 2) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr rank does not match requested coordinate rank", & 
  ESMF_CONTEXT, rc) 
@@ -2104,10 +2262,12 @@ endif
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Gets a fortran pointer to the coordinate data for the piece of tile on a local DE. 
-!    This routine will need to be overloaded to cover the full range of ranks, types, 
-!    and kinds. 
-
+!    This method gets a fortran pointer to the piece of memory which holds the 
+!    coordinate data for the given coordinate and stagger locations on the given local DE. 
+!    This is useful, for example, for setting the coordinate values in a Grid, or
+!    for reading the coordinate values. Eventually this method will be overloaded
+!    for the full range of ESMF supported types and dimensions. 
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[{grid}]
@@ -2140,7 +2300,7 @@ endif
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: lDE
- integer :: coordRanks(ESMF_MAXDIM)
+ integer :: coordRank(ESMF_MAXDIM)
 
  ! Initialize return code 
  status = ESMF_RC_NOT_IMPL 
@@ -2150,7 +2310,7 @@ endif
  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
  ! Check consistency 
- call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRanks=coordRanks, &
+ call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
                    localDECount=localDECount, rc=status) 
  if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2172,7 +2332,7 @@ if ((coord .lt. 1) .or. (coord .gt. rank)) then
  endif 
 
  ! Require farrayPtr rank to match coordinate rank 
- if (coordRanks(coord) .ne. 3) then 
+ if (coordRank(coord) .ne. 3) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr rank does not match requested coordinate rank", & 
  ESMF_CONTEXT, rc) 
@@ -2267,10 +2427,12 @@ endif
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Gets a fortran pointer to the coordinate data for the piece of tile on a local DE. 
-!    This routine will need to be overloaded to cover the full range of ranks, types, 
-!    and kinds. 
-
+!    This method gets a fortran pointer to the piece of memory which holds the 
+!    coordinate data for the given coordinate and stagger locations on the given local DE. 
+!    This is useful, for example, for setting the coordinate values in a Grid, or
+!    for reading the coordinate values. Eventually this method will be overloaded
+!    for the full range of ESMF supported types and dimensions. 
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[{grid}]
@@ -2303,7 +2465,7 @@ endif
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: lDE
- integer :: coordRanks(ESMF_MAXDIM)
+ integer :: coordRank(ESMF_MAXDIM)
 
  ! Initialize return code 
  status = ESMF_RC_NOT_IMPL 
@@ -2313,7 +2475,7 @@ endif
  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
  ! Check consistency 
- call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRanks=coordRanks, &
+ call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
                    localDECount=localDECount, rc=status) 
  if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2335,7 +2497,7 @@ if ((coord .lt. 1) .or. (coord .gt. rank)) then
  endif 
 
  ! Require farrayPtr rank to match coordinate rank 
- if (coordRanks(coord) .ne. 1) then 
+ if (coordRank(coord) .ne. 1) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr rank does not match requested coordinate rank", & 
  ESMF_CONTEXT, rc) 
@@ -2430,10 +2592,12 @@ endif
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Gets a fortran pointer to the coordinate data for the piece of tile on a local DE. 
-!    This routine will need to be overloaded to cover the full range of ranks, types, 
-!    and kinds. 
-
+!    This method gets a fortran pointer to the piece of memory which holds the 
+!    coordinate data for the given coordinate and stagger locations on the given local DE. 
+!    This is useful, for example, for setting the coordinate values in a Grid, or
+!    for reading the coordinate values. Eventually this method will be overloaded
+!    for the full range of ESMF supported types and dimensions. 
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[{grid}]
@@ -2466,7 +2630,7 @@ endif
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: lDE
- integer :: coordRanks(ESMF_MAXDIM)
+ integer :: coordRank(ESMF_MAXDIM)
 
  ! Initialize return code 
  status = ESMF_RC_NOT_IMPL 
@@ -2476,7 +2640,7 @@ endif
  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
  ! Check consistency 
- call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRanks=coordRanks, &
+ call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
                    localDECount=localDECount, rc=status) 
  if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2498,7 +2662,7 @@ if ((coord .lt. 1) .or. (coord .gt. rank)) then
  endif 
 
  ! Require farrayPtr rank to match coordinate rank 
- if (coordRanks(coord) .ne. 2) then 
+ if (coordRank(coord) .ne. 2) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr rank does not match requested coordinate rank", & 
  ESMF_CONTEXT, rc) 
@@ -2593,10 +2757,12 @@ endif
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Gets a fortran pointer to the coordinate data for the piece of tile on a local DE. 
-!    This routine will need to be overloaded to cover the full range of ranks, types, 
-!    and kinds. 
-
+!    This method gets a fortran pointer to the piece of memory which holds the 
+!    coordinate data for the given coordinate and stagger locations on the given local DE. 
+!    This is useful, for example, for setting the coordinate values in a Grid, or
+!    for reading the coordinate values. Eventually this method will be overloaded
+!    for the full range of ESMF supported types and dimensions. 
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[{grid}]
@@ -2629,7 +2795,7 @@ endif
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: lDE
- integer :: coordRanks(ESMF_MAXDIM)
+ integer :: coordRank(ESMF_MAXDIM)
 
  ! Initialize return code 
  status = ESMF_RC_NOT_IMPL 
@@ -2639,7 +2805,7 @@ endif
  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
  ! Check consistency 
- call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRanks=coordRanks, &
+ call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
                    localDECount=localDECount, rc=status) 
  if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2661,7 +2827,7 @@ if ((coord .lt. 1) .or. (coord .gt. rank)) then
  endif 
 
  ! Require farrayPtr rank to match coordinate rank 
- if (coordRanks(coord) .ne. 3) then 
+ if (coordRank(coord) .ne. 3) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr rank does not match requested coordinate rank", & 
  ESMF_CONTEXT, rc) 
@@ -2764,7 +2930,12 @@ endif
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Gets various types of information about the part of a grid tile which lies on this DE. 
+!  This method gets information about the range of index space which a particular
+!  piece of coordinate data occupies. Note that unlike the output from the 
+!  Array, these values also include the undistributed dimensions and are
+!  ordered to reflect the order of the indices in the coordinate. So, for example,
+!  {\tt totalLBound} and {\tt totalUBound} should match the bounds of the fortran array
+!  retreived by {\tt ESMF\_GridGetLocalTileCoord}. 
 !
 !The arguments are:
 !\begin{description}
@@ -2779,22 +2950,28 @@ endif
 !     The stagger location to get the information for. If not set, defaults to center.  
 !\item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
-!     {\tt exclusiveLBound} must be allocated to be of size dimCount.
+!     {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
 !\item[{[exclusiveUBound]}]
 !     Upon return this holds the upper bounds of the exclusive region.
-!     {\tt exclusiveUBound} must be allocated to be of size dimCount.
+!     {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!\item[{[staggerLBound]}]
+!     Upon return this holds the lower bounds of the stagger region.
+!     {\tt staggerLBound} must be allocated to be of size equal to the coord rank.
+!\item[{[staggerUBound]}]
+!     Upon return this holds the upper bounds of the stagger region.
+!     {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !\item[{[computationalLBound]}]
 !     Upon return this holds the lower bounds of the computational region. 
-!     {\tt computationalLBound} must be allocated to be of size dimCount.
+!     {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
 !\item[{[computationalUBound]}]
 !     Upon return this holds the upper bounds of the computational region.
-!     {\tt computationalUBound} must be allocated to be of size dimCount.
+!     {\tt computationalUBound} must be allocated to be of size equal to the coord rank.
 !\item[{[totalLBound]}]
 !     Upon return this holds the lower bounds of the total region.
-!     {\tt totalLBound} must be allocated to be of size dimCount.
+!     {\tt totalLBound} must be allocated to be of size equal to the coord rank.
 !\item[{[totalUBound]}]
 !     Upon return this holds the upper bounds of the total region.
-!     {\tt totalUBound} must be allocated to be of size dimCount.
+!     {\tt totalUBound} must be allocated to be of size equal to the coord rank.
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -2833,10 +3010,10 @@ endif
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=status)
+    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(staggerUBound, rc=status)
+    staggerUBoundArg=ESMF_InterfaceIntCreate(staggerUBound, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=status)
@@ -2902,7 +3079,7 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSet()
     subroutine ESMF_GridSetFromDistGrid(grid,name,coordTypeKind,distgrid, &
-                 dimmap, lbounds, ubounds, coordRanks, coordDimMap, &
+                 dimmap, lbounds, ubounds, coordRank, coordDimMap, &
                  indexflag, gridType, rc)
 !
 ! !RETURN VALUE:
@@ -2916,14 +3093,15 @@ endif
        integer,               intent(in),   optional  :: dimmap(:)
        integer,               intent(in),   optional  :: lbounds(:)
        integer,               intent(in),   optional  :: ubounds(:)
-       integer,               intent(in),   optional  :: coordRanks(:)
+       integer,               intent(in),   optional  :: coordRank(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: gridType
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!  Set values in a grid in preparation for committing and creating a grid. Note that 
+!  Set values in a grid in preparation for committing and creating a grid. This method
+!  is called between {\tt ESMF\_GridCreateEmpty} and {\tt ESMF\_GridCommit}. Note that 
 ! once a grid is committed and created it's an error to try to set values in it. Note also 
 ! that new values overwrite old values if previously set. 
 !
@@ -2966,7 +3144,7 @@ endif
     type(ESMF_InterfaceInt) :: dimmapArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: lboundsArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: uboundsArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordRanksArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: coordRankArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
 
 
@@ -3002,7 +3180,7 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Description of array factorization
-    coordRanksArg = ESMF_InterfaceIntCreate(coordRanks, rc=localrc)
+    coordRankArg = ESMF_InterfaceIntCreate(coordRank, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
@@ -3011,7 +3189,7 @@ endif
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridsetfromdistgrid(grid%this, nameLen, name, &
-      coordTypeKind, distgrid, dimmapArg, lboundsArg, uboundsArg, coordRanksArg, coordDimMapArg, &
+      coordTypeKind, distgrid, dimmapArg, lboundsArg, uboundsArg, coordRankArg, coordDimMapArg, &
       indexflag, gridtype, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3026,7 +3204,7 @@ endif
     call ESMF_InterfaceIntDestroy(uboundsArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordRanksArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(coordRankArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
@@ -3047,7 +3225,7 @@ endif
 
 ! !INTERFACE:
       subroutine ESMF_GridSetCoordFromArray(grid, staggerLoc, coord, &
-                            array, doCopy, coordAlign, rc)
+                            array, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
@@ -3055,12 +3233,13 @@ endif
       integer,                intent(in)            :: coord
       type(ESMF_Array),       intent(in)            :: array
       type(ESMF_CopyFlag),    intent(in), optional  :: docopy
-      integer,                intent(in), optional  :: coordAlign(:)
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Sets the coordinates for a stagger location from an array. 
-!
+!   This method sets the passed in Array as the holder of the coordinate data
+!   for stagger location {\tt staggerloc} and coordinate {\tt coord}. If the location
+!   already contains an Array, then this one overwrites it. 
+!    
 !     The arguments are:
 !\begin{description}
 !\item[{staggerLoc}]
@@ -3073,18 +3252,7 @@ endif
 !\item[{[doCopy]}]
 !    Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
 !    in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
-!    of the array.
-!\item[{[coordAlign]}] 
-!    This array is of size  grid rank.
-!    For this stagger location, it specifies which element
-!    has the same index value as the center. For example, 
-!    for a 2D cell with corner stagger it specifies which 
-!    of the 4 corners has the same index as the center. 
-!    If this is set and coordUWidth is not,
-!    this determines the default array padding for a stagger. 
-!    If not set, then this defaults to all negative. (e.g. 
-!    The most negative part of the stagger in a cell is aligned with the 
-!    center and the padding is all on the postive side.) 
+!    of the array. [THE COPY OPTION IS CURRENTLY NOT IMPLEMENTED] 
 !\item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -3092,7 +3260,6 @@ endif
 !EOP
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: coordAlignArg  ! Language Interface Helper Var
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -3109,26 +3276,777 @@ endif
        tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
     endif
 
-
-    !! coordAlign
-    coordAlignArg = ESMF_InterfaceIntCreate(coordAlign, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridsetcoordfromarray(grid%this,tmp_staggerloc, coord, &
-      array, docopy, coordAlignArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Deallocate helper variables
-    call ESMF_InterfaceIntDestroy(coordAlignArg, rc=localrc)
+      array, docopy, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridSetCoordFromArray
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetShapeIrreg"
+!BOP
+! !IROUTINE: ESMF_GridSetShape - Create a Grid with an irregular distribution
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridSetShape()
+     subroutine ESMF_GridSetShapeIrreg(grid, name,coordTypeKind, minIndex,  &
+                        countsPerDEDim1,countsPerDeDim2, countsPerDEDim3, &
+                        connDim1, connDim2, connDim3, &
+                        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
+                        bipolePos1, bipolePos2, bipolePos3, &
+                        coordDep1, coordDep2, coordDep3, &
+                        indexflag, gridType, petMap, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateShapeIrreg
+!
+! !ARGUMENTS:
+	type (ESMF_Grid) :: grid
+      character (len=*), intent(in), optional :: name 
+       type(ESMF_TypeKind),  intent(in),    optional  :: coordTypeKind
+       integer,               intent(in),   optional  :: minIndex(:)
+       integer,               intent(in)              :: countsPerDEDim1(:)
+       integer,               intent(in)              :: countsPerDEDim2(:)
+       integer,               intent(in),   optional  :: countsPerDEDim3(:)
+       type(ESMF_GridConn),   intent(in),   optional  :: connDim1(:)
+       type(ESMF_GridConn),   intent(in),   optional  :: connDim2(:)
+       type(ESMF_GridConn),   intent(in),   optional  :: connDim3(:)
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2)
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2)
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2)
+       integer,               intent(in),   optional  :: bipolePos1(2)
+       integer,               intent(in),   optional  :: bipolePos2(2)
+       integer,               intent(in),   optional  :: bipolePos3(2)
+       integer,               intent(in),   optional  :: coordDep1(:)
+       integer,               intent(in),   optional  :: coordDep2(:)
+       integer,               intent(in),   optional  :: coordDep3(:)
+       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       integer,               intent(in),   optional  :: gridType
+       integer,               intent(in),   optional  :: petMap(:,:,:)
+       integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!
+! WARNING: Due to current implementation limitations this 
+!          set doesn't behave like the other set and may change 
+!          previous settings in a irregular way. It is recommended
+!          that this set be called only once on each partially formed Grid. 
+!
+! This method creates a single tile, irregularly distributed grid 
+! (see Figure \ref{fig:GridDecomps}).
+! To specify the irregular distribution, the user passes in an array 
+! for each grid dimension, where the length of the array is the number
+! of DEs in the dimension.   Up to three dimensions can be specified, 
+! using the countsPerDEDim1, countsPerDEDim2, countsPerDEDim3 arguments.
+! The index of each array element corresponds to a DE number.  The 
+! array value at the index is the number of grid cells on the DE in 
+! that dimension.  The rank of the grid is equal to the number of 
+! countsPerDEDim<> arrays that are specified. 
+!
+! To specify an undistributed dimension, the array in that dimension
+! should have only one element, and its value should be the number of
+! grid cells in that dimension.
+!
+! Section \ref{example:2DIrregUniGrid} shows an example
+! of using this method to create a 2D Grid with uniformly spaced 
+! coordinates.  This creation method can also be used as the basis for
+! grids with rectilinear coordinates or curvilinear coordinates.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+! \item[{[coordTypeKind]}] 
+!     The type/kind of the grid coordinate data. 
+!     If not specified then the type/kind will be 8 byte reals. 
+! \item[{[minIndex]}] 
+!      Tuple to start the index ranges at. If not present, defaults
+!      to (1,1,..1)
+! \item[{countsPerDEDim1}] 
+!     This arrays specifies the number of cells per DE for index dimension 1
+!     for the exclusive region (the center stagger location).
+!     If the array has only one entry, then the dimension is undistributed. 
+! \item[{countsPerDEDim2}] 
+!     This array specifies the number of cells per DE for index dimension 2
+!     for the exclusive region (center stagger location). 
+!     If the array has only one entry, then the dimension is undistributed. 
+! \item[{[countsPerDEDim3]}] 
+!     This array specifies the number of cells per DE for index dimension 3
+!     for the exclusive region (center stagger location).  
+!     If not specified  then grid is 2D. Also, If the array has only one entry,
+!     then the dimension is undistributed. 
+! \item[{[connDim1]}] 
+!     Two element array describing the index dimension 1 connections.
+!      The first element represents the minimum end of dimension 1.
+!      The second element represents the maximum end of dimension 1.
+!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
+!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
+!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+! \item[{[connDim2]}] 
+!     Two element array describing the index dimension 2 connections.
+!      The first element represents the minimum end of dimension 2.
+!      The second element represents the maximum end of dimension 2.
+!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
+!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
+!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+! \item[{[connDim3]}] 
+!     Two element array describing the index dimension 3 connections.
+!      The first element represents the minimum end of dimension 3.
+!      The second element represents the maximum end of dimension 3.
+!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
+!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
+!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be.
+! \item[{[poleStaggerLoc1]}] 
+!     Two element array describing the index dimension 1 connections.
+!      The first element represents the minimum end of dimension 1.
+!      The second element represents the maximum end of dimension 1.
+!      If a pole, this describes which staggerlocation is at the pole at each end.
+!      If not present, the default is the edge.
+! \item[{[poleStaggerLoc2]}] 
+!     Two element array describing the index dimension 2 connections.
+!      The first element represents the minimum end of dimension 2.
+!      The second element represents the maximum end of dimension 2.
+!      If a pole, this describes which staggerlocation is at the pole at each end.
+!      If not present, the default is the edge.
+! \item[{[poleStaggerLoc3]}] 
+!     Two element array describing the index dimension 3 connections.
+!      The first element represents the minimum end of dimension 3.
+!      The second element represents the maximum end of dimension 3.
+!      If a pole, this describes which staggerlocation is at the pole at each end.
+!      If not present, the default is the edge.
+! \item[{[bipolePos1]}] 
+!     Two element array describing the index dimension 1 connections.
+!      The first element represents the minimum end of dimension 1.
+!      The second element represents the maximum end of dimension 1.
+!      If a bipole, this gives the index position of one of the poles.
+!      The other is half way around. If not present, the default is 1.
+! \item[{[bipolePos2]}] 
+!     Two element array describing the index dimension 2 connections.
+!      The first element represents the minimum end of dimension 2.
+!      The second element represents the maximum end of dimension 2.
+!      If a bipole, this gives the index position of one of the poles.
+!      The other is half way around. If not present, the default is 1.
+! \item[{[bipolePos3]}] 
+!     Two element array describing the index dimension 3 connections.
+!      The first element represents the minimum end of dimension 3.
+!      The second element represents the maximum end of dimension 3.
+!      If a bipole, this gives the index position of one of the poles.
+!      The other is half way around. If not present, the default is 1. 
+! \item[{[coordDep1]}] 
+!     This array specifies the dependence of the first 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the first
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/1/). 
+! \item[{[coordDep2]}] 
+!     This array specifies the dependence of the second 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the second
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/2/). 
+! \item[{[coordDep3]}] 
+!     This array specifies the dependence of the third 
+!     coordinate component on the three index dimensions
+!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+!     array specifies the number of dimensions of the third
+!     coordinate component array. The values specify which
+!     of the index dimensions the corresponding coordinate
+!     arrays map to. If not present the default is (/3/). 
+! \item[{[indexflag]}]
+!      Flag that indicates how the DE-local indices are to be defined.
+! \item[{[petMap]}]
+!       Sets the mapping of pets to the created DEs. This 3D
+!       should be of size size(countsPerDEDim1)xsize(countsPerDEDim2)x
+!       size(countsPerDEDim3). If countsPerDEDim3 isn't present, then
+!       the last dimension is of size 1.   
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+    type(ESMF_DistGrid)  :: distgrid
+    type(ESMF_DELayout)  :: delayout
+    integer, pointer     :: petList(:)
+    integer, pointer     :: lbounds(:)
+    integer, pointer     :: ubounds(:)
+    integer, pointer     :: coordRank(:)
+    integer, pointer     :: coordDimMap(:,:)
+    integer              :: localrc
+    integer              :: rank,i,distRank,undistRank,maxSizeDEDim
+    integer, pointer     :: minIndexDG(:),maxIndexDG(:)
+    integer, pointer     :: dimMap(:),minIndexLocal(:), deDimCount(:)
+    integer, pointer     :: deBlockList(:,:,:),minPerDEDim(:,:),maxPerDEDim(:,:)
+    integer              :: deCount
+    integer              :: d,i1,i2,i3,k
+    type(ESMF_GridConn)  :: connDim1Local(2)
+    type(ESMF_GridConn)  :: connDim2Local(2)
+    type(ESMF_GridConn)  :: connDim3Local(2)
+    integer              :: connCount 
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Compute the Grid Rank and Derivatives ---------------------------------------------------
+    ! rank
+    if (present(countsPerDEDim3)) then
+	rank=3
+    else
+	rank=2
+    endif
+
+    ! rank of distributed part
+    distRank=0 
+
+    if (size(countsPerDEDim1) .gt. 1) then
+       distRank=distRank+1
+    endif
+
+    if (size(countsPerDEDim2) .gt. 1) then
+       distRank=distRank+1
+    endif
+
+    if (rank .gt. 2) then
+       if (size(countsPerDEDim3) .gt. 1) then
+           distRank=distRank+1
+        endif
+    endif
+
+    ! ranks of the undistributed part of the grid
+    undistRank=rank-distRank
+
+    ! Argument Consistency Checking --------------------------------------------------------------
+    if (size(countsPerDEDim1) .lt. 1) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+               "- size 0 countsPerDEDim1 not allowed", & 
+               ESMF_CONTEXT, rc) 
+         return 
+    endif
+
+    if (size(countsPerDEDim2) .lt. 1) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+               "- size 0 countsPerDEDim2 not allowed", & 
+               ESMF_CONTEXT, rc) 
+         return 
+    endif
+
+    if (present(countsPerDEDim3)) then
+        if (size(countsPerDEDim3) .lt. 1) then
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                    "- size 0 countsPerDEDim3 not allowed", & 
+                    ESMF_CONTEXT, rc) 
+            return 
+        endif
+    endif
+
+    if ((rank .lt. 3) .and. present(connDim3)) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                 "- connDim3 not allowed when grid is less than rank 3", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if ((rank .lt. 3) .and. present(poleStaggerLoc3)) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                 "- poleStaggerLoc3 not allowed when grid is less than rank 3", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if ((rank .lt. 3) .and. present(bipolePos3)) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                 "- bipolePos3 not allowed when grid is less than rank 3", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+
+    if ((rank .lt. 3) .and. present(coordDep3)) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                 "- coordDep3 not allowed when grid is less than rank 3", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (present(coordDep1)) then
+       if ((size(coordDep1) < 1) .or. (size(coordDep1)>rank)) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+               "- coordDep1 size incompatible with grid rank", & 
+               ESMF_CONTEXT, rc) 
+          return 
+       endif
+    endif
+
+    if (present(coordDep2)) then
+       if ((size(coordDep2) < 1) .or. (size(coordDep2)>rank)) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+               "- coordDep2 size incompatible with grid rank", & 
+               ESMF_CONTEXT, rc) 
+          return 
+       endif
+    endif
+
+    if (present(coordDep3)) then
+       if ((size(coordDep3) < 1) .or. (size(coordDep3)>rank)) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+               "- coordDep3 size incompatible with grid rank", & 
+               ESMF_CONTEXT, rc) 
+          return 
+       endif
+    endif
+
+    if (present(minIndex)) then
+       if (size(minIndex) .ne. rank) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+               "- minIndex size must equal grid rank", & 
+               ESMF_CONTEXT, rc) 
+          return 
+       endif
+    endif
+
+
+    if (present(petMap)) then
+       if (rank .gt. 2) then
+          if ((size(petMap,1) .ne. size(countsPerDEDim1)) .or. &
+              (size(petMap,2) .ne. size(countsPerDEDim2)) .or. &
+              (size(petMap,3) .ne. size(countsPerDEDim3))) then
+              call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                     "- petMap wrong size in one or more dimensions", & 
+                     ESMF_CONTEXT, rc) 
+              return 
+          endif
+       else
+          if ((size(petMap,1) .ne. size(countsPerDEDim1)) .or. &
+              (size(petMap,2) .ne. size(countsPerDEDim2)) .or. &
+              (size(petMap,3) .ne. 1)) then
+              call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                     "- petMap wrong size in one or more dimensions", & 
+                     ESMF_CONTEXT, rc) 
+              return 
+          endif
+       endif
+    endif
+
+
+   ! Check for non-valid connection types here
+
+
+
+   ! TODO: can you create an array without a distgrid??? What if everything they specify is undistributed?
+   !       for now make a totally undistributed grid an error. Work on handling it later.
+   !       Perhaps don't use lbounds, ubounds
+    if (distRank .eq. 0) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                 "- Need to have at least one distributed dimension", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+
+   !TODO: Consider making some of these a separate local subroutine (particularly if you're going to 
+   !      have 3 of these ShapeCreate subroutines with only minor changes
+
+
+    ! Set Defaults ------------------------------------------------------------------
+
+    ! Set default for minIndex 
+    allocate(minIndexLocal(rank), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+                                     ESMF_CONTEXT, rc)) return
+
+    if (present(minIndex)) then
+       minIndexLocal(:)=minIndex(:)
+    else
+       do i=1,rank
+          minIndexLocal(i)=1
+       enddo
+    endif
+
+    ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
+    if (present(connDim1)) then
+       if (size(connDim1) .eq. 1) then
+          connDim1Local(1)=connDim1(1)     
+          connDim1Local(2)=connDim1(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connDim1) .ge. 2) then
+          connDim1Local(1)=connDim1(1)
+          connDim1Local(2)=connDim1(2)
+       endif
+    else
+!       connDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+!       connDim1Local(2)=ESMF_GRIDCONN_NONE
+    endif
+
+    if (present(connDim2)) then
+       if (size(connDim2) .eq. 1) then
+          connDim2Local(1)=connDim2(1)     
+          connDim2Local(2)=connDim2(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connDim2) .ge. 2) then
+          connDim2Local(1)=connDim2(1)
+          connDim2Local(2)=connDim2(2)
+       endif
+    else
+!       connDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+!       connDim2Local(2)=ESMF_GRIDCONN_NONE
+    endif
+
+    if (present(connDim3)) then
+       if (size(connDim3) .eq. 1) then
+          connDim3Local(1)=connDim3(1)     
+          connDim3Local(2)=connDim3(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connDim3) .ge. 2) then
+          connDim3Local(1)=connDim3(1)
+          connDim3Local(2)=connDim3(2)
+       endif
+    else
+!       connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+!       connDim3Local(2)=ESMF_GRIDCONN_NONE
+    endif
+
+
+   ! Calc minIndex,maxIndex,dimMap for DistGrid -----------------------------------
+   allocate(minIndexDG(distRank), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
+               ESMF_CONTEXT, rc)) return
+   allocate(maxIndexDG(distRank), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
+               ESMF_CONTEXT, rc)) return
+   allocate(dimMap(distRank), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimMap", &
+               ESMF_CONTEXT, rc)) return
+          
+
+   ! Fill in minIndex, maxIndex, dimMap
+   d=1
+   if (size(countsPerDEDim1) .gt. 1) then
+      minIndexDG(d)=minIndexLocal(1)
+      maxIndexDG(d)=sum(countsPerDeDim1)+minIndexDG(d)-1
+      dimMap(d)=1      
+      d=d+1
+   endif
+
+   if (size(countsPerDEDim2) .gt. 1) then
+      minIndexDG(d)=minIndexLocal(2)
+      maxIndexDG(d)=sum(countsPerDeDim2)+minIndexDG(d)-1
+      dimMap(d)=2      
+      d=d+1
+   endif
+
+   if (rank .gt. 2) then
+      if (size(countsPerDEDim3) .gt. 1) then
+         minIndexDG(d)=minIndexLocal(2)
+         maxIndexDG(d)=sum(countsPerDeDim2)+minIndexDG(d)-1
+         dimMap(d)=3      
+         d=d+1
+      endif
+   endif
+
+
+  ! Setup deBlockList for DistGrid ------------------------------------------------
+  ! count de blocks
+  deCount=1
+  deCount=deCount*size(countsPerDEDim1) 
+  deCount=deCount*size(countsPerDEDim2)
+  if (rank .gt. 2) then
+     deCount=deCount*size(countsPerDEDim3)
+  endif 
+ 
+  ! Calc the max size of a DEDim
+  maxSizeDEDim=1
+  if (size(countsPerDEDim1) .gt. maxSizeDEDim) then
+      maxSizeDEDim=size(countsPerDEDim1)
+  endif
+  if (size(countsPerDEDim2) .gt. maxSizeDEDim) then
+      maxSizeDEDim=size(countsPerDEDim2)
+  endif
+  if (rank .gt. 2) then
+      if (size(countsPerDEDim3) .gt. maxSizeDEDim) then
+         maxSizeDEDim=size(countsPerDEDim3)
+      endif
+  endif
+  
+
+  ! generate deblocklist
+  allocate(maxPerDEDim(distRank,maxSizeDEDim), stat=localrc)
+  if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxPerDEDim", &
+              ESMF_CONTEXT, rc)) return
+  allocate(minPerDEDim(distRank,maxSizeDEDim), stat=localrc)
+  if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minPerDEDim", &
+              ESMF_CONTEXT, rc)) return
+ allocate(deDimCount(distRank), stat=localrc)
+  if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxPerDEDim", &
+              ESMF_CONTEXT, rc)) return
+
+
+  ! Calc the maximum end of each DE in a Dim, and the size of each DEDim
+  d=1
+  if (size(countsPerDEDim1) .gt. 1) then
+      deDimCount(d)=size(countsPerDEDim1)
+      minPerDeDim(d,1)=minIndexLocal(1)
+      maxPerDeDim(d,1)=minIndexLocal(1)+countsPerDEDim1(1)-1
+      do i=2,deDimCount(d) 
+         minPerDEDim(d,i)=maxPerDEDim(d,i-1)+1
+         maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim1(i)-1
+      enddo
+      d=d+1  ! advance to next distgrid dimension
+  endif
+
+  if (size(countsPerDEDim2) .gt. 1) then
+      deDimCount(d)=size(countsPerDEDim2)
+      minPerDeDim(d,1)=minIndexLocal(2)
+      maxPerDeDim(d,1)=minIndexLocal(2)+countsPerDEDim2(1)-1
+      do i=2,deDimCount(d) 
+         minPerDEDim(d,i)=maxPerDEDim(d,i-1)+1
+         maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim2(i)-1
+      enddo
+      d=d+1  ! advance to next distgrid dimension
+  endif
+
+  if (rank .gt. 2) then
+  if (size(countsPerDEDim3) .gt. 1) then
+      deDimCount(d)=size(countsPerDEDim3)
+      minPerDeDim(d,1)=minIndexLocal(3)
+      maxPerDeDim(d,1)=minIndexLocal(3)+countsPerDEDim3(1)-1
+      do i=2,deDimCount(d) 
+         minPerDEDim(d,i)=maxPerDEDim(d,i-1)+1
+         maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim3(i)-1
+      enddo
+      d=d+1  ! advance to next distgrid dimension
+  endif
+  endif
+
+
+  ! allocate deblocklist
+  allocate(deBlockList(distRank,2,deCount), stat=localrc)
+  if (ESMF_LogMsgFoundAllocError(localrc, "Allocating deBlockList", &
+              ESMF_CONTEXT, rc)) return
+
+  ! Fill in DeBlockList
+  if (distRank .eq. 1) then
+     k=1
+     do i1=1,deDimCount(1)
+        deBlockList(1,1,k)=minPerDEDim(1,i1)
+        deBlockList(1,2,k)=maxPerDEDim(1,i1)
+        k=k+1
+     enddo
+  else if (distRank .eq. 2) then
+     k=1
+     do i2=1,deDimCount(2)
+     do i1=1,deDimCount(1)
+        deBlockList(1,1,k)=minPerDEDim(1,i1)
+        deBlockList(1,2,k)=maxPerDEDim(1,i1)
+        deBlockList(2,1,k)=minPerDEDim(2,i2)
+        deBlockList(2,2,k)=maxPerDEDim(2,i2)
+        k=k+1
+     enddo
+     enddo
+  else if (distRank .eq. 3) then
+     k=1
+     do i3=1,deDimCount(3)
+     do i2=1,deDimCount(2)
+     do i1=1,deDimCount(1)
+        deBlockList(1,1,k)=minPerDEDim(1,i1)
+        deBlockList(1,2,k)=maxPerDEDim(1,i1)
+        deBlockList(2,1,k)=minPerDEDim(2,i2)
+        deBlockList(2,2,k)=maxPerDEDim(2,i2)
+        deBlockList(3,1,k)=minPerDEDim(3,i3)
+        deBlockList(3,2,k)=maxPerDEDim(3,i3)
+        k=k+1
+     enddo
+     enddo
+     enddo
+  endif
+  
+!  do i=1,deCount
+!     write(*,*) i,"min=",deBlockList(:,1,i)," max=",deBlockList(:,2,i)
+!  enddo
+
+
+   
+   ! Setup Connections between patch sides ----------------------------------------
+
+   ! CONNECTIONS DON'T WORK YET SO NOT IMPLEMENTED
+
+
+   ! Process PetMap --------------------------------------------------------------
+   if (present(petMap)) then
+      !! Allocate a petList
+      allocate(petList(deCount))
+
+      !! copy petMap to petList
+      if (rank .gt. 2) then
+	 k=1
+     	 do i3=1,size(countsPerDEDim3)
+         do i2=1,size(countsPerDEDim2)
+         do i1=1,size(countsPerDEDim1)
+            petList(k)=petMap(i1,i2,i3)
+            k=k+1
+         enddo
+         enddo
+         enddo
+      else 
+     	 do i3=1,1
+         do i2=1,size(countsPerDEDim2)
+         do i1=1,size(countsPerDEDim1)
+            petList(k)=petMap(i1,i2,i3)
+            k=k+1
+         enddo
+         enddo
+         enddo
+      endif
+      
+      !! create delayout from the petList
+      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      !! Get rid of list
+      deallocate(petList)
+   else
+      !! create a default delayout
+      delayout=ESMF_DELayoutCreate(rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+   endif
+
+
+   ! Create DistGrid --------------------------------------------------------------
+
+    distgrid=ESMF_DistGridCreate(minIndex=minIndexDG, maxIndex=maxIndexDG, &
+               deBlockList=deBlockList, delayout=delayout, indexflag=indexflag, rc=localrc)   
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+   ! Calc lbounds, ubounds for Grid -----------------------------------------------
+   if (undistRank .gt. 0) then
+      allocate(lbounds(undistRank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating lbounds", &
+              ESMF_CONTEXT, rc)) return
+      allocate(ubounds(undistRank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating ubounds", &
+              ESMF_CONTEXT, rc)) return     
+
+      ! Fill in minIndex, maxIndex, dimMap
+       d=1
+      if (size(countsPerDEDim1) .eq. 1) then
+         lbounds(d)=minIndexLocal(1)
+         ubounds(d)=countsPerDEDim1(1)+lbounds(d)-1
+         d=d+1
+      endif
+
+      if (size(countsPerDEDim2) .eq. 1) then
+         lbounds(d)=minIndexLocal(2)
+         ubounds(d)=countsPerDEDim2(1)+lbounds(d)-1
+         d=d+1
+      endif
+
+      if (rank .gt. 2) then
+         if (size(countsPerDEDim3) .eq. 1) then
+            lbounds(d)=minIndexLocal(3)
+            ubounds(d)=countsPerDEDim3(1)+lbounds(d)-1
+            d=d+1
+         endif
+      endif
+   endif
+
+
+   ! Convert coordDeps to coordRank and coordDimMap -------------------------------
+   allocate(coordRank(rank), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordRank", &
+              ESMF_CONTEXT, rc)) return
+   allocate(coordDimMap(rank,rank), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimMap", &
+              ESMF_CONTEXT, rc)) return
+
+   if (present(coordDep1)) then
+      coordRank(1)=size(coordDep1)
+      coordDimMap(1,:)=0
+      do i=1,size(coordDep1)
+         coordDimMap(1,i)=coordDep1(i)
+      enddo
+   else 
+      coordRank(1)=rank
+      do i=1,rank
+         coordDimMap(1,i)=i      
+      enddo
+   endif
+
+   if (present(coordDep2)) then
+      coordRank(2)=size(coordDep2)
+      coordDimMap(2,:)=0
+      do i=1,size(coordDep2)
+         coordDimMap(2,i)=coordDep2(i)
+      enddo
+   else 
+      coordRank(2)=rank
+      do i=1,rank
+         coordDimMap(2,i)=i      
+      enddo
+   endif
+
+   if (rank .gt. 2) then
+      if (present(coordDep3)) then 
+         coordRank(3)=size(coordDep3)
+          coordDimMap(3,:)=0
+          do i=1,size(coordDep3)
+             coordDimMap(3,i)=coordDep3(i)
+          enddo
+      else 
+        coordRank(3)=rank
+        do i=1,rank
+	   coordDimMap(3,i)=i      
+        enddo
+      endif
+   endif
+
+  
+   ! Create Grid from specification -----------------------------------------------
+   if (undistRank .gt. 0) then
+       call ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, &
+                                    distgrid, dimmap, lbounds, ubounds, &
+                                    coordRank, coordDimMap, indexflag, &
+                                    gridType, localrc)
+    else
+       call ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, &
+                                    distgrid=distgrid, dimmap=dimmap, &
+                                    coordRank=coordRank, coordDimMap=coordDimMap, &
+                                    indexflag=indexflag, &
+                                    gridtype=gridType, rc=localrc)
+    endif
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+
+    ! Clean up memory
+    deallocate(coordRank)
+    deallocate(coordDimMap)
+    deallocate(minIndexDG)
+    deallocate(maxIndexDG)
+    deallocate(dimMap)
+    deallocate(maxPerDEDim)
+    deallocate(minPerDEDim)
+    deallocate(deDimCount)
+    deallocate(deBlockList)
+    if (undistRank .gt. 0) then
+       deallocate(lbounds)
+       deallocate(ubounds)
+    endif
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    end subroutine ESMF_GridSetShapeIrreg
+
+
 
 
 
@@ -3552,58 +4470,58 @@ endif
 ! \item[{[connDim1]}] 
 !     Two element array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
-!      The second element represents the minimum end of dimension 1.
+!      The second element represents the maximum end of dimension 1.
 !      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
 !       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
 !       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
 ! \item[{[connDim2]}] 
 !     Two element array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
-!      The second element represents the minimum end of dimension 2.
+!      The second element represents the maximum end of dimension 2.
 !      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
 !       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
 !       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
 ! \item[{[connDim3]}] 
 !     Two element array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
-!      The second element represents the minimum end of dimension 3.
+!      The second element represents the maximum end of dimension 3.
 !      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
 !       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
 !       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
 ! \item[{[poleStaggerLoc1]}] 
 !     Two element array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
-!      The second element represents the minimum end of dimension 1.
+!      The second element represents the maximum end of dimension 1.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
 !      If not present, the default is the edge.
 ! \item[{[poleStaggerLoc2]}] 
 !     Two element array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
-!      The second element represents the minimum end of dimension 2.
+!      The second element represents the maximum end of dimension 2.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
 !      If not present, the default is the edge.
 ! \item[{[poleStaggerLoc3]}] 
 !     Two element array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
-!      The second element represents the minimum end of dimension 3.
+!      The second element represents the maximum end of dimension 3.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
 !      If not present, the default is the edge.
 ! \item[{[bipolePos1]}] 
 !     Two element array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
-!      The second element represents the minimum end of dimension 1.
+!      The second element represents the maximum end of dimension 1.
 !      If a bipole, this gives the index position of one of the poles.
 !      The other is half way around. If not present, the default is 1.
 ! \item[{[bipolePos2]}] 
 !     Two element array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
-!      The second element represents the minimum end of dimension 2.
+!      The second element represents the maximum end of dimension 2.
 !      If a bipole, this gives the index position of one of the poles.
 !      The other is half way around. If not present, the default is 1.
 ! \item[{[bipolePos3]}] 
 !     Two element array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
-!      The second element represents the minimum end of dimension 3.
+!      The second element represents the maximum end of dimension 3.
 !      If a bipole, this gives the index position of one of the poles.
 !      The other is half way around. If not present, the default is 1.
 ! \item[{[coordDep1]}] 
@@ -3661,7 +4579,7 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateArb(name,coordTypeKind, minIndex,maxIndex, localIndices, &
-                        dimmap, arbDecomp, lbounds, ubounds, coordRanks, &
+                        dimmap, arbDecomp, lbounds, ubounds, coordRank, &
                         coordDimMap, &
                         indexflag, gridType, noData,
                         computationalLWidth, computationalUWidth,  &
@@ -3680,7 +4598,7 @@ endif
        integer,               intent(in),   optional  :: dimmap(:)
        integer,               intent(in),   optional  :: lbounds(:)
        integer,               intent(in),   optional  :: ubounds(:)
-       integer,               intent(in),   optional  :: coordRanks(:)
+       integer,               intent(in),   optional  :: coordRank(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: gridType
@@ -3726,7 +4644,7 @@ endif
 !      default to {1,1,1,...}
 ! \item[{[ubounds]}] 
 !      Upper bounds for tensor array dimensions.
-! \item[{[coordRanks]}]
+! \item[{[coordRank]}]
 !      List that has as many elements as the grid rank .
 !      Gives the dimension of each component (e.g. x) array. This is 
 !      to allow factorization of the coordinate arrays. If not specified
@@ -3736,7 +4654,7 @@ endif
 !      map of each component array's dimensions onto the grids
 !      dimensions. Each entry {\tt coordDimMap(i,j)} tells which
 !      grid dimension component i's, jth dimension maps to. 
-!      Note that if j is bigger than {\tt coordRanks(i)} than its ignored.        
+!      Note that if j is bigger than {\tt coordRank(i)} than its ignored.        
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[gridType]}]
@@ -3895,7 +4813,7 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateReg(name,coordTypeKind, minIndex,maxIndex, dimmap, &
-                        regDecomp, lbounds, ubounds, coordRanks, &
+                        regDecomp, lbounds, ubounds, coordRank, &
                         coordDimMap, &
                         indexflag, gridType, noData, &
                         computationalLWidth, computationalUWidth, &
@@ -3913,7 +4831,7 @@ endif
        integer,               intent(in),   optional  :: dimmap(:)
        integer,               intent(in),   optional  :: lbounds(:)
        integer,               intent(in),   optional  :: ubounds(:)
-       integer,               intent(in),   optional  :: coordRanks(:)
+       integer,               intent(in),   optional  :: coordRank(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: gridType
@@ -3958,7 +4876,7 @@ endif
 !      default to {1,1,1,...}
 ! \item[{[ubounds]}] 
 !      Upper bounds for tensor array dimensions.
-! \item[{[coordRanks]}]
+! \item[{[coordRank]}]
 !      List that has as many elements as the grid rank .
 !      Gives the dimension of each component (e.g. x) array. This is 
 !      to allow factorization of the coordinate arrays. If not specified
@@ -3968,7 +4886,7 @@ endif
 !      map of each component array's dimensions onto the grids
 !      dimensions. Each entry {\tt coordDimMap(i,j)} tells which
 !      grid dimension component i's, jth dimension maps to. 
-!      Note that if j is bigger than {\tt coordRanks(i)} than its ignored. ! \item[{[indexflag]}]
+!      Note that if j is bigger than {\tt coordRank(i)} than its ignored. ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[gridType]}]
 !      Flag that indicates the type of the grid. If not given, defaults
@@ -4053,7 +4971,7 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
    function ESMF_GridCreateIrreg(name,coordTypeKind, minIndex, countsPerDE, dimmap, &
-                         lbounds, ubounds, coordRanks, &
+                         lbounds, ubounds, coordRank, &
                         coordDimMap, &
                         indexflag, gridType, noData, &
                         computationalLWidth, computationalUWidth, petMap, &
@@ -4070,7 +4988,7 @@ endif
        integer,               intent(in),   optional  :: minIndex(:)
        integer,               intent(in),   optional  :: lbounds(:)
        integer,               intent(in),   optional  :: ubounds(:)
-       integer,               intent(in),   optional  :: coordRanks(:)
+       integer,               intent(in),   optional  :: coordRank(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: gridType
@@ -4117,7 +5035,7 @@ endif
 !      default to {1,1,1,...}
 ! \item[{[ubounds]}] 
 !      Upper bounds for tensor array dimensions.
-! \item[{[coordRanks]}]
+! \item[{[coordRank]}]
 !      List that has as many elements as the grid rank .
 !      Gives the dimension of each component (e.g. x) array. This is 
 !      to allow factorization of the coordinate arrays. If not specified
@@ -4127,7 +5045,7 @@ endif
 !      map of each component array's dimensions onto the grids
 !      dimensions. Each entry {\tt coordDimMap(i,j)} tells which
 !      grid dimension component i's, jth dimension maps to. 
-!      Note that if j is bigger than {\tt coordRanks(i)} than its ignored.        
+!      Note that if j is bigger than {\tt coordRank(i)} than its ignored.        
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[gridType]}]
@@ -4216,7 +5134,7 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
    function ESMF_GridCreateRegP(name,coordTypeKind, minIndex, countsPerDE, dimmap, &
-                         lbounds, ubounds, coordRanks, &
+                         lbounds, ubounds, coordRank, &
                         coordDimMap, &
                         indexflag, gridType, noData, &
                         computationalLWidth, computationalUWidth, petMap, &
@@ -4233,7 +5151,7 @@ endif
        integer,               intent(in),   optional  :: minIndex(:,:)
        integer,               intent(in),   optional  :: lbounds(:)
        integer,               intent(in),   optional  :: ubounds(:)
-       integer,               intent(in),   optional  :: coordRanks(:)
+       integer,               intent(in),   optional  :: coordRank(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: gridType
@@ -4280,7 +5198,7 @@ endif
 !      default to {1,1,1,...}
 ! \item[{[ubounds]}] 
 !      Upper bounds for tensor array dimensions.
-! \item[{[coordRanks]}]
+! \item[{[coordRank]}]
 !      List that has as many elements as the grid rank .
 !      Gives the dimension of each component (e.g. x) array. This is 
 !      to allow factorization of the coordinate arrays. If not specified
@@ -4290,7 +5208,7 @@ endif
 !      map of each component array's dimensions onto the grids
 !      dimensions. Each entry {\tt coordDimMap(i,j)} tells which
 !      grid dimension component i's, jth dimension maps to. 
-!      Note that if j is bigger than {\tt coordRanks(i)} than its ignored.        
+!      Note that if j is bigger than {\tt coordRank(i)} than its ignored.        
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[gridType]}]
@@ -4437,58 +5355,58 @@ endif
 ! \item[{[connDim1]}] 
 !     Two element array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
-!      The second element represents the minimum end of dimension 1.
+!      The second element represents the maximum end of dimension 1.
 !      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
 !       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
 !       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
 ! \item[{[connDim2]}] 
 !     Two element array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
-!      The second element represents the minimum end of dimension 2.
+!      The second element represents the maximum end of dimension 2.
 !      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
 !       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
 !       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
 ! \item[{[connDim3]}] 
 !     Two element array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
-!      The second element represents the minimum end of dimension 3.
+!      The second element represents the maximum end of dimension 3.
 !      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
 !       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
 !       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
 ! \item[{[poleStaggerLoc1]}] 
 !     Two element array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
-!      The second element represents the minimum end of dimension 1.
+!      The second element represents the maximum end of dimension 1.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
 !      If not present, the default is the edge.
 ! \item[{[poleStaggerLoc2]}] 
 !     Two element array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
-!      The second element represents the minimum end of dimension 2.
+!      The second element represents the maximum end of dimension 2.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
 !      If not present, the default is the edge.
 ! \item[{[poleStaggerLoc3]}] 
 !     Two element array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
-!      The second element represents the minimum end of dimension 3.
+!      The second element represents the maximum end of dimension 3.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
 !      If not present, the default is the edge.
 ! \item[{[bipolePos1]}] 
 !     Two element array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
-!      The second element represents the minimum end of dimension 1.
+!      The second element represents the maximum end of dimension 1.
 !      If a bipole, this gives the index position of one of the poles.
 !      The other is half way around. If not present, the default is 1.
 ! \item[{[bipolePos2]}] 
 !     Two element array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
-!      The second element represents the minimum end of dimension 2.
+!      The second element represents the maximum end of dimension 2.
 !      If a bipole, this gives the index position of one of the poles.
 !      The other is half way around. If not present, the default is 1.
 ! \item[{[bipolePos3]}] 
 !     Two element array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
-!      The second element represents the minimum end of dimension 3.
+!      The second element represents the maximum end of dimension 3.
 !      If a bipole, this gives the index position of one of the poles.
 !      The other is half way around. If not present, the default is 1.
 ! \item[{[indexflag]}]
