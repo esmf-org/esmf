@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.7 2007/07/20 00:27:28 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.8 2007/07/20 05:12:14 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -187,9 +187,9 @@ program ESMF_GridCreateEx
               ! Specify connectivity
               connDim1=(/ESMF_GRIDCONN_PERIODIC,ESMF_GRIDCONN_PERIODIC/),  &
               connDim2=(/ESMF_GRIDCONN_POLE,ESMF_GRIDCONN_POLE/),          &
-              coordDep1=(/1,2/),       &  ! Coordinate Dependences (curvilinear horizontal)
+              coordDep1=(/1,2/),       &  ! Coordinate dependencies (curvilinear horizontal)
               coordDep2=(/1,2/),       &
-              coordDep3=(/3/),         &  ! Coordinate Dependences (rectilinear vertical)
+              coordDep3=(/3/),         &  ! Coordinate dependencies (rectilinear vertical)
               indexflag=ESMF_GLOBAL,   &  ! Create grid with global indices
               rc=rc)
 
@@ -386,7 +386,7 @@ program ESMF_GridCreateEx
 
 !BOE
 !
-!\subsubsection{Specifying Grid Size, Rank, and Distribution}
+!\subsubsection{Shortcut Creation Method for Single-Tile Grids}
 
 ! The method {\tt ESMF\_GridCreateShape()} is a shortcut
 ! for specifying single tile logically rectangular grids.
@@ -404,7 +404,7 @@ program ESMF_GridCreateEx
 ! addition to describing the partitioning of the index space,
 ! these methods also simultaneously describe its size and rank.
 !
-! The Regular distribution is not yet implemented, but the design is as follows:
+! Regular distribution is not yet implemented, but the design is as follows:
 ! To use employ a regular distribution, the user specifies the global
 ! maximum and minimum ranges of the index space ({\tt maxIndex} and
 ! {\tt minIndex}), and the number of pieces in which to partition
@@ -433,7 +433,7 @@ program ESMF_GridCreateEx
 !  call ESMF_GridDestroy(grid3D, rc=rc)
 
 !BOE
-! The Irregular distribution requires the user to specify the
+! Irregular distribution requires the user to specify the
 ! exact number of cells per DE in each dimension.  For the
 ! {\tt ESMF\_GridCreateShape} call the {\tt countsPerDEDim1,2,3}
 ! arguments are used to specify a rectangular distribution
@@ -539,9 +539,9 @@ endif
 
 
 !BOE
-! The Arbitrary distribution has not yet been implemented.
-! It is designed for the user will specify the 
-! global minimum and maximum ranges of the index space with the
+! Arbitrary distribution has not yet been implemented.
+! The design is that the user specifies the global minimum and maximum
+! ranges of the index space with the
 ! arguments {\tt minIndex} and {\tt maxIndex}, and through {\tt localIndices},
 ! specify the set of index space locations residing on the local processor.
 ! Again, if {\tt minIndex} is  not specified, then the bottom of the 
@@ -663,20 +663,26 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! Index Space Dimensions}
 !
 ! To specify how the coordinate arrays are mapped to the 
-! index dimensions the arguments {\tt coordDep1,2,3}
-! are used. The size of the arrays specify the rank
-! of the cooresponding coordinate component array.
-! (e.g. size(coordDep1)=2 means that coordinate
-! component 1 (e.g. x) is 2D) The entries in
-! {\tt coordDep} specify which index dimension
-! the cooresponding coordinate component dimension
-! maps to.  (e.g. coordDep1=(/1,2/) means that
-! the first dimension of component 1 maps to index dimension
-! 1 and the second maps to index dimension 2.) If not set,
-! then {\tt coordDepX} defaults to (/X/), in other
-! words rectilinear.  
+! index dimensions the arguments {\tt coordDep1}, 
+! {\tt coordDep2}, and {\tt coordDep3} are used, each 
+! of which is a Fortran array. The values of the elements
+! in a {\tt coordDep} array specify which index dimension
+! the corresponding coordinate dimension
+! maps to.  For example, {\tt coordDep1=(/1,2/)} means that
+! the first dimension of coordinate 1 maps to index
+! dimension 1 and the second maps to index dimension 2. If
+! the {\tt coordDep} arrays are not specified, 
+! then {\tt coordDepX} defaults to {/X/}.  This default
+! thus specifies a rectilinear grid.  
+!
+! It follows that the size of the {\tt coordDep}
+! array is the rank of the corresponding coordinate array.
+! For example, {\tt size(coordDep1)=2} means that coordinate
+! array 1 is 2D. 
+
 ! Currently ESMF only supports coordinate dimensions 
-! that are the same as the grid.
+! that are the same rank as the grid.  So, for example ....
+! [explain limitation further]. 
 !EOE
 
 #ifdef LOCAL_NOT_IMP
@@ -808,7 +814,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !EOE
 
 
-!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!
 ! Setup For Example
 !!!!!!!!!!!!!!!!!!!!!!
    distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
@@ -893,7 +899,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 
 !BOE
-! The {\tt ESMF\_GridGetCoord()}, allows the user
+! The method {\tt ESMF\_GridGetCoord()} allows the user
 ! to access the Array, as a direct reference, which
 ! contains the coordinate data for a stagger location on a Grid. The user
 ! can then employ any of the standard {\tt ESMF\_Array} tools to operate
@@ -952,7 +958,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 #endif
 
 !BOE
-! alternatively, the call {\tt ESMF\_GridLocalTileGetCoord} gets a fortran pointer to 
+! Alternatively, the call {\tt ESMF\_GridLocalTileGetCoord()} gets a fortran pointer to 
 ! the coordinate data. The user can then operate on this array in the usual
 ! manner. The following call gets a reference to the
 ! fortran array which holds the data for the second coordinate (e.g. y). 
@@ -1381,7 +1387,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 
 !BOE
-!\subsubsection{Creation: Advanced}
+!\subsubsection{Using DistGrid to Create More Complex Grids}
 !
 ! Beyond the shortcut methods for creating a grid, there is
 ! a set of methods which give the user more control over the
@@ -1565,7 +1571,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 
 !BOE
-!\subsubsection{Stagger Location: Advanced}
+!\subsubsection{Specifying Custom Stagger Locations}
 !\label{sec:usage:staggerloc:adv}
 !
 ! This section discusses the advanced options for adding data 
