@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.13 2007/07/20 00:27:28 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.14 2007/07/20 21:31:31 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.13 2007/07/20 00:27:28 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.14 2007/07/20 21:31:31 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1013,7 +1013,7 @@ end interface
     type(ESMF_GridConn)  :: connDim1Local(2)
     type(ESMF_GridConn)  :: connDim2Local(2)
     type(ESMF_GridConn)  :: connDim3Local(2)
-    integer              :: connCount 
+    integer              :: connCount, petListCount 
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1401,8 +1401,12 @@ end interface
 
    ! Process PetMap --------------------------------------------------------------
    if (present(petMap)) then
-      !! Allocate a petList
-      allocate(petList(deCount))
+
+      !! Allocate petList
+      allocate(petList(deCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating petList", &
+              ESMF_CONTEXT, rc)) return
+
 
       !! copy petMap to petList
       if (rank .gt. 2) then
@@ -1416,6 +1420,7 @@ end interface
          enddo
          enddo
       else 
+	 k=1
      	 do i3=1,1
          do i2=1,size(countsPerDEDim2)
          do i1=1,size(countsPerDEDim1)
@@ -1425,7 +1430,7 @@ end interface
          enddo
          enddo
       endif
-      
+
       !! create delayout from the petList
       delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1435,7 +1440,7 @@ end interface
       deallocate(petList)
    else
       !! create a default delayout
-      delayout=ESMF_DELayoutCreate(rc=localrc)
+      delayout=ESMF_DELayoutCreate(deCount=deCount,rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
    endif
@@ -3490,7 +3495,7 @@ endif
     type(ESMF_GridConn)  :: connDim1Local(2)
     type(ESMF_GridConn)  :: connDim2Local(2)
     type(ESMF_GridConn)  :: connDim3Local(2)
-    integer              :: connCount 
+    integer              :: connCount, petListCount 
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -3875,11 +3880,14 @@ endif
 
    ! CONNECTIONS DON'T WORK YET SO NOT IMPLEMENTED
 
-
    ! Process PetMap --------------------------------------------------------------
    if (present(petMap)) then
-      !! Allocate a petList
-      allocate(petList(deCount))
+
+      !! Allocate petList
+      allocate(petList(deCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating petList", &
+              ESMF_CONTEXT, rc)) return
+
 
       !! copy petMap to petList
       if (rank .gt. 2) then
@@ -3893,6 +3901,7 @@ endif
          enddo
          enddo
       else 
+	 k=1
      	 do i3=1,1
          do i2=1,size(countsPerDEDim2)
          do i1=1,size(countsPerDEDim1)
@@ -3902,7 +3911,7 @@ endif
          enddo
          enddo
       endif
-      
+
       !! create delayout from the petList
       delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3912,7 +3921,7 @@ endif
       deallocate(petList)
    else
       !! create a default delayout
-      delayout=ESMF_DELayoutCreate(rc=localrc)
+      delayout=ESMF_DELayoutCreate(deCount=deCount,rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
    endif
@@ -6634,7 +6643,7 @@ endif
       end subroutine ESMF_GridSetMetricFromArray
 
 !------------------------------------------------------------------------------
-#endif ! Take out so you don't have to worry about compiler warnings for now
+#endif
 
       end module ESMF_GridMod
 
