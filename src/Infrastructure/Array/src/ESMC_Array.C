@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.99 2007/07/19 22:30:45 theurich Exp $
+// $Id: ESMC_Array.C,v 1.100 2007/07/21 04:52:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.99 2007/07/19 22:30:45 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.100 2007/07/21 04:52:57 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2124,15 +2124,15 @@ int Array::sparseMatMulStore(
   // determine local srcCellCount
   int srcLocalDeCount = srcArray->delayout->getLocalDeCount();
   const int *srcLocalDeList = srcArray->delayout->getLocalDeList();
-  int *srcDistGridDeCellCount = new int[srcLocalDeCount];
+  int *srcDistGridLocalDeCellCount = new int[srcLocalDeCount];
   int srcCellCount = 0;   // initialize
   for (int i=0; i<srcLocalDeCount; i++){
     int de = srcLocalDeList[i];  // global DE index
-    srcDistGridDeCellCount[i] =
+    srcDistGridLocalDeCellCount[i] =
       srcArray->distgrid->getCellCountPDe(de, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
-    srcCellCount += srcDistGridDeCellCount[i];
+    srcCellCount += srcDistGridLocalDeCellCount[i];
   }
   // communicate srcCellCount across all Pets
   // todo: use nb-allgather and wait right before needed below
@@ -2141,15 +2141,15 @@ int Array::sparseMatMulStore(
   // determine local dstCellCount
   int dstLocalDeCount = dstArray->delayout->getLocalDeCount();
   const int *dstLocalDeList = dstArray->delayout->getLocalDeList();
-  int *dstDistGridDeCellCount = new int[dstLocalDeCount];
+  int *dstDistGridLocalDeCellCount = new int[dstLocalDeCount];
   int dstCellCount = 0;   // initialize
   for (int i=0; i<dstLocalDeCount; i++){
     int de = dstLocalDeList[i];  // global DE index
-    dstDistGridDeCellCount[i] = 
+    dstDistGridLocalDeCellCount[i] = 
       dstArray->distgrid->getCellCountPDe(de, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
-    dstCellCount += dstDistGridDeCellCount[i];
+    dstCellCount += dstDistGridLocalDeCellCount[i];
   }
   // communicate dstCellCount across all Pets
   // todo: use nb-allgather and wait right before needed below
@@ -2204,51 +2204,53 @@ int Array::sparseMatMulStore(
   for (int i=0; i<srcLocalDeCount; i++){
     int de = srcLocalDeList[i];  // global DE index
     // allocate memory in srcLinSeqList for this DE
-    srcLinSeqList[i] = new AssociationElement[srcDistGridDeCellCount[i]];
-    // reset counters
-    int joff = i*srcRank; // offset according to localDe index
-    for (int j=0; j<srcRank; j++){
-      ii[j] = 0;  // reset
-      iiEnd[j] = srcArray->exclusiveUBound[joff+j]
-        - srcArray->exclusiveLBound[joff+j] + 1;
-    }
-    // loop over all cells in exclusive region for this DE
-    int cellIndex = 0;  // reset
-    while(ii[srcRank-1] < iiEnd[srcRank-1]){
-//      printf("src: DE = %d  - (", de);
-//      int jjj;
-//      for (jjj=0; jjj<srcRank-1; jjj++)
-//        printf("%d, ", ii[jjj]);
-//      printf("%d)\n", ii[jjj]);
-
-      // determine the linearized index for cell ii[] in localArray for this DE
-      int linIndex = srcArray->getLinearIndexExclusive(i, ii);
-      // determine the sequentialized index for cell ii[] in this DE
-      // getSequenceIndex() expects basis 0 ii[] in excl. region
-      int seqIndex = srcArray->distgrid->getSequenceIndex(i, ii);
-      // store linIndex and seqIndex in srcLinSeqList for this DE
-      srcLinSeqList[i][cellIndex].linIndex = linIndex;
-      srcLinSeqList[i][cellIndex].seqIndex = seqIndex;
-      // reset factorCount
-      srcLinSeqList[i][cellIndex].factorCount = 0;
-      // record seqIndex min and max
-      if (i==0 && cellIndex==0)
-        srcSeqIndexMinMax[0] = srcSeqIndexMinMax[1] = seqIndex; // initialize
-      else{
-        if (seqIndex < srcSeqIndexMinMax[0]) srcSeqIndexMinMax[0] = seqIndex;
-        if (seqIndex > srcSeqIndexMinMax[1]) srcSeqIndexMinMax[1] = seqIndex;
+    srcLinSeqList[i] = new AssociationElement[srcDistGridLocalDeCellCount[i]];
+    // only go into the multi-dim loop if there are cells for the local DE
+    if (srcDistGridLocalDeCellCount[i]){
+      // reset counters
+      int joff = i*srcRank; // offset according to localDe index
+      for (int j=0; j<srcRank; j++){
+        ii[j] = 0;  // reset
+        iiEnd[j] = srcArray->exclusiveUBound[joff+j]
+          - srcArray->exclusiveLBound[joff+j] + 1;
       }
-      // increment
-      ++cellIndex;
-      // multi-dim index increment
-      ++ii[0];
-      for (int j=0; j<srcRank-1; j++){
-        if (ii[j] == iiEnd[j]){
-          ii[j] = 0;  // reset
-          ++ii[j+1];
+      // loop over all cells in exclusive region for this DE
+      int cellIndex = 0;  // reset
+      while(ii[srcRank-1] < iiEnd[srcRank-1]){
+        //printf("src: DE = %d  - (", de);
+        //int jjj;
+        //for (jjj=0; jjj<srcRank-1; jjj++)
+        //  printf("%d, ", ii[jjj]);
+        //printf("%d)\n", ii[jjj]);
+        // determine the lin. index for cell ii[] in localArray for this DE
+        int linIndex = srcArray->getLinearIndexExclusive(i, ii);
+        // determine the sequentialized index for cell ii[] in this DE
+        // getSequenceIndex() expects basis 0 ii[] in excl. region
+        int seqIndex = srcArray->distgrid->getSequenceIndex(i, ii);
+        // store linIndex and seqIndex in srcLinSeqList for this DE
+        srcLinSeqList[i][cellIndex].linIndex = linIndex;
+        srcLinSeqList[i][cellIndex].seqIndex = seqIndex;
+        // reset factorCount
+        srcLinSeqList[i][cellIndex].factorCount = 0;
+        // record seqIndex min and max
+        if (i==0 && cellIndex==0)
+          srcSeqIndexMinMax[0] = srcSeqIndexMinMax[1] = seqIndex; // initialize
+        else{
+          if (seqIndex < srcSeqIndexMinMax[0]) srcSeqIndexMinMax[0] = seqIndex;
+          if (seqIndex > srcSeqIndexMinMax[1]) srcSeqIndexMinMax[1] = seqIndex;
         }
-      }
-    } // end while over all exclusive cells
+        // increment
+        ++cellIndex;
+        // multi-dim index increment
+        ++ii[0];
+        for (int j=0; j<srcRank-1; j++){
+          if (ii[j] == iiEnd[j]){
+            ii[j] = 0;  // reset
+            ++ii[j+1];
+          }
+        }
+      } // end while over all exclusive cells
+    } // if there are cells in localArray associated with this local DE
   } // end for over local DEs
   delete [] ii;
   delete [] iiEnd;
@@ -2260,7 +2262,7 @@ int Array::sparseMatMulStore(
 
 #if 0  
   for (int i=0; i<srcLocalDeCount; i++)
-    for (int j=0; j<srcDistGridDeCellCount[i]; j++)
+    for (int j=0; j<srcDistGridLocalDeCellCount[i]; j++)
       printf("gjt: localPet %d, srcLinSeqList[%d][%d] = %d, %d\n", 
         localPet, i, j, srcLinSeqList[i][j].linIndex,
         srcLinSeqList[i][j].seqIndex);
@@ -2277,50 +2279,53 @@ int Array::sparseMatMulStore(
   for (int i=0; i<dstLocalDeCount; i++){
     int de = dstLocalDeList[i];  // global DE index
     // allocate memory in dstLinSeqList for this DE
-    dstLinSeqList[i] = new AssociationElement[dstDistGridDeCellCount[i]];
-    // reset counters
-    int joff = i*dstRank; // offset according to localDe index
-    for (int j=0; j<dstRank; j++){
-      ii[j] = 0;  // reset
-      iiEnd[j] = dstArray->exclusiveUBound[joff+j]
-        - dstArray->exclusiveLBound[joff+j] + 1;
-    }
-    // loop over all cells in exclusive region for this DE
-    int cellIndex = 0;  // reset
-    while(ii[dstRank-1] < iiEnd[dstRank-1]){
-      //printf("dst: DE = %d  - (", de);
-      //int jjj;
-      //for (jjj=0; jjj<dstRank-1; jjj++)
-      //  printf("%d, ", ii[jjj]);
-      //printf("%d)\n", ii[jjj]);
-      // determine the linearized index for cell ii[] in localArray for this DE
-      int linIndex = dstArray->getLinearIndexExclusive(i, ii);
-      // determine the sequentialized index for cell ii[] in this DE
-      // getSequenceIndex() expects basis 0 ii[] in excl. region
-      int seqIndex = dstArray->distgrid->getSequenceIndex(i, ii);
-      // store linIndex and seqIndex in dstLinSeqList for this DE
-      dstLinSeqList[i][cellIndex].linIndex = linIndex;
-      dstLinSeqList[i][cellIndex].seqIndex = seqIndex;
-      // reset factorCount
-      dstLinSeqList[i][cellIndex].factorCount = 0;
-      // record seqIndex min and max
-      if (i==0 && cellIndex==0)
-        dstSeqIndexMinMax[0] = dstSeqIndexMinMax[1] = seqIndex; // initialize
-      else{
-        if (seqIndex < dstSeqIndexMinMax[0]) dstSeqIndexMinMax[0] = seqIndex;
-        if (seqIndex > dstSeqIndexMinMax[1]) dstSeqIndexMinMax[1] = seqIndex;
+    dstLinSeqList[i] = new AssociationElement[dstDistGridLocalDeCellCount[i]];
+    // only go into the multi-dim loop if there are cells for the local DE
+    if (dstDistGridLocalDeCellCount[i]){
+      // reset counters
+      int joff = i*dstRank; // offset according to localDe index
+      for (int j=0; j<dstRank; j++){
+        ii[j] = 0;  // reset
+        iiEnd[j] = dstArray->exclusiveUBound[joff+j]
+          - dstArray->exclusiveLBound[joff+j] + 1;
       }
-      // increment
-      ++cellIndex;
-      // multi-dim index increment
-      ++ii[0];
-      for (int j=0; j<dstRank-1; j++){
-        if (ii[j] == iiEnd[j]){
-          ii[j] = 0;  // reset
-          ++ii[j+1];
+      // loop over all cells in exclusive region for this DE
+      int cellIndex = 0;  // reset
+      while(ii[dstRank-1] < iiEnd[dstRank-1]){
+        //printf("dst: DE = %d  - (", de);
+        //int jjj;
+        //for (jjj=0; jjj<dstRank-1; jjj++)
+        //  printf("%d, ", ii[jjj]);
+        //printf("%d)\n", ii[jjj]);
+        // determine the lin. index for cell ii[] in localArray for this DE
+        int linIndex = dstArray->getLinearIndexExclusive(i, ii);
+        // determine the sequentialized index for cell ii[] in this DE
+        // getSequenceIndex() expects basis 0 ii[] in excl. region
+        int seqIndex = dstArray->distgrid->getSequenceIndex(i, ii);
+        // store linIndex and seqIndex in dstLinSeqList for this DE
+        dstLinSeqList[i][cellIndex].linIndex = linIndex;
+        dstLinSeqList[i][cellIndex].seqIndex = seqIndex;
+        // reset factorCount
+        dstLinSeqList[i][cellIndex].factorCount = 0;
+        // record seqIndex min and max
+        if (i==0 && cellIndex==0)
+          dstSeqIndexMinMax[0] = dstSeqIndexMinMax[1] = seqIndex; // initialize
+        else{
+          if (seqIndex < dstSeqIndexMinMax[0]) dstSeqIndexMinMax[0] = seqIndex;
+          if (seqIndex > dstSeqIndexMinMax[1]) dstSeqIndexMinMax[1] = seqIndex;
         }
-      }
-    } // end while over all exclusive cells
+        // increment
+        ++cellIndex;
+        // multi-dim index increment
+        ++ii[0];
+        for (int j=0; j<dstRank-1; j++){
+          if (ii[j] == iiEnd[j]){
+            ii[j] = 0;  // reset
+            ++ii[j+1];
+          }
+        }
+      } // end while over all exclusive cells
+    } // if there are cells in localArray associated with this local DE
   } // end for over local DEs
   delete [] ii;
   delete [] iiEnd;
@@ -2332,7 +2337,7 @@ int Array::sparseMatMulStore(
 
 #if 0
   for (int i=0; i<dstLocalDeCount; i++)
-    for (int j=0; j<dstDistGridDeCellCount[i]; j++)
+    for (int j=0; j<dstDistGridLocalDeCellCount[i]; j++)
       printf("gjt: localPet %d, dstLinSeqList[%d][%d] = %d, %d\n", 
         localPet, i, j, dstLinSeqList[i][j].linIndex,
         dstLinSeqList[i][j].seqIndex);
@@ -2712,7 +2717,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       int count = 0; // reset
       for (int j=0; j<srcLocalDeCount; j++){
         int de = srcLocalDeList[j];  // global DE number
-        for (int k=0; k<srcDistGridDeCellCount[j]; k++){
+        for (int k=0; k<srcDistGridLocalDeCellCount[j]; k++){
           int srcSeqIndex = srcLinSeqList[j][k].seqIndex;
           if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
             seqIndexDeInfoList[count].seqIndex = srcSeqIndex;
@@ -2736,7 +2741,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           // server Pet itself
           for (int j=0; j<srcLocalDeCount; j++){
             int de = srcLocalDeList[j];  // global DE number
-            for (int k=0; k<srcDistGridDeCellCount[j]; k++){
+            for (int k=0; k<srcDistGridLocalDeCellCount[j]; k++){
               int srcSeqIndex = srcLinSeqList[j][k].seqIndex;
               if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
                 int kk = srcSeqIndex - seqIndexMin;
@@ -3136,7 +3141,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       int count = 0; // reset
       for (int j=0; j<dstLocalDeCount; j++){
         int de = dstLocalDeList[j];  // global DE number
-        for (int k=0; k<dstDistGridDeCellCount[j]; k++){
+        for (int k=0; k<dstDistGridLocalDeCellCount[j]; k++){
           int dstSeqIndex = dstLinSeqList[j][k].seqIndex;
           if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
             seqIndexDeInfoList[count].seqIndex = dstSeqIndex;
@@ -3160,7 +3165,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           // server Pet itself
           for (int j=0; j<dstLocalDeCount; j++){
             int de = dstLocalDeList[j];  // global DE number
-            for (int k=0; k<dstDistGridDeCellCount[j]; k++){
+            for (int k=0; k<dstDistGridLocalDeCellCount[j]; k++){
               int dstSeqIndex = dstLinSeqList[j][k].seqIndex;
               if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
                 int kk = dstSeqIndex - seqIndexMin;
@@ -3407,7 +3412,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         new SeqIndexIndexInfo[seqIndexCount];
       int count = 0; // reset
       for (int j=0; j<srcLocalDeCount; j++){
-        for (int k=0; k<srcDistGridDeCellCount[j]; k++){
+        for (int k=0; k<srcDistGridLocalDeCellCount[j]; k++){
           int srcSeqIndex = srcLinSeqList[j][k].seqIndex;
           if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
             seqIndexIndexInfoList[count].seqIndex = srcSeqIndex;
@@ -3456,7 +3461,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         if (ii==i){
           // server Pet itself
           for (int j=0; j<srcLocalDeCount; j++){
-            for (int k=0; k<srcDistGridDeCellCount[j]; k++){
+            for (int k=0; k<srcDistGridLocalDeCellCount[j]; k++){
               int srcSeqIndex = srcLinSeqList[j][k].seqIndex;
               if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
                 int kk = srcSeqIndex - seqIndexMin;
@@ -3536,7 +3541,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         new SeqIndexIndexInfo[seqIndexCount];
       int count = 0; // reset
       for (int j=0; j<dstLocalDeCount; j++){
-        for (int k=0; k<dstDistGridDeCellCount[j]; k++){
+        for (int k=0; k<dstDistGridLocalDeCellCount[j]; k++){
           int dstSeqIndex = dstLinSeqList[j][k].seqIndex;
           if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
             seqIndexIndexInfoList[count].seqIndex = dstSeqIndex;
@@ -3585,7 +3590,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         if (ii==i){
           // server Pet itself
           for (int j=0; j<dstLocalDeCount; j++){
-            for (int k=0; k<dstDistGridDeCellCount[j]; k++){
+            for (int k=0; k<dstDistGridLocalDeCellCount[j]; k++){
               int dstSeqIndex = dstLinSeqList[j][k].seqIndex;
               if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
                 int kk = dstSeqIndex - seqIndexMin;
@@ -3657,7 +3662,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
 #if 0
   // more serious printing
   for (int j=0; j<srcLocalDeCount; j++){
-    for (int k=0; k<srcDistGridDeCellCount[j]; k++){
+    for (int k=0; k<srcDistGridLocalDeCellCount[j]; k++){
       printf("localPet: %d, srcLinSeqList[%d][%d].linIndex = %d, "
         ".seqIndex = %d, .factorCount = %d\n",
         localPet, j, k, srcLinSeqList[j][k].linIndex,
@@ -3673,7 +3678,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     
   // more serious printing
   for (int j=0; j<dstLocalDeCount; j++){
-    for (int k=0; k<dstDistGridDeCellCount[j]; k++){
+    for (int k=0; k<dstDistGridLocalDeCellCount[j]; k++){
       printf("localPet: %d, dstLinSeqList[%d][%d].linIndex = %d, "
         ".seqIndex = %d, .factorCount = %d\n",
         localPet, j, k, dstLinSeqList[j][k].linIndex,
@@ -3704,10 +3709,10 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
 
   // determine send pattern for all localDEs in srcArray and fill in XXE
   for (int j=0; j<srcLocalDeCount; j++){
-    int *index2Ref = new int[srcDistGridDeCellCount[j]];  // large enough
+    int *index2Ref = new int[srcDistGridLocalDeCellCount[j]];  // large enough
     int localDeFactorCount = 0; // reset
     int iCount = 0; // reset
-    for (int k=0; k<srcDistGridDeCellCount[j]; k++){
+    for (int k=0; k<srcDistGridLocalDeCellCount[j]; k++){
       int factorCount = srcLinSeqList[j][k].factorCount;
       if (factorCount){
         index2Ref[iCount] = k;   // store index2
@@ -3901,10 +3906,10 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
 
   // determine recv pattern for all localDEs in dstArray and fill in XXE
   for (int j=0; j<dstLocalDeCount; j++){
-    int *index2Ref = new int[dstDistGridDeCellCount[j]];  // large enough
+    int *index2Ref = new int[dstDistGridLocalDeCellCount[j]];  // large enough
     int localDeFactorCount = 0; // reset
     int iCount = 0; // reset
-    for (int k=0; k<dstDistGridDeCellCount[j]; k++){
+    for (int k=0; k<dstDistGridLocalDeCellCount[j]; k++){
       int factorCount = dstLinSeqList[j][k].factorCount;
       if (factorCount){
         index2Ref[iCount] = k;   // store index2
@@ -4181,21 +4186,21 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   
   // garbage collection
   for (int i=0; i<srcLocalDeCount; i++){
-    for (int j=0; j<srcDistGridDeCellCount[i]; j++)
+    for (int j=0; j<srcDistGridLocalDeCellCount[i]; j++)
       if (srcLinSeqList[i][j].factorCount)
         delete [] srcLinSeqList[i][j].factorList;
     delete [] srcLinSeqList[i];
   }
   delete [] srcLinSeqList;
-  delete [] srcDistGridDeCellCount;
+  delete [] srcDistGridLocalDeCellCount;
   for (int i=0; i<dstLocalDeCount; i++){
-    for (int j=0; j<dstDistGridDeCellCount[i]; j++)
+    for (int j=0; j<dstDistGridLocalDeCellCount[i]; j++)
       if (dstLinSeqList[i][j].factorCount)
         delete [] dstLinSeqList[i][j].factorList;
     delete [] dstLinSeqList[i];
   }
   delete [] dstLinSeqList;
-  delete [] dstDistGridDeCellCount;
+  delete [] dstDistGridLocalDeCellCount;
   delete [] srcCellCountList;
   delete [] dstCellCountList;
   delete [] srcSeqIndexMinMaxList;
