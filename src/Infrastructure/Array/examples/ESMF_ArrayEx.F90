@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.21 2007/07/20 05:47:07 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.22 2007/07/21 05:24:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -27,9 +27,10 @@ program ESMF_ArrayEx
   type(ESMF_VM):: vm
   type(ESMF_DELayout):: delayout
   type(ESMF_DistGrid):: distgrid, distgrid3D, distgrid2D, distgrid1D
-  type(ESMF_DistGrid):: distgrid1, distgrid2
-  type(ESMF_ArraySpec):: arrayspec
+  type(ESMF_DistGrid):: srcDistGrid, dstDistGrid
+  type(ESMF_ArraySpec):: arrayspec, arrayspec1D
   type(ESMF_Array):: array, array1, array2, array1D, array2D, array3D
+  type(ESMF_Array):: srcArray, dstArray
 !  type(ESMF_Array):: arrayTracer, arrayNScalar, arrayNEu, arrayNEv
 !  type(ESMF_ArrayBundle):: arrayBundle
 !  type(ESMF_Array), allocatable:: arrayList(:)
@@ -59,6 +60,7 @@ program ESMF_ArrayEx
   type(ESMF_RouteHandle):: sparseMatMulHandle
   real(ESMF_KIND_R8), allocatable:: factorList(:)
   integer, allocatable:: factorIndexList(:,:)
+  integer:: seqIndexList(2)
 
   ! result code
   integer :: finalrc
@@ -997,8 +999,8 @@ program ESMF_ArrayEx
 ! frequently used application of this method is the interpolation between pairs
 ! of Arrays. The principle is this: the value of each cell in the exclusive 
 ! region of the destination Array is expressed as a linear combination of {\em 
-! all} the exclusive cells of the source Array. Naturally most of the 
-! coefficients of these linear combinations will be zero and it is more 
+! potentially all} the exclusive cells of the source Array. Naturally most of
+! the coefficients of these linear combinations will be zero and it is more 
 ! efficient to store explicit information about the non-zero elements than to 
 ! keep track of all the coefficients.
 !
@@ -1008,220 +1010,228 @@ program ESMF_ArrayEx
 ! and source cell index. Destination and source indices could be expressed in
 ! terms of the corresponding DistGrid patch index together with the coordinate
 ! tuple within the patch. While this format may be the most natural way to
-! express cells in the source and destination Array, it has a major drawback, it
-! is extremly bulky. For two 2D Arrays it requires 6 integers to store the
-! source and destination cell information for each non-zero interpolation 
-! weight.
+! express cells in the source and destination Array, it has two major drawbacks.
+! First the coordinate tuple is {\tt dimCount} specific and second the format
+! is extremly bulky. For 2D source and destination Arrays it would require 6
+! integers to store the source and destination cell information for each
+! non-zero coefficient and matters get worse for higher dimensions.
 !
-! An alternative format exists that only requires two integers to be stored 
-! with each non-zero interpolation coefficient, regardless of the rank of 
-! source and destination Arrays. For this format a unique cell order must be 
-! defined which allows to uniquely address each exclusive cell in an Array 
-! object by a single integer number. In other words the cells defined by the 
-! DistGrid associated with the Array must be sequentialized. The cell sequence 
-! suggested in this proposal first moves fastest through the DistGrid 
-! dimensions in their order and then moves through the patches of the DistGrid.
+! Both problems can be circumvented by {\em interpreting} source and destination
+! Arrays as sequentialized strings or {\em vectors} of cells. This is done
+! by assigning a unique {\em sequence index} to each exclusive cell in both
+! Arrays. With that the operation of updating the cells in the destination Array
+! as linear combinations of source Array cells takes the form of a {\em sparse
+! matrix multiplication}.
 !
-! In the following example {\tt array1} will be the source Array that will be
-! interpolated onto {\tt array2}, the destination Array. Both Arrays are 2D
-! Arrays of double precision real numbers. {\tt array1} uses the 5 x 5 
-! DistGrid decomposed over 2 x 3 = 6 DEs as was used in previous examples.
-! {\tt array2} is defined on a [-4,..,2] x [1,..,3] DistGrid that is decomposed
-! over as many DEs as there are PETs in the context at runtime. Notice also that
-! {\tt array1} only allocates space for the exclusive DE-local regions
-! whereas {\tt array2} allocates a 1 cell wide rim around each exclusive region
-! to define a larger total region for each of its DE.
-! 
+! The default sequence index rule assigns index $1$ to the {\tt minIndex} corner
+! cell of the first patch of the DistGrid on which the Array is defined. It then
+! increments the sequence index by $1$ for each cell running through the
+! DistGrid dimensions by order. The index space position of the DistGrid patches
+! does not affect the sequence labeling of cells. The default sequence indices
+! for
 !EOE
 !BOC
-  distgrid1 = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
-    regDecomp=(/2,3/), rc=rc)
-  array1 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid1, rc=rc)
+  srcDistgrid = ESMF_DistGridCreate(minIndex=(/-1,0/), maxIndex=(/1,3/), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_DistGridGet(distgrid1, delayout=delayout, rc=rc)
-  call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
-  allocate(larrayList(localDeCount))
-  call ESMF_ArrayGet(array1, larrayList=larrayList, rc=rc)
-  do de=1, localDeCount
-    call ESMF_LocalArrayGetData(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
-    myF90Array = 1.5 + 2.3 * de
-  enddo
-  deallocate(larrayList)
-!BOC
-  distgrid2 = ESMF_DistGridCreate(minIndex=(/-4,1/), maxIndex=(/2,3/), rc=rc)
-  array2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid2, &
-    totalLWidth=(/1,1/), totalUWidth=(/1,1/), rc=rc)
-!EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_DistGridGet(distgrid2, delayout=delayout, rc=rc)
-  call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
-  allocate(larrayList(localDeCount))
-  call ESMF_ArrayGet(array2, larrayList=larrayList, rc=rc)
-  do de=1, localDeCount
-    call ESMF_LocalArrayGetData(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
-    myF90Array = 1.5 - 0.9 * de
-  enddo
-  deallocate(larrayList)
 !BOE
-! 
-! The sequentialization of both Arrays is straight forward.
-!
-! {\tt array1}:
+! for each cell are:
 ! \begin{verbatim}
-!  Array/DistGrid coordinate   -   sequential index
-!            (1, 1)            -       1
-!            (2, 1)            -       2
-!            (3, 1)            -       3
-!            (4, 1)            -       4
-!            (5, 1)            -       5
-!            (1, 2)            -       6
-!            (2, 2)            -       7
-!            (3, 2)            -       8
-!            (4, 2)            -       9
-!            (5, 2)            -      10
-!            (1, 3)            -      11
-!            (2, 3)            -      12
-!            (3, 3)            -      13
-!            (4, 3)            -      14
-!            (5, 3)            -      15
-!            (1, 4)            -      16
-!            (2, 4)            -      17
-!            (3, 4)            -      18
-!            (4, 4)            -      19
-!            (5, 4)            -      20
-!            (1, 5)            -      21
-!            (2, 5)            -      22
-!            (3, 5)            -      23
-!            (4, 5)            -      24
-!            (5, 5)            -      25
+!   -------------------------------------> 2nd dim
+!   |
+!   |   +------+------+------+------+
+!   |   |(-1,0)|      |      |(-1,3)|
+!   |   |      |      |      |      |
+!   |   |   1  |   4  |   7  |  10  |
+!   |   +------+------+------+------+
+!   |   |      |      |      |      |
+!   |   |      |      |      |      |
+!   |   |   2  |   5  |   8  |  11  |
+!   |   +------+------+------+------+
+!   |   | (1,0)|      |      | (1,3)|
+!   |   |      |      |      |      |
+!   |   |   3  |   6  |   9  |  12  |
+!   |   +------+------+------+------+
+!   |
+!   v
+!  1st dim
 ! \end{verbatim}
 !
-! {\tt array2}:
-! \begin{verbatim}
-!  Array/DistGrid coordinate   -   sequential index
-!            (-4, 1)           -       1
-!            (-3, 1)           -       2
-!            (-2, 1)           -       3
-!            (-1, 1)           -       4
-!            ( 0, 1)           -       5
-!            ( 1, 1)           -       6
-!            ( 2, 1)           -       7
-!            (-4, 2)           -       8
-!            (-3, 2)           -       9
-!            (-2, 2)           -      10
-!            (-1, 2)           -      11
-!            ( 0, 2)           -      12
-!            ( 1, 2)           -      13
-!            ( 2, 2)           -      14
-!            (-4, 3)           -      15
-!            (-3, 3)           -      16
-!            (-2, 3)           -      17
-!            (-1, 3)           -      18
-!            ( 0, 3)           -      19
-!            ( 1, 3)           -      20
-!            ( 2, 3)           -      21
-! \end{verbatim}
-!
-! Notice that the number of cells in source and destination Arrays need not
-! match. Also, the only meaning the sequential indices carry is to provide
-! a unique order for the source and destination cells for the sparse matrix
-! multiplication.
-!
-! In order to carry out a sparse matrix multiplication of the data stored in 
-! {\tt array1} and to store the result in {\tt array2} the non-zero values of
-! the sparse matrix need to be provided. In case of an Array to Array 
-! interpolation the matrix values correspond to the interpolation weights for 
-! the specific case. A number of different schemes exist to generate the 
-! coefficients from the physical grid information associated with the Arrays. 
-! In ESMF the physical information stored in the Grids is not accessible on 
-! the index space level on which the Array class is defined. For the Array
-! an interpolation or regridding is simply a sparse matix multiplication.
-!
-! It is very common to compute the interpolation weights between two physical
-! grids with an external tool, and then read these values in from file before
-! the multiplication is to be performed. The ArraySparseMatMulStore() method 
-! requires this information in two arguments on the rootPET. The 
-! {\tt factorList} argument provides the non-zero coefficients as a list of 
-! real numbers. The {\tt factorIndexList} is a two dimensional array that has 
-! as many elements in the second dimension as there are non-zero factors. The 
-! first dimension is of size 2 and provides the sequentialized index of the 
-! source and destination cell, respectively.
-!
-! The ArraySparseMatMul() operation performs the following update on the
-! destination array:
-!
-! \begin{verbatim}
-!   do n=1, size(factorList)
-!       dstArray(factorIndexList(2, n)) += 
-!         factorList(n) * srcArray(factorIndexList(1, n))
-!   enddo
-! \end{verbatim}
-!
-! In principle, a full linear combination of all cells of {\tt array1} to all
-! cells of {\tt array2} would require a total of 21 x 25 = 525 coefficients. 
-! However, most of the coefficients will be zero. For this example assume that 
-! only the following 4 factors are non-zero.
-!
-! \begin{verbatim}
-!   factorList(:)     -   factorIndexList(1,:)  / factorIndexList(2,:)
-!     0.5             -                   8     /     4
-!     0.5             -                   9     /     4
-!     0.8             -                  11     /    20
-!     0.2             -                  15     /    20
-! \end{verbatim}
-!
+! The assigned sequence indices are decomposition and distribution invariant by
+! construction. Furthermore, when an Array is created with extra cells per DE on
+! a DistGrid the sequence indices (which only cover the exclusive cells) remain
+! unchanged.
 !EOE
 !BOC
-  allocate(factorList(4), factorIndexList(2,4))
-  factorList = (/0.5, 0.5, 0.8, 0.2/)       ! weights
-  factorIndexList(1,:) = (/8, 9, 11, 15/)   ! source cell indices
-  factorIndexList(2,:) = (/4, 4, 20, 20/)   ! destination cell indices
+  srcArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=srcDistgrid, &
+    totalLWidth=(/1,1/), totalUWidth=(/1,1/), indexflag=ESMF_INDEX_GLOBAL, &
+    rc=rc)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
-! The following call will pass this information into the Array SparseMatMul
-! on PET 0 while all other PETs call in without factorList and factorIndexList
-! arguments.
+! The extra padding of 1 cell in each direction around the exclusive cells on
+! each DE are "invisible" to the Array spare matrix multiplication method. These
+! extra cells are either updated by the computational kernel or by Array halo
+! operations (not yet implemented!).
+!
+! An alternative way to assign sequence indices to all the cells in the patches
+! covered by a DistGrid object is to use a special {\tt ESMF\_DistGridCreate()}
+! call. This call has been specifically designed for 1D cases with arbitrary,
+! user-supplied sequence indices.
+!EOE
+!BOC
+  seqIndexList(1) = localPet*10
+  seqIndexList(2) = localPet*10 + 1
+  dstDistgrid = ESMF_DistGridCreate(arbSeqIndexList=seqIndexList, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! This call to {\tt ESMF\_DistGridCreate()} is collective across the current VM.
+! The {\tt arbSeqIndexList} argument specifies the PET-local arbitrary sequence
+! indices that need to be covered by the local DE. The resulting DistGrid has as
+! many 1D patches as there are PETs in the current VM. There is one local DE per
+! PET which covers the entire PET-local patch. The user supplied sequence
+! indices must be unique, but the sequence may be interrupted. The four patches
+! of {\tt dstDistgrid} have the following local 1D index space coordinates
+! (given between "()") and sequence indices:
+! \begin{verbatim}
+!  patch 0            patch 1           patch 2           patch 3
+!  covered by DE 0    covered by DE 1   covered by DE 2   covered by DE 3
+!  on PET 0           on PET 1          on PET 2          on PET 3
+!  ----------------------------------------------------------------------
+!  (1) : 0            (1) : 10          (1) : 20          (1) : 30
+!  (2) : 1            (2) : 11          (2) : 21          (2) : 31
+! \end{verbatim}
+!
+! Again the DistGrid object provides the sequence index labeling for the
+! exclusive cells of an Array created on the DistGrid regardless of extra,
+! non-exclusive cells.
+!EOE
+  call ESMF_ArraySpecSet(arrayspec1D, typekind=ESMF_TYPEKIND_R8, rank=1, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  dstArray = ESMF_ArrayCreate(arrayspec=arrayspec1D, distgrid=dstDistgrid, &
+    rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! With the definition of sequence indices, either by the default rule or as user
+! provided arbitrary sequence indices, it is now possible to uniquely identify
+! each exclusive cell in the source and destination Array by a single integer
+! number. Specifying a pair of source and destination cells takes two integer
+! number regardless of the number of dimensions.
+!
+! The information required to carry out a sparse matrix multiplication are the
+! pair of source and destination sequence indices and the associated
+! multiplication factor for each pair. ESMF requires this information in form of
+! two Fortran arrays. The factors are stored in a 1D array of the appropriate
+! type and kind, e.g. {\tt real(ESMF\_KIND\_R8)::factorList(:)}. Array sparse
+! matrix multiplications are only supported between Arrays of the same type and
+! kind using factors of identical type and kind. The sequence index pairs
+! associated with the factors provided by {\tt factorList} are stored in a 2D
+! Fortran array of default integer kind of the shape {\tt
+! integer::factorIndexList(2,:)}. The sequence indices of the source Array cells
+! are stored in the first row of {\tt 
+! factorIndexList} while the sequence indices of the destination Array cells are
+! stored in the second row.
+!
+! Each PET in the current VM must call into {\tt ESMF\_ArraySparseMatMulStore()}
+! to precompute and store the communication pattern for the sparse matrix
+! multiplication. The multiplication factors may be provided in parallel, i.e.
+! multiple PETs may specify {\tt factorList} and {\tt factorIndexList} arguments
+! when calling into {\tt ESMF\_ArraySparseMatMulStore()}. PETs that do not
+! provide factors must issue the call without the {\tt factorList} and {\tt
+! factorIndexList} arguments.
 !EOE
 !BOC
   if (localPet == 0) then
-    call ESMF_ArraySparseMatMulStore(srcArray=array1, dstArray=array2, &
+    allocate(factorList(1))             ! PET 0 specifies 1 factor
+    allocate(factorIndexList(2,1))
+    factorList = (/0.2/)                  ! factors
+    factorIndexList(1,:) = (/5/)          ! seq indices into srcArray
+    factorIndexList(2,:) = (/30/)         ! seq indices into dstArray
+    
+    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, factorList=factorList, &
       factorIndexList=factorIndexList, rc=rc)
+      
+    deallocate(factorList)
+    deallocate(factorIndexList)
+  else if (localPet == 1) then
+    allocate(factorList(3))               ! PET 1 specifies 3 factor
+    allocate(factorIndexList(2,3))
+    factorList = (/0.5, 0.5, 0.8/)        ! factors
+    factorIndexList(1,:) = (/8, 2, 12/)   ! seq indices into srcArray
+    factorIndexList(2,:) = (/11, 11, 30/) ! seq indices into dstArray
+    
+    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+      routehandle=sparseMatMulHandle, factorList=factorList, &
+      factorIndexList=factorIndexList, rc=rc)
+      
+    deallocate(factorList)
+    deallocate(factorIndexList)
   else
-    call ESMF_ArraySparseMatMulStore(srcArray=array1, dstArray=array2, &
+    ! PETs 2 and 3 do not provide factors
+    
+    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, rc=rc)
-  endif      
+      
+  endif
 !EOC
-!call ESMF_ArrayPrint(array1, rc=rc)
-!call ESMF_ArrayPrint(array2, rc=rc)
 !BOE
-! The call to {\tt ESMF\_ArraySparseMatMulStore()} will have distributed the
-! sparse matrix coefficients according to the distribution pattern of 
-! {\tt array1} and {\tt array2}. Furthermore the exchange patterns of the 
-! Array data has been precomputed and is stored in a Route object referenced
-! by the returned RouteHandle object. The {\tt sparseMatMulHandle} can now be 
-! used to execute the sparse matrix multiplication.
+! The RouteHandle object {\tt sparseMatMulHandle} produced by 
+! {\tt ESMF\_ArraySparseMatMulStore()} can now be used to call {\tt
+! ESMF\_ArraySparseMatMul()} collectively across all PETs of the current VM to
+! perform
+! \begin{verbatim}
+!   dstArray = 0.0
+!   do n=1, size(combinedFactorList)
+!       dstArray(combinedFactorIndexList(2, n)) += 
+!         combinedFactorList(n) * srcArray(combinedFactorIndexList(1, n))
+!   enddo
+! \end{verbatim}
+! in parallel. Here {\tt combinedFactorList} and {\tt combinedFactorIndexList}
+! are the combined lists defined by the respective local lists provided by 
+! PETs 0 and 1 in parallel. For this example
 !EOE
 !BOC
-  call ESMF_ArraySparseMatMul(srcArray=array1, dstArray=array2, &
+  call ESMF_ArraySparseMatMul(srcArray=srcArray, dstArray=dstArray, &
     routehandle=sparseMatMulHandle, rc=rc)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
-! This parallel sparse matrix multiplication call will have updated two cells
-! of destination array ({\tt array2}):
+! will initialize the entire {\tt dstArray} to 0.0 and then update two cells:
 !
 ! \begin{verbatim}
-! array2(-1,1)  =  array2(-1,1)  +  0.5 * array1(3,2)  +  0.5 * array1(4, 2)
+! on DE 1:
+! dstArray(2) = 0.5 * srcArray(0,0)  +  0.5 * srcArray(0,2)
 ! \end{verbatim}
 !
 ! and
 !
 ! \begin{verbatim}
-! array2(1,3)  =  array2(1,3)  +  0.8 * array1(1,3)  +  0.2 * array1(5, 3)
+! on DE 3:
+! dstArray(1) = 0.2 * srcArray(0,1)  +  0.8 * srcArray(1,3).
 ! \end{verbatim}
-! 
-! All other valuew in {\tt array2} will be left unchanged. 
+!
+! The call to {\tt ESMF\_ArraySparseMatMul()} does provide the option to turn
+! the default {\tt dstArray} initialization off. If argument {\tt zeroflag}
+! is set to {\tt ESMF\_FALSE}
+!EOE
+!BOC
+  call ESMF_ArraySparseMatMul(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=sparseMatMulHandle, zeroflag=ESMF_FALSE, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! skips the initialization and cells in {\tt dstArray} are updated according to:
+!
+! \begin{verbatim}
+!   do n=1, size(combinedFactorList)
+!       dstArray(combinedFactorIndexList(2, n)) += 
+!         combinedFactorList(n) * srcArray(combinedFactorIndexList(1, n)).
+!   enddo
+! \end{verbatim}
 !
 ! Finally the RouteHandle can be used to release all memory allocation 
 ! associated with the precomputed ArrayMatMul operation.
@@ -1232,12 +1242,12 @@ program ESMF_ArrayEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
-!call ESMF_ArrayPrint(array1, rc=rc)
-!call ESMF_ArrayPrint(array2, rc=rc)
+!call ESMF_ArrayPrint(srcArray, rc=rc)
+!call ESMF_ArrayPrint(dstArray, rc=rc)
   
-  call ESMF_ArrayDestroy(array1, rc=rc) ! finally destroy the array object
+  call ESMF_ArrayDestroy(srcArray, rc=rc) ! finally destroy the array object
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_ArrayDestroy(array2, rc=rc) ! finally destroy the array object
+  call ESMF_ArrayDestroy(dstArray, rc=rc) ! finally destroy the array object
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
