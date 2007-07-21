@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.58 2007/07/20 05:47:08 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.59 2007/07/21 05:21:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.58 2007/07/20 05:47:08 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.59 2007/07/21 05:21:57 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -596,16 +596,21 @@ contains
 ! !DESCRIPTION:
 !   Store an Array sparse matrix multiplication operation from {\tt srcArray}
 !   to {\tt dstArray}. PETs that specify non-zero matrix coefficients must use
-!   the type/kind specific interface and provide the {\tt factorList} and
+!   the <type><kind> overloaded interface and provide the {\tt factorList} and
 !   {\tt factorIndexList} arguments. PETs that don't provide matrix elements
-!   call into the interface without {\tt factorList} and {\tt factorIndexList}.
+!   call into the overloaded interface without {\tt factorList} and 
+!   {\tt factorIndexList} arguments.
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
 !   vectors. The sequence is defined by the order of DistGrid dimensions and 
-!   the order of patches within the DistGrid. Source and destination Arrays 
-!   must be of identical type/kind, but may differ in shape and number of cells.
-!   See section \ref{Array:SparseMatMul} for details on the definition of Array
-!   {\em sequence indices}.
+!   the order of patches within the DistGrid or by user-supplied arbitrary
+!   sequence indices. See section \ref{Array:SparseMatMul} for details on the
+!   definition of {\em sequence indices}.
+!
+!   Source and destination Arrays must be of identical <type> and <kind>, but 
+!   may differ in shape and number of cells. The <type> and <kind> of a supplied
+!   {\tt factorList} argument must also match the <type> and <kind> of the
+!   Array arguments.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_ArraySparseMatMul()} on any pair of Arrays that are 
@@ -923,16 +928,21 @@ contains
 ! !DESCRIPTION:
 !   Store an Array sparse matrix multiplication operation from {\tt srcArray}
 !   to {\tt dstArray}. PETs that specify non-zero matrix coefficients must use
-!   the type/kind specific interface and provide the {\tt factorList} and
+!   the <type><kind> overloaded interface and provide the {\tt factorList} and
 !   {\tt factorIndexList} arguments. PETs that don't provide matrix elements
-!   call into the interface without {\tt factorList} and {\tt factorIndexList}.
+!   call into the overloaded interface without {\tt factorList} and 
+!   {\tt factorIndexList} arguments.
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
 !   vectors. The sequence is defined by the order of DistGrid dimensions and 
-!   the order of patches within the DistGrid. Source and destination Arrays 
-!   must be of identical type/kind, but may differ in shape and number of cells.
-!   See section \ref{Array:SparseMatMul} for details on the definition of Array
-!   {\em sequence indices}.
+!   the order of patches within the DistGrid or by user-supplied arbitrary
+!   sequence indices. See section \ref{Array:SparseMatMul} for details on the
+!   definition of {\em sequence indices}.
+!
+!   Source and destination Arrays must be of identical <type> and <kind>, but 
+!   may differ in shape and number of cells. The <type> and <kind> of a supplied
+!   {\tt factorList} argument must also match the <type> and <kind> of the
+!   Array arguments.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_ArraySparseMatMul()} on any pair of Arrays that are 
@@ -999,8 +1009,8 @@ contains
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Execute an Array sparse matrix operation from {\tt srcArray} to
-!   {\tt dstArray}. See {\tt ESMF\_ArraySparseMatMulStore()} on how to
+!   Execute a precomputed Array sparse matrix multiplication from {\tt srcArray}
+!   to {\tt dstArray}. See {\tt ESMF\_ArraySparseMatMulStore()} on how to
 !   precompute {\tt routehandle}. See section \ref{Array:SparseMatMul} for
 !   details on the operation this call performs.
 !
