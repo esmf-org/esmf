@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.61 2007/07/18 20:43:40 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.62 2007/07/23 18:48:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.61 2007/07/18 20:43:40 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.62 2007/07/23 18:48:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2511,9 +2511,15 @@ int DELayout::ESMC_DELayoutFillLocal(int mypet){
   int localrc;
   // Initialize return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
+  deList = new int[deCount];
   localDeCount = 0;               // reset local de count
-  for (int i=0; i<deCount; i++)
-    if (deInfoList[i].pet == mypet) ++localDeCount;
+  for (int i=0; i<deCount; i++){
+    if (deInfoList[i].pet == mypet){
+      deList[i] = localDeCount; // set to local DE
+      ++localDeCount;
+    }else
+      deList[i] = -1;           // indicate not a local DE
+  }
   localDeList = new int[localDeCount];  // allocate space to hold local de ids
   int j=0;
   for (int i=0; i<deCount; i++)
