@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.9 2007/07/20 21:32:56 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.10 2007/07/23 04:44:52 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -102,7 +102,7 @@ program ESMF_GridCreateEx
    !-------------------------------------------------------------------
    call ESMF_GridGetLocalTileInfo(grid2D, coord=1, &
           staggerloc=ESMF_STAGGERLOC_CENTER,       &
-          computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
+          staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the pointer to the first coordinate array from inside
@@ -126,7 +126,7 @@ program ESMF_GridCreateEx
    !-------------------------------------------------------------------
    call ESMF_GridGetLocalTileInfo(grid2D, coord=2, &
           staggerloc=ESMF_STAGGERLOC_CENTER,       &
-          computationalLBound=lbnd, computationalUBound=ubnd, rc=rc)
+          staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the pointer to the second coordinate array from inside
@@ -215,7 +215,8 @@ program ESMF_GridCreateEx
    ! Get the pointer to the first coordinate array from inside
    ! the Grid object.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid3D, coord=1, fptr=cornerX, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid3D, coord=1, &
+          staggerloc=ESMF_STAGGERLOC_CORNER, fptr=cornerX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension.
@@ -232,17 +233,18 @@ program ESMF_GridCreateEx
    ! Get the local bounds of the global indexing for the second
    ! coordinate array on the local DE.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileInfo(grid3D, coord=1, &
+   call ESMF_GridGetLocalTileInfo(grid3D, coord=2, &
           staggerLoc=ESMF_STAGGERLOC_CORNER,                    &
-          computationalLBound=lbnd_corner,                      &
-          computationalUBound=ubnd_corner,                      &
+          staggerLBound=lbnd_corner,                      &
+          staggerUBound=ubnd_corner,                      &
           rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the pointer to the second coordinate array from inside
    ! the Grid object.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid3D, coord=2, fptr=cornerY, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid3D, coord=2, &
+          staggerLoc=ESMF_STAGGERLOC_CORNER, fptr=cornerY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calcuate and set coordinates in the second dimension.
