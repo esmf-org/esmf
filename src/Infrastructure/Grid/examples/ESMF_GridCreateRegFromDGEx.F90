@@ -1,5 +1,5 @@
 
-! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.5 2007/07/20 00:27:27 oehmke Exp $
+! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.6 2007/07/24 21:46:45 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -72,6 +72,7 @@ program ESMF_GridCreateEx
 !BOE
 ! Set the one stagger location as center. 
 !EOE
+
 !BOC
    call ESMF_GridAllocCoord(Grid2D,  &
           staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)

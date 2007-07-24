@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.15 2007/07/24 19:33:05 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.16 2007/07/24 21:46:46 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.15 2007/07/24 19:33:05 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.16 2007/07/24 21:46:46 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -331,10 +331,10 @@ end interface
       integer,                intent(in),optional     :: staggerLWidth(:)
       integer,                intent(in),optional     :: staggerUWidth(:)
       integer,                intent(in),optional     :: staggerAlign(:)
-      integer,                intent(out), optional   :: computationalLWidth(:)
-      integer,                intent(out), optional   :: computationalUWidth(:)
-      integer,                intent(out), optional   :: totalLWidth(:)
-      integer,                intent(out), optional   :: totalUWidth(:)
+      integer,                intent(out), optional   :: computationalLWidth(:) ! N. IMP
+      integer,                intent(out), optional   :: computationalUWidth(:) ! N. IMP
+      integer,                intent(out), optional   :: totalLWidth(:)         ! N. IMP
+      integer,                intent(out), optional   :: totalUWidth(:)         ! N. IMP
       integer,                intent(out),optional    :: rc
 !
 ! !DESCRIPTION:
@@ -352,7 +352,8 @@ end interface
 !     \item[{grid}]
 !       Grid to allocate coordinate storage in.  
 ! \item[{[staggerLoc]}]
-!      The stagger location to add. If not present, defaults to ESMF\_STAGGERLOC\_CENTER. 
+!      The stagger location to add. Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 ! \item[{[staggerLWidth]}] 
 !      This array should be the same rank as the grid. It specifies the lower corner of the stagger
 !      region with respect to the lower corner of the exclusive region.
@@ -500,8 +501,8 @@ end interface
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout)     :: grid
-      type(ESMF_GridStatus),optional     :: status
-      type(ESMF_DefaultFlag), optional   :: defaultflag
+      type(ESMF_GridStatus),optional     :: status      ! NOT IMPLEMENTED
+      type(ESMF_DefaultFlag), optional   :: defaultflag ! NOT IMPLEMENTED
       integer, intent(out), optional     :: rc
 !
 ! !DESCRIPTION:
@@ -541,11 +542,11 @@ end interface
 !          Grid object to commit.
 !     \item[{status}]
 !          Grid status to commit to.  For valid values see section
-!          \ref{sec:opt:gridstatus}.   
+!          \ref{sec:opt:gridstatus}. [CURRENTLY NOT IMPLEMENTED]  
 !     \item[{[defaultFlag]}]
 !          Indicates whether to use default values to achieve the desired
-!          grid status.  For valid values see section \ref{opt:defaultflag}.
-!          The default value is {\tt ESMF\_NO\_DEFAULTS}.  [CURRENTLY NOT IMPLEMENTED]
+!          grid status. The default value is {\tt ESMF\_NO\_DEFAULTS}.  
+!          [CURRENTLY NOT IMPLEMENTED]
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -611,7 +612,7 @@ end interface
        integer,               intent(in),   optional  :: coordRank(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       integer,               intent(in),   optional  :: gridType
+       integer,               intent(in),   optional  :: gridType ! NOT IMPLEMENTED
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -667,7 +668,7 @@ end interface
 !      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
 ! \item[{[gridType]}]
 !      Flag that indicates the type of the grid. If not given, defaults
-!       to ESMF\_GRIDTYPE\_UNKNOWN.
+!       to ESMF\_GRIDTYPE\_UNKNOWN. [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -841,20 +842,20 @@ end interface
        integer,               intent(in)              :: countsPerDEDim1(:)
        integer,               intent(in)              :: countsPerDEDim2(:)
        integer,               intent(in),   optional  :: countsPerDEDim3(:)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim1(:)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim2(:)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim3(:)
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2)
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2)
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2)
-       integer,               intent(in),   optional  :: bipolePos1(2)
-       integer,               intent(in),   optional  :: bipolePos2(2)
-       integer,               intent(in),   optional  :: bipolePos3(2)
+       type(ESMF_GridConn),   intent(in),   optional  :: connDim1(:)        ! N. IMP.
+       type(ESMF_GridConn),   intent(in),   optional  :: connDim2(:)        ! N. IMP.
+       type(ESMF_GridConn),   intent(in),   optional  :: connDim3(:)        ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2) ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2) ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2) ! N. IMP.
+       integer,               intent(in),   optional  :: bipolePos1(2)      ! N. IMP.
+       integer,               intent(in),   optional  :: bipolePos2(2)      ! N. IMP.
+       integer,               intent(in),   optional  :: bipolePos3(2)      ! N. IMP.
        integer,               intent(in),   optional  :: coordDep1(:)
        integer,               intent(in),   optional  :: coordDep2(:)
        integer,               intent(in),   optional  :: coordDep3(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       integer,               intent(in),   optional  :: gridType
+       integer,               intent(in),   optional  :: gridType           ! N. IMP.
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
 !
@@ -904,62 +905,77 @@ end interface
 !     If not specified  then grid is 2D. Also, If the array has only one entry,
 !     then the dimension is undistributed. 
 ! \item[{[connDim1]}] 
-!     Two element array describing the index dimension 1 connections.
+!      Fortran array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
-!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
-!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
-!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+!      If array is only one element long, then that element is used
+!      for both the minimum and maximum end. 
+!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
+!     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connDim2]}] 
-!     Two element array describing the index dimension 2 connections.
+!      Fortran array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
-!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
-!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
-!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+!      If array is only one element long, then that element is used
+!      for both the minimum and maximum end. 
+!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
+!     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connDim3]}] 
-!     Two element array describing the index dimension 3 connections.
+!      Fortran array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
-!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
-!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
-!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be.
+!      If array is only one element long, then that element is used
+!      for both the minimum and maximum end. 
+!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
+!     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc1]}] 
 !     Two element array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      If not present, the default is the center.
+!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
+!     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc2]}] 
 !     Two element array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      If not present, the default is the center.
+!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
+!     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc3]}] 
 !     Two element array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      If not present, the default is the center.
+!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
+!     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[bipolePos1]}] 
 !     Two element array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
 !      If a bipole, this gives the index position of one of the poles.
 !      The other is half way around. If not present, the default is 1.
+!     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[bipolePos2]}] 
 !     Two element array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
 !      If a bipole, this gives the index position of one of the poles.
 !      The other is half way around. If not present, the default is 1.
+!     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[bipolePos3]}] 
 !     Two element array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
 !      If a bipole, this gives the index position of one of the poles.
 !      The other is half way around. If not present, the default is 1. 
+!     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[coordDep1]}] 
 !     This array specifies the dependence of the first 
 !     coordinate component on the three index dimensions
@@ -967,7 +983,7 @@ end interface
 !     array specifies the number of dimensions of the first
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/1/). 
+!     arrays map to. If not present the default is (/1,2,3/). 
 ! \item[{[coordDep2]}] 
 !     This array specifies the dependence of the second 
 !     coordinate component on the three index dimensions
@@ -975,7 +991,7 @@ end interface
 !     array specifies the number of dimensions of the second
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/2/). 
+!     arrays map to. If not present the default is (/1,2,3/). 
 ! \item[{[coordDep3]}] 
 !     This array specifies the dependence of the third 
 !     coordinate component on the three index dimensions
@@ -983,12 +999,12 @@ end interface
 !     array specifies the number of dimensions of the third
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/3/). 
+!     arrays map to. If not present the default is (/1,2,3/). 
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
-!       should be of size size(countsPerDEDim1)xsize(countsPerDEDim2)x
+!       should be of size size(countsPerDEDim1) x size(countsPerDEDim2) x
 !       size(countsPerDEDim3). If countsPerDEDim3 isn't present, then
 !       the last dimension is of size 1.   
 ! \item[{[rc]}]
@@ -1660,7 +1676,7 @@ end interface
       integer,               intent(out), optional :: distRank
       integer,               intent(out), optional :: undistRank
       type(ESMF_IndexFlag),  intent(out), optional :: indexflag
-      integer,               intent(out), optional :: gridType
+      integer,               intent(out), optional :: gridType  ! NOT IMPLEMENTED
       integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1682,10 +1698,7 @@ end interface
 !\item[{[distGrid]}]
 !   The structure describing the distribution of the grid. 
 !\item[{[staggerLocsCount]}]
-!   The number of stagger locations which have coordinate arrays allocated.
-!\item[{[staggerLocs]}]
-!   An array of size {\tt staggerLocsCount}. It contains a list of 
-!   the stagger locations which have coordinate data allocated. 
+!   The number of stagger locations.
 ! \item[{[coordRank]}]
 !   List that has as many elements as the grid rank (from arrayspec).
 !   Gives the dimension of each component (e.g. x) array. This is 
@@ -1707,12 +1720,13 @@ end interface
 !\item[{[localDECount]}]
 !   The number of DE's in this grid on this processor
 !\item[{[distRank]}]
-!   The rank of the distributed part of the grid
+!   The rank of the distributed part of the grid. Should be equal to the distgrid's
+!   dimCount. 
 !\item[{[undistRank]}]
-!   The rank of the undistributed part of the grid
+!   The rank of the undistributed part of the grid.
 !\item[{[gridType]}]
 !   Flag that indicates the type of the grid. If not given, defaults
-!    to ESMF\_GRIDTYPE\_UNKNOWN.
+!    to ESMF\_GRIDTYPE\_UNKNOWN. [CURRENTLY NOT IMPLEMENTED]
 !\item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -1819,7 +1833,7 @@ end subroutine ESMF_GridGet
       type (ESMF_StaggerLoc), intent(in),optional  :: staggerLoc
       integer, intent(in)  :: coord
       type(ESMF_Array), intent(out) :: array
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_CopyFlag), intent(in), optional :: docopy ! NOT IMPLEMENTED
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1832,8 +1846,9 @@ end subroutine ESMF_GridGet
 !     The arguments are:
 !     \begin{description}
 !     \item[{staggerLoc}]
-!          The stagger location from which to get the arrays. If not set, 
-!          defaults to center. 
+!          The stagger location from which to get the arrays. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{coord}]
 !          The coordinate component to get the data from (e.g. 1=x).
 !     \item[{array}]
@@ -1926,6 +1941,7 @@ end subroutine ESMF_GridGet
 ! !IROUTINE: ESMF_GridGetLocalTileCoord - Get pointer to coordinates of a local tile
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_GridGetLocalTileCoord()
       subroutine ESMF_GridGetLocalTileCoord1DR4(grid, localDE, &
                             staggerLoc, coord, fptr, doCopy, rc)
 !
@@ -1953,8 +1969,9 @@ end subroutine ESMF_GridGet
 !          The local DE to get the information for. If not set, defaults to 
 !          the first DE on this processor. (localDE starts at 0)
 !     \item[{staggerLoc}]
-!          The stagger location to get the information for. If not set, defaults
-!          to center.
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{coord}]
 !          The coordinate component to get the data from (e.g. 1=x).
 !     \item[{[doCopy]}]
@@ -2091,6 +2108,7 @@ endif
 ! !IROUTINE: ESMF_GridGetLocalTileCoord - Get pointer to coordinates of a local tile
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_GridGetLocalTileCoord()
       subroutine ESMF_GridGetLocalTileCoord2DR4(grid, localDE, &
                             staggerLoc, coord, fptr, doCopy, rc)
 !
@@ -2118,8 +2136,10 @@ endif
 !          The local DE to get the information for. If not set, defaults to 
 !          the first DE on this processor. (localDE starts at 0)
 !     \item[{staggerLoc}]
-!          The stagger location to get the information for. If not set, defaults
-!          to center.
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to
+!          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{coord}]
 !          The coordinate component to get the data from (e.g. 1=x).
 !     \item[{[doCopy]}]
@@ -2256,6 +2276,7 @@ endif
 ! !IROUTINE: ESMF_GridGetLocalTileCoord - Get pointer to coordinates of a local tile
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_GridGetLocalTileCoord()
       subroutine ESMF_GridGetLocalTileCoord3DR4(grid, localDE, &
                             staggerLoc, coord, fptr, doCopy, rc)
 !
@@ -2283,8 +2304,10 @@ endif
 !          The local DE to get the information for. If not set, defaults to 
 !          the first DE on this processor. (localDE starts at 0)
 !     \item[{staggerLoc}]
-!          The stagger location to get the information for. If not set, defaults
-!          to center.
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to
+!          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{coord}]
 !          The coordinate component to get the data from (e.g. 1=x).
 !     \item[{[doCopy]}]
@@ -2421,6 +2444,7 @@ endif
 ! !IROUTINE: ESMF_GridGetLocalTileCoord - Get pointer to coordinates of a local tile
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_GridGetLocalTileCoord()
       subroutine ESMF_GridGetLocalTileCoord1DR8(grid, localDE, &
                             staggerLoc, coord, fptr, doCopy, rc)
 !
@@ -2448,8 +2472,10 @@ endif
 !          The local DE to get the information for. If not set, defaults to 
 !          the first DE on this processor. (localDE starts at 0)
 !     \item[{staggerLoc}]
-!          The stagger location to get the information for. If not set, defaults
-!          to center.
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to
+!          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{coord}]
 !          The coordinate component to get the data from (e.g. 1=x).
 !     \item[{[doCopy]}]
@@ -2586,6 +2612,7 @@ endif
 ! !IROUTINE: ESMF_GridGetLocalTileCoord - Get pointer to coordinates of a local tile
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_GridGetLocalTileCoord()
       subroutine ESMF_GridGetLocalTileCoord2DR8(grid, localDE, &
                             staggerLoc, coord, fptr, doCopy, rc)
 !
@@ -2613,8 +2640,10 @@ endif
 !          The local DE to get the information for. If not set, defaults to 
 !          the first DE on this processor. (localDE starts at 0)
 !     \item[{staggerLoc}]
-!          The stagger location to get the information for. If not set, defaults
-!          to center.
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to
+!          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{coord}]
 !          The coordinate component to get the data from (e.g. 1=x).
 !     \item[{[doCopy]}]
@@ -2751,6 +2780,7 @@ endif
 ! !IROUTINE: ESMF_GridGetLocalTileCoord - Get pointer to coordinates of a local tile
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_GridGetLocalTileCoord()
       subroutine ESMF_GridGetLocalTileCoord3DR8(grid, localDE, &
                             staggerLoc, coord, fptr, doCopy, rc)
 !
@@ -2778,8 +2808,10 @@ endif
 !          The local DE to get the information for. If not set, defaults to 
 !          the first DE on this processor. (localDE starts at 0)
 !     \item[{staggerLoc}]
-!          The stagger location to get the information for. If not set, defaults
-!          to center.
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to
+!          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{coord}]
 !          The coordinate component to get the data from (e.g. 1=x).
 !     \item[{[doCopy]}]
@@ -2954,7 +2986,10 @@ endif
 !\item[{coord}]
 !     The coordinate component to get the information for (e.g. 1=x). 
 !\item[{staggerLoc}]
-!     The stagger location to get the information for. If not set, defaults to center.  
+!     The stagger location to get the information for. 
+!     Please see Section~\ref{sec:opt:staggerloc} for a list 
+!     of predefined stagger locations. If not present, defaults to
+!     ESMF\_STAGGERLOC\_CENTER.
 !\item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
 !     {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
@@ -3103,7 +3138,7 @@ endif
        integer,               intent(in),   optional  :: coordRank(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       integer,               intent(in),   optional  :: gridType
+       integer,               intent(in),   optional  :: gridType ! NOT IMPLEMENTED
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -3140,7 +3175,7 @@ endif
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[gridType]}]
 !      Flag that indicates the type of the grid. If not given, defaults
-!       to ESMF\_GRIDTYPE\_UNKNOWN.
+!       to ESMF\_GRIDTYPE\_UNKNOWN. [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3239,7 +3274,7 @@ endif
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerLoc
       integer,                intent(in)            :: coord
       type(ESMF_Array),       intent(in)            :: array
-      type(ESMF_CopyFlag),    intent(in), optional  :: docopy
+      type(ESMF_CopyFlag),    intent(in), optional  :: docopy ! NOT IMPLEMENTED
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3250,8 +3285,10 @@ endif
 !     The arguments are:
 !\begin{description}
 !\item[{staggerLoc}]
-!    The stagger location into which to copy the arrays. If not set,
-!    defaults to center. 
+!    The stagger location into which to copy the arrays. 
+!    Please see Section~\ref{sec:opt:staggerloc} for a list 
+!    of predefined stagger locations. If not present, defaults to
+!    ESMF\_STAGGERLOC\_CENTER.
 !\item[{coord}]
 !    The coordinate component to put the data in (e.g. 1=x).
 !\item[{array}]
@@ -3308,9 +3345,7 @@ endif
                         bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
                         indexflag, gridType, petMap, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateShapeIrreg
+
 !
 ! !ARGUMENTS:
 	type (ESMF_Grid) :: grid
@@ -3320,20 +3355,20 @@ endif
        integer,               intent(in)              :: countsPerDEDim1(:)
        integer,               intent(in)              :: countsPerDEDim2(:)
        integer,               intent(in),   optional  :: countsPerDEDim3(:)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim1(:)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim2(:)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim3(:)
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2)
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2)
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2)
-       integer,               intent(in),   optional  :: bipolePos1(2)
-       integer,               intent(in),   optional  :: bipolePos2(2)
-       integer,               intent(in),   optional  :: bipolePos3(2)
+       type(ESMF_GridConn),   intent(in),   optional  :: connDim1(:)        ! N. IMP.
+       type(ESMF_GridConn),   intent(in),   optional  :: connDim2(:)        ! N. IMP.
+       type(ESMF_GridConn),   intent(in),   optional  :: connDim3(:)        ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2) ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2) ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2) ! N. IMP.
+       integer,               intent(in),   optional  :: bipolePos1(2)      ! N. IMP.
+       integer,               intent(in),   optional  :: bipolePos2(2)      ! N. IMP.
+       integer,               intent(in),   optional  :: bipolePos3(2)      ! N. IMP.
        integer,               intent(in),   optional  :: coordDep1(:)
        integer,               intent(in),   optional  :: coordDep2(:)
        integer,               intent(in),   optional  :: coordDep3(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       integer,               intent(in),   optional  :: gridType
+       integer,               intent(in),   optional  :: gridType           ! N. IMP.
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
 !
@@ -3388,62 +3423,81 @@ endif
 !     If not specified  then grid is 2D. Also, If the array has only one entry,
 !     then the dimension is undistributed. 
 ! \item[{[connDim1]}] 
-!     Two element array describing the index dimension 1 connections.
+!      Fortran array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
-!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
-!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
-!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+!      If array is only one element long, then that element is used
+!      for both the minimum and maximum end. 
+!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
+!     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connDim2]}] 
-!     Two element array describing the index dimension 2 connections.
+!      Fortran array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
-!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
-!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
-!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be. 
+!      If array is only one element long, then that element is used
+!      for both the minimum and maximum end. 
+!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
+!     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connDim3]}] 
-!     Two element array describing the index dimension 3 connections.
+!      Fortran array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
-!      The second element represents the maximum end of dimension 3.
-!      The valid setting are ESMF\_GRIDCONN\_NONE, ESMF\_GRIDCONN\_POLE,
-!       ESMF\_GRIDCONN\_BIPOLE, or ESMF\_GRIDCONN\_PERIODIC. 
-!       If one element is set to ESMF\_GRIDCONN\_PERIODIC then both must be.
+!      The second element represents the maximum end of dimension 3
+!      If array is only one element long, then that element is used
+!      for both the minimum and maximum end. 
+!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
+!      [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc1]}] 
 !     Two element array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      If not present, the default is the edge.
+!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      of predefined stagger locations. If not present, defaults to
+!      ESMF\_STAGGERLOC\_CENTER.
+!      [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc2]}] 
 !     Two element array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      If not present, the default is the edge.
+!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      of predefined stagger locations. If not present, defaults to
+!      ESMF\_STAGGERLOC\_CENTER.
+!      [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc3]}] 
 !     Two element array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
 !      If not present, the default is the edge.
+!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      of predefined stagger locations. If not present, defaults to
+!      ESMF\_STAGGERLOC\_CENTER.
+!      [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[bipolePos1]}] 
 !     Two element array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
 !      If a bipole, this gives the index position of one of the poles.
 !      The other is half way around. If not present, the default is 1.
+!      [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[bipolePos2]}] 
 !     Two element array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
 !      If a bipole, this gives the index position of one of the poles.
 !      The other is half way around. If not present, the default is 1.
+!      [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[bipolePos3]}] 
 !     Two element array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
 !      If a bipole, this gives the index position of one of the poles.
 !      The other is half way around. If not present, the default is 1. 
+!      [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[coordDep1]}] 
 !     This array specifies the dependence of the first 
 !     coordinate component on the three index dimensions
@@ -3451,7 +3505,7 @@ endif
 !     array specifies the number of dimensions of the first
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/1/). 
+!     arrays map to. If not present the default is (/1,2,3/). 
 ! \item[{[coordDep2]}] 
 !     This array specifies the dependence of the second 
 !     coordinate component on the three index dimensions
@@ -3459,7 +3513,7 @@ endif
 !     array specifies the number of dimensions of the second
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/2/). 
+!     arrays map to. If not present the default is (/1,2,3/). 
 ! \item[{[coordDep3]}] 
 !     This array specifies the dependence of the third 
 !     coordinate component on the three index dimensions
@@ -3467,12 +3521,12 @@ endif
 !     array specifies the number of dimensions of the third
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/3/). 
+!     arrays map to. If not present the default is (/1,2,3/). 
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
-!       should be of size size(countsPerDEDim1)xsize(countsPerDEDim2)x
+!       should be of size size(countsPerDEDim1) x size(countsPerDEDim2) x
 !       size(countsPerDEDim3). If countsPerDEDim3 isn't present, then
 !       the last dimension is of size 1.   
 ! \item[{[rc]}]
