@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.10 2007/06/25 05:57:29 theurich Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.11 2007/07/24 18:06:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -71,11 +71,11 @@ module ESMF_VMComponentUTest_gcomp_mod
     ! your own code development you probably don't want to include the 
     ! following call unless you are interested in exploring ESMF's 
     ! threading features.
-    !call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
+    call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
     ! TODO: Many systems are not able to run the exhaustive version of this
-    ! test in ESMF-threaded mode because it will spawn 1000 concurrent Pthreads.
+    ! test in ESMF-threaded mode because it will spawn 500 concurrent Pthreads.
     ! This is *not* an ESMF problem but a system issue that originates from 
-    ! the stacklimit being too small as to allow 1000 concurrent threads within
+    ! the stacklimit being too small as to allow 500 concurrent threads within
     ! the same VAS. On some systems the default stacklimit can be set to unlimited
     ! in which case this test _will_ run, but there are other systems out there
     ! where the admin has set the hardlimit of the stacksize too small as to 
@@ -176,11 +176,11 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.10 2007/06/25 05:57:29 theurich Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.11 2007/07/24 18:06:18 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
-  integer, parameter :: ConThreads = 900        ! Number of concurrent threads
+  integer, parameter :: ConThreads = 500        ! Number of concurrent threads
                                                 ! for exhaustive test section
 
   ! individual test failure message
